@@ -1,471 +1,428 @@
 /**
  * @process repo/issue-602-external-agent-discovery
- * @description Implement issue #602: SDK external agent discovery backed by optional agent-mux.
- * @inputs { issueNumber: number, baseBranch: string, branchName: string, maxImplementationAttempts?: number }
- * @outputs { success: boolean, diagnosis: object, testAuthoring: object, implementation: object, verification: object, review: object, delivery: object }
+ * @description Implement issue #602: SDK external agent discovery API for tasks-mux routing consumers.
+ * @inputs { issueNumber: number, baseBranch: string, implementationBranch: string, maxReviewIterations?: number }
+ * @outputs { success: boolean, phases: string[], reuseAudit: object, architecture: object, tests: object, implementation: object, verification: object, review: object, delivery: object }
+ *
+ * This process uses agent tasks rather than shell tasks to respect the
+ * repository process-authoring override for direct Babysitter workflows.
  *
  * @process methodologies/pilot-shell/pilot-shell-feature
- * @process processes/shared/tdd-triplet
  * @process methodologies/superpowers/test-driven-development
  * @process methodologies/superpowers/verification-before-completion
  * @process methodologies/shared/root-cause-diagnosis
- * @process specializations/sdk-platform-development/sdk-feature-implementation
- * @process specializations/qa-testing-automation/test-strategy-design
- * @agent test-strategy-architect specializations/qa-testing-automation/agents/test-strategy-architect/AGENT.md
- * @agent code-reviewer methodologies/superpowers/agents/code-reviewer/AGENT.md
+ * @process methodologies/planning-with-files/planning-execution
+ * @process processes/shared/tdd-triplet
+ * @agent spec-guard methodologies/pilot-shell/agents/spec-guard/AGENT.md
+ * @agent tdd-enforcer methodologies/pilot-shell/agents/tdd-enforcer/AGENT.md
+ * @agent unified-reviewer methodologies/pilot-shell/agents/unified-reviewer/AGENT.md
+ * @agent code-reviewer methodologies/maestro/agents/code-reviewer/AGENT.md
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
-function taskStdout(result) {
-  return result?.stdout ?? result?.value?.stdout ?? '';
+const repositoryContext = [
+  'You are working in the a5c-ai/babysitter repository.',
+  'This is a planning/execution process for issue #602 only.',
+  'Do not implement source changes outside the issue #602 boundary.',
+  'Preserve unrelated worktree changes.',
+  'Use the Babysitter skill requirements in AGENTS.md when working in this repository.',
+].join('\n');
+
+const sourceOfTruthInstructions = [
+  'Before making decisions, read the source materials directly at execution time.',
+  'Required command/file reads:',
+  '- gh issue view 602 --json title,body,labels,comments',
+  '- docs/agent-mux-babysitter-integrations/sdk-discovery.md',
+  '- docs/agent-mux-babysitter-integrations/tasks-mux-routing.md',
+  '- docs/agent-mux-babysitter-integrations/testing.md when selecting tests',
+  '- packages/sdk/src/harness/discovery.ts',
+  '- packages/sdk/src/harness/install.ts',
+  '- packages/sdk/src/harness/index.ts',
+  '- packages/sdk/src/index.ts',
+  '- packages/agent-mux/core/src/adapter-registry.ts',
+  '- packages/agent-mux/core/src/model-registry.ts',
+  '- packages/agent-mux/core/src/client.ts',
+  '- packages/agent-mux/cli/src/commands/doctor.ts',
+  '- packages/tasks-mux/src/client/responder-matcher.ts',
+  '- packages/tasks-mux/src/client/breakpoint-router.ts',
+  '- packages/tasks-mux/src/types.ts',
+  'Treat the issue body and comments as the authoritative spec. The May 30, 2026 redispatch comment supersedes any prior plan that framed SDK direct dispatch as the consumer.',
+].join('\n');
+
+const issueBoundaryInstructions = [
+  'Implement the Phase 1 SDK discovery API only.',
+  'Required API surface: discoverExternalAgents(options?: { timeout?: number; cwd?: string; force?: boolean }).',
+  'Required returned unavailable shape: { available: false, agents: [], defaultProvider: null, defaultModel: null }.',
+  'Required discovery strategy: optional agent-mux module discovery first, amux doctor --json CLI fallback second, graceful unavailable result third.',
+  'Required cache behavior: 60 second TTL with force:true invalidation.',
+  'Required public exposure: SDK/harness exports so downstream packages can import the API.',
+  'Downstream consumers are tasks-mux TaskRouter/matchAgentResponder (#630), process prompts (#605), SDK responderType validation (#635), and AgentMuxResponderBackend (#631).',
+  'Do not implement #630, #631, #635, process prompt injection, SDK direct agent dispatch, plugin host tool discovery, or external tracker routing in this issue.',
+].join('\n');
+
+function asJson(value) {
+  return JSON.stringify(value ?? {}, null, 2);
 }
 
-const readSpecAndContextTask = defineTask('issue-602.read-spec-and-context', (args, taskCtx) => ({
-  kind: 'shell',
-  title: 'Read issue #602, design docs, and SDK/agent-mux context',
-  labels: ['issue-602', 'context', 'sdk', 'agent-mux'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      `gh issue view ${args.issueNumber} --json title,body,labels,comments`,
-      'printf "\\n--- related open prs ---\\n"',
-      `gh pr list --state open --search "${args.issueNumber} in:body OR #${args.issueNumber} in:body OR fixes #${args.issueNumber} in:body OR closes #${args.issueNumber} in:body" --json number,title,headRefName,baseRefName,body,url`,
-      'printf "\\n--- design: sdk discovery ---\\n"',
-      'sed -n "1,260p" docs/agent-mux-babysitter-integrations/sdk-discovery.md',
-      'printf "\\n--- design: testing ---\\n"',
-      'sed -n "1,220p" docs/agent-mux-babysitter-integrations/testing.md',
-      'printf "\\n--- design: overview/process authoring links ---\\n"',
-      'sed -n "1,120p" docs/agent-mux-babysitter-integrations/overview.md',
-      'sed -n "1,140p" docs/agent-mux-babysitter-integrations/process-authoring.md',
-      'printf "\\n--- git status ---\\n"',
-      'git status --short --branch',
-      'printf "\\n--- current SDK harness exports/discovery ---\\n"',
-      'sed -n "1,240p" packages/sdk/src/harness/index.ts',
-      'sed -n "1,280p" packages/sdk/src/harness/discovery.ts',
-      'sed -n "1,260p" packages/sdk/src/harness/install.ts',
-      'sed -n "1,220p" packages/sdk/src/harness/installSupport.ts',
-      'sed -n "1,180p" packages/sdk/src/index.ts',
-      'printf "\\n--- existing SDK harness tests ---\\n"',
-      'find packages/sdk/src/harness/__tests__ -maxdepth 1 -type f | sort',
-      'sed -n "1,260p" packages/sdk/src/harness/__tests__/discovery.test.ts',
-      'sed -n "1,240p" packages/sdk/src/harness/__tests__/install.test.ts',
-      'printf "\\n--- current agent-mux discovery APIs ---\\n"',
-      'sed -n "1,260p" packages/agent-mux/core/src/adapter-registry.ts',
-      'sed -n "1,220p" packages/agent-mux/core/src/model-registry.ts',
-      'sed -n "1,220p" packages/agent-mux/core/src/client.ts',
-      'sed -n "1,260p" packages/agent-mux/core/src/adapter.ts',
-      'sed -n "1,240p" packages/agent-mux/core/src/capabilities.ts',
-      'sed -n "1,220p" packages/agent-mux/cli/src/commands/doctor.ts',
-      'printf "\\n--- package scripts ---\\n"',
-      'node -e "const root=require(\\"./package.json\\"); const sdk=require(\\"./packages/sdk/package.json\\"); console.log(JSON.stringify({root: root.scripts, sdk: sdk.scripts}, null, 2))"',
-      'printf "\\n--- implementation absence check ---\\n"',
-      'rg -n "discoverExternalAgents|externalAgentDiscovery" packages/sdk/src docs/agent-mux-babysitter-integrations -S || true',
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 240000,
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
-
-const prepareBranchTask = defineTask('issue-602.prepare-branch', (args, taskCtx) => ({
-  kind: 'shell',
-  title: 'Create issue #602 implementation branch',
-  labels: ['issue-602', 'git', 'branch'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      `if git rev-parse --verify ${args.branchName} >/dev/null 2>&1; then`,
-      `  git switch ${args.branchName}`,
-      'else',
-      `  git switch -c ${args.branchName} ${args.baseBranch}`,
-      'fi',
-      'git status --short --branch',
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 60000,
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
-
-const diagnoseTask = defineTask('issue-602.diagnose', (args, taskCtx) => ({
-  kind: 'agent',
-  title: 'Diagnose SDK external agent discovery implementation path',
-  labels: ['issue-602', 'diagnosis', 'sdk', 'agent-mux'],
-  agent: {
-    name: 'sdk-agent-mux-diagnoser',
-    prompt: {
-      role: 'senior TypeScript SDK maintainer',
-      task: 'Plan the smallest correct implementation path for issue #602 without editing files.',
-      instructions: [
-        'SPEC AND CONTEXT (verbatim):',
-        '---',
-        args.contextStdout,
-        '---',
-        'Do not edit files in this task.',
-        'Trace the runtime call path from the new SDK API through optional agent-mux import, adapter/model registries, CLI fallback, cache, and public exports.',
-        'Respect the related-issue boundary: do not implement external task dispatch (#614), host capability ingestion (#616), or full process-prompt injection (#605) unless issue #602 explicitly requires a narrow export/integration hook.',
-        'Identify how to normalize agent-mux structured capabilities into the string capabilities array required by the SDK design.',
-        'Identify deterministic tests that mock module discovery, CLI fallback, unavailable agent-mux, timeout/failure behavior, and 60s cache/force invalidation.',
-        'Return JSON: { rootCause: string, runtimeCallPaths: string[], targetFiles: string[], publicApiShape: object, normalizationPlan: string[], testPlan: string[], implementationPlan: string[], outOfScope: string[], risks: string[] }.',
-      ],
-      outputFormat: 'JSON only',
+const reuseAuditTask = defineTask(
+  'issue-602.reuse-audit',
+  async ({ issueNumber }) => ({
+    kind: 'agent',
+    title: 'Phase 0 reuse audit for issue #602',
+    labels: ['issue-602', 'reuse-audit', 'planning'],
+    agent: {
+      name: 'repo-reuse-auditor',
+      prompt: {
+        role: 'senior monorepo maintainer',
+        task: 'Run the repository reuse audit before planning or implementing issue #602.',
+        instructions: [
+          repositoryContext,
+          sourceOfTruthInstructions,
+          `Issue number: ${issueNumber}`,
+          'Extract keyword nouns and verbs from the issue and redispatch comment.',
+          'Scan for matching migrations, API routes, environment variables, SDK dependencies, imports, discovery helpers, adapter registry clients, responder matching, and tasks-mux routing code.',
+          'Include existing infrastructure that should be reused or explicitly avoided.',
+          'Render a section named exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
+          'Return JSON: { findingsTitle: string, keywords: string[], matchingInfrastructure: Array<{ path: string, reason: string }>, noMatchNotes: string[], implications: string[] }.',
+        ],
+      },
     },
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
+  }),
+  { kind: 'agent', title: 'Phase 0 reuse audit for issue #602', labels: ['issue-602', 'reuse-audit'] },
+);
 
-const writeTestsTask = defineTask('issue-602.write-tests', (args, taskCtx) => ({
-  kind: 'agent',
-  title: 'Write failing SDK tests for external agent discovery',
-  labels: ['issue-602', 'tdd', 'tests'],
-  agent: {
-    name: 'sdk-discovery-test-writer',
-    prompt: {
-      role: 'senior TypeScript test engineer practicing strict TDD',
-      task: 'Author focused failing tests for issue #602 before implementation.',
-      instructions: [
-        'SPEC AND CONTEXT (verbatim):',
-        '---',
-        args.contextStdout,
-        '---',
-        'DIAGNOSIS (verbatim JSON):',
-        '---',
-        JSON.stringify(args.diagnosis ?? {}, null, 2),
-        '---',
-        'Edit only test files unless a tiny test-only fixture is truly necessary.',
-        'Primary target: packages/sdk/src/harness/__tests__/externalAgentDiscovery.test.ts.',
-        'Do not read implementation files beyond the context already provided here. Author tests strictly from the spec text and existing test style.',
-        'Cover unavailable optional dependency returning available=false, mocked in-process agent-mux discovery, CLI doctor --json fallback, cache hit within 60 seconds, force:true bypass, and graceful timeout/failure handling.',
-        'The tests should initially fail because packages/sdk/src/harness/externalAgentDiscovery.ts does not exist or does not satisfy the API yet.',
-        'Return JSON: { testFiles: string[], testsWritten: string[], expectedRedReason: string }.',
-      ],
-      outputFormat: 'JSON only',
+const architectureTask = defineTask(
+  'issue-602.architecture',
+  async ({ issueNumber, reuseAudit }) => ({
+    kind: 'agent',
+    title: 'Trace issue #602 architecture and implementation boundary',
+    labels: ['issue-602', 'architecture', 'sdk', 'tasks-mux', 'agent-mux'],
+    agent: {
+      name: 'sdk-discovery-architect',
+      prompt: {
+        role: 'senior TypeScript SDK architect',
+        task: 'Trace the live architecture for SDK external agent discovery and define the implementation boundary.',
+        instructions: [
+          repositoryContext,
+          sourceOfTruthInstructions,
+          issueBoundaryInstructions,
+          `Issue number: ${issueNumber}`,
+          'REUSE AUDIT (JSON):',
+          asJson(reuseAudit),
+          'Trace runtime call paths from the new SDK API and exports to the downstream tasks-mux consumer that will be added by #630.',
+          'Differentiate existing SDK harness discovery from the new external agent discovery API.',
+          'Identify the minimal local agent-mux client shape needed for optional dynamic import without hard SDK dependency behavior.',
+          'Identify the amux doctor --json output shape and normalization strategy.',
+          'Identify files to create/modify and files that must remain out of scope.',
+          'Return JSON: { runtimeCallPaths: string[], targetFiles: string[], outOfScopeFiles: string[], publicApiShape: object, optionalDependencyPlan: string[], cliFallbackPlan: string[], capabilityNormalizationPlan: string[], cachePlan: string[], downstreamConsumerContract: string[], risks: string[] }.',
+        ],
+      },
     },
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
+  }),
+  { kind: 'agent', title: 'Trace issue #602 architecture', labels: ['issue-602', 'architecture'] },
+);
 
-const runRedTestsTask = defineTask('issue-602.run-red-tests', (args, taskCtx) => ({
-  kind: 'shell',
-  title: 'Confirm issue #602 tests fail before implementation',
-  labels: ['issue-602', 'tdd', 'red'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/harness/__tests__/externalAgentDiscovery.test.ts',
-    ].join('\n'),
-    expectedExitCode: 1,
-    timeout: 180000,
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
-
-const implementTask = defineTask('issue-602.implement', (args, taskCtx) => ({
-  kind: 'agent',
-  title: 'Implement SDK external agent discovery API',
-  labels: ['issue-602', 'implementation', 'sdk', 'agent-mux'],
-  agent: {
-    name: 'sdk-agent-mux-implementer',
-    prompt: {
-      role: 'senior TypeScript SDK maintainer',
-      task: 'Implement issue #602 and make the pre-authored tests pass.',
-      instructions: [
-        'SPEC AND CONTEXT (verbatim):',
-        '---',
-        args.contextStdout,
-        '---',
-        'DIAGNOSIS (verbatim JSON):',
-        '---',
-        JSON.stringify(args.diagnosis ?? {}, null, 2),
-        '---',
-        'RED TEST OUTPUT (verbatim):',
-        '---',
-        args.redTestStdout,
-        '---',
-        'Edit the repository directly.',
-        'Expected implementation surface: packages/sdk/src/harness/externalAgentDiscovery.ts, packages/sdk/src/harness/index.ts, packages/sdk/src/index.ts if needed for a direct public export, packages/sdk/src/harness/discovery.ts only if a narrow integration point is required by the spec, and the new externalAgentDiscovery test file.',
-        'Keep @a5c-ai/agent-mux optional. Use dynamic import or an equivalent optional import boundary with no static hard dependency in SDK runtime code.',
-        'Fallback to `amux doctor --json` when the module import path is unavailable. Normalize missing or partial fields to safe defaults.',
-        'Return { available: false, agents: [], defaultProvider: null, defaultModel: null } when neither module nor CLI discovery succeeds.',
-        'Implement 60s caching and `force: true` invalidation. Preserve `timeout` and `cwd` options from the design.',
-        'Normalize agent-mux adapters into ExternalAgentInfo with name, displayName, installed, authenticated, and string capabilities. Include model/default metadata only if it fits the exported interface or a clearly typed extension without breaking the requested API.',
-        'Do not implement external agent task dispatch, host tool discovery, or process prompt injection beyond public API/export plumbing for this issue.',
-        'Preserve unrelated worktree changes.',
-        'Return JSON: { changedFiles: string[], summary: string, apiShape: object, testsUpdated: string[], verificationCommands: string[] }.',
-      ],
-      outputFormat: 'JSON only',
+const branchTask = defineTask(
+  'issue-602.branch',
+  async ({ baseBranch, implementationBranch }) => ({
+    kind: 'agent',
+    title: 'Prepare implementation branch for issue #602',
+    labels: ['issue-602', 'git', 'branch'],
+    agent: {
+      name: 'git-branch-preparer',
+      prompt: {
+        role: 'repository maintainer',
+        task: 'Prepare the implementation branch for issue #602.',
+        instructions: [
+          repositoryContext,
+          `Base branch: ${baseBranch}`,
+          `Implementation branch: ${implementationBranch}`,
+          'Check the current branch and worktree status.',
+          'Create or switch to the implementation branch from the base branch without overwriting unrelated local changes.',
+          'If unrelated local changes would block the branch operation, stop and report the blocker instead of stashing or reverting them.',
+          'Return JSON: { branchReady: boolean, currentBranch: string, baseBranch: string, blockers: string[] }.',
+        ],
+      },
     },
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
+  }),
+  { kind: 'agent', title: 'Prepare implementation branch', labels: ['issue-602', 'git'] },
+);
 
-const verifyTask = defineTask('issue-602.verify', (args, taskCtx) => ({
-  kind: 'shell',
-  title: 'Run issue #602 verification gates',
-  labels: ['issue-602', 'verification', 'quality-gate'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/harness/__tests__/externalAgentDiscovery.test.ts packages/sdk/src/harness/__tests__/discovery.test.ts packages/sdk/src/harness/__tests__/install.test.ts',
-      'npm run build:sdk',
-      'npm run test:sdk',
-      'npm run verify:metadata',
-      'git diff --check',
-      'rg -n "discoverExternalAgents|ExternalAgentDiscovery|ExternalAgentInfo" packages/sdk/src/harness packages/sdk/src/index.ts',
-      'if rg -n "from [\\\"\\x27]@a5c-ai/agent-mux[\\\"\\x27]|require\\([\\\"\\x27]@a5c-ai/agent-mux[\\\"\\x27]\\)" packages/sdk/src/harness/externalAgentDiscovery.ts; then',
-      '  echo "externalAgentDiscovery.ts appears to statically require agent-mux; keep the dependency optional" >&2',
-      '  exit 1',
-      'fi',
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 900000,
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
-
-const readArtifactsTask = defineTask('issue-602.read-artifacts', (args, taskCtx) => ({
-  kind: 'shell',
-  title: 'Read final issue #602 artifacts for review',
-  labels: ['issue-602', 'review', 'artifacts'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'git status --short --branch',
-      'git diff -- packages/sdk/src/harness packages/sdk/src/index.ts docs/agent-mux-babysitter-integrations',
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 60000,
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
-
-const reviewTask = defineTask('issue-602.review', (args, taskCtx) => ({
-  kind: 'agent',
-  title: 'Review issue #602 implementation against spec',
-  labels: ['issue-602', 'review', 'quality-gate'],
-  agent: {
-    name: 'sdk-agent-mux-reviewer',
-    prompt: {
-      role: 'senior SDK code reviewer',
-      task: 'Review the issue #602 implementation against the issue, design, tests, and final artifacts.',
-      instructions: [
-        'VERIFICATION (verbatim JSON):',
-        '---',
-        JSON.stringify(args.verification ?? {}, null, 2),
-        '---',
-        'ARTIFACTS (verbatim):',
-        '---',
-        args.artifactsStdout,
-        '---',
-        'SPEC (verbatim):',
-        '---',
-        args.contextStdout,
-        '---',
-        'Compare SPEC to ARTIFACTS directly. Ignore any narrative in your context about how ARTIFACTS were built.',
-        'Check optional dependency behavior, CLI fallback, timeout/failure fallback, cache/force semantics, exports, tests with mocks, and issue-boundary discipline around #605/#614/#616.',
-        'Return JSON: { approved: boolean, issues: string[], summary: string, residualRisks: string[] }.',
-      ],
-      outputFormat: 'JSON only',
+const testAuthoringTask = defineTask(
+  'issue-602.tests',
+  async ({ architecture }) => ({
+    kind: 'agent',
+    title: 'Author failing SDK discovery tests before implementation',
+    labels: ['issue-602', 'tdd', 'tests'],
+    agent: {
+      name: 'sdk-discovery-test-author',
+      prompt: {
+        role: 'senior TypeScript test engineer',
+        task: 'Write focused failing tests for the issue #602 SDK discovery API before implementing it.',
+        instructions: [
+          repositoryContext,
+          sourceOfTruthInstructions,
+          issueBoundaryInstructions,
+          'ARCHITECTURE (JSON):',
+          asJson(architecture),
+          'Author tests strictly from the issue/design source materials read during this task.',
+          'Primary target test file: packages/sdk/src/harness/__tests__/externalAgentDiscovery.test.ts.',
+          'Use existing SDK harness test style and mocking patterns.',
+          'Cover unavailable optional dependency, in-process mocked agent-mux discovery, CLI doctor --json fallback, CLI/module failures, timeout behavior, cache hit within TTL, and force:true cache bypass.',
+          'Cover that discovered agents expose installed+authenticated status and string capabilities suitable for tasks-mux matchAgentResponder() in #630.',
+          'Do not implement production code in this task.',
+          'Run the new targeted test and confirm it fails for the expected reason before handing off.',
+          'Return JSON: { testFiles: string[], testsWritten: string[], redCommand: string, expectedFailure: string, notes: string[] }.',
+        ],
+      },
     },
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
+  }),
+  { kind: 'agent', title: 'Author failing SDK discovery tests', labels: ['issue-602', 'tdd'] },
+);
 
-const refineTask = defineTask('issue-602.refine', (args, taskCtx) => ({
-  kind: 'agent',
-  title: 'Refine issue #602 implementation after failed review',
-  labels: ['issue-602', 'refinement', 'quality-gate'],
-  agent: {
-    name: 'sdk-agent-mux-refiner',
-    prompt: {
-      role: 'senior TypeScript SDK maintainer',
-      task: 'Fix the review-blocking issues for issue #602.',
-      instructions: [
-        'SPEC AND CONTEXT (verbatim):',
-        '---',
-        args.contextStdout,
-        '---',
-        'REVIEW (verbatim JSON):',
-        '---',
-        JSON.stringify(args.review ?? {}, null, 2),
-        '---',
-        'ARTIFACTS (verbatim):',
-        '---',
-        args.artifactsStdout,
-        '---',
-        'Edit only files required to resolve the review issues. Keep the scope bounded to issue #602.',
-        'Return JSON: { changedFiles: string[], fixes: string[], remainingRisks: string[] }.',
-      ],
-      outputFormat: 'JSON only',
+const implementationTask = defineTask(
+  'issue-602.implementation',
+  async ({ architecture, tests, previousReview }) => ({
+    kind: 'agent',
+    title: 'Implement SDK external agent discovery API',
+    labels: ['issue-602', 'implementation', 'sdk', 'agent-mux'],
+    agent: {
+      name: 'sdk-discovery-implementer',
+      prompt: {
+        role: 'senior TypeScript SDK maintainer',
+        task: 'Implement the issue #602 SDK external agent discovery API and make the pre-authored tests pass.',
+        instructions: [
+          repositoryContext,
+          sourceOfTruthInstructions,
+          issueBoundaryInstructions,
+          'ARCHITECTURE (JSON):',
+          asJson(architecture),
+          'TEST AUTHORING RESULT (JSON):',
+          asJson(tests),
+          'PREVIOUS REVIEW, IF ANY (JSON):',
+          asJson(previousReview),
+          'Expected production file: packages/sdk/src/harness/externalAgentDiscovery.ts.',
+          'Expected test file: packages/sdk/src/harness/__tests__/externalAgentDiscovery.test.ts.',
+          'Expected export files: packages/sdk/src/harness/index.ts and, if needed for public SDK import ergonomics, packages/sdk/src/index.ts.',
+          'Modify packages/sdk/src/harness/discovery.ts only for a narrow integration point required by the issue; do not blend external agent discovery into legacy harness discovery unless the source materials justify it.',
+          'Keep @a5c-ai/agent-mux optional through a dynamic/optional import boundary. Do not introduce a hard runtime dependency from SDK discovery.',
+          'Normalize agent-mux adapter registry and CLI doctor data into the requested ExternalAgentInfo and ExternalAgentDiscovery shapes.',
+          'Use env defaults AMUX_PROVIDER and AMUX_MODEL for defaultProvider/defaultModel unless the source materials identify an existing richer model registry default that should be preferred.',
+          'Keep tasks-mux as the consumer contract only. Do not implement TaskRouter, matchAgentResponder, AgentMuxResponderBackend, SDK direct dispatch, or responderType validation in this phase.',
+          'Run the targeted test while implementing, and stop only when the targeted tests pass.',
+          'Return JSON: { changedFiles: string[], summary: string, apiShape: object, testsRun: string[], remainingRisks: string[] }.',
+        ],
+      },
     },
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
+  }),
+  { kind: 'agent', title: 'Implement SDK discovery API', labels: ['issue-602', 'implementation'] },
+);
 
-const deliverTask = defineTask('issue-602.deliver', (args, taskCtx) => ({
-  kind: 'shell',
-  title: 'Commit, push, open PR, and comment on issue #602',
-  labels: ['issue-602', 'delivery', 'github'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'git status --short --branch',
-      'git add packages/sdk/src/harness/externalAgentDiscovery.ts packages/sdk/src/harness/__tests__/externalAgentDiscovery.test.ts packages/sdk/src/harness/index.ts packages/sdk/src/index.ts packages/sdk/src/harness/discovery.ts',
-      'git diff --cached --check',
-      'git diff --cached --quiet && { echo "No staged changes to commit" >&2; exit 1; }',
-      'git commit -m "feat(sdk): discover external agent-mux agents"',
-      'git push -u origin "${BRANCH_NAME}"',
-      'PR_URL=$(gh pr create --base "${BASE_BRANCH}" --head "${BRANCH_NAME}" --title "Add SDK external agent discovery" --body "Fixes #602\\n\\n## Summary\\n- add discoverExternalAgents() as an optional SDK API for agent-mux discovery\\n- normalize agent installation/auth/capability/default data with module discovery and amux doctor --json fallback\\n- add 60s caching with force invalidation and focused SDK unit coverage\\n\\n## Tests\\n- targeted externalAgentDiscovery/discovery/install Vitest suite\\n- npm run build:sdk\\n- npm run test:sdk\\n- npm run verify:metadata")',
-      'gh issue comment "${ISSUE_NUMBER}" --body "Implemented the SDK external agent discovery API.\\n\\nSummary:\\n- added \\`discoverExternalAgents()\\` with optional agent-mux module discovery and \\`amux doctor --json\\` fallback\\n- normalized discovered agents, auth/install status, capabilities, defaults, and unavailable semantics\\n- added 60s cache behavior with \\`force: true\\` invalidation and focused SDK tests\\n\\nQuality gates run locally:\\n- targeted externalAgentDiscovery/discovery/install Vitest suite\\n- \\`npm run build:sdk\\`\\n- \\`npm run test:sdk\\`\\n- \\`npm run verify:metadata\\`\\n\\nPR: ${PR_URL}"',
-      'printf "%s\\n" "$PR_URL"',
-    ].join('\n'),
-    env: {
-      BRANCH_NAME: args.branchName,
-      BASE_BRANCH: args.baseBranch,
-      ISSUE_NUMBER: String(args.issueNumber),
+const verificationTask = defineTask(
+  'issue-602.verification',
+  async ({ implementation }) => ({
+    kind: 'agent',
+    title: 'Run issue #602 quality gates',
+    labels: ['issue-602', 'verification', 'quality-gate'],
+    agent: {
+      name: 'sdk-discovery-verifier',
+      prompt: {
+        role: 'senior SDK release verifier',
+        task: 'Run and report the deterministic quality gates for issue #602.',
+        instructions: [
+          repositoryContext,
+          issueBoundaryInstructions,
+          'IMPLEMENTATION RESULT (JSON):',
+          asJson(implementation),
+          'Run these gates from the repository root and capture pass/fail plus important output:',
+          '- targeted Vitest for packages/sdk/src/harness/__tests__/externalAgentDiscovery.test.ts',
+          '- related SDK harness discovery/install tests if present',
+          '- npm run build:sdk',
+          '- npm run test:sdk',
+          '- npm run verify:metadata',
+          '- git diff --check',
+          '- grep/search guard proving packages/sdk/src/harness/externalAgentDiscovery.ts does not statically import or require @a5c-ai/agent-mux',
+          '- grep/search guard proving no tasks-mux router/backend implementation was added for #630/#631 in this issue branch',
+          'If a gate fails, diagnose root cause and return the exact failing command and remediation needed.',
+          'Return JSON: { passed: boolean, commands: Array<{ command: string, passed: boolean, summary: string }>, failures: string[], artifactsChecked: string[] }.',
+        ],
+      },
     },
-    expectedExitCode: 0,
-    timeout: 180000,
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
+  }),
+  { kind: 'agent', title: 'Run issue #602 quality gates', labels: ['issue-602', 'verification'] },
+);
+
+const reviewTask = defineTask(
+  'issue-602.review',
+  async ({ architecture, implementation, verification }) => ({
+    kind: 'agent',
+    title: 'Review issue #602 against verbatim source materials',
+    labels: ['issue-602', 'review', 'quality-gate'],
+    agent: {
+      name: 'sdk-discovery-reviewer',
+      prompt: {
+        role: 'senior SDK code reviewer',
+        task: 'Review the issue #602 implementation against the source materials and final artifacts.',
+        instructions: [
+          repositoryContext,
+          sourceOfTruthInstructions,
+          issueBoundaryInstructions,
+          'ARCHITECTURE (JSON):',
+          asJson(architecture),
+          'IMPLEMENTATION RESULT (JSON):',
+          asJson(implementation),
+          'VERIFICATION RESULT (JSON):',
+          asJson(verification),
+          'Read the final diff and relevant files directly during this review.',
+          'Compare SPEC to ARTIFACTS directly. Ignore any narrative in your context about how ARTIFACTS were built.',
+          'Findings must prioritize bugs, API mismatches, optional-dependency regressions, cache bugs, timeout/fallback bugs, public export omissions, and scope creep into #630/#631/#635/#605.',
+          'The review is approved only if the revised consumer contract is correct: tasks-mux matchAgentResponder() can later query discovery for installed+authenticated adapters, and SDK does not directly dispatch to agent-mux in this issue.',
+          'Return JSON: { approved: boolean, findings: Array<{ severity: string, file: string, line: number, issue: string }>, summary: string, residualRisks: string[] }.',
+        ],
+      },
+    },
+  }),
+  { kind: 'agent', title: 'Review issue #602 implementation', labels: ['issue-602', 'review'] },
+);
+
+const deliveryTask = defineTask(
+  'issue-602.delivery',
+  async ({ issueNumber, baseBranch, implementationBranch, review, verification }) => ({
+    kind: 'agent',
+    title: 'Commit, push, open PR, and comment on issue #602',
+    labels: ['issue-602', 'delivery', 'github'],
+    agent: {
+      name: 'github-delivery-maintainer',
+      prompt: {
+        role: 'repository maintainer',
+        task: 'Deliver the completed issue #602 implementation through GitHub.',
+        instructions: [
+          repositoryContext,
+          `Issue number: ${issueNumber}`,
+          `Base branch: ${baseBranch}`,
+          `Implementation branch: ${implementationBranch}`,
+          'REVIEW RESULT (JSON):',
+          asJson(review),
+          'VERIFICATION RESULT (JSON):',
+          asJson(verification),
+          'Only proceed if review.approved is true and verification.passed is true.',
+          'Stage only the files changed for issue #602.',
+          'Commit with an issue-specific message.',
+          'Push the implementation branch.',
+          'Create a PR against the base branch that links #602.',
+          'In the PR body, summarize SDK discovery API changes, tasks-mux downstream-consumer alignment, and quality gates run.',
+          'Post a comment on issue #602 with the implementation PR link and the same concise quality-gate summary.',
+          'Return JSON: { delivered: boolean, commit: string, prUrl: string, issueCommentUrl: string, blockers: string[] }.',
+        ],
+      },
+    },
+  }),
+  { kind: 'agent', title: 'Deliver issue #602 implementation', labels: ['issue-602', 'delivery'] },
+);
 
 export async function process(inputs, ctx) {
   const issueNumber = inputs?.issueNumber ?? 602;
   const baseBranch = inputs?.baseBranch ?? 'staging';
-  const branchName = inputs?.branchName ?? 'agent/issue-602-external-agent-discovery';
-  const maxImplementationAttempts = inputs?.maxImplementationAttempts ?? 2;
+  const implementationBranch = inputs?.implementationBranch ?? 'agent/issue-602-external-agent-discovery';
+  const maxReviewIterations = inputs?.maxReviewIterations ?? 2;
 
-  const context = await ctx.task(readSpecAndContextTask, { issueNumber }, {
-    key: 'issue-602.context',
+  const reuseAudit = await ctx.task(reuseAuditTask, { issueNumber }, {
+    key: 'issue-602.reuse-audit',
   });
-  const contextStdout = taskStdout(context);
 
-  await ctx.task(prepareBranchTask, { baseBranch, branchName }, {
+  const architecture = await ctx.task(architectureTask, {
+    issueNumber,
+    reuseAudit,
+  }, {
+    key: 'issue-602.architecture',
+  });
+
+  const branch = await ctx.task(branchTask, {
+    baseBranch,
+    implementationBranch,
+  }, {
     key: 'issue-602.branch',
   });
 
-  const diagnosis = await ctx.task(diagnoseTask, { contextStdout }, {
-    key: 'issue-602.diagnosis',
+  const tests = await ctx.task(testAuthoringTask, { architecture }, {
+    key: 'issue-602.tests',
   });
 
-  const testAuthoring = await ctx.task(writeTestsTask, {
-    contextStdout,
-    diagnosis,
-  }, {
-    key: 'issue-602.tests.write',
-  });
-
-  const redTests = await ctx.task(runRedTestsTask, {}, {
-    key: 'issue-602.tests.red',
-  });
-
-  let implementation = await ctx.task(implementTask, {
-    contextStdout,
-    diagnosis,
-    redTestStdout: taskStdout(redTests),
-  }, {
-    key: 'issue-602.implementation.1',
-  });
-
+  let implementation;
   let verification;
-  let artifacts;
-  let review;
+  let review = null;
 
-  for (let attempt = 1; attempt <= maxImplementationAttempts; attempt += 1) {
-    verification = await ctx.task(verifyTask, {}, {
-      key: `issue-602.verify.${attempt}`,
+  for (let iteration = 1; iteration <= maxReviewIterations; iteration += 1) {
+    implementation = await ctx.task(implementationTask, {
+      architecture,
+      tests,
+      previousReview: review,
+    }, {
+      key: `issue-602.implementation.${iteration}`,
     });
 
-    artifacts = await ctx.task(readArtifactsTask, {}, {
-      key: `issue-602.artifacts.${attempt}`,
+    verification = await ctx.task(verificationTask, { implementation }, {
+      key: `issue-602.verification.${iteration}`,
     });
 
     review = await ctx.task(reviewTask, {
-      contextStdout,
+      architecture,
+      implementation,
       verification,
-      artifactsStdout: taskStdout(artifacts),
     }, {
-      key: `issue-602.review.${attempt}`,
+      key: `issue-602.review.${iteration}`,
     });
 
-    if (review?.approved) {
+    if (review?.approved && verification?.passed) {
       break;
     }
 
-    if (attempt >= maxImplementationAttempts) {
+    if (iteration >= maxReviewIterations) {
       await ctx.breakpoint({
-        title: 'Issue #602 Review Did Not Approve',
-        question: 'The implementation still has review-blocking issues after the configured attempts. Review the artifacts and decide whether to continue refinement or stop for manual intervention.',
+        title: 'Issue #602 Review Gate Failed',
+        question: 'The issue #602 implementation did not pass review or verification within the configured iteration budget. Continue refinement, increase the iteration budget, or stop for manual intervention?',
         options: ['continue refinement', 'stop for manual intervention'],
         context: {
           issueNumber,
-          branchName,
+          implementationBranch,
+          verification,
           review,
         },
       });
     }
-
-    implementation = await ctx.task(refineTask, {
-      contextStdout,
-      review,
-      artifactsStdout: taskStdout(artifacts),
-    }, {
-      key: `issue-602.refine.${attempt}`,
-    });
   }
 
-  const delivery = await ctx.task(deliverTask, {
+  const delivery = await ctx.task(deliveryTask, {
     issueNumber,
     baseBranch,
-    branchName,
+    implementationBranch,
+    review,
+    verification,
   }, {
     key: 'issue-602.delivery',
   });
 
   return {
-    success: Boolean(review?.approved),
-    diagnosis,
-    testAuthoring,
+    success: Boolean(review?.approved && verification?.passed && delivery?.delivered),
+    phases: [
+      'reuse-audit',
+      'architecture',
+      'branch',
+      'test-authoring',
+      'implementation',
+      'verification',
+      'review',
+      'delivery',
+    ],
+    reuseAudit,
+    architecture,
+    branch,
+    tests,
     implementation,
     verification,
     review,
     delivery,
-    runtimeCallPaths: diagnosis?.runtimeCallPaths ?? [],
-    changedFiles: implementation?.changedFiles ?? [],
+    runtimeCallPaths: architecture?.runtimeCallPaths ?? [],
   };
 }
