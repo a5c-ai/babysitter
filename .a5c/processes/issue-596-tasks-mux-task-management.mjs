@@ -1,45 +1,49 @@
 /**
  * @process repo/issue-596-tasks-mux-task-management
- * @description Implementation process for issue #596: expand tasks-mux from breakpoint routing into task-management primitives.
+ * @description Implementation process for issue #596: expand tasks-mux breakpoint routing into task-management primitives.
  * @inputs { issueNumber: number, baseBranch: string, targetBranch: string, relatedIssues: number[], targetFiles: string[], verificationCommands: string[] }
- * @outputs { success: boolean, phases: string[], issueContext: object, reuseAudit: object, architecture: object, tests: object, implementations: object[], verification: object, review: object }
+ * @outputs { success: boolean, phases: string[], issueContext: object, reuseAudit: object, architecture: object, tests: object, implementationAttempts: object[], finalGate: object }
  *
- * References used while authoring:
- * - gh issue view 596 --json title,body,labels,comments
- * - docs/agent-layer-gaps.md
- * - docs/agent-reference/process-authoring.md
- * - packages/tasks-mux/src/types.ts
- * - packages/tasks-mux/src/backend.ts
- * - packages/tasks-mux/src/backends/git-native.ts
- * - packages/tasks-mux/src/backends/server.ts
- * - packages/tasks-mux/src/backends/github-issues.ts
- * - packages/tasks-mux/src/cli/commands/breakpoints.ts
- * - packages/tasks-mux/src/mcp/server.ts
- * - packages/tasks-mux/README.md
+ * Authoring context:
+ * - Trigger: manual dispatch
+ * - Source issue: gh issue view 596 --json title,body,labels,comments
+ * - PR check: gh pr view 596 --json files,title,body,comments returned no PR for #596.
+ * - Active process-library root: /home/runner/.a5c/process-library/babysitter-repo/library
+ * - Repo-specific policy: docs/agent-reference/process-authoring.md
  *
- * Process-library audit:
- * - .a5c/process-library/ was absent in this checkout.
- * - Used local library references instead:
- *   - library/tdd-quality-convergence.md
- *   - library/specializations/sdk-platform-development/README.md
- *   - library/specializations/cli-mcp-development/README.md
- *   - library/specializations/software-architecture/README.md
+ * Process-library research:
+ * - cradle/feature-implementation-contribute.js for PR-oriented feature delivery shape.
+ * - methodologies/atdd-tdd/atdd-tdd.js for tests-first outside-in acceptance coverage.
+ * - methodologies/bdd-specification-by-example/examples/search-filtering.json for search/filter examples.
+ * - methodologies/pilot-shell/README.md for spec, TDD, review, and verification gates.
+ * - tdd-quality-convergence.md for iterative quality convergence and scoring.
  *
- * @process methodologies/superpowers/test-driven-development
- * @process methodologies/superpowers/verification-before-completion
- * @process methodologies/v-model
- * @process specializations/sdk-platform-development
- * @process specializations/cli-mcp-development
- * @process specializations/software-architecture
- * @agent architect methodologies/maestro/agents/architect/AGENT.md
- * @agent test-engineer methodologies/maestro/agents/test-engineer/AGENT.md
- * @agent coder methodologies/maestro/agents/coder/AGENT.md
- * @agent code-reviewer methodologies/maestro/agents/code-reviewer/AGENT.md
+ * Phase 0 reuse-audit findings (REVIEW BEFORE PROCEEDING):
+ * - No repo-local .a5c/process-library directory exists; use the active process-library root above.
+ * - No .a5c/reuse-audit.json exists in this checkout.
+ * - packages/tasks-mux/src/types.ts currently has BreakpointStatus values pending/routed/claimed/answered/completed/expired/cancelled and Urgency low/medium/high, but not task priority low/medium/high/critical or assigned/in-progress/blocked/escalated.
+ * - packages/tasks-mux/src/backend.ts exposes breakpoint operations only: submit/get/wait/listPending/answer/cancel/listResponders/claim. It has no task search, bulk mutation, dependency, comment, history, metrics, audit, export, notification, escalation, or form contract.
+ * - packages/tasks-mux/src/backends/git-native.ts persists .breakpoints JSON and scans files for pending breakpoints. It can be extended, but indexing/search must remain compatible with existing JSON files.
+ * - Later tasks-mux work is present on staging: responder types, external-tracker backend, and agent-mux backend now exist. Reuse those seams; do not recreate tracker or agent routing infrastructure.
+ * - docs/agent-layer-gaps.md still lists issue #596 capabilities as open platform gaps.
+ *
+ * @process methodologies/atdd-tdd
+ * @process methodologies/pilot-shell/pilot-shell-feature
+ * @process processes/shared/completeness-gate
+ * @process specializations/collaboration/github/pr-policies
+ * @process specializations/collaboration/github/issue-linking
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
-const MAX_IMPLEMENTATION_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 3;
+
+function io(taskCtx) {
+  return {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  };
+}
 
 export async function process(inputs, ctx) {
   const issueNumber = inputs?.issueNumber ?? 596;
@@ -60,24 +64,23 @@ export async function process(inputs, ctx) {
 
   if (reuseAudit?.needsMaintainerDecision === true) {
     await ctx.breakpoint({
-      title: 'Issue #596 Scope or Dependency Decision',
-      question: reuseAudit.question ?? 'The reuse audit found an unresolved dependency or scope split. Choose how to proceed before implementation.',
+      title: 'Issue #596 Scope Decision',
+      question: reuseAudit.question ?? 'The reuse audit found a dependency or staging decision that should be resolved before implementation.',
       options: [
-        'Proceed with staged core tasks-mux primitives',
-        'Pause until related dependency work lands',
+        'Proceed with additive core task-management primitives',
+        'Pause for maintainer guidance',
       ],
       expert: 'owner',
-      tags: ['approval-gate', 'issue-596', 'tasks-mux'],
+      tags: ['approval-gate', 'issue-596', 'tasks-mux', 'reuse-audit'],
       context: {
         runId: ctx.runId,
         summary: reuseAudit.summary,
         blockers: reuseAudit.blockers ?? [],
-        relatedIssues: inputs?.relatedIssues ?? [577, 597, 634, 630],
       },
     });
   }
 
-  const architecture = await ctx.task(designTaskManagementArchitectureTask, {
+  const architecture = await ctx.task(designArchitectureTask, {
     inputs,
     issueContext,
     reuseAudit,
@@ -85,105 +88,105 @@ export async function process(inputs, ctx) {
     key: 'issue-596.design-architecture',
   });
 
-  const acceptanceTests = await ctx.task(authorAcceptanceTestsTask, {
+  const tests = await ctx.task(authorTestsFirstPlanTask, {
     inputs,
     issueContext,
     reuseAudit,
     architecture,
   }, {
-    key: 'issue-596.author-acceptance-tests',
+    key: 'issue-596.tests-first-plan',
   });
 
-  const implementations = [];
   let verification = null;
   let review = null;
+  const implementationAttempts = [];
 
-  for (let attempt = 1; attempt <= MAX_IMPLEMENTATION_ATTEMPTS; attempt += 1) {
-    const coreImplementation = await ctx.task(implementCoreSchemaBackendTask, {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    const coreContract = await ctx.task(implementCoreContractTask, {
       inputs,
       issueContext,
       reuseAudit,
       architecture,
-      acceptanceTests,
+      tests,
+      attempt,
       previousVerification: verification,
       previousReview: review,
-      attempt,
     }, {
-      key: `issue-596.implementation.${attempt}.core-schema-backend`,
+      key: `issue-596.implementation.${attempt}.core-contract`,
     });
 
-    const backendImplementation = await ctx.task(implementBackendParityTask, {
+    const backendParity = await ctx.task(implementBackendParityTask, {
       inputs,
       issueContext,
       reuseAudit,
       architecture,
-      acceptanceTests,
-      coreImplementation,
+      tests,
+      coreContract,
+      attempt,
       previousVerification: verification,
       previousReview: review,
-      attempt,
     }, {
       key: `issue-596.implementation.${attempt}.backend-parity`,
     });
 
-    const cliMcpImplementation = await ctx.task(implementCliMcpDocsTask, {
+    const cliMcpDocs = await ctx.task(implementCliMcpDocsTask, {
       inputs,
       issueContext,
       reuseAudit,
       architecture,
-      acceptanceTests,
-      coreImplementation,
-      backendImplementation,
+      tests,
+      coreContract,
+      backendParity,
+      attempt,
       previousVerification: verification,
       previousReview: review,
-      attempt,
     }, {
       key: `issue-596.implementation.${attempt}.cli-mcp-docs`,
     });
 
-    const providerImplementation = await ctx.task(implementProviderGuardrailsTask, {
+    const providersAndGovernance = await ctx.task(implementProvidersAndGovernanceTask, {
       inputs,
       issueContext,
       reuseAudit,
       architecture,
-      acceptanceTests,
-      coreImplementation,
-      backendImplementation,
-      cliMcpImplementation,
+      tests,
+      coreContract,
+      backendParity,
+      cliMcpDocs,
+      attempt,
       previousVerification: verification,
       previousReview: review,
-      attempt,
     }, {
-      key: `issue-596.implementation.${attempt}.provider-guardrails`,
+      key: `issue-596.implementation.${attempt}.providers-governance`,
     });
 
     const implementation = {
       attempt,
-      coreImplementation,
-      backendImplementation,
-      cliMcpImplementation,
-      providerImplementation,
+      coreContract,
+      backendParity,
+      cliMcpDocs,
+      providersAndGovernance,
     };
-    implementations.push(implementation);
+    implementationAttempts.push(implementation);
 
     verification = await ctx.task(runQualityGatesTask, {
       inputs,
       issueContext,
       reuseAudit,
       architecture,
-      acceptanceTests,
+      tests,
       implementation,
       attempt,
     }, {
       key: `issue-596.verification.${attempt}`,
     });
 
-    review = await ctx.task(reviewCompatibilityAndCompletenessTask, {
+    review = await ctx.task(reviewCompatibilityTask, {
       inputs,
       issueContext,
       reuseAudit,
       architecture,
-      acceptanceTests,
+      tests,
       implementation,
       verification,
       attempt,
@@ -201,8 +204,8 @@ export async function process(inputs, ctx) {
     issueContext,
     reuseAudit,
     architecture,
-    acceptanceTests,
-    implementations,
+    tests,
+    implementationAttempts,
     verification,
     review,
   }, {
@@ -211,10 +214,10 @@ export async function process(inputs, ctx) {
 
   if (finalGate?.needsMaintainerDecision === true) {
     await ctx.breakpoint({
-      title: 'Issue #596 Final Acceptance Decision',
-      question: finalGate.question ?? 'Final acceptance found a product/API decision that should not be guessed.',
+      title: 'Issue #596 Final Product/API Decision',
+      question: finalGate.question ?? 'Final acceptance found a product or API decision that should not be guessed.',
       options: [
-        'Accept staged implementation and open follow-up issues',
+        'Accept the staged implementation and open follow-up issues',
         'Continue implementation in this issue',
       ],
       expert: 'owner',
@@ -222,7 +225,7 @@ export async function process(inputs, ctx) {
       context: {
         runId: ctx.runId,
         finalGate,
-        attempts: implementations.length,
+        attempts: implementationAttempts.length,
       },
     });
   }
@@ -234,10 +237,10 @@ export async function process(inputs, ctx) {
       'reuse-audit',
       'architecture',
       'tests-first',
-      'core-schema-backend',
+      'core-contract',
       'backend-parity',
       'cli-mcp-docs',
-      'provider-guardrails',
+      'providers-governance',
       'quality-gates',
       'compatibility-review',
       'final-acceptance',
@@ -245,8 +248,8 @@ export async function process(inputs, ctx) {
     issueContext,
     reuseAudit,
     architecture,
-    tests: acceptanceTests,
-    implementations,
+    tests,
+    implementationAttempts,
     verification,
     review,
     finalGate,
@@ -255,27 +258,20 @@ export async function process(inputs, ctx) {
 
 export const readIssueContextTask = defineTask('issue-596.read-issue-context', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Read issue #596 and current tasks-mux context',
-  labels: ['issue-596', 'tasks-mux', 'research'],
+  title: 'Read issue #596 and related task-management context',
+  labels: ['issue-596', 'tasks-mux', 'issue-context'],
   agent: {
-    name: 'architect',
+    name: 'tasks-mux-context-researcher',
     prompt: {
-      role: 'senior maintainer for tasks-mux and Babysitter SDK integration',
-      task: 'Read the live issue context and current tasks-mux implementation before planning edits.',
+      role: 'senior TypeScript monorepo engineer',
+      task: 'Read the authoritative GitHub issue context before implementation.',
       instructions: [
         `Run: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
-        `Confirm whether #${args.issueNumber} is a PR with: gh pr view ${args.issueNumber} --json files,title,body,comments`,
-        'Treat the issue body, labels, and every comment as the source of truth, including links to #577, #597, #634, and #630.',
-        'Read docs/agent-layer-gaps.md, especially the tasks-mux section.',
-        'Inspect packages/tasks-mux/src/types.ts, backend.ts, backends/git-native.ts, backends/server.ts, backends/github-issues.ts, cli/commands/breakpoints.ts, mcp/server.ts, MCP tools, package tests, exports, and README.',
-        'Inspect existing issue #606, #631, #633, and #635 process files only to identify local process style and adjacent task-routing dependencies.',
-        'Do not implement code in this phase.',
-        'Return JSON: { title, labels, commentsSummary, requestedCapabilities, relatedIssues, currentCapabilities, missingCapabilities, affectedFiles, acceptanceCriteria, nonGoals, risks, openQuestions }.',
+        `Also run: gh pr view ${args.issueNumber} --json files,title,body,comments. If it is not a PR, record that result.`,
+        'Read every comment and label. Pay special attention to blockers/related issues #577, #597, #634, and #630.',
+        'Read docs/agent-layer-gaps.md and extract only the tasks-mux task-management gaps relevant to this issue.',
+        'Return JSON with title, labels, commentsSummary, relatedIssues, acceptanceCapabilities, nonGoals, riskLevel, and sourceEvidence.',
       ],
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['requestedCapabilities', 'currentCapabilities', 'missingCapabilities', 'affectedFiles', 'acceptanceCriteria', 'risks'],
     },
   },
   io: io(taskCtx),
@@ -283,112 +279,100 @@ export const readIssueContextTask = defineTask('issue-596.read-issue-context', (
 
 export const reuseAuditTask = defineTask('issue-596.reuse-audit', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Phase 0 - Mandatory reuse audit',
-  labels: ['issue-596', 'reuse-audit', 'planning'],
+  title: 'Phase 0 - Reuse audit before design',
+  labels: ['issue-596', 'tasks-mux', 'reuse-audit'],
   agent: {
-    name: 'architect',
+    name: 'tasks-mux-reuse-auditor',
     prompt: {
-      role: 'senior maintainer performing the repo-required reuse audit',
-      task: 'Find existing infrastructure before proposing or adding new task-management surfaces.',
+      role: 'senior SDK architect',
+      task: 'Run the required reuse audit before proposing new infrastructure for issue #596.',
       context: args,
       instructions: [
         'Start the report with exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
-        'Extract keyword nouns and verbs from issue #596: priority, dependsOn, dependencies, search, filter, bulk approve, bulk close, reassign, assigned, in-progress, blocked, escalated, history, timeline, comments, discussion, metrics, SLA, notifications, escalation chains, forms, validation, audit, export, backup, migration.',
-        'Scan current tasks-mux source, tests, docs, and package exports for matching schemas, API routes, environment variables, dependencies, imports, CLI commands, MCP tools, and backend methods.',
-        'Scan process-library locations in order: .a5c/process-library/ if present, then library/methodologies and library/specializations for matching methodologies and specializations.',
-        'Explicitly classify current overlap such as urgency, claimed status, responder profiles, responder matcher, GitHub issue comments, server API paths, and external tracker backends.',
-        'Identify infrastructure to reuse rather than duplicating, and list missing seams that must be added.',
-        'Flag blockers only when they require human input; otherwise produce a staged implementation recommendation.',
-        'Do not modify source files in this phase.',
-        'Return JSON: { summary, findings, reusableSeams, missingSeams, processLibraryMatches, dependencyStatus, blockers, needsMaintainerDecision, question }.',
+        'Extract nouns and verbs from the issue: priority, dependsOn, search, filter, bulk approve, bulk close, reassign, assigned, in-progress, blocked, escalated, status history, timeline, comments, metrics, SLA, notification, Slack, Discord, webhook, escalation chains, forms, state machine, audit log, export, backup.',
+        'Check whether .a5c/reuse-audit.json exists. If absent, state that explicitly.',
+        'Search current package surfaces: packages/tasks-mux/src/types.ts, backend.ts, backends/*.ts, cli/commands/*.ts, mcp/**/*.ts, router/client/server surfaces, README, docs, and tests.',
+        'Search for matching migrations, API routes, environment variables, SDK dependencies, package dependencies, exports, imports, and existing tests.',
+        'Use the active process-library root /home/runner/.a5c/process-library/babysitter-repo/library and record matching methodologies or specializations that should guide implementation.',
+        'Identify landed related infrastructure such as ResponderType, ExternalTrackerBackend, AgentMuxBackend, server backend, GitHub Issues backend, and MCP tools.',
+        'Return JSON with summary, findings, reusableSeams, missingSeams, incompatibleAssumptions, blockers, needsMaintainerDecision, question, and recommendedFirstSlice.',
       ],
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['summary', 'findings', 'reusableSeams', 'missingSeams', 'processLibraryMatches', 'needsMaintainerDecision'],
     },
   },
   io: io(taskCtx),
 }));
 
-export const designTaskManagementArchitectureTask = defineTask('issue-596.design-architecture', (args, taskCtx) => ({
+export const designArchitectureTask = defineTask('issue-596.design-architecture', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design additive task-management architecture',
   labels: ['issue-596', 'architecture', 'tasks-mux'],
   agent: {
-    name: 'architect',
+    name: 'tasks-mux-architect',
     prompt: {
-      role: 'tasks-mux API architect',
-      task: 'Design a backward-compatible staged architecture for the issue #596 task-management expansion.',
+      role: 'domain-driven TypeScript API architect',
+      task: 'Design a backward-compatible task-management architecture for tasks-mux.',
       context: args,
       instructions: [
-        'Use an additive design that preserves existing Breakpoint JSON compatibility, CLI behavior, MCP tool names, and backend contracts unless a migration path is explicitly defined.',
-        'Define schema changes for priority low/medium/high/critical, dependsOn[], richer statuses, assignee metadata, history/timeline events, comments/discussion, SLA/metrics, form definitions/submissions, audit entries, export/backup metadata, notification config, and escalation chains.',
-        'Define a transition validator for pending, routed, assigned, claimed, in-progress, blocked, escalated, answered, completed, expired, cancelled, and closed-like terminal states; document aliases where needed.',
-        'Define backend interface additions for search/filter, dependency operations, assignment/reassignment, state transitions, bulk operations, comments, history, metrics, forms, audit/export, and provider-backed notifications/escalation.',
-        'Stage capabilities so core schema/search/state/history/comments/bulk ship before optional provider integrations.',
-        'Specify compatibility defaults for old breakpoint files and server/GitHub payloads.',
-        'Identify test fixture strategy and migration fixture format.',
-        'Return JSON: { architectureSummary, stagedPlan, schemaContract, backendContract, stateMachine, compatibilityPlan, providerInterfaces, docsPlan, risks, qualityGates }.',
+        'Do not edit implementation files in this phase.',
+        'Design around additive schema evolution so existing Breakpoint JSON, proven answers, CLI commands, MCP tools, and backend consumers keep working.',
+        'Decide canonical naming for task priority, dependency, lifecycle status, assignment, comments, history, metrics, audit, export, forms, notifications, and escalation.',
+        'Separate required core primitives from optional provider integrations. Notification and escalation providers must be disabled by default and credential-safe.',
+        'Define state-transition validation rules including terminal statuses and allowed transitions for pending/routed/claimed/answered/completed/expired/cancelled plus assigned/in-progress/blocked/escalated.',
+        'Define backend capability behavior for git-native, server, GitHub Issues, external-tracker, and agent-mux. Unsupported capabilities must return explicit typed errors rather than silent no-ops.',
+        'Define search/filter semantics, pagination/sorting defaults, and bulk operation result shape with per-item success/error details.',
+        'Return JSON with architectureSummary, newTypes, backendInterfaceExtensions, compatibilityPlan, migrationPlan, providerPlan, openDecisions, and implementationSlices.',
       ],
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['stagedPlan', 'schemaContract', 'backendContract', 'stateMachine', 'compatibilityPlan', 'qualityGates'],
     },
   },
   io: io(taskCtx),
 }));
 
-export const authorAcceptanceTestsTask = defineTask('issue-596.author-acceptance-tests', (args, taskCtx) => ({
+export const authorTestsFirstPlanTask = defineTask('issue-596.tests-first-plan', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Author failing acceptance and compatibility tests first',
-  labels: ['issue-596', 'tests', 'tdd'],
+  title: 'Author acceptance and compatibility tests first',
+  labels: ['issue-596', 'tests-first', 'atdd', 'tdd'],
   agent: {
-    name: 'test-engineer',
+    name: 'tasks-mux-test-architect',
     prompt: {
-      role: 'senior TypeScript test engineer for backend-agnostic task systems',
-      task: 'Author the failing test suite for issue #596 before implementation changes.',
+      role: 'ATDD/TDD test architect',
+      task: 'Create failing acceptance and compatibility tests before implementation.',
       context: args,
       instructions: [
-        'Edit tests and fixtures only in this phase.',
-        'Add focused tests for schema defaults and parsing compatibility with existing breakpoint JSON.',
-        'Add shared backend capability tests for priorities, dependencies, assignment/reassignment, valid and invalid transitions, search/filter, bulk approve/close/reassign, comments, history, metrics/SLA, audit, and export/backup metadata.',
-        'Add git-native tests for filesystem persistence, filtering without ad hoc test-only behavior, migration fixtures, and bulk atomicity or explicit partial-failure reporting.',
-        'Add server and GitHub Issues backend mapping tests for capability parity or explicit unsupported-feature errors.',
-        'Add CLI program tests for search, assign, reassign, close, approve, stats, comments, escalate, templates/forms, rules, and JSON output.',
-        'Add MCP tests for create_todo/assign_task/search_tasks/cancel_breakpoint/add_comment/escalate plus compatibility with existing ask/list/answer tools.',
-        'Keep external notification, escalation, and provider tests mocked and disabled by default.',
-        'Return JSON: { changedFiles, fixturesAdded, testsAdded, expectedInitialFailures, verificationCommands, coverageMap }.',
+        'Author tests before production code changes.',
+        'Cover schema parsing/defaulting for priorities, dependencies, statuses, assignments, history, comments, forms, metrics, audit, export metadata, notifications, and escalation config.',
+        'Cover backward compatibility fixtures for existing breakpoint JSON without new fields.',
+        'Cover backend contract tests using a shared capability suite for git-native, server, GitHub Issues, external-tracker, and agent-mux where applicable.',
+        'Cover search/filter combinations including status, priority, assignee/responder, tags/domains, text query, dependency state, created/updated ranges, sorting, and pagination.',
+        'Cover bulk approve/close/reassign partial failure behavior and idempotency.',
+        'Cover invalid state transitions, dependency blocking, history/audit append behavior, comments, SLA metrics, export/backup redaction, and provider disabled-by-default behavior.',
+        'Cover CLI and MCP parity for every public operation added.',
+        'Run focused tests and confirm they fail for missing capability rather than setup errors.',
+        'Return JSON with testFiles, acceptanceMatrix, redCommands, redResultSummary, fixtures, and knownDeferredCases.',
       ],
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['changedFiles', 'testsAdded', 'expectedInitialFailures', 'verificationCommands', 'coverageMap'],
     },
   },
   io: io(taskCtx),
 }));
 
-export const implementCoreSchemaBackendTask = defineTask('issue-596.implement-core-schema-backend', (args, taskCtx) => ({
+export const implementCoreContractTask = defineTask('issue-596.implement-core-contract', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement core schema, contracts, transitions, and migrations',
-  labels: ['issue-596', 'implementation', 'schema', 'backend-contract'],
+  title: 'Implement core schema and backend contract',
+  labels: ['issue-596', 'implementation', 'core-contract'],
   agent: {
-    name: 'coder',
+    name: 'tasks-mux-core-implementer',
     prompt: {
-      role: 'senior TypeScript engineer for tasks-mux core APIs',
-      task: 'Implement the core schema and backend contract slice for issue #596.',
+      role: 'senior TypeScript SDK engineer',
+      task: 'Implement the additive core schema, validation, and backend contract for issue #596.',
       context: args,
       instructions: [
-        'Edit only files required by the architecture and tests.',
-        'Add new schema types with compatibility defaults rather than breaking existing Breakpoint consumers.',
-        'Prefer named exported schemas/types and shared helper functions over duplicating string unions across CLI, MCP, and backends.',
-        'Implement state transition validation and clear error types/messages for invalid transitions.',
-        'Extend the BreakpointBackend contract with capability methods and capability detection for optional backend support.',
-        'Add migration/defaulting helpers for existing git-native JSON and legacy GitHub/server payloads.',
-        'Keep provider-backed notifications/escalation/forms behind interfaces and disabled-by-default configuration.',
-        'Return JSON: { changedFiles, exportedTypes, backendMethods, migrationBehavior, compatibilityNotes, testsExpectedToPass, residualRisks }.',
+        'Keep changes scoped to tasks-mux and directly necessary docs/tests.',
+        'Extend types and schemas additively. Do not rename or remove existing Breakpoint fields without migration compatibility.',
+        'Add priority, dependencies, assignment, richer statuses, comments, history/timeline, metrics/SLA metadata, form definitions/submissions, audit entries, export metadata, notification config, and escalation chain types as designed.',
+        'Extend the backend interface with search/filter, bulk operations, assignment/reassignment, comments, transitions, metrics, export/backup, and capability discovery.',
+        'Add state-transition validation helpers and typed unsupported-feature errors.',
+        'Preserve proven-answer and existing selectBreakpointAnswer behavior.',
+        'Run the focused type/schema tests and report results.',
+        'Return JSON with changedFiles, contractSummary, compatibilityNotes, commandsRun, and unresolvedRisks.',
       ],
     },
   },
@@ -397,23 +381,22 @@ export const implementCoreSchemaBackendTask = defineTask('issue-596.implement-co
 
 export const implementBackendParityTask = defineTask('issue-596.implement-backend-parity', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement git-native, server, GitHub, and tracker backend parity',
+  title: 'Implement backend parity and compatibility',
   labels: ['issue-596', 'implementation', 'backend-parity'],
   agent: {
-    name: 'coder',
+    name: 'tasks-mux-backend-implementer',
     prompt: {
-      role: 'senior backend engineer for tasks-mux storage adapters',
-      task: 'Implement backend support for the issue #596 task-management contract.',
+      role: 'backend parity engineer',
+      task: 'Implement task-management capabilities across tasks-mux backends with explicit capability reporting.',
       context: args,
       instructions: [
-        'Start with git-native as the canonical durable implementation for local/repo workflows.',
-        'Implement search/filtering with deterministic semantics for status, priority, assignee/responder, tags, text, dependencies, dates, and project/repo scope.',
-        'Implement bulk operations with explicit result reporting for per-item success/failure; do not hide partial failures.',
-        'Persist comments/history/audit entries in a format that remains readable and migratable.',
-        'Map server and GitHub Issues backends to the shared contract where possible, and return explicit unsupported-feature errors where the remote surface cannot support a feature yet.',
-        'Preserve proven answer behavior and existing breakpoint wait/list/answer compatibility.',
-        'Do not add real email/Slack/Discord side effects in this slice.',
-        'Return JSON: { changedFiles, backendSupportMatrix, unsupportedFeatures, dataFormatNotes, testsExpectedToPass, residualRisks }.',
+        'Start with git-native as the canonical durable implementation, preserving existing .breakpoints JSON compatibility.',
+        'Use structured JSON parsing and typed helpers, not ad hoc string parsing.',
+        'Implement search/filter and bulk operations efficiently enough for git-native, while preserving deterministic output and malformed-file tolerance.',
+        'Map server and GitHub Issues backends to the new contract where possible; for unsupported operations, expose explicit unsupported capability errors and tests.',
+        'Integrate with external-tracker and agent-mux only through their current public seams. Do not duplicate tracker or agent routing code.',
+        'Ensure dependency blocking and escalation timeout behavior are deterministic and testable without real credentials or external network calls.',
+        'Return JSON with changedFiles, backendCapabilityMatrix, compatibilityFixtures, commandsRun, and unsupportedCapabilities.',
       ],
     },
   },
@@ -422,45 +405,44 @@ export const implementBackendParityTask = defineTask('issue-596.implement-backen
 
 export const implementCliMcpDocsTask = defineTask('issue-596.implement-cli-mcp-docs', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement CLI, MCP, exports, and documentation surfaces',
+  title: 'Expose CLI, MCP, and documentation surfaces',
   labels: ['issue-596', 'implementation', 'cli', 'mcp', 'docs'],
   agent: {
-    name: 'coder',
+    name: 'tasks-mux-surface-implementer',
     prompt: {
-      role: 'senior CLI and MCP developer',
-      task: 'Expose issue #596 task-management capabilities through CLI, MCP, package exports, and docs.',
+      role: 'CLI and MCP API engineer',
+      task: 'Expose task-management operations consistently through tasks-mux CLI, MCP, README, and docs.',
       context: args,
       instructions: [
-        'Add CLI commands and tests for search, assign, reassign, close/cancel, approve, bulk operations, comments, escalate, stats, templates/forms, rules, and export/backup where included by the core contract.',
-        'Add MCP tools with clear JSON schemas and backend-agnostic handlers for create_todo, assign_task, search_tasks, cancel_breakpoint, add_comment, escalate, and stats/forms where included by the core contract.',
-        'Preserve existing breakpoints pending/answer/status/poll and existing MCP ask/list/answer/check/claim/poll behavior.',
-        'Update package exports only for stable public types and helpers.',
-        'Update README and relevant docs so CLI/MCP/backend support matrices match implementation.',
-        'Return JSON: { changedFiles, cliCommands, mcpTools, exportsChanged, docsChanged, testsExpectedToPass, residualRisks }.',
+        'Add backend-agnostic CLI commands for search, assign/reassign, close/cancel, approve/answer, bulk approve/close/reassign, comments, escalation, stats, templates/forms, rules, export, and backup as applicable to the architecture.',
+        'Add MCP tools for the same backend-agnostic operations and keep parameter schemas explicit.',
+        'Keep existing ask/breakpoints/responders/server/auth commands compatible.',
+        'Add CLI/MCP parity tests and JSON/text output tests.',
+        'Update packages/tasks-mux/README.md, docs, and package architecture specs to document capabilities, unsupported behavior, provider defaults, and migration compatibility.',
+        'Return JSON with changedFiles, cliCommands, mcpTools, docsUpdated, parityTests, and commandsRun.',
       ],
     },
   },
   io: io(taskCtx),
 }));
 
-export const implementProviderGuardrailsTask = defineTask('issue-596.implement-provider-guardrails', (args, taskCtx) => ({
+export const implementProvidersAndGovernanceTask = defineTask('issue-596.implement-providers-governance', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement notification, escalation, forms, audit, and export guardrails',
-  labels: ['issue-596', 'implementation', 'providers', 'audit'],
+  title: 'Implement provider guardrails, audit, export, and metrics',
+  labels: ['issue-596', 'implementation', 'providers', 'governance'],
   agent: {
-    name: 'coder',
+    name: 'tasks-mux-governance-implementer',
     prompt: {
-      role: 'senior platform engineer for controlled external side effects',
-      task: 'Implement the optional provider and operational guardrails for issue #596 without enabling noisy side effects by default.',
+      role: 'integration safety engineer',
+      task: 'Implement optional provider guardrails and governance features without creating noisy external side effects.',
       context: args,
       instructions: [
-        'Implement notification provider interfaces and mocked test providers for email, Slack, Discord, and webhook targets only as far as the architecture requires.',
-        'Implement escalation-chain evaluation with deterministic timeout/fallback behavior, but keep real external delivery disabled unless explicitly configured.',
-        'Implement structured form definitions/submissions with validation and tests for required fields, conditional fields if supported, and invalid payloads.',
-        'Implement metrics/SLA calculations from history/audit data without introducing nondeterministic timing tests.',
-        'Implement export/backup operations as deterministic serialized output; ensure secrets/tokens are not exported.',
-        'Add security-minded tests for audit integrity, provider disabled-by-default behavior, and credential redaction.',
-        'Return JSON: { changedFiles, providers, guardrails, metrics, exportBehavior, testsExpectedToPass, residualRisks }.',
+        'Notification and escalation providers must be disabled by default and require explicit configuration.',
+        'Add provider interfaces for email, Slack, Discord, and webhook without requiring credentials in the default test suite.',
+        'Use mocked integration tests for provider dispatch, timeout escalation, credential redaction, retries, and failure handling.',
+        'Implement audit log, deterministic export/backup output, metrics/SLA calculations, and redaction rules.',
+        'Ensure provider failures do not corrupt task state and are recorded in history/audit where appropriate.',
+        'Return JSON with changedFiles, providerInterfaces, auditExportSummary, metricsSummary, commandsRun, and residualRisks.',
       ],
     },
   },
@@ -469,53 +451,43 @@ export const implementProviderGuardrailsTask = defineTask('issue-596.implement-p
 
 export const runQualityGatesTask = defineTask('issue-596.run-quality-gates', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Run targeted and repo quality gates',
-  labels: ['issue-596', 'verification', 'quality-gate'],
+  title: 'Run quality gates and repair scoped failures',
+  labels: ['issue-596', 'quality-gate', 'verification'],
   agent: {
-    name: 'test-engineer',
+    name: 'tasks-mux-quality-engineer',
     prompt: {
-      role: 'senior release engineer verifying tasks-mux changes',
-      task: 'Run and summarize the quality gates for issue #596.',
+      role: 'senior TypeScript QA engineer',
+      task: 'Run focused and broad verification for issue #596 and fix scoped failures.',
       context: args,
       instructions: [
-        'Run the verification commands from inputs.verificationCommands in order unless a command is clearly obsolete in the current package scripts; report any substitution with evidence.',
-        'At minimum cover tasks-mux tests, tasks-mux typecheck/build if available, CLI/MCP focused tests, backend capability tests, git diff --check, npm run verify:metadata, and the repo quick commands from AGENTS.md where relevant.',
-        'If tests fail, diagnose whether the failure is from implementation, stale baseline, dependency work, or environment.',
-        'Do not mark passed unless all required gates pass or there is a documented maintainer-approved exception.',
-        'Return JSON: { passed, commands, failures, substitutions, environmentNotes, followUpRequired }.',
+        'Run the verificationCommands from inputs plus any focused red/green commands identified by the tests-first phase.',
+        'At minimum run git diff --check, tasks-mux tests, tasks-mux typecheck/build, root metadata verification, and any affected SDK compatibility tests.',
+        'Read full failures before editing. Fix only failures attributable to issue #596.',
+        'Verify existing breakpoint fixture compatibility, CLI/MCP parity, backend capability matrix, provider disabled-by-default behavior, state validation, audit/history, export/backup redaction, and docs accuracy.',
+        'Return JSON with passed, commandsRun, failures, fixesApplied, changedFiles, evidence, and unresolvedFailures.',
       ],
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['passed', 'commands', 'failures'],
     },
   },
   io: io(taskCtx),
 }));
 
-export const reviewCompatibilityAndCompletenessTask = defineTask('issue-596.review-compatibility-completeness', (args, taskCtx) => ({
+export const reviewCompatibilityTask = defineTask('issue-596.review-compatibility', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Review compatibility, backend parity, and issue coverage',
+  title: 'Review compatibility, completeness, and scope',
   labels: ['issue-596', 'review', 'compatibility'],
   agent: {
-    name: 'code-reviewer',
+    name: 'tasks-mux-adversarial-reviewer',
     prompt: {
-      role: 'strict code reviewer for API compatibility and task-system completeness',
-      task: 'Review the issue #596 implementation for correctness, compatibility, and coverage.',
+      role: 'adversarial reviewer for TypeScript SDK and task-routing systems',
+      task: 'Review the issue #596 implementation for compatibility regressions and missing requested capabilities.',
       context: args,
       instructions: [
-        'Lead with blocking findings and file/line references where possible.',
-        'Verify every issue-requested capability is implemented, intentionally deferred with explicit unsupported-feature behavior, or documented as a follow-up with rationale.',
-        'Check old breakpoint files and existing CLI/MCP workflows still work.',
-        'Check backend support matrix consistency across code, tests, and README.',
-        'Check provider integrations are disabled by default, mocked in tests, and do not leak credentials in export/audit output.',
-        'Check transition validation rejects invalid state moves and allows documented aliases/compatibility paths.',
-        'Return JSON: { approved, score, blockingFindings, nonBlockingFindings, compatibilityAssessment, issueCoverage, requiredFixes }.',
+        'Do not broaden the implementation beyond issue #596.',
+        'Review for schema/API breakage, invalid migration assumptions, backend divergence, partial bulk-operation behavior, unsafe provider side effects, missing credential redaction, invalid state transitions, and CLI/MCP docs drift.',
+        'Check every requested capability from the issue body and comments. Mark each implemented, explicitly unsupported, or deferred with a linked rationale.',
+        'If defects are found, fix narrowly and rerun affected tests.',
+        'Return JSON with approved, score, findings, capabilityChecklist, fixesApplied, commandsRun, and residualRisks.',
       ],
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['approved', 'blockingFindings', 'compatibilityAssessment', 'issueCoverage'],
     },
   },
   io: io(taskCtx),
@@ -523,35 +495,22 @@ export const reviewCompatibilityAndCompletenessTask = defineTask('issue-596.revi
 
 export const finalAcceptanceGateTask = defineTask('issue-596.final-acceptance', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Final acceptance gate for issue #596',
-  labels: ['issue-596', 'final-gate'],
+  title: 'Final acceptance and delivery readiness',
+  labels: ['issue-596', 'final-gate', 'delivery'],
   agent: {
-    name: 'code-reviewer',
+    name: 'tasks-mux-release-reviewer',
     prompt: {
-      role: 'release owner deciding whether issue #596 is ready to merge',
-      task: 'Produce the final acceptance decision for the issue #596 implementation.',
+      role: 'release-minded maintainer',
+      task: 'Decide whether the issue #596 implementation is ready for PR delivery.',
       context: args,
       instructions: [
-        'Compare the final diff, tests, docs, and verification results against the issue body and comments.',
-        'Require compatibility for existing Breakpoint schema/files, CLI commands, MCP tools, and backend behavior unless a migration is documented and tested.',
-        'Require explicit backend capability tests and a clear support matrix.',
-        'Require disabled-by-default external notification/escalation behavior and mocked integration tests.',
-        'Require docs for new CLI/MCP APIs and migration/compatibility behavior.',
-        'List any follow-up issues that should be opened for intentionally deferred provider integrations or remote-backend gaps.',
-        'Return JSON: { passed, needsMaintainerDecision, question, summary, changedFiles, gates, coverage, followUps, mergeRecommendation }.',
+        'Confirm the issue source, comments, labels, and docs/agent-layer-gaps.md are satisfied or explicitly scoped.',
+        'Confirm no implementation code outside the intended tasks-mux surfaces changed without documented reason.',
+        'Confirm verificationCommands passed or environment-only failures are recorded with exact command output and rationale.',
+        'Confirm the PR body can link #596 and summarize implemented capabilities, unsupported/deferred work, tests, and risk.',
+        'Return JSON with passed, needsMaintainerDecision, question, changedFiles, verificationSummary, capabilitySummary, prSummary, and followUps.',
       ],
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['passed', 'summary', 'gates', 'coverage', 'mergeRecommendation'],
     },
   },
   io: io(taskCtx),
 }));
-
-function io(taskCtx) {
-  return {
-    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  };
-}
