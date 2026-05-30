@@ -8,6 +8,8 @@
  * - Current staging already contains hooks-mux canonical lifecycle entries and Claude adapter normalizer/renderer tests for many #636 events; do not
  *   reimplement those surfaces blindly. Begin by producing a current-state support matrix from code, tests, atlas/catalog data, runtime hook registration,
  *   and docs.
+ * - Issue #636 has prior merged planning/implementation PRs (#643, #696), an open refreshed plan PR (#720), and a later issue-thread comment saying
+ *   implementation tracking moved to PRs. Treat issue status and PR state as part of the first-phase audit before executing implementation work.
  * - Matching existing infrastructure found in hooks-mux canonical lifecycle types, Claude adapter catalog-backed mappings, normalizer/renderer tests,
  *   atlas hook mappings, agent-catalog SDK descriptors, agent-mux Claude runtime hook shim/socket registration, SDK runtime hook dispatch,
  *   task intrinsic/result commit paths, and agent-platform orchestration effects.
@@ -57,7 +59,8 @@ const readIssueAndReuseAuditTask = defineTask('issue-636.read-issue-and-reuse-au
         `Run: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
         `If #${args.issueNumber} is a PR rather than an issue, also run: gh pr view ${args.issueNumber} --json files,title,body,comments`,
         'Read docs/agent-stack/hooks/missing-events.md and docs/agent-stack/hooks/coverage-matrix.md in full, but treat them as claims to verify against current code rather than as automatically current truth.',
-        'Check whether prior plan or implementation PRs for this issue have already landed; record their URLs, merge state, and what changed.',
+        'Check whether prior plan or implementation PRs for this issue have already landed or remain open; record their URLs, merge state, and what changed. Include PRs #643, #696, and #720 if present.',
+        'Check the latest issue-thread state, including whether the issue was closed as tracked elsewhere, before deciding whether execution should continue, narrow scope, or only refresh stale docs/tests.',
         'Research process-library guidance. The prompt requested .a5c/process-library/; if that directory is absent, record that fact and use the checked-in library/ methodologies that match this task.',
         'Run the repo-specific plan reuse audit from docs/agent-reference/process-authoring.md before drafting implementation work.',
         'Extract keyword nouns and verbs from the issue and scan existing migrations, APIs, SDK dependencies, imports, atlas hook mappings, canonical phase types, adapters, normalizers, renderers, CLI invoke tests, agent-mux Claude runtime hook shim/socket registration, SDK runtime hook dispatch, task effect handling, and instruction discovery code.',

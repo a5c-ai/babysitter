@@ -61,7 +61,30 @@
   },
   "currentRepoFindings": {
     "sourceBranchAudited": "staging",
-    "issueState": "Issue #636 has previous plan and implementation comments, and prior planning PRs #643 and #696 are referenced in the issue thread. Treat this process as a refreshed executable implementation plan, not as evidence that no prior work exists.",
+    "issueState": "Issue #636 has previous plan and implementation comments, prior planning/implementation PRs #643 and #696, and open refreshed plan PR #720 referenced in the issue thread. A maintainer comment says the implementation pipeline is active and work is tracked via PRs. Treat this process as a refreshed executable implementation plan, not as evidence that no prior work exists.",
+    "relatedPlanPrs": [
+      {
+        "number": 643,
+        "state": "MERGED",
+        "headRefName": "plan/issue-636",
+        "url": "https://github.com/a5c-ai/babysitter/pull/643",
+        "note": "Initial plan plus implementation changes landed into staging."
+      },
+      {
+        "number": 696,
+        "state": "MERGED",
+        "headRefName": "plan/issue-636",
+        "url": "https://github.com/a5c-ai/babysitter/pull/696",
+        "note": "Refreshed plan artifact update landed into staging."
+      },
+      {
+        "number": 720,
+        "state": "OPEN",
+        "headRefName": "plan/issue-636",
+        "url": "https://github.com/a5c-ai/babysitter/pull/720",
+        "note": "Current refreshed plan branch to update rather than duplicate."
+      }
+    ],
     "observedPartialCoverage": [
       "packages/hooks-mux/core/src/types/lifecycle.ts already includes the named canonical phases for the 13 target entries, including tool.after_failure, tool.after_batch, turn.prompt_expansion, turn.stop_failure, task.created, task.completed, team.idle, session.setup, session.instructions_loaded, message.received, model.before_request, model.after_response, and planner.before_tool_selection.",
       "packages/hooks-mux/adapter-claude/src/mappings.ts now builds mappings from agent-catalog with validation against CANONICAL_PHASES and LIFECYCLE_SCOPES instead of accepting unknown strings by cast.",
