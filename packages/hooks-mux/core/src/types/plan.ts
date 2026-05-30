@@ -8,6 +8,10 @@ export interface HandlerRef {
   handler: string;
   /** Optional priority (lower = earlier execution). */
   priority?: number;
+  /** Optional handler type. Omitted type is treated as a legacy shell command. */
+  type?: 'command' | 'shell';
+  /** Optional shell executable used for command handlers. */
+  shell?: string;
 }
 
 /**
@@ -21,6 +25,18 @@ export interface HookPlanEntry {
   phase: string;
   priority: number;
   when?: Record<string, unknown>;
+  /** Additional matcher conditions evaluated with AND semantics after `when`. */
+  if?: Record<string, unknown>;
   handler: HandlerRef;
   timeoutMs?: number;
+  /** Optional shell executable for this hook entry. */
+  shell?: string;
+  /** Diagnostic status message surfaced in handler metadata. */
+  statusMessage?: string;
+  /** Run the command without awaiting process exit. */
+  async?: boolean;
+  /** Request a rewake/reminder after async completion when supported. */
+  asyncRewake?: boolean;
+  /** Suppress duplicate execution for this entry within a session. */
+  once?: boolean;
 }

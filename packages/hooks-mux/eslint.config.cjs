@@ -6,7 +6,7 @@ const globals = require("globals");
 
 module.exports = [
   {
-    ignores: ["**/dist/**", "node_modules/**", "**/__tests__/**", "docs/**"]
+    ignores: ["**/dist/**", "node_modules/**", "**/__tests__/**", "**/*.test.ts", "docs/**"]
   },
   {
     linterOptions: {
@@ -39,7 +39,8 @@ module.exports = [
           "./adapter-openclaw/tsconfig.json",
           "./adapter-hermes/tsconfig.json"
         ],
-        tsconfigRootDir: __dirname
+        tsconfigRootDir: __dirname,
+        allowAutomaticSingleRunInference: true
       }
     },
     plugins: {
@@ -47,6 +48,10 @@ module.exports = [
     },
     rules: {
       ...tseslint.configs.recommended.rules,
+      "max-lines": [
+        "warn",
+        { max: 700, skipBlankLines: true, skipComments: true }
+      ],
       "no-unused-vars": "off",
       "no-undef": "off",
       "@typescript-eslint/no-require-imports": "off",

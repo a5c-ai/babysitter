@@ -38,6 +38,7 @@ export interface RegisteredHandler {
   priority: number;
   handler: PortableHookHandler;
   when?: Record<string, unknown>;
+  if?: Record<string, unknown>;
   timeoutMs?: number;
 }
 
@@ -169,7 +170,7 @@ export function createHooksEngine(config: ProgrammaticEngineConfig): HooksEngine
 
     for (const handler of matchingHandlers) {
       // Evaluate `when` conditions
-      if (!evaluateWhen(handler.when, event)) {
+      if (!evaluateWhen(handler.when, event) || !evaluateWhen(handler.if, event)) {
         continue;
       }
 

@@ -48,12 +48,63 @@ export function evaluateWhen(
 
   for (const [key, expected] of Object.entries(when)) {
     const actual = getNestedValue(event, key);
-    if (actual !== expected) {
+    if (!matchesExpected(actual, expected)) {
       return false;
     }
   }
 
   return true;
+}
+
+function matchesExpected(actual: unknown, expected: unknown): boolean {
+  if (typeof expected !== 'string') {
+    return actual === expected;
+  }
+
+  const negated = expected.startsWith('!');
+  const matcher = negated ? expected.slice(1) : expected;
+  const matched = matchesStringExpected(actual, matcher);
+  return negated ? !matched : matched;
+}
+
+function matchesStringExpected(actual: unknown, expected: string): boolean {
+  if (actual == null) {
+    return false;
+  }
+
+  const actualString = typeof actual === 'string' ? actual : JSON.stringify(actual);
+  if (actualString == null) {
+    return false;
+  }
+  const regex = parseRegexMatcher(expected);
+  if (regex) {
+    return regex.test(actualString);
+  }
+
+  if (expected.includes('|')) {
+    return expected.split('|').some((part) => actualString === part);
+  }
+
+  return actual === expected;
+}
+
+function parseRegexMatcher(expected: string): RegExp | null {
+  if (!expected.startsWith('/') || expected.length < 2) {
+    return null;
+  }
+
+  const lastSlash = expected.lastIndexOf('/');
+  if (lastSlash <= 0) {
+    return null;
+  }
+
+  const source = expected.slice(1, lastSlash);
+  const flags = expected.slice(lastSlash + 1);
+  try {
+    return new RegExp(source, flags);
+  } catch {
+    return null;
+  }
 }
 
 /**

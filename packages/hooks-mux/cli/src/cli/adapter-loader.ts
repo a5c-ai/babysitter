@@ -50,7 +50,7 @@ export interface LoadedAdapter {
   module: Record<string, unknown>;
 }
 
-function isFunction<T extends Function>(value: unknown): value is T {
+function isFunction<T>(value: unknown): value is T {
   return typeof value === 'function';
 }
 

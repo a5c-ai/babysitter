@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import type { UnifiedHookEvent } from '../types/event';
 import type { UnifiedHookResult } from '../types/result';
 import type { HandlerRef, HookPlanEntry } from '../types/plan';
@@ -21,6 +21,21 @@ export type ErrorPolicy = 'fail-open' | 'fail-closed' | 'fail-open-bootstrap-onl
  */
 export type HandlerFn = (event: UnifiedHookEvent) => Promise<UnifiedHookResult> | UnifiedHookResult;
 
+export interface AsyncHandlerRecord {
+  handlerId: string;
+  pluginId: string;
+  command: string;
+  startedAt: string;
+  finishedAt?: string;
+  status: 'running' | 'completed' | 'exited' | 'error';
+  exitCode?: number | null;
+  stdout?: string;
+  stderr?: string;
+  error?: string;
+  asyncRewake?: boolean;
+  rewakeDeferred?: boolean;
+}
+
 /**
  * Options for runPlan execution.
  */
@@ -35,6 +50,8 @@ export interface RunPlanOptions {
   handlerTimeoutMs?: number;
   /** Adapter capabilities to inject as AGENT_CAPABILITIES_JSON into handler subprocess env. */
   capabilities?: AdapterCapabilities;
+  /** Skip all hook execution and return a noop diagnostic result. */
+  disableAllHooks?: boolean;
 }
 
 /**
@@ -46,6 +63,23 @@ const DEFAULT_PHASE_POLICIES: Partial<Record<CanonicalPhase, ErrorPolicy>> = {
   'tool.after': 'fail-open',
   'turn.stop': 'fail-open',
 };
+
+const CLAUDE_COMPAT_ENV_ALLOWLIST = new Set([
+  'CLAUDE_ENV_FILE',
+  'CLAUDE_EFFORT',
+  'CLAUDE_PLUGIN_DATA',
+  'CLAUDE_PROJECT_DIR',
+]);
+
+const asyncHandlerRecords = new Map<string, AsyncHandlerRecord>();
+
+export function getAsyncHandlerRecords(): AsyncHandlerRecord[] {
+  return [...asyncHandlerRecords.values()];
+}
+
+export function clearAsyncHandlerRecords(): void {
+  asyncHandlerRecords.clear();
+}
 
 /**
  * Get the effective error policy for a phase.
@@ -106,10 +140,28 @@ function buildExecContextEnv(event: UnifiedHookEvent, capabilities?: AdapterCapa
 
   // Merge persisted env from the session store
   if (event.execution.persistedEnv) {
-    Object.assign(ctx, event.execution.persistedEnv);
+    for (const [key, value] of Object.entries(event.execution.persistedEnv)) {
+      if (!CLAUDE_COMPAT_ENV_ALLOWLIST.has(key)) {
+        continue;
+      }
+      ctx[key] = value;
+    }
+  }
+
+  if (!ctx['CLAUDE_PROJECT_DIR'] && event.execution.cwd) {
+    ctx['CLAUDE_PROJECT_DIR'] = event.execution.cwd;
   }
 
   return ctx;
+}
+
+function buildHandlerEnv(event: UnifiedHookEvent, capabilities?: AdapterCapabilities): NodeJS.ProcessEnv {
+  const execContextEnv = buildExecContextEnv(event, capabilities);
+  return {
+    ...process.env,
+    ...execContextEnv,
+    HOOKS_PROXY_EVENT: JSON.stringify(event),
+  };
 }
 
 /**
@@ -128,18 +180,14 @@ function runShellHandler(
   event: UnifiedHookEvent,
   timeoutMs?: number,
   capabilities?: AdapterCapabilities,
+  shell?: string,
 ): Promise<UnifiedHookResult> {
   return new Promise((resolve, reject) => {
-    const execContextEnv = buildExecContextEnv(event, capabilities);
-
     const child = exec(
       command,
       {
-        env: {
-          ...process.env,
-          ...execContextEnv,
-          HOOKS_PROXY_EVENT: JSON.stringify(event),
-        },
+        env: buildHandlerEnv(event, capabilities),
+        shell,
         timeout: timeoutMs ?? 30000,
       },
       (error, stdout, _stderr) => {
@@ -187,6 +235,61 @@ function runShellHandler(
   });
 }
 
+function runAsyncShellHandler(
+  entry: HookPlanEntry,
+  command: string,
+  event: UnifiedHookEvent,
+  capabilities?: AdapterCapabilities,
+  shell?: string,
+): string {
+  const recordId = `${entry.pluginId}:${entry.id}:${Date.now()}`;
+  const stdoutChunks: Buffer[] = [];
+  const stderrChunks: Buffer[] = [];
+  asyncHandlerRecords.set(recordId, {
+    handlerId: entry.id,
+    pluginId: entry.pluginId,
+    command,
+    startedAt: new Date().toISOString(),
+    status: 'running',
+    asyncRewake: entry.asyncRewake || undefined,
+    rewakeDeferred: entry.asyncRewake || undefined,
+  });
+
+  const child = spawn(command, {
+    env: buildHandlerEnv(event, capabilities),
+    shell: shell ?? true,
+    detached: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    windowsHide: true,
+  });
+  child.stdout?.on('data', (chunk: Buffer) => stdoutChunks.push(chunk));
+  child.stderr?.on('data', (chunk: Buffer) => stderrChunks.push(chunk));
+  child.on('close', (code) => {
+    asyncHandlerRecords.set(recordId, {
+      ...asyncHandlerRecords.get(recordId)!,
+      finishedAt: new Date().toISOString(),
+      status: code === 0 ? 'completed' : 'exited',
+      exitCode: code,
+      stdout: Buffer.concat(stdoutChunks).toString('utf8'),
+      stderr: Buffer.concat(stderrChunks).toString('utf8'),
+    });
+  });
+  child.on('error', (error) => {
+    asyncHandlerRecords.set(recordId, {
+      ...asyncHandlerRecords.get(recordId)!,
+      finishedAt: new Date().toISOString(),
+      status: 'error',
+      error: error.message,
+      stdout: Buffer.concat(stdoutChunks).toString('utf8'),
+      stderr: Buffer.concat(stderrChunks).toString('utf8'),
+    });
+  });
+  child.unref();
+  (child.stdout as { unref?: () => void } | null)?.unref?.();
+  (child.stderr as { unref?: () => void } | null)?.unref?.();
+  return recordId;
+}
+
 /**
  * Execute a single handler as a shell command child process.
  *
@@ -202,8 +305,20 @@ export async function runHandler(
   handler: HandlerRef,
   timeoutMs?: number,
   capabilities?: AdapterCapabilities,
+  shell?: string,
 ): Promise<UnifiedHookResult> {
-  return runShellHandler(handler.source, event, timeoutMs, capabilities);
+  return runShellHandler(handler.source, event, timeoutMs, capabilities, shell ?? handler.shell);
+}
+
+function onceContextKey(entry: HookPlanEntry): string {
+  return `hooksMux.once.${entry.pluginId}.${entry.id}`;
+}
+
+function statusMetadata(entry: HookPlanEntry): Record<string, unknown> {
+  return {
+    handlerId: entry.id,
+    ...(entry.statusMessage ? { statusMessage: entry.statusMessage } : {}),
+  };
 }
 
 /**
@@ -226,18 +341,70 @@ export async function runPlan(
 ): Promise<UnifiedHookResult[]> {
   const results: UnifiedHookResult[] = [];
 
+  if (options?.disableAllHooks) {
+    return [{
+      decision: 'noop',
+      metadata: {
+        disabled: true,
+        reason: 'disableAllHooks',
+      },
+    }];
+  }
+
   for (const entry of plan) {
     // Evaluate `when` condition — skip handler if any condition fails
-    if (!evaluateWhen(entry.when, event)) {
+    if (!evaluateWhen(entry.when, event) || !evaluateWhen(entry.if, event)) {
       continue;
     }
 
     const policy = getEffectivePolicy(entry.phase, options);
     const timeout = entry.timeoutMs ?? options?.handlerTimeoutMs;
+    const shell = entry.shell ?? entry.handler.shell;
+
+    if (entry.once && event.execution.contextVars[onceContextKey(entry)] === '1') {
+      results.push({
+        decision: 'noop',
+        metadata: {
+          ...statusMetadata(entry),
+          once: true,
+          duplicateSuppressed: true,
+        },
+      });
+      continue;
+    }
+
+    if (entry.async) {
+      const asyncRecordId = runAsyncShellHandler(entry, entry.handler.source, event, options?.capabilities, shell);
+      results.push({
+        decision: 'noop',
+        contextVars: entry.once ? { [onceContextKey(entry)]: '1' } : undefined,
+        metadata: {
+          ...statusMetadata(entry),
+          async: true,
+          asyncRecordId,
+          once: entry.once || undefined,
+          asyncRewake: entry.asyncRewake || undefined,
+          rewakeDeferred: entry.asyncRewake || undefined,
+        },
+      });
+      continue;
+    }
 
     try {
-      const result = await runHandler(event, entry.handler, timeout, options?.capabilities);
-      results.push(result);
+      const result = await runHandler(event, entry.handler, timeout, options?.capabilities, shell);
+      results.push({
+        ...result,
+        contextVars: entry.once
+          ? { ...result.contextVars, [onceContextKey(entry)]: '1' }
+          : result.contextVars,
+        metadata: entry.statusMessage || entry.once
+          ? {
+              ...result.metadata,
+              ...statusMetadata(entry),
+              ...(entry.once ? { once: true } : {}),
+            }
+          : result.metadata,
+      });
     } catch (err) {
       const shouldFailOpen = resolveFailOpen(policy, event.phase);
 

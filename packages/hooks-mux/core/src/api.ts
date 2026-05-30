@@ -9,6 +9,7 @@ import type { UnifiedHookResult } from './types/result';
 import type { AdapterCapabilities } from './types/adapter';
 import type { HookPlanEntry } from './types/plan';
 import { mergeResults, type MergedExecutionResult } from './merge-engine';
+import { evaluateWhen } from './normalizer/plan-resolver';
 
 /**
  * Implementation callbacks provided by an adapter.
@@ -79,10 +80,20 @@ export async function runNormalized(
   const results: UnifiedHookResult[] = [];
 
   for (const entry of matchingEntries) {
+    if (!evaluateWhen(entry.when, event) || !evaluateWhen(entry.if, event)) {
+      continue;
+    }
+
     // Handler.source is the shell command to execute as a child process.
     const { runHandler } = await import('./normalizer/runner');
     try {
-      const result = await runHandler(event, entry.handler);
+      const result = await runHandler(
+        event,
+        entry.handler,
+        entry.timeoutMs,
+        undefined,
+        entry.shell ?? entry.handler.shell,
+      );
       results.push(result);
     } catch (_err) {
       // Fail-open by default in programmatic API

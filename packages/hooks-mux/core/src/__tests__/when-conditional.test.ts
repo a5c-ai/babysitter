@@ -106,6 +106,28 @@ describe('evaluateWhen', () => {
     expect(evaluateWhen({ 'payload.tool_name': 'Edit' }, event)).toBe(false);
   });
 
+  it('should match pipe-separated OR string conditions', () => {
+    const event = makeEvent({ payload: { tool_name: 'Edit' } });
+
+    expect(evaluateWhen({ 'payload.tool_name': 'Edit|Write' }, event)).toBe(true);
+    expect(evaluateWhen({ 'payload.tool_name': 'Bash|Read' }, event)).toBe(false);
+  });
+
+  it('should match slash-delimited regex string conditions', () => {
+    const event = makeEvent({ payload: { tool_name: 'mcp__filesystem__read_file' } });
+
+    expect(evaluateWhen({ 'payload.tool_name': '/^mcp__.*__read_file$/' }, event)).toBe(true);
+    expect(evaluateWhen({ 'payload.tool_name': '/^mcp__.*__write_file$/' }, event)).toBe(false);
+  });
+
+  it('should support negated string conditions', () => {
+    const event = makeEvent({ payload: { tool_name: 'Read' } });
+
+    expect(evaluateWhen({ 'payload.tool_name': '!Bash' }, event)).toBe(true);
+    expect(evaluateWhen({ 'payload.tool_name': '!Read' }, event)).toBe(false);
+    expect(evaluateWhen({ 'payload.missing': '!Bash' }, event)).toBe(true);
+  });
+
   it('should fail for non-existent nested path', () => {
     const event = makeEvent();
     expect(evaluateWhen({ 'execution.nonexistent': 'value' }, event)).toBe(false);
@@ -213,5 +235,41 @@ describe('runPlan with when conditions', () => {
 
     expect(results).toHaveLength(1);
     expect(results[0].metadata?.matched).toBe(true);
+  });
+
+  it('should require optional if conditions to match in addition to when', async () => {
+    const event = makeEvent({ payload: { tool_name: 'Write' } });
+
+    const results = await runPlan(event, [
+      {
+        id: 'skip',
+        pluginId: 'plugin-skip',
+        phase: 'tool.before',
+        priority: 1,
+        when: { phase: 'tool.before' },
+        if: { 'payload.tool_name': 'Read' },
+        handler: {
+          source: 'node -e "console.log(JSON.stringify({decision:\'noop\',metadata:{id:\'skip\'}}))"',
+          handler: 'shell',
+          priority: 1,
+        },
+      },
+      {
+        id: 'run',
+        pluginId: 'plugin-run',
+        phase: 'tool.before',
+        priority: 2,
+        when: { phase: 'tool.before' },
+        if: { 'payload.tool_name': 'Edit|Write' },
+        handler: {
+          source: 'node -e "console.log(JSON.stringify({decision:\'noop\',metadata:{id:\'run\'}}))"',
+          handler: 'shell',
+          priority: 2,
+        },
+      },
+    ]);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].metadata?.id).toBe('run');
   });
 });

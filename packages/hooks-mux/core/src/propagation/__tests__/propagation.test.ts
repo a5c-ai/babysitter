@@ -212,6 +212,57 @@ describe('materializeExecContext', () => {
     expect(result.env['NORMAL_VAR']).toBe('should-appear');
   });
 
+  it('rehydrates only Claude compatibility env vars when the Claude allowlist is requested', async () => {
+    const session = createMockSession({
+      persistedEnv: {
+        CLAUDE_ENV_FILE: '/tmp/claude-env',
+        CLAUDE_EFFORT: 'high',
+        CLAUDE_PLUGIN_DATA: '{"plugin":true}',
+        CLAUDE_PROJECT_DIR: '/workspace/project',
+        RANDOM_SECRET: 'do-not-leak',
+        AGENT_WORKSPACE_ROOT: '/stale/root',
+      },
+      cwd: '/workspace/project',
+    });
+    const store = createMockSessionStore(session);
+
+    const result = await materializeExecContext({
+      sessionId: 'test-session-001',
+      sessionStore: store,
+      envAllowlist: ['CLAUDE_ENV_FILE', 'CLAUDE_EFFORT', 'CLAUDE_PLUGIN_DATA', 'CLAUDE_PROJECT_DIR'],
+      tempDir: tmpDir,
+    });
+
+    expect(result.env['CLAUDE_ENV_FILE']).toBe('/tmp/claude-env');
+    expect(result.env['CLAUDE_EFFORT']).toBe('high');
+    expect(result.env['CLAUDE_PLUGIN_DATA']).toBe('{"plugin":true}');
+    expect(result.env['CLAUDE_PROJECT_DIR']).toBe('/workspace/project');
+    expect(result.env['RANDOM_SECRET']).toBeUndefined();
+    expect(result.env['AGENT_WORKSPACE_ROOT']).toBe('/workspace/project');
+  });
+
+  it('derives CLAUDE_PROJECT_DIR from the workspace root when not persisted explicitly', async () => {
+    const session = createMockSession({
+      persistedEnv: {
+        CLAUDE_EFFORT: 'medium',
+      },
+      metadata: {
+        workspaceRoot: '/workspace/root',
+      },
+    });
+    const store = createMockSessionStore(session);
+
+    const result = await materializeExecContext({
+      sessionId: 'test-session-001',
+      sessionStore: store,
+      envAllowlist: ['CLAUDE_PROJECT_DIR', 'CLAUDE_EFFORT'],
+      tempDir: tmpDir,
+    });
+
+    expect(result.env['CLAUDE_PROJECT_DIR']).toBe('/workspace/root');
+    expect(result.env['CLAUDE_EFFORT']).toBe('medium');
+  });
+
   it('injects AGENT_CAPABILITIES_JSON when capabilities are provided', async () => {
     const session = createMockSession();
     const store = createMockSessionStore(session);

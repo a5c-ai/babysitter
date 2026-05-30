@@ -65,6 +65,16 @@ export async function materializeExecContext(
         env[key] = value;
       }
     }
+
+    if (
+      env['CLAUDE_PROJECT_DIR'] == null
+      && (!envAllowlist || envAllowlist.includes('CLAUDE_PROJECT_DIR'))
+    ) {
+      const projectDir = typeof workspaceRoot === 'string' ? workspaceRoot : session.cwd;
+      if (projectDir) {
+        env['CLAUDE_PROJECT_DIR'] = projectDir;
+      }
+    }
   }
 
   // Inject adapter capabilities as JSON for downstream consumers
