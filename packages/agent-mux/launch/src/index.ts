@@ -10,6 +10,7 @@ export {
   launchCommand,
   resolveLaunchPlan,
   LAUNCH_FLAGS,
+  PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS,
 } from './launch.js';
 
 // Launch plan types

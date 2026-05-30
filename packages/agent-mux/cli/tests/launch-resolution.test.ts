@@ -1,9 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { resolveLaunchPlan } from '../src/commands/launch.js';
+import { PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS, resolveLaunchPlan } from '../src/commands/launch.js';
 
 describe('resolveLaunchPlan', () => {
   const originalEnv = { ...process.env };
   afterEach(() => { process.env = { ...originalEnv }; });
+
+  it('keeps the prompt artifact monitor timeout long enough for slow Windows bridge-interactive cells', () => {
+    expect(PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS).toBe(900_000);
+  });
 
   it('claude + anthropic: no proxy needed', () => {
     const plan = resolveLaunchPlan({

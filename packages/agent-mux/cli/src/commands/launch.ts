@@ -9,6 +9,7 @@ export {
   launchCommand,
   resolveLaunchPlan,
   LAUNCH_FLAGS,
+  PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS,
 } from '@a5c-ai/agent-launch-mux';
 
 export type {

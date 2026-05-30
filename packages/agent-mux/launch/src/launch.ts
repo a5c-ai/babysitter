@@ -111,6 +111,8 @@ export interface LaunchPlan {
   env: Record<string, string>;
 }
 
+export const PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS = 900_000;
+
 // ---------------------------------------------------------------------------
 // Plan resolution
 // ---------------------------------------------------------------------------
@@ -591,11 +593,10 @@ function startPromptArtifactCompletionMonitor(input: {
   const requireBabysitterCompletion = promptRequiresBabysitterCompletion(input.prompt);
   const lastSizes = new Map<string, number>();
   const startedAt = Date.now();
-  const MONITOR_TIMEOUT_MS = 600_000;
   return setInterval(() => {
     void (async () => {
-      if (Date.now() - startedAt > MONITOR_TIMEOUT_MS) {
-        console.error(`[amux launch] artifact monitor timed out after ${MONITOR_TIMEOUT_MS / 1000}s — forcing completion`);
+      if (Date.now() - startedAt > PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS) {
+        console.error(`[amux launch] artifact monitor timed out after ${PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS / 1000}s — forcing completion`);
         input.onComplete();
         return;
       }
