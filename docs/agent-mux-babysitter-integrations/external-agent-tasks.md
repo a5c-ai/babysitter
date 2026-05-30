@@ -2,7 +2,7 @@
 
 ## Summary
 
-Extend the `agent` task kind with an `external` flag that routes execution through agent-mux instead of the internal agent-core session. This lets processes delegate specialist work to the best available agent.
+Extend the `agent` task kind with `responderType` routing metadata so tasks-mux can route work to an internal responder, human, external agent, tracker, or automatic choice. This supersedes the older #603 `external: true` proposal.
 
 ## Task Definition API
 
@@ -23,11 +23,11 @@ const reviewTask = defineTask("review", (args) => ({
   agent: {
     name: "Code Reviewer",
     prompt: "Review the changes in the working directory...",
-    external: true,           // NEW — dispatch via agent-mux
+    responderType: "agent",   // tasks-mux routes to agent-mux
     adapter: "claude-code",   // NEW — which agent-mux adapter
     model: "claude-sonnet-4-6", // optional — model override
     provider: "anthropic",    // optional — provider override
-    timeout: 300_000,         // optional — per-task timeout
+    timeoutMs: 300_000,       // optional — per-task timeout
     approvalMode: "yolo",     // optional — auto-approve tool use
     maxTurns: 10,             // optional — conversation turn limit
   },
@@ -42,10 +42,9 @@ const flexibleTask = defineTask("flexible-review", (args) => ({
   agent: {
     name: "Reviewer",
     prompt: "Review the code...",
-    external: true,
+    responderType: "agent",
     adapter: "claude-code",
-    // If claude-code not installed, fall back to internal agent-core
-    fallbackToInternal: true,  // NEW — graceful degradation
+    fallbackType: "internal",
   },
 }));
 ```
@@ -59,15 +58,14 @@ interface AgentTaskOptions {
   name: string;
   prompt: string | { instructions: string[] };
   outputSchema?: Record<string, unknown>;
-  // New fields for external dispatch:
-  external?: boolean;
+  responderType?: "internal" | "human" | "agent" | "tracker" | "auto";
   adapter?: string;           // agent-mux adapter name
+  fallbackType?: "internal" | "human" | "agent" | "tracker" | "auto";
   model?: string;             // model override
   provider?: string;          // provider override
-  timeout?: number;           // per-task timeout
+  timeoutMs?: number;         // per-task timeout
   approvalMode?: "yolo" | "prompt";
   maxTurns?: number;
-  fallbackToInternal?: boolean;
 }
 
 // Add to TaskDef
@@ -83,49 +81,34 @@ interface TaskDef {
 Add helper function:
 
 ```typescript
-export function externalAgentTask(
-  adapter: string,
-  prompt: string,
-  options?: { model?: string; timeout?: number; maxTurns?: number }
-): Partial<TaskDef> {
-  return {
-    kind: "agent",
-    agent: {
-      name: adapter,
-      prompt,
-      external: true,
-      adapter,
-      ...options,
-    },
-  };
-}
+const reviewTask = externalAgentTask("review", {
+  adapter: "claude-code",
+  prompt: "Review the changes in the working directory...",
+  fallbackType: "internal",
+});
 ```
 
-### `packages/sdk/src/runtime/intrinsics/task.ts`
+### `packages/sdk/src/tasks/defineTask.ts`
 
-In `runTaskIntrinsic()`, when the task kind is `"agent"` and `agent.external` is true:
+When the task kind is `"agent"` and `agent.responderType` is `"agent"`:
 - Validate that `agent.adapter` is set
-- Set metadata flag `externalDispatch: true` on the effect
-- The rest happens in effect resolution (agent-platform side)
+- Preserve valid routing metadata on the task definition
+- Leave effect routing to the tasks-mux work tracked by #630/#620
 
-## Files to Create/Modify
+## Files to Modify
 
-### New Files
-- `packages/sdk/src/tasks/kinds/externalAgent.ts` — helper functions
-- `packages/sdk/src/tasks/__tests__/externalAgent.test.ts` — unit tests
-
-### Modified Files
-- `packages/sdk/src/tasks/types.ts` — extend AgentTaskOptions, add external fields
-- `packages/sdk/src/tasks/kinds/index.ts` — export externalAgentTask helper
-- `packages/sdk/src/runtime/intrinsics/task.ts` — handle external flag in effect dispatch
-- `packages/sdk/src/index.ts` — export new types
+- `packages/sdk/src/tasks/types.ts` — extend AgentTaskOptions with responder routing fields
+- `packages/sdk/src/tasks/kinds/index.ts` — export `externalAgentTask`, `humanTask`, and `autoTask` helpers
+- `packages/sdk/src/tasks/defineTask.ts` — validate agent adapter for `responderType: "agent"`
+- `packages/sdk/src/tasks/serializer.ts` — preserve typed agent routing metadata
+- `packages/sdk/src/tasks/__tests__/*.test.ts` — cover helpers, validation, serialization, and compatibility
 
 ## Validation Rules
 
-In `packages/agent-platform/src/harness/internal/createRun/planProcess/validationSource.ts`:
-- Accept `external: true` on agent tasks
-- Validate `adapter` is a non-empty string when `external: true`
-- Warn (not error) if adapter is not in discovered agents list
+In SDK task definition validation:
+- Accept typed `agent.responderType`
+- Validate `adapter` is a non-empty string when `agent.responderType === "agent"`
+- Leave adapter availability checks to the tasks-mux/runtime routing work
 
 ## Process Template Update
 
@@ -135,7 +118,7 @@ When external agents are available, the process definition template should menti
 You may use external agent tasks to delegate work to installed agents:
 - defineTask("id", (args) => ({
     kind: "agent",
-    agent: { name: "...", prompt: "...", external: true, adapter: "claude-code" }
+    agent: { name: "...", prompt: "...", responderType: "agent", adapter: "claude-code" }
   }))
 Available adapters: claude-code, codex, gemini-cli, ...
 ```

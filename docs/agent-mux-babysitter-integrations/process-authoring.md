@@ -32,7 +32,7 @@ if (externalAgents.available && externalAgents.agents.some(a => a.installed)) {
     '    agent: {',
     '      name: "Task Name",',
     '      prompt: "Instructions for the external agent...",',
-    '      external: true,',
+    '      responderType: "agent",',
     '      adapter: "claude-code",  // or codex, gemini-cli, etc.',
     '    },',
     '  }))',
@@ -42,7 +42,7 @@ if (externalAgents.available && externalAgents.agents.some(a => a.installed)) {
     '- A specific agent has better capabilities for the task (e.g., codex for code generation)',
     '- The task benefits from a separate workspace or conversation context',
     '',
-    'Use internal agent tasks (no external flag) when:',
+    'Use internal agent tasks when:',
     '- The task is purely text generation (summarization, analysis, planning)',
     '- Low latency is important (internal is faster than spawning external agents)',
   ].join('\n');
@@ -63,11 +63,11 @@ if (externalAgents.available && externalAgents.agents.some(a => a.installed)) {
 
 ### `packages/agent-platform/src/harness/internal/createRun/planProcess/validationSource.ts`
 
-Current validation checks for `kind: "agent"` with `agent: { ... }` shape. Extend to accept `external: true`:
+Current validation checks for `kind: "agent"` with `agent: { ... }` shape. Extend it to accept `agent.responderType: "agent"` routing metadata:
 
 ```typescript
 // In getDefineTaskKindShapeMismatches():
-// Accept agent tasks with external flag
+// Accept agent tasks with responderType routing metadata
 if (kind === "agent" && properties.has("agent")) {
   // Valid — both internal and external agent tasks have agent property
   continue;
@@ -91,7 +91,7 @@ if (hasExternalAgentTasks(source) && !externalAgentsAvailable) {
 Update `packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts` conformance repair prompt to include external agent task format:
 
 ```
-- External agent tasks must use kind: "agent" with agent: { external: true, adapter: "..." }
+- External agent tasks must use kind: "agent" with agent: { responderType: "agent", adapter: "..." }
 - The adapter field must be a valid agent-mux adapter name
 ```
 

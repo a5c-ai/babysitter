@@ -109,6 +109,66 @@ describe("defineTask label metadata", () => {
   });
 });
 
+describe("defineTask responder routing metadata", () => {
+  beforeEach(() => {
+    resetGlobalTaskRegistry();
+  });
+
+  it("preserves valid agent routing metadata from positional task definitions", async () => {
+    const defined = defineTask("agent-routing", () => ({
+      kind: "agent",
+      agent: {
+        responderType: "agent",
+        adapter: "codex",
+        fallbackType: "internal",
+      },
+    }));
+
+    const built = await defined.build({}, fakeCtx());
+
+    expect(built.agent).toMatchObject({
+      responderType: "agent",
+      adapter: "codex",
+      fallbackType: "internal",
+    });
+  });
+
+  it("preserves breakpoint routing metadata from object-form task definitions", async () => {
+    const defined = defineTask({
+      id: "breakpoint-routing",
+      kind: "breakpoint",
+      breakpoint: {
+        responderType: "human",
+        targetResponders: ["maintainer"],
+        trackerBackend: "linear",
+      },
+    });
+
+    const built = await defined.build({}, fakeCtx());
+
+    expect(built.breakpoint).toMatchObject({
+      responderType: "human",
+      targetResponders: ["maintainer"],
+      trackerBackend: "linear",
+    });
+  });
+
+  it("rejects agent responderType without a non-empty adapter", async () => {
+    const missing = defineTask("missing-agent-adapter", () => ({
+      kind: "agent",
+      agent: { responderType: "agent" },
+    }));
+    const blank = defineTask({
+      id: "blank-agent-adapter",
+      kind: "agent",
+      agent: { responderType: "agent", adapter: "  " },
+    });
+
+    await expect(missing.build({}, fakeCtx())).rejects.toThrow(/adapter/);
+    await expect(blank.build({}, fakeCtx())).rejects.toThrow(/adapter/);
+  });
+});
+
 describe("defineTask object-form (backward-compat for legacy library processes)", () => {
   beforeEach(() => {
     resetGlobalTaskRegistry();
@@ -178,5 +238,23 @@ describe("defineTask object-form (backward-compat for legacy library processes)"
         title: "missing id and name",
       } as unknown as Parameters<typeof defineTask>[0])
     ).toThrow(/id.*name/);
+  });
+
+  it("keeps custom agent task definitions valid when responderType is absent", async () => {
+    const defined = defineTask({
+      id: "legacy-agent",
+      kind: "agent",
+      agent: {
+        role: "legacy reviewer",
+        external: true,
+      },
+    });
+
+    const built = await defined.build({}, fakeCtx());
+
+    expect(built.agent).toMatchObject({
+      role: "legacy reviewer",
+      external: true,
+    });
   });
 });

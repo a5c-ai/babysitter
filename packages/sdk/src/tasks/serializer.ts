@@ -64,6 +64,7 @@ export interface SerializedTaskDefinition extends JsonRecord {
   inputs?: unknown;
   inputsRef?: string;
   io?: JsonRecord;
+  agent?: JsonRecord;
   node?: JsonRecord;
   breakpoint?: JsonRecord;
   orchestratorTask?: JsonRecord;
@@ -101,6 +102,7 @@ export async function serializeTaskDefinition(
     description: normalized.description,
     labels: normalized.labels,
     io: normalized.io,
+    agent: normalized.agent,
     node: normalized.node,
     breakpoint: normalized.breakpoint,
     orchestratorTask: normalized.orchestratorTask,
@@ -191,6 +193,7 @@ function normalizeTaskDef(task: TaskDef) {
     description: typeof task.description === "string" ? task.description : undefined,
     labels: normalizeLabels(task.labels),
     io: normalizeJson(task.io),
+    agent: normalizeJson(task.agent),
     node: normalizeJson(task.node),
     breakpoint: normalizeJson(task.breakpoint),
     orchestratorTask: normalizeJson(task.orchestratorTask),

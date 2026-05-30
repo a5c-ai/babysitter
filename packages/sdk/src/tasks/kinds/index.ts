@@ -1,6 +1,8 @@
 import { JsonRecord } from "../../storage/types";
 import { defineTask } from "../defineTask";
 import type {
+  AgentTaskDefinitionOptions,
+  AgentTaskOptions,
   BreakpointTaskDefinitionOptions,
   BreakpointTaskOptions,
   DefinedTask,
@@ -31,6 +33,7 @@ import {
 } from "./resolvers";
 
 const DEFAULT_NODE_TIMEOUT_MS = DEFAULTS.nodeTaskTimeout;
+const DEFAULT_AGENT_LABEL = "agent";
 const DEFAULT_BREAKPOINT_LABEL = "breakpoint";
 const DEFAULT_ORCHESTRATOR_LABEL = "orchestrator-task";
 const DEFAULT_SLEEP_TASK_ID = "__sdk.sleep";
@@ -65,23 +68,137 @@ export function nodeTask<TArgs = unknown, TResult = unknown>(
   }, { kind: "node" });
 }
 
+export function agentTask<TArgs = unknown, TResult = unknown>(
+  id: string,
+  options: AgentTaskDefinitionOptions<TArgs>
+): DefinedTask<TArgs, TResult> {
+  return defineTask<TArgs, TResult>(id, async (args, ctx) => {
+    const [
+      title,
+      description,
+      helperLabels,
+      metadata,
+      io,
+      name,
+      prompt,
+      outputSchema,
+      responderType,
+      adapter,
+      fallbackType,
+      model,
+      provider,
+      approvalMode,
+      maxTurns,
+      timeoutMs,
+    ] = await Promise.all([
+      resolveOptionalValue(options.title, args, ctx),
+      resolveOptionalValue(options.description, args, ctx),
+      resolveLabelList(options.labels, args, ctx),
+      resolveMetadata(options.metadata, args, ctx),
+      resolveIoHints(options.io, args, ctx),
+      resolveOptionalValue(options.name, args, ctx),
+      resolveOptionalValue(options.prompt, args, ctx),
+      resolveOptionalValue(options.outputSchema, args, ctx),
+      resolveOptionalValue(options.responderType, args, ctx),
+      resolveOptionalValue(options.adapter, args, ctx),
+      resolveOptionalValue(options.fallbackType, args, ctx),
+      resolveOptionalValue(options.model, args, ctx),
+      resolveOptionalValue(options.provider, args, ctx),
+      resolveOptionalValue(options.approvalMode, args, ctx),
+      resolveNumber(options.maxTurns, args, ctx),
+      resolveNumber(options.timeoutMs, args, ctx),
+    ]);
+    const labels = mergeLabels(ctx, helperLabels, DEFAULT_AGENT_LABEL);
+    const agent = buildAgentOptions({
+      name,
+      prompt,
+      outputSchema,
+      responderType,
+      adapter,
+      fallbackType,
+      model,
+      provider,
+      approvalMode,
+      maxTurns,
+      timeoutMs,
+    });
+    const resolvedTitle = title ?? ctx.label ?? labels?.[0] ?? DEFAULT_AGENT_LABEL;
+    return { kind: "agent", title: resolvedTitle, description, labels, metadata, io, agent };
+  }, { kind: "agent" });
+}
+
+export function externalAgentTask<TArgs = unknown, TResult = unknown>(
+  id: string,
+  options: AgentTaskDefinitionOptions<TArgs>
+): DefinedTask<TArgs, TResult> {
+  return agentTask<TArgs, TResult>(id, {
+    ...options,
+    responderType: "agent",
+  });
+}
+
+export function autoTask<TArgs = unknown, TResult = unknown>(
+  id: string,
+  options: AgentTaskDefinitionOptions<TArgs>
+): DefinedTask<TArgs, TResult> {
+  return agentTask<TArgs, TResult>(id, {
+    ...options,
+    responderType: "auto",
+  });
+}
+
 export function breakpointTask<TArgs = unknown, TResult = void>(
   id: string, options: BreakpointTaskDefinitionOptions<TArgs> = {}
 ): DefinedTask<TArgs, TResult> {
   return defineTask<TArgs, TResult>(id, async (args, ctx) => {
-    const [title, description, helperLabels, metadata, payload, confirmationRequired] = await Promise.all([
+    const [
+      title,
+      description,
+      helperLabels,
+      metadata,
+      payload,
+      confirmationRequired,
+      responderType,
+      fallbackType,
+      targetResponders,
+      trackerBackend,
+      timeoutMs,
+    ] = await Promise.all([
       resolveOptionalValue(options.title, args, ctx),
       resolveOptionalValue(options.description, args, ctx),
       resolveLabelList(options.labels, args, ctx),
       resolveMetadata(options.metadata, args, ctx),
       resolveOptionalValue(options.payload, args, ctx),
       resolveBoolean(options.confirmationRequired, args, ctx),
+      resolveOptionalValue(options.responderType, args, ctx),
+      resolveOptionalValue(options.fallbackType, args, ctx),
+      resolveStringArray(options.targetResponders, args, ctx),
+      resolveOptionalValue(options.trackerBackend, args, ctx),
+      resolveNumber(options.timeoutMs, args, ctx),
     ]);
     const labels = mergeLabels(ctx, helperLabels, DEFAULT_BREAKPOINT_LABEL);
-    const breakpoint = buildBreakpointOptions(payload ?? args, confirmationRequired);
+    const breakpoint = buildBreakpointOptions({
+      payload: payload ?? args,
+      confirmationRequired,
+      responderType,
+      fallbackType,
+      targetResponders,
+      trackerBackend,
+      timeoutMs,
+    });
     const resolvedTitle = title ?? ctx.label ?? labels?.[0] ?? DEFAULT_BREAKPOINT_LABEL;
     return { kind: "breakpoint", title: resolvedTitle, description, labels, metadata, breakpoint };
   }, { kind: "breakpoint" });
+}
+
+export function humanTask<TArgs = unknown, TResult = void>(
+  id: string,
+  options: Omit<BreakpointTaskDefinitionOptions<TArgs>, "responderType"> = {}
+): DefinedTask<TArgs, TResult> {
+  return breakpointTask<TArgs, TResult>(id, {
+    ...options,
+    responderType: "human",
+  });
 }
 
 export function orchestratorTask<TArgs = JsonRecord, TResult = unknown>(
@@ -176,10 +293,31 @@ function buildNodeOptions(entry: string, args: string[] | undefined, env: Record
   return nodeOptions;
 }
 
-function buildBreakpointOptions(payload: unknown, confirmationRequired?: boolean): BreakpointTaskOptions {
+function buildAgentOptions(options: AgentTaskOptions): AgentTaskOptions {
+  const agent: AgentTaskOptions = {};
+  if (typeof options.name === "string" && options.name.trim()) agent.name = options.name;
+  if (options.prompt !== undefined) agent.prompt = options.prompt;
+  if (options.outputSchema !== undefined) agent.outputSchema = options.outputSchema;
+  if (options.responderType !== undefined) agent.responderType = options.responderType;
+  if (typeof options.adapter === "string" && options.adapter.trim()) agent.adapter = options.adapter.trim();
+  if (options.fallbackType !== undefined) agent.fallbackType = options.fallbackType;
+  if (typeof options.model === "string" && options.model.trim()) agent.model = options.model;
+  if (typeof options.provider === "string" && options.provider.trim()) agent.provider = options.provider;
+  if (typeof options.approvalMode === "string" && options.approvalMode.trim()) agent.approvalMode = options.approvalMode;
+  if (typeof options.maxTurns === "number") agent.maxTurns = options.maxTurns;
+  if (typeof options.timeoutMs === "number") agent.timeoutMs = options.timeoutMs;
+  return agent;
+}
+
+function buildBreakpointOptions(options: BreakpointTaskOptions): BreakpointTaskOptions {
   const breakpoint: BreakpointTaskOptions = {};
-  if (payload !== undefined) breakpoint.payload = payload;
-  if (confirmationRequired !== undefined) breakpoint.confirmationRequired = confirmationRequired;
+  if (options.payload !== undefined) breakpoint.payload = options.payload;
+  if (options.confirmationRequired !== undefined) breakpoint.confirmationRequired = options.confirmationRequired;
+  if (options.responderType !== undefined) breakpoint.responderType = options.responderType;
+  if (options.fallbackType !== undefined) breakpoint.fallbackType = options.fallbackType;
+  if (options.targetResponders !== undefined) breakpoint.targetResponders = options.targetResponders;
+  if (typeof options.trackerBackend === "string" && options.trackerBackend.trim()) breakpoint.trackerBackend = options.trackerBackend;
+  if (typeof options.timeoutMs === "number") breakpoint.timeoutMs = options.timeoutMs;
   return breakpoint;
 }
 

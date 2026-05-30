@@ -26,6 +26,24 @@ export const breakpointKindFixtures = {
   id: "fixtures.breakpoint.example",
   payload: { reason: "inspect diff", branch: "feature/123" },
   metadata: { severity: "high" },
+  routing: {
+    targetResponders: ["maintainer"],
+    trackerBackend: "linear",
+  },
+};
+
+export const externalAgentKindFixtures = {
+  id: "fixtures.external-agent.example",
+  prompt: "Review the SDK routing patch.",
+  adapter: "codex",
+  fallbackType: "internal",
+  metadata: { subsystem: "sdk" },
+};
+
+export const autoKindFixtures = {
+  id: "fixtures.auto-agent.example",
+  prompt: "Choose the best responder for this task.",
+  fallbackType: "internal",
 };
 
 export const orchestratorKindFixtures = {

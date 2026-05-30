@@ -11,23 +11,23 @@
 - Handles timeout gracefully (returns empty on timeout)
 - Falls back to CLI (`amux doctor --json`) when module import fails
 
-**Task type tests** (`packages/sdk/src/tasks/__tests__/externalAgent.test.ts`):
+**Task type tests** (`packages/sdk/src/tasks/__tests__/kinds.test.ts`, `defineTask.test.ts`, `serializer.test.ts`):
 - `externalAgentTask()` helper produces correct TaskDef shape
-- `external: true` flag preserved through defineTask → build → TaskDef
-- `adapter` field required when `external: true`
-- `fallbackToInternal: true` flag preserved
+- `agent.responderType: "agent"` metadata preserved through defineTask → build → TaskDef
+- `adapter` field required when `agent.responderType` is `"agent"`
+- `fallbackType: "internal"` flag preserved
+- `humanTask()` emits `breakpoint.responderType: "human"`
+- `autoTask()` emits `agent.responderType: "auto"`
 
-**Task intrinsic tests** (`packages/sdk/src/runtime/intrinsics/__tests__/task.test.ts`):
-- External agent tasks create effects with `externalDispatch: true` metadata
-- Missing adapter field throws validation error
-- Task kind "agent" with and without external flag both dispatch correctly
+Runtime effect-routing tests are part of the tasks-mux follow-up work. The SDK
+unit tests only validate task definition shape, validation, and serialization.
 
 ### 2. Agent-Platform Unit Tests
 
 **Effect resolution tests** (`packages/agent-platform/src/harness/internal/createRun/orchestration/__tests__/externalAgentEffect.test.ts`):
 - External agent effect routes to amuxBridge
-- Returns error when agent-mux not available and `fallbackToInternal` is false
-- Falls back to internal when agent-mux not available and `fallbackToInternal` is true
+- Returns error when agent-mux not available and `fallbackType` is not set
+- Falls back to internal when agent-mux not available and `fallbackType: "internal"` is set
 - Adapter not installed → clear error message with install hint
 - Adapter not authenticated → clear error message
 - Agent timeout → error with partial output
@@ -53,7 +53,7 @@
 
 **E2E with mock agent-mux** (`packages/agent-platform/src/harness/__tests__/e2e-external-agent.test.ts`):
 - Process defines external agent task → dispatches → mock agent returns → process completes
-- Process with `fallbackToInternal: true` → mock agent-mux unavailable → falls back to agent-core
+- Process with `fallbackType: "internal"` → mock agent-mux unavailable → falls back to agent-core
 - Cost tracking flows through journal
 
 **Live-stack addition** (`.github/workflows/live-stack.yml`):

@@ -13,6 +13,31 @@ export interface TaskIOHints {
   stderrPath?: string;
 }
 
+export type ResponderType = "internal" | "human" | "agent" | "tracker" | "auto";
+
+export interface ResponderRoutingOptions {
+  responderType?: ResponderType;
+  adapter?: string;
+  fallbackType?: ResponderType;
+  targetResponders?: string[];
+  trackerBackend?: string;
+  capabilities?: string[];
+  timeoutMs?: number;
+}
+
+export type AgentPrompt = string | JsonRecord;
+
+export interface AgentTaskOptions extends ResponderRoutingOptions {
+  name?: string;
+  prompt?: AgentPrompt;
+  outputSchema?: Record<string, unknown>;
+  model?: string;
+  provider?: string;
+  approvalMode?: string;
+  maxTurns?: number;
+  [key: string]: unknown;
+}
+
 export interface NodeTaskOptions {
   entry: string;
   args?: string[];
@@ -24,6 +49,11 @@ export interface NodeTaskOptions {
 export interface BreakpointTaskOptions {
   payload?: unknown;
   confirmationRequired?: boolean;
+  responderType?: ResponderType;
+  fallbackType?: ResponderType;
+  targetResponders?: string[];
+  trackerBackend?: string;
+  timeoutMs?: number;
 }
 
 export interface OrchestratorTaskOptions {
@@ -68,6 +98,7 @@ export interface TaskDef {
   io?: TaskIOHints;
   metadata?: JsonRecord;
   execution?: EffectExecutionHints;
+  agent?: AgentTaskOptions;
   node?: NodeTaskOptions;
   breakpoint?: BreakpointTaskOptions;
   orchestratorTask?: OrchestratorTaskOptions;
@@ -178,6 +209,25 @@ export interface NodeTaskDefinitionOptions<TArgs = unknown> {
   timeoutMs?: TaskValueOrFactory<TArgs, number | undefined>;
 }
 
+export interface AgentTaskDefinitionOptions<TArgs = unknown> {
+  title?: TaskValueOrFactory<TArgs, string | undefined>;
+  description?: TaskValueOrFactory<TArgs, string | undefined>;
+  labels?: TaskValueOrFactory<TArgs, string[] | undefined>;
+  metadata?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
+  io?: TaskValueOrFactory<TArgs, TaskIOHints | undefined>;
+  name?: TaskValueOrFactory<TArgs, string | undefined>;
+  prompt?: TaskValueOrFactory<TArgs, AgentPrompt | undefined>;
+  outputSchema?: TaskValueOrFactory<TArgs, Record<string, unknown> | undefined>;
+  responderType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
+  adapter?: TaskValueOrFactory<TArgs, string | undefined>;
+  fallbackType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
+  model?: TaskValueOrFactory<TArgs, string | undefined>;
+  provider?: TaskValueOrFactory<TArgs, string | undefined>;
+  approvalMode?: TaskValueOrFactory<TArgs, string | undefined>;
+  maxTurns?: TaskValueOrFactory<TArgs, number | undefined>;
+  timeoutMs?: TaskValueOrFactory<TArgs, number | undefined>;
+}
+
 export interface BreakpointTaskDefinitionOptions<TArgs = unknown> {
   title?: TaskValueOrFactory<TArgs, string | undefined>;
   description?: TaskValueOrFactory<TArgs, string | undefined>;
@@ -185,6 +235,11 @@ export interface BreakpointTaskDefinitionOptions<TArgs = unknown> {
   metadata?: TaskValueOrFactory<TArgs, JsonRecord | undefined>;
   payload?: TaskValueOrFactory<TArgs, unknown>;
   confirmationRequired?: TaskValueOrFactory<TArgs, boolean | undefined>;
+  responderType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
+  fallbackType?: TaskValueOrFactory<TArgs, ResponderType | undefined>;
+  targetResponders?: TaskValueOrFactory<TArgs, string[] | undefined>;
+  trackerBackend?: TaskValueOrFactory<TArgs, string | undefined>;
+  timeoutMs?: TaskValueOrFactory<TArgs, number | undefined>;
 }
 
 export interface OrchestratorTaskDefinitionOptions<TArgs = JsonRecord> {
