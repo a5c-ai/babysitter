@@ -722,6 +722,8 @@ babysitter task:show run-20260125-143012 ef-build-001
 
 Posts a result for an executed task. This is how you commit external execution results into the run.
 
+For shell tasks with a top-level `outputSchema`, successful `--status ok` values are validated before commit. Schema failures exit non-zero and do not write `result.json` or append `EFFECT_RESOLVED`.
+
 #### Synopsis
 
 ```bash

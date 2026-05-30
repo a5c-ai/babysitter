@@ -61,6 +61,7 @@ export interface SerializedTaskDefinition extends JsonRecord {
   title?: string;
   description?: string;
   labels?: string[];
+  outputSchema?: JsonRecord | false | null;
   inputs?: unknown;
   inputsRef?: string;
   io?: JsonRecord;

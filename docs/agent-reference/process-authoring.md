@@ -88,6 +88,32 @@ When authoring a Babysitter process for a direct user request in this repository
 
 This is a deliberate repo-specific override of more general guidance that may recommend shell tasks for objective verification.
 
+When a shell task returns JSON that later process code reads as structured data, declare a top-level `outputSchema` on the shell `TaskDef`. The shared SDK commit path validates successful posted values before `result.json`, `EFFECT_RESOLVED`, hooks, registry updates, or state-cache mutation. Use `outputSchema: false` or omit the field to preserve unvalidated legacy behavior.
+
+```javascript
+export const liveVerifyTask = defineTask('live-verify', (args, taskCtx) => ({
+  kind: 'shell',
+  title: 'Live verification',
+  shell: {
+    command: `cd ${args.projectDir || '.'} && node scripts/live-verify.js`,
+    expectedExitCode: 0,
+    timeout: 60000
+  },
+  outputSchema: {
+    type: 'object',
+    required: ['verified', 'checks'],
+    properties: {
+      verified: { type: 'boolean' },
+      checks: { type: 'array' }
+    }
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
+  }
+}));
+```
+
 ## `babysitter:plan` Reuse Audit
 
 For plan-only requests, run Phase 0 -- REUSE-AUDIT before drafting process or

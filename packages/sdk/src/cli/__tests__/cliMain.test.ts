@@ -8,6 +8,7 @@ import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
 import { commitEffectResult } from "../../runtime/commitEffectResult";
 import type { EffectRecord } from "../../runtime/types";
+import { RunFailedError } from "../../runtime/exceptions";
 
 vi.mock("../../runtime/replay/effectIndex", () => ({
   buildEffectIndex: vi.fn(),
@@ -327,6 +328,46 @@ describe("CLI main entry", () => {
         }),
       })
     );
+  });
+
+  it("exits non-zero and reports structured validation errors from task:post", async () => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([shellEffectRecord("ef-schema")]));
+    commitEffectResultMock.mockRejectedValue(
+      new RunFailedError("Shell task result failed outputSchema validation for effect ef-schema", {
+        details: {
+          reason: "validation_error",
+          effectId: "ef-schema",
+          taskId: "task/shell",
+          kind: "shell",
+          errors: ["Missing required field: checks"],
+        },
+      }),
+    );
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "task:post",
+      "runs/demo",
+      "ef-schema",
+      "--status",
+      "ok",
+      "--value-inline",
+      '{"verified":true}',
+      "--json",
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(1);
+    const errorPayload = JSON.parse(String(errorSpy.mock.calls.at(-1)?.[0] ?? "{}"));
+    expect(errorPayload).toMatchObject({
+      name: "RunFailedError",
+      details: {
+        reason: "validation_error",
+        effectId: "ef-schema",
+        errors: ["Missing required field: checks"],
+      },
+    });
   });
 
   it("rejects task:post when --value and --value-inline are combined", async () => {

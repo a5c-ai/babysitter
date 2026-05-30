@@ -28,6 +28,19 @@ const sampleTask: DefinedTask<{ value: number }, { doubled: number }> = {
   },
 };
 
+const shellSchemaTask: DefinedTask<{
+  outputSchema?: Record<string, unknown> | false | null;
+}, { verified?: boolean; checks?: unknown[] }> = {
+  id: "commit-shell-schema-task",
+  async build(args) {
+    return {
+      kind: "shell",
+      title: "commit-shell-schema",
+      ...(args.outputSchema !== undefined ? { outputSchema: args.outputSchema } : {}),
+    };
+  },
+};
+
 beforeEach(async () => {
   tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), "babysitter-commit-"));
 });
@@ -213,6 +226,114 @@ describe("commitEffectResult", () => {
 
     const taskResult = await readTaskResult(effect.runDir, effect.effectId);
     expect(taskResult?.sdkVersion).toBe(BABYSITTER_SDK_VERSION);
+  });
+
+  test("rejects shell ok results that do not satisfy outputSchema before mutating run state", async () => {
+    const effect = await requestShellSchemaEffect({
+      type: "object",
+      required: ["verified", "checks"],
+      properties: {
+        verified: { type: "boolean" },
+        checks: { type: "array" },
+      },
+    });
+    const hookSpy = vi.spyOn(runtimeHooks, "callRuntimeHook");
+    const metrics: Record<string, unknown>[] = [];
+
+    await expect(
+      commitEffectResult({
+        runDir: effect.runDir,
+        effectId: effect.effectId,
+        logger: (entry) => metrics.push(entry),
+        result: {
+          status: "ok",
+          value: { verified: true },
+        },
+      }),
+    ).rejects.toMatchObject({
+      name: "RunFailedError",
+      details: {
+        reason: "validation_error",
+        effectId: effect.effectId,
+        taskId: "commit-shell-schema-task",
+        kind: "shell",
+        errors: expect.arrayContaining(["Missing required field: checks"]),
+      },
+    });
+
+    await expect(fs.stat(path.join(effect.runDir, "tasks", effect.effectId, "result.json"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+    const index = await buildEffectIndex({ runDir: effect.runDir });
+    expect(index.getByEffectId(effect.effectId)?.status).toBe("requested");
+    expect(globalTaskRegistry.get(effect.effectId)?.status).not.toBe("resolved_ok");
+    expect(await readStateCache(effect.runDir)).toBeNull();
+    expect(hookSpy).not.toHaveBeenCalled();
+    expect(metrics[0]).toMatchObject({
+      metric: "commit.effect",
+      status: "rejected",
+      reason: "validation_error",
+      effectId: effect.effectId,
+      taskId: "commit-shell-schema-task",
+      kind: "shell",
+      errors: ["Missing required field: checks"],
+    });
+  });
+
+  test("commits valid shell ok results that satisfy outputSchema", async () => {
+    const outputSchema = {
+      type: "object",
+      required: ["verified", "checks"],
+      properties: {
+        verified: { type: "boolean" },
+        checks: { type: "array" },
+      },
+    };
+    const effect = await requestShellSchemaEffect(outputSchema);
+
+    await commitEffectResult({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      result: {
+        status: "ok",
+        value: { verified: true, checks: [] },
+      },
+    });
+
+    const index = await buildEffectIndex({ runDir: effect.runDir });
+    expect(index.getByEffectId(effect.effectId)?.status).toBe("resolved_ok");
+    await expect(readTaskResult(effect.runDir, effect.effectId)).resolves.toMatchObject({
+      status: "ok",
+      value: { verified: true, checks: [] },
+    });
+
+    const replayContext = await buildTaskContext(effect.runDir, effect.runId);
+    const replayed = await runTaskIntrinsic({
+      task: shellSchemaTask,
+      args: { outputSchema },
+      context: replayContext,
+    });
+    expect(replayed).toEqual({ verified: true, checks: [] });
+  });
+
+  test("preserves shell compatibility when outputSchema is absent or false", async () => {
+    const withoutSchema = await requestShellSchemaEffect();
+    await expect(
+      commitEffectResult({
+        runDir: withoutSchema.runDir,
+        effectId: withoutSchema.effectId,
+        result: { status: "ok", value: { verified: true } },
+      }),
+    ).resolves.toMatchObject({ resultRef: expect.any(String) });
+
+    const disabledSchema = await requestShellSchemaEffect(false);
+    await expect(
+      commitEffectResult({
+        runDir: disabledSchema.runDir,
+        effectId: disabledSchema.effectId,
+        result: { status: "ok", value: { verified: true } },
+      }),
+    ).resolves.toMatchObject({ resultRef: expect.any(String) });
   });
 
   test("emits task.completed runtime hook with task and run metadata before resolving", async () => {
@@ -532,6 +653,31 @@ async function requestSampleEffect(runIdOverride?: string) {
     await runTaskIntrinsic({
       task: sampleTask,
       args: { value: 2 },
+      context,
+    });
+  } catch (error) {
+    if (error instanceof EffectRequestedError) {
+      return {
+        runDir,
+        runId,
+        effectId: error.action.effectId,
+        invocationKey: error.action.invocationKey,
+      };
+    }
+    throw error;
+  }
+
+  throw new Error("Expected EffectRequestedError");
+}
+
+async function requestShellSchemaEffect(outputSchema?: Record<string, unknown> | false | null) {
+  const { runDir, runId } = await createTestRun(tmpRoot);
+  const context = await buildTaskContext(runDir, runId);
+
+  try {
+    await runTaskIntrinsic({
+      task: shellSchemaTask,
+      args: { outputSchema },
       context,
     });
   } catch (error) {

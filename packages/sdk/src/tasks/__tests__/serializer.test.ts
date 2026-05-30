@@ -104,6 +104,50 @@ describe("task serializer", () => {
     expect(serialized.agent).toHaveProperty("context.requiredPath", "codex-artifacts/alpha.txt");
   });
 
+  it("preserves shell outputSchema declarations in task.json", async () => {
+    const outputSchema = {
+      type: "object",
+      required: ["verified", "checks"],
+      properties: {
+        verified: { type: "boolean" },
+        checks: { type: "array" },
+      },
+    };
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "shell-schema-task",
+      invocationKey: "proc:step-shell-schema",
+      task: {
+        kind: "shell",
+        title: "Verify shell output",
+        outputSchema,
+      },
+    });
+
+    expect(serialized.outputSchema).toEqual(outputSchema);
+    const onDisk = JSON.parse(await fs.readFile(path.join(runDir, `tasks/${EFFECT_ID}/task.json`), "utf8"));
+    expect(onDisk.outputSchema).toEqual(outputSchema);
+  });
+
+  it("preserves shell outputSchema false opt-out in task.json", async () => {
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "shell-schema-disabled-task",
+      invocationKey: "proc:step-shell-schema-disabled",
+      task: {
+        kind: "shell",
+        title: "Verify shell output without schema",
+        outputSchema: false,
+      },
+    });
+
+    expect(serialized.outputSchema).toBe(false);
+    const onDisk = JSON.parse(await fs.readFile(path.join(runDir, `tasks/${EFFECT_ID}/task.json`), "utf8"));
+    expect(onDisk.outputSchema).toBe(false);
+  });
+
   it("preserves responder routing metadata for agent and breakpoint tasks", async () => {
     const { serialized: agentSerialized } = await serializeAndWriteTaskDefinition({
       runDir,
