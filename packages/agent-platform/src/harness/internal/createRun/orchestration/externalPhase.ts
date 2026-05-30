@@ -326,19 +326,20 @@ export async function runExternalOrchestrationPhase(args: RunOrchestrationPhaseA
         state.iteration -= 1;
         continue;
       }
+      const errorDetail = "error" in result ? extractErrorMessage(result.error) : (result.status === "halted" ? result.reason : "unknown error");
       emitProgress(
         {
           phase: "2",
           status: "failed",
           iteration: state.iteration,
           runStatus: "failed",
-          error: extractErrorMessage(result.error),
+          error: errorDetail,
         },
         args.json,
         args.verbose,
         args.outputMode,
       );
-      await recordExternalRunSummary(state, args, "failed", extractErrorMessage(result.error));
+      await recordExternalRunSummary(state, args, "failed", errorDetail);
       return 1;
     }
     emitProgress(
