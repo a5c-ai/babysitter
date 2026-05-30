@@ -328,6 +328,31 @@ test('model routes API route creates KrateModelRoute with required fields', () =
   assert.match(route, /invalidateApiCache/);
 });
 
+test('external sync route forwards complete sync request options', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'external', 'sync', 'route.js');
+  assert.match(route, /syncExternalBinding\(\s*body\.bindingName\s*,/, 'route must pass an options object to syncExternalBinding');
+  assert.match(route, /kind:\s*body\.kind/, 'route must forward kind');
+  assert.match(route, /localName:\s*body\.localName/, 'route must forward localName');
+  assert.match(route, /spec:\s*body\.spec/, 'route must forward spec');
+  assert.match(route, /externalEnvelope:\s*body\.externalEnvelope/, 'route must forward externalEnvelope');
+  assert.match(route, /watermark:\s*body\.watermark/, 'route must forward watermark');
+});
+
+test('external write-intent approve route passes object-shaped controller input', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'external', 'write-intents', '[name]', 'approve', 'route.js');
+  assert.match(route, /request\.json\(\)/, 'route must read request body for approver and resources');
+  assert.match(route, /approveExternalWriteIntent\(\s*\{/, 'route must call approveExternalWriteIntent with an object');
+  assert.match(route, /intentName:\s*name/, 'route must pass intentName from params');
+  assert.match(route, /approvedBy:\s*body\.approvedBy/, 'route must pass approvedBy from body');
+  assert.match(route, /resources:\s*body\.resources/, 'route must pass resources from body');
+});
+
+test('model routes API route uses controller model-route apply boundary', () => {
+  const route = readFile('app', 'api', 'orgs', '[org]', 'inference', 'routes', 'route.js');
+  assert.match(route, /applyModelRoute/, 'route must use the API controller model-route apply boundary');
+  assert.doesNotMatch(route, /kubectl\s+apply/, 'route must not shell out to kubectl');
+});
+
 // ── Contract: virtual model form references required KrateVirtualModel fields ──
 
 test('virtual model form references required KrateVirtualModel fields', () => {

@@ -226,10 +226,17 @@ export function createKrateApiController(options = {}) {
         ...controllerOptions,
         agentMuxClient: controllerOptions.agentMuxClient || createAgentMuxClient({ resourceGateway }),
       });
-      return controller.createManualDispatch({
+      const result = await controller.createManualDispatch({
         ...input,
         resources: snapshot.resources
       });
+      if (result?.memorySnapshot) {
+        result.memorySnapshotApplyResult = await this.applyResourceForOrg(
+          input.organizationRef || result.memorySnapshot.spec?.organizationRef || 'default',
+          result.memorySnapshot
+        );
+      }
+      return result;
     },
     async approveAgentAction(input) {
       const snapshot = await this.snapshot();
@@ -298,11 +305,50 @@ export function createKrateApiController(options = {}) {
     },
     async createMemoryImport(input) {
       const memoryController = createAgentMemoryController();
-      return memoryController.createImport({
+      const importResource = memoryController.createImport({
         ...input,
         namespace: input.namespace || namespace,
         organizationRef: input.organizationRef || 'default'
       });
+      const applyResult = await this.applyResourceForOrg(
+        importResource.spec?.organizationRef || input.organizationRef || 'default',
+        importResource
+      );
+      return { ...importResource, applyResult };
+    },
+    async createMemoryUpdate(input) {
+      const memoryController = createAgentMemoryController();
+      const update = memoryController.createMemoryUpdate({
+        ...input,
+        namespace: input.namespace || namespace,
+        organizationRef: input.organizationRef || 'default'
+      });
+      const applyResult = await this.applyResourceForOrg(
+        update.spec?.organizationRef || input.organizationRef || 'default',
+        update
+      );
+      return { ...update, applyResult };
+    },
+    async applyModelRoute(route, options = {}) {
+      const routeController = createModelRouteController();
+      const validation = routeController.validate(route);
+      if (!validation.valid) {
+        throw new Error(`Invalid KrateModelRoute: ${validation.errors.join('; ')}`);
+      }
+
+      const routeResult = await this.applyResource(route);
+      const appliedRoute = routeResult.resource || route;
+      const snapshot = options.resources
+        ? { resources: options.resources }
+        : await resourceGateway.snapshot();
+      const allResources = normalizeResourceList(snapshot?.resources || snapshot?.items || snapshot || []);
+      const resolvedEndpoint = routeController.resolveRoute(appliedRoute, allResources);
+      if (!resolvedEndpoint.endpoint) {
+        throw new Error(`Could not resolve endpoint for KrateModelRoute "${appliedRoute.metadata?.name || 'unknown'}"`);
+      }
+      const gatewayRoute = routeController.generateEnvoyRouteManifest(appliedRoute, resolvedEndpoint);
+      const gatewayRouteResult = await this.applyResource(gatewayRoute);
+      return { route: appliedRoute, routeResult, gatewayRoute, gatewayRouteResult };
     },
 
     // ---------------------------------------------------------------------------
