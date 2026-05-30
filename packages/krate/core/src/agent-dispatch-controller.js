@@ -2,6 +2,7 @@ import { createPermissionReviewer } from './agent-permission-review.js';
 import { createAgentStackController } from './agent-stack-controller.js';
 import { createAgentPersonaController } from './agent-persona-controller.js';
 import { composeAgentPrompt } from './agent-prompt-composition.js';
+import { legacyAgentStackIdentityWarning } from './agent-identity-migration.js';
 import { assembleContextBundle } from './agent-context-bundles.js';
 import { createResource, clone } from './resource-model.js';
 import { createAgentMuxClient } from './agent-mux-client.js';
@@ -49,6 +50,7 @@ export function createAgentDispatchController(options = {}) {
   const lifecycleEmitter = options.lifecycleEmitter || (eventBus ? createHooksLifecycleEmitter(eventBus) : null);
   const hookBridge = options.hookBridge || null;
   const jitsiAgentBridge = options.jitsiAgentBridge || null;
+  const logger = options.logger || console;
 
   return {
     role: 'agent-dispatch-controller',
@@ -304,6 +306,8 @@ export function createAgentDispatchController(options = {}) {
       // 1. Find stack
       const stack = (resources.AgentStack || []).find(s => s.metadata?.name === agentStack);
       if (!stack) return { error: true, reason: 'stack-not-found', message: `AgentStack '${agentStack}' not found` };
+      const legacyWarning = legacyAgentStackIdentityWarning(stack);
+      if (legacyWarning && typeof logger?.warn === 'function') logger.warn(legacyWarning);
 
       // 2. Permission review
       const review = permissionReviewer.reviewPermissions({ repository, ref, actor, agentStack, resources });
@@ -372,6 +376,7 @@ export function createAgentDispatchController(options = {}) {
           memorySnapshot,
           permissionSnapshot,
           review,
+          warnings: legacyWarning ? [legacyWarning] : [],
         };
       }
 
@@ -526,7 +531,7 @@ export function createAgentDispatchController(options = {}) {
         run.status.conditions = [{ type: 'JobSubmitted', status: 'False', reason: 'ManifestFailed', message: err.message || 'Job manifest generation failed' }];
       }
 
-      return { error: false, run, attempt, contextBundle, permissionSnapshot, memorySnapshot, transcript, workspace: workspaceResult, mountSpec, jobResult, executionConfig, identity };
+      return { error: false, run, attempt, contextBundle, permissionSnapshot, memorySnapshot, transcript, workspace: workspaceResult, mountSpec, jobResult, executionConfig, identity, warnings: legacyWarning ? [legacyWarning] : [] };
     }
   };
 }

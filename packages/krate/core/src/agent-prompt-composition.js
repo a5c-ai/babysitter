@@ -46,9 +46,10 @@ export function composeAgentSystemPrompt({ soul = null, persona = null, definiti
 }
 
 export function composeAgentPrompt({ soul = null, persona = null, definition = null, stack = null } = {}) {
+  const legacyPrompts = persona?.spec?.legacyPrompts || {};
   return {
     system: composeAgentSystemPrompt({ soul, persona, definition, stack }) || null,
-    developer: stack?.spec?.developerPrompt || null,
-    task: stack?.spec?.taskPrompt || null,
+    developer: legacyPrompts.developerPrompt || stack?.spec?.developerPrompt || null,
+    task: legacyPrompts.taskPrompt || stack?.spec?.taskPrompt || null,
   };
 }

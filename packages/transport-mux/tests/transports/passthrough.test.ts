@@ -63,6 +63,46 @@ describe('passthrough transport', () => {
     expect(headers.get('x-request-id')).toBe('req-123');
   });
 
+  it('redacts internal babysitter metadata headers before forwarding upstream', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ type: 'message' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    vi.stubEnv('ANTHROPIC_API_KEY', 'sk-ant-upstream');
+
+    const app = createTestApp({
+      targetProvider: 'anthropic',
+      targetModel: 'anthropic/claude-sonnet-4-20250514',
+      exposedTransport: 'passthrough',
+    });
+
+    const response = await app.request('/passthrough/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': 'test-token',
+        'x-babysitter-run-id': 'run-1',
+        'x-babysitter-session-id': 'session-1',
+        'x-babysitter-effect-id': 'effect-1',
+        'x-babysitter-cost-idempotency-key': 'transport:run-1:effect-1',
+        'x-request-id': 'req-123',
+      },
+      body: JSON.stringify({ model: 'claude', messages: [] }),
+    });
+
+    expect(response.status).toBe(200);
+
+    const [, init] = fetchMock.mock.calls[0] ?? [];
+    const headers = new Headers(init?.headers);
+    expect(headers.get('x-babysitter-run-id')).toBeNull();
+    expect(headers.get('x-babysitter-session-id')).toBeNull();
+    expect(headers.get('x-babysitter-effect-id')).toBeNull();
+    expect(headers.get('x-babysitter-cost-idempotency-key')).toBeNull();
+    expect(headers.get('x-request-id')).toBe('req-123');
+  });
+
   it('honors explicit apiBase overrides and injects openai-compatible bearer auth', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ id: 'chatcmpl_123' }), {

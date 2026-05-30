@@ -102,4 +102,36 @@ describe('amux-tui binary entrypoint', () => {
     expect(deps.createClient).not.toHaveBeenCalled();
     expect(deps.renderApp).not.toHaveBeenCalled();
   });
+
+  it('enables full observability for log files without mutating env mode', async () => {
+    const setObservabilityMode = vi.fn();
+    const reconfigureLogger = vi.fn();
+    vi.doMock('@a5c-ai/agent-mux-observability', () => ({
+      setObservabilityMode,
+      reconfigureLogger,
+    }));
+    vi.doMock('ink', () => ({ render: vi.fn() }));
+    vi.doMock('@a5c-ai/agent-comm-mux', () => ({ createClient: vi.fn() }));
+    vi.doMock('@a5c-ai/agent-mux-cli/bootstrap', () => ({ registerBuiltInAdapters: vi.fn() }));
+    vi.doMock('../src/index.js', () => ({
+      App: vi.fn(),
+      builtinPlugins: [],
+      defaultExternalPluginsDir: vi.fn(),
+      loadExternalPlugins: vi.fn(),
+    }));
+
+    process.env.AMUX_LOG_LEVEL = 'debug';
+    process.env.AMUX_LOG_FILE = '/tmp/amux.log';
+    delete process.env.AMUX_OBSERVABILITY_MODE;
+
+    const { configureLoggingFromEnv } = await import('../src/bin/amux-tui.js');
+    configureLoggingFromEnv();
+
+    expect(process.env.AMUX_OBSERVABILITY_MODE).toBeUndefined();
+    expect(setObservabilityMode).toHaveBeenCalledWith('full');
+    expect(reconfigureLogger).toHaveBeenCalledWith({
+      level: 'debug',
+      logFile: '/tmp/amux.log',
+    });
+  });
 });

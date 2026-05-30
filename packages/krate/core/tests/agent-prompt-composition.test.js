@@ -51,6 +51,22 @@ test('composeAgentPrompt preserves legacy developer and task prompts', () => {
   assert.equal(prompt.task, 'Legacy task.');
 });
 
+test('composeAgentPrompt uses migrated persona legacy prompts before stack fallback', () => {
+  const migratedPersona = {
+    spec: {
+      ...persona.spec,
+      legacyPrompts: {
+        developerPrompt: 'Migrated developer.',
+        taskPrompt: 'Migrated task.',
+      },
+    },
+  };
+  const prompt = composeAgentPrompt({ soul, persona: migratedPersona, definition, stack });
+
+  assert.equal(prompt.developer, 'Migrated developer.');
+  assert.equal(prompt.task, 'Migrated task.');
+});
+
 test('composeAgentPrompt returns legacy stack prompts when no identity resources are supplied', () => {
   const prompt = composeAgentPrompt({ stack });
 

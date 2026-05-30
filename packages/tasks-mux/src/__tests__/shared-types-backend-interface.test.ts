@@ -3,6 +3,7 @@ import {
   // Zod schemas
   BreakpointStatusSchema,
   BreakpointStrategySchema,
+  ResponderTypeSchema,
   UrgencySchema,
   InteractionKindSchema,
   CodeSnippetSchema,
@@ -222,6 +223,19 @@ describe("Section 3: Domain Types and Zod Schemas", () => {
 
     it("contains exactly 4 strategy values", () => {
       expect(BreakpointStrategySchema.options).toHaveLength(4);
+    });
+  });
+
+  describe("ResponderTypeSchema", () => {
+    it.each(["human", "agent", "tracker", "internal", "auto"] as const)(
+      "accepts responder type '%s'",
+      (responderType) => {
+        expect(ResponderTypeSchema.safeParse(responderType).success).toBe(true);
+      },
+    );
+
+    it("rejects unknown responder types", () => {
+      expect(ResponderTypeSchema.safeParse("bot").success).toBe(false);
     });
   });
 
@@ -651,6 +665,34 @@ describe("Section 3: Domain Types and Zod Schemas", () => {
       if (result.success) {
         expect(result.data.publicKeyFingerprint).toBe("abcdef1234567890");
       }
+    });
+
+    it("accepts responder type metadata, capabilities, and type-specific fields", () => {
+      const agent = ResponderProfileSchema.safeParse(makeResponderProfile({
+        type: "agent",
+        capabilities: ["code", "test"],
+        adapter: "codex",
+        model: "gpt-5.4",
+        provider: "openai",
+      }));
+      const tracker = ResponderProfileSchema.safeParse(makeResponderProfile({
+        type: "tracker",
+        capabilities: ["tracking"],
+        trackerBackend: "linear",
+        trackerConfig: { team: "eng" },
+      }));
+
+      expect(agent.success).toBe(true);
+      expect(tracker.success).toBe(true);
+    });
+
+    it("rejects unknown responder types and empty capability names", () => {
+      expect(ResponderProfileSchema.safeParse(makeResponderProfile({
+        type: "bot" as never,
+      })).success).toBe(false);
+      expect(ResponderProfileSchema.safeParse(makeResponderProfile({
+        capabilities: [""],
+      })).success).toBe(false);
     });
 
     it("rejects responder profile with empty id", () => {

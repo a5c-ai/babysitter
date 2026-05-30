@@ -32,9 +32,9 @@ type TasksMuxModuleLike = {
   isHostDelegableRoute?: (route: unknown) => boolean;
 };
 
-const importOptionalModule = new Function("specifier", "return import(specifier)") as (
-  specifier: string,
-) => Promise<unknown>;
+async function importOptionalModule(specifier: string): Promise<unknown> {
+  return import(specifier);
+}
 
 // ---------------------------------------------------------------------------
 // Assistant state parsing
@@ -252,7 +252,9 @@ async function isHostDelegableEffect(
     if (typeof routeTask !== "function" || typeof isHostDelegableRoute !== "function") {
       return record.kind !== "breakpoint";
     }
-    return isHostDelegableRoute(routeTask(taskDef));
+    const decision = routeTask(taskDef) as Record<string, unknown>;
+    if (decision?.unavailable) return false;
+    return isHostDelegableRoute(decision);
   } catch {
     return record.kind !== "breakpoint";
   }

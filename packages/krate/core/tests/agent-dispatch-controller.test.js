@@ -330,6 +330,32 @@ test('AgentDefinition dispatch composes identity prompt for the job while legacy
   assert.equal(result.executionConfig.prompt.task, 'Legacy task.');
 });
 
+test('Legacy stack dispatch emits deprecation warning for inline identity fields', async () => {
+  const warnings = [];
+  const gw = createMockResourceGateway();
+  const resources = buildValidResources('legacy-prompt-stack');
+  resources.AgentStack[0].spec.systemPrompt = 'Legacy identity prompt.';
+  const controller = createAgentDispatchController({
+    agentMuxClient: createAgentMuxClient({ resourceGateway: gw }),
+    logger: { warn(message) { warnings.push(message); } },
+  });
+
+  const result = await controller.createManualDispatch({
+    repository: 'test-repo',
+    ref: 'main',
+    agentStack: 'legacy-prompt-stack',
+    actor: 'test-user',
+    namespace: 'krate-org-default',
+    organizationRef: 'default',
+    resources
+  });
+
+  assert.equal(result.error, false);
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /AgentStack "legacy-prompt-stack" has inline prompts or skills/);
+  assert.deepEqual(result.warnings, warnings);
+});
+
 test('Context bundle referenced correctly', async () => {
   const muxClient = createAgentMuxClient({ gateway: '', enabled: false });
   const resources = buildValidResources('ref-stack');

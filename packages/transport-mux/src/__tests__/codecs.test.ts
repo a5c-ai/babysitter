@@ -9,10 +9,13 @@ import {
   convertTools,
   getCodec,
   getCodecForDescriptor,
+  listRegisteredCodecs,
   normalizeUsage,
+  registerCodec,
 } from '../codecs/index.js';
 
 import type { CompletionResult } from '../types.js';
+import type { TransportCodec } from '../codec.js';
 
 /* -------------------------------------------------------------------------- */
 /*  Helpers                                                                   */
@@ -494,6 +497,106 @@ describe('getCodec', () => {
     });
 
     expect(codec?.transportId).toBe('openai-responses');
+  });
+
+  it('registers plugin codecs with deterministic aliases', () => {
+    const codec: TransportCodec = {
+      transportId: 'plugin-custom',
+      capabilities: {
+        supportsTools: false,
+        supportsStreaming: false,
+        supportsTokenCounting: false,
+        costTracking: false,
+        toolSchemaFormat: 'none',
+      },
+      decodeRequest(body) {
+        return {
+          model: 'plugin-model',
+          transport: 'plugin-custom',
+          messages: [],
+          stream: false,
+          raw: body,
+        };
+      },
+      encodeResult(result) {
+        return result;
+      },
+      encodeStreamChunk(event) {
+        return JSON.stringify(event);
+      },
+    };
+
+    const registeredIds = registerCodec(codec, {
+      aliases: ['transport-runtime:plugin-custom', 'plugin-custom-completions'],
+    });
+
+    expect(registeredIds).toEqual([
+      'plugin-custom',
+      'transport-runtime:plugin-custom',
+      'plugin-custom-completions',
+    ]);
+    expect(getCodec('plugin-custom')).toBe(codec);
+    expect(getCodec('transport-runtime:plugin-custom')).toBe(codec);
+    expect(getCodec('plugin-custom-completions')).toBe(codec);
+    expect(listRegisteredCodecs()).toContain(codec);
+  });
+
+  it('rejects duplicate plugin codec registrations unless explicitly overridden', () => {
+    const first: TransportCodec = {
+      transportId: 'plugin-duplicate',
+      capabilities: {
+        supportsTools: false,
+        supportsStreaming: false,
+        supportsTokenCounting: false,
+        costTracking: false,
+        toolSchemaFormat: 'none',
+      },
+      decodeRequest(body) {
+        return {
+          model: 'first',
+          transport: 'plugin-duplicate',
+          messages: [],
+          stream: false,
+          raw: body,
+        };
+      },
+      encodeResult(result) {
+        return result;
+      },
+      encodeStreamChunk(event) {
+        return JSON.stringify(event);
+      },
+    };
+    const second: TransportCodec = {
+      transportId: 'plugin-duplicate',
+      capabilities: {
+        supportsTools: false,
+        supportsStreaming: false,
+        supportsTokenCounting: false,
+        costTracking: false,
+        toolSchemaFormat: 'none',
+      },
+      decodeRequest(body) {
+        return {
+          model: 'replacement',
+          transport: 'plugin-duplicate',
+          messages: [],
+          stream: false,
+          raw: body,
+        };
+      },
+      encodeResult(result) {
+        return result;
+      },
+      encodeStreamChunk(event) {
+        return JSON.stringify(event);
+      },
+    };
+
+    registerCodec(first);
+    expect(() => registerCodec(second)).toThrow(/already registered/);
+    registerCodec(second, { override: true });
+    expect(getCodec('plugin-duplicate')).toBe(second);
   });
 
   it('returns undefined for unknown transport', () => {

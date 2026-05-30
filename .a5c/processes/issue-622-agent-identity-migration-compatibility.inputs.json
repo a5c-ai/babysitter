@@ -1,0 +1,30 @@
+{
+  "issueNumber": 622,
+  "baseBranch": "staging",
+  "targetBranch": "agent/issue-622",
+  "specFiles": [
+    "packages/krate/docs/agent-identity/01-resource-model.md",
+    "packages/krate/docs/agent-identity/02-migration.md"
+  ],
+  "targetSurfaces": {
+    "core": [
+      "packages/krate/core/src/agent-dispatch-controller.js",
+      "packages/krate/core/src/agent-prompt-composition.js",
+      "packages/krate/core/src/agent-identity-migration.js"
+    ],
+    "web": [
+      "packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js",
+      "packages/krate/web/app/components/agent/dispatch-button.jsx",
+      "packages/krate/web/app/components/agent/trigger-rule-form.jsx"
+    ],
+    "mcp": [
+      "packages/krate/cli/src/mcp-server.js",
+      "packages/atlas/graph/extensions/tool-servers/krate-mcp-server.yaml"
+    ]
+  },
+  "verificationCommands": [
+    "cd packages/krate/core && node --test tests/agent-identity-migration.test.js tests/agent-prompt-composition.test.js tests/agent-dispatch-controller.test.js",
+    "cd packages/krate/cli && node --test tests/mcp-server.test.js",
+    "cd packages/krate/web && node --test tests/resource-contract.test.js"
+  ]
+}
