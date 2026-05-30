@@ -57,7 +57,37 @@ export function parseHookResult(stdout: string): UnifiedHookResult {
     );
   }
 
-  return parsed;
+  return normalizeHookResult(parsed);
+}
+
+function sameJsonValue(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function normalizeHookResult(result: unknown): UnifiedHookResult {
+  const record = result as UnifiedHookResult & { updatedInput?: unknown };
+  if (record.updatedInput === undefined) {
+    return record;
+  }
+
+  const mutation = { mode: 'replace' as const, value: record.updatedInput };
+  if (
+    record.toolMutation &&
+    (record.toolMutation.mode !== mutation.mode ||
+      !sameJsonValue(record.toolMutation.value, mutation.value))
+  ) {
+    throw new HookOutputParseError(
+      'Parsed value is not a valid UnifiedHookResult object',
+      JSON.stringify(result),
+      'INVALID_RESULT',
+    );
+  }
+
+  const { updatedInput: _updatedInput, ...rest } = record;
+  return {
+    ...rest,
+    toolMutation: record.toolMutation ?? mutation,
+  };
 }
 
 /**
@@ -97,11 +127,13 @@ export function validateHookResult(result: unknown): result is UnifiedHookResult
 
   // decision must be one of the known values if present
   if (result.decision !== undefined) {
-    const validDecisions = ['allow', 'deny', 'ask', 'continue', 'noop'];
+    const validDecisions = ['allow', 'deny', 'block', 'retry', 'ask', 'defer', 'continue', 'noop'];
     if (typeof result.decision !== 'string' || !validDecisions.includes(result.decision)) {
       return false;
     }
   }
+
+  if (result.watchPaths !== undefined) return false;
 
   // Optional string fields
   for (const field of ['reason', 'systemMessage', 'additionalContext', 'followUpMessage', 'stopReason', 'sessionTitle', 'displayContent'] as const) {
@@ -118,6 +150,13 @@ export function validateHookResult(result: unknown): result is UnifiedHookResult
     if (!isRecord(result.toolMutation)) return false;
     const tm = result.toolMutation;
     if (tm.mode !== 'replace' && tm.mode !== 'patch') return false;
+  }
+
+  if (result.updatedInput !== undefined && result.toolMutation !== undefined) {
+    if (!isRecord(result.toolMutation)) return false;
+    const tm = result.toolMutation;
+    if (tm.mode !== 'replace') return false;
+    if (!sameJsonValue(tm.value, result.updatedInput)) return false;
   }
 
   // Record<string, string> fields

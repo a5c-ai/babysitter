@@ -23,7 +23,7 @@ export interface MergeOptions {
   systemMessageStrategy?: 'concatenate' | 'keep-first';
 }
 
-export type DecisionVerb = 'deny' | 'ask' | 'allow' | 'continue' | 'noop';
+export type DecisionVerb = 'deny' | 'block' | 'retry' | 'ask' | 'allow' | 'defer' | 'continue' | 'noop';
 
 export interface MergedExecutionResult {
   decision: DecisionVerb;
@@ -51,10 +51,13 @@ export interface MergedExecutionResult {
 
 const DECISION_PRECEDENCE: Record<DecisionVerb, number> = {
   deny: 0,
-  ask: 1,
-  allow: 2,
-  continue: 3,
-  noop: 4,
+  block: 1,
+  retry: 2,
+  ask: 3,
+  allow: 4,
+  defer: 5,
+  continue: 6,
+  noop: 7,
 };
 
 function mostRestrictiveDecision(a: DecisionVerb, b: DecisionVerb): DecisionVerb {
@@ -115,6 +118,32 @@ function extractDecision(result: UnifiedHookResult): DecisionVerb {
     return result.decision;
   }
   return 'noop';
+}
+
+function sameJsonValue(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function extractToolMutation(
+  result: UnifiedHookResult,
+): { mode: 'replace' | 'patch'; value: unknown } | undefined {
+  const updatedInput = (result as UnifiedHookResult & { updatedInput?: unknown }).updatedInput;
+  if (updatedInput === undefined) {
+    return result.toolMutation;
+  }
+  const updatedInputMutation = { mode: 'replace' as const, value: updatedInput };
+  if (!result.toolMutation) {
+    return updatedInputMutation;
+  }
+  if (
+    result.toolMutation.mode !== updatedInputMutation.mode ||
+    !sameJsonValue(result.toolMutation.value, updatedInputMutation.value)
+  ) {
+    throw new MergeConflictError(
+      'Handler result cannot provide conflicting updatedInput and toolMutation values.',
+    );
+  }
+  return result.toolMutation;
 }
 
 // ---------------------------------------------------------------------------
@@ -312,11 +341,12 @@ export function mergeResults(
     decision = mostRestrictiveDecision(decision, handlerDecision);
 
     // --- toolMutation (typed field, single writer) ---
-    if (r.toolMutation) {
+    const resultToolMutation = extractToolMutation(r);
+    if (resultToolMutation) {
       mutatingWriterCount++;
       if (mutatingWriterCount > 1) {
         // Two replace-mode mutations are always a conflict
-        if (toolMutation?.mode === 'replace' && r.toolMutation.mode === 'replace') {
+        if (toolMutation?.mode === 'replace' && resultToolMutation.mode === 'replace') {
           throw new MergeConflictError(
             'Multiple handlers produced toolMutation with mode=replace. Only one replace-mode writer is allowed.',
           );
@@ -325,7 +355,7 @@ export function mergeResults(
           'Multiple handlers produced tool mutations. Only one mutating writer is allowed unless patch chaining is enabled.',
         );
       }
-      toolMutation = r.toolMutation;
+      toolMutation = resultToolMutation;
     }
 
     // --- continueSession (typed field) ---

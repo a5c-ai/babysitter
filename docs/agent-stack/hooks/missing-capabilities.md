@@ -34,22 +34,22 @@ Claude Code supports 5 hook handler types. Agent-platform/hooks-mux only support
 | `allow` | ✅ PreToolUse | ✅ hooks-mux | — |
 | `deny` | ✅ PreToolUse | ✅ hooks-mux | — |
 | `ask` | ✅ PreToolUse | ✅ hooks-mux | — |
-| `defer` | ✅ Let normal flow decide | ❌ | Need in hooks-mux result types |
-| `block` | ✅ Block action with reason | ❌ | Need in hooks-mux + agent-platform |
-| `retry` | ✅ PermissionDenied recovery | ❌ | Need in hooks-mux + agent-platform |
+| `defer` | ✅ Let normal flow decide | ✅ hooks-mux | First-class decision; renders as normal flow where native adapters have no explicit field |
+| `block` | ✅ Block action with reason | ✅ hooks-mux + agent-platform bridge | Precedence and audit bridge implemented; Claude PreToolUse renders as `deny` |
+| `retry` | ✅ PermissionDenied recovery | Partial | First-class decision with bounded/audited agent-platform metadata; native Claude retry rendering is deferred until a stable event contract exists |
 
 ### Changes needed
 
 **hooks-mux/core:**
-- `src/types/result.ts` — Add `defer`, `block`, `retry` to decision union
-- `src/normalizer/evaluator.ts` — Handle new decision types
+- `src/types/result.ts` — `defer`, `block`, `retry` are in the decision union
+- `src/merge-engine/merge.ts` and `src/sdk-interface/parser.ts` — Handle precedence and validation for the decision types
 
 **hooks-mux/adapter-claude:**
-- `src/renderer.ts` — Render `defer`, `block`, `retry` decisions for Claude Code
+- `src/renderer.ts` — Renders `block` as PreToolUse `deny`; `defer` and unsupported `retry` omit native decisions explicitly
 
 **agent-platform:**
-- `src/harness/internal/createRun/orchestration/effects.ts` — Handle `block` decision in effect resolution
-- `src/governance/` — Integrate `block` with governance policy engine
+- `src/harness/internal/createRun/orchestration/effects.ts` — Handles hook decision metadata for block/retry/session abort
+- `src/governance/` — Existing permission events audit hook block/retry bridge decisions
 
 ## 3. Matcher Patterns (regex, negation, OR missing)
 
@@ -109,29 +109,29 @@ Claude Code supports 5 hook handler types. Agent-platform/hooks-mux only support
 
 | Capability | Claude Code | Agent Stack | Gap |
 |-----------|------------|-------------|-----|
-| `continue: false` | ✅ Stop entire session | ❌ | Need session abort signal |
-| `stopReason` | ✅ Message on stop | ❌ | Need reason propagation |
-| `suppressOutput` | ✅ Hide hook output | ❌ | Need output suppression |
+| `continue: false` | ✅ Stop entire session | Partial | Core merge and Claude Stop rendering exist; agent-platform hook metadata bridge treats it as an abort signal |
+| `stopReason` | ✅ Message on stop | ✅ hooks-mux + Claude renderer | Core merge and Claude Stop reason rendering exist |
+| `suppressOutput` | ✅ Hide hook output | ✅ hooks-mux + Claude renderer | MessageDisplay can render empty display content |
 | `systemMessage` | ✅ Warning to user | Partial | Exists but not all events |
 | `terminalSequence` | ✅ Terminal escape codes | ❌ | Need terminal sequence injection |
 | `additionalContext` | ✅ Context for Claude | Partial | Some events only |
-| `updatedInput` | ✅ Modify tool input | ❌ | Need input mutation pipeline |
-| `sessionTitle` | ✅ Set session name | ❌ | Need session title API |
-| `watchPaths` | ✅ Add file watchers | ❌ | Need dynamic watcher registration |
+| `updatedInput` | ✅ Modify tool input | ✅ hooks-mux + Claude PreToolUse | Adapter/parser alias over canonical `toolMutation`; platform mutation only applies where a live tool invocation can be proven |
+| `sessionTitle` | ✅ Set session name | ✅ Claude SessionStart renderer | Existing hook-specific output propagates `sessionTitle` |
+| `watchPaths` | ✅ Add file watchers | Deferred | Current daemon watchers have static trigger config and expose no safe dynamic registration API |
 
 ### Changes needed
 
 **hooks-mux/core:**
-- `src/types/result.ts` — Extend UnifiedHookResult with all output fields
-- `src/normalizer/evaluator.ts` — Process `continue`, `stopReason`, `suppressOutput`, `updatedInput`
+- `src/types/result.ts` — Continue to keep supported output fields as typed top-level fields
+- `src/sdk-interface/parser.ts` and `src/merge-engine/merge.ts` — Normalize `updatedInput` to canonical `toolMutation`
 
 **agent-platform:**
-- `src/harness/internal/createRun/orchestration/` — Handle `continue: false` as session abort
-- `src/session/` — Session title API for `sessionTitle` output
-- `src/harness/` — Tool input mutation pipeline for `updatedInput`
+- `src/harness/internal/createRun/orchestration/` — Handles hook metadata `continueSession:false` as session abort
+- `src/session/` — No new API required for current Claude `sessionTitle`; it is emitted through SessionStart hook-specific output
+- `src/harness/` — `updatedInput` remains canonicalized to `toolMutation`; live tool input mutation requires a provable pending tool invocation boundary
 
 **agent-runtime:**
-- `src/daemon/` — Dynamic file watcher registration for `watchPaths`
+- `src/daemon/` — Dynamic file watcher registration for `watchPaths` remains deferred until watcher handles support safe runtime registration
 
 ## 7. Hook Configuration (partial)
 

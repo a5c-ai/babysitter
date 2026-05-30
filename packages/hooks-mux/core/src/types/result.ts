@@ -6,7 +6,7 @@
  * NOT stored in a generic data bag.
  */
 export interface UnifiedHookResult {
-  decision?: 'allow' | 'deny' | 'ask' | 'continue' | 'noop';
+  decision?: 'allow' | 'deny' | 'block' | 'retry' | 'ask' | 'defer' | 'continue' | 'noop';
   reason?: string;
   systemMessage?: string;
   additionalContext?: string;

@@ -202,6 +202,23 @@ describe('mergeResults', () => {
       const merged = mergeResults([result()]);
       expect(merged.decision).toBe('noop');
     });
+
+    it('orders new decisions as deny > block > retry > ask > allow > defer > continue > noop', () => {
+      const merged = mergeResults([
+        result({ decision: 'allow' }),
+        result({ decision: 'defer' as UnifiedHookResult['decision'] }),
+        result({ decision: 'retry' as UnifiedHookResult['decision'] }),
+        result({ decision: 'ask' }),
+        result({ decision: 'continue' }),
+      ]);
+      expect(merged.decision).toBe('retry');
+
+      const blocked = mergeResults([
+        result({ decision: 'retry' as UnifiedHookResult['decision'] }),
+        result({ decision: 'block' as UnifiedHookResult['decision'] }),
+      ]);
+      expect(blocked.decision).toBe('block');
+    });
   });
 
   // -----------------------------------------------------------------------
@@ -230,6 +247,18 @@ describe('mergeResults', () => {
           }),
         ]),
       ).toThrow(MergeConflictError);
+    });
+
+    it('normalizes updatedInput as the canonical toolMutation replace value', () => {
+      const merged = mergeResults([
+        result({ updatedInput: { command: 'npm test -- --run focused' } } as Partial<UnifiedHookResult>),
+      ]);
+
+      expect(merged.toolMutation).toEqual({
+        mode: 'replace',
+        value: { command: 'npm test -- --run focused' },
+      });
+      expect(merged).not.toHaveProperty('updatedInput');
     });
   });
 

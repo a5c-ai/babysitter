@@ -159,6 +159,26 @@ export class HookResultBuilder {
     return b;
   }
 
+  static block(reason?: string): HookResultBuilder {
+    const b = new HookResultBuilder();
+    b._result.decision = 'block';
+    if (reason !== undefined) b._result.reason = reason;
+    return b;
+  }
+
+  static retry(reason?: string): HookResultBuilder {
+    const b = new HookResultBuilder();
+    b._result.decision = 'retry';
+    if (reason !== undefined) b._result.reason = reason;
+    return b;
+  }
+
+  static defer(): HookResultBuilder {
+    const b = new HookResultBuilder();
+    b._result.decision = 'defer';
+    return b;
+  }
+
   static noop(): HookResultBuilder {
     const b = new HookResultBuilder();
     b._result.decision = 'noop';

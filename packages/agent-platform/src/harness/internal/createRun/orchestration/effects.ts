@@ -7,6 +7,10 @@ import {
   invokePromptEffect,
   invokeAgentHarness,
 } from "./effectsHelpers";
+import {
+  getHookDecisionResult,
+  resolveHookDecisionResult,
+} from "./hookDecisionEffects";
 export { readProcessFileFingerprint } from "./effectsHelpers";
 import { getAdapterByName } from "../../../";
 import type { StreamingOutputOptions } from "../../../types";
@@ -90,6 +94,16 @@ export async function resolveEffect(
   json?: boolean,
   askUserQuestionHandler?: ((params: unknown) => Promise<unknown>) | null,
 ): Promise<ResolveEffectResult> {
+  const hookResult = getHookDecisionResult(action);
+  if (hookResult) {
+    const hookResolution = resolveHookDecisionResult(action, hookResult, {
+      maxRetries: (action.taskDef?.metadata as Record<string, unknown> | undefined)?.maxRetries as number | undefined,
+    });
+    if (hookResolution) {
+      return hookResolution;
+    }
+  }
+
   const kind = action.kind;
   if (kind === "node" || kind === "orchestrator_task") {
     const meta = action.taskDef?.metadata as Record<string, unknown> | undefined;

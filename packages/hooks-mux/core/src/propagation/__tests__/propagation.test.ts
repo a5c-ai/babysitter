@@ -403,6 +403,38 @@ describe('adaptOutput', () => {
     expect(result.degradedFields).not.toContain('decision');
   });
 
+  it('preserves block and retry decisions only when adapter supports blocking', () => {
+    const block = adaptOutput({
+      adapter: 'claude',
+      mergedResult: createMockMergedResult({ decision: 'block' as any }),
+      nativeInput: {},
+      capabilities: createMockCapabilities({ supportsBlock: true }),
+    });
+    expect(block.output['decision']).toBe('block');
+    expect(block.degradedFields).not.toContain('decision');
+
+    const retry = adaptOutput({
+      adapter: 'basic',
+      mergedResult: createMockMergedResult({ decision: 'retry' as any }),
+      nativeInput: {},
+      capabilities: createMockCapabilities({ supportsBlock: false }),
+    });
+    expect(retry.output['decision']).toBeUndefined();
+    expect(retry.degradedFields).toContain('decision');
+  });
+
+  it('degrades watchPaths until runtime dynamic watcher registration exists', () => {
+    const result = adaptOutput({
+      adapter: 'claude',
+      mergedResult: createMockMergedResult({ watchPaths: ['src/**/*.ts'] } as any),
+      nativeInput: {},
+      capabilities: createMockCapabilities(),
+    });
+
+    expect(result.output['watchPaths']).toBeUndefined();
+    expect(result.degradedFields).toContain('watchPaths');
+  });
+
   it('degrades additionalContext when adapter does not support it', () => {
     const result = adaptOutput({
       adapter: 'basic',

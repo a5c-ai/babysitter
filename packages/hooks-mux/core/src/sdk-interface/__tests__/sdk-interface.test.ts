@@ -76,6 +76,31 @@ describe('parseHookResult', () => {
     expect(() => parseHookResult('{"decision":"explode"}')).toThrow(HookOutputParseError);
   });
 
+  it('parses new decision values', () => {
+    expect(parseHookResult('{"decision":"defer"}').decision).toBe('defer');
+    expect(parseHookResult('{"decision":"block","reason":"policy"}').decision).toBe('block');
+    expect(parseHookResult('{"decision":"retry","reason":"permission recovery"}').decision).toBe('retry');
+  });
+
+  it('normalizes updatedInput to toolMutation and does not keep a second canonical field', () => {
+    const parsed = parseHookResult('{"updatedInput":{"command":"npm test"}}');
+
+    expect(parsed.toolMutation).toEqual({
+      mode: 'replace',
+      value: { command: 'npm test' },
+    });
+    expect(parsed).not.toHaveProperty('updatedInput');
+  });
+
+  it('rejects conflicting updatedInput and toolMutation values', () => {
+    expect(() =>
+      parseHookResult(JSON.stringify({
+        updatedInput: { command: 'npm test' },
+        toolMutation: { mode: 'replace', value: { command: 'npm run build' } },
+      })),
+    ).toThrow(HookOutputParseError);
+  });
+
   it('ignores extra fields', () => {
     const input = JSON.stringify({ decision: 'noop', extraField: 42 });
     const result = parseHookResult(input);
@@ -157,12 +182,22 @@ describe('validateHookResult', () => {
     expect(validateHookResult({ decision: 'invalid' })).toBe(false);
   });
 
+  it('returns true for defer, block, and retry decisions', () => {
+    expect(validateHookResult({ decision: 'defer' })).toBe(true);
+    expect(validateHookResult({ decision: 'block', reason: 'policy' })).toBe(true);
+    expect(validateHookResult({ decision: 'retry', reason: 'recover permission' })).toBe(true);
+  });
+
   it('returns false for non-string reason', () => {
     expect(validateHookResult({ reason: 123 })).toBe(false);
   });
 
   it('returns false for invalid toolMutation mode', () => {
     expect(validateHookResult({ toolMutation: { mode: 'bad', value: {} } })).toBe(false);
+  });
+
+  it('does not silently accept watchPaths before runtime watcher support exists', () => {
+    expect(validateHookResult({ watchPaths: ['src/**/*.ts'] })).toBe(false);
   });
 });
 
@@ -246,6 +281,18 @@ describe('HookResultBuilder', () => {
   it('continue() sets decision', () => {
     const r = HookResultBuilder.continue().build();
     expect(r.decision).toBe('continue');
+  });
+
+  it('has builders for new decision values', () => {
+    expect((HookResultBuilder as any).defer().build().decision).toBe('defer');
+    expect((HookResultBuilder as any).block('policy').build()).toMatchObject({
+      decision: 'block',
+      reason: 'policy',
+    });
+    expect((HookResultBuilder as any).retry('try again').build()).toMatchObject({
+      decision: 'retry',
+      reason: 'try again',
+    });
   });
 
   it('supports chaining all setters', () => {

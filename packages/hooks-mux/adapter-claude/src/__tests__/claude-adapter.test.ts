@@ -374,6 +374,27 @@ describe('renderClaudeOutput', () => {
       const output = renderClaudeOutput({ decision: 'noop' }, 'PreToolUse');
       expect(output).toEqual({});
     });
+
+    it('renders defer as no native decision', () => {
+      const output = renderClaudeOutput({ decision: 'defer' as any }, 'PreToolUse');
+      expect(output).toEqual({});
+    });
+
+    it('renders block through Claude deny decision', () => {
+      const output = renderClaudeOutput(
+        { decision: 'block' as any, reason: 'Blocked by hook policy' },
+        'PreToolUse',
+      );
+      expect(output).toEqual({ decision: 'deny', reason: 'Blocked by hook policy' });
+    });
+
+    it('renders toolMutation as Claude updatedInput', () => {
+      const output = renderClaudeOutput(
+        { toolMutation: { mode: 'replace', value: { command: 'npm test' } } },
+        'PreToolUse',
+      );
+      expect(output).toEqual({ updatedInput: { command: 'npm test' } });
+    });
   });
 
   describe('PostToolUse rendering', () => {
@@ -388,6 +409,11 @@ describe('renderClaudeOutput', () => {
     it('renders empty object when no additional context', () => {
       const output = renderClaudeOutput({}, 'PostToolUse');
       expect(output).toEqual({});
+    });
+
+    it('does not falsely render unsupported block or retry decisions', () => {
+      expect(renderClaudeOutput({ decision: 'block' as any, reason: 'no' }, 'PostToolUse')).toEqual({});
+      expect(renderClaudeOutput({ decision: 'retry' as any, reason: 'again' }, 'PostToolUse')).toEqual({});
     });
   });
 

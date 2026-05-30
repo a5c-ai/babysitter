@@ -7,6 +7,7 @@ import type { AdapterCapabilities } from '../types/adapter';
 const CAPABILITY_FIELD_MAP: Record<string, (caps: AdapterCapabilities) => boolean> = {
   toolMutation: (caps) => caps.supportsToolInputMutation || caps.supportsToolResultMutation,
   decision: (caps) => caps.supportsBlock,
+  watchPaths: () => false,
 };
 
 /**
@@ -81,6 +82,11 @@ export function adaptOutput(options: AdaptOutputOptions): AdaptedOutput {
     } else {
       degradedFields.push('toolMutation');
     }
+  }
+
+  const watchPaths = (mergedResult as unknown as { watchPaths?: unknown }).watchPaths;
+  if (watchPaths !== undefined) {
+    degradedFields.push('watchPaths');
   }
 
   // Decision/blocking support check

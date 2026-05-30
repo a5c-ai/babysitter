@@ -119,12 +119,13 @@ function renderPreToolUseOutput(result: UnifiedHookResult): Record<string, unkno
   // Map unified decision to Claude's permission decision
   if (result.decision === 'allow') {
     output['decision'] = 'allow';
-  } else if (result.decision === 'deny') {
+  } else if (result.decision === 'deny' || result.decision === 'block') {
     output['decision'] = 'deny';
   } else if (result.decision === 'ask') {
     output['decision'] = 'ask';
   }
-  // 'continue' and 'noop' produce no decision field — Claude defaults to allow
+  // 'defer', 'continue', and 'noop' produce no decision field — Claude defaults to normal flow.
+  // 'retry' has no stable native PreToolUse output here, so it degrades to no decision.
 
   if (result.reason != null) {
     output['reason'] = result.reason;
@@ -132,6 +133,10 @@ function renderPreToolUseOutput(result: UnifiedHookResult): Record<string, unkno
 
   if (result.additionalContext != null) {
     output['additionalContext'] = result.additionalContext;
+  }
+
+  if (result.toolMutation?.mode === 'replace') {
+    output['updatedInput'] = result.toolMutation.value;
   }
 
   return output;
