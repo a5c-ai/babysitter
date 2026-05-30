@@ -26,6 +26,21 @@ describe("routeTask", () => {
     expect(isHostDelegableRoute(decision)).toBe(true);
   });
 
+  it("routes external agent tasks to agent-mux", () => {
+    const decision = routeTask({
+      kind: "agent",
+      agent: {
+        external: true,
+        adapter: "codex",
+        model: "gpt-5.4",
+      },
+    });
+
+    expect(decision.responderType).toBe("agent");
+    expect(decision.route).toBe("agent-mux");
+    expect(decision.responder.adapter).toBe("codex");
+  });
+
   it("routes breakpoint tasks to human responders through breakpoint backends", () => {
     const decision = routeTask({ kind: "breakpoint", breakpoint: { responderType: "human" } });
 
