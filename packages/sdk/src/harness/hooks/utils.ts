@@ -231,6 +231,8 @@ export function buildFollowupMessage(
     return `Babysitter iteration ${nextIteration} | Run completed! To finish: call 'babysitter run:status ${runId} --json', extract 'completionProof' from the output, then output it in <promise>SECRET</promise> tags. Do not mention or reveal the secret otherwise.\n\n${prompt}`;
   } else if (runState === "waiting" && pendingKinds) {
     return `Babysitter iteration ${nextIteration} | Waiting on: ${pendingKinds}. Check if pending effects are resolved, then call 'babysitter run:iterate ${runId} --json'.\n\n${prompt}`;
+  } else if (runState === "halted") {
+    return `Babysitter iteration ${nextIteration} | Run halted. Inspect 'babysitter run:status ${runId} --json' for the halt reason and payload, then fix the process or inputs before continuing.\n\n${prompt}`;
   } else if (runState === "failed") {
     return `Babysitter iteration ${nextIteration} | Run failed. Inspect the run journal and fix the issue, then proceed.\n\n${prompt}`;
   }

@@ -189,6 +189,7 @@ Each event is stored as an individual JSON file in `journal/` with the naming pa
 
 - `RUN_CREATED`: A new run began with specific inputs
 - `RUN_COMPLETED`: Run finished successfully
+- `RUN_HALTED`: Run intentionally stopped early via `ctx.halt(...)`; inspect `run:status --json` for `reason` and `payload`
 - `RUN_FAILED`: Run finished with an error
 
 **Note:** The `seq` number is derived from the filename, not stored in the event body. Each event includes a `checksum` field (sha256 hex) for integrity verification.
@@ -233,7 +234,7 @@ Breakpoints are modeled as effects. When human approval is needed:
 - **Interactively** (via AskUserQuestion in Claude Code chat), or
 - **Non-interactively** (via the breakpoints web UI at http://localhost:3184)
 
-**Note on quality tracking:** Quality scores and iteration/phase progress are not tracked as separate event types in the journal. Quality metrics can be tracked within effect data or via custom application logic on top of the five core event types: `RUN_CREATED`, `EFFECT_REQUESTED`, `EFFECT_RESOLVED`, `RUN_COMPLETED`, and `RUN_FAILED`.
+**Note on quality tracking:** Quality scores and iteration/phase progress are not tracked as separate event types in the journal. Quality metrics can be tracked within effect data or via custom application logic on top of the core event types: `RUN_CREATED`, `EFFECT_REQUESTED`, `EFFECT_RESOLVED`, `RUN_COMPLETED`, `RUN_HALTED`, and `RUN_FAILED`.
 
 ### Why Event Sourcing Matters
 
@@ -648,7 +649,7 @@ LIST ALL RUNS:
   ls .a5c/runs/
 
 KEY EVENT TYPES (exactly 5):
-  RUN_CREATED, RUN_COMPLETED, RUN_FAILED
+  RUN_CREATED, RUN_COMPLETED, RUN_HALTED, RUN_FAILED
   EFFECT_REQUESTED, EFFECT_RESOLVED
 
 JOURNAL FORMAT:

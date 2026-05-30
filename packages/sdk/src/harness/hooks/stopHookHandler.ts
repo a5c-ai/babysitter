@@ -152,7 +152,7 @@ function isEffectStillPending(events: JournalEvent[], effectId: string): boolean
   let pending = false;
   for (const event of events) {
     const data = event.data as Record<string, unknown> | undefined;
-    if (event.type === "RUN_COMPLETED" || event.type === "RUN_FAILED") {
+    if (event.type === "RUN_COMPLETED" || event.type === "RUN_HALTED" || event.type === "RUN_FAILED") {
       pending = false;
     }
     if (event.type === "EFFECT_REQUESTED" && data?.effectId === effectId) {
@@ -190,7 +190,7 @@ async function applyStopHookBackoff(args: {
   }
 
   const lastLifecycleEventType = findLastLifecycleEventType(events);
-  if (lastLifecycleEventType === "RUN_COMPLETED" || lastLifecycleEventType === "RUN_FAILED") {
+  if (lastLifecycleEventType === "RUN_COMPLETED" || lastLifecycleEventType === "RUN_HALTED" || lastLifecycleEventType === "RUN_FAILED") {
     return {};
   }
 

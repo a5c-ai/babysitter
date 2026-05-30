@@ -139,4 +139,26 @@ describe("handleSessionIterationMessage", () => {
     expect(output.pendingKinds).toBe("agent");
     expect(output.completionProof).toBeNull();
   });
+
+  it("reports halted runs without a completion proof", async () => {
+    const runDir = await createRun("run-halted");
+    await appendEvent({
+      runDir,
+      eventType: "RUN_HALTED",
+      event: { reason: "phase-0", payload: { reason: "invalid-input" } },
+    });
+
+    const exitCode = await handleSessionIterationMessage({
+      runId: "run-halted",
+      iteration: 5,
+      runsDir: runsRoot,
+      json: true,
+    });
+
+    expect(exitCode).toBe(0);
+    const output = JSON.parse(String(logSpy.mock.calls.at(-1)?.[0] ?? "{}"));
+    expect(output.runState).toBe("halted");
+    expect(output.completionProof).toBeNull();
+    expect(output.systemMessage).toContain("Halted");
+  });
 });

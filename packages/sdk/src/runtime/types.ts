@@ -200,6 +200,11 @@ export interface ProcessContext {
    * Callbacks are process-local functions and are never serialized.
    */
   onCleanup(callback: () => void | Promise<void>): void;
+  /**
+   * End the run as an intentional, non-success halt. Halted runs record
+   * RUN_HALTED and do not receive a completion proof.
+   */
+  halt(reason: string, payload?: Record<string, unknown>): never;
   task<TArgs, TResult>(
     task: DefinedTask<TArgs, TResult>,
     args: TArgs,
@@ -250,6 +255,7 @@ export interface IterationMetadata {
 
 export type IterationResult =
   | { status: "completed"; output: unknown; metadata?: IterationMetadata }
+  | { status: "halted"; reason: string; payload?: Record<string, unknown>; metadata?: IterationMetadata }
   | { status: "waiting"; nextActions: EffectAction[]; metadata?: IterationMetadata }
   | { status: "failed"; error: unknown; metadata?: IterationMetadata }
   | { status: "process-error"; error: unknown; metadata?: IterationMetadata };

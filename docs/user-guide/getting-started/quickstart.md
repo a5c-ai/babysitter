@@ -302,7 +302,7 @@ ls .a5c/runs/01KFFTSF8TK8C9GT3YM9QYQ6WG/journal/*.json
 {"type":"RUN_COMPLETED","recordedAt":"2026-01-25T14:34:45Z","data":{"status":"success"},"checksum":"v2w3x4"}
 ```
 
-This is the audit trail. Every effect request, every resolution - all recorded. The five SDK event types are: `RUN_CREATED`, `EFFECT_REQUESTED`, `EFFECT_RESOLVED`, `RUN_COMPLETED`, and `RUN_FAILED`.
+This is the audit trail. Every effect request, every resolution - all recorded. Core SDK event types include `RUN_CREATED`, `EFFECT_REQUESTED`, `EFFECT_RESOLVED`, `RUN_COMPLETED`, `RUN_HALTED`, and `RUN_FAILED`. `RUN_HALTED` means a process intentionally stopped early via `ctx.halt(...)` and does not receive a completion proof.
 
 ---
 

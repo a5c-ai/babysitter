@@ -744,6 +744,27 @@ describe("run lifecycle inspection commands", () => {
       expect(orchestrateSpy.mock.calls[0][0]).not.toHaveProperty("subprocessSupport");
       orchestrateSpy.mockRestore();
     });
+
+    it("returns non-zero for halted runs without a completion proof", async () => {
+      const runDir = await createRunSkeleton("run-halted-iterate");
+      const orchestrateSpy = vi.spyOn(orchestrateIterationModule, "orchestrateIteration").mockResolvedValue({
+        status: "halted",
+        reason: "phase-0",
+        payload: { reason: "invalid-input" },
+      });
+
+      const exitCode = await cli.run(["run:iterate", runDir, "--json"]);
+
+      expect(exitCode).toBe(1);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({
+        status: "halted",
+        reason: "phase-0",
+        payload: { reason: "invalid-input" },
+      });
+      expect(payload.completionProof).toBeUndefined();
+      orchestrateSpy.mockRestore();
+    });
   });
 
   describe("run:status", () => {
@@ -789,6 +810,25 @@ describe("run lifecycle inspection commands", () => {
       const payload = readLastJson(logSpy);
       expect(payload.state).toBe("completed");
       expect(payload.completionProof).toBe(deriveCompletionProof(runId));
+    });
+
+    it("reports halted runs with reason and no completion proof", async () => {
+      const runId = "run-halted-status";
+      const runDir = await createRunSkeleton(runId);
+      await appendEvent({
+        runDir,
+        eventType: "RUN_HALTED",
+        event: { reason: "phase-0", payload: { reason: "invalid-input" } },
+      });
+
+      const exitCode = await cli.run(["run:status", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.state).toBe("halted");
+      expect(payload.reason).toBe("phase-0");
+      expect(payload.payload).toEqual({ reason: "invalid-input" });
+      expect(payload.completionProof).toBeNull();
     });
 
     it("includes iteration metadata in JSON output", async () => {

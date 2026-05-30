@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import os from "os";
 import path from "path";
 import { promises as fs } from "fs";
@@ -461,6 +461,97 @@ describe("orchestrateIteration integration", () => {
 
     const journal = await loadJournal(runDir);
     expect(journal.filter((event) => event.type === "RUN_COMPLETED")).toHaveLength(1);
+  });
+
+  test("ctx.halt records RUN_HALTED without output or RUN_COMPLETED and replays idempotently", async () => {
+    const processDir = path.join(tmpRoot, "processes-halted-replay");
+    await fs.mkdir(processDir, { recursive: true });
+    const markerPath = path.join(tmpRoot, "halt-marker.txt");
+    const processPath = path.join(processDir, "halted-replay.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      import { promises as fs } from "fs";
+
+      export async function process(inputs, ctx) {
+        await fs.appendFile(inputs.markerPath, "executed\\n");
+        return ctx.halt("phase-0", { reason: "invalid-input" });
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-halted-replay",
+      request: "halt replay",
+      processPath,
+      inputs: { markerPath },
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-halted-replay" } });
+
+    const first = await orchestrateIteration({ runDir });
+    expect(first).toMatchObject({
+      status: "halted",
+      reason: "phase-0",
+      payload: { reason: "invalid-input" },
+    });
+
+    const replay = await orchestrateIteration({ runDir });
+    expect(replay).toMatchObject({
+      status: "halted",
+      reason: "phase-0",
+      payload: { reason: "invalid-input" },
+    });
+
+    const marker = await fs.readFile(markerPath, "utf8");
+    expect(marker.trim().split("\n")).toHaveLength(1);
+    await expect(fs.stat(path.join(runDir, "state", "output.json"))).rejects.toMatchObject({ code: "ENOENT" });
+
+    const journal = await loadJournal(runDir);
+    expect(journal.filter((event) => event.type === "RUN_HALTED")).toHaveLength(1);
+    expect(journal.some((event) => event.type === "RUN_COMPLETED")).toBe(false);
+  });
+
+  test("legacy halt:true return records RUN_HALTED with a deprecation warning", async () => {
+    const processDir = path.join(tmpRoot, "processes-legacy-halt");
+    await fs.mkdir(processDir, { recursive: true });
+    const processPath = path.join(processDir, "legacy-halt.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      export async function process() {
+        return { success: false, halt: true, phase: "RDD-0", error: undefined };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-legacy-halt",
+      request: "legacy halt",
+      processPath,
+      inputs: {},
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-legacy-halt" } });
+
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const result = await orchestrateIteration({ runDir });
+      expect(result).toMatchObject({
+        status: "halted",
+        reason: "RDD-0",
+        payload: { success: false, halt: true, phase: "RDD-0" },
+      });
+      expect(String(warnSpy.mock.calls.at(-1)?.[0] ?? "")).toContain("Deprecated process return { halt: true }");
+    } finally {
+      warnSpy.mockRestore();
+    }
+
+    const journal = await loadJournal(runDir);
+    expect(journal.filter((event) => event.type === "RUN_HALTED")).toHaveLength(1);
+    expect(journal.some((event) => event.type === "RUN_COMPLETED")).toBe(false);
   });
 
   test("emits replay iteration metrics with logger instrumentation", async () => {

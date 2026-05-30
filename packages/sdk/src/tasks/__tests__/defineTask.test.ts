@@ -84,6 +84,35 @@ describe("defineTask deterministic output", () => {
     expect(first.labels).not.toBe(firstCtx.labels);
     expect(second.labels).not.toBe(secondCtx.labels);
   });
+
+  it("allows shell task definitions to declare outputSchema or disable it", async () => {
+    const schemaTask = defineTask("shell-schema", () => ({
+      kind: "shell",
+      outputSchema: {
+        type: "object",
+        required: ["verified"],
+        properties: {
+          verified: { type: "boolean" },
+        },
+      },
+    }));
+    const disabledTask = defineTask("shell-schema-disabled", () => ({
+      kind: "shell",
+      outputSchema: false,
+    }));
+
+    await expect(schemaTask.build({}, fakeCtx())).resolves.toMatchObject({
+      kind: "shell",
+      outputSchema: {
+        type: "object",
+        required: ["verified"],
+      },
+    });
+    await expect(disabledTask.build({}, fakeCtx())).resolves.toMatchObject({
+      kind: "shell",
+      outputSchema: false,
+    });
+  });
 });
 
 describe("defineTask label metadata", () => {

@@ -199,6 +199,11 @@ SDK-defined exceptions include (names are illustrative):
 
   * not usually thrown; completion is represented by a normal return
 
+* `RunHalted` —
+
+  * thrown internally by `ctx.halt(reason, payload?)`
+  * represented as a recorded `RUN_HALTED` event for intentional early exits
+
 * `RunFailed` —
 
   * represented as a recorded `RUN_FAILED` event when an unhandled error escapes
@@ -344,6 +349,18 @@ type RunCompleted = JournalEventBase & {
 };
 ```
 
+#### RUN_HALTED
+
+```ts
+type RunHalted = JournalEventBase & {
+  type: "RUN_HALTED";
+  payload: {
+    reason: string;
+    payload?: Record<string, unknown>;
+  };
+};
+```
+
 #### RUN_FAILED
 
 ```ts
@@ -437,6 +454,7 @@ export interface TaskDef {
   kind: "node" | "breakpoint" | "orchestrator_task" | string;
   title?: string;
   description?: string;
+  outputSchema?: Record<string, unknown> | false | null; // shell result schema
 
   node?: {
     entry: string;                // path to node script
@@ -580,8 +598,18 @@ export interface ProcessContext {
 `ctx.onCleanup(callback)` registers a process-local cleanup callback for
 scratch resources such as `/tmp/<descriptive-name>/` clones. Callbacks are not
 serialized into task definitions or journals. They run once when the process
-execution reaches a terminal completed, failed, or process-error path, and they
+execution reaches a terminal completed, halted, failed, or process-error path, and they
 do not run during ordinary waiting iterations.
+
+#### Process Function Exit Conventions
+
+Process functions have three terminal exits:
+
+* Return normally to record `RUN_COMPLETED`. Completed runs may expose a `completionProof`.
+* Call `return ctx.halt("phase-or-reason", payload)` to record `RUN_HALTED`. Halted runs are intentional non-success exits; `run:status --json` reports `state: "halted"`, `reason`, `payload`, and `completionProof: null`.
+* Throw an uncaught `RunFailedError` to record `RUN_FAILED`. Other uncaught errors are reported as `process-error` and should be fixed before continuing.
+
+Legacy process returns shaped like `{ halt: true }` are still recognized as halted for migration, but the runtime emits a deprecation warning. Prefer `ctx.halt(...)` for new processes.
 
 ### 6.2 Intrinsic behavior details
 
@@ -838,11 +866,12 @@ function commitEffectResult(
 
 Behavior:
 
+* For successful `kind="shell"` results with a top-level `outputSchema`, validates `value` before any hook, artifact, journal, registry, or state-cache mutation. `outputSchema: false`, `null`, or absence disables this validation.
 * Writes `tasks/<effectId>/result.json` with `value` or normalized error
 * Writes `stdout.txt` / `stderr.txt` if provided
 * Appends `EFFECT_RESOLVED` event
 * Updates `state/state.json` (best-effort)
-* Emits a `commit.effect` metric for both success and rejection (`unknown_effect`, `already_resolved`, `invocation_mismatch`, `invalid_payload`, etc.) including whether stdout/stderr artifacts were written.
+* Emits a `commit.effect` metric for both success and rejection (`unknown_effect`, `already_resolved`, `invocation_mismatch`, `invalid_payload`, `validation_error`, etc.) including whether stdout/stderr artifacts were written.
 
 Error semantics:
 
@@ -866,7 +895,7 @@ The SDK runtime automatically calls the following hooks:
 | `on-run-start` | After `RUN_CREATED` event in `createRun()` | `{ runId, processId, entry, inputs, timestamp }` |
 | `on-iteration-start` | At the start of each `orchestrateIteration()` | `{ runId, iteration, timestamp }` |
 | `on-run-complete` | After `RUN_COMPLETED` event | `{ runId, status: "completed", output, duration, timestamp }` |
-| `on-run-fail` | After `RUN_FAILED` event | `{ runId, status: "failed", error, duration, timestamp }` |
+| `on-run-fail` | After `RUN_FAILED` or `RUN_HALTED` event | `{ runId, status: "failed" | "halted", error, reason?, payload?, duration, timestamp }` |
 | `on-iteration-end` | At the end of each iteration (finally block) | `{ runId, iteration, status, timestamp }` |
 | `on-task-start` | Before executing a task | `{ runId, effectId, taskId, kind, timestamp }` |
 | `on-task-complete` | After task execution completes | `{ runId, effectId, taskId, status, duration, timestamp }` |
@@ -1217,10 +1246,10 @@ babysitter run:status runs/2026-01-09-001
 Human output is always a single line:
 
 ```
-[run:status] state=<created|waiting|completed|failed> last=<TYPE#SEQ ISO> pending[total]=<n> pending[node]=<x> pending[breakpoint]=<y> ...
+[run:status] state=<created|waiting|completed|halted|failed> last=<TYPE#SEQ ISO> pending[total]=<n> pending[node]=<x> pending[breakpoint]=<y> ...
 ```
 
-`state` is derived from the latest lifecycle event plus the effect index: `waiting` is emitted while the index reports pending work, `completed` reflects `RUN_COMPLETED`, `failed` reflects `RUN_FAILED` or `PROCESS_RUNTIME_ERROR`, and `created` is used when only `RUN_CREATED` exists. Terminal lifecycle events always win even if pending effects remain, so operators can see that the run stopped progressing while still reviewing straggler counts. JSON status includes `reason: "process_runtime_error"` when the failed state came from a typed process exception. `last` echoes the event type, padded sequence number, and timestamp for the most recent journal entry (or `none` when a run has no events). `pending[total]` is always present and additional `pending[<kind>]` entries are printed in alphabetical order for every effect kind still waiting.
+`state` is derived from the latest lifecycle event plus the effect index: `waiting` is emitted while the index reports pending work, `completed` reflects `RUN_COMPLETED`, `halted` reflects `RUN_HALTED`, `failed` reflects `RUN_FAILED` or `PROCESS_RUNTIME_ERROR`, and `created` is used when only `RUN_CREATED` exists. Terminal lifecycle events always win even if pending effects remain, so operators can see that the run stopped progressing while still reviewing straggler counts. JSON status includes `reason: "process_runtime_error"` when the failed state came from a typed process exception; halted runs include their halt `reason` and optional `payload` with `completionProof: null`. `last` echoes the event type, padded sequence number, and timestamp for the most recent journal entry (or `none` when a run has no events). `pending[total]` is always present and additional `pending[<kind>]` entries are printed in alphabetical order for every effect kind still waiting.
 
 Status lines also append deterministic metadata pairs emitted by the runtime: `stateVersion=<n>` tracks the derived state revision, `journalHead=<seq#ulid>` identifies the latest event applied to that state, `stateRebuilt=true` appears when the CLI regenerates the cache on the fly, and the existing `pending[...]` rollups summarize unresolved work. These fields mirror what JSON consumers see so humans can correlate consecutive invocations without switching formats.
 
@@ -1229,12 +1258,15 @@ Status lines also append deterministic metadata pairs emitted by the runtime: `s
 ```json
 {
   "state": "waiting",
+  "reason": null,
+  "payload": null,
   "lastEvent": { "seq": 3, "type": "EFFECT_REQUESTED", "recordedAt": "2026-01-09T10:20:10.111Z", "path": "journal/000003.ABCDEF.json", "data": { "effectId": "ef-node", "kind": "node" } },
-  "pendingByKind": { "breakpoint": 1, "node": 2 }
+  "pendingByKind": { "breakpoint": 1, "node": 2 },
+  "completionProof": null
 }
 ```
 
-`lastEvent` becomes `null` for empty journals. Paths are normalized to POSIX separators relative to `<runDir>`.
+`reason` and `payload` are populated for halted runs. `completionProof` is non-null only when `state` is `completed`. `lastEvent` becomes `null` for empty journals. Paths are normalized to POSIX separators relative to `<runDir>`.
 
 #### `babysitter run:events <runDir>`
 
@@ -1270,6 +1302,8 @@ The command finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/
 #### `babysitter run:iterate <runDir>`
 
 Execute exactly one iteration through the hook-driven orchestration loop. The CLI calls `on-iteration-start`, and if no hooks are configured, falls back to a single `orchestrateIteration` step.
+
+Terminal completed iterations exit `0` and include `completionProof`. Terminal halted or failed iterations exit `1`; halted JSON includes `status: "halted"`, `reason`, and optional `payload`, but never includes a completion proof.
 
 #### `babysitter run:continue <runDir>`
 
@@ -1361,6 +1395,26 @@ These commands operate on pending/resolved **effects** (tasks).
 Commit/post a task result after it was executed externally. The CLI validates that the effect exists and is still `status="requested"`, then appends `EFFECT_RESOLVED` + writes `tasks/<effectId>/result.json`.
 
 Human output logs `[task:post] status=<ok|error>` followed by stdout/stderr/result refs (when present). `--json` returns `{ status, committed, stdoutRef, stderrRef, resultRef }`. Exit codes follow the status: `ok` returns `0`, while `error` returns `1`. `--dry-run` returns `status=skipped` and makes no on-disk changes.
+
+For `kind="shell"` tasks, a top-level `outputSchema` validates successful posted values before commit:
+
+```ts
+export const liveVerifyTask = defineTask("live-verify", (args, taskCtx) => ({
+  kind: "shell",
+  title: "Live verification",
+  shell: { command: "node scripts/live-verify.js", expectedExitCode: 0 },
+  outputSchema: {
+    type: "object",
+    required: ["verified", "checks"],
+    properties: {
+      verified: { type: "boolean" },
+      checks: { type: "array" },
+    },
+  },
+}));
+```
+
+If `task:post --status ok --value-inline '{"verified":true}'` is used for that task, the shared SDK commit path rejects the post with `RunFailedError` details containing `reason: "validation_error"` and the schema errors. The rejected post does not write `result.json` or append `EFFECT_RESOLVED`.
 
 Options:
 

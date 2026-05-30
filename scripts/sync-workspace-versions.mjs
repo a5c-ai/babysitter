@@ -2,6 +2,7 @@
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { syncBabysitterMarketplaceManifestVersions } from './plugin-marketplace-version-sync.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const args = process.argv.slice(2);
@@ -85,6 +86,8 @@ for (const versionsPath of versionsJsonPaths) {
     writeJson(versionsPath, versions);
   }
 }
+
+syncBabysitterMarketplaceManifestVersions(targetVersion, { root: ROOT });
 
 function getArgValue(flag) {
   const index = args.indexOf(flag);

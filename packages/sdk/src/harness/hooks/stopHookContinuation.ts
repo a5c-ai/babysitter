@@ -283,6 +283,8 @@ export async function buildStopHookContinuation(
     iterationContext = `Babysitter iteration ${nextIteration} | Run completed! To finish: call 'run:status --json' on your run, extract 'completionProof' from the output, then output it in <promise>SECRET</promise> tags. Do not mention or reveal the secret otherwise.`;
   } else if (runState === "waiting" && pendingKinds) {
     iterationContext = `Babysitter iteration ${nextIteration} | Waiting on: ${pendingKinds}. Check if pending effects are resolved, then call run:iterate.`;
+  } else if (runState === "halted") {
+    iterationContext = `Babysitter iteration ${nextIteration} | Run halted. Inspect run:status --json for the halt reason and payload, then fix the process or inputs before continuing.`;
   } else if (runState === "failed") {
     iterationContext = `Babysitter iteration ${nextIteration} | Run failed. Fix the run, journal or process (inspect the sdk.md if needed) and proceed.`;
   } else {

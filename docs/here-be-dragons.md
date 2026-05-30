@@ -21,16 +21,18 @@ Files/modules that concentrate the most danger across multiple categories.
 | `packages/agent-mux/webui/src/lib/global-registry.ts` | coupling | globalThis shared mutable state, duplicated in observer-dashboard |
 | `packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts` | hazard | 3-layer recovery chain invisible without verbose *(code block extraction now rejects non-process blocks)* |
 | ~~`packages/sdk/src/storage/journal.ts`~~ | ~~fallback~~ | ~~Atomicity abandoned~~ → now throws on ENOENT. Queue errors logged. |
-| `packages/agent-mux/core/src/kanban.ts` | hazard | 2518 lines, 6+ sealed switch statements, stringly-typed status values |
+| ~~`packages/agent-mux/core/src/kanban.ts`~~ | ~~hazard~~ | ~~2518 lines, 6+ sealed switch statements, stringly-typed status values~~ -> status/workflow mappings now use typed tables with coverage tests. |
 
 ---
 
 ## Critical Dragons
 
 ### process.env mutation couples modules through ambient state
-**Files:** `packages/agent-platform/src/harness/piWrapper/moduleSupport.ts:126-144`, `packages/agent-core/src/agenticTools/config/state.ts:112-122`, `packages/agent-mux/cli/src/index.ts:132-147`
+**Files:** `packages/agent-platform/src/harness/piWrapper/moduleSupport.ts:126-144`, `packages/agent-core/src/agenticTools/config/state.ts:112-122`, `packages/agent-platform/src/harness/agenticTools/config/state.ts:112-122`, `packages/agent-mux/cli/src/index.ts:132-147`
 
-`configureAzureOpenAiEnvDefaults()` writes `AZURE_OPENAI_RESOURCE_NAME`, `AZURE_OPENAI_BASE_URL`, `AZURE_OPENAI_DEPLOYMENT_NAME_MAP` to `process.env`. `setConfigValue()` with `scope: "global"` permanently mutates `process.env`. The CLI writes `AMUX_LOG_LEVEL`, `AMUX_OBSERVABILITY_MODE`. Any code reading these env vars is coupled to the initialization order of the writers. No central registry of these contracts.
+`configureAzureOpenAiEnvDefaults()` writes `AZURE_OPENAI_RESOURCE_NAME`, `AZURE_OPENAI_BASE_URL`, `AZURE_OPENAI_DEPLOYMENT_NAME_MAP` to `process.env`. `setConfigValue()` with `scope: "global"` permanently mutates `process.env` in both agent-core and agent-platform copies of the config state helper. The CLI writes `AMUX_LOG_LEVEL`, `AMUX_OBSERVABILITY_MODE`. Any code reading these env vars is coupled to the initialization order of the writers. No central registry of these contracts.
+
+**Tracked separately:** #584 is the focused implementation issue for replacing these ambient in-process writes with an explicit env/config contract. Keep #601 changes from duplicating that larger refactor.
 
 ### ~~globalThis shared mutable state with duplicate definitions~~
 **Files:** `packages/agent-mux/webui/src/lib/global-registry.ts`, `packages/observer-dashboard/src/lib/global-registry.ts`
@@ -64,6 +66,7 @@ Files/modules that concentrate the most danger across multiple categories.
 | `piWrapper/moduleSupport.ts` | `AZURE_OPENAI_BASE_URL` | `session.ts`, Pi module | Mutated in-place |
 | `piWrapper/moduleSupport.ts` | `AZURE_OPENAI_DEPLOYMENT_NAME_MAP` | Pi module | Conditional write |
 | `agent-core/config/state.ts` | Any key via `setConfigValue("global")` | All process.env readers | Permanent mutation |
+| `agent-platform/config/state.ts` | Any key via `setConfigValue("global")` | Platform tool/config readers | Permanent mutation |
 | `agent-mux/cli/index.ts` | `AMUX_LOG_LEVEL`, `AMUX_LOG_FILE` | `observability/logger.ts` | Startup coupling |
 
 ### Cross-package internal imports (fragile)
@@ -90,10 +93,10 @@ Files/modules that concentrate the most danger across multiple categories.
 
 **FIXED:** Shell argv construction is centralized in `@a5c-ai/agent-runtime` through `buildShellInvocation()`. Runtime background spawning, agent-core session execution, and core/platform bash tools all use the shared contract.
 
-### Kanban status — 6+ sealed switch statements
+### ~~Kanban status — 6+ sealed switch statements~~
 **File:** `packages/agent-mux/core/src/kanban.ts` (2518 lines)
 
-`getColumnName`, `getColumnWipLimit`, `getAllowedMoveStates`, `resolveKanbanWorkflowState`, `resolveKanbanStatusForWorkflowState`, `evaluateKanbanIssueMove` all switch on the same status values. Adding a new status requires updating 6+ functions with no exhaustiveness check.
+**FIXED:** #586 replaced the repeated status/workflow switch pattern with typed mapping tables and focused coverage in `packages/agent-mux/core/tests/kanban.test.ts`. Adding a new status or workflow state now has a single mapping contract and tests that enumerate the supported values.
 
 ### ~~Process definition extraction — any code block as fallback~~
 **File:** `packages/agent-platform/src/harness/internal/createRun/planProcess/recovery.ts:33-106`
@@ -192,3 +195,7 @@ The timeout sets an abort signal but doesn't guarantee the request stops. Fetch 
 - ~~**`noImplicitAny: false`** in `packages/agent-mux/gateway/tsconfig.json`~~ — **FIXED:** set to `true` along with `useUnknownInCatchVariables`
 - **`skipLibCheck: true`** in root `tsconfig.json` — dependency type incompatibilities invisible
 - **E2E gaps**: No end-to-end coverage for babysitter orchestration loop, hook-mux lifecycle, or trigger dispatching. Heavy reliance on unit tests
+
+### #601 disposition
+
+#601 is an umbrella tracker, not a single safe refactor boundary. Its previously listed WeakMap disposal, piWrapper lazy-init retry, shell invocation, skipped UI-test, and kanban exhaustiveness streams are fixed. The remaining critical env-coupling work belongs to #584. The duplicated utilities, root `skipLibCheck`, and E2E coverage gaps remain active debt and need focused follow-up issues with their own acceptance criteria before implementation.

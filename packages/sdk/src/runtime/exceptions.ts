@@ -161,6 +161,21 @@ export class RunFailedError extends BabysitterRuntimeError {
   }
 }
 
+export class RunHaltedError extends BabysitterRuntimeError {
+  readonly reason: string;
+  readonly payload?: Record<string, unknown>;
+
+  constructor(reason: string, payload?: Record<string, unknown>) {
+    const normalizedReason = normalizeHaltReason(reason);
+    super("RunHaltedError", `Run halted: ${normalizedReason}`, {
+      category: ErrorCategory.Runtime,
+      details: payload === undefined ? { reason: normalizedReason } : { reason: normalizedReason, payload },
+    });
+    this.reason = normalizedReason;
+    this.payload = payload;
+  }
+}
+
 export class MissingProcessContextError extends BabysitterRuntimeError {
   constructor() {
     super("MissingProcessContextError", "No active process context found on the current async call stack", {
@@ -198,6 +213,17 @@ export function isIntrinsicError(error: unknown): error is BabysitterIntrinsicEr
 
 export function isBabysitterError(error: unknown): error is BabysitterRuntimeError {
   return error instanceof BabysitterRuntimeError;
+}
+
+function normalizeHaltReason(reason: string): string {
+  if (typeof reason !== "string") {
+    throw new TypeError("ctx.halt(reason, payload?) requires a string reason");
+  }
+  const trimmed = reason.trim();
+  if (!trimmed) {
+    throw new TypeError("ctx.halt(reason, payload?) requires a non-empty reason");
+  }
+  return trimmed;
 }
 
 type ErrorWithData = Error & { data?: unknown };

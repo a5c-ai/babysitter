@@ -44,13 +44,14 @@ export interface RunIterateOptions {
 export interface RunIterateResult {
   iteration: number;
   iterationCount: number;
-  status: "executed" | "waiting" | "completed" | "failed" | "none";
+  status: "executed" | "waiting" | "completed" | "halted" | "failed" | "none";
   action?: string;
   reason?: string;
   count?: number;
   until?: number;
   nextActions?: EffectAction[];
   completionProof?: string;
+  payload?: Record<string, unknown>;
   /** Parallel groups keyed by parallelGroupId. Only when harness declares concurrent-effects. */
   parallelGroups?: Record<string, EffectAction[]>;
   /** Background vs foreground classification. Only when harness declares background-effects. */
@@ -129,6 +130,32 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
       action: "none",
       reason: "completed",
       completionProof,
+      warnings: warnings.length ? warnings : undefined,
+      metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
+    };
+  }
+
+  if (iterationResult.status === "halted") {
+    await callRuntimeHook(
+      "on-iteration-end",
+      {
+        runId,
+        iteration,
+        action: "none",
+        status: "halted",
+        reason: iterationResult.reason,
+        payload: iterationResult.payload,
+        timestamp: new Date().toISOString(),
+      },
+      { cwd: projectRoot, logger: verbose ? ((msg: string) => console.error(msg)) : undefined }
+    );
+    return {
+      iteration,
+      iterationCount,
+      status: "halted",
+      action: "none",
+      reason: iterationResult.reason,
+      payload: iterationResult.payload,
       warnings: warnings.length ? warnings : undefined,
       metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
     };

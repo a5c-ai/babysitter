@@ -1,0 +1,178 @@
+{
+  "issueNumber": 572,
+  "baseBranch": "staging",
+  "targetBranch": "feat/issue-572-shell-output-schema-task-post",
+  "title": "sdk: extend outputSchema to shell tasks and enforce in task:post",
+  "labels": [
+    "sdk",
+    "priority:high",
+    "effort:medium",
+    "ready-for-dev",
+    "feature",
+    "automated-triage"
+  ],
+  "summary": "Add SDK-enforced outputSchema validation for successful shell task result values so malformed shell JSON is rejected during task result posting, before result.json is written or EFFECT_RESOLVED is emitted.",
+  "acceptanceCriteria": [
+    "Shell task definitions can declare an outputSchema, with absence or outputSchema: false preserving current behavior.",
+    "Validation is implemented in the shared SDK commit path, not only in the CLI task:post wrapper.",
+    "A successful shell task post whose value is missing a required field is rejected with structured validation_error details.",
+    "Rejected schema posts do not write result.json, append EFFECT_RESOLVED, update the task registry, rebuild state cache as resolved, or fire task.completed hooks.",
+    "A successful shell task post with a valid value commits as it does today.",
+    "Direct SDK callers, CLI task:post, MCP task_post, and testing harnesses all inherit the same commitEffectResult invariant.",
+    "Existing tasks without outputSchema and tasks with outputSchema: false continue to work as before.",
+    "Docs show shell outputSchema usage and task:post validation behavior.",
+    "Tests cover negative validation, positive validation, compatibility behavior, mutation safety, CLI surface behavior, and task-definition preservation."
+  ],
+  "nonGoals": [
+    "Do not replace the existing lightweight JSON Schema validator with a new dependency unless a required acceptance criterion cannot be met.",
+    "Do not redesign task serialization or resultRef spill behavior beyond validating the in-memory value before serialization.",
+    "Do not change process outputSchema validation behavior.",
+    "Do not make outputSchema mandatory for all shell tasks.",
+    "Do not sweep every shared library shell helper into this implementation unless the change remains small; produce follow-up items for broad helper schema adoption.",
+    "Do not implement unrelated process runtime error classification from #573."
+  ],
+  "processLibraryResearch": {
+    "requestedRoot": ".a5c/process-library/",
+    "requestedRootStatus": "absent in this checkout during planning",
+    "fallbackReferences": [
+      "docs/agent-reference/process-authoring.md",
+      "library/processes/shared/prior-attempts-scanner.js",
+      "library/processes/shared/completeness-gate.js",
+      "library/processes/shared/deterministic-quality-gate.js",
+      "library/processes/shared/tdd-triplet.js",
+      "library/processes/shared/ts-check.js"
+    ],
+    "methodologyReferences": [
+      "methodologies/superpowers/test-driven-development.js",
+      "methodologies/superpowers/verification-before-completion.js",
+      "methodologies/v-model/v-model.js",
+      "cradle/feature-implementation-contribute.js"
+    ]
+  },
+  "targetFiles": [
+    "packages/sdk/src/runtime/commitEffectResult.ts",
+    "packages/sdk/src/runtime/schemaValidator.ts",
+    "packages/sdk/src/runtime/types.ts",
+    "packages/sdk/src/tasks/types.ts",
+    "packages/sdk/src/tasks/serializer.ts",
+    "packages/sdk/src/storage/tasks.ts",
+    "packages/sdk/src/cli/main/taskCommands.ts",
+    "packages/sdk/src/mcp/tools/tasks.ts",
+    "packages/sdk/src/runtime/intrinsics/taskHelpers.ts",
+    "packages/sdk/src/runtime/__tests__/commitEffectResult.test.ts",
+    "packages/sdk/src/tasks/__tests__/serializer.test.ts",
+    "packages/sdk/src/tasks/__tests__/defineTask.test.ts",
+    "packages/sdk/src/cli/__tests__/cliMain.test.ts",
+    "packages/sdk/src/mcp/__tests__/integration.test.ts",
+    "library/reference/sdk.md",
+    "docs/agent-reference/process-authoring.md",
+    "docs/reference/babysitter_cli_surface_spec.md",
+    "docs/user-guide/reference/cli-reference.md",
+    "packages/sdk/src/prompts/templates/task-examples.md",
+    "packages/sdk/src/prompts/templates/task-kinds.md"
+  ],
+  "plannedPhases": [
+    {
+      "name": "Reuse audit",
+      "purpose": "Run the repo-required plan reuse audit for outputSchema, task:post, schemaValidator, result commit, task serializer, CLI, MCP, and shared process helper surfaces."
+    },
+    {
+      "name": "Issue context",
+      "purpose": "Read #572, every comment, labels, and confirm it is not a PR; extract acceptance criteria, non-goals, and triage refinements."
+    },
+    {
+      "name": "Architecture map",
+      "purpose": "Trace task definitions from ctx.task through task.json, task:post value parsing, commitEffectResult, result serialization, EFFECT_RESOLVED, and replay consumption."
+    },
+    {
+      "name": "Schema contract design",
+      "purpose": "Define the public shell outputSchema task contract, validation point, structured error payload, outputSchema: false compatibility, and shell failure normalization policy."
+    },
+    {
+      "name": "Regression plan",
+      "purpose": "Add failing tests first for invalid shell values, valid shell values, compatibility, mutation safety, CLI behavior, and task-definition preservation."
+    },
+    {
+      "name": "Implementation loop",
+      "purpose": "Implement the narrow SDK type, validation, CLI error propagation, and docs changes; iterate up to three attempts based on verification and review."
+    },
+    {
+      "name": "Verification gate",
+      "purpose": "Run targeted tests, SDK build, SDK test suite, metadata verification, and diff hygiene checks with exact evidence."
+    },
+    {
+      "name": "Implementation review",
+      "purpose": "Review shared commit-path enforcement, pre-mutation ordering, public API compatibility, and test coverage."
+    },
+    {
+      "name": "Docs and library sweep",
+      "purpose": "Verify docs and examples, then scan shared shell helpers and produce follow-up schema adoption items where broad changes exceed issue scope."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm all issue requirements, non-goals, quality gates, changed files, and PR summary are ready."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "The shell outputSchema contract has a genuine ambiguity, especially around CLI-normalized shell failure values or top-level versus nested schema placement.",
+      "owner": "maintainer",
+      "options": [
+        "Apply recommended shared commit-path contract",
+        "Pause for maintainer guidance"
+      ]
+    },
+    {
+      "when": "Final acceptance finds unresolved compatibility risk or a verification failure that cannot be classified as unrelated.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with documented remaining follow-up",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "qualityGates": [
+    "A red test proves a shell task with outputSchema requiring checks rejects { verified: true } with validation_error details.",
+    "The rejection test proves no result.json exists and no EFFECT_RESOLVED event was appended.",
+    "A positive test proves { verified: true, checks: [] } commits successfully and replay consumers receive checks.",
+    "Compatibility tests prove no outputSchema and outputSchema: false preserve current behavior.",
+    "Task definition tests prove outputSchema is preserved in task.json for shell task definitions.",
+    "CLI task:post tests prove invalid --value and --value-inline posts exit non-zero and surface actionable validation output.",
+    "Shared commitEffectResult tests prove direct SDK/MCP/testing callers inherit the invariant.",
+    "Docs include a shell task outputSchema example and task:post failure semantics.",
+    "Targeted tests pass.",
+    "npm run build:sdk passes.",
+    "npm run test:sdk passes or unrelated pre-existing failures are documented with exact evidence.",
+    "npm run verify:metadata passes.",
+    "git diff --check passes.",
+    "Code review approves shared commit-path placement, mutation ordering, compatibility rules, and docs."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/runtime/__tests__/commitEffectResult.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/tasks/__tests__/serializer.test.ts packages/sdk/src/tasks/__tests__/defineTask.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/cli/__tests__/cliMain.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/mcp/__tests__/integration.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "implementationNotes": {
+    "preferredValidationLocation": "packages/sdk/src/runtime/commitEffectResult.ts after effect lookup and invocation-key validation, before task.completed hooks and before serializeAndWriteTaskResult.",
+    "validatorToReuse": "packages/sdk/src/runtime/schemaValidator.ts validateAgainstSchema",
+    "schemaSelection": "For shell task definitions, read tasks/<effectId>/task.json and use top-level outputSchema when it is an object. Treat false, undefined, and null as no schema.",
+    "errorShape": "Throw RunFailedError with structured data including reason: validation_error, effectId, taskId, kind, and errors from validateAgainstSchema.",
+    "mutationSafety": "Rejected posts must not write tasks/<effectId>/result.json, append EFFECT_RESOLVED, update globalTaskRegistry, or rebuild state cache as resolved."
+  },
+  "publishPlan": {
+    "implementationBranchName": "feat/issue-572-shell-output-schema-task-post",
+    "implementationPrTitle": "Enforce shell task outputSchema on posted results",
+    "implementationPrBodyMustMention": [
+      "Closes #572",
+      "Shared commitEffectResult validation",
+      "Shell outputSchema contract and outputSchema: false compatibility",
+      "Pre-mutation rejection behavior",
+      "Docs and verification commands"
+    ]
+  }
+}

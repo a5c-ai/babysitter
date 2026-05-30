@@ -15,7 +15,7 @@ import {
   type StateCacheSnapshot,
 } from "./runSupport";
 
-type RunLifecycleState = "created" | "waiting" | "completed" | "failed";
+type RunLifecycleState = "created" | "waiting" | "completed" | "halted" | "failed";
 
 export interface TaskListEntry {
   effectId: string;
@@ -35,7 +35,7 @@ export interface TaskListEntry {
 }
 
 const LARGE_RESULT_PREVIEW_LIMIT = DEFAULTS.largeResultPreviewLimit;
-const RUN_LIFECYCLE_TYPES: ReadonlySet<JournalEvent["type"]> = new Set(["RUN_CREATED", "RUN_COMPLETED", "RUN_FAILED", "PROCESS_RUNTIME_ERROR"]);
+const RUN_LIFECYCLE_TYPES: ReadonlySet<JournalEvent["type"]> = new Set(["RUN_CREATED", "RUN_COMPLETED", "RUN_HALTED", "RUN_FAILED", "PROCESS_RUNTIME_ERROR"]);
 
 export async function buildEffectIndexSafe(runDir: string, command: string, events?: JournalEvent[]) {
   try {
@@ -145,6 +145,7 @@ export async function loadTaskResultPreview(
 
 export function deriveRunState(lastLifecycleEventType: JournalEvent["type"] | undefined, pendingTotal: number): RunLifecycleState {
   if (lastLifecycleEventType === "RUN_COMPLETED") return "completed";
+  if (lastLifecycleEventType === "RUN_HALTED") return "halted";
   if (lastLifecycleEventType === "RUN_FAILED" || lastLifecycleEventType === "PROCESS_RUNTIME_ERROR") return "failed";
   if (pendingTotal > 0) return "waiting";
   return "created";

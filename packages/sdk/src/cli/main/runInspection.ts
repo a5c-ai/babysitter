@@ -55,12 +55,15 @@ export async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
     autoRunnableCount: pendingRecords.filter((record) => record.kind === "node").length,
   };
   const needsMoreIterations = state === "waiting" && pendingEffectsSummary.autoRunnableCount > 0;
+  const haltReason = state === "halted" ? readStringField(findLastLifecycleEvent(journal)?.data, "reason") : undefined;
+  const haltPayload = state === "halted" ? readObjectField(findLastLifecycleEvent(journal)?.data, "payload") : undefined;
 
   if (parsed.json) {
     console.log(
       JSON.stringify({
         state,
-        reason,
+        reason: haltReason ?? reason,
+        payload: haltPayload ?? null,
         lastEvent: lastEvent ? serializeJournalEvent(lastEvent, runDir) : null,
         pendingByKind,
         pendingEffectsSummary,
@@ -88,7 +91,8 @@ export async function handleRunStatus(parsed: ParsedArgs): Promise<number> {
   const suffix = formattedMetadata.textParts.length ? ` ${formattedMetadata.textParts.join(" ")}` : "";
   const completionProof = state === "completed" ? resolveCompletionProof(metadata) : undefined;
   const secretSuffix = completionProof ? ` completionProof=${completionProof}` : "";
-  console.log(`[run:status] state=${state} last=${formatLastEventSummary(lastEvent)}${suffix}${secretSuffix}`);
+  const haltSuffix = haltReason ? ` reason=${haltReason}` : "";
+  console.log(`[run:status] state=${state}${haltSuffix} last=${formatLastEventSummary(lastEvent)}${suffix}${secretSuffix}`);
   return 0;
 }
 
@@ -121,7 +125,7 @@ export async function handleRunIterate(parsed: ParsedArgs): Promise<number> {
         console.log(`[run:iterate] Waiting until: ${new Date(result.until).toISOString()}`);
       }
     }
-    return 0;
+    return result.status === "halted" ? 1 : 0;
   } catch (error) {
     console.error(`[run:iterate] Error: ${error instanceof Error ? error.message : String(error)}`);
     return 1;
@@ -135,6 +139,18 @@ function resolveHarnessCapabilitiesForRunIterate(parsed: ParsedArgs): string[] |
     return adapterCaps;
   }
   return detectCallerHarness()?.capabilities;
+}
+
+function readStringField(value: unknown, key: string): string | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const field = (value as Record<string, unknown>)[key];
+  return typeof field === "string" && field ? field : undefined;
+}
+
+function readObjectField(value: unknown, key: string): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const field = (value as Record<string, unknown>)[key];
+  return field && typeof field === "object" && !Array.isArray(field) ? field as Record<string, unknown> : undefined;
 }
 
 export async function handleRunEvents(parsed: ParsedArgs): Promise<number> {
