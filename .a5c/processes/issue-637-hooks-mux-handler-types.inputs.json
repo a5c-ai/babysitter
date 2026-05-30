@@ -1,0 +1,102 @@
+{
+  "issueNumber": 637,
+  "baseBranch": "staging",
+  "targetBranch": "issue/637-hooks-mux-handler-types",
+  "dependentIssues": [636],
+  "relatedIssues": [576, 638],
+  "maxFixAttempts": 3,
+  "userRequest": "Create implementation plan for issue #637: hooks-mux: add HTTP, MCP tool, prompt, and agent handler types.",
+  "scope": {
+    "include": [
+      "Extend hooks-mux HandlerRef with a backward-compatible type model where omitted type remains command.",
+      "Dispatch hooks-mux handlers by type from the normalizer runner instead of unconditionally executing shell commands.",
+      "Add HTTP, MCP tool, prompt, and agent handler modules with typed configuration and UnifiedHookResult-compatible output.",
+      "Preserve legacy command handler behavior, diagnostics, timeout handling, fail-open/fail-closed policy, plan ordering, and public imports.",
+      "Wire typed hook handler configuration through agent-platform/agent-mux bridge surfaces where needed.",
+      "Update docs/agent-stack/hooks/missing-capabilities.md section 1 after implementation."
+    ],
+    "exclude": [
+      "Do not implement the missing hook events from #636 except to consume stable landed interfaces.",
+      "Do not implement defer/block/retry decision work from #638 except to remain compatible with landed result types.",
+      "Do not create a second MCP tool registry; use or adapt to the existing #576/tool-mux direction.",
+      "Do not add real external service dependencies to tests."
+    ]
+  },
+  "handlerTypes": [
+    {
+      "type": "command",
+      "legacyDefault": true,
+      "requiredConfig": ["source"],
+      "notes": "Existing shell subprocess behavior remains the compatibility baseline."
+    },
+    {
+      "type": "http",
+      "requiredConfig": ["url"],
+      "expectedBehavior": "POST normalized event JSON, parse JSON UnifiedHookResult response, enforce timeout and allowedEnvVars header interpolation."
+    },
+    {
+      "type": "mcp_tool",
+      "requiredConfig": ["server", "tool"],
+      "expectedBehavior": "Invoke an MCP tool through the existing registry/tool-mux path or a narrow injectable seam if #576 is not landed."
+    },
+    {
+      "type": "prompt",
+      "requiredConfig": ["prompt"],
+      "expectedBehavior": "Evaluate a bounded model prompt using existing platform invocation surfaces, parse UnifiedHookResult-compatible output, and enforce timeout/cancellation."
+    },
+    {
+      "type": "agent",
+      "requiredConfig": ["prompt"],
+      "expectedBehavior": "Spawn or route to an agent responder through existing agent-platform/agent-mux surfaces with maxTurns/depth controls."
+    }
+  ],
+  "targetFiles": [
+    "docs/agent-stack/hooks/missing-capabilities.md",
+    "packages/hooks-mux/core/src/types/plan.ts",
+    "packages/hooks-mux/core/src/normalizer/runner.ts",
+    "packages/hooks-mux/core/src/normalizer/plan-resolver.ts",
+    "packages/hooks-mux/core/src/api.ts",
+    "packages/hooks-mux/core/src/index.ts",
+    "packages/hooks-mux/core/src/handlers/http.ts",
+    "packages/hooks-mux/core/src/handlers/mcp-tool.ts",
+    "packages/hooks-mux/core/src/handlers/prompt.ts",
+    "packages/hooks-mux/core/src/handlers/agent.ts",
+    "packages/hooks-mux/core/src/normalizer/__tests__/normalizer.test.ts",
+    "packages/hooks-mux/core/src/__tests__/handler-timeout.test.ts",
+    "packages/hooks-mux/core/src/__tests__/integration/invoke-fanout.test.ts",
+    "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
+    "packages/hooks-mux/cli/src/__tests__",
+    "packages/agent-platform/src/harness/amux/amuxBridge.ts",
+    "packages/agent-platform/src/harness/amux/amuxTypes.ts",
+    "packages/agent-platform/src/harness/deferredToolRegistry.ts",
+    "packages/agent-platform/src/mcp/client",
+    "packages/agent-platform/src/harness/agenticTools",
+    "packages/agent-platform/src/harness/invoker.ts"
+  ],
+  "verificationCommands": [
+    "npm run build:hooks-mux",
+    "npm run test:hooks-mux",
+    "npm run lint:hooks-mux",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "qualityGates": [
+    "Reuse audit is rendered before implementation work and identifies existing command, bridge, and MCP registry infrastructure.",
+    "Dependency readiness for #636 and #576 is assessed before coding; ambiguous interface choices raise a maintainer breakpoint.",
+    "Runtime trace lists live call paths from handler registration through dispatch, merge, and bridge forwarding before implementation.",
+    "HandlerRef remains backward compatible: omitted type behaves as command and existing command tests still pass.",
+    "Each handler type has contract tests before implementation, with no real external services required.",
+    "HTTP handler tests cover URL validation, allowedEnvVars-only header interpolation, timeout, result parsing, and secret-leak prevention.",
+    "mcp_tool uses the existing registry/tool-mux path or a clearly documented narrow compatibility seam, not a duplicate registry.",
+    "prompt and agent handlers enforce timeout/cancellation and bounded recursion or max-turn controls.",
+    "Unsupported handler types and handler failures interact correctly with fail-open/fail-closed policy.",
+    "Documentation reflects the implemented support and any residual dependency-limited gaps."
+  ],
+  "parallelDependencyPolicy": {
+    "issue636": "Proceed only against stable landed handler/event dispatch interfaces. If #636 is not landed or changes core runner contracts incompatibly, raise the dependency breakpoint.",
+    "issue576": "Use the unified tool registry/tool-mux path for mcp_tool. If unavailable, implement only a narrow injectable executor seam with tests and document the temporary assumption.",
+    "issue638": "Do not implement decision semantics here, but keep result parsing compatible with any landed defer/block/retry result types."
+  }
+}
