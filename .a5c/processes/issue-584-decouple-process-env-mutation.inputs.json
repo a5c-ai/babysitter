@@ -1,0 +1,34 @@
+{
+  "issueNumber": 584,
+  "baseBranch": "staging",
+  "targetBranch": "fix/issue-584-decouple-process-env-mutation",
+  "maxIterations": 3,
+  "targetFiles": [
+    "docs/here-be-dragons.md",
+    "packages/agent-platform/src/harness/piWrapper/moduleSupport.ts",
+    "packages/agent-platform/src/harness/piWrapper.ts",
+    "packages/agent-core/src/session.ts",
+    "packages/agent-core/src/agenticTools/config/state.ts",
+    "packages/agent-platform/src/harness/agenticTools/config/state.ts",
+    "packages/agent-mux/cli/src/index.ts",
+    "packages/agent-mux/observability/src/logger.ts"
+  ],
+  "mutationFiles": [
+    "packages/agent-platform/src/harness/piWrapper/moduleSupport.ts",
+    "packages/agent-core/src/agenticTools/config/state.ts",
+    "packages/agent-platform/src/harness/agenticTools/config/state.ts",
+    "packages/agent-mux/cli/src/index.ts"
+  ],
+  "regressionTestFiles": [
+    "packages/agent-platform/src/harness/piWrapper/moduleSupport.test.ts",
+    "packages/agent-core/src/agenticTools/config/state.test.ts",
+    "packages/agent-platform/src/harness/agenticTools/config/state.test.ts",
+    "packages/agent-mux/cli/tests/logging-config.test.ts"
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/agent-platform/src/harness/piWrapper/moduleSupport.test.ts packages/agent-platform/src/harness/piWrapper.test.ts packages/agent-core/src/session.test.ts packages/agent-core/src/agenticTools/config/state.test.ts packages/agent-platform/src/harness/agenticTools/config/state.test.ts packages/agent-mux/cli/tests/logging-config.test.ts",
+    "npm run build:runtime",
+    "npm run build:agent-mux:non-realtime",
+    "npm run verify:metadata"
+  ]
+}
