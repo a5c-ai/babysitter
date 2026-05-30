@@ -49,6 +49,36 @@ describe("DeferredToolRegistry", () => {
     expect(registry.loadedSchemaCount).toBe(2);
   });
 
+  it("preserves unified metadata through search and schema fetch", async () => {
+    const registry = new DeferredToolRegistry();
+    registry.registerLoader("mcp", async () => ({
+      inputSchema: { type: "object" },
+    }));
+    registry.registerTools([
+      {
+        name: "web_fetch",
+        description: "Fetch remote content",
+        source: "mcp",
+        sourceQualifier: "web",
+        metadata: {
+          category: "web",
+          tags: ["read-only"],
+          requiresApproval: "never",
+          cache: { read: true },
+        },
+      },
+    ]);
+
+    const metadata = {
+      category: "web",
+      tags: ["read-only"],
+      requiresApproval: "never",
+      cache: { read: true },
+    };
+    expect(registry.searchTools("fetch")[0]?.metadata).toEqual(metadata);
+    expect((await registry.fetchSchema("web_fetch", "mcp", "web"))?.metadata).toEqual(metadata);
+  });
+
   it("removes matching source entries and cached schemas without touching others", async () => {
     const registry = new DeferredToolRegistry();
     const loader = vi.fn(async () => ({

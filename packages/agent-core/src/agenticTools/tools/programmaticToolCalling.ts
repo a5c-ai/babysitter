@@ -51,7 +51,7 @@ export function createProgrammaticToolCallingTool(
         description: `Maximum nested tool calls (default: ${config.maxToolCalls})`,
       })),
     }),
-    execute: async (_toolCallId, params) => {
+    execute: async (_toolCallId, params, onUpdate, toolContext) => {
       const calls: ToolCallRecord[] = [];
       const timeout = resolveInvocationLimit(params.timeout, config.timeout);
       const maxToolCalls = resolveInvocationLimit(params.max_tool_calls, config.maxToolCalls);
@@ -67,7 +67,12 @@ export function createProgrammaticToolCallingTool(
           throw new Error(`Tool "${name}" is not available to code_executor.`);
         }
         calls.push({ tool: name, params: toolParams });
-        return unwrapToolResult(await tool.execute(`code-executor:${calls.length}:${name}`, toolParams));
+        return unwrapToolResult(await tool.execute(
+          `code-executor:${calls.length}:${name}`,
+          toolParams,
+          onUpdate,
+          toolContext,
+        ));
       };
 
       const tools = Object.create(null) as Record<string, (toolParams?: Record<string, unknown>) => Promise<unknown>>;

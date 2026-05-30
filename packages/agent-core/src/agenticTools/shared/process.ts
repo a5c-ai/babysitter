@@ -34,14 +34,20 @@ export function spawnAsync(
     env?: Record<string, string>;
     timeout?: number;
     shell?: boolean;
+    signal?: AbortSignal;
+    maxOutputBytes?: number;
+    onStdout?: (chunk: string) => void | Promise<void>;
+    onStderr?: (chunk: string) => void | Promise<void>;
   },
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   return new Promise((resolve) => {
+    const maxOutputBytes = options.maxOutputBytes ?? MAX_SPAWN_OUTPUT_BYTES;
     const processHandle = childProcess.spawn(command, args, {
       cwd: options.cwd,
       env: { ...process.env, ...options.env },
       timeout: options.timeout ?? DEFAULT_BASH_TIMEOUT,
       shell: options.shell ?? false,
+      signal: options.signal,
       windowsHide: true,
     });
 
@@ -57,11 +63,12 @@ export function spawnAsync(
         return;
       }
       stdoutBytes += chunk.length;
-      if (stdoutBytes > MAX_SPAWN_OUTPUT_BYTES) {
+      if (stdoutBytes > maxOutputBytes) {
         stdoutTruncated = true;
-        stdoutChunks.push(Buffer.from(`\n[babysitter] WARNING: stdout truncated at ${MAX_SPAWN_OUTPUT_BYTES} bytes. Subsequent output discarded.\n`));
+        stdoutChunks.push(Buffer.from(`\n[babysitter] WARNING: stdout truncated at ${maxOutputBytes} bytes. Subsequent output discarded.\n`));
         return;
       }
+      void options.onStdout?.(chunk.toString("utf8"));
       stdoutChunks.push(chunk);
     });
 
@@ -70,18 +77,19 @@ export function spawnAsync(
         return;
       }
       stderrBytes += chunk.length;
-      if (stderrBytes > MAX_SPAWN_OUTPUT_BYTES) {
+      if (stderrBytes > maxOutputBytes) {
         stderrTruncated = true;
-        stderrChunks.push(Buffer.from(`\n[babysitter] WARNING: stderr truncated at ${MAX_SPAWN_OUTPUT_BYTES} bytes. Subsequent output discarded.\n`));
+        stderrChunks.push(Buffer.from(`\n[babysitter] WARNING: stderr truncated at ${maxOutputBytes} bytes. Subsequent output discarded.\n`));
         return;
       }
+      void options.onStderr?.(chunk.toString("utf8"));
       stderrChunks.push(chunk);
     });
 
     const concatSafe = (chunks: Buffer[], truncated: boolean, totalBytes: number): string => {
       const text = Buffer.concat(chunks).toString("utf8");
       return truncated
-        ? `${text}\n... [truncated: ${totalBytes} bytes total, limit ${MAX_SPAWN_OUTPUT_BYTES}]`
+        ? `${text}\n... [truncated: ${totalBytes} bytes total, limit ${maxOutputBytes}]`
         : text;
     };
 

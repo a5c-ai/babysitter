@@ -27,6 +27,15 @@ export interface DeferredToolEntry {
   source: ToolSource;
   /** Optional source qualifier (e.g. MCP server name, plugin name). */
   sourceQualifier?: string;
+  /** Optional unified metadata used by discovery, policy, approval, and cache planning. */
+  metadata?: {
+    category?: string;
+    tags?: string[];
+    cost?: Record<string, unknown>;
+    rateLimit?: Record<string, unknown>;
+    requiresApproval?: "never" | "on-risk" | "always";
+    cache?: Record<string, unknown>;
+  };
 }
 
 /** Tier-2 data: full JSON Schema, loaded on demand. */

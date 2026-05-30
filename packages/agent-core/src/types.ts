@@ -137,22 +137,49 @@ export interface ToolResult {
   content: Array<{ type: "text"; text: string }>;
 }
 
+export type ToolUpdateEvent =
+  | { type: "tool.stdout"; callId: string; chunk: string; sequence: number }
+  | { type: "tool.stderr"; callId: string; chunk: string; sequence: number }
+  | { type: "tool.progress"; callId: string; message?: string; current?: number; total?: number }
+  | { type: "tool.cancelled"; callId: string; reason?: string };
+
+export interface ToolExecutionContext {
+  signal?: AbortSignal;
+  limits?: {
+    timeoutMs?: number;
+    maxOutputBytes?: number;
+  };
+  cache?: {
+    get(key: string, signal?: AbortSignal): Promise<unknown> | unknown;
+  };
+}
+
+export interface ToolMetadata {
+  category: string;
+  tags?: string[];
+  cost?: Record<string, unknown>;
+  rateLimit?: Record<string, unknown>;
+  requiresApproval?: "never" | "on-risk" | "always";
+  cache?: Record<string, unknown>;
+}
+
 export interface CustomToolDefinition {
   name: string;
   label: string;
   description: string;
   promptSnippet?: string;
   parameters: TObject;
+  metadata?: ToolMetadata;
   /**
-   * Agent-core does not provide a shared AbortSignal to custom tool
-   * implementations. Long-running tools should own their cancellation behavior
-   * through explicit tool parameters, internal timeouts, or background handles.
+   * Agent-core may pass a shared execution context as the fourth argument.
+   * Long-running tools should honor its AbortSignal when present and still keep
+   * any tool-specific timeout/background cleanup behavior they require.
    */
   execute: (
     toolCallId: string,
     params: Record<string, unknown>,
-    onUpdate?: unknown,
-    toolContext?: unknown,
+    onUpdate?: ((event: ToolUpdateEvent) => void | Promise<void>) | unknown,
+    toolContext?: ToolExecutionContext | unknown,
   ) => Promise<ToolResult> | ToolResult;
 }
 
@@ -172,6 +199,12 @@ export interface AgentCoreToolOptions {
   onBackgroundComplete?: (event: unknown) => void;
   maxBackgroundProcesses?: number;
   registryId?: string;
+  signal?: AbortSignal;
+  limits?: {
+    defaultTimeoutMs?: number;
+    defaultMaxOutputBytes?: number;
+  };
+  cache?: ToolExecutionContext["cache"];
   /** Optional externally managed registry. When provided, the caller owns disposal. */
   backgroundRegistry?: BackgroundProcessRegistry;
   deferredToolRegistry?: DeferredToolRegistry;

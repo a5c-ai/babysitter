@@ -192,6 +192,59 @@ describe("agent-core tools", () => {
     });
   });
 
+  it("propagates shared AbortSignal and streams bash output updates", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-bash-signal-"));
+    const controller = new AbortController();
+    vi.mocked(childProcess.spawn).mockImplementation(() => {
+      const processHandle = new PassThrough() as unknown as childProcess.ChildProcessWithoutNullStreams;
+      const stdout = new PassThrough();
+      const stderr = new PassThrough();
+      Object.assign(processHandle, { stdout, stderr });
+      setTimeout(() => {
+        stdout.write("streamed stdout");
+        stdout.end();
+        stderr.end();
+        (processHandle as unknown as PassThrough).emit("close", 0);
+      }, 0);
+      return processHandle;
+    });
+
+    const onUpdate = vi.fn();
+    const bashTool = getTool("bash", workspace);
+    await bashTool.execute(
+      "call-bash-stream",
+      { command: "echo test" },
+      onUpdate,
+      { signal: controller.signal, limits: { timeoutMs: 1234, maxOutputBytes: 2048 } },
+    );
+
+    expect(childProcess.spawn).toHaveBeenCalledOnce();
+    const spawnOptions = vi.mocked(childProcess.spawn).mock.calls[0][2] as childProcess.SpawnOptions;
+    expect(spawnOptions.signal).toBe(controller.signal);
+    expect(spawnOptions.timeout).toBe(1234);
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      type: "tool.stdout",
+      callId: "call-bash-stream",
+      chunk: "streamed stdout",
+      sequence: 1,
+    }));
+  });
+
+  it("requires explicit insecure SSH host-key policy before disabling host checks", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-ssh-policy-"));
+    mockSpawnExit();
+
+    const sshTool = getTool("ssh", workspace);
+    await sshTool.execute("call-ssh", {
+      host: "host.example",
+      command: "pwd",
+      hostKeyPolicy: "strict",
+    });
+
+    const args = vi.mocked(childProcess.spawn).mock.calls[0][1] as string[];
+    expect(args).not.toContain("StrictHostKeyChecking=no");
+  });
+
   it("exposes code_executor only when programmatic tool calling is enabled", () => {
     const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-code-mode-toggle-"));
 
@@ -241,6 +294,50 @@ describe("agent-core tools", () => {
       path: "copy.txt",
       content: expect.stringContaining("alpha"),
     });
+  });
+
+  it("propagates code_executor tool context into nested tool calls", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-code-mode-context-"));
+    const controller = new AbortController();
+    vi.mocked(childProcess.spawn).mockImplementation(() => {
+      const processHandle = new PassThrough() as unknown as childProcess.ChildProcessWithoutNullStreams;
+      const stdout = new PassThrough();
+      const stderr = new PassThrough();
+      Object.assign(processHandle, { stdout, stderr });
+      setTimeout(() => {
+        stdout.write("nested stdout");
+        stdout.end();
+        stderr.end();
+        (processHandle as unknown as PassThrough).emit("close", 0);
+      }, 0);
+      return processHandle;
+    });
+
+    const codeExecutor = getToolDefinitions(workspace, {
+      programmaticToolCalling: true,
+    }).find((tool) => tool.name === "code_executor");
+    if (!codeExecutor) {
+      throw new Error("Expected code_executor to be registered");
+    }
+
+    const onUpdate = vi.fn();
+    const result = await codeExecutor.execute(
+      "code-mode-context",
+      { code: "return await tools.bash({ command: 'echo nested' });" },
+      onUpdate,
+      { signal: controller.signal, limits: { timeoutMs: 4321, maxOutputBytes: 4096 } },
+    );
+    const payload = JSON.parse(getText(result)) as { result: { exitCode: number } };
+
+    const spawnOptions = vi.mocked(childProcess.spawn).mock.calls[0][2] as childProcess.SpawnOptions;
+    expect(payload.result.exitCode).toBe(0);
+    expect(spawnOptions.signal).toBe(controller.signal);
+    expect(spawnOptions.timeout).toBe(4321);
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      type: "tool.stdout",
+      callId: "code-executor:1:bash",
+      chunk: "nested stdout",
+    }));
   });
 
   it("enforces code_executor nested tool call limits", async () => {
@@ -494,6 +591,71 @@ describe("agent-core tools", () => {
     const result = await resultPromise;
     expect(getText(result)).toBe("Error: Tool execution was cancelled.");
     expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it("preserves fetch timeout cancellation when a shared AbortSignal is supplied", async () => {
+    vi.useFakeTimers();
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-fetch-shared-timeout-"));
+    const controller = new AbortController();
+    const fetchMock = vi.fn((_url: string, init?: { signal?: AbortSignal }) => new Promise((_, reject) => {
+      init?.signal?.addEventListener("abort", () => {
+        const error = new Error("This operation was aborted");
+        error.name = "AbortError";
+        reject(error);
+      }, { once: true });
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const fetchTool = getTool("fetch", workspace);
+    const resultPromise = fetchTool.execute(
+      "fetch-shared-timeout",
+      {
+        url: "https://example.com/slow",
+        timeout: 5,
+      },
+      undefined,
+      { signal: controller.signal },
+    );
+
+    await vi.advanceTimersByTimeAsync(5);
+
+    const result = await resultPromise;
+    expect(getText(result)).toBe("Error: Tool execution was cancelled.");
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(controller.signal.aborted).toBe(false);
+  });
+
+  it("uses opt-in read-only fetch cache without writing side-effectful entries", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-fetch-cache-"));
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const cache = {
+      get: vi.fn(async () => ({
+        status: 200,
+        statusText: "OK",
+        body: "cached body",
+      })),
+    };
+
+    const fetchTool = getToolDefinitions(workspace, { cache }).find((tool) => tool.name === "fetch");
+    const bashTool = getToolDefinitions(workspace, { cache }).find((tool) => tool.name === "bash");
+    if (!fetchTool || !bashTool) {
+      throw new Error("Expected fetch and bash tools to be registered");
+    }
+
+    const result = await fetchTool.execute("fetch-cache", {
+      url: "https://example.com/cacheable",
+    });
+    const parsed = JSON.parse(getText(result)) as { body: string; cache: { hit: boolean; mode: string } };
+
+    expect(parsed.body).toBe("cached body");
+    expect(parsed.cache).toMatchObject({ hit: true, mode: "read-only" });
+    expect(cache.get).toHaveBeenCalledWith(
+      "agent-core:fetch:https://example.com/cacheable:truncated",
+      undefined,
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(bashTool.metadata?.cache).toBeUndefined();
   });
 
   it("caps ast_edit rewrites to the requested file limit", async () => {
