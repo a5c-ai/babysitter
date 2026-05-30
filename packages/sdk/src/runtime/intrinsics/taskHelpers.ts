@@ -7,7 +7,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { readTaskResult } from "../../storage/tasks";
 import type { StoredTaskResult } from "../../storage/types";
-import { RunFailedError, rehydrateSerializedError } from "../exceptions";
+import { EffectCancelledError, RunFailedError, rehydrateSerializedError } from "../exceptions";
 import type { EffectAction, EffectRecord, EffectSchedulerHints, TaskBuildContext, TaskDef } from "../types";
 import { collapseDoubledA5cRuns } from "../../cli/resolveInputPath";
 
@@ -76,6 +76,17 @@ export async function coerceStoredShellFailureResult(runDir: string, stored: Sto
 }
 
 export async function handleResolvedRecord(runDir: string, record: EffectRecord): Promise<unknown> {
+  if (record.status === "cancelled") {
+    const storedCancelledResult = await readTaskResult(
+      runDir, record.effectId,
+      record.resultRef ? normalizeRef(runDir, record.resultRef) : undefined
+    );
+    if (!storedCancelledResult) {
+      throw new RunFailedError(`Result for effect ${record.effectId} is missing from disk`, { effectId: record.effectId });
+    }
+    throw new EffectCancelledError(record.effectId, storedCancelledResult.reason);
+  }
+
   if (record.status === "resolved_error") {
     if (record.kind === "shell") {
       const storedShellResult = await readTaskResult(

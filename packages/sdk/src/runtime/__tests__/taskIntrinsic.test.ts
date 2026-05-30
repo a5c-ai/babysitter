@@ -8,11 +8,12 @@ import { buildEffectIndex } from "../replay/effectIndex";
 import { ReplayCursor } from "../replay/replayCursor";
 import { runTaskIntrinsic } from "../intrinsics/task";
 import {
+  EffectCancelledError,
   EffectPendingError,
   EffectRequestedError,
   RunFailedError,
 } from "../exceptions";
-import { commitEffectResult } from "../commitEffectResult";
+import { commitEffectCancellation, commitEffectResult } from "../commitEffectResult";
 import { DefinedTask } from "../types";
 import { TaskIntrinsicContext } from "../intrinsics/task";
 import { globalTaskRegistry } from "../../tasks/registry";
@@ -125,6 +126,44 @@ describe("runTaskIntrinsic", () => {
         context: replayCtx,
       })
     ).resolves.toBe(4);
+  });
+
+  test("replaying a cancelled task throws EffectCancelledError with details", async () => {
+    const { runDir, runId } = await createRun("run-cancelled-replay");
+    const context = await buildContext(runDir, runId);
+
+    let effectId = "";
+    try {
+      await runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 2 },
+        context,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(EffectRequestedError);
+      effectId = (error as EffectRequestedError).action.effectId;
+    }
+
+    await commitEffectCancellation({
+      runDir,
+      effectId,
+      reason: "host cancelled",
+    });
+
+    const replayCtx = await buildContext(runDir, runId);
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 2 },
+        context: replayCtx,
+      })
+    ).rejects.toMatchObject({
+      name: "EffectCancelledError",
+      details: {
+        effectId,
+        reason: "host cancelled",
+      },
+    } satisfies Partial<EffectCancelledError>);
   });
 
   test("throws when task result missing from disk", async () => {

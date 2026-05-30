@@ -1,7 +1,7 @@
 import * as path from "path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod/v3";
-import { commitEffectResult } from "../../runtime/commitEffectResult";
+import { commitEffectCancellation, commitEffectResult } from "../../runtime/commitEffectResult";
 import { loadJournal } from "../../storage";
 import { readTaskDefinition, readTaskResult } from "../../storage/tasks";
 import type { JournalEvent } from "../../storage/types";
@@ -9,17 +9,18 @@ import { toolResult, toolError } from "../util/errors";
 import { resolveRunDir } from "../util/resolve-run-dir";
 
 /**
- * Build a task list from journal events by tracking EFFECT_REQUESTED and
- * EFFECT_RESOLVED events.
+ * Build a task list from journal events by tracking requested effects and
+ * terminal resolution/cancellation events.
  */
 function buildTaskList(events: JournalEvent[]): Array<{
   effectId: string;
   kind: string;
-  status: "pending" | "resolved";
+  status: "pending" | "resolved" | "cancelled";
   label?: string;
   taskId?: string;
   requestedAt?: string;
   resolvedAt?: string;
+  cancelledAt?: string;
 }> {
   const requested = new Map<
     string,
@@ -31,7 +32,11 @@ function buildTaskList(events: JournalEvent[]): Array<{
       requestedAt?: string;
     }
   >();
-  const resolved = new Map<string, { resolvedAt?: string }>();
+  const terminal = new Map<string, {
+    status: "resolved" | "cancelled";
+    resolvedAt?: string;
+    cancelledAt?: string;
+  }>();
 
   for (const event of events) {
     if (event.type === "EFFECT_REQUESTED") {
@@ -53,7 +58,19 @@ function buildTaskList(events: JournalEvent[]): Array<{
     } else if (event.type === "EFFECT_RESOLVED") {
       const data = event.data as { effectId?: string };
       if (data.effectId) {
-        resolved.set(data.effectId, { resolvedAt: event.recordedAt });
+        terminal.set(data.effectId, {
+          status: "resolved",
+          resolvedAt: event.recordedAt,
+        });
+      }
+    } else if (event.type === "EFFECT_CANCELLED") {
+      const data = event.data as { effectId?: string };
+      if (data.effectId) {
+        terminal.set(data.effectId, {
+          status: "cancelled",
+          resolvedAt: event.recordedAt,
+          cancelledAt: event.recordedAt,
+        });
       }
     }
   }
@@ -61,23 +78,25 @@ function buildTaskList(events: JournalEvent[]): Array<{
   const tasks: Array<{
     effectId: string;
     kind: string;
-    status: "pending" | "resolved";
+    status: "pending" | "resolved" | "cancelled";
     label?: string;
     taskId?: string;
     requestedAt?: string;
     resolvedAt?: string;
+    cancelledAt?: string;
   }> = [];
 
   for (const [effectId, info] of requested) {
-    const resolvedInfo = resolved.get(effectId);
+    const terminalInfo = terminal.get(effectId);
     tasks.push({
       effectId,
       kind: info.kind,
-      status: resolvedInfo ? "resolved" : "pending",
+      status: terminalInfo?.status ?? "pending",
       label: info.label,
       taskId: info.taskId,
       requestedAt: info.requestedAt,
-      resolvedAt: resolvedInfo?.resolvedAt,
+      resolvedAt: terminalInfo?.resolvedAt,
+      cancelledAt: terminalInfo?.cancelledAt,
     });
   }
 
@@ -165,6 +184,39 @@ export function registerTaskTools(server: McpServer): void {
     }
   );
 
+  // ── task_cancel ─────────────────────────────────────────────────────
+  server.tool(
+    "task_cancel",
+    "Cancel a pending task effect",
+    {
+      runId: z.string().describe("The run ID the task belongs to"),
+      effectId: z.string().describe("The effect ID of the task to cancel"),
+      reason: z.string().optional().describe("Human-readable cancellation reason"),
+      runsDir: z.string().optional().describe("Override runs directory path"),
+    },
+    async (args) => {
+      try {
+        const runsDir = resolveRunDir(args.runsDir);
+        const runDir = path.join(runsDir, args.runId);
+
+        const committed = await commitEffectCancellation({
+          runDir,
+          effectId: args.effectId,
+          reason: args.reason,
+        });
+
+        return toolResult({
+          status: "cancelled",
+          effectId: args.effectId,
+          resultRef: committed.resultRef,
+          ...(args.reason !== undefined ? { reason: args.reason } : {}),
+        });
+      } catch (err) {
+        return toolError(err instanceof Error ? err.message : String(err));
+      }
+    }
+  );
+
   // ── task_list ───────────────────────────────────────────────────────
   server.tool(
     "task_list",
@@ -234,9 +286,9 @@ export function registerTaskTools(server: McpServer): void {
           // Task definition might not exist yet
         }
 
-        // Read task result if resolved
+        // Read task result if terminal
         let taskResultData: unknown = null;
-        if (taskEntry.status === "resolved") {
+        if (taskEntry.status !== "pending") {
           try {
             taskResultData = await readTaskResult(runDir, args.effectId);
           } catch {

@@ -372,6 +372,127 @@ describe("MCP Server Integration Tests", () => {
       expect(resolved).toBeTruthy();
       expect(resolved!.data.status).toBe("error");
     });
+
+    it("task_cancel cancels the effect via real SDK cancellation", async () => {
+      const cancelHandler = getToolHandler(server, "task_cancel");
+      const cancelResult = await cancelHandler({
+        runId: RUN_ID,
+        effectId: EFFECT_ID,
+        reason: "host abandoned work",
+        runsDir,
+      });
+
+      expect(cancelResult.isError).toBeUndefined();
+      const cancelData = parseResult(cancelResult);
+      expect(cancelData.status).toBe("cancelled");
+      expect(cancelData.effectId).toBe(EFFECT_ID);
+      expect(cancelData.reason).toBe("host abandoned work");
+      expect(cancelData.resultRef).toBe(`tasks/${EFFECT_ID}/result.json`);
+
+      const journal = await loadJournal(runDir);
+      const cancelledEvents = journal.filter(
+        (e) => e.type === "EFFECT_CANCELLED"
+      );
+      expect(cancelledEvents).toHaveLength(1);
+      expect(cancelledEvents[0].data).toMatchObject({
+        effectId: EFFECT_ID,
+        reason: "host abandoned work",
+      });
+
+      const rawResult = await fs.readFile(
+        path.join(runDir, "tasks", EFFECT_ID, "result.json"),
+        "utf8"
+      );
+      const stored = JSON.parse(rawResult) as {
+        status: string;
+        reason?: string;
+        error?: { name?: string; message?: string };
+      };
+      expect(stored.status).toBe("cancelled");
+      expect(stored.reason).toBe("host abandoned work");
+      expect(stored.error?.name).toBe("EffectCancelledError");
+
+      const listHandler = getToolHandler(server, "task_list");
+      const listResult = await listHandler({
+        runId: RUN_ID,
+        runsDir,
+        pendingOnly: true,
+      });
+      const listData = parseResult(listResult);
+      expect(listData.pendingCount).toBe(0);
+      expect(listData.tasks).toEqual([]);
+
+      const allListResult = await listHandler({ runId: RUN_ID, runsDir });
+      const allListData = parseResult(allListResult);
+      const tasks = allListData.tasks as Array<{ effectId: string; status: string }>;
+      expect(tasks[0]).toMatchObject({
+        effectId: EFFECT_ID,
+        status: "cancelled",
+      });
+
+      const statusHandler = getToolHandler(server, "run_status");
+      const statusResult = await statusHandler({ runId: RUN_ID, runsDir });
+      const statusData = parseResult(statusResult);
+      expect(statusData.pendingEffects).toEqual([]);
+
+      const showHandler = getToolHandler(server, "task_show");
+      const showResult = await showHandler({
+        runId: RUN_ID,
+        effectId: EFFECT_ID,
+        runsDir,
+      });
+      const showData = parseResult(showResult);
+      expect(showData.effect).toMatchObject({
+        effectId: EFFECT_ID,
+        status: "cancelled",
+      });
+      expect(showData.result).toMatchObject({
+        status: "cancelled",
+        reason: "host abandoned work",
+      });
+    });
+
+    it("task_cancel returns an MCP error for unknown effects", async () => {
+      const cancelHandler = getToolHandler(server, "task_cancel");
+      const cancelResult = await cancelHandler({
+        runId: RUN_ID,
+        effectId: "missing-effect",
+        runsDir,
+      });
+
+      expect(cancelResult.isError).toBe(true);
+      const data = parseResult(cancelResult);
+      expect(data.error).toContain("Unknown effectId missing-effect");
+
+      const journal = await loadJournal(runDir);
+      expect(journal.filter((e) => e.type === "EFFECT_CANCELLED")).toHaveLength(0);
+    });
+
+    it("task_cancel returns an MCP error for already resolved effects", async () => {
+      const postHandler = getToolHandler(server, "task_post");
+      const postResult = await postHandler({
+        runId: RUN_ID,
+        effectId: EFFECT_ID,
+        status: "ok",
+        value: JSON.stringify({ answer: 42 }),
+        runsDir,
+      });
+      expect(postResult.isError).toBeUndefined();
+
+      const cancelHandler = getToolHandler(server, "task_cancel");
+      const cancelResult = await cancelHandler({
+        runId: RUN_ID,
+        effectId: EFFECT_ID,
+        runsDir,
+      });
+
+      expect(cancelResult.isError).toBe(true);
+      const data = parseResult(cancelResult);
+      expect(data.error).toContain("not requested");
+
+      const journal = await loadJournal(runDir);
+      expect(journal.filter((e) => e.type === "EFFECT_CANCELLED")).toHaveLength(0);
+    });
   });
 
   describe("multiple effects", () => {

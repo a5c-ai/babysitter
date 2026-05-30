@@ -4,6 +4,7 @@ import { registerTaskTools } from "../../tools/tasks";
 
 vi.mock("../../../runtime/commitEffectResult", () => ({
   commitEffectResult: vi.fn(),
+  commitEffectCancellation: vi.fn(),
 }));
 
 vi.mock("../../../storage", () => ({
@@ -15,11 +16,12 @@ vi.mock("../../../storage/tasks", () => ({
   readTaskResult: vi.fn(),
 }));
 
-import { commitEffectResult } from "../../../runtime/commitEffectResult";
+import { commitEffectCancellation, commitEffectResult } from "../../../runtime/commitEffectResult";
 import { loadJournal } from "../../../storage";
 import { readTaskDefinition, readTaskResult } from "../../../storage/tasks";
 
 const mockedCommitEffectResult = vi.mocked(commitEffectResult);
+const mockedCommitEffectCancellation = vi.mocked(commitEffectCancellation);
 const mockedLoadJournal = vi.mocked(loadJournal);
 const mockedReadTaskDefinition = vi.mocked(readTaskDefinition);
 const mockedReadTaskResult = vi.mocked(readTaskResult);
@@ -73,6 +75,18 @@ describe("task_list", () => {
         data: { effectId: "eff-1" },
         checksum: "d",
       },
+      {
+        seq: 5, type: "EFFECT_REQUESTED",
+        recordedAt: "2026-01-01T00:00:04Z",
+        data: { effectId: "eff-3", kind: "agent", label: "Cancel" },
+        checksum: "e",
+      },
+      {
+        seq: 6, type: "EFFECT_CANCELLED",
+        recordedAt: "2026-01-01T00:00:05Z",
+        data: { effectId: "eff-3", reason: "stale" },
+        checksum: "f",
+      },
     ] as Awaited<ReturnType<typeof loadJournal>>);
 
     const handler = getToolHandler(server, "task_list");
@@ -84,11 +98,12 @@ describe("task_list", () => {
       pendingCount: number;
       tasks: Array<{ effectId: string; status: string }>;
     };
-    expect(data.total).toBe(2);
-    expect(data.showing).toBe(2);
+    expect(data.total).toBe(3);
+    expect(data.showing).toBe(3);
     expect(data.pendingCount).toBe(1);
     expect(data.tasks.find(t => t.effectId === "eff-1")?.status).toBe("resolved");
     expect(data.tasks.find(t => t.effectId === "eff-2")?.status).toBe("pending");
+    expect(data.tasks.find(t => t.effectId === "eff-3")?.status).toBe("cancelled");
   });
 
   it("filters to pending only", async () => {
@@ -110,6 +125,18 @@ describe("task_list", () => {
         recordedAt: "t3",
         data: { effectId: "eff-1" },
         checksum: "c",
+      },
+      {
+        seq: 4, type: "EFFECT_REQUESTED",
+        recordedAt: "t4",
+        data: { effectId: "eff-3", kind: "node" },
+        checksum: "d",
+      },
+      {
+        seq: 5, type: "EFFECT_CANCELLED",
+        recordedAt: "t5",
+        data: { effectId: "eff-3" },
+        checksum: "e",
       },
     ] as Awaited<ReturnType<typeof loadJournal>>);
 
@@ -177,6 +204,49 @@ describe("task_show", () => {
     expect(data.result).toEqual({ status: "ok", value: { success: true } });
   });
 
+  it("shows cancelled task details with result", async () => {
+    mockedLoadJournal.mockResolvedValue([
+      {
+        seq: 1, type: "EFFECT_REQUESTED",
+        recordedAt: "t1",
+        data: { effectId: "eff-cancel", kind: "agent", label: "Cancel me" },
+        checksum: "a",
+      },
+      {
+        seq: 2, type: "EFFECT_CANCELLED",
+        recordedAt: "t2",
+        data: { effectId: "eff-cancel", reason: "no longer needed" },
+        checksum: "b",
+      },
+    ] as Awaited<ReturnType<typeof loadJournal>>);
+
+    mockedReadTaskDefinition.mockResolvedValue({ kind: "agent", title: "Cancel me" });
+    mockedReadTaskResult.mockResolvedValue({
+      status: "cancelled",
+      reason: "no longer needed",
+      error: { name: "EffectCancelledError", message: "no longer needed" },
+    });
+
+    const handler = getToolHandler(server, "task_show");
+    const result = await handler({
+      runId: "01SHOW",
+      effectId: "eff-cancel",
+      runsDir: "/tmp/runs",
+    });
+
+    const data = parseResult(result) as {
+      effect: { effectId: string; status: string };
+      result: unknown;
+    };
+    expect(data.effect.effectId).toBe("eff-cancel");
+    expect(data.effect.status).toBe("cancelled");
+    expect(data.result).toEqual({
+      status: "cancelled",
+      reason: "no longer needed",
+      error: { name: "EffectCancelledError", message: "no longer needed" },
+    });
+  });
+
   it("returns error for unknown effect", async () => {
     mockedLoadJournal.mockResolvedValue([
       { seq: 1, type: "RUN_CREATED", recordedAt: "t1", data: {}, checksum: "a" },
@@ -217,6 +287,73 @@ describe("task_show", () => {
     const data = parseResult(result) as { task: unknown; result: unknown };
     expect(data.task).toBeNull();
     expect(data.result).toBeNull();
+  });
+});
+
+describe("task_cancel", () => {
+  it("cancels a pending effect", async () => {
+    mockedCommitEffectCancellation.mockResolvedValue({
+      resultRef: "tasks/eff-1/result.json",
+    } as Awaited<ReturnType<typeof commitEffectCancellation>>);
+
+    const handler = getToolHandler(server, "task_cancel");
+    const result = await handler({
+      runId: "01POST",
+      effectId: "eff-1",
+      reason: "not needed",
+      runsDir: "/tmp/runs",
+    });
+
+    expect(result.isError).toBeUndefined();
+    const data = parseResult(result) as {
+      status: string;
+      effectId: string;
+      resultRef: string;
+      reason?: string;
+    };
+    expect(data).toEqual({
+      status: "cancelled",
+      effectId: "eff-1",
+      resultRef: "tasks/eff-1/result.json",
+      reason: "not needed",
+    });
+
+    expect(mockedCommitEffectCancellation).toHaveBeenCalledWith({
+      runDir: "/tmp/runs/01POST",
+      effectId: "eff-1",
+      reason: "not needed",
+    });
+  });
+
+  it("omits reason when cancellation reason is not provided", async () => {
+    mockedCommitEffectCancellation.mockResolvedValue({
+      resultRef: "tasks/eff-2/result.json",
+    } as Awaited<ReturnType<typeof commitEffectCancellation>>);
+
+    const handler = getToolHandler(server, "task_cancel");
+    const result = await handler({
+      runId: "01POST",
+      effectId: "eff-2",
+      runsDir: "/tmp/runs",
+    });
+
+    const data = parseResult(result) as { reason?: string };
+    expect(data).not.toHaveProperty("reason");
+  });
+
+  it("returns tool error when cancellation fails", async () => {
+    mockedCommitEffectCancellation.mockRejectedValue(new Error("Effect eff-1 is not requested (status=resolved_ok)"));
+
+    const handler = getToolHandler(server, "task_cancel");
+    const result = await handler({
+      runId: "01POST",
+      effectId: "eff-1",
+      runsDir: "/tmp/runs",
+    });
+
+    expect(result.isError).toBe(true);
+    const data = parseResult(result) as { error: string };
+    expect(data.error).toContain("not requested");
   });
 });
 

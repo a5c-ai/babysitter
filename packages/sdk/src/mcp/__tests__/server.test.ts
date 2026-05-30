@@ -8,7 +8,7 @@ describe("createBabysitterMcpServer", () => {
     expect(server).toBeInstanceOf(McpServer);
   });
 
-  it("registers all 15 expected tools", () => {
+  it("registers all 16 expected tools", () => {
     const server = createBabysitterMcpServer();
     // Access internal registered tools object
     const registeredTools = (server as unknown as { _registeredTools: Record<string, unknown> })._registeredTools;
@@ -28,13 +28,14 @@ describe("createBabysitterMcpServer", () => {
       "session_resume",
       "session_state",
       "skill_discover",
+      "task_cancel",
       "task_list",
       "task_post",
       "task_show",
     ];
 
     expect(toolNames).toEqual(expectedTools);
-    expect(Object.keys(registeredTools)).toHaveLength(15);
+    expect(Object.keys(registeredTools)).toHaveLength(16);
   });
 
   it("sets server name to 'babysitter'", () => {
