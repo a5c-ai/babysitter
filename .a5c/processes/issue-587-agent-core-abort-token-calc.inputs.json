@@ -1,0 +1,107 @@
+{
+  "issueNumber": 587,
+  "baseBranch": "staging",
+  "implementationBranch": "fix/issue-587-agent-core-abort-token-calc",
+  "issueContext": {
+    "title": "agent-core: fix abort(), token estimation, and calc tool stub",
+    "body": "## Summary\nThree medium-priority gaps in agent-core:\n\n### abort() is no-op\n`session.ts:332-334` -- AbortController is set up but never exposed. In-flight API calls cannot be cancelled.\n\n### Token estimation broken\n`context/token-estimator.ts` -- Hardcoded chars/4 for all models. Wrong for Claude (~3.5), GPT-4 (~4.2). Context overflow risk.\n\n### calc tool missing\n`types.ts:145` -- Listed in AGENT_CORE_TOOL_NAMES but no implementation. Runtime error if called.\n\n### Also\n- initialize() is no-op (no warmup, no health check)\n- No DI for LLM client (can't inject custom fetch for testing)\n- Browser tool: global singleton, no connection pool\n- Web search hardcoded to DuckDuckGo HTML scraping\n- Context summary strategy is just concatenation, no actual summarization\n\nRef: `docs/agent-layer-gaps.md`",
+    "labels": [
+      "bug",
+      "effort:medium",
+      "ready-for-dev",
+      "priority:medium",
+      "agent-core",
+      "P2",
+      "risk:medium"
+    ],
+    "comments": [
+      {
+        "author": "tmuskal",
+        "createdAt": "2026-05-30T06:54:51Z",
+        "body": "**Related:** #575 (streaming -- abort becomes meaningful with streaming)\n**Related:** #578 (cost tracking -- token estimation accuracy affects cost calculation)\n**Related:** #588 (tool AbortSignal -- abort() fix enables tool cancellation)"
+      },
+      {
+        "author": "a5c-ai",
+        "createdAt": "2026-05-30T10:10:30Z",
+        "body": "## Triage Summary\n- One-line: agent-core exposes or documents three capabilities that are either unwired or missing: prompt abort, model-aware token estimation, and the `calc` bundled tool.\n\n## Critical Evaluation\n- The reporter's analysis is accurate.\n- This is a valid `agent-core` bug/hardening issue, not a duplicate and not already fixed.\n\n## Root Cause Analysis\n- `packages/agent-core/src/session.ts`: `callCompletionApi()` creates a local `AbortController` and passes its signal to `fetch()`, but `AgentCoreSessionHandle.abort()` has no access to that controller and is currently a no-op at lines 332-334.\n- `packages/agent-core/src/context/token-estimator.ts`: `estimateTokens()` uses one fixed `chars/4` heuristic for every model/provider.\n- `packages/agent-core/src/context/__tests__/manager.test.ts`: the current test asserts the fixed `chars/4` behavior, so implementation should update tests along with behavior.\n- `packages/agent-core/src/types.ts`: `AGENT_CORE_TOOL_NAMES` includes `calc`.\n- `packages/agent-core/src/agenticTools/index.ts`: the actual composed tool definitions do not include a `calc` implementation.\n- `docs/agent-layer-gaps.md` already records the same gaps, so the issue matches documented backlog rather than a reporter misunderstanding.\n\n## Affected Components\n- Packages: `agent-core`\n- Effort: `effort:medium`\n\n## Recommended Approach\n- Wire `abort()` by storing the active request `AbortController` on `AgentCoreSessionHandle`, aborting it from `abort()`, and clearing it in a `finally` path after `prompt()` completes.\n- Make token estimation model/provider-aware while preserving a conservative default for callers that do not pass model context.\n- Prefer implementing a safe `calc` tool because the README and canonical tool list already advertise it. Do not use raw `eval` or `Function`; use a constrained parser/evaluator.\n- Add regression tests for prompt cancellation, abort after completion, model-aware/default token estimation, and parity between exported tool names and actual tool definitions.\n\n## Reproduction\n- Abort: start `AgentCoreSessionHandle.prompt()` against a slow API/fetch, call `abort()`, and observe no cancellation because `abort()` has no active controller reference.\n- Token estimate: call `estimateTokens()` for different provider/model assumptions and observe it always returns `ceil(chars / 4)`.\n- Calc: compare `AGENT_CORE_TOOL_NAMES.includes(\"calc\")` with `createAgentCoreToolDefinitions(...).some(t => t.name === \"calc\")`; the name is advertised but absent from actual definitions.\n\n## Related Issues/PRs\n- #575: streaming makes abort behavior more visible and important.\n- #578: token usage and cost tracking depends on accurate token accounting.\n- #588: tool cancellation is related but covers custom tool `AbortSignal` rather than session prompt abort.\n- #617: task cancellation is related at the SDK/tooling layer.\n- No closed PR found that fixes this bundle.\n\n## Priority: medium\n- Meaningful reliability and public-contract impact, but not an immediate production outage or data-loss path. Existing `P2` label is consistent; added normalized `priority:medium`.\n\n## Risk Analysis\n- Risk Level: `risk:medium`\n- Abort lifecycle/event timing: keep controller state scoped to one active prompt; test abort during fetch, abort after completion, and concurrent prompt rejection.\n- Context compaction changes from new estimates: keep a conservative fallback and update tests to assert budget behavior, not only the old `chars/4` implementation detail.\n- Unsafe calculator evaluation: use a constrained evaluator with explicit allowed operations and invalid-expression tests.\n- Tool-surface drift recurring: add a parity test between canonical tool names and actual tool definitions, with explicit exceptions only where intentional."
+      }
+    ],
+    "acceptanceCriteria": [
+      "AgentCoreSessionHandle.abort() cancels an active provider request and leaves session state consistent.",
+      "Abort after prompt completion is harmless.",
+      "Aborted or failed prompts do not append partial output to history.",
+      "Token estimation supports model/provider-aware heuristics while preserving a conservative default for existing callers.",
+      "Session history/context trimming use the selected estimator where model context is available.",
+      "The advertised calc bundled tool exists in createAgentCoreToolDefinitions().",
+      "Calc evaluates only a safe constrained arithmetic language and rejects unsafe or malformed expressions.",
+      "AGENT_CORE_TOOL_NAMES and actual bundled tool definitions have regression parity coverage.",
+      "Focused agent-core tests and build pass.",
+      "Docs/gap inventory are updated only for behavior actually completed."
+    ],
+    "nonGoals": [
+      "Implement initialize() health checks or warmup.",
+      "Add dependency injection for the LLM client.",
+      "Redesign the browser tool singleton or connection pooling.",
+      "Replace DuckDuckGo web search scraping.",
+      "Implement real context summarization.",
+      "Add custom tool AbortSignal support from issue #588.",
+      "Implement broader cost tracking from issue #578."
+    ]
+  },
+  "relatedIssues": {
+    "575": "Streaming makes abort behavior more visible and important.",
+    "578": "Cost tracking depends on token estimation accuracy.",
+    "588": "Tool AbortSignal is related but out of scope for this issue.",
+    "617": "Task cancellation is related at the SDK/tooling layer."
+  },
+  "targetFiles": [
+    "packages/agent-core/src/session.ts",
+    "packages/agent-core/src/session.test.ts",
+    "packages/agent-core/src/context/token-estimator.ts",
+    "packages/agent-core/src/context/manager.ts",
+    "packages/agent-core/src/context/types.ts",
+    "packages/agent-core/src/context/__tests__/manager.test.ts",
+    "packages/agent-core/src/context/index.ts",
+    "packages/agent-core/src/agenticTools/index.ts",
+    "packages/agent-core/src/agenticTools/tools/code.ts",
+    "packages/agent-core/src/agenticTools/types.ts",
+    "packages/agent-core/src/types.ts",
+    "packages/agent-core/src/tools.ts",
+    "packages/agent-core/src/index.ts",
+    "packages/agent-core/README.md",
+    "docs/agent-layer-gaps.md"
+  ],
+  "verificationCommands": [
+    "npm run test --workspace=@a5c-ai/agent-core",
+    "npm run build --workspace=@a5c-ai/agent-core",
+    "npm run verify:metadata"
+  ],
+  "planningFindings": {
+    "issueReadCommand": "gh issue view 587 --json title,body,labels,comments",
+    "processLibrarySearch": {
+      "requestedPathPresent": false,
+      "requestedPath": ".a5c/process-library/",
+      "activeLibraryPath": "/home/runner/.a5c/process-library/babysitter-repo/library",
+      "matchingReferences": [
+        "methodologies/spec-kit-brownfield.js",
+        "processes/shared/tdd-triplet.js",
+        "contrib/rogelsm/generic-bugfix.js",
+        "specializations/ai-agents-conversational/custom-tool-development.js",
+        "specializations/ai-agents-conversational/tool-safety-validation.js"
+      ]
+    },
+    "repoResearch": {
+      "abortCurrentState": "Current staging snapshot already has activeAbortController wiring in packages/agent-core/src/session.ts and an abort regression test in packages/agent-core/src/session.test.ts; implementation run must verify whether the issue is partially fixed and avoid rewriting working code.",
+      "tokenEstimatorCurrentState": "packages/agent-core/src/context/token-estimator.ts still uses a fixed CHARS_PER_TOKEN = 4 and manager.test.ts asserts chars/4 behavior.",
+      "calcCurrentState": "AGENT_CORE_TOOL_NAMES includes calc and README lists calc under code tools, but createCodeTools()/createAgentCoreToolDefinitions() do not define a calc tool.",
+      "runtimeCallPaths": [
+        "createAgentCoreSession() -> AgentCoreSessionHandle.prompt() -> resolveEndpoint() -> buildNormalizedRequest() -> callCompletionApi() -> fetch(signal) -> readOpenAiStream()/readAnthropicStream() -> appendSuccessfulTurn()/emit()",
+        "AgentCoreSessionHandle.abort()/dispose() -> active AbortController lifecycle for the active prompt",
+        "AgentCoreSessionHandle.trimHistoryForPrompt() -> historyTokenCount() -> estimateTokens()",
+        "ContextManagerImpl.inject()/summarize()/getTokenCount() -> estimateEntryTokens()/estimateTokens()",
+        "createAgentCoreToolDefinitions() -> createCodeTools() -> wrapped CustomToolDefinition[] compared against AGENT_CORE_TOOL_NAMES"
+      ]
+    },
+    "repoPolicy": "Use agent tasks rather than kind:'shell' subtasks in generated Babysitter process definitions unless the user explicitly asks for shell-oriented workflow; verification agents still run deterministic commands and report evidence."
+  }
+}
