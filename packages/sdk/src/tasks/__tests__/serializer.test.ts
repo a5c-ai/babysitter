@@ -104,6 +104,54 @@ describe("task serializer", () => {
     expect(serialized.agent).toHaveProperty("context.requiredPath", "codex-artifacts/alpha.txt");
   });
 
+  it("preserves responder routing metadata for agent and breakpoint tasks", async () => {
+    const { serialized: agentSerialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "responder-agent-task",
+      invocationKey: "proc:step-responder-agent",
+      stepId: "step-responder-agent",
+      task: {
+        kind: "agent",
+        title: "Route to external agent",
+        agent: {
+          responderType: "agent",
+          adapter: "codex",
+          fallbackType: "internal",
+        },
+      },
+    });
+
+    expect(agentSerialized.agent).toMatchObject({
+      responderType: "agent",
+      adapter: "codex",
+      fallbackType: "internal",
+    });
+
+    const { serialized: breakpointSerialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: `${EFFECT_ID}B`,
+      taskId: "responder-breakpoint-task",
+      invocationKey: "proc:step-responder-breakpoint",
+      stepId: "step-responder-breakpoint",
+      task: {
+        kind: "breakpoint",
+        title: "Route to human",
+        breakpoint: {
+          responderType: "human",
+          targetResponders: ["maintainer"],
+          trackerBackend: "linear",
+        },
+      },
+    });
+
+    expect(breakpointSerialized.breakpoint).toMatchObject({
+      responderType: "human",
+      targetResponders: ["maintainer"],
+      trackerBackend: "linear",
+    });
+  });
+
   it("serializes task results, spilling large payloads and emitting stdout/stderr refs", async () => {
     const hugeResult = { payload: "z".repeat(1024 * 1024 + 256) };
     const { resultRef, stdoutRef, stderrRef, serialized } = await serializeAndWriteTaskResult({

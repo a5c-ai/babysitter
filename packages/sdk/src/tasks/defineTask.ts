@@ -160,6 +160,7 @@ function normalizeTaskDef(taskDef: TaskDef): TaskDef {
   if (!taskDef || typeof taskDef !== "object") {
     throw new Error("Task implementations must return a TaskDef object");
   }
+  validateAgentRouting(taskDef);
   const labels = Array.isArray(taskDef.labels)
     ? taskDef.labels.filter((label): label is string => typeof label === "string" && Boolean(label.trim()))
     : undefined;
@@ -167,4 +168,12 @@ function normalizeTaskDef(taskDef: TaskDef): TaskDef {
     taskDef.labels = Array.from(new Set(labels.map((label) => label.trim())));
   }
   return taskDef;
+}
+
+function validateAgentRouting(taskDef: TaskDef): void {
+  const agent = taskDef.agent;
+  if (!agent || typeof agent !== "object" || Array.isArray(agent)) return;
+  if (agent.responderType !== "agent") return;
+  if (typeof agent.adapter === "string" && agent.adapter.trim()) return;
+  throw new Error("agent.responderType 'agent' requires a non-empty agent.adapter");
 }

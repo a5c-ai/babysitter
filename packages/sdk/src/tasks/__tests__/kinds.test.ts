@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  autoTask,
   breakpointTask,
+  externalAgentTask,
+  humanTask,
   nodeTask,
   orchestratorTask,
   sleepTask,
@@ -8,6 +11,8 @@ import {
 import { TaskBuildContext } from "../types";
 import {
   breakpointKindFixtures,
+  autoKindFixtures,
+  externalAgentKindFixtures,
   nodeKindFixtures,
   orchestratorKindFixtures,
   sleepKindFixtures,
@@ -79,6 +84,62 @@ describe("task kind helpers", () => {
       expect(def.breakpoint?.payload).toEqual(breakpointKindFixtures.payload);
       expect(def.breakpoint?.confirmationRequired).toBe(true);
       expect(def.metadata).toMatchObject(breakpointKindFixtures.metadata);
+    });
+  });
+
+  describe("responder routing helpers", () => {
+    it("externalAgentTask emits agent responder metadata without external:true", async () => {
+      const helper = externalAgentTask(externalAgentKindFixtures.id, {
+        adapter: externalAgentKindFixtures.adapter,
+        prompt: () => externalAgentKindFixtures.prompt,
+        fallbackType: () => "internal",
+        metadata: () => externalAgentKindFixtures.metadata,
+      });
+      const ctx = createTestBuildContext({ labels: ["ctx-agent"] });
+      const def = await helper.build({}, ctx);
+
+      expect(def.kind).toBe("agent");
+      expect(def.labels).toEqual(["ctx-agent"]);
+      expect(def.metadata).toMatchObject(externalAgentKindFixtures.metadata);
+      expect(def.agent).toMatchObject({
+        responderType: "agent",
+        adapter: externalAgentKindFixtures.adapter,
+        prompt: externalAgentKindFixtures.prompt,
+        fallbackType: externalAgentKindFixtures.fallbackType,
+      });
+      expect(def.agent).not.toHaveProperty("external");
+    });
+
+    it("humanTask emits breakpoint responder metadata", async () => {
+      const helper = humanTask("fixtures.human.example", {
+        payload: () => breakpointKindFixtures.payload,
+        targetResponders: () => breakpointKindFixtures.routing.targetResponders,
+      });
+      const ctx = createTestBuildContext();
+      const def = await helper.build({}, ctx);
+
+      expect(def.kind).toBe("breakpoint");
+      expect(def.breakpoint).toMatchObject({
+        responderType: "human",
+        payload: breakpointKindFixtures.payload,
+        targetResponders: breakpointKindFixtures.routing.targetResponders,
+      });
+    });
+
+    it("autoTask emits auto responder metadata for agent tasks", async () => {
+      const helper = autoTask(autoKindFixtures.id, {
+        prompt: () => autoKindFixtures.prompt,
+        fallbackType: () => "internal",
+      });
+      const ctx = createTestBuildContext();
+      const def = await helper.build({}, ctx);
+
+      expect(def.kind).toBe("agent");
+      expect(def.agent).toMatchObject({
+        responderType: "auto",
+        prompt: autoKindFixtures.prompt,
+        fallbackType: autoKindFixtures.fallbackType,
+      });
     });
   });
 
