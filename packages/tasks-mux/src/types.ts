@@ -132,6 +132,7 @@ export const ResponderProfileSchema = z.object({
   type: ResponderTypeSchema.optional(),
   name: z.string().min(1),
   title: z.string(),
+  capabilities: z.array(z.string().min(1)).optional(),
   domains: z.array(z.string()),
   tags: z.array(z.string()),
   availability: z.boolean(),

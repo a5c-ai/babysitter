@@ -17,9 +17,22 @@
       "minLength": 1,
       "description": "Display name of the responder."
     },
+    "type": {
+      "type": "string",
+      "enum": ["human", "agent", "tracker", "internal", "auto"],
+      "description": "Responder type used by task routing. Existing profiles default to human when omitted."
+    },
     "title": {
       "type": "string",
       "description": "Professional title or role."
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Capabilities this responder can satisfy during task routing."
     },
     "domains": {
       "type": "array",
@@ -47,6 +60,30 @@
     "publicKeyFingerprint": {
       "type": "string",
       "description": "Optional fingerprint for provenance-aware responder flows."
+    },
+    "adapter": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Agent-mux adapter name for agent responders."
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Default model for agent responders."
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Default provider for agent responders."
+    },
+    "trackerBackend": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Tracker backend identifier for tracker responders."
+    },
+    "trackerConfig": {
+      "type": "object",
+      "description": "Tracker-specific responder configuration."
     }
   }
 }

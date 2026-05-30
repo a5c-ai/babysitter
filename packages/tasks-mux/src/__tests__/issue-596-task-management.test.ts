@@ -220,6 +220,99 @@ describe("issue #596 task-management primitives", () => {
     ]);
   });
 
+  it("blocks answering a dependent breakpoint until blocking prerequisites are satisfied", async () => {
+    const backend = new GitNativeBackend({ breakpointsDir });
+    const prerequisite = await backend.submitBreakpoint({
+      text: "Complete prerequisite",
+      context: makeContext(),
+      routing: makeRouting(),
+    });
+    const dependent = await backend.submitBreakpoint({
+      text: "Approve dependent work",
+      context: makeContext(),
+      routing: makeRouting(),
+      dependsOn: [{ id: prerequisite.id, requiredStatus: "completed" }],
+    });
+
+    await expect(backend.answerBreakpoint(dependent.id, {
+      responderId: "codex",
+      responderName: "Codex",
+      text: "Approved too early",
+      approved: true,
+    })).rejects.toThrow(/blocking dependencies/i);
+
+    await backend.transitionBreakpoint(prerequisite.id, {
+      status: "completed",
+      actorId: "codex",
+    });
+
+    await expect(backend.answerBreakpoint(dependent.id, {
+      responderId: "codex",
+      responderName: "Codex",
+      text: "Approved after prerequisite",
+      approved: true,
+    })).resolves.toMatchObject({
+      breakpointId: dependent.id,
+      approved: true,
+    });
+  });
+
+  it("reports dependency-blocked bulk close failures and succeeds after prerequisites complete", async () => {
+    const backend = new GitNativeBackend({ breakpointsDir });
+    const prerequisite = await backend.submitBreakpoint({
+      text: "Complete parent task",
+      context: makeContext(),
+      routing: makeRouting(),
+    });
+    const independent = await backend.submitBreakpoint({
+      text: "Close independent task",
+      context: makeContext(),
+      routing: makeRouting(),
+    });
+    const dependent = await backend.submitBreakpoint({
+      text: "Close dependent task",
+      context: makeContext(),
+      routing: makeRouting(),
+      dependsOn: [{ id: prerequisite.id, requiredStatus: "completed" }],
+    });
+
+    const blockedResult = await backend.bulkUpdateBreakpoints({
+      ids: [independent.id, dependent.id],
+      action: "close",
+      actorId: "codex",
+    });
+
+    expect(blockedResult).toMatchObject({
+      total: 2,
+      succeeded: 1,
+      failed: 1,
+    });
+    expect(blockedResult.items).toEqual([
+      expect.objectContaining({ id: independent.id, ok: true }),
+      expect.objectContaining({ id: dependent.id, ok: false, errorCode: "invalid_transition" }),
+    ]);
+
+    await backend.transitionBreakpoint(prerequisite.id, {
+      status: "completed",
+      actorId: "codex",
+    });
+
+    const unblockedResult = await backend.bulkUpdateBreakpoints({
+      ids: [dependent.id],
+      action: "close",
+      actorId: "codex",
+    });
+
+    expect(unblockedResult).toMatchObject({
+      total: 1,
+      succeeded: 1,
+      failed: 0,
+    });
+    await expect(backend.getBreakpoint(dependent.id)).resolves.toMatchObject({
+      status: "completed",
+    });
+  });
+
   it("applies lifecycle validation to claim, answer, and cancel mutations", async () => {
     const backend = new GitNativeBackend({ breakpointsDir });
     const breakpoint = await backend.submitBreakpoint({

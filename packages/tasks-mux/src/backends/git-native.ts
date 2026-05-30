@@ -202,6 +202,28 @@ export class GitNativeBackend implements BreakpointBackend {
     return breakpoints;
   }
 
+  private async assertBlockingDependenciesSatisfied(breakpoint: Breakpoint): Promise<void> {
+    const blockingDependencies = breakpoint.dependsOn.filter((dependency) => dependency.blocking !== false);
+    if (blockingDependencies.length === 0) return;
+
+    const unmet: string[] = [];
+    for (const dependency of blockingDependencies) {
+      const requiredStatus = dependency.requiredStatus ?? "completed";
+      try {
+        const dependencyBreakpoint = await this.getBreakpoint(dependency.id);
+        if (dependencyBreakpoint.status !== requiredStatus) {
+          unmet.push(`${dependency.id} is ${dependencyBreakpoint.status}, requires ${requiredStatus}`);
+        }
+      } catch {
+        unmet.push(`${dependency.id} is missing, requires ${requiredStatus}`);
+      }
+    }
+
+    if (unmet.length > 0) {
+      throw new Error(`Invalid breakpoint status transition: blocking dependencies are not satisfied (${unmet.join("; ")})`);
+    }
+  }
+
   async submitBreakpoint(params: SubmitBreakpointParams): Promise<Breakpoint> {
     await fs.mkdir(this.breakpointsDir, { recursive: true });
 
@@ -416,6 +438,7 @@ export class GitNativeBackend implements BreakpointBackend {
     if (!validation.valid) {
       throw new Error(validation.reason);
     }
+    await this.assertBlockingDependenciesSatisfied(existing);
     const fromStatus = existing.status;
 
     const answerId = generateBreakpointId();
@@ -558,7 +581,6 @@ export class GitNativeBackend implements BreakpointBackend {
     if (!validation.valid) {
       throw new Error(validation.reason);
     }
-
     const fromStatus = breakpoint.status;
     breakpoint.status = "assigned";
     breakpoint.assigneeId = params.assigneeId;
@@ -588,6 +610,9 @@ export class GitNativeBackend implements BreakpointBackend {
     const validation = validateBreakpointTransition(breakpoint.status, params.status);
     if (!validation.valid) {
       throw new Error(validation.reason);
+    }
+    if (params.status === "answered" || params.status === "completed") {
+      await this.assertBlockingDependenciesSatisfied(breakpoint);
     }
 
     const fromStatus = breakpoint.status;
@@ -868,7 +893,7 @@ function isNotFoundError(error: unknown): boolean {
 }
 
 function isInvalidTransitionError(error: unknown): boolean {
-  return error instanceof Error && /transition|terminal/i.test(error.message);
+  return error instanceof Error && /transition|terminal|dependenc/i.test(error.message);
 }
 
 function redactBreakpointForExport(breakpoint: Breakpoint): Breakpoint {

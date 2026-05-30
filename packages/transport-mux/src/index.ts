@@ -12,8 +12,11 @@ export {
   convertTools,
   getCodec,
   getCodecForDescriptor,
+  listRegisteredCodecs,
   normalizeUsage,
+  registerCodec,
 } from './codecs/index.js';
+export type { RegisterCodecOptions } from './codecs/index.js';
 export { createOpenAICompletionEngine } from './engines/openai.js';
 export { createGoogleCompletionEngine } from './engines/google.js';
 export type { GoogleCompletionEngineOptions } from './engines/google.js';

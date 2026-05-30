@@ -10,6 +10,7 @@ describe("external agent task definitions", () => {
       adapter: () => "codex",
       model: () => "gpt-5.4",
       provider: () => "foundry",
+      timeout: () => 300_000,
       fallbackType: () => "internal",
       prompt: () => ({ task: "Review the diff" }),
     });
@@ -20,21 +21,23 @@ describe("external agent task definitions", () => {
       kind: "agent",
       title: "Delegate review",
       agent: {
+        external: true,
         responderType: "agent",
         adapter: "codex",
         model: "gpt-5.4",
         provider: "foundry",
+        timeout: 300_000,
         fallbackType: "internal",
         prompt: { task: "Review the diff" },
       },
     });
-    expect(def.agent).not.toHaveProperty("external");
+    expect(def.agent).toHaveProperty("external", true);
   });
 
-  it("rejects agent responder tasks without a non-empty adapter", async () => {
+  it("rejects external agent tasks without a non-empty adapter", async () => {
     const missingAdapter = defineTask("issue-606.missing-adapter", () => ({
       kind: "agent",
-      agent: { responderType: "agent" },
+      agent: { external: true },
     }));
 
     await expect(missingAdapter.build({}, createContext())).rejects.toThrow(

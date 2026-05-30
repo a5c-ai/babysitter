@@ -286,8 +286,10 @@ export class AgentMuxResponderBackend implements BreakpointBackend {
     return [
       {
         id: agent,
+        type: "agent",
         name: agent,
         title: "Agent mux responder",
+        capabilities: ["text", "code", "automation", agent],
         domains: [],
         tags: ["agent-mux", agent],
         availability: true,

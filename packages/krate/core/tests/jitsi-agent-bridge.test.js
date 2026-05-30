@@ -53,7 +53,7 @@ test('Jitsi agent bridge gates capability and prepares meeting context', async (
 
   await bridge.onAgentJoined('dispatch-1', 'daily');
   await bridge.onAgentLeft('dispatch-1', 'daily', 'completed');
-  assert.deepEqual(emitted.map((event) => event.type), ['agent-joined-meeting', 'agent-left-meeting']);
+  assert.deepEqual(emitted.map((event) => event.type), ['agent-joined-meeting', 'agent-left-meeting', 'participant-left']);
 });
 
 test('Jitsi agent bridge can resolve meetings from resources and keeps generated JWT runtime-only', async () => {

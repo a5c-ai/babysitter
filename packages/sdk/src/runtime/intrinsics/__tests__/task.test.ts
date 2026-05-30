@@ -29,6 +29,7 @@ describe("task intrinsic responder routing metadata", () => {
             kind: "agent",
             title: "external agent",
             agent: {
+              external: true,
               responderType: "agent",
               adapter: "codex",
               model: "gpt-5.4",
@@ -65,6 +66,7 @@ describe("task intrinsic responder routing metadata", () => {
     expect(iteration.status).toBe("waiting");
     if (iteration.status !== "waiting") throw new Error("Expected waiting iteration");
     expect(iteration.nextActions[0]?.taskDef.agent).toMatchObject({
+      external: true,
       responderType: "agent",
       adapter: "codex",
       model: "gpt-5.4",
@@ -72,6 +74,7 @@ describe("task intrinsic responder routing metadata", () => {
       fallbackType: "internal",
     });
     expect(iteration.nextActions[0]?.taskDef.metadata).toMatchObject({
+      externalDispatch: true,
       responderType: "agent",
       adapter: "codex",
     });

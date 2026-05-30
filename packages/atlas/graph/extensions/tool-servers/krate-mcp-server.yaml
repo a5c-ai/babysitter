@@ -279,26 +279,51 @@ attributes:
     {
       "type": "object",
       "properties": {
+        "agentDefinition": {
+          "type": "string"
+        },
+        "definitionRef": {
+          "type": "string"
+        },
         "stackRef": {
+          "type": "string"
+        },
+        "agentStack": {
           "type": "string"
         },
         "input": {
           "type": "object"
         }
       },
-      "required": [
-        "stackRef"
+      "anyOf": [
+        { "required": ["agentDefinition"] },
+        { "required": ["definitionRef"] },
+        { "required": ["stackRef"] },
+        { "required": ["agentStack"] }
       ]
     }
   inputSchema:
     type: object
     properties:
+      agentDefinition:
+        type: string
+      definitionRef:
+        type: string
       stackRef:
+        type: string
+      agentStack:
         type: string
       input:
         type: object
-    required:
-      - stackRef
+    anyOf:
+      - required:
+          - agentDefinition
+      - required:
+          - definitionRef
+      - required:
+          - stackRef
+      - required:
+          - agentStack
   streamable: false
   timeoutMs: 30000
 edges: {}

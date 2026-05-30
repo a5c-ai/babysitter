@@ -121,6 +121,7 @@ async function requestNewEffect<TArgs, TResult>(
   if (!taskDef || typeof taskDef.kind !== "string") {
     throw new InvalidTaskDefinitionError(`Task ${options.task.id} did not provide a kind`);
   }
+  normalizeAgentTaskDispatch(taskDef);
 
   const taskCreatedHookResult = await callRuntimeHook(
     "task.created",
@@ -209,6 +210,30 @@ async function requestNewEffect<TArgs, TResult>(
   };
   const action = buildEffectAction(actionRecord, taskDef);
   throw new EffectRequestedError(action);
+}
+
+function normalizeAgentTaskDispatch(taskDef: TaskDef): void {
+  if (taskDef.kind !== "agent") return;
+  const agent = taskDef.agent;
+  if (!agent || typeof agent !== "object" || Array.isArray(agent)) return;
+
+  if (agent.external === true && agent.responderType === undefined) {
+    agent.responderType = "agent";
+  }
+  if (agent.external !== true) return;
+
+  if (typeof agent.adapter !== "string" || !agent.adapter.trim()) {
+    throw new InvalidTaskDefinitionError("External agent tasks require a non-empty agent.adapter");
+  }
+  agent.adapter = agent.adapter.trim();
+
+  const metadata = taskDef.metadata && typeof taskDef.metadata === "object" && !Array.isArray(taskDef.metadata)
+    ? taskDef.metadata
+    : {};
+  metadata.externalDispatch = true;
+  metadata.responderType ??= "agent";
+  metadata.adapter ??= agent.adapter;
+  taskDef.metadata = metadata;
 }
 
 async function ensureTaskDefinition(runDir: string, record: EffectRecord): Promise<TaskDef> {

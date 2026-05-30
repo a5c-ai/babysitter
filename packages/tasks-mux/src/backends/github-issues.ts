@@ -859,8 +859,10 @@ export class GitHubIssuesBackend implements BreakpointBackend {
   async listResponders(_params?: ListRespondersParams): Promise<ResponderProfile[]> {
     return this.assignees.map((login) => ({
       id: login,
+      type: "human" as const,
       name: login,
       title: "",
+      capabilities: ["review", "approval", "text"],
       domains: [],
       tags: [],
       availability: true,

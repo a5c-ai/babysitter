@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   createModelRouteController,
+  createKrateApiController,
   validateModelRoute,
   createResource,
   MODEL_ROUTE_CONTROLLER_BOUNDARY,
@@ -51,6 +52,37 @@ function makeInferenceService(name, statusUrl) {
     metadata: { name, namespace: 'krate-org-default' },
     spec: { organizationRef: 'default', modelFormat: 'pytorch', storageUri: 's3://models/test', inferenceProtocol: 'v2' },
     status: statusUrl ? { url: statusUrl } : {}
+  };
+}
+
+function createRecordingGateway({ failKinds = new Set(), snapshotResources = [] } = {}) {
+  const applied = [];
+  return {
+    namespace: 'krate-system',
+    resourceDefinitions: {},
+    applied,
+    async snapshot() {
+      return { resources: snapshotResources, namespace: 'krate-system' };
+    },
+    async list() {
+      return { items: [] };
+    },
+    async get() {
+      return null;
+    },
+    async apply(resource) {
+      if (failKinds.has(resource.kind)) {
+        throw new Error(`apply failed for ${resource.kind}`);
+      }
+      applied.push(JSON.parse(JSON.stringify(resource)));
+      return { operation: 'apply', resource };
+    },
+    async delete() {
+      return { operation: 'delete' };
+    },
+    watch() {
+      return { close: () => {} };
+    },
   };
 }
 
@@ -390,6 +422,34 @@ test('generateEnvoyRouteManifest produces valid Envoy AI Gateway route config', 
   assert.equal(manifest.spec.modelName, route.spec.modelName, 'modelName must match');
   assert.ok(manifest.spec.rules, 'rules must be present');
   assert.ok(manifest.spec.rules.length > 0, 'must have at least one rule');
+});
+
+test('api-controller applyModelRoute applies KrateModelRoute and generated AIGatewayRoute', async () => {
+  const route = makeExternalRoute('gpt4');
+  const gateway = createRecordingGateway();
+  const controller = createKrateApiController({ resourceGateway: gateway });
+
+  assert.equal(typeof controller.applyModelRoute, 'function', 'controller must expose applyModelRoute');
+  const result = await controller.applyModelRoute(route);
+
+  const appliedKinds = gateway.applied.map((resource) => resource.kind);
+  assert.deepEqual(appliedKinds, ['KrateModelRoute', 'AIGatewayRoute']);
+  const appliedGatewayRoute = gateway.applied.find((resource) => resource.kind === 'AIGatewayRoute');
+  assert.equal(appliedGatewayRoute.metadata.namespace, route.metadata.namespace);
+  assert.equal(appliedGatewayRoute.metadata.labels['krate.a5c.ai/model-route'], route.metadata.name);
+  assert.equal(result.routeResult.resource.kind, 'KrateModelRoute');
+  assert.equal(result.gatewayRouteResult.resource.kind, 'AIGatewayRoute');
+});
+
+test('api-controller applyModelRoute propagates generated AIGatewayRoute apply failure', async () => {
+  const route = makeExternalRoute('gpt4-fail');
+  const gateway = createRecordingGateway({ failKinds: new Set(['AIGatewayRoute']) });
+  const controller = createKrateApiController({ resourceGateway: gateway });
+
+  await assert.rejects(
+    () => controller.applyModelRoute(route),
+    /apply failed for AIGatewayRoute/
+  );
 });
 
 // ---------------------------------------------------------------------------

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import test from 'node:test';
 import {
+  createJoinPayload,
   createJitsiWebhookDeliveryCache,
   handleJitsiWebhookPayload,
   verifyJitsiWebhookSignature,
@@ -52,4 +53,20 @@ test('Jitsi webhook payload handler maps room, participant, and recording events
     assert.equal(result.eventType, expectedEventType);
     assert.ok(result.resource.kind === 'JitsiMeeting' || result.resource.kind === 'JitsiRecording');
   }
+});
+
+test('Jitsi join payload uses standard HS256 JWT shape', () => {
+  process.env.KRATE_JITSI_JWT_SECRET = 'join-secret';
+  const payload = createJoinPayload({
+    metadata: { name: 'daily' },
+    spec: { organizationRef: 'default', roomId: 'daily-default', ttlMinutes: 15 },
+    status: { roomUrl: 'https://meet.example/daily-default' },
+  }, {
+    participantName: 'Alice',
+    participantRef: 'alice',
+  });
+  const [header, claims, signature] = payload.jwt.split('.');
+  assert.ok(header);
+  assert.ok(signature);
+  assert.equal(JSON.parse(Buffer.from(claims, 'base64url').toString('utf8')).room, 'daily-default');
 });

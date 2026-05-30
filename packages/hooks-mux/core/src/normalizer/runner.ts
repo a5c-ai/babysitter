@@ -465,7 +465,14 @@ export async function runPlan(
       const shouldFailOpen = resolveFailOpen(policy, event.phase);
 
       if (shouldFailOpen) {
-        results.push(errorResult(err));
+        const result = errorResult(err);
+        results.push({
+          ...result,
+          metadata: {
+            ...result.metadata,
+            ...statusMetadata(entry),
+          },
+        });
       } else {
         throw err;
       }
