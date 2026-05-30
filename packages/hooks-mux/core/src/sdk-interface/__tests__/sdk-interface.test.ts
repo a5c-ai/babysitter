@@ -396,6 +396,14 @@ describe('readExecutionContext', () => {
       supportsPersistedEnv: true,
       envPersistenceMode: 'native_env_file',
       toolInterceptionScope: 'all',
+      hostTools: [
+        {
+          name: 'Bash',
+          category: 'shell',
+          description: 'Run shell commands.',
+          availability: 'built-in',
+        },
+      ],
     };
     const env = {
       AGENT_SESSION_ID: 'sess-1',
@@ -406,6 +414,7 @@ describe('readExecutionContext', () => {
     expect(ctx.capabilities!.name).toBe('claude');
     expect(ctx.capabilities!.supportsBlock).toBe(true);
     expect(ctx.capabilities!.envPersistenceMode).toBe('native_env_file');
+    expect(ctx.capabilities!.hostTools).toEqual(capabilities.hostTools);
   });
 
   it('returns null capabilities for malformed AGENT_CAPABILITIES_JSON', () => {

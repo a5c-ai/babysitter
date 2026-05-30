@@ -19,6 +19,7 @@ import { renderCodingPhilosophy } from '../parts/codingPhilosophy';
 import { renderToolPreferences } from '../parts/toolPreferences';
 import { renderOutputEfficiency } from '../parts/outputEfficiency';
 import { renderGitSafety } from '../parts/gitSafety';
+import { renderHostTools } from '../parts/hostTools';
 
 // ---------------------------------------------------------------------------
 // 1. Context factories
@@ -217,6 +218,35 @@ describe('composeProcessCreatePrompt', () => {
     const output = composeProcessCreatePrompt(createPromptContextFromCatalog('claude-code'));
     expect(output).toContain('## Task Kinds');
     expect(output).toContain('| Kind |');
+  });
+
+  it('renders host-native tools separately from external agent dispatch when inventory exists', () => {
+    const output = composeProcessCreatePrompt(createPromptContextFromCatalog('claude-code', {
+      hostTools: [
+        {
+          name: 'Bash',
+          category: 'shell',
+          description: 'Run shell commands.',
+          availability: 'built-in',
+        },
+        {
+          name: 'Edit',
+          category: 'file',
+          description: 'Apply targeted file edits.',
+        },
+      ],
+    }));
+
+    expect(output).toContain('## Host-Native Tools');
+    expect(output).toContain('`Bash` (shell, built-in): Run shell commands.');
+    expect(output).toContain('`Edit` (file): Apply targeted file edits.');
+    expect(output).toContain('separate from external agent dispatch');
+    expect(output).toContain('Use external agents for capabilities missing from the host inventory');
+  });
+
+  it('omits host-native tool guidance when no inventory exists', () => {
+    const output = composeProcessCreatePrompt(createPromptContextFromCatalog('claude-code'));
+    expect(output).not.toContain('## Host-Native Tools');
   });
 
   it('does NOT contain run:create section', () => {
@@ -544,6 +574,29 @@ describe('renderToolPreferences', () => {
   it('contains "read a file before editing"', () => {
     const result = renderToolPreferences(createPromptContextFromCatalog('claude-code'));
     expect(result).toContain('read a file before editing');
+  });
+});
+
+describe('renderHostTools', () => {
+  it('returns empty string without host tool inventory', () => {
+    const result = renderHostTools(createPromptContextFromCatalog('claude-code'));
+    expect(result).toBe('');
+  });
+
+  it('renders structured host tool inventory', () => {
+    const result = renderHostTools(createPromptContextFromCatalog('claude-code', {
+      hostTools: [
+        {
+          name: 'Bash',
+          category: 'shell',
+          description: 'Run shell commands.',
+          availability: 'built-in',
+        },
+      ],
+    }));
+
+    expect(result).toContain('## Host-Native Tools');
+    expect(result).toContain('`Bash` (shell, built-in): Run shell commands.');
   });
 });
 

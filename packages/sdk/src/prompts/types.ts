@@ -36,8 +36,11 @@ export interface PromptContext {
   /** Host-local capabilities derived from plugin capability context. */
   hostCapabilities?: string[];
 
-  /** Optional host tool inventory when supplied by the host capability context. */
-  hostTools?: unknown[];
+  /**
+   * Optional structured inventory of tools exposed by the current host agent.
+   * This is host-native capability data, separate from external agent discovery.
+   */
+  hostTools?: HostToolDescriptor[];
 
   /** Runtime platform: 'win32' | 'darwin' | 'linux' */
   platform: string;
@@ -149,6 +152,26 @@ export interface ContinuityEffectSummary {
   kind: string;
   title: string;
   status: 'resolved' | 'pending';
+}
+
+export type HostToolCategory =
+  | 'file'
+  | 'shell'
+  | 'search'
+  | 'browser'
+  | 'workflow'
+  | 'interaction'
+  | 'mcp'
+  | 'other';
+
+export type HostToolAvailability = 'built-in' | 'conditional' | 'unknown';
+
+export interface HostToolDescriptor {
+  name: string;
+  category?: HostToolCategory;
+  description?: string;
+  availability?: HostToolAvailability;
+  notes?: string[];
 }
 
 /**

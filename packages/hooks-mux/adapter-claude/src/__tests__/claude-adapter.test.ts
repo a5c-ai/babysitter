@@ -29,6 +29,13 @@ describe('createAdapter', () => {
     expect(caps.envPersistenceMode).toBe('native_env_file');
     expect(caps.supportsNativeAdditionalContext).toBe(true);
     expect(caps.toolInterceptionScope).toBe('all');
+    expect(caps.hostTools?.map((tool) => tool.name)).toEqual(
+      expect.arrayContaining(['Bash', 'Read', 'Edit', 'Write', 'Glob', 'Grep']),
+    );
+    expect(caps.hostTools?.find((tool) => tool.name === 'Bash')).toMatchObject({
+      category: 'shell',
+      availability: 'built-in',
+    });
   });
 });
 

@@ -336,6 +336,14 @@ describe("unified adapter getPromptContext", () => {
       sessionIdQuality: "stable",
       supportsOrderedFanout: false,
       supportsNativeAdditionalContext: true,
+      hostTools: [
+        {
+          name: "Bash",
+          category: "shell",
+          description: "Run shell commands.",
+          availability: "built-in",
+        },
+      ],
     });
     const adapter = createUnifiedAdapter();
     const ctx = adapter.getPromptContext!();
@@ -345,5 +353,13 @@ describe("unified adapter getPromptContext", () => {
     expect(ctx.hostCapabilities).toContain("ask-user-question");
     expect(ctx.hookDriven).toBe(true);
     expect(ctx.loopControlTerm).toBe("stop-hook");
+    expect(ctx.hostTools).toEqual([
+      {
+        name: "Bash",
+        category: "shell",
+        description: "Run shell commands.",
+        availability: "built-in",
+      },
+    ]);
   });
 });

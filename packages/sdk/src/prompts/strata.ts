@@ -47,7 +47,7 @@ export function tagPart(
  * Map of all known prompt parts to their stratum classification.
  *
  * STABLE (11): System identity, core rules, tool definitions — rarely change.
- * RUNTIME (12): Capabilities, flags, workspace context — change per session.
+ * RUNTIME (13): Capabilities, flags, workspace context — change per session.
  * TURN_LOCAL (6): Interview, user profile, task-specific — change every turn.
  *
  * Volatility scores (0=most stable, 100=most volatile) control intra-stratum
@@ -71,6 +71,7 @@ export const PART_STRATA_MAP: Record<string, StratumTaggedPart> = {
 
   // ── Runtime stratum ──────────────────────────────────────────────────
   renderLoopControl: tagPart('renderLoopControl', 'runtime', parts.renderLoopControl, 30),
+  renderHostTools: tagPart('renderHostTools', 'runtime', parts.renderHostTools, 30),
   renderIteration: tagPart('renderIteration', 'runtime', parts.renderIteration, 30),
   renderEffects: tagPart('renderEffects', 'runtime', parts.renderEffects, 30),
   renderBreakpointHandling: tagPart('renderBreakpointHandling', 'runtime', parts.renderBreakpointHandling, 30),

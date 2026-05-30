@@ -8,6 +8,7 @@ export { renderDependencies } from './dependencies';
 export { renderInterview } from './interview';
 export { renderUserProfile } from './userProfile';
 export { renderProcessCreation } from './processCreation';
+export { renderHostTools } from './hostTools';
 export { renderIntentFidelityChecks } from './intentFidelityChecks';
 export { renderRunCreation } from './runCreation';
 export { renderRunOverlapDetection } from './runOverlapDetection';

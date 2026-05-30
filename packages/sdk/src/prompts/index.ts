@@ -109,6 +109,7 @@ export {
   renderInterview,
   renderUserProfile,
   renderProcessCreation,
+  renderHostTools,
   renderIntentFidelityChecks,
   renderRunCreation,
   renderIteration,

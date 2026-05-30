@@ -16,5 +16,26 @@ export interface AdapterCapabilities {
   supportsPersistedEnv: boolean;
   envPersistenceMode: 'native_env_file' | 'runtime_hook' | 'wrapper_only' | 'none';
   toolInterceptionScope: 'all' | 'shell_only' | 'partial_shell_only' | 'none';
+  hostTools?: HostToolDescriptor[];
+  notes?: string[];
+}
+
+export type HostToolCategory =
+  | 'file'
+  | 'shell'
+  | 'search'
+  | 'browser'
+  | 'workflow'
+  | 'interaction'
+  | 'mcp'
+  | 'other';
+
+export type HostToolAvailability = 'built-in' | 'conditional' | 'unknown';
+
+export interface HostToolDescriptor {
+  name: string;
+  category?: HostToolCategory;
+  description?: string;
+  availability?: HostToolAvailability;
   notes?: string[];
 }

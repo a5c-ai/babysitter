@@ -56,6 +56,14 @@ function createTestConfig(overrides?: Partial<ProgrammaticEngineConfig>): Progra
       supportsPersistedEnv: true,
       envPersistenceMode: 'runtime_hook',
       toolInterceptionScope: 'all',
+      hostTools: [
+        {
+          name: 'RunCommand',
+          category: 'shell',
+          description: 'Run a command through the host.',
+          availability: 'built-in',
+        },
+      ],
     },
     phaseMappings: TEST_PHASE_MAPPINGS,
     ...overrides,
@@ -707,6 +715,14 @@ describe('createHooksEngine', () => {
       expect(parsed.supportsBlock).toBe(true);
       expect(parsed.supportsToolInputMutation).toBe(true);
       expect(parsed.envPersistenceMode).toBe('runtime_hook');
+      expect(parsed.hostTools).toEqual([
+        {
+          name: 'RunCommand',
+          category: 'shell',
+          description: 'Run a command through the host.',
+          availability: 'built-in',
+        },
+      ]);
     });
   });
 

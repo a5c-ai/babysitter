@@ -45,14 +45,14 @@ SDK journals resolution → next iteration
 
 ### 2. No host tool discovery
 
-**Current:** The SDK knows the host agent's *capabilities* (file-edit, bash, browser) via `AGENT_CAPABILITIES_JSON`, but doesn't know the specific *tools* available.
+**Current:** The SDK knows the host agent's *capabilities* (file-edit, bash, browser) via `AGENT_CAPABILITIES_JSON`, and may receive an optional structured `hostTools` inventory when the adapter can report reliable host-native tool descriptors.
 
 **Needed:** The SDK should be able to query the host agent's tool inventory so process definitions can make informed decisions about what to delegate vs. what to dispatch externally.
 
 **Implementation:**
-- Extend `AGENT_CAPABILITIES_JSON` to include tool inventory (or add `AGENT_TOOLS_JSON`)
-- hooks-mux adapters would populate this from the host agent's tool list
-- SDK's promptContext would include available host tools
+- Extend `AGENT_CAPABILITIES_JSON` to include optional `hostTools` inventory
+- hooks-mux adapters populate this from reliable host agent tool descriptors when available
+- SDK's promptContext includes available host tools and renders them separately from external agent dispatch guidance
 
 **Files affected:**
 - `packages/hooks-mux/core/src/types/adapter.ts` — extend AdapterCapabilities

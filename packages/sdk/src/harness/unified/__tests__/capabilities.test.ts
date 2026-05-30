@@ -90,6 +90,43 @@ describe("buildPromptContextFromProxy", () => {
     expect(ctx.harness).toBe("my-editor");
   });
 
+  it("preserves structured host tool inventory", () => {
+    const ctx = buildPromptContextFromProxy(
+      makeProxy({
+        hostTools: [
+          {
+            name: "Bash",
+            category: "shell",
+            description: "Run shell commands.",
+            availability: "built-in",
+          },
+          {
+            name: "  Edit  ",
+            category: "file",
+          },
+        ],
+      }),
+    );
+
+    expect(ctx.hostTools).toEqual([
+      {
+        name: "Bash",
+        category: "shell",
+        description: "Run shell commands.",
+        availability: "built-in",
+      },
+      {
+        name: "Edit",
+        category: "file",
+      },
+    ]);
+  });
+
+  it("omits host tool inventory when absent", () => {
+    const ctx = buildPromptContextFromProxy(makeProxy());
+    expect(ctx.hostTools).toBeUndefined();
+  });
+
   it("sets harnessLabel as title-cased name", () => {
     const ctx = buildPromptContextFromProxy(
       makeProxy({ name: "my-cool-editor" }),

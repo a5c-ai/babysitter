@@ -232,6 +232,31 @@ describe('materializeExecContext', () => {
     expect(parsed.toolInterceptionScope).toBe('all');
   });
 
+  it('preserves host tool inventory in AGENT_CAPABILITIES_JSON', async () => {
+    const session = createMockSession();
+    const store = createMockSessionStore(session);
+    const capabilities = createMockCapabilities({
+      hostTools: [
+        {
+          name: 'Bash',
+          category: 'shell',
+          description: 'Run shell commands.',
+          availability: 'built-in',
+        },
+      ],
+    });
+
+    const result = await materializeExecContext({
+      sessionId: 'test-session-001',
+      sessionStore: store,
+      capabilities,
+      tempDir: tmpDir,
+    });
+
+    const parsed = JSON.parse(result.env['AGENT_CAPABILITIES_JSON']);
+    expect(parsed.hostTools).toEqual(capabilities.hostTools);
+  });
+
   it('does not inject AGENT_CAPABILITIES_JSON when capabilities are omitted', async () => {
     const session = createMockSession();
     const store = createMockSessionStore(session);

@@ -39,6 +39,26 @@ export interface ProxyCapabilities {
   tools?: unknown[];
 }
 
+export type HostToolCategory =
+  | "file"
+  | "shell"
+  | "search"
+  | "browser"
+  | "workflow"
+  | "interaction"
+  | "mcp"
+  | "other";
+
+export type HostToolAvailability = "built-in" | "conditional" | "unknown";
+
+export interface HostToolDescriptor {
+  name: string;
+  category?: HostToolCategory;
+  description?: string;
+  availability?: HostToolAvailability;
+  notes?: string[];
+}
+
 // ---------------------------------------------------------------------------
 // Capability derivation
 // ---------------------------------------------------------------------------
@@ -99,7 +119,6 @@ export function buildPromptContextFromProxy(
       hostAgentName,
       hostAgentLabel,
       hostCapabilities: hostAgentName ? proxy.hostCapabilities ?? promptCapabilities : undefined,
-      hostTools: proxy.hostTools ?? proxy.tools,
       pluginRootVar: "",
       loopControlTerm: proxy.supportsBlock ? "stop-hook" : "in-turn",
       sessionBindingFlags: "",
@@ -112,6 +131,7 @@ export function buildPromptContextFromProxy(
       iterateFlags: "",
       hasIntentFidelityChecks: false,
       hasNonNegotiables: false,
+      hostTools: normalizeHostTools(proxy.hostTools ?? proxy.tools),
     },
     overrides,
   );
@@ -128,4 +148,21 @@ function formatHarnessLabel(name: string): string {
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
+}
+
+function normalizeHostTools(
+  hostTools: ProxyCapabilities["hostTools"] | ProxyCapabilities["tools"],
+): HostToolDescriptor[] | undefined {
+  if (!Array.isArray(hostTools)) return undefined;
+
+  const normalized = hostTools
+    .filter((tool): tool is HostToolDescriptor => {
+      return Boolean(tool) && typeof tool.name === "string" && tool.name.trim() !== "";
+    })
+    .map((tool) => ({
+      ...tool,
+      name: tool.name.trim(),
+    }));
+
+  return normalized.length > 0 ? normalized : undefined;
 }
