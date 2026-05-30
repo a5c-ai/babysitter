@@ -1,0 +1,91 @@
+{
+  "issueNumber": 624,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-624-jitsi-crds-controllers-webhook-sync",
+  "maxImplementationAttempts": 3,
+  "prompt": "Implement issue #624: complete Jitsi CRDs, core controllers, webhook sync, agent bridge integration, and event bus coverage. The current staging branch may already contain partial Jitsi resource-model, web route, CLI/MCP, and test work; audit and preserve complete surfaces before filling gaps.",
+  "specFiles": [
+    "packages/krate/docs/jitsi/03-crds-and-controllers.md",
+    "packages/krate/docs/jitsi/01-architecture.md",
+    "packages/krate/docs/jitsi/06-agent-meeting-participation.md",
+    "packages/krate/docs/jitsi/07-agent-meeting-runtime.md"
+  ],
+  "currentBaselineHints": {
+    "observedPartialSurfaces": [
+      "packages/krate/core/src/resource-model.js contains JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, and JitsiRecording entries on current staging.",
+      "packages/krate/core/tests/jitsi-resource-model.test.js exists on current staging.",
+      "packages/krate/web/app/api/orgs/[org]/jitsi/** routes exist on current staging, including webhooks/ingest.",
+      "packages/krate/web/app/lib/jitsi-service.js and Jitsi web components exist on current staging.",
+      "packages/krate/cli/src/mcp-server.js and packages/krate/cli/tests/jitsi-mcp-tools.test.js include Jitsi meeting MCP surfaces on current staging."
+    ],
+    "observedLikelyGaps": [
+      "No packages/krate/core/src/jitsi-meeting-controller.js was found during planning.",
+      "No packages/krate/core/src/jitsi-sync-controller.js was found during planning.",
+      "No packages/krate/core/src/jitsi-agent-bridge.js was found during planning.",
+      "The current Jitsi webhook route appears lightweight and must be audited for timing-safe HMAC validation, persistent deduplication, replay handling, participant events, room destroyed events, and recording stopped events.",
+      "Chart CRD manifests and package exports must be verified rather than assumed complete."
+    ]
+  },
+  "expectedScope": [
+    "Verify and complete JitsiMeetProvider and JitsiMeetingTemplate as etcd/config resource kinds.",
+    "Verify and complete JitsiMeeting and JitsiRecording as postgres/aggregated resource kinds.",
+    "Verify and complete chart CRDs, package exports, schemas, and tests for the new Jitsi resource and controller surfaces.",
+    "Implement jitsi-meeting-controller.js with validate, createRoom, endRoom, generateParticipantJwt, reconcile, listActiveMeetings, getMeetingStats, startRecording, and stopRecording.",
+    "Implement jitsi-sync-controller.js following the external sync-controller pattern for Jitsi room, participant, recording, idempotency, and watermark sync.",
+    "Implement jitsi-agent-bridge.js with meeting capability checks, meeting context preparation, sidecar spec creation, and agent join/leave handling.",
+    "Harden /api/orgs/[org]/jitsi/webhooks/ingest with timing-safe signature validation, delivery deduplication/replay protection, event normalization, and controller delegation.",
+    "Emit or persist meeting-created, participant-joined, participant-left, recording-started, and agent-joined-meeting through the existing event bus shape.",
+    "Keep Jitsi Helm deployment work in #623, web-console management UX in #625, and deeper agent meeting runtime work in #627."
+  ],
+  "targetSurfaces": {
+    "coreFiles": [
+      "packages/krate/core/src/resource-model.js",
+      "packages/krate/core/src/jitsi-meeting-controller.js",
+      "packages/krate/core/src/jitsi-sync-controller.js",
+      "packages/krate/core/src/jitsi-agent-bridge.js",
+      "packages/krate/core/src/event-bus.js",
+      "packages/krate/core/src/agent-dispatch-controller.js",
+      "packages/krate/core/src/agent-mux-client.js",
+      "packages/krate/core/src/index.js"
+    ],
+    "webFiles": [
+      "packages/krate/web/app/api/orgs/[org]/jitsi/webhooks/ingest/route.js",
+      "packages/krate/web/app/lib/jitsi-service.js"
+    ],
+    "testAreas": [
+      "packages/krate/core/tests/jitsi-resource-model.test.js",
+      "packages/krate/core/tests/jitsi-meeting-controller.test.js",
+      "packages/krate/core/tests/jitsi-sync-controller.test.js",
+      "packages/krate/core/tests/jitsi-agent-bridge.test.js",
+      "packages/krate/web/tests/jitsi-webhook-ingest.test.js",
+      "packages/krate/core/tests/agent-dispatch-controller.test.js",
+      "packages/krate/core/tests/event-bus-integration.test.js"
+    ]
+  },
+  "qualityGates": [
+    "Phase 0 reuse audit rendered before implementation planning.",
+    "Acceptance and unit tests authored or strengthened before production code.",
+    "All four Jitsi resource kinds verified for storage, context, plural, requiredSpec, schema, and API behavior.",
+    "Jitsi meeting, sync, and agent bridge controllers covered by focused unit tests with mocked providers and resource gateways.",
+    "Webhook security negative tests cover missing, malformed, invalid, replayed, duplicate, and invalid JSON cases.",
+    "Room, participant, and recording webhook events update resources idempotently.",
+    "Event bus coverage verifies meeting-created, participant-joined, participant-left, recording-started, and agent-joined-meeting.",
+    "Non-meeting agent dispatch behavior has a regression guard.",
+    "Focused Krate tests plus npm run test:sdk, npm run build:sdk, and npm run verify:metadata are run or exact blockers are documented.",
+    "Final review compares the issue and Jitsi specs directly against the git diff and verification output before delivery."
+  ],
+  "verificationCommands": [
+    "npm run test --workspace=@a5c-ai/krate",
+    "npm run test --workspace=@a5c-ai/krate-web",
+    "npm run test --workspace=@a5c-ai/krate-cli",
+    "npm run test:sdk",
+    "npm run build:sdk",
+    "npm run verify:metadata"
+  ],
+  "outOfScope": [
+    "Do not implement or alter Jitsi Helm deployment work owned by #623 except for CRD manifests required by #624.",
+    "Do not redesign Jitsi web-console management UX owned by #625.",
+    "Do not implement deep agent meeting runtime, sidecar protocol, audio processing, or MCP runtime work owned by #627.",
+    "Do not require a live Jitsi server for unit or contract tests; use injectable mocked providers first."
+  ]
+}
