@@ -13,6 +13,11 @@ export {
   disposeBackgroundRegistry,
 } from "./background/state";
 
+export {
+  buildShellInvocation,
+  type ShellInvocation,
+} from "./shellInvocation";
+
 // Result envelope utility (used by daemon lifecycle/config)
 export { ok, fail, type ApiResult } from "./apiResult";
 

@@ -181,6 +181,11 @@ describe("agent-core tools", () => {
     const parsed = JSON.parse(getText(result)) as { output: string; exitCode: number };
 
     expect(childProcess.spawn).toHaveBeenCalledOnce();
+    const [command, args] = vi.mocked(childProcess.spawn).mock.calls[0]!;
+    expect({ command, args }).toEqual({
+      command: process.platform === "win32" ? "cmd.exe" : "/bin/bash",
+      args: process.platform === "win32" ? ["/c", "echo test"] : ["-c", "echo test"],
+    });
     expect(parsed).toEqual({
       output: "stdout text\nstderr text",
       exitCode: 7,

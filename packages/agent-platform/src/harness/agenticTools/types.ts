@@ -1,5 +1,5 @@
 import type { TObject } from "@sinclair/typebox";
-import type { BackgroundProcessRegistry } from "../backgroundProcessRegistry";
+import type { BackgroundProcessRegistry } from "@a5c-ai/agent-runtime";
 import type { DeferredToolRegistry } from "../deferredToolRegistry";
 
 export interface ToolResult {
@@ -34,6 +34,7 @@ export interface AgenticToolOptions {
   onToolUse?: (toolName: string, params: unknown) => void;
   onBackgroundComplete?: (event: unknown) => void;
   maxBackgroundProcesses?: number;
+  registryId?: string;
   /** Optional externally managed registry. When provided, the caller owns disposal. */
   backgroundRegistry?: BackgroundProcessRegistry;
   deferredToolRegistry?: DeferredToolRegistry;

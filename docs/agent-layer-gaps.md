@@ -332,8 +332,8 @@ Only `GitHubIssuesBackend` exists. Basic mapping of breakpoints to GitHub issues
 
 | Gap | Layers | Description |
 |-----|--------|-------------|
-| Background process registry duplicated | L4↔L5 | Same code in 5 files across agent-core, agent-runtime, agent-platform |
-| Shell invocation duplicated | L4↔L5↔L6 | 5 locations with different flags (now unified but still duplicated) |
+| ~~Background process registry duplicated~~ | ~~L4↔L5~~ | ~~Same code in 5 files across agent-core, agent-runtime, agent-platform~~ → runtime now owns the registry/state; core and platform keep shims |
+| ~~Shell invocation duplicated~~ | ~~L4↔L5↔L6~~ | ~~5 locations with different flags (now unified but still duplicated)~~ → runtime now owns the shell argv contract |
 | Endpoint resolution duplicated | L4↔agent-mux | agent-core reimplements provider handling that agent-mux owns |
 | Cost tracking disconnected | L4→L5→L6 | Token usage parsed in L4, budgets in L5, enforcement supposed in L6 — none connected |
 | Session state fragmented | L5↔L6 | Runtime has session types, platform has session management — not integrated |

@@ -88,7 +88,7 @@ Files/modules that concentrate the most danger across multiple categories.
 
 ### ~~Shell invocation — 5 locations, subtly different~~
 
-**FIXED:** `session.ts` changed from `-lc` to `-c` for consistency. All 5 locations now cross-reference each other with HERE BE DRAGONS comments.
+**FIXED:** Shell argv construction is centralized in `@a5c-ai/agent-runtime` through `buildShellInvocation()`. Runtime background spawning, agent-core session execution, and core/platform bash tools all use the shared contract.
 
 ### Kanban status — 6+ sealed switch statements
 **File:** `packages/agent-mux/core/src/kanban.ts` (2518 lines)
@@ -156,7 +156,7 @@ HERE BE DRAGONS comment added. N concurrent callers can trigger N parallel init 
 ### Platform-specific shell path assumption — *annotated*
 **File:** `packages/agent-core/src/agenticTools/tools/execution.ts:53-56`
 
-HERE BE DRAGONS comment added. `/bin/bash` hardcoded for non-Windows. Risk remains but is now visible.
+Shell invocation now uses the shared runtime helper. `/bin/bash` remains the non-Windows contract, and the risk is covered by focused argv tests.
 
 ---
 

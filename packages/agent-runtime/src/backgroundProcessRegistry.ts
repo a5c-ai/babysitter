@@ -7,6 +7,7 @@
 
 import * as childProcess from "node:child_process";
 import { nextUlid } from "@a5c-ai/babysitter-sdk";
+import { buildShellInvocation } from "./shellInvocation";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -101,16 +102,9 @@ export class BackgroundProcessRegistry {
 
     const backgroundTaskId = nextUlid();
     const startMs = Date.now();
-    // HERE BE DRAGONS: Shell invocation is duplicated in 5 files. All must use the same flags.
-    // See also: agent-core/session.ts, agent-core/tools/execution.ts,
-    // agent-platform/tools/execution.ts, agent-platform/backgroundProcessRegistry.ts
-    const shell = process.platform === "win32" ? "cmd.exe" : "/bin/bash";
-    const shellArgs =
-      process.platform === "win32"
-        ? ["/c", opts.command]
-        : ["-c", opts.command];
+    const shellInvocation = buildShellInvocation(opts.command);
 
-    const child = this.spawnFn(shell, shellArgs, {
+    const child = this.spawnFn(shellInvocation.command, shellInvocation.args, {
       cwd: opts.cwd,
       env: { ...process.env, ...opts.env },
       shell: false,

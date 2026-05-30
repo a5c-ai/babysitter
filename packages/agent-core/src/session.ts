@@ -1,4 +1,5 @@
 import * as childProcess from "node:child_process";
+import { buildShellInvocation } from "@a5c-ai/agent-runtime";
 import type {
   AgentCorePromptResult,
   AgentCoreSessionEvent,
@@ -281,15 +282,10 @@ export class AgentCoreSessionHandle {
     command: string,
     onChunk?: (chunk: string) => void,
   ): Promise<{ output: string; exitCode: number | undefined; cancelled: boolean }> {
-    // HERE BE DRAGONS: Shell invocation is duplicated in 5 files. All must use the same flags.
-    // See also: agent-core/tools/execution.ts, agent-platform/tools/execution.ts,
-    // agent-platform/backgroundProcessRegistry.ts, agent-runtime/backgroundProcessRegistry.ts
-    // Use -c (not -lc) to avoid loading login profile, consistent with all other shell invocations
-    const shell = process.platform === "win32" ? "cmd.exe" : "/bin/bash";
-    const args = process.platform === "win32" ? ["/c", command] : ["-c", command];
+    const shellInvocation = buildShellInvocation(command);
 
     return new Promise((resolve, reject) => {
-      const child = childProcess.spawn(shell, args, {
+      const child = childProcess.spawn(shellInvocation.command, shellInvocation.args, {
         cwd: this.options.workspace,
         env: process.env,
         stdio: ["ignore", "pipe", "pipe"],

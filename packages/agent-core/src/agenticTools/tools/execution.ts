@@ -1,4 +1,5 @@
 import { Type } from "@sinclair/typebox";
+import { buildShellInvocation } from "@a5c-ai/agent-runtime";
 import type { AgenticToolOptions, CustomToolDefinition } from "../types";
 import { DEFAULT_BASH_TIMEOUT, DEFAULT_SEARCH_TIMEOUT, spawnAsync } from "../shared/process";
 import { jsonResult } from "../shared/results";
@@ -50,16 +51,10 @@ export function createExecutionTools(options: AgenticToolOptions): CustomToolDef
           });
         }
 
-        // HERE BE DRAGONS: Shell invocation is duplicated in 5 files. All must use the same flags.
-        // See also: agent-core/session.ts, agent-platform/tools/execution.ts,
-        // agent-platform/backgroundProcessRegistry.ts, agent-runtime/backgroundProcessRegistry.ts
         // HERE BE DRAGONS: Assumes /bin/bash exists on non-Windows. macOS Catalina+
         // defaults to zsh, and some containers may not have bash at this path.
-        const shell = process.platform === "win32" ? "cmd.exe" : "/bin/bash";
-        const shellArgs = process.platform === "win32"
-          ? ["/c", String(params.command)]
-          : ["-c", String(params.command)];
-        const result = await spawnAsync(shell, shellArgs, {
+        const shellInvocation = buildShellInvocation(String(params.command));
+        const result = await spawnAsync(shellInvocation.command, shellInvocation.args, {
           cwd,
           env: (params.env as Record<string, string>) ?? undefined,
           timeout: (params.timeout as number) ?? DEFAULT_BASH_TIMEOUT,

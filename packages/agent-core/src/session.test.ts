@@ -1,4 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("node:child_process", () => ({
+  spawn: vi.fn(),
+}));
+
+import * as childProcess from "node:child_process";
 import { createAgentCoreSession } from "./session";
 
 const mockFetch = vi.fn();
@@ -151,5 +157,36 @@ describe("AgentCoreSessionHandle", () => {
     expect(result.success).toBe(false);
     expect(result.exitCode).toBe(1);
     expect(result.output).toContain("401");
+  });
+
+  it("executes session commands through the shared shell argv contract", async () => {
+    vi.mocked(childProcess.spawn).mockImplementation(() => {
+      const listeners = new Map<string, (...args: unknown[]) => void>();
+      return {
+        stdout: { on: vi.fn() },
+        stderr: { on: vi.fn() },
+        on: vi.fn((event: string, listener: (...args: unknown[]) => void) => {
+          listeners.set(event, listener);
+          if (event === "close") {
+            queueMicrotask(() => listener(0, null));
+          }
+          return undefined;
+        }),
+      } as unknown as childProcess.ChildProcessWithoutNullStreams;
+    });
+
+    const session = createAgentCoreSession({ workspace: "/tmp/workspace" });
+    const result = await session.executeCommand("echo from-session");
+
+    expect(result.exitCode).toBe(0);
+    const [command, args, options] = vi.mocked(childProcess.spawn).mock.calls[0]!;
+    expect({ command, args }).toEqual({
+      command: process.platform === "win32" ? "cmd.exe" : "/bin/bash",
+      args: process.platform === "win32" ? ["/c", "echo from-session"] : ["-c", "echo from-session"],
+    });
+    expect(options).toMatchObject({
+      cwd: "/tmp/workspace",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
   });
 });

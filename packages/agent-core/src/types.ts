@@ -110,6 +110,7 @@ export interface AgentCoreToolOptions {
   onToolUse?: (toolName: string, params: unknown) => void;
   onBackgroundComplete?: (event: unknown) => void;
   maxBackgroundProcesses?: number;
+  registryId?: string;
   /** Optional externally managed registry. When provided, the caller owns disposal. */
   backgroundRegistry?: BackgroundProcessRegistry;
   deferredToolRegistry?: DeferredToolRegistry;
