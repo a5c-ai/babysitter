@@ -1,0 +1,66 @@
+{
+  "issueNumber": 577,
+  "branch": "staging",
+  "trigger": "manual dispatch",
+  "goal": "Wire tasks-mux into the agent stack as native built-in tools and the unified task routing hub.",
+  "targetPackages": [
+    "packages/tasks-mux",
+    "packages/sdk",
+    "packages/agent-core",
+    "packages/agent-platform",
+    "packages/agent-mux"
+  ],
+  "relatedIssues": [
+    630,
+    631,
+    633,
+    635,
+    597,
+    581,
+    602,
+    603,
+    604
+  ],
+  "sourceDocs": [
+    "docs/agent-layer-gaps.md",
+    "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md",
+    "docs/agent-mux-babysitter-integrations/effect-resolution.md",
+    "docs/agent-mux-babysitter-integrations/external-agent-tasks.md",
+    "docs/agent-mux-babysitter-integrations/testing.md",
+    "docs/agent-reference/process-authoring.md"
+  ],
+  "qualityGates": {
+    "targetQualityScore": 90,
+    "commands": [
+      "npm run test --workspace=@a5c-ai/tasks-mux",
+      "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+      "npm run lint --workspace=@a5c-ai/tasks-mux",
+      "npm run test:sdk",
+      "npm run build:sdk",
+      "npm run test --workspace=@a5c-ai/agent-core",
+      "npm run test --workspace=@a5c-ai/agent-platform",
+      "npm run test:agent-mux",
+      "npm run build:runtime",
+      "npm run test:architecture",
+      "npm run verify:metadata",
+      "git diff --check"
+    ]
+  },
+  "maxImplementationIterations": 2,
+  "breakpointPolicy": "sparse: pause only for incompatible dependency/API decisions or final acceptance below target",
+  "expectedOutput": {
+    "runtimeCallPaths": true,
+    "testsFirst": true,
+    "nativeTools": [
+      "create_todo",
+      "assign_task",
+      "search_tasks",
+      "escalate"
+    ],
+    "mcpToolsRegisteredInAgentHarness": true,
+    "breakpointDelegationThroughTasksMux": true,
+    "approvalChainsThroughTasksMux": true,
+    "sdkTaskEffectsThroughTasksMux": true,
+    "subtaskDispatchThroughAgentMuxAdaptersBehindTasksMux": true
+  }
+}
