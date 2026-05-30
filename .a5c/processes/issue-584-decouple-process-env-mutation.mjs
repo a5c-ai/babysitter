@@ -9,12 +9,21 @@
  * - docs/here-be-dragons.md
  * - .a5c/processes/issue-600-deduplicate-background-registry-shell-invocation.mjs
  * - .a5c/processes/issue-601-remaining-dragons-plan.mjs
- * - methodologies/planning-with-files/README.md
+ * - methodologies/spec-kit-brownfield.js
  * - methodologies/superpowers/test-driven-development.js
  * - methodologies/superpowers/verification-before-completion.js
- * - methodologies/process-hardening/process-hardening-patterns.js
- * - processes/shared/tdd-triplet.js
+ * - tdd-quality-convergence.js
  * - specializations/sdk-platform-development/sdk-architecture-design.js
+ * - specializations/sdk-platform-development/compatibility-testing.js
+ *
+ * Process-library research note:
+ * - The requested repo-local .a5c/process-library/ directory was not present.
+ * - The active process-library binding was /home/runner/.a5c/process-library/babysitter-repo/library.
+ *
+ * Repo policy note:
+ * - Direct Babysitter processes in this repo should avoid kind:"shell" subtasks
+ *   unless a shell-oriented workflow is explicitly requested. This process uses
+ *   agent tasks for context collection and deterministic verification.
  *
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
  * - Env var infrastructure already exists through direct process.env reads/writes in
@@ -227,22 +236,30 @@ export async function process(inputs, ctx) {
 }
 
 export const readIssueContextTask = defineTask('issue-584.read-issue-context', (args, taskCtx) => ({
-  kind: 'shell',
+  kind: 'agent',
   title: 'Read issue #584 and current env-coupling context',
   labels: ['issue-584', 'context', 'spec'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      `gh issue view ${args.issueNumber} --json title,body,labels,comments`,
-      'printf "\\n--- docs/here-be-dragons env coupling section ---\\n"',
-      'sed -n "25,75p" docs/here-be-dragons.md',
-      'printf "\\n--- issue-listed env mutation/read surfaces ---\\n"',
-      'rg -n "process\\\\.env|configureAzureOpenAiEnvDefaults|setConfigValue|AMUX_LOG_LEVEL|AMUX_OBSERVABILITY_MODE|AZURE_OPENAI|BABYSITTER_" docs/here-be-dragons.md packages/agent-platform/src/harness/piWrapper/moduleSupport.ts packages/agent-platform/src/harness/piWrapper.ts packages/agent-core/src/session.ts packages/agent-core/src/agenticTools/config/state.ts packages/agent-platform/src/harness/agenticTools/config/state.ts packages/agent-mux/cli/src/index.ts',
-      'printf "\\n--- package scripts relevant to verification ---\\n"',
-      'node -e "const p=require(\'./package.json\'); const names=[\'build:sdk\',\'test:sdk\',\'build:runtime\',\'build:agent-mux:non-realtime\',\'verify:metadata\']; for (const name of names) console.log(`${name}: ${p.scripts?.[name] ?? \'<missing>\'}`)"',
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 180000,
+  agent: {
+    name: 'platform-architect',
+    prompt: {
+      role: 'senior Babysitter repository researcher',
+      task: 'Read the authoritative GitHub and repository context for issue #584.',
+      instructions: [
+        `Run gh issue view ${args.issueNumber} --json title,body,labels,comments and preserve the title, body, labels, and every comment.`,
+        `Also run gh pr view ${args.issueNumber} --json files,title,body,comments and record that it is not a PR if GitHub returns no pull request.`,
+        'Read docs/here-be-dragons.md around the process.env coupling section and coupling map.',
+        'Inspect only the issue-listed env mutation/read surfaces plus package scripts needed for verification:',
+        'packages/agent-platform/src/harness/piWrapper/moduleSupport.ts',
+        'packages/agent-platform/src/harness/piWrapper.ts',
+        'packages/agent-core/src/session.ts',
+        'packages/agent-core/src/agenticTools/config/state.ts',
+        'packages/agent-platform/src/harness/agenticTools/config/state.ts',
+        'packages/agent-mux/cli/src/index.ts',
+        'packages/agent-mux/observability/src/logger.ts',
+        'package.json',
+        'Return JSON: { title, labels, rawIssue, comments, isPullRequest, affectedFiles, envContractTable, mutationEvidence, readerEvidence, verificationScripts, acceptanceCriteria, risks, relatedIssues, priorPlanningPrs }.',
+      ],
+    },
   },
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
@@ -287,7 +304,9 @@ export const researchProcessLibraryTask = defineTask('issue-584.research-process
       role: 'Babysitter process author',
       task: 'Identify process-library patterns that should shape this implementation run.',
       instructions: [
-        'Use the active process-library root and inspect relevant files under methodologies/planning-with-files, methodologies/superpowers, methodologies/process-hardening, processes/shared, and specializations/sdk-platform-development.',
+        'Use babysitter process-library:active --json to find the active process-library root.',
+        'If repo-local .a5c/process-library/ does not exist, record that and use the active process-library binding instead.',
+        'Inspect relevant files under methodologies/spec-kit-brownfield, methodologies/superpowers/test-driven-development, methodologies/superpowers/verification-before-completion, tdd-quality-convergence, and specializations/sdk-platform-development.',
         'Favor patterns for brownfield runtime-path tracing, TDD, compatibility review, deterministic verification, and final acceptance gates.',
         'Return JSON: { selectedPatterns: string[], rejectedPatterns: string[], taskShapeGuidance: string[], breakpointGuidance: string[], qualityGateGuidance: string[] }.',
       ],
@@ -454,17 +473,27 @@ export const implementEnvDecouplingTask = defineTask('issue-584.implement-env-de
 }));
 
 export const runVerificationGateTask = defineTask('issue-584.run-verification-gate', (args, taskCtx) => ({
-  kind: 'shell',
+  kind: 'agent',
   title: `Run deterministic verification gate iteration ${args.iteration}`,
   labels: ['issue-584', 'verification', 'quality-gate'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'git diff --check',
-      ...args.inputs.verificationCommands,
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 1200000,
+  agent: {
+    name: 'test-coverage-analyzer',
+    prompt: {
+      role: 'verification engineer',
+      task: 'Run and interpret the deterministic verification gate for issue #584.',
+      instructions: [
+        'Run git diff --check.',
+        'Run each verification command from inputs.verificationCommands exactly once unless a command is unavailable; if unavailable, explain the concrete blocker.',
+        'Capture command, exit status, high-signal output, and whether the result proves the intended gate.',
+        'Do not claim success for skipped commands.',
+        'Return JSON: { passed: boolean, commands: object[], failures: object[], skipped: object[], changedFiles: string[], evidenceSummary: string }.',
+      ],
+      context: {
+        inputs: args.inputs,
+        implementation: args.implementation,
+        iteration: args.iteration,
+      },
+    },
   },
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
@@ -473,17 +502,27 @@ export const runVerificationGateTask = defineTask('issue-584.run-verification-ga
 }));
 
 export const auditRemainingMutationTask = defineTask('issue-584.audit-remaining-mutation', (args, taskCtx) => ({
-  kind: 'shell',
+  kind: 'agent',
   title: `Audit remaining env writes iteration ${args.iteration}`,
   labels: ['issue-584', 'static-audit', 'quality-gate'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'printf "%s\\n" "Auditing issue-listed writer files for direct process.env assignment"',
-      '! rg -n "process\\\\.env(\\\\[[^\\\\]]+\\\\]|\\\\.[A-Z0-9_]+)\\\\s*=" ' + args.inputs.mutationFiles.map((file) => JSON.stringify(file)).join(' '),
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 60000,
+  agent: {
+    name: 'compatibility-auditor',
+    prompt: {
+      role: 'static configuration coupling auditor',
+      task: 'Audit issue-listed writer files for remaining hidden process.env mutation.',
+      instructions: [
+        'Run rg or equivalent over inputs.mutationFiles for direct process.env assignment using this intent: process.env[...] = or process.env.A_NAME =.',
+        'Classify any matches as hidden in-process config mutation, allowed test fixture, process-boundary env construction, or false positive.',
+        'Fail this gate if any issue-listed production writer still mutates process.env for in-process config flow.',
+        'Return JSON: { passed: boolean, command: string, matches: object[], allowedMatches: object[], blockingMatches: object[], rationale: string }.',
+      ],
+      context: {
+        inputs: args.inputs,
+        implementation: args.implementation,
+        verification: args.verification,
+        iteration: args.iteration,
+      },
+    },
   },
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
