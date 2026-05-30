@@ -129,6 +129,7 @@ export type {
 } from "./types.js";
 
 export {
+  TaskRouter,
   routeTask,
   routingHints,
   isHostDelegableRoute,

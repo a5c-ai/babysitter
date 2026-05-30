@@ -47,29 +47,41 @@ export type TaskRouteDecision =
       reason: string;
     };
 
+export class TaskRouter {
+  constructor(private readonly context: TaskRouteContext = {}) {}
+
+  routeTask(task: RoutableTaskDef, context: TaskRouteContext = {}): TaskRouteDecision {
+    return routeTask(task, {
+      ...this.context,
+      ...context,
+      responders: context.responders ?? this.context.responders,
+    });
+  }
+}
+
 export function routeTask(task: RoutableTaskDef, context: TaskRouteContext = {}): TaskRouteDecision {
   const hints = routingHints(task);
   const requested = hints.responderType ?? defaultResponderType(task);
 
   if (requested === "auto") {
-    const agent = selectResponder(context.responders, "agent", hints.adapter);
+    const agent = selectResponder(context.responders, "agent", hints);
     if (agent || context.agentBackend) {
       return agentDecision(hints, context, agent, "auto selected available agent responder");
     }
-    return humanDecision(context, "auto fell back to human responder");
+    return humanDecision(context, hints, "auto fell back to human responder");
   }
 
   if (requested === "agent") {
-    const responder = selectResponder(context.responders, "agent", hints.adapter);
+    const responder = selectResponder(context.responders, "agent", hints);
     return agentDecision(hints, context, responder, "agent responder requested");
   }
 
   if (requested === "human") {
-    return humanDecision(context, "human responder requested");
+    return humanDecision(context, hints, "human responder requested");
   }
 
   if (requested === "tracker") {
-    const responder = selectResponder(context.responders, "tracker", hints.trackerBackend);
+    const responder = selectResponder(context.responders, "tracker", hints);
     return {
       responderType: "tracker",
       responder,
@@ -93,6 +105,7 @@ export function routingHints(task: RoutableTaskDef): TaskRoutingHints {
     model: source.model ?? task.metadata?.model,
     provider: source.provider ?? task.metadata?.provider,
     trackerBackend: source.trackerBackend ?? task.metadata?.trackerBackend,
+    capabilities: source.capabilities ?? task.metadata?.capabilities,
     fallbackType: source.fallbackType ?? task.metadata?.fallbackType,
   };
 }
@@ -118,20 +131,26 @@ function internalDecision(reason: string): TaskRouteDecision {
       title: "Internal Agent",
       domains: [],
       tags: ["internal"],
+      capabilities: ["text"],
       availability: true,
       responseTimeSla: 1,
     },
   };
 }
 
-function humanDecision(context: TaskRouteContext, reason: string): TaskRouteDecision {
-  const responder = selectResponder(context.responders, "human") ?? {
+function humanDecision(
+  context: TaskRouteContext,
+  hints: TaskRoutingHints,
+  reason: string,
+): TaskRouteDecision {
+  const responder = selectResponder(context.responders, "human", hints) ?? {
     id: "human",
     type: "human" as const,
     name: "Human Responder",
     title: "Human Responder",
     domains: [],
     tags: ["human"],
+    capabilities: hints.capabilities ?? ["text"],
     availability: true,
     responseTimeSla: 300_000,
   };
@@ -156,6 +175,7 @@ function agentDecision(
       title: "AgentMux Responder",
       domains: [],
       tags: ["agent"],
+      capabilities: hints.capabilities ?? ["text"],
       availability: true,
       responseTimeSla: 300_000,
       adapter: hints.adapter,
@@ -168,17 +188,26 @@ function agentDecision(
 function selectResponder(
   responders: ResponderProfile[] | undefined,
   type: ResponderType,
-  preferred?: string,
+  hints: TaskRoutingHints = {},
 ): ResponderProfile | undefined {
+  const preferred = type === "tracker" ? hints.trackerBackend : hints.adapter;
   const available = responders?.filter((responder) =>
-    (responder.type ?? "human") === type && responder.availability
+    (responder.type ?? "human") === type
+    && responder.availability
+    && hasCapabilities(responder, hints.capabilities)
   ) ?? [];
   if (preferred) {
     return available.find((responder) =>
       responder.id === preferred ||
       responder.adapter === preferred ||
       responder.trackerBackend === preferred
-    );
+    ) ?? available[0];
   }
   return available[0];
+}
+
+function hasCapabilities(responder: ResponderProfile, required: string[] | undefined): boolean {
+  if (!required?.length) return true;
+  const capabilities = new Set(responder.capabilities ?? []);
+  return required.every((capability) => capabilities.has(capability));
 }

@@ -121,6 +121,7 @@ export const BreakpointRoutingSchema = z.object({
   model: z.string().min(1).optional(),
   provider: z.string().min(1).optional(),
   trackerBackend: z.string().min(1).optional(),
+  capabilities: z.array(z.string().min(1)).optional(),
   fallbackType: ResponderTypeSchema.optional(),
 });
 export type BreakpointRouting = z.infer<typeof BreakpointRoutingSchema>;
@@ -134,6 +135,7 @@ export const ResponderProfileSchema = z.object({
   title: z.string(),
   domains: z.array(z.string()),
   tags: z.array(z.string()),
+  capabilities: z.array(z.string().min(1)).optional(),
   availability: z.boolean(),
   responseTimeSla: z.number().positive(),
   publicKeyFingerprint: z.string().optional(),

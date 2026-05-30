@@ -8,10 +8,10 @@ export interface TaskRoutingHints {
   model?: string;
   provider?: string;
   trackerBackend?: string;
+  capabilities?: string[];
   fallbackType?: ResponderType;
 }
 
 export interface RoutedResponder extends ResponderProfile {
   type: ResponderType;
 }
-

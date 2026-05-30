@@ -3,6 +3,7 @@ import {
   // Zod schemas
   BreakpointStatusSchema,
   BreakpointStrategySchema,
+  ResponderTypeSchema,
   UrgencySchema,
   InteractionKindSchema,
   CodeSnippetSchema,
@@ -62,6 +63,7 @@ import type {
   BreakpointContextLink,
   BreakpointContextSection,
   BreakpointContextArtifact,
+  ResponderType,
 } from "../index.js";
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -636,6 +638,14 @@ describe("Section 3: Domain Types and Zod Schemas", () => {
   // ── 3.7 ResponderProfileSchema ─────────────────────────────────────────
 
   describe("ResponderProfileSchema", () => {
+    it("accepts every responder type including auto", () => {
+      const validTypes: ResponderType[] = ["human", "agent", "tracker", "internal", "auto"];
+
+      for (const type of validTypes) {
+        expect(ResponderTypeSchema.safeParse(type).success).toBe(true);
+      }
+    });
+
     it("accepts a valid responder profile with required fields", () => {
       const profile = makeResponderProfile();
       const result = ResponderProfileSchema.safeParse(profile);
@@ -650,6 +660,25 @@ describe("Section 3: Domain Types and Zod Schemas", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.publicKeyFingerprint).toBe("abcdef1234567890");
+      }
+    });
+
+    it("accepts responder type-specific metadata and capabilities", () => {
+      const profile = makeResponderProfile({
+        type: "agent",
+        capabilities: ["typescript", "tests"],
+        adapter: "codex",
+        model: "gpt-5.4",
+        provider: "openai",
+        trackerBackend: "linear",
+      });
+      const result = ResponderProfileSchema.safeParse(profile);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.capabilities).toEqual(["typescript", "tests"]);
+        expect(result.data.adapter).toBe("codex");
+        expect(result.data.trackerBackend).toBe("linear");
       }
     });
 
