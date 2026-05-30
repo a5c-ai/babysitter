@@ -29,8 +29,11 @@ so the user's intent is unambiguous.
 **CRITICAL: Breakpoint rejection posting rules:**
 - Breakpoint rejection MUST be posted with `--status ok` and a value of
   `{"approved": false, "response": "..."}`. NEVER use `--status error` for a
-  user rejection -- that signals a task execution failure and will trigger
-  `RUN_FAILED`, requiring manual journal surgery to recover.
+  user rejection -- that signals a task execution failure, not user feedback.
+  If bad posted data later causes `PROCESS_RUNTIME_ERROR`, inspect it with
+  `run:status`/`run:events` and recover with `run:recover-process-error`;
+  reserve manual journal repair for malformed or partially written journal
+  entries that targeted recovery cannot represent.
 - Only use `--status error` if the {{interactiveToolName}} itself throws an error.
 
 **Breakpoint posting examples:**
