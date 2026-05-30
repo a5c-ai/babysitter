@@ -1,0 +1,76 @@
+{
+  "issueNumber": 621,
+  "dependencyIssueNumber": 620,
+  "maxImplementationIterations": 3,
+  "targetQuality": 90,
+  "requireE2e": false,
+  "specPaths": [
+    "packages/krate/docs/agent-identity/01-resource-model.md",
+    "packages/krate/docs/agent-identity/02-migration.md",
+    "packages/krate/docs/agent-identity/03-web-experience.md"
+  ],
+  "repositoryPaths": [
+    "packages/krate/web/app/lib/krate-ui.jsx",
+    "packages/krate/web/app/pages/agent-overview-pages.jsx",
+    "packages/krate/web/app/pages/agent-run-pages.jsx",
+    "packages/krate/web/app/pages/agent-session-pages.jsx",
+    "packages/krate/web/app/pages/agent-helpers.jsx",
+    "packages/krate/web/app/components/agent/dispatch-button.jsx",
+    "packages/krate/web/app/components/agent/run-actions.jsx",
+    "packages/krate/web/app/components/agent/session-shell.jsx",
+    "packages/krate/web/app/components/shell/notification-bell.jsx",
+    "packages/krate/web/app/components/shell/command-palette.jsx",
+    "packages/krate/web/app/api/orgs/[org]/resources/route.js",
+    "packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js",
+    "packages/krate/web/tests/page-structure.test.js",
+    "packages/krate/web/tests/component-structure.test.js",
+    "packages/krate/web/tests/api-routes.test.js",
+    "packages/krate/web/tests/api-integration.test.js"
+  ],
+  "pages": [
+    "/agents/directory",
+    "/agents/directory/[name]",
+    "/agents/directory/new"
+  ],
+  "components": [
+    "agent-directory.jsx",
+    "agent-profile-card.jsx",
+    "agent-profile-page.jsx",
+    "agent-persona-editor.jsx",
+    "agent-soul-editor.jsx",
+    "agent-appearance-editor.jsx",
+    "agent-voice-editor.jsx",
+    "agent-definition-form.jsx",
+    "agent-create-wizard.jsx",
+    "agent-personality-traits.jsx"
+  ],
+  "apiRoutes": [
+    "/agents/personas",
+    "/agents/personas/[name]",
+    "/agents/souls/[name]",
+    "/agents/appearances/[name]",
+    "/agents/appearances/[name]/avatar",
+    "/agents/voices/[name]",
+    "/agents/voices/[name]/preview",
+    "/agents/definitions",
+    "/agents/definitions/[name]"
+  ],
+  "existingUiTargets": [
+    "packages/krate/web/app/components/agent/dispatch-button.jsx",
+    "packages/krate/web/app/components/agent/run-actions.jsx",
+    "packages/krate/web/app/pages/agent-overview-pages.jsx",
+    "packages/krate/web/app/pages/agent-run-pages.jsx",
+    "packages/krate/web/app/pages/agent-session-pages.jsx",
+    "packages/krate/web/app/components/agent/session-shell.jsx",
+    "packages/krate/web/app/components/shell/notification-bell.jsx",
+    "packages/krate/web/app/components/shell/command-palette.jsx",
+    "packages/krate/web/app/components/workspace/workspace-run-history.jsx",
+    "packages/krate/web/app/orgs/[org]/costs/page.jsx"
+  ],
+  "testCommands": {
+    "web": "npm run test --workspace=@a5c-ai/krate-web",
+    "webBuild": "npm run build:krate-web",
+    "staticStructure": "node packages/krate/web/tests/page-structure.test.js && node packages/krate/web/tests/component-structure.test.js && node packages/krate/web/tests/api-routes.test.js && node packages/krate/web/tests/api-integration.test.js",
+    "e2e": "npm run test:e2e --workspace=@a5c-ai/krate-web"
+  }
+}
