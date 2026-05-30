@@ -224,18 +224,84 @@ externalDependencies:
 
 jitsi:
   install: false
+  enableAuth: true
+  enableGuests: false
+  publicURL: https://meet.krate.local
   external:
     enabled: false
     url: ""
     jwtAppId: ""
     jwtAppSecret: ""
+    existingSecret: ""
+    jwtAppIdKey: appId
+    jwtAppSecretKey: appSecret
+  web: &jitsiWeb
+    replicaCount: 1
+    image:
+      repository: jitsi/web
+    ingress:
+      enabled: true
+      hosts:
+        - host: meet.krate.local
+          paths:
+            - /
+      tls: []
+    health:
+      configPath: /config.js
+  prosody: &jitsiProsody
+    replicaCount: 1
+    image:
+      repository: jitsi/prosody
+    auth:
+      type: jwt
+      jwt:
+        appId: krate
+        appSecret: ""
+        existingSecret: ""
+        appIdKey: appId
+        appSecretKey: appSecret
+        issuer: krate
+        audience: jitsi
+    http:
+      enabled: true
+      port: 5280
+  jicofo: &jitsiJicofo
+    replicaCount: 1
+    image:
+      repository: jitsi/jicofo
+  jvb: &jitsiJvb
+    replicaCount: 1
+    image:
+      repository: jitsi/jvb
+    publicIPs: []
+    useNodeIP: true
+    UDPPort: 10000
+    service:
+      type: NodePort
+      udpPort: 10000
+      nodePort: 30000
+    publicIP: ""
+  jibri: &jitsiJibri
+    enabled: false
+    replicaCount: 0
+    image:
+      repository: jitsi/jibri
+    persistence:
+      enabled: true
+      size: 20Gi
   krate:
     autoCreateRooms: true
     webhookSecret: ""
+    webhookExistingSecret: ""
+    webhookSecretKey: webhookSecret
     defaultRoomTTL: 120m
     agentSidecarImage: "krate/jitsi-agent-sidecar:latest"
     maxAgentsPerRoom: 5
     recordingStorageClass: ""
+    healthProbe:
+      enabled: true
+      configUrl: ""
+      path: /healthz
     sidecarResources:
       chatOnly:
         requests:
@@ -265,6 +331,22 @@ jitsi:
         limits:
           cpu: 2000m
           memory: 4Gi
+
+jitsi-subchart:
+  enableAuth: true
+  enableGuests: false
+  publicURL: https://meet.krate.local
+  extraCommonEnvs:
+    AUTH_TYPE: jwt
+    JWT_APP_ID: krate
+    JWT_APP_SECRET: ""
+    JWT_ACCEPTED_ISSUERS: krate
+    JWT_ACCEPTED_AUDIENCES: jitsi
+  web: *jitsiWeb
+  prosody: *jitsiProsody
+  jicofo: *jitsiJicofo
+  jvb: *jitsiJvb
+  jibri: *jitsiJibri
 
 autoscaling:
   api:

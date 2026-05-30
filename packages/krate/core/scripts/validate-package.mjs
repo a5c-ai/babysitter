@@ -15,6 +15,7 @@ const requiredFiles = [
   '../charts/crds/repositories.yaml',
   '../charts/crds/aggregated-resources.yaml',
   '../charts/crds/policy-resources.yaml',
+  '../charts/crds/jitsi-resources.yaml',
   '../charts/templates/apiservice.yaml',
   '../charts/templates/deployments.yaml',
   '../charts/templates/rbac.yaml',
@@ -24,6 +25,7 @@ const requiredFiles = [
   '../charts/templates/gitea.yaml',
   '../charts/templates/ingress.yaml',
   '../charts/templates/auth-secret.yaml',
+  '../charts/templates/jitsi-secrets.yaml',
   '../charts/templates/argocd-application.yaml',
   '../charts/templates/kubevela-application.yaml',
   '../charts/templates/NOTES.txt',
@@ -33,9 +35,9 @@ const requiredFiles = [
 ];
 
 const requiredKinds = ['Deployment', 'Service', 'ServiceAccount', 'ClusterRole', 'ClusterRoleBinding', 'NetworkPolicy', 'PersistentVolumeClaim'];
-const requiredCrds = ['Organization', 'OrgNamespaceBinding', 'User', 'Team', 'Invite', 'IdentityMapping', 'AuthProvider', 'Repository', 'SSHKey', 'RepositoryPermission', 'BranchProtection', 'RefPolicy', 'PolicyProfile', 'PolicyTemplate', 'PolicyBinding', 'PolicyExceptionRequest', 'PullRequest', 'Issue', 'Review', 'Pipeline', 'Job', 'RunnerPool', 'WebhookSubscription', 'WebhookDelivery', 'View', 'Selector'];
+const requiredCrds = ['Organization', 'OrgNamespaceBinding', 'User', 'Team', 'Invite', 'IdentityMapping', 'AuthProvider', 'Repository', 'SSHKey', 'RepositoryPermission', 'BranchProtection', 'RefPolicy', 'PolicyProfile', 'PolicyTemplate', 'PolicyBinding', 'PolicyExceptionRequest', 'PullRequest', 'Issue', 'Review', 'Pipeline', 'Job', 'RunnerPool', 'WebhookSubscription', 'WebhookDelivery', 'View', 'Selector', 'JitsiMeetProvider', 'JitsiMeetingTemplate', 'JitsiMeeting', 'JitsiRecording'];
 const requiredExampleKinds = ['Pipeline', 'Application'];
-const requiredValueTerms = ['externalDependencies', 'postgres', 'objectStorage', 'nats', 'arc', 'kyverno', 'gatekeeper', 'ingress', 'oidc', 'auth', 'github', 'sso', 'delegatedIdentity', 'autoscaling', 'targetCPUUtilizationPercentage', 'gitea', 'argocd', 'repoURL', 'syncPolicy', 'apiService', 'kubevela', 'vela-core'];
+const requiredValueTerms = ['externalDependencies', 'postgres', 'objectStorage', 'nats', 'arc', 'kyverno', 'gatekeeper', 'ingress', 'oidc', 'auth', 'github', 'sso', 'delegatedIdentity', 'autoscaling', 'targetCPUUtilizationPercentage', 'gitea', 'argocd', 'repoURL', 'syncPolicy', 'apiService', 'kubevela', 'vela-core', 'jitsi', 'jitsi-subchart', 'jwtAppSecret', 'webhookSecret', 'udpPort'];
 const missing = [];
 for (const file of requiredFiles) if (!existsSync(file)) missing.push(`missing file: ${file}`);
 const chartText = requiredFiles.filter((file) => file.startsWith('../charts/') && existsSync(file)).map((file) => readFileSync(file, 'utf8')).join('\n');
