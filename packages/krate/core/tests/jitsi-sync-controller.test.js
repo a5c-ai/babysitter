@@ -35,15 +35,18 @@ test('Jitsi sync controller normalizes room, participant, and recording events',
 
   await controller.syncParticipant('daily-default', {
     eventType: 'participant-joined',
+    deliveryId: 'join-alice-1',
     participant: { id: 'alice', name: 'Alice', type: 'user', audioMuted: false },
     organizationRef: 'default',
   });
   const joinedAgain = await controller.syncParticipant('daily-default', {
     eventType: 'participant-joined',
+    deliveryId: 'join-alice-1',
     participant: { id: 'alice', name: 'Alice Updated', type: 'user' },
     organizationRef: 'default',
   });
   assert.equal(joinedAgain.status.participants.current.length, 1, 'participant join must be idempotent by id');
+  assert.equal(joinedAgain.status.participants.current[0].name, 'Alice', 'duplicate deliveries must not rewrite participant state');
   assert.equal(joinedAgain.status.participants.total, 1);
   assert.equal(joinedAgain.status.participants.peak, 1);
   assert.equal(emitted.at(-1).type, 'participant-joined');
@@ -60,6 +63,7 @@ test('Jitsi sync controller normalizes room, participant, and recording events',
 
   const recording = await controller.syncRecording('daily-default', {
     eventType: 'recording-started',
+    deliveryId: 'rec-start-1',
     recordingId: 'rec-1',
     organizationRef: 'default',
     providerRef: 'jitsi-prod',
@@ -71,12 +75,14 @@ test('Jitsi sync controller normalizes room, participant, and recording events',
 
   const stopped = await controller.syncRecording('daily-default', {
     eventType: 'recording-stopped',
+    deliveryId: 'rec-stop-1',
     recordingId: 'rec-1',
     duration: 120,
     organizationRef: 'default',
   });
   assert.equal(stopped.status.phase, 'Completed');
   assert.equal(stopped.status.duration, 120);
+  assert.equal(persisted.findLast((resource) => resource.kind === 'JitsiMeeting').status.recording.active, false);
 
   const ended = await controller.syncRoom('daily-default', { eventType: 'room-destroyed', organizationRef: 'default' });
   assert.equal(ended.status.phase, 'Ended');
@@ -84,14 +90,15 @@ test('Jitsi sync controller normalizes room, participant, and recording events',
   assert.ok(persisted.some((resource) => resource.kind === 'JitsiRecording'));
 });
 
-test('Jitsi sync controller maintains monotonic provider watermarks', () => {
+test('Jitsi sync controller maintains monotonic provider watermarks', async () => {
   const persisted = [];
   const controller = createJitsiSyncController({ persistFn: (resource) => persisted.push(resource) });
 
-  controller.updateWatermark('jitsi-prod', '2026-05-30T12:00:00Z');
-  controller.updateWatermark('jitsi-prod', '2026-05-30T11:00:00Z');
-  controller.updateWatermark('jitsi-prod', '2026-05-30T12:05:00Z');
+  await controller.updateWatermark('jitsi-prod', '2026-05-30T12:00:00Z', { organizationRef: 'default' });
+  await controller.updateWatermark('jitsi-prod', '2026-05-30T11:00:00Z', { organizationRef: 'default' });
+  await controller.updateWatermark('jitsi-prod', '2026-05-30T12:05:00Z', { organizationRef: 'default' });
 
   assert.equal(controller.getWatermark('jitsi-prod'), '2026-05-30T12:05:00Z');
   assert.equal(persisted.filter((resource) => resource.kind === 'ExternalSyncState').length, 2);
+  assert.equal(persisted.at(-1).metadata.namespace, 'krate-org-default');
 });

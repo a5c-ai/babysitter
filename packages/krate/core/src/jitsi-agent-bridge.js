@@ -87,6 +87,16 @@ export function createJitsiAgentBridge(options = {}) {
       const event = { type: 'agent-left-meeting', dispatchRunRef, meetingRef, reason, timestamp: isoNow(now) };
       eventBus?.emit?.(event);
       await dispatchController?.recordMeetingEvent?.(event);
+      const participantEvent = {
+        type: 'participant-left',
+        dispatchRunRef,
+        meetingRef,
+        participant: { id: dispatchRunRef, type: 'agent' },
+        reason,
+        timestamp: event.timestamp,
+      };
+      eventBus?.emit?.(participantEvent);
+      await dispatchController?.recordMeetingEvent?.(participantEvent);
       return event;
     },
   };

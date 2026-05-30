@@ -11,11 +11,23 @@ function epochSeconds(now, ttlMinutes) {
   return Math.floor((typeof now === 'function' ? now() : new Date()).getTime() / 1000) + ttlMinutes * 60;
 }
 
+function encodeJson(value) {
+  return Buffer.from(JSON.stringify(value)).toString('base64url');
+}
+
+function signJwt(claims, secret) {
+  const header = encodeJson({ alg: 'HS256', typ: 'JWT' });
+  const payload = encodeJson(claims);
+  const signature = crypto.createHmac('sha256', secret).update(`${header}.${payload}`).digest('base64url');
+  return `${header}.${payload}.${signature}`;
+}
+
 export function createJitsiMeetingController(options = {}) {
   const {
     providerClient = {},
     resourceGateway = null,
     eventBus = null,
+    jwtConfig = {},
     jwtSecret = process.env.KRATE_JITSI_JWT_SECRET || process.env.JITSI_JWT_SECRET || 'dev-jitsi-secret',
     now = () => new Date(),
   } = options;
@@ -29,6 +41,15 @@ export function createJitsiMeetingController(options = {}) {
     const direct = await resourceGateway?.get?.('JitsiMeeting', nameOrRoomId);
     if (direct) return direct;
     return (await listMeetings()).find((meeting) => meeting.metadata?.name === nameOrRoomId || meeting.spec?.roomId === nameOrRoomId) || null;
+  }
+
+  async function getResource(kind, name) {
+    if (!name) return null;
+    return resourceGateway?.get?.(kind, name) || null;
+  }
+
+  async function getRecording(name) {
+    return getResource('JitsiRecording', name);
   }
 
   async function persist(resource) {
@@ -54,7 +75,19 @@ export function createJitsiMeetingController(options = {}) {
     async createRoom(meetingSpec = {}) {
       const roomId = meetingSpec.roomId;
       if (!roomId) throw new Error('createRoom requires roomId');
-      const providerResult = await providerClient.createRoom?.(meetingSpec) || {};
+      const provider = await getResource('JitsiMeetProvider', meetingSpec.providerRef);
+      const template = await getResource('JitsiMeetingTemplate', meetingSpec.templateRef);
+      const mergedSpec = {
+        ...meetingSpec,
+        endpoint: meetingSpec.endpoint || provider?.spec?.endpoint,
+        ttlMinutes: meetingSpec.ttlMinutes || template?.spec?.ttlMinutes || provider?.spec?.defaultRoomTTL || DEFAULT_TTL_MINUTES,
+        roomConfig: {
+          ...(provider?.spec?.defaultRoomConfig || {}),
+          ...(template?.spec?.roomConfig || {}),
+          ...(meetingSpec.roomConfig || {}),
+        },
+      };
+      const providerResult = await providerClient.createRoom?.(mergedSpec) || {};
       const resource = createResource('JitsiMeeting', {
         name: meetingSpec.name || roomId,
         namespace: meetingSpec.namespace || `krate-org-${meetingSpec.organizationRef || 'default'}`,
@@ -65,12 +98,12 @@ export function createJitsiMeetingController(options = {}) {
         roomId,
         displayName: meetingSpec.displayName || roomId,
         dispatchRunRef: meetingSpec.dispatchRunRef,
-        ttlMinutes: meetingSpec.ttlMinutes || DEFAULT_TTL_MINUTES,
+        ttlMinutes: mergedSpec.ttlMinutes,
         participants: clone(meetingSpec.participants || { invited: [] }),
-        roomConfig: clone(meetingSpec.roomConfig || {}),
+        roomConfig: clone(mergedSpec.roomConfig || {}),
       }, {
         phase: 'Active',
-        roomUrl: providerResult.roomUrl || meetingSpec.roomUrl || `${meetingSpec.endpoint || 'https://meet.krate.local'}/${roomId}`,
+        roomUrl: providerResult.roomUrl || meetingSpec.roomUrl || `${mergedSpec.endpoint || 'https://meet.krate.local'}/${roomId}`,
         startedAt: isoNow(now),
         endedAt: null,
         duration: null,
@@ -101,11 +134,12 @@ export function createJitsiMeetingController(options = {}) {
       return persisted;
     },
 
-    generateParticipantJwt(roomId, participant = {}, ttlMinutes = DEFAULT_TTL_MINUTES) {
+    generateParticipantJwt(roomId, participant = {}, ttlMinutes = DEFAULT_TTL_MINUTES, providerJwtConfig = {}) {
+      const config = { ...jwtConfig, ...providerJwtConfig, ...(participant.jwtConfig || {}) };
       const claims = {
-        aud: 'jitsi',
-        iss: 'krate',
-        sub: participant.subject || participant.org || 'krate',
+        aud: config.audience || 'jitsi',
+        iss: config.issuer || 'krate',
+        sub: config.subject || participant.subject || participant.org || 'krate',
         room: roomId,
         exp: epochSeconds(now, Math.max(1, Number(ttlMinutes) || DEFAULT_TTL_MINUTES)),
         context: {
@@ -119,9 +153,7 @@ export function createJitsiMeetingController(options = {}) {
           features: participant.features || {},
         },
       };
-      const encoded = Buffer.from(JSON.stringify(claims)).toString('base64url');
-      const signature = crypto.createHmac('sha256', jwtSecret).update(encoded).digest('base64url');
-      return `krate-jitsi.${encoded}.${signature}`;
+      return signJwt(claims, config.secret || jwtSecret);
     },
 
     async reconcile(meeting) {
@@ -163,6 +195,20 @@ export function createJitsiMeetingController(options = {}) {
       if (!meeting) throw new Error(`JitsiMeeting ${meetingRef} not found`);
       const result = await providerClient.startRecording?.(meeting.spec.roomId) || {};
       const recordingId = result.recordingId || `rec-${meeting.metadata.name}`;
+      const recording = createResource('JitsiRecording', {
+        name: recordingId,
+        namespace: meeting.metadata?.namespace,
+      }, {
+        organizationRef: meeting.spec.organizationRef,
+        meetingRef: meeting.metadata.name,
+        providerRef: meeting.spec.providerRef,
+        format: result.format || 'mp4',
+        storageRef: result.storageRef,
+      }, {
+        phase: 'Recording',
+        startedAt: isoNow(now),
+        transcript: { available: false },
+      });
       const updated = {
         ...meeting,
         status: {
@@ -170,6 +216,7 @@ export function createJitsiMeetingController(options = {}) {
           recording: { active: true, recordingId },
         },
       };
+      await persist(recording);
       const persisted = await persist(updated);
       emit('recording-started', persisted, { recordingId });
       return persisted;
@@ -179,11 +226,35 @@ export function createJitsiMeetingController(options = {}) {
       const meeting = await getMeeting(meetingRef);
       if (!meeting) throw new Error(`JitsiMeeting ${meetingRef} not found`);
       const result = await providerClient.stopRecording?.(meeting.spec.roomId) || {};
+      const recordingId = result.recordingId || meeting.status?.recording?.recordingId || null;
+      if (recordingId) {
+        const existingRecording = await getRecording(recordingId);
+        const recording = existingRecording || createResource('JitsiRecording', {
+          name: recordingId,
+          namespace: meeting.metadata?.namespace,
+        }, {
+          organizationRef: meeting.spec.organizationRef,
+          meetingRef: meeting.metadata.name,
+          providerRef: meeting.spec.providerRef,
+          format: result.format || 'mp4',
+          storageRef: result.storageRef,
+        }, {});
+        await persist({
+          ...recording,
+          status: {
+            ...(recording.status || {}),
+            phase: 'Completed',
+            endedAt: isoNow(now),
+            duration: result.duration,
+            transcript: recording.status?.transcript || { available: false },
+          },
+        });
+      }
       const updated = {
         ...meeting,
         status: {
           ...(meeting.status || {}),
-          recording: { active: false, recordingId: result.recordingId || meeting.status?.recording?.recordingId || null },
+          recording: { active: false, recordingId },
         },
       };
       return persist(updated);

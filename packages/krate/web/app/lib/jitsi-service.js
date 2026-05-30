@@ -74,6 +74,37 @@ export async function deleteJitsiResource(org, kind, name, { controller = jitsiC
   return result;
 }
 
+export function createJitsiWebhookDeliveryStore(org, { controller = jitsiController(org) } = {}) {
+  function deliveryName(deliveryId) {
+    return jitsiName(`jitsi-${deliveryId}`, 'jitsi-delivery');
+  }
+
+  return {
+    async get(deliveryId) {
+      if (!deliveryId) return null;
+      return controller.getResourceForOrg?.(org, 'ExternalWebhookDelivery', deliveryName(deliveryId))
+        || controller.getResource?.('ExternalWebhookDelivery', deliveryName(deliveryId))
+        || null;
+    },
+
+    async remember(deliveryId, record = {}) {
+      if (!deliveryId) return null;
+      const resource = orgResource(org, 'ExternalWebhookDelivery', deliveryName(deliveryId), {
+        providerRef: record.providerRef || 'jitsi',
+        eventType: record.eventType || 'jitsi-webhook',
+        payload: {
+          deliveryId,
+          timestamp: record.timestamp,
+        },
+      }, {
+        phase: 'Processed',
+        receivedAt: record.seenAt || new Date().toISOString(),
+      });
+      return controller.applyResourceForOrg?.(org, resource) || controller.applyResource?.(resource);
+    },
+  };
+}
+
 export function createMeetingResource(org, body = {}) {
   const displayName = String(body.displayName || body.name || 'Jitsi meeting');
   const name = jitsiName(body.name || displayName, `meeting-${Date.now()}`);
@@ -213,23 +244,101 @@ export function verifyJitsiWebhookSignature(rawBody, signatureHeader, secret = p
 
 export function createJitsiWebhookDeliveryCache({ ttlMs = 5 * 60 * 1000, replayWindowMs = 5 * 60 * 1000, now = () => Date.now() } = {}) {
   const deliveries = new Map();
+  function localCheckAndRemember(deliveryId, timestamp = new Date(now()).toISOString()) {
+    const currentTime = now();
+    for (const [id, record] of deliveries) {
+      if (currentTime - record.seenAt > ttlMs) deliveries.delete(id);
+    }
+    const eventTime = new Date(timestamp).getTime();
+    if (!Number.isFinite(eventTime) || currentTime - eventTime > replayWindowMs) {
+      return { duplicate: false, replay: true, deliveryId };
+    }
+    if (deliveryId && deliveries.has(deliveryId)) {
+      return { duplicate: true, replay: false, deliveryId };
+    }
+    if (deliveryId) deliveries.set(deliveryId, { seenAt: currentTime, timestamp });
+    return { duplicate: false, replay: false, deliveryId };
+  }
+
   return {
-    checkAndRemember(deliveryId, timestamp = new Date(now()).toISOString()) {
-      const currentTime = now();
-      for (const [id, record] of deliveries) {
-        if (currentTime - record.seenAt > ttlMs) deliveries.delete(id);
-      }
-      const eventTime = new Date(timestamp).getTime();
-      if (Number.isFinite(eventTime) && currentTime - eventTime > replayWindowMs) {
-        return { duplicate: false, replay: true, deliveryId };
-      }
-      if (deliveryId && deliveries.has(deliveryId)) {
-        return { duplicate: true, replay: false, deliveryId };
-      }
-      if (deliveryId) deliveries.set(deliveryId, { seenAt: currentTime, timestamp });
-      return { duplicate: false, replay: false, deliveryId };
+    checkAndRemember(deliveryId, timestamp = new Date(now()).toISOString(), { deliveryStore, eventType, providerRef } = {}) {
+      const local = localCheckAndRemember(deliveryId, timestamp);
+      if (!deliveryStore || !deliveryId || local.replay || local.duplicate) return local;
+      return Promise.resolve(deliveryStore.get(deliveryId)).then(async (existing) => {
+        if (existing) return { duplicate: true, replay: false, deliveryId };
+        await deliveryStore.remember(deliveryId, {
+          eventType,
+          providerRef,
+          timestamp,
+          seenAt: new Date(now()).toISOString(),
+        });
+        return local;
+      });
     },
   };
+}
+
+function cloneMeetingForWebhook(org, meetingRef, payload, existingMeeting) {
+  if (existingMeeting) {
+    return {
+      ...existingMeeting,
+      apiVersion: existingMeeting.apiVersion || 'krate.a5c.ai/v1alpha1',
+      kind: 'JitsiMeeting',
+      metadata: {
+        ...(existingMeeting.metadata || {}),
+        name: existingMeeting.metadata?.name || meetingRef,
+        namespace: existingMeeting.metadata?.namespace || orgNamespaceName(org),
+      },
+      spec: {
+        ...(existingMeeting.spec || {}),
+        organizationRef: existingMeeting.spec?.organizationRef || org,
+        providerRef: existingMeeting.spec?.providerRef || payload.providerRef || 'default',
+        roomId: existingMeeting.spec?.roomId || payload.roomId || payload.roomName || payload.room,
+      },
+      status: {
+        participants: { current: [], total: 0, peak: 0 },
+        recording: { active: false, recordingId: null },
+        ...(existingMeeting.status || {}),
+      },
+    };
+  }
+  return createMeetingResource(org, {
+    name: meetingRef,
+    displayName: payload.displayName || payload.roomName || payload.roomId,
+    providerRef: payload.providerRef || 'default',
+    roomId: payload.roomId || payload.roomName || payload.room,
+    roomUrl: payload.roomUrl,
+    phase: payload.phase || 'Active',
+  });
+}
+
+function withRecordingStatus(meeting, recordingId, active) {
+  return {
+    ...meeting,
+    status: {
+      ...(meeting.status || {}),
+      recording: { active, recordingId: active ? recordingId : null },
+    },
+  };
+}
+
+export async function getExistingJitsiMeeting(org, meetingRef, { controller = jitsiController(org) } = {}) {
+  if (!meetingRef) return null;
+  return controller.getResourceForOrg?.(org, 'JitsiMeeting', meetingRef)
+    || controller.getResource?.('JitsiMeeting', meetingRef)
+    || null;
+}
+
+export async function applyJitsiWebhookResources(org, normalized, { controller = jitsiController(org) } = {}) {
+  const resources = [
+    ...(normalized.relatedResources || []),
+    ...(normalized.resource ? [normalized.resource] : []),
+  ];
+  const results = [];
+  for (const resource of resources) {
+    results.push(await applyJitsiResource(org, resource, { controller, eventType: normalized.eventType }));
+  }
+  return results;
 }
 
 function participantList(meeting, payload, joined) {
@@ -253,7 +362,7 @@ function participantList(meeting, payload, joined) {
   };
 }
 
-export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
+export function handleJitsiWebhookPayload(org, rawBody, { deliveryId, existingMeeting = null } = {}) {
   let payload;
   try {
     payload = JSON.parse(rawBody);
@@ -285,27 +394,15 @@ export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
   }
 
   if (eventType === 'room-destroyed') {
-    const resource = createMeetingResource(org, {
-      name: meetingRef,
-      displayName: payload.displayName || payload.roomName || roomId,
-      providerRef,
-      roomId,
-      roomUrl: payload.roomUrl,
-      phase: 'Ended',
-    });
+    const resource = cloneMeetingForWebhook(org, meetingRef, payload, existingMeeting);
+    resource.status.phase = 'Ended';
     resource.status.endedAt = timestamp;
     return { deliveryId: effectiveDeliveryId, eventType: 'meeting-ended', resource };
   }
 
   if (eventType === 'participant-joined' || eventType === 'participant-left') {
-    const resource = createMeetingResource(org, {
-      name: meetingRef,
-      displayName: payload.displayName || payload.roomName || roomId,
-      providerRef,
-      roomId,
-      roomUrl: payload.roomUrl,
-      phase: 'Active',
-    });
+    const resource = cloneMeetingForWebhook(org, meetingRef, payload, existingMeeting);
+    resource.status.phase = resource.status.phase || 'Active';
     resource.status.participants = participantList(resource, payload, eventType === 'participant-joined');
     return { deliveryId: effectiveDeliveryId, eventType, resource };
   }
@@ -322,6 +419,7 @@ export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
         phase: 'Recording',
         startedAt: timestamp,
       }),
+      relatedResources: [withRecordingStatus(cloneMeetingForWebhook(org, meetingRef, payload, existingMeeting), payload.recordingId, true)],
     };
   }
 
@@ -338,6 +436,7 @@ export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
         endedAt: timestamp,
         duration: payload.duration,
       }),
+      relatedResources: [withRecordingStatus(cloneMeetingForWebhook(org, meetingRef, payload, existingMeeting), payload.recordingId, false)],
     };
   }
 

@@ -1,4 +1,12 @@
-import { applyJitsiResource, createJitsiWebhookDeliveryCache, handleJitsiWebhookPayload, verifyJitsiWebhookSignature } from '../../../../../../lib/jitsi-service.js';
+import {
+  applyJitsiWebhookResources,
+  createJitsiWebhookDeliveryCache,
+  createJitsiWebhookDeliveryStore,
+  getExistingJitsiMeeting,
+  handleJitsiWebhookPayload,
+  jitsiController,
+  verifyJitsiWebhookSignature,
+} from '../../../../../../lib/jitsi-service.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -6,6 +14,7 @@ const deliveries = createJitsiWebhookDeliveryCache();
 
 export const POST = async (request, { params }) => {
   const { org } = await params;
+  const controller = jitsiController(org);
   const rawBody = await request.text();
   const signature = request.headers.get('x-jitsi-signature');
   const verification = verifyJitsiWebhookSignature(rawBody, signature);
@@ -13,10 +22,21 @@ export const POST = async (request, { params }) => {
     return Response.json({ error: verification.reason || 'invalid_signature' }, { status: 400 });
   }
 
+  let payload;
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    return Response.json({ error: 'invalid_json' }, { status: 400 });
+  }
+
   let normalized;
   try {
+    const roomId = payload.roomId || payload.roomName || payload.room;
+    const meetingRef = payload.meetingRef || roomId;
+    const existingMeeting = await getExistingJitsiMeeting(org, meetingRef, { controller });
     normalized = handleJitsiWebhookPayload(org, rawBody, {
       deliveryId: request.headers.get('x-jitsi-delivery') || undefined,
+      existingMeeting,
     });
   } catch (err) {
     if (err.message === 'invalid_json') {
@@ -25,7 +45,11 @@ export const POST = async (request, { params }) => {
     throw err;
   }
 
-  const replay = deliveries.checkAndRemember(normalized.deliveryId, JSON.parse(rawBody).timestamp);
+  const replay = await deliveries.checkAndRemember(normalized.deliveryId, payload.timestamp, {
+    deliveryStore: createJitsiWebhookDeliveryStore(org, { controller }),
+    eventType: normalized.eventType,
+    providerRef: payload.providerRef || 'jitsi',
+  });
   if (replay.replay) {
     return Response.json({ error: 'stale_delivery' }, { status: 409 });
   }
@@ -37,6 +61,6 @@ export const POST = async (request, { params }) => {
     return Response.json({ ok: true, ignored: true, eventType: normalized.eventType }, { headers: { 'Cache-Control': 'no-store' } });
   }
 
-  const result = await applyJitsiResource(org, normalized.resource, { eventType: normalized.eventType });
+  const result = await applyJitsiWebhookResources(org, normalized, { controller });
   return Response.json({ ok: true, eventType: normalized.eventType, result }, { headers: { 'Cache-Control': 'no-store' } });
 };
