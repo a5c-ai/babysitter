@@ -1,0 +1,98 @@
+{
+  "issueNumber": 601,
+  "title": "Remaining here-be-dragons: process.env coupling, missing caveats",
+  "baseBranch": "staging",
+  "workBranch": "fix/issue-601-here-be-dragons",
+  "relatedIssues": [584, 586],
+  "priorPrs": [683, 716],
+  "maxImplementationLoops": 2,
+  "labels": [
+    "priority:medium",
+    "P2",
+    "agent-core",
+    "agent-platform",
+    "agent-mux",
+    "testing",
+    "refactor",
+    "effort:large",
+    "risk:high",
+    "here-be-dragons",
+    "automated-triage"
+  ],
+  "issueDisposition": "Umbrella tracker; audit current base branch and prior PRs before treating any stream as residual.",
+  "reuseAuditKeywords": [
+    "here-be-dragons",
+    "process.env mutation",
+    "WeakMap disposal",
+    "piWrapper initPromise",
+    "/bin/bash portability",
+    "SessionDetailScreen skipped tests",
+    "skipLibCheck",
+    "E2E coverage gaps",
+    "duplicate utility patterns",
+    "docs caveats"
+  ],
+  "coveredByRelatedIssues": [
+    {
+      "issue": 584,
+      "scope": "process.env mutation coupling"
+    },
+    {
+      "issue": 586,
+      "scope": "kanban sealed switch/exhaustiveness maintenance debt"
+    }
+  ],
+  "priorWorkToAudit": [
+    {
+      "pr": 683,
+      "stateAtPlanning": "merged",
+      "scope": "implementation work for #601"
+    },
+    {
+      "pr": 716,
+      "stateAtPlanning": "open",
+      "scope": "process-artifact refresh for #601"
+    }
+  ],
+  "candidateResidualStreams": [
+    "WeakMap tool disposal ownership and copied/recreated tool arrays",
+    "piWrapper lazy init retry storms and backoff/circuit-breaker behavior",
+    "portable shell selection while preserving explicit bash opt-in",
+    "unexplained SessionDetailScreen skipped UI tests",
+    "root skipLibCheck disposition",
+    "agent-mux orchestration, hook-mux lifecycle, and trigger dispatch E2E coverage gaps",
+    "duplicated utility patterns around platform detection, path normalization, and config loading",
+    "docs/here-be-dragons.md caveat accuracy"
+  ],
+  "targetEvidenceFiles": [
+    "docs/here-be-dragons.md",
+    "packages/agent-core/src/agenticTools/index.ts",
+    "packages/agent-platform/src/harness/piWrapper.ts",
+    "packages/agent-core/src/agenticTools/tools/execution.ts",
+    "packages/agent-platform/src/harness/agenticTools/tools/execution.ts",
+    "packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx",
+    "tsconfig.json",
+    ".a5c/processes/issue-601-remaining-dragons-plan.mjs",
+    ".a5c/processes/issue-601-remaining-dragons-plan.inputs.json"
+  ],
+  "verificationCommands": [
+    "npm run test --workspace=@a5c-ai/agent-core",
+    "npm run test --workspace=@a5c-ai/agent-platform",
+    "npm run test:realtime --workspace=@a5c-ai/agent-mux-ui",
+    "npm run build:runtime",
+    "npm run test:agent-mux",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "staticGuards": [
+    "No unexplained it.skip entries remain in packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx.",
+    "Any deferred residual stream has an explicit follow-up acceptance criterion.",
+    "Docs updates reflect only work actually fixed or explicitly split."
+  ],
+  "nonGoals": [
+    "Do not duplicate #584 process.env coupling work.",
+    "Do not duplicate #586 kanban exhaustiveness work.",
+    "Do not overwrite PR #716 process artifacts without a maintainer decision.",
+    "Do not add migrations, API routes, SDK dependencies, or new environment variables unless runtime evidence proves they are necessary."
+  ]
+}
