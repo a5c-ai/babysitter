@@ -89,6 +89,56 @@ export function createDelegationTools(options: AgenticToolOptions): CustomToolDe
         return jsonResult(await options.taskHandler(params));
       },
     },
+    createNativeTaskTool(
+      options,
+      "create_todo",
+      "Create Todo",
+      "Create a todo through the host task router. Hosts with tasks-mux support should route this through tasks-mux.",
+      Type.Object({
+        title: Type.String({ description: "Short todo title" }),
+        description: Type.Optional(Type.String({ description: "Optional todo details" })),
+        ...nativeRoutingProperties(),
+      }),
+    ),
+    createNativeTaskTool(
+      options,
+      "assign_task",
+      "Assign Task",
+      "Assign a task through the host task router. Hosts with tasks-mux support should route this through tasks-mux.",
+      Type.Object({
+        title: Type.String({ description: "Task title" }),
+        instructions: Type.Optional(Type.String({ description: "Task instructions or acceptance notes" })),
+        assignee: Type.Optional(Type.String({ description: "Responder id to assign to" })),
+        ...nativeRoutingProperties(),
+      }),
+    ),
+    createNativeTaskTool(
+      options,
+      "search_tasks",
+      "Search Tasks",
+      "Search tasks visible to the host task router.",
+      Type.Object({
+        query: Type.Optional(Type.String({ description: "Search text" })),
+        status: Type.Optional(Type.String({ description: "Task status filter" })),
+        responderId: Type.Optional(Type.String({ description: "Responder id filter" })),
+        domain: Type.Optional(Type.String({ description: "Domain filter" })),
+        tags: Type.Optional(Type.Array(Type.String(), { description: "Required tags" })),
+        limit: Type.Optional(Type.Number({ description: "Maximum number of tasks to return" })),
+      }),
+    ),
+    createNativeTaskTool(
+      options,
+      "escalate",
+      "Escalate",
+      "Escalate an existing task or create a high-urgency routed intervention.",
+      Type.Object({
+        taskId: Type.Optional(Type.String({ description: "Existing task id to escalate" })),
+        title: Type.Optional(Type.String({ description: "Escalation title" })),
+        reason: Type.String({ description: "Why escalation is required" }),
+        targetResponderId: Type.Optional(Type.String({ description: "Responder id to receive escalation" })),
+        ...nativeRoutingProperties(),
+      }),
+    ),
     {
       name: "skill",
       label: "Skill",
@@ -139,4 +189,62 @@ function createDelegatedTaskSchema(taskDescription: string) {
     })),
     subagentName: Type.Optional(Type.String({ description: "Preferred subagent/agent directory name" })),
   });
+}
+
+function createNativeTaskTool(
+  options: AgenticToolOptions,
+  name: "create_todo" | "assign_task" | "search_tasks" | "escalate",
+  label: string,
+  description: string,
+  parameters: CustomToolDefinition["parameters"],
+): CustomToolDefinition {
+  return {
+    name,
+    label,
+    description,
+    promptSnippet: `Use ${name} when work should be visible to the host task router.`,
+    parameters,
+    execute: async (_toolCallId, params) => {
+      if (!options.taskHandler) {
+        return errorResult("No taskHandler provided.");
+      }
+      return jsonResult(await options.taskHandler({
+        ...params,
+        tool: name,
+        action: name,
+      }));
+    },
+  };
+}
+
+function nativeRoutingProperties() {
+  return {
+    responderId: Type.Optional(Type.String({ description: "Preferred responder id" })),
+    responderType: Type.Optional(Type.Union([
+      Type.Literal("human"),
+      Type.Literal("agent"),
+      Type.Literal("tracker"),
+      Type.Literal("internal"),
+      Type.Literal("auto"),
+    ], { description: "Preferred responder type" })),
+    adapter: Type.Optional(Type.String({ description: "Agent adapter hint" })),
+    model: Type.Optional(Type.String({ description: "Model hint" })),
+    provider: Type.Optional(Type.String({ description: "Provider hint" })),
+    trackerBackend: Type.Optional(Type.String({ description: "External tracker backend hint" })),
+    fallbackType: Type.Optional(Type.Union([
+      Type.Literal("human"),
+      Type.Literal("agent"),
+      Type.Literal("tracker"),
+      Type.Literal("internal"),
+      Type.Literal("auto"),
+    ], { description: "Fallback responder type" })),
+    tags: Type.Optional(Type.Array(Type.String(), { description: "Task tags" })),
+    domain: Type.Optional(Type.String({ description: "Task domain" })),
+    urgency: Type.Optional(Type.Union([
+      Type.Literal("low"),
+      Type.Literal("medium"),
+      Type.Literal("high"),
+    ], { description: "Task urgency" })),
+    sourceUrl: Type.Optional(Type.String({ description: "Source URL" })),
+  };
 }

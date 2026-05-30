@@ -205,6 +205,26 @@ export {
   startBreakpointMcpServer,
 } from "./mcp/index.js";
 
+export {
+  handleCreateTodo,
+  createTodoDescription,
+  createTodoParams,
+  handleAssignTask,
+  assignTaskDescription,
+  assignTaskParams,
+  handleSearchTasks,
+  searchTasksDescription,
+  searchTasksParams,
+  handleEscalate,
+  escalateDescription,
+  escalateParams,
+} from "./mcp/index.js";
+
+export type {
+  NativeTaskResult,
+  SearchTasksResult,
+} from "./mcp/index.js";
+
 // ── Harness Integration ─────────────────────────────────────────────
 export {
   BreakpointMuxInteractionProvider,

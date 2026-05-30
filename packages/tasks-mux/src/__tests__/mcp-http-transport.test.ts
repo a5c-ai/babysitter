@@ -596,17 +596,21 @@ describe("MCP HTTP Transport", () => {
       expect(toolsBody.result).toBeDefined();
       expect(toolsBody.result.tools).toBeInstanceOf(Array);
 
-      // Should expose the current 8 public tools
+      // Should expose breakpoint/responder tools plus native task tools.
       const toolNames = toolsBody.result.tools.map((t: { name: string }) => t.name);
       expect(toolNames).toContain("ask_breakpoint");
       expect(toolNames).toContain("check_breakpoint_status");
       expect(toolNames).toContain("list_breakpoints");
+      expect(toolNames).toContain("create_todo");
+      expect(toolNames).toContain("assign_task");
+      expect(toolNames).toContain("search_tasks");
+      expect(toolNames).toContain("escalate");
       expect(toolNames).toContain("answer_breakpoint");
       expect(toolNames).toContain("verify_breakpoint_answer");
       expect(toolNames).toContain("list_responders");
       expect(toolNames).toContain("claim_breakpoint");
       expect(toolNames).toContain("poll_breakpoints");
-      expect(toolNames.length).toBe(8);
+      expect(toolNames.length).toBe(12);
     });
   });
 

@@ -253,6 +253,42 @@ describe("agent-core tools", () => {
       .toBe(true);
   });
 
+  it("exposes native task-router tools and delegates through taskHandler", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-native-task-tools-"));
+    const taskHandler = vi.fn(async (params) => ({ routed: true, params }));
+    const definitions = getToolDefinitions(workspace, { taskHandler });
+
+    for (const name of ["create_todo", "assign_task", "search_tasks", "escalate"]) {
+      expect(definitions.some((tool) => tool.name === name)).toBe(true);
+    }
+
+    const createTodo = definitions.find((tool) => tool.name === "create_todo");
+    if (!createTodo) {
+      throw new Error("create_todo not found");
+    }
+
+    const result = await createTodo.execute("call-create-todo", {
+      title: "Review tasks-mux routing",
+      responderType: "human",
+    });
+
+    expect(taskHandler).toHaveBeenCalledWith({
+      title: "Review tasks-mux routing",
+      responderType: "human",
+      tool: "create_todo",
+      action: "create_todo",
+    });
+    expect(JSON.parse(getText(result))).toEqual({
+      routed: true,
+      params: {
+        title: "Review tasks-mux routing",
+        responderType: "human",
+        tool: "create_todo",
+        action: "create_todo",
+      },
+    });
+  });
+
   it("executes a programmatic tool chain against existing tools", async () => {
     const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-code-mode-"));
     writeFileSync(path.join(workspace, "note.txt"), "alpha\nbeta\n", "utf8");
