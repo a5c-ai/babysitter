@@ -1,0 +1,37 @@
+{
+  "issueNumber": 596,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-596-tasks-mux-task-management",
+  "maxImplementationAttempts": 3,
+  "packageName": "@a5c-ai/tasks-mux",
+  "targetPackagePath": "packages/tasks-mux",
+  "relatedIssues": [577, 597, 634],
+  "qualityGates": [
+    "git diff --check",
+    "npm run lint --workspace=@a5c-ai/tasks-mux",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-mux",
+    "npm run build --workspace=@a5c-ai/tasks-mux",
+    "npm pack --json --dry-run --workspace=@a5c-ai/tasks-mux",
+    "npm run verify:metadata"
+  ],
+  "expectedFeatureAreas": [
+    "priority",
+    "dependencies",
+    "search-filter",
+    "bulk-operations",
+    "richer-statuses",
+    "history-timeline",
+    "comments-discussions",
+    "metrics-sla",
+    "notifications",
+    "escalation-chains",
+    "interactive-forms",
+    "state-transition-validation",
+    "audit-log",
+    "export-backup",
+    "cli-mcp-parity",
+    "backend-parity"
+  ]
+}
