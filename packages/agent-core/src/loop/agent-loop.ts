@@ -11,6 +11,9 @@ import type {
   AgentLoop,
   AgentLoopConfig,
   AgentLoopIterationResult,
+  AgentLoopPromptContext,
+  AgentLoopRunOptions,
+  AgentLoopStrategy,
   AgentLoopState,
 } from "./types";
 import { SequentialLoopRunner } from "./strategies/sequential";
@@ -31,6 +34,7 @@ import { HandoffLoopRunner } from "./strategies/handoff";
 export type PromptFn<TInput, TOutput> = (
   input: TInput,
   agentId: string,
+  context?: AgentLoopPromptContext,
 ) => Promise<TOutput>;
 
 // ---------------------------------------------------------------------------
@@ -79,11 +83,14 @@ export class AgentLoopImpl<TInput = string, TOutput = unknown>
   // AgentLoop interface
   // -----------------------------------------------------------------------
 
-  async iterate(input: TInput): Promise<AgentLoopIterationResult<TOutput>> {
+  async iterate(
+    input: TInput,
+    options?: AgentLoopRunOptions,
+  ): Promise<AgentLoopIterationResult<TOutput>> {
     this.state = "running";
 
     try {
-      const result = await this.runIteration(input);
+      const result = await this.runIteration(input, options);
       this.iterationCount++;
       this.notifyCallbacks(result);
       return result;
@@ -95,12 +102,15 @@ export class AgentLoopImpl<TInput = string, TOutput = unknown>
 
   async *run(
     input: TInput,
+    options?: AgentLoopRunOptions,
   ): AsyncIterable<AgentLoopIterationResult<TOutput>> {
     this.state = "running";
     this.iterationCount = 0;
 
     try {
       while (true) {
+        this.throwIfAborted(options?.signal);
+
         // Check max iterations
         if (
           this.config.maxIterations !== undefined &&
@@ -114,7 +124,7 @@ export class AgentLoopImpl<TInput = string, TOutput = unknown>
           break;
         }
 
-        const result = await this.runIteration(input);
+        const result = await this.runIteration(input, options);
         this.iterationCount++;
         this.notifyCallbacks(result);
 
@@ -174,35 +184,51 @@ export class AgentLoopImpl<TInput = string, TOutput = unknown>
 
   private async runIteration(
     input: TInput,
+    options?: AgentLoopRunOptions,
   ): Promise<AgentLoopIterationResult<TOutput>> {
     const iterationIndex = this.iterationCount;
+    this.throwIfAborted(options?.signal);
 
     // Apply per-iteration timeout if configured
+    let promise = this.dispatchToStrategy(input, iterationIndex, options);
+
     if (this.config.iterationTimeoutMs !== undefined) {
-      return this.withTimeout(
-        this.dispatchToStrategy(input, iterationIndex),
-        this.config.iterationTimeoutMs,
-      );
+      promise = this.withTimeout(promise, this.config.iterationTimeoutMs);
     }
 
-    return this.dispatchToStrategy(input, iterationIndex);
+    if (options?.signal) {
+      promise = this.withAbort(promise, options.signal);
+    }
+
+    return promise;
   }
 
   private async dispatchToStrategy(
     input: TInput,
     iterationIndex: number,
+    options?: AgentLoopRunOptions,
   ): Promise<AgentLoopIterationResult<TOutput>> {
     const { strategy } = this.config;
+    return this.dispatchSingleStrategy(strategy, input, iterationIndex, options);
+  }
+
+  private async dispatchSingleStrategy(
+    strategy: AgentLoopStrategy,
+    input: TInput,
+    iterationIndex: number,
+    options?: AgentLoopRunOptions,
+  ): Promise<AgentLoopIterationResult<TOutput>> {
+    const promptContext = { signal: options?.signal };
 
     switch (strategy.kind) {
       case "sequential": {
         const runner = this.getSequentialRunner();
-        return runner.run(input, iterationIndex);
+        return runner.run(input, iterationIndex, promptContext);
       }
 
       case "concurrent": {
         const runner = this.getConcurrentRunner();
-        const result = await runner.run(input, iterationIndex);
+        const result = await runner.run(input, iterationIndex, promptContext);
 
         // Runtime shape check: the concurrent runner wraps TOutput inside
         // ConcurrentIterationOutput<TOutput>.  Validate the envelope before
@@ -234,12 +260,31 @@ export class AgentLoopImpl<TInput = string, TOutput = unknown>
 
       case "group-chat": {
         const runner = this.getGroupChatRunner();
-        return runner.run(input, iterationIndex);
+        return runner.run(input, iterationIndex, promptContext);
       }
 
       case "handoff": {
         const runner = this.getHandoffRunner();
-        return runner.run(input, iterationIndex);
+        return runner.run(input, iterationIndex, promptContext);
+      }
+
+      case "composed": {
+        const start = Date.now();
+        const results = [];
+        for (const childStrategy of strategy.strategies) {
+          const childLoop = new AgentLoopImpl<TInput, TOutput>(
+            { strategy: childStrategy, maxIterations: 1 },
+            this.promptFn,
+            [...this.agentIds],
+          );
+          results.push(await childLoop.iterate(input, options));
+        }
+        return {
+          index: iterationIndex,
+          agentId: "composed",
+          output: { results } as TOutput,
+          durationMs: Date.now() - start,
+        };
       }
 
       default: {
@@ -350,6 +395,35 @@ export class AgentLoopImpl<TInput = string, TOutput = unknown>
           reject(err);
         });
     });
+  }
+
+  private async withAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+    this.throwIfAborted(signal);
+
+    return new Promise<T>((resolve, reject) => {
+      const onAbort = () => reject(this.abortError());
+      signal.addEventListener("abort", onAbort, { once: true });
+
+      promise
+        .then((value) => {
+          signal.removeEventListener("abort", onAbort);
+          resolve(value);
+        })
+        .catch((err) => {
+          signal.removeEventListener("abort", onAbort);
+          reject(err);
+        });
+    });
+  }
+
+  private throwIfAborted(signal?: AbortSignal): void {
+    if (signal?.aborted) {
+      throw this.abortError();
+    }
+  }
+
+  private abortError(): Error {
+    return new Error("Agent loop cancelled");
   }
 }
 

@@ -15,7 +15,8 @@ export type AgentLoopStrategyKind =
   | 'sequential'
   | 'concurrent'
   | 'group-chat'
-  | 'handoff';
+  | 'handoff'
+  | 'composed';
 
 /** Sequential: one agent processes turns in order. */
 export interface SequentialStrategy {
@@ -30,6 +31,8 @@ export interface ConcurrentStrategy {
   readonly kind: 'concurrent';
   /** Maximum number of agents that may run in parallel. */
   readonly maxParallelism?: number;
+  /** Optional timeout for each individual agent prompt. */
+  readonly perAgentTimeoutMs?: number;
 }
 
 /**
@@ -44,6 +47,14 @@ export interface GroupChatStrategy {
   readonly moderatorAgentId?: string;
 }
 
+/** Context passed to a handoff input transformer. */
+export interface HandoffContextTransfer<TInput = unknown, TOutput = unknown> {
+  readonly previousInput: TInput;
+  readonly output: TOutput;
+  readonly fromAgentId: string;
+  readonly toAgentId: string;
+}
+
 /**
  * Handoff: the active agent explicitly transfers control to another agent.
  * The loop ends when no further handoff is requested or a terminal
@@ -55,6 +66,16 @@ export interface HandoffStrategy {
   readonly entryAgentId: string;
   /** Maximum handoffs before forced termination. */
   readonly maxHandoffs?: number;
+  /** Optional transformer for the input sent to the next handoff target. */
+  readonly prepareHandoffInput?: (
+    context: HandoffContextTransfer,
+  ) => unknown;
+}
+
+/** Composition: execute multiple strategies as one loop iteration. */
+export interface ComposedStrategy {
+  readonly kind: 'composed';
+  readonly strategies: readonly AgentLoopStrategy[];
 }
 
 /** Union of all supported loop strategies. */
@@ -62,7 +83,8 @@ export type AgentLoopStrategy =
   | SequentialStrategy
   | ConcurrentStrategy
   | GroupChatStrategy
-  | HandoffStrategy;
+  | HandoffStrategy
+  | ComposedStrategy;
 
 // ---------------------------------------------------------------------------
 // Loop State
@@ -132,6 +154,16 @@ export interface AgentLoopConfig<TOutput = unknown> {
   ) => boolean | Promise<boolean>;
 }
 
+/** Prompt execution context supplied by loop runners. */
+export interface AgentLoopPromptContext {
+  readonly signal?: AbortSignal;
+}
+
+/** Options accepted by loop execution methods. */
+export interface AgentLoopRunOptions {
+  readonly signal?: AbortSignal;
+}
+
 // ---------------------------------------------------------------------------
 // AgentLoop Interface
 // ---------------------------------------------------------------------------
@@ -150,7 +182,10 @@ export interface AgentLoop<TInput = string, TOutput = unknown> {
    * @param input - The input payload for this iteration (e.g. a user prompt).
    * @returns The result of the iteration.
    */
-  iterate(input: TInput): Promise<AgentLoopIterationResult<TOutput>>;
+  iterate(
+    input: TInput,
+    options?: AgentLoopRunOptions,
+  ): Promise<AgentLoopIterationResult<TOutput>>;
 
   /**
    * Run the loop to completion, yielding results as an async iterable.
@@ -160,7 +195,10 @@ export interface AgentLoop<TInput = string, TOutput = unknown> {
    *
    * @param input - The initial input payload.
    */
-  run(input: TInput): AsyncIterable<AgentLoopIterationResult<TOutput>>;
+  run(
+    input: TInput,
+    options?: AgentLoopRunOptions,
+  ): AsyncIterable<AgentLoopIterationResult<TOutput>>;
 
   /** Return the current observable state of the loop. */
   getState(): AgentLoopState;

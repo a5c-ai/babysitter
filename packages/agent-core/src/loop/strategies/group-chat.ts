@@ -9,11 +9,16 @@
  * returning a next-speaker selection as part of its output.
  */
 
-import type { AgentLoopIterationResult, GroupChatStrategy } from "../types";
+import type {
+  AgentLoopIterationResult,
+  AgentLoopPromptContext,
+  GroupChatStrategy,
+} from "../types";
 
 export type PromptFn<TInput, TOutput> = (
   input: TInput,
   agentId: string,
+  context?: AgentLoopPromptContext,
 ) => Promise<TOutput>;
 
 export interface GroupChatLoopRunnerConfig {
@@ -59,6 +64,7 @@ export class GroupChatLoopRunner<TInput, TOutput> {
   async run(
     input: TInput,
     iterationIndex: number,
+    context?: AgentLoopPromptContext,
   ): Promise<AgentLoopIterationResult<TOutput>> {
     if (this.isExhausted) {
       throw new Error(
@@ -70,16 +76,18 @@ export class GroupChatLoopRunner<TInput, TOutput> {
 
     if (this.moderatorAgentId) {
       // Ask the moderator to select the next speaker.
-      // The moderator's output is expected to be a string containing the agent id.
-      const moderatorOutput = await this.promptFn(input, this.moderatorAgentId);
-      const selectedAgent = this.resolveModeratorSelection(moderatorOutput);
-      currentSpeaker = selectedAgent ?? this.agentIds[this.speakerIndex]!;
+      const moderatorOutput = await this.promptFn(
+        input,
+        this.moderatorAgentId,
+        context,
+      );
+      currentSpeaker = this.resolveModeratorSelection(moderatorOutput);
     } else {
       currentSpeaker = this.agentIds[this.speakerIndex]!;
     }
 
     const start = Date.now();
-    const output = await this.promptFn(input, currentSpeaker);
+    const output = await this.promptFn(input, currentSpeaker, context);
     const durationMs = Date.now() - start;
 
     // Advance round-robin pointer
@@ -106,17 +114,57 @@ export class GroupChatLoopRunner<TInput, TOutput> {
   }
 
   /**
-   * Best-effort extraction of a selected agent from the moderator output.
-   * Returns the agent ID if the output contains exactly one known agent id,
-   * otherwise falls back to undefined (round-robin).
+   * Extract and validate a selected agent from moderator output.
+   * Structured output is preferred: `{ nextAgentId: "agent-id" }`.
+   * String output is accepted only when it maps to exactly one configured agent.
    */
-  private resolveModeratorSelection(output: TOutput): string | undefined {
-    const text = typeof output === "string" ? output : String(output);
-    for (const id of this.agentIds) {
-      if (text.includes(id)) {
-        return id;
+  private resolveModeratorSelection(output: TOutput): string {
+    const structured = this.extractStructuredSelection(output);
+    if (structured !== undefined) {
+      this.assertKnownAgent(structured);
+      return structured;
+    }
+
+    const text = typeof output === "string" ? output.trim() : String(output);
+    const exact = this.agentIds.filter((id) => text === id);
+    if (exact.length === 1) {
+      return exact[0]!;
+    }
+
+    const mentioned = this.agentIds.filter((id) => text.includes(id));
+    if (mentioned.length === 1) {
+      return mentioned[0]!;
+    }
+    if (mentioned.length > 1) {
+      throw new Error(
+        `Moderator selected multiple agents: ${mentioned.join(", ")}`,
+      );
+    }
+
+    throw new Error(`Moderator selected unknown agent: ${text}`);
+  }
+
+  private extractStructuredSelection(output: TOutput): string | undefined {
+    if (output !== null && typeof output === "object") {
+      const record = output as { nextAgentId?: unknown; agentId?: unknown };
+      const target = record.nextAgentId ?? record.agentId;
+      return typeof target === "string" ? target : undefined;
+    }
+
+    if (typeof output === "string" && output.trim().startsWith("{")) {
+      try {
+        return this.extractStructuredSelection(JSON.parse(output));
+      } catch {
+        return undefined;
       }
     }
+
     return undefined;
+  }
+
+  private assertKnownAgent(agentId: string): void {
+    if (!this.agentIds.includes(agentId)) {
+      throw new Error(`Moderator selected unknown agent: ${agentId}`);
+    }
   }
 }

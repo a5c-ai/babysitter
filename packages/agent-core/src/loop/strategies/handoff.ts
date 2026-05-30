@@ -9,11 +9,17 @@
  * switches to prevent infinite delegation chains.
  */
 
-import type { AgentLoopIterationResult, HandoffStrategy } from "../types";
+import type {
+  AgentLoopIterationResult,
+  AgentLoopPromptContext,
+  HandoffContextTransfer,
+  HandoffStrategy,
+} from "../types";
 
 export type PromptFn<TInput, TOutput> = (
   input: TInput,
   agentId: string,
+  context?: AgentLoopPromptContext,
 ) => Promise<TOutput>;
 
 /**
@@ -34,9 +40,13 @@ export class HandoffLoopRunner<TInput, TOutput> {
   private readonly entryAgentId: string;
   private readonly agentIds: ReadonlySet<string>;
   private readonly maxHandoffs: number;
+  private readonly prepareHandoffInput:
+    | ((context: HandoffContextTransfer<TInput, TOutput>) => TInput)
+    | undefined;
   private readonly promptFn: PromptFn<TInput, TOutput>;
 
   private currentAgentId: string;
+  private nextInput: TInput | undefined;
   private handoffCount = 0;
   private _terminated = false;
 
@@ -46,7 +56,13 @@ export class HandoffLoopRunner<TInput, TOutput> {
   ) {
     this.entryAgentId = config.strategy.entryAgentId;
     this.agentIds = new Set(config.agentIds);
+    if (!this.agentIds.has(this.entryAgentId)) {
+      throw new Error(`Unknown handoff entry agent: ${this.entryAgentId}`);
+    }
     this.maxHandoffs = config.strategy.maxHandoffs ?? Infinity;
+    this.prepareHandoffInput = config.strategy.prepareHandoffInput as
+      | ((context: HandoffContextTransfer<TInput, TOutput>) => TInput)
+      | undefined;
     this.promptFn = promptFn;
     this.currentAgentId = this.entryAgentId;
   }
@@ -59,24 +75,33 @@ export class HandoffLoopRunner<TInput, TOutput> {
   async run(
     input: TInput,
     iterationIndex: number,
+    context?: AgentLoopPromptContext,
   ): Promise<AgentLoopIterationResult<TOutput>> {
     if (this._terminated) {
       throw new Error("HandoffLoopRunner: loop has already terminated");
     }
 
     const agentId = this.currentAgentId;
+    const currentInput = this.nextInput ?? input;
     const start = Date.now();
-    const output = await this.promptFn(input, agentId);
+    const output = await this.promptFn(currentInput, agentId, context);
     const durationMs = Date.now() - start;
 
     // Determine if a handoff was requested
     const handoffTarget = this.extractHandoffTarget(output);
 
     if (handoffTarget) {
+      this.assertKnownTarget(handoffTarget);
       if (this.handoffCount >= this.maxHandoffs) {
         // Max handoffs reached — terminate after this iteration
         this._terminated = true;
       } else {
+        this.nextInput = this.buildNextInput(
+          currentInput,
+          output,
+          agentId,
+          handoffTarget,
+        );
         this.currentAgentId = handoffTarget;
         this.handoffCount++;
       }
@@ -96,6 +121,7 @@ export class HandoffLoopRunner<TInput, TOutput> {
 
   reset(): void {
     this.currentAgentId = this.entryAgentId;
+    this.nextInput = undefined;
     this.handoffCount = 0;
     this._terminated = false;
   }
@@ -116,5 +142,29 @@ export class HandoffLoopRunner<TInput, TOutput> {
       return typeof target === "string" ? target : undefined;
     }
     return undefined;
+  }
+
+  private assertKnownTarget(target: string): void {
+    if (!this.agentIds.has(target)) {
+      throw new Error(`Unknown handoff target: ${target}`);
+    }
+  }
+
+  private buildNextInput(
+    previousInput: TInput,
+    output: TOutput,
+    fromAgentId: string,
+    toAgentId: string,
+  ): TInput {
+    if (!this.prepareHandoffInput) {
+      return previousInput;
+    }
+
+    return this.prepareHandoffInput({
+      previousInput,
+      output,
+      fromAgentId,
+      toAgentId,
+    });
   }
 }

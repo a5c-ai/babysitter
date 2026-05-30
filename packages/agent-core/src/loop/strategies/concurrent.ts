@@ -6,11 +6,16 @@
  * into groups that run sequentially.
  */
 
-import type { AgentLoopIterationResult, ConcurrentStrategy } from "../types";
+import type {
+  AgentLoopIterationResult,
+  AgentLoopPromptContext,
+  ConcurrentStrategy,
+} from "../types";
 
 export type PromptFn<TInput, TOutput> = (
   input: TInput,
   agentId: string,
+  context?: AgentLoopPromptContext,
 ) => Promise<TOutput>;
 
 export interface ConcurrentLoopRunnerConfig {
@@ -21,14 +26,27 @@ export interface ConcurrentLoopRunnerConfig {
 /** Result wrapper that includes per-agent settled status. */
 export interface ConcurrentIterationOutput<TOutput> {
   readonly results: ReadonlyArray<
-    | { readonly status: "fulfilled"; readonly agentId: string; readonly output: TOutput }
-    | { readonly status: "rejected"; readonly agentId: string; readonly reason: unknown }
+    | {
+        readonly status: "fulfilled";
+        readonly agentId: string;
+        readonly output: TOutput;
+        readonly durationMs: number;
+      }
+    | {
+        readonly status: "rejected";
+        readonly agentId: string;
+        readonly reason: unknown;
+        readonly durationMs: number;
+        readonly timedOut?: boolean;
+      }
   >;
+  readonly partial: boolean;
 }
 
 export class ConcurrentLoopRunner<TInput, TOutput> {
   private readonly agentIds: readonly string[];
   private readonly maxParallelism: number;
+  private readonly perAgentTimeoutMs: number | undefined;
   private readonly promptFn: PromptFn<TInput, TOutput>;
 
   constructor(
@@ -37,12 +55,14 @@ export class ConcurrentLoopRunner<TInput, TOutput> {
   ) {
     this.agentIds = config.agentIds;
     this.maxParallelism = config.strategy.maxParallelism ?? config.agentIds.length;
+    this.perAgentTimeoutMs = config.strategy.perAgentTimeoutMs;
     this.promptFn = promptFn;
   }
 
   async run(
     input: TInput,
     iterationIndex: number,
+    context?: AgentLoopPromptContext,
   ): Promise<AgentLoopIterationResult<ConcurrentIterationOutput<TOutput>>> {
     const start = Date.now();
 
@@ -51,19 +71,11 @@ export class ConcurrentLoopRunner<TInput, TOutput> {
     // Process agents in batches of maxParallelism
     for (let i = 0; i < this.agentIds.length; i += this.maxParallelism) {
       const batch = this.agentIds.slice(i, i + this.maxParallelism);
-      const settled = await Promise.allSettled(
-        batch.map((agentId) => this.promptFn(input, agentId)),
+      const settled = await Promise.all(
+        batch.map((agentId) => this.runAgent(input, agentId, context)),
       );
 
-      for (let j = 0; j < settled.length; j++) {
-        const s = settled[j]!;
-        const agentId = batch[j]!;
-        if (s.status === "fulfilled") {
-          allResults.push({ status: "fulfilled", agentId, output: s.value });
-        } else {
-          allResults.push({ status: "rejected", agentId, reason: s.reason });
-        }
-      }
+      allResults.push(...settled);
     }
 
     const durationMs = Date.now() - start;
@@ -71,8 +83,72 @@ export class ConcurrentLoopRunner<TInput, TOutput> {
     return {
       index: iterationIndex,
       agentId: this.agentIds[0] ?? "concurrent",
-      output: { results: allResults },
+      output: {
+        results: allResults,
+        partial: allResults.some((result) => result.status === "rejected"),
+      },
       durationMs,
     };
+  }
+
+  private async runAgent(
+    input: TInput,
+    agentId: string,
+    context?: AgentLoopPromptContext,
+  ): Promise<ConcurrentIterationOutput<TOutput>["results"][number]> {
+    const start = Date.now();
+    try {
+      const output = await this.withOptionalTimeout(
+        this.promptFn(input, agentId, context),
+        agentId,
+      );
+      return {
+        status: "fulfilled",
+        agentId,
+        output,
+        durationMs: Date.now() - start,
+      };
+    } catch (reason) {
+      return {
+        status: "rejected",
+        agentId,
+        reason,
+        durationMs: Date.now() - start,
+        ...(this.isTimeoutError(reason) ? { timedOut: true } : {}),
+      };
+    }
+  }
+
+  private async withOptionalTimeout(
+    promise: Promise<TOutput>,
+    agentId: string,
+  ): Promise<TOutput> {
+    if (this.perAgentTimeoutMs === undefined) {
+      return promise;
+    }
+
+    return new Promise<TOutput>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(
+          new Error(
+            `Agent ${agentId} timed out after ${this.perAgentTimeoutMs}ms`,
+          ),
+        );
+      }, this.perAgentTimeoutMs);
+
+      promise
+        .then((value) => {
+          clearTimeout(timer);
+          resolve(value);
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
+  }
+
+  private isTimeoutError(reason: unknown): boolean {
+    return reason instanceof Error && reason.message.includes("timed out");
   }
 }

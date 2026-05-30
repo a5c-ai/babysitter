@@ -90,6 +90,43 @@ describe("AgentLoop — concurrent strategy", () => {
     expect(output.results.map((r) => r.agentId)).toEqual(["a1", "a2", "a3"]);
     expect(promptFn).toHaveBeenCalledTimes(3);
   });
+
+  it("enforces per-agent timeout while returning partial results", async () => {
+    const promptFn = vi.fn(async (_input: string, agentId: string) => {
+      if (agentId === "slow") {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      return `${agentId}-done`;
+    });
+    const loop = createAgentLoop<string, string>(
+      {
+        strategy: {
+          kind: "concurrent",
+          perAgentTimeoutMs: 5,
+        },
+        maxIterations: 1,
+      },
+      promptFn,
+      ["fast", "slow"],
+    );
+
+    const results = await collect(loop.run("data"));
+    const output = results[0].output as unknown as {
+      partial: boolean;
+      results: Array<{
+        status: string;
+        agentId: string;
+        output?: string;
+        timedOut?: boolean;
+      }>;
+    };
+
+    expect(output.partial).toBe(true);
+    expect(output.results).toMatchObject([
+      { status: "fulfilled", agentId: "fast", output: "fast-done" },
+      { status: "rejected", agentId: "slow", timedOut: true },
+    ]);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -128,6 +165,43 @@ describe("AgentLoop — group-chat strategy", () => {
     // 2 rounds * 2 agents = 4 iterations.
     expect(results).toHaveLength(4);
     expect(results.map((r) => r.agentId)).toEqual(["x", "y", "x", "y"]);
+  });
+
+  it("uses structured moderator selection and validates targets", async () => {
+    const promptFn = vi.fn(async (_input: string, agentId: string) => {
+      if (agentId === "moderator") return { nextAgentId: "bob" };
+      return `${agentId}-spoke`;
+    });
+    const loop = createAgentLoop<string, string | { nextAgentId: string }>(
+      {
+        strategy: { kind: "group-chat", maxRounds: 1, moderatorAgentId: "moderator" },
+      },
+      promptFn,
+      ["alice", "bob"],
+    );
+
+    const result = await loop.iterate("topic");
+
+    expect(result.agentId).toBe("bob");
+    expect(result.output).toBe("bob-spoke");
+  });
+
+  it("rejects ambiguous moderator selections", async () => {
+    const promptFn = vi.fn(async (_input: string, agentId: string) => {
+      if (agentId === "moderator") return "alice or bob";
+      return `${agentId}-spoke`;
+    });
+    const loop = createAgentLoop<string, string>(
+      {
+        strategy: { kind: "group-chat", maxRounds: 1, moderatorAgentId: "moderator" },
+      },
+      promptFn,
+      ["alice", "bob"],
+    );
+
+    await expect(loop.iterate("topic")).rejects.toThrow(
+      "Moderator selected multiple agents",
+    );
   });
 });
 
@@ -189,6 +263,83 @@ describe("AgentLoop — handoff strategy", () => {
     expect(results[1].agentId).toBe("b");
     expect(results[2].agentId).toBe("c");
   });
+
+  it("validates handoff target and transfers prepared context", async () => {
+    const promptFn = vi.fn(async (input: string, agentId: string) => {
+      if (agentId === "a") {
+        return { handoffTarget: "b", summary: `summary:${input}` };
+      }
+      return { data: input };
+    });
+    const loop = createAgentLoop<string, { handoffTarget?: string; summary?: string; data?: string }>(
+      {
+        strategy: {
+          kind: "handoff",
+          entryAgentId: "a",
+          prepareHandoffInput: ({ output, toAgentId }) =>
+            `${toAgentId}:${(output as { summary: string }).summary}`,
+        },
+      },
+      promptFn,
+      ["a", "b"],
+    );
+
+    const results = await collect(loop.run("start"));
+
+    expect(results).toHaveLength(2);
+    expect(results[1].agentId).toBe("b");
+    expect(results[1].output).toEqual({ data: "b:summary:start" });
+  });
+
+  it("rejects unknown handoff targets", async () => {
+    const promptFn = vi.fn(async () => ({ handoffTarget: "missing" }));
+    const loop = createAgentLoop(
+      {
+        strategy: { kind: "handoff", entryAgentId: "a" },
+      },
+      promptFn,
+      ["a", "b"],
+    );
+
+    await expect(loop.iterate("start")).rejects.toThrow(
+      "Unknown handoff target",
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Composed strategy
+// ---------------------------------------------------------------------------
+
+describe("AgentLoop — composed strategy", () => {
+  it("executes child strategies in order as one iteration", async () => {
+    const promptFn = vi.fn(echoPrompt);
+    const loop = createAgentLoop<string, string>(
+      {
+        strategy: {
+          kind: "composed",
+          strategies: [
+            { kind: "sequential" },
+            { kind: "concurrent", maxParallelism: 2 },
+          ],
+        },
+        maxIterations: 1,
+      },
+      promptFn,
+      ["a", "b"],
+    );
+
+    const result = await loop.iterate("mix");
+    const output = result.output as unknown as {
+      results: Array<AgentLoopIterationResult<unknown>>;
+    };
+
+    expect(result.agentId).toBe("composed");
+    expect(output.results).toHaveLength(2);
+    expect(output.results[0].agentId).toBe("a");
+    expect(output.results[1].agentId).toBe("a");
+    expect(promptFn.mock.calls.map((call) => call[1])).toEqual(["a", "a", "b"]);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -211,6 +362,32 @@ describe("AgentLoop — shouldTerminate", () => {
     // shouldTerminate fires after yielding, so 2 iterations are yielded
     // before the loop stops.
     expect(results).toHaveLength(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cancellation
+// ---------------------------------------------------------------------------
+
+describe("AgentLoop — cancellation", () => {
+  it("aborts run from an external signal", async () => {
+    const controller = new AbortController();
+    const promptFn = vi.fn(async (_input: string, _agentId: string, context) => {
+      expect(context?.signal).toBe(controller.signal);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      return "done";
+    });
+    const loop = createAgentLoop<string, string>(
+      { strategy: { kind: "sequential" }, maxIterations: 1 },
+      promptFn,
+    );
+
+    setTimeout(() => controller.abort(), 5);
+
+    await expect(collect(loop.run("x", { signal: controller.signal }))).rejects.toThrow(
+      "Agent loop cancelled",
+    );
+    expect(loop.getState()).toBe("errored");
   });
 });
 
