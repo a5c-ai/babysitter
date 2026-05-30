@@ -387,10 +387,88 @@ export const GitHubIssuesBackendConfigSchema = z.object({
 });
 export type GitHubIssuesBackendConfig = z.infer<typeof GitHubIssuesBackendConfigSchema>;
 
+export const ExternalTrackerProviderSchema = z.enum([
+  "github-issues",
+  "jira",
+  "linear",
+  "generic-rest",
+]);
+export type ExternalTrackerProvider = z.infer<typeof ExternalTrackerProviderSchema>;
+
+export const ExternalTrackerStatusSchema = z.enum([
+  "open",
+  "claimed",
+  "answered",
+  "completed",
+  "cancelled",
+]);
+export type ExternalTrackerStatus = z.infer<typeof ExternalTrackerStatusSchema>;
+
+export const ExternalTrackerSyncDirectionSchema = z.enum([
+  "outbound",
+  "inbound",
+  "bidirectional",
+]);
+export type ExternalTrackerSyncDirection = z.infer<typeof ExternalTrackerSyncDirectionSchema>;
+
+export const ExternalTrackerConflictStrategySchema = z.enum([
+  "remote-wins",
+  "local-wins",
+  "newest-wins",
+  "manual",
+]);
+export type ExternalTrackerConflictStrategy = z.infer<typeof ExternalTrackerConflictStrategySchema>;
+
+export const ExternalTrackerAuthConfigSchema = z.object({
+  tokenEnv: z.string().min(1).optional(),
+  emailEnv: z.string().min(1).optional(),
+  apiTokenEnv: z.string().min(1).optional(),
+  webhookSecretEnv: z.string().min(1).optional(),
+}).strict();
+export type ExternalTrackerAuthConfig = z.infer<typeof ExternalTrackerAuthConfigSchema>;
+
+export const ExternalTrackerFieldMappingSchema = z.object({
+  title: z.string().min(1).optional(),
+  description: z.string().min(1).optional(),
+  status: z.string().min(1).optional(),
+  assignee: z.string().min(1).optional(),
+  labels: z.string().min(1).optional(),
+  priority: z.string().min(1).optional(),
+  answer: z.string().min(1).optional(),
+  externalId: z.string().min(1).optional(),
+  externalKey: z.string().min(1).optional(),
+  updatedAt: z.string().min(1).optional(),
+  url: z.string().min(1).optional(),
+  metadata: z.record(z.string(), z.string()).optional(),
+}).strict();
+export type ExternalTrackerFieldMapping = z.infer<typeof ExternalTrackerFieldMappingSchema>;
+
+export const ExternalTrackerWebhookConfigSchema = z.object({
+  secretEnv: z.string().min(1).optional(),
+  dedupeWindowMs: z.number().positive().optional(),
+}).strict();
+export type ExternalTrackerWebhookConfig = z.infer<typeof ExternalTrackerWebhookConfigSchema>;
+
+export const ExternalTrackerBackendConfigSchema = z.object({
+  type: z.literal("external-tracker"),
+  provider: ExternalTrackerProviderSchema,
+  tracker: z.record(z.string(), z.unknown()).optional(),
+  auth: ExternalTrackerAuthConfigSchema.optional(),
+  fieldMapping: ExternalTrackerFieldMappingSchema.optional(),
+  statusMapping: z.record(z.string(), ExternalTrackerStatusSchema).optional(),
+  syncDirection: ExternalTrackerSyncDirectionSchema.default("bidirectional").optional(),
+  conflictStrategy: ExternalTrackerConflictStrategySchema.default("newest-wins").optional(),
+  webhook: ExternalTrackerWebhookConfigSchema.optional(),
+  pollIntervalMs: z.number().positive().optional(),
+  timeoutMs: z.number().positive().optional(),
+});
+export type ExternalTrackerBackendConfig = z.infer<typeof ExternalTrackerBackendConfigSchema>;
+
 export const BackendConfigSchema = z.discriminatedUnion("type", [
   GitNativeBackendConfigSchema,
   ServerBackendConfigSchema,
   GitHubIssuesBackendConfigSchema,
+  ExternalTrackerBackendConfigSchema,
 ]);
 export type BackendConfig = z.infer<typeof BackendConfigSchema>;
 

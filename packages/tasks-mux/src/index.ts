@@ -26,6 +26,14 @@ export {
   GitNativeBackendConfigSchema,
   ServerBackendConfigSchema,
   GitHubIssuesBackendConfigSchema,
+  ExternalTrackerProviderSchema,
+  ExternalTrackerStatusSchema,
+  ExternalTrackerSyncDirectionSchema,
+  ExternalTrackerConflictStrategySchema,
+  ExternalTrackerAuthConfigSchema,
+  ExternalTrackerFieldMappingSchema,
+  ExternalTrackerWebhookConfigSchema,
+  ExternalTrackerBackendConfigSchema,
   BackendConfigSchema,
   RoutingRuleSchema,
   RoutingConfigSchema,
@@ -65,6 +73,14 @@ export type {
   BreakpointSessionView,
   ServerBackendConfig,
   GitHubIssuesBackendConfig,
+  ExternalTrackerProvider,
+  ExternalTrackerStatus,
+  ExternalTrackerSyncDirection,
+  ExternalTrackerConflictStrategy,
+  ExternalTrackerAuthConfig,
+  ExternalTrackerFieldMapping,
+  ExternalTrackerWebhookConfig,
+  ExternalTrackerBackendConfig,
   GitHubRepo,
   ProjectMember,
   TeamMember,
@@ -105,6 +121,26 @@ export type { GitNativeBackendOptions } from "./backends/git-native.js";
 
 // ── GitHub Issues Backend ──────────────────────────────────────────
 export { GitHubIssuesBackend, getGitHubToken, parseAnswerFromComment } from "./backends/github-issues.js";
+
+// ── External Tracker Backend ───────────────────────────────────────
+export {
+  ExternalTrackerBackend,
+  GenericRestTrackerAdapter,
+  JiraTrackerAdapter,
+  LinearTrackerAdapter,
+  createExternalTrackerAdapter,
+  redactExternalTrackerSecrets,
+} from "./backends/external-tracker.js";
+
+export type {
+  ExternalTrackerAdapter,
+  ExternalTrackerComment,
+  ExternalTrackerCreateIssueInput,
+  ExternalTrackerIssue,
+  ExternalTrackerReference,
+  ExternalTrackerWebhookEvent,
+  ExternalTrackerWebhookResult,
+} from "./backends/external-tracker.js";
 
 // ── Server Backend ─────────────────────────────────────────────────
 export { ServerBreakpointBackend, ServerBackendError } from "./backends/server.js";

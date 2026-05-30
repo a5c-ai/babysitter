@@ -1,12 +1,36 @@
 import type { BreakpointBackend } from "../backend.js";
-import type { BreakpointContext, BackendConfig, RoutingConfig, GitHubIssuesBackendConfig } from "../types.js";
+import type {
+  BreakpointContext,
+  BackendConfig,
+  RoutingConfig,
+  GitHubIssuesBackendConfig,
+  ExternalTrackerBackendConfig,
+} from "../types.js";
 import { GitNativeBackend } from "./git-native.js";
 import type { GitNativeBackendOptions } from "./git-native.js";
 import { GitHubIssuesBackend } from "./github-issues.js";
+import { ExternalTrackerBackend } from "./external-tracker.js";
 import { ServerBreakpointBackend } from "./server.js";
 import type { ServerBreakpointBackendConfig } from "./server.js";
 export { ServerBreakpointBackend, ServerBackendError } from "./server.js";
 export type { ServerBreakpointBackendConfig } from "./server.js";
+export {
+  ExternalTrackerBackend,
+  GenericRestTrackerAdapter,
+  JiraTrackerAdapter,
+  LinearTrackerAdapter,
+  createExternalTrackerAdapter,
+  redactExternalTrackerSecrets,
+} from "./external-tracker.js";
+export type {
+  ExternalTrackerAdapter,
+  ExternalTrackerComment,
+  ExternalTrackerCreateIssueInput,
+  ExternalTrackerIssue,
+  ExternalTrackerReference,
+  ExternalTrackerWebhookEvent,
+  ExternalTrackerWebhookResult,
+} from "./external-tracker.js";
 
 /**
  * Factory function type for creating backends from config.
@@ -26,6 +50,11 @@ backendFactories.set("git-native", (config) => {
 // Register the GitHub Issues backend
 backendFactories.set("github-issues", (config) => {
   return new GitHubIssuesBackend(config as GitHubIssuesBackendConfig);
+});
+
+// Register the provider-neutral external tracker backend
+backendFactories.set("external-tracker", (config) => {
+  return new ExternalTrackerBackend(config as ExternalTrackerBackendConfig);
 });
 
 // Register the breakpoints-pro server backend
