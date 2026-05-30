@@ -1,0 +1,26 @@
+{
+  "issueNumber": 594,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-594",
+  "maxRefinementIterations": 2,
+  "requireArchitectureApproval": true,
+  "validationCommands": [
+    "git diff --check",
+    "npm run build --workspace=@a5c-ai/agent-platform",
+    "npm run test --workspace=@a5c-ai/agent-platform",
+    "npm run verify:v6:seams",
+    "npm run verify:metadata"
+  ],
+  "scope": {
+    "package": "packages/agent-platform",
+    "issue": "agent-platform session management gaps",
+    "mustCover": [
+      "inject existing session context into planProcess prompt construction",
+      "record session decisions, run summaries, and context snapshots from live orchestration",
+      "aggregate session cost and enforce configured budgets without changing no-budget behavior",
+      "trigger compaction from orchestration state size while preserving original run artifacts",
+      "wire capability routing, model selection, fallback chains, and selection policies into task dispatch with resolveTaskHarness as compatibility baseline"
+    ],
+    "relatedIssues": [580, 578]
+  }
+}
