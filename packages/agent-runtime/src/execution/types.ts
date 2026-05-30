@@ -14,6 +14,89 @@
 export type ExecutionMode = "local" | "docker" | "ssh" | "kubernetes";
 
 // ---------------------------------------------------------------------------
+// Execution Policy
+// ---------------------------------------------------------------------------
+
+export interface ExecutionEnvironmentPolicy {
+  readonly inheritParentEnv?: boolean;
+  readonly allow?: string[];
+  readonly values?: Record<string, string>;
+  readonly deny?: string[];
+  readonly redact?: string[];
+}
+
+export interface ExecutionMount {
+  readonly hostPath: string;
+  readonly containerPath: string;
+  readonly readOnly?: boolean;
+}
+
+export interface ExecutionFilesystemPolicy {
+  readonly allowedRoots?: string[];
+  readonly mounts?: ExecutionMount[];
+  readonly readOnlyRootFilesystem?: boolean;
+}
+
+export interface ExecutionNetworkPolicy {
+  readonly mode?: "none" | "bridge" | "host" | "custom";
+  readonly name?: string;
+  readonly dns?: string[];
+  readonly allowEgress?: string[];
+  readonly blockEgress?: string[];
+}
+
+export interface ExecutionResourcePolicy {
+  readonly cpuCount?: number;
+  readonly memoryBytes?: number;
+  readonly pidsLimit?: number;
+  readonly openFilesLimit?: number;
+  readonly timeoutMs?: number;
+  readonly maxOutputBytes?: number;
+}
+
+export type NormalizedResourceLimits = ExecutionResourcePolicy;
+
+export interface ExecutionSandboxPolicy {
+  readonly requireNamespaces?: boolean;
+  readonly requireChroot?: boolean;
+  readonly requireSeccomp?: boolean;
+  readonly requireCapabilitiesDrop?: boolean;
+  readonly allowUnsupportedLocal?: boolean;
+}
+
+export interface DockerPolicy {
+  readonly readOnlyRootFilesystem?: boolean;
+  readonly user?: string;
+  readonly capDrop?: string[];
+  readonly securityOpt?: string[];
+  readonly skipPreflight?: boolean;
+  readonly insecureAllowPrivilegedOptions?: boolean;
+}
+
+export interface SshHostKeyPolicy {
+  readonly strictHostKeyChecking?: "yes" | "accept-new";
+  readonly knownHostsFile?: string;
+  readonly insecureSkipHostKeyChecking?: boolean;
+}
+
+export interface KubernetesPolicy {
+  readonly runAsNonRoot?: boolean;
+  readonly readOnlyRootFilesystem?: boolean;
+  readonly allowPrivilegeEscalation?: boolean;
+}
+
+export interface ExecutionPolicy {
+  readonly environment?: ExecutionEnvironmentPolicy;
+  readonly filesystem?: ExecutionFilesystemPolicy;
+  readonly network?: ExecutionNetworkPolicy;
+  readonly resources?: ExecutionResourcePolicy;
+  readonly sandbox?: ExecutionSandboxPolicy;
+  readonly docker?: DockerPolicy;
+  readonly ssh?: SshHostKeyPolicy;
+  readonly kubernetes?: KubernetesPolicy;
+}
+
+// ---------------------------------------------------------------------------
 // Per-Mode Config
 // ---------------------------------------------------------------------------
 
@@ -24,6 +107,8 @@ export interface LocalExecutionConfig {
   readonly cwd: string;
   /** Optional environment variable overrides. */
   readonly env?: Record<string, string>;
+  /** Shared execution policy. Secure defaults apply when omitted. */
+  readonly policy?: ExecutionPolicy;
 }
 
 /** Configuration for Docker-based execution. */
@@ -37,6 +122,8 @@ export interface DockerExecutionConfig {
   readonly network?: string;
   /** Optional environment variable overrides. */
   readonly env?: Record<string, string>;
+  /** Shared execution policy. Secure defaults apply when omitted. */
+  readonly policy?: ExecutionPolicy;
 }
 
 /** Configuration for SSH-based remote execution. */
@@ -52,6 +139,8 @@ export interface SshExecutionConfig {
   readonly keyPath?: string;
   /** Optional environment variable overrides. */
   readonly env?: Record<string, string>;
+  /** Shared execution policy. Secure defaults apply when omitted. */
+  readonly policy?: ExecutionPolicy;
 }
 
 /** Configuration for Kubernetes pod-based execution. */
@@ -65,6 +154,10 @@ export interface KubernetesExecutionConfig {
   readonly serviceAccount?: string;
   /** Resource requests/limits (e.g. `{ cpu: "500m", memory: "256Mi" }`). */
   readonly resources?: Record<string, string>;
+  /** Optional environment variable overrides. */
+  readonly env?: Record<string, string>;
+  /** Shared execution policy. Secure defaults apply when omitted. */
+  readonly policy?: ExecutionPolicy;
 }
 
 // ---------------------------------------------------------------------------

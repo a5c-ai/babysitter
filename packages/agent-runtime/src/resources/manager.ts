@@ -12,6 +12,8 @@ import type {
   ResourceWarningCallback,
   TokenBudget,
 } from "./types";
+import type { ExecutionPolicy, ResourceAdmission } from "../execution";
+import { admitExecutionPolicy } from "../execution";
 import { BudgetTracker } from "./budget-tracker";
 import { ConcurrencyGuard } from "./concurrency-guard";
 import { TimeoutCascade } from "./timeout-cascade";
@@ -110,6 +112,10 @@ export class ResourceManagerImpl implements ResourceManager {
 
   onWarning(callback: ResourceWarningCallback): void {
     this._warningCallbacks.push(callback);
+  }
+
+  admitExecutionPolicy(policy: ExecutionPolicy): ResourceAdmission {
+    return admitExecutionPolicy(policy);
   }
 
   // -- Helpers --------------------------------------------------------------

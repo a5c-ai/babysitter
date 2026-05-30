@@ -141,4 +141,12 @@ export interface ResourceManager {
    * @param callback - Function invoked with the warning payload.
    */
   onWarning(callback: ResourceWarningCallback): void;
+
+  /**
+   * Admit OS execution limits into the resource layer.
+   *
+   * This records the policy seam for executors. ResourceManager does not apply
+   * kernel limits directly; concrete executors translate accepted limits.
+   */
+  admitExecutionPolicy(policy: import("../execution").ExecutionPolicy): import("../execution").ResourceAdmission;
 }
