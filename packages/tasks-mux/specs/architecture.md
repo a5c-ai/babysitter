@@ -56,7 +56,11 @@ Supported command paths:
 - `tasks-mux breakpoints poll <breakpointId> [--timeout <seconds>] [--interval <seconds>]`
 - `tasks-mux tasks search [--query <text>] [--status <csv>] [--priority <csv>] [--assignee <id>]`
 - `tasks-mux tasks assign <taskId> --assignee <id> [--assignee-name <name>]`
+- `tasks-mux tasks approve <taskId> --responder <id> [--answer <text>]`
 - `tasks-mux tasks close <taskId> [--message <text>]`
+- `tasks-mux tasks cancel <taskId>`
+- `tasks-mux tasks transition <taskId> --status <status>`
+- `tasks-mux tasks bulk --ids <csv> --action <approve|close|cancel|reassign|transition> [--assignee <id>] [--status <status>]`
 - `tasks-mux tasks comment <taskId> --author <id> --text <text>`
 - `tasks-mux tasks stats`
 - `tasks-mux tasks export`

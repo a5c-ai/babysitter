@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { GitNativeBackend } from "../../backends/git-native.js";
+import type { BulkUpdateBreakpointsParams } from "../../backend.js";
 import type { BreakpointStatus, TaskPriority } from "../../types.js";
 import { formatTable, printError } from "../output.js";
 
@@ -17,6 +18,14 @@ function backend(opts: LocalBackendOpts): GitNativeBackend {
 
 function splitCsv<T extends string>(value: string | undefined): T[] | undefined {
   return value?.split(",").map((item) => item.trim()).filter(Boolean) as T[] | undefined;
+}
+
+function requiredCsv<T extends string>(value: string | undefined): T[] {
+  const items = splitCsv<T>(value);
+  if (!items?.length) {
+    throw new Error("At least one id is required");
+  }
+  return items;
 }
 
 function printResult(value: unknown, jsonMode: boolean): void {
@@ -99,6 +108,32 @@ export function createTasksCommand(): Command {
     });
 
   cmd
+    .command("approve")
+    .description("Approve and answer a task-like breakpoint")
+    .argument("<taskId>")
+    .requiredOption("--responder <id>", "Responder id")
+    .option("--responder-name <name>", "Responder display name")
+    .option("--answer <text>", "Approval answer text", "Approved")
+    .option("--confidence <0-100>", "Confidence score")
+    .action(async (taskId: string, opts: Record<string, string | undefined>, command: Command) => {
+      const allOpts: GlobalOpts & LocalBackendOpts = command.optsWithGlobals();
+      const jsonMode = allOpts.json === true;
+      try {
+        const result = await backend(allOpts).answerBreakpoint(taskId, {
+          responderId: opts.responder ?? "",
+          responderName: opts.responderName ?? opts.responder ?? "",
+          text: opts.answer ?? "Approved",
+          approved: true,
+          confidence: opts.confidence ? Number.parseInt(opts.confidence, 10) : undefined,
+        });
+        printResult(result, jsonMode);
+      } catch (error) {
+        printError(error, jsonMode);
+        process.exitCode = 1;
+      }
+    });
+
+  cmd
     .command("close")
     .description("Mark a task-like breakpoint completed")
     .argument("<taskId>")
@@ -113,6 +148,89 @@ export function createTasksCommand(): Command {
           actorId: opts.actor,
           message: opts.message,
         });
+        printResult(result, jsonMode);
+      } catch (error) {
+        printError(error, jsonMode);
+        process.exitCode = 1;
+      }
+    });
+
+  cmd
+    .command("cancel")
+    .description("Cancel a task-like breakpoint")
+    .argument("<taskId>")
+    .action(async (taskId: string, _opts: Record<string, string | undefined>, command: Command) => {
+      const allOpts: GlobalOpts & LocalBackendOpts = command.optsWithGlobals();
+      const jsonMode = allOpts.json === true;
+      try {
+        await backend(allOpts).cancelBreakpoint(taskId);
+        printResult({ id: taskId, status: "cancelled" }, jsonMode);
+      } catch (error) {
+        printError(error, jsonMode);
+        process.exitCode = 1;
+      }
+    });
+
+  cmd
+    .command("transition")
+    .description("Move a task-like breakpoint through the validated lifecycle")
+    .argument("<taskId>")
+    .requiredOption("--status <status>", "Target breakpoint status")
+    .option("--actor <id>", "Actor id")
+    .option("--message <text>", "History message")
+    .action(async (taskId: string, opts: Record<string, string | undefined>, command: Command) => {
+      const allOpts: GlobalOpts & LocalBackendOpts = command.optsWithGlobals();
+      const jsonMode = allOpts.json === true;
+      try {
+        const result = await backend(allOpts).transitionBreakpoint(taskId, {
+          status: opts.status as BreakpointStatus,
+          actorId: opts.actor,
+          message: opts.message,
+        });
+        printResult(result, jsonMode);
+      } catch (error) {
+        printError(error, jsonMode);
+        process.exitCode = 1;
+      }
+    });
+
+  cmd
+    .command("bulk")
+    .description("Apply a bulk task operation with per-item results")
+    .requiredOption("--ids <csv>", "Comma-separated task ids")
+    .requiredOption("--action <action>", "approve, close, cancel, reassign, or transition")
+    .option("--actor <id>", "Actor id")
+    .option("--assignee <id>", "Assignee responder id for reassign")
+    .option("--assignee-name <name>", "Assignee display name for reassign")
+    .option("--status <status>", "Target status for transition")
+    .option("--message <text>", "History message")
+    .option("--responder <id>", "Responder id for approve")
+    .option("--responder-name <name>", "Responder display name for approve")
+    .option("--answer <text>", "Approval answer text", "Approved")
+    .option("--confidence <0-100>", "Approval confidence score")
+    .action(async (opts: Record<string, string | undefined>, command: Command) => {
+      const allOpts: GlobalOpts & LocalBackendOpts = command.optsWithGlobals();
+      const jsonMode = allOpts.json === true;
+      try {
+        const action = opts.action as BulkUpdateBreakpointsParams["action"];
+        const params: BulkUpdateBreakpointsParams = {
+          ids: requiredCsv(opts.ids),
+          action,
+          actorId: opts.actor,
+          assigneeId: opts.assignee,
+          assigneeName: opts.assigneeName,
+          status: opts.status as BreakpointStatus | undefined,
+          message: opts.message,
+        };
+        if (action === "approve") {
+          params.answer = {
+            responderId: opts.responder ?? opts.actor ?? "tasks-mux-cli",
+            responderName: opts.responderName ?? opts.responder ?? opts.actor ?? "tasks-mux CLI",
+            text: opts.answer ?? "Approved",
+            confidence: opts.confidence ? Number.parseInt(opts.confidence, 10) : undefined,
+          };
+        }
+        const result = await backend(allOpts).bulkUpdateBreakpoints(params);
         printResult(result, jsonMode);
       } catch (error) {
         printError(error, jsonMode);

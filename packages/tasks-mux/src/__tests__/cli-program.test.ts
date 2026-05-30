@@ -1,4 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { promises as fs } from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import { GitNativeBackend } from "../backends/git-native.js";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Dynamic import
@@ -13,6 +17,11 @@ async function importProgram() {
 // ────────────────────────────────────────────────────────────────────────────
 
 describe("CLI Program", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    process.exitCode = undefined;
+  });
+
   describe("createProgram", () => {
     it("creates a Commander program instance", async () => {
       const { createProgram } = await importProgram();
@@ -66,6 +75,20 @@ describe("CLI Program", () => {
       const commands = program.commands.map((c) => c.name());
 
       expect(commands).toContain("tasks");
+    });
+
+    it("registers task-management lifecycle and bulk commands", async () => {
+      const { createProgram } = await importProgram();
+      const program = createProgram();
+      const tasksCommand = program.commands.find((c) => c.name() === "tasks");
+
+      expect(tasksCommand).toBeDefined();
+      expect(tasksCommand!.commands.map((c) => c.name())).toEqual(expect.arrayContaining([
+        "approve",
+        "cancel",
+        "transition",
+        "bulk",
+      ]));
     });
 
     it("does not register adjacent breakpoints claim lifecycle command", async () => {
@@ -172,6 +195,82 @@ describe("CLI Program", () => {
       const { createProgram } = await importProgram();
       const program = createProgram();
       expect(program.version()).toBe("5.0.0");
+    });
+  });
+
+  describe("tasks command execution", () => {
+    it("applies bulk reassign operations through the git-native backend", async () => {
+      const { createProgram } = await importProgram();
+      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "tasks-mux-cli-"));
+      const breakpointsDir = path.join(tmpDir, ".breakpoints");
+      const backend = new GitNativeBackend({ breakpointsDir });
+      const first = await backend.submitBreakpoint({
+        text: "First CLI task",
+        context: {
+          description: "First CLI task",
+          codeSnippets: [],
+          fileReferences: [],
+          tags: ["cli"],
+        },
+        routing: {
+          strategy: "single",
+          targetResponders: [],
+          timeoutMs: 1_800_000,
+          presentToUser: true,
+        },
+      });
+      const second = await backend.submitBreakpoint({
+        text: "Second CLI task",
+        context: {
+          description: "Second CLI task",
+          codeSnippets: [],
+          fileReferences: [],
+          tags: ["cli"],
+        },
+        routing: {
+          strategy: "single",
+          targetResponders: [],
+          timeoutMs: 1_800_000,
+          presentToUser: true,
+        },
+      });
+      const log = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      try {
+        const program = createProgram();
+        program.exitOverride();
+        await program.parseAsync([
+          "node",
+          "tasks-mux",
+          "--json",
+          "tasks",
+          "--breakpoints-dir",
+          breakpointsDir,
+          "bulk",
+          "--ids",
+          `${first.id},${second.id},missing`,
+          "--action",
+          "reassign",
+          "--assignee",
+          "codex",
+          "--actor",
+          "tester",
+        ]);
+
+        const result = JSON.parse(String(log.mock.calls.at(-1)?.[0]));
+        expect(result).toMatchObject({ total: 3, succeeded: 2, failed: 1 });
+        expect(result.items).toEqual([
+          expect.objectContaining({ id: first.id, ok: true }),
+          expect.objectContaining({ id: second.id, ok: true }),
+          expect.objectContaining({ id: "missing", ok: false, errorCode: "not_found" }),
+        ]);
+        await expect(backend.getBreakpoint(first.id)).resolves.toMatchObject({
+          status: "assigned",
+          assigneeId: "codex",
+        });
+      } finally {
+        await fs.rm(tmpDir, { recursive: true, force: true });
+      }
     });
   });
 });
