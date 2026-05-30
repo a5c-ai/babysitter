@@ -13,7 +13,10 @@ import type {
   ExecutionHandle,
   DockerExecutionConfig,
 } from "../types";
-import { resolveExecutionEnvironment } from "../policy";
+import {
+  resolveExecutionEnvironment,
+  validateFilesystemMounts,
+} from "../policy";
 import type { Executor } from "./local";
 
 // ---------------------------------------------------------------------------
@@ -38,6 +41,11 @@ interface MutableHandle {
 
 export class DockerExecutor implements Executor<DockerExecutionConfig> {
   private readonly processes = new Map<string, DockerProcess>();
+  private readonly preflight: (config: DockerExecutionConfig) => Promise<void>;
+
+  constructor(options?: { preflight?: (config: DockerExecutionConfig) => Promise<void> }) {
+    this.preflight = options?.preflight ?? (async () => {});
+  }
 
   async spawn(
     command: string,
@@ -45,6 +53,10 @@ export class DockerExecutor implements Executor<DockerExecutionConfig> {
     config: DockerExecutionConfig,
   ): Promise<ExecutionHandle> {
     const id = randomUUID();
+
+    if (config.policy?.docker?.skipPreflight !== true) {
+      await this.preflight(config);
+    }
 
     const dockerArgs = this._buildDockerArgs(id, command, args, config);
     const child = spawn("docker", dockerArgs, {
@@ -117,6 +129,8 @@ export class DockerExecutor implements Executor<DockerExecutionConfig> {
   ): string[] {
     const dockerArgs: string[] = ["run", "--rm", "--name", `babysitter-${id.slice(0, 8)}`];
     const policy = config.policy;
+    validateFilesystemMounts(policy);
+
     const dockerPolicy = policy?.docker;
     const insecureDocker = dockerPolicy?.insecureAllowPrivilegedOptions === true;
 

@@ -13,7 +13,10 @@ import type {
   ExecutionHandle,
   KubernetesExecutionConfig,
 } from "../types";
-import { resolveExecutionEnvironment } from "../policy";
+import {
+  resolveExecutionEnvironment,
+  validateFilesystemMounts,
+} from "../policy";
 import type { Executor } from "./local";
 
 // ---------------------------------------------------------------------------
@@ -103,6 +106,8 @@ export class KubernetesExecutor implements Executor<KubernetesExecutionConfig> {
     args: string[],
     config: KubernetesExecutionConfig,
   ): string {
+    validateFilesystemMounts(config.policy);
+
     const resourceBlock = this._resourcesFromConfig(config)
       ? this._resourcesYaml(this._resourcesFromConfig(config) as Record<string, string>)
       : "";
@@ -114,6 +119,8 @@ export class KubernetesExecutor implements Executor<KubernetesExecutionConfig> {
     const commandYaml = `          command: ${JSON.stringify([command, ...args])}`;
     const envBlock = this._envYaml(resolveExecutionEnvironment(config.env, config.policy));
     const securityContextBlock = this._securityContextYaml(config);
+    const volumeMountBlock = this._volumeMountsYaml(config);
+    const volumesBlock = this._volumesYaml(config);
 
     return [
       `apiVersion: batch/v1`,
@@ -134,8 +141,10 @@ export class KubernetesExecutor implements Executor<KubernetesExecutionConfig> {
       `          image: ${config.image}`,
       commandYaml,
       envBlock || null,
+      volumeMountBlock || null,
       securityContextBlock,
       resourceBlock || null,
+      volumesBlock || null,
     ]
       .filter((line): line is string => line !== null)
       .join("\n");
@@ -176,6 +185,36 @@ export class KubernetesExecutor implements Executor<KubernetesExecutionConfig> {
       ...entries.flatMap(([key, value]) => [
         `            - name: ${key}`,
         `              value: ${JSON.stringify(value)}`,
+      ]),
+    ].join("\n");
+  }
+
+  private _volumeMountsYaml(config: KubernetesExecutionConfig): string {
+    const mounts = config.policy?.filesystem?.mounts ?? [];
+    if (mounts.length === 0) {
+      return "";
+    }
+    return [
+      `          volumeMounts:`,
+      ...mounts.flatMap((mount, index) => [
+        `            - name: policy-mount-${index}`,
+        `              mountPath: ${mount.containerPath}`,
+        `              readOnly: ${mount.readOnly ?? true}`,
+      ]),
+    ].join("\n");
+  }
+
+  private _volumesYaml(config: KubernetesExecutionConfig): string {
+    const mounts = config.policy?.filesystem?.mounts ?? [];
+    if (mounts.length === 0) {
+      return "";
+    }
+    return [
+      `      volumes:`,
+      ...mounts.flatMap((mount, index) => [
+        `        - name: policy-mount-${index}`,
+        `          hostPath:`,
+        `            path: ${mount.hostPath}`,
       ]),
     ].join("\n");
   }

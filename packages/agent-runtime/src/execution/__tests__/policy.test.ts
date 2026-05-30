@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   resolveExecutionEnvironment,
+  validateFilesystemMounts,
   validateLocalExecutionPolicy,
 } from "../policy";
 import type { ExecutionPolicy, LocalExecutionConfig } from "../types";
@@ -99,5 +100,23 @@ describe("ExecutionPolicy local validation", () => {
     };
 
     expect(() => validateLocalExecutionPolicy(config)).not.toThrow();
+  });
+});
+
+describe("ExecutionPolicy filesystem validation", () => {
+  it("rejects mounts outside allowed roots", () => {
+    expect(() =>
+      validateFilesystemMounts({
+        filesystem: {
+          allowedRoots: ["/workspace"],
+          mounts: [
+            {
+              hostPath: "/etc",
+              containerPath: "/mnt/etc",
+            },
+          ],
+        },
+      }),
+    ).toThrow(/outside the configured filesystem allowed roots/);
   });
 });

@@ -51,20 +51,34 @@ export function validateFilesystemPolicy(cwd: string, policy?: ExecutionPolicy):
   }
 
   const resolvedCwd = path.resolve(cwd);
-  const allowedRoots = filesystem.allowedRoots.map((root) => path.resolve(root));
+  validatePathAgainstRoots(resolvedCwd, filesystem.allowedRoots, `Execution cwd "${cwd}"`);
 
-  if (!allowedRoots.some((root) => isPathInside(resolvedCwd, root))) {
-    throw new Error(
-      `Execution cwd "${cwd}" is outside the configured filesystem allowed roots`,
-    );
+  validateFilesystemMounts(policy);
+}
+
+export function validateFilesystemMounts(policy?: ExecutionPolicy): void {
+  const filesystem = policy?.filesystem;
+  if (!filesystem?.allowedRoots?.length) {
+    return;
   }
 
   for (const mount of filesystem.mounts ?? []) {
-    if (!allowedRoots.some((root) => isPathInside(path.resolve(mount.hostPath), root))) {
-      throw new Error(
-        `Execution mount "${mount.hostPath}" is outside the configured filesystem allowed roots`,
-      );
-    }
+    validatePathAgainstRoots(
+      path.resolve(mount.hostPath),
+      filesystem.allowedRoots,
+      `Execution mount "${mount.hostPath}"`,
+    );
+  }
+}
+
+function validatePathAgainstRoots(candidate: string, roots: string[], label: string): void {
+  const resolvedCandidate = path.resolve(candidate);
+  const allowedRoots = roots.map((root) => path.resolve(root));
+
+  if (!allowedRoots.some((root) => isPathInside(resolvedCandidate, root))) {
+    throw new Error(
+      `${label} is outside the configured filesystem allowed roots`,
+    );
   }
 }
 

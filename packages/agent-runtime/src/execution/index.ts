@@ -26,6 +26,7 @@ export type {
 export {
   resolveExecutionEnvironment,
   validateFilesystemPolicy,
+  validateFilesystemMounts,
   validateLocalExecutionPolicy,
   normalizeResourceLimits,
   admitExecutionPolicy,

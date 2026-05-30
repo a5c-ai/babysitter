@@ -100,6 +100,25 @@ describe("DockerExecutor", () => {
     expect(args).toContain("--network");
     expect(args).toContain("bridge");
   });
+
+  it("rejects policy mounts outside allowed roots", () => {
+    const executor = new DockerExecutor();
+
+    const config: DockerExecutionConfig = {
+      mode: "docker",
+      image: "node:20-slim",
+      policy: {
+        filesystem: {
+          allowedRoots: ["/workspace"],
+          mounts: [{ hostPath: "/etc", containerPath: "/host-etc" }],
+        },
+      },
+    };
+
+    expect(() =>
+      executor._buildDockerArgs("abc12345-uuid", "node", ["index.js"], config),
+    ).toThrow(/outside the configured filesystem allowed roots/);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -249,6 +268,35 @@ describe("KubernetesExecutor", () => {
     expect(handle.manifest).toContain("value: \"test\"");
     expect(handle.manifest).toContain("cpu: \"1\"");
     expect(handle.manifest).toContain("memory: \"134217728\"");
+  });
+
+  it("maps filesystem mounts into Kubernetes volume mounts", async () => {
+    const executor = new KubernetesExecutor();
+
+    const config: KubernetesExecutionConfig = {
+      mode: "kubernetes",
+      namespace: "ci-jobs",
+      image: "node:20-slim",
+      policy: {
+        filesystem: {
+          allowedRoots: ["/workspace"],
+          mounts: [
+            {
+              hostPath: "/workspace/cache",
+              containerPath: "/cache",
+              readOnly: true,
+            },
+          ],
+        },
+      },
+    };
+
+    const handle = await executor.spawn("node", ["script.js"], config);
+
+    expect(handle.manifest).toContain("volumeMounts:");
+    expect(handle.manifest).toContain("mountPath: /cache");
+    expect(handle.manifest).toContain("volumes:");
+    expect(handle.manifest).toContain("path: /workspace/cache");
   });
 });
 
