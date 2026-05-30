@@ -293,6 +293,130 @@ describe("orchestrateIteration integration", () => {
     }
   });
 
+  test("journals PROCESS_RUNTIME_ERROR when process code throws after consuming a bad task result", async () => {
+    const processDir = path.join(tmpRoot, "processes-process-runtime-error");
+    await fs.mkdir(processDir, { recursive: true });
+    const processPath = path.join(processDir, "process-runtime-error.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      const verifyTask = {
+        id: "verify-task",
+        async build() {
+          return { kind: "node", title: "verify" };
+        }
+      };
+
+      export async function process(_inputs, ctx) {
+        const verifyResult = await ctx.task(verifyTask, {});
+        return { checkCount: verifyResult.checks.length };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-process-runtime-error",
+      request: "process runtime error",
+      processPath,
+      inputs: {},
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-process-runtime-error" } });
+
+    const waiting = await orchestrateIteration({ runDir });
+    expect(waiting.status).toBe("waiting");
+    if (waiting.status !== "waiting") throw new Error("Expected waiting status");
+
+    await commitEffectResult({
+      runDir,
+      effectId: waiting.nextActions[0].effectId,
+      result: {
+        status: "ok",
+        value: { verified: true },
+      },
+    });
+
+    const processError = await orchestrateIteration({ runDir });
+    expect(processError.status).toBe("process-error");
+
+    const journal = await loadJournal(runDir);
+    const marker = journal.find((event) => event.type === "PROCESS_RUNTIME_ERROR");
+    expect(marker).toBeDefined();
+    expect(marker?.data).toMatchObject({
+      runId: "run-process-runtime-error",
+      processId: "process runtime error",
+      recovery: {
+        command: "run:recover-process-error",
+        recoverable: true,
+      },
+    });
+    expect((marker?.data.error as { message?: string }).message).toContain("length");
+    expect(marker?.data.lastEffect).toMatchObject({
+      effectId: waiting.nextActions[0].effectId,
+      status: "resolved_ok",
+    });
+    expect(journal.some((event) => event.type === "RUN_FAILED")).toBe(false);
+  });
+
+  test("task effect failures stay EFFECT_RESOLVED errors instead of PROCESS_RUNTIME_ERROR", async () => {
+    const processDir = path.join(tmpRoot, "processes-effect-error");
+    await fs.mkdir(processDir, { recursive: true });
+    const processPath = path.join(processDir, "effect-error.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      const failingTask = {
+        id: "failing-task",
+        async build() {
+          return { kind: "agent", title: "fails" };
+        }
+      };
+
+      export async function process(_inputs, ctx) {
+        await ctx.task(failingTask, {});
+        return { unreachable: true };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-effect-error",
+      request: "effect error",
+      processPath,
+      inputs: {},
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-effect-error" } });
+
+    const waiting = await orchestrateIteration({ runDir });
+    expect(waiting.status).toBe("waiting");
+    if (waiting.status !== "waiting") throw new Error("Expected waiting status");
+
+    await commitEffectResult({
+      runDir,
+      effectId: waiting.nextActions[0].effectId,
+      result: {
+        status: "error",
+        error: { message: "task failed" },
+      },
+    });
+
+    const processError = await orchestrateIteration({ runDir });
+    expect(processError.status).toBe("process-error");
+
+    const journal = await loadJournal(runDir);
+    expect(journal).toContainEqual(expect.objectContaining({
+      type: "EFFECT_RESOLVED",
+      data: expect.objectContaining({
+        effectId: waiting.nextActions[0].effectId,
+        status: "error",
+      }),
+    }));
+    expect(journal.some((event) => event.type === "PROCESS_RUNTIME_ERROR")).toBe(false);
+  });
+
   test("does not append duplicate RUN_COMPLETED when iterating an already completed run", async () => {
     const processDir = path.join(tmpRoot, "processes-completed-replay");
     await fs.mkdir(processDir, { recursive: true });

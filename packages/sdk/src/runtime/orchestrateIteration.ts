@@ -15,6 +15,7 @@ import type {
   IterationResult,
   OrchestrateOptions,
   EffectAction,
+  EffectRecord,
   ProcessContext,
 } from "./types";
 import type { JournalEvent } from "../storage/types";
@@ -149,6 +150,26 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
 
       const failure = serializeUnknownError(error);
       if (!(error instanceof RunFailedError)) {
+        const lastEffect = findLastEffectContext(engine.effectIndex.listEffects());
+        if (lastEffect?.status !== "resolved_error") {
+          await appendEvent({
+            runDir: options.runDir,
+            eventType: "PROCESS_RUNTIME_ERROR",
+            event: {
+              error: failure,
+              iteration: engine.replayCursor.value,
+              runId: engine.runId,
+              processId: engine.metadata.processId,
+              journalHead: engine.effectIndex.getJournalHead() ?? null,
+              lastEffect,
+              recovery: {
+                command: "run:recover-process-error",
+                recoverable: true,
+              },
+            },
+          });
+          await rebuildStateCache(options.runDir, { reason: "post_process_runtime_error" });
+        }
         const result: IterationResult = { status: "process-error", error: failure, metadata: createIterationMetadata(engine) };
         finalStatus = result.status;
         return result;
@@ -225,6 +246,14 @@ async function getTerminalReplayResult(runDir: string, engine: ReplayEngine): Pr
     return { status: "completed", output, metadata };
   }
 
+  if (terminalEvent.type === "PROCESS_RUNTIME_ERROR") {
+    return {
+      status: "process-error",
+      error: readObjectField(terminalEvent.data, "error") ?? { message: "Process runtime error" },
+      metadata,
+    };
+  }
+
   return {
     status: "failed",
     error: readObjectField(terminalEvent.data, "error") ?? { message: "Run failed" },
@@ -235,7 +264,7 @@ async function getTerminalReplayResult(runDir: string, engine: ReplayEngine): Pr
 function findLastTerminalEvent(events: JournalEvent[]): JournalEvent | undefined {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
-    if (event.type === "RUN_COMPLETED" || event.type === "RUN_FAILED") return event;
+    if (event.type === "RUN_COMPLETED" || event.type === "RUN_FAILED" || event.type === "PROCESS_RUNTIME_ERROR") return event;
   }
   return undefined;
 }
@@ -250,6 +279,23 @@ function readObjectField(value: unknown, key: string): Record<string, unknown> |
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
   const field = (value as Record<string, unknown>)[key];
   return field && typeof field === "object" && !Array.isArray(field) ? field as Record<string, unknown> : undefined;
+}
+
+function findLastEffectContext(effects: EffectRecord[]) {
+  const resolved = effects
+    .filter((effect) => effect.resolvedAt)
+    .sort((a, b) => String(a.resolvedAt).localeCompare(String(b.resolvedAt)));
+  const effect = resolved.at(-1) ?? effects.at(-1);
+  if (!effect) return null;
+  return {
+    effectId: effect.effectId,
+    invocationKey: effect.invocationKey,
+    taskId: effect.taskId,
+    stepId: effect.stepId,
+    kind: effect.kind,
+    status: effect.status,
+    resultRef: effect.resultRef,
+  };
 }
 
 async function initializeReplayEngine(options: OrchestrateOptions, nowFn: () => Date, iterationStartedAt: number): Promise<ReplayEngine> {

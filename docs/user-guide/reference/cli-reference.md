@@ -22,6 +22,7 @@ Complete reference documentation for the core Babysitter command-line interface.
   - [run:events](#runevents)
   - [run:iterate](#runiterate)
   - [run:rebuild-state](#runrebuild-state)
+  - [run:recover-process-error](#runrecover-process-error)
 - [Task Commands](#task-commands)
   - [task:list](#tasklist)
   - [task:show](#taskshow)
@@ -371,7 +372,7 @@ babysitter run:status <runId> [--json]
 | `running` | Run in progress |
 | `waiting` | Blocked on breakpoint or sleep |
 | `completed` | Run finished successfully |
-| `failed` | Run terminated with error |
+| `failed` | Run terminated with error. JSON includes `reason: "process_runtime_error"` when the failure came from a typed process-code exception. |
 
 #### Examples
 
@@ -449,6 +450,9 @@ babysitter run:events run-20260125-143012 --limit 20 --reverse
 
 # Filter by type
 babysitter run:events run-20260125-143012 --filter-type EFFECT_RESOLVED --json
+
+# Inspect process runtime exceptions
+babysitter run:events run-20260125-143012 --filter-type PROCESS_RUNTIME_ERROR --json
 ```
 
 ---
@@ -565,6 +569,34 @@ babysitter run:rebuild-state run-20260125-143012
 
 # Check result
 babysitter run:status run-20260125-143012 --json
+```
+
+---
+
+### run:recover-process-error
+
+Clears the latest typed `PROCESS_RUNTIME_ERROR` marker and optionally patches the offending task result.
+
+#### Synopsis
+
+```bash
+babysitter run:recover-process-error <runId> \
+  [--patch-effect <effectId>:<jsonPath>=<json>] \
+  [--dry-run] \
+  [--json]
+```
+
+#### Description
+
+Use this when process code threw after consuming a bad result. The command finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/<effectId>/result.json`, rewrites the journal with only that typed marker removed, rebuilds state, and leaves the run ready for `run:iterate`.
+
+Without `--patch-effect`, recovery is honest: if the underlying result is still bad, the next `run:iterate` records a new `PROCESS_RUNTIME_ERROR`.
+
+#### Examples
+
+```bash
+babysitter run:recover-process-error run-20260125-143012 --dry-run --json
+babysitter run:recover-process-error run-20260125-143012 --patch-effect 'ef-live:value.checks=[]' --json
 ```
 
 ---

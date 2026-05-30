@@ -360,6 +360,41 @@ type RunFailed = JournalEventBase & {
 };
 ```
 
+#### PROCESS_RUNTIME_ERROR
+
+```ts
+type ProcessRuntimeError = JournalEventBase & {
+  type: "PROCESS_RUNTIME_ERROR";
+  payload: {
+    error: {
+      name?: string;
+      message: string;
+      stack?: string;
+      data?: any;
+    };
+    iteration?: number;
+    runId?: string;
+    processId?: string;
+    journalHead?: { seq: number; ulid: string; checksum?: string } | null;
+    lastEffect?: {
+      effectId: string;
+      invocationKey?: string;
+      taskId?: string;
+      stepId?: string;
+      kind?: string;
+      status?: string;
+      resultRef?: string;
+    } | null;
+    recovery: {
+      command: "run:recover-process-error";
+      recoverable: true;
+    };
+  };
+};
+```
+
+`PROCESS_RUNTIME_ERROR` is emitted when process code throws an unhandled exception. It is distinct from `EFFECT_RESOLVED` with `status: "error"`, which records a task/effect failure, and from `RUN_FAILED`, which remains reserved for runtime/replay infrastructure failures.
+
 ### 4.2 Derived state
 
 `state/state.json` is a derived index optimized for fast lookups:
@@ -1185,7 +1220,7 @@ Human output is always a single line:
 [run:status] state=<created|waiting|completed|failed> last=<TYPE#SEQ ISO> pending[total]=<n> pending[node]=<x> pending[breakpoint]=<y> ...
 ```
 
-`state` is derived from the latest `RUN_*` event plus the effect index: `waiting` is emitted while the index reports pending work, `completed` and `failed` reflect the final event type, and `created` is used when only `RUN_CREATED` exists. Terminal lifecycle events (`RUN_COMPLETED`/`RUN_FAILED`) always win even if pending effects remain, so operators can see that the run stopped progressing while still reviewing straggler counts. `last` echoes the event type, padded sequence number, and timestamp for the most recent journal entry (or `none` when a run has no events). `pending[total]` is always present and additional `pending[<kind>]` entries are printed in alphabetical order for every effect kind still waiting.
+`state` is derived from the latest lifecycle event plus the effect index: `waiting` is emitted while the index reports pending work, `completed` reflects `RUN_COMPLETED`, `failed` reflects `RUN_FAILED` or `PROCESS_RUNTIME_ERROR`, and `created` is used when only `RUN_CREATED` exists. Terminal lifecycle events always win even if pending effects remain, so operators can see that the run stopped progressing while still reviewing straggler counts. JSON status includes `reason: "process_runtime_error"` when the failed state came from a typed process exception. `last` echoes the event type, padded sequence number, and timestamp for the most recent journal entry (or `none` when a run has no events). `pending[total]` is always present and additional `pending[<kind>]` entries are printed in alphabetical order for every effect kind still waiting.
 
 Status lines also append deterministic metadata pairs emitted by the runtime: `stateVersion=<n>` tracks the derived state revision, `journalHead=<seq#ulid>` identifies the latest event applied to that state, `stateRebuilt=true` appears when the CLI regenerates the cache on the fly, and the existing `pending[...]` rollups summarize unresolved work. These fields mirror what JSON consumers see so humans can correlate consecutive invocations without switching formats.
 
@@ -1220,6 +1255,17 @@ Options:
 `--json` emits `{ "events": [ ... ], "metadata": { ... } }` where each entry matches the run status payload (`seq`, `ulid`, `type`, `recordedAt`, `filename`, `path`, `data`). The `metadata` block surfaces the same lifecycle pairs described above (`stateVersion`, `journalHead`, `stateRebuilt`, derived `pending[...]` counts) while the human-readable header continues to log the pagination info (`total`, `matching`, `showing`, filter/ordering hints). The limit, filter, and ordering flags apply before serialization so automation can replay slices deterministically.
 
 If `<runDir>` cannot be read the command exits with code `1` and logs `[run:events] unable to read run metadata at <path>: <reason>` to help identify typos or cleaned-up runs.
+
+#### `babysitter run:recover-process-error <runDir>`
+
+Recover from the latest typed process exception without hand-editing the journal:
+
+```bash
+babysitter run:recover-process-error <runDir> --dry-run --json
+babysitter run:recover-process-error <runDir> --patch-effect '<effectId>:value.checks=[]'
+```
+
+The command finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/<effectId>/result.json` with a scoped dot-path assignment, rewrites the journal with only that marker removed, rebuilds the state cache, and leaves the run ready for `run:iterate`. Without `--patch-effect`, recovery is honest: if the bad task result is still malformed, the next `run:iterate` rethrows and records a new `PROCESS_RUNTIME_ERROR`. Malformed patch flags, missing result artifacts, and runs without a typed marker fail with exit code `1` and do not mutate artifacts.
 
 #### `babysitter run:iterate <runDir>`
 

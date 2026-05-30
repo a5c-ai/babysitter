@@ -14,6 +14,7 @@ const EVENT_RENDERERS: Record<string, (event: JournalEvent) => string> = {
   EFFECT_RESOLVED: renderEffectResolvedMessage,
   RUN_COMPLETED: renderRunCompletedMessage,
   RUN_FAILED: renderRunFailedMessage,
+  PROCESS_RUNTIME_ERROR: renderRunFailedMessage,
 };
 
 export type { JournalEvent } from "./types";

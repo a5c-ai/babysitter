@@ -257,6 +257,49 @@ describe("run_status", () => {
     expect(data.state).toBe("failed");
   });
 
+  it("returns process runtime error details as a distinct failed reason", async () => {
+    mockedReadRunMetadata.mockResolvedValue({
+      runId: "01PROCERR",
+      processId: "test/process",
+    } as Awaited<ReturnType<typeof readRunMetadata>>);
+    mockedLoadJournal.mockResolvedValue([
+      {
+        seq: 1,
+        ulid: "01PROCERR1",
+        filename: "000001.01PROCERR1.json",
+        path: "/tmp/runs/01PROCERR/journal/000001.01PROCERR1.json",
+        type: "RUN_CREATED",
+        recordedAt: "2026-01-01T00:00:00Z",
+        data: { runId: "01PROCERR" },
+        checksum: "x",
+      },
+      {
+        seq: 2,
+        ulid: "01PROCERR2",
+        filename: "000002.01PROCERR2.json",
+        path: "/tmp/runs/01PROCERR/journal/000002.01PROCERR2.json",
+        type: "PROCESS_RUNTIME_ERROR",
+        recordedAt: "2026-01-01T00:00:01Z",
+        data: {
+          error: { message: "Cannot read properties of undefined" },
+          recovery: { command: "run:recover-process-error", recoverable: true },
+        },
+        checksum: "y",
+      },
+    ] as Awaited<ReturnType<typeof loadJournal>>);
+
+    const handler = getToolHandler(server, "run_status");
+    const result = await handler({ runId: "01PROCERR", runsDir: "/tmp/runs" });
+
+    const data = parseResult(result) as { state: string; reason: string; processRuntimeError: unknown };
+    expect(data.state).toBe("failed");
+    expect(data.reason).toBe("process_runtime_error");
+    expect(data.processRuntimeError).toMatchObject({
+      error: { message: "Cannot read properties of undefined" },
+      recovery: { command: "run:recover-process-error", recoverable: true },
+    });
+  });
+
   it("returns error when run not found", async () => {
     mockedReadRunMetadata.mockRejectedValue(new Error("Run not found: nonexistent"));
 
@@ -348,6 +391,42 @@ describe("run_events", () => {
     expect(data.matching).toBe(2);
     expect(data.showing).toBe(2);
     expect(data.events).toHaveLength(2);
+  });
+
+  it("filters process runtime error events case-insensitively", async () => {
+    mockedLoadJournal.mockResolvedValue([
+      {
+        seq: 1,
+        ulid: "01A",
+        filename: "000001.01A.json",
+        path: "/tmp/runs/01EVENTS/journal/000001.01A.json",
+        type: "RUN_CREATED",
+        recordedAt: "2026-01-01T00:00:00Z",
+        data: {},
+        checksum: "a",
+      },
+      {
+        seq: 2,
+        ulid: "01B",
+        filename: "000002.01B.json",
+        path: "/tmp/runs/01EVENTS/journal/000002.01B.json",
+        type: "PROCESS_RUNTIME_ERROR",
+        recordedAt: "2026-01-01T00:00:01Z",
+        data: { error: { message: "boom" } },
+        checksum: "b",
+      },
+    ] as Awaited<ReturnType<typeof loadJournal>>);
+
+    const handler = getToolHandler(server, "run_events");
+    const result = await handler({
+      runId: "01EVENTS",
+      runsDir: "/tmp/runs",
+      filterType: "process_runtime_error",
+    });
+
+    const data = parseResult(result) as { matching: number; events: Array<{ type: string }> };
+    expect(data.matching).toBe(1);
+    expect(data.events[0].type).toBe("PROCESS_RUNTIME_ERROR");
   });
 
   it("applies reverse and limit locally", async () => {
@@ -454,6 +533,22 @@ describe("run_iterate", () => {
     const data = parseResult(result) as { status: string; error: string };
     expect(data.status).toBe("failed");
     expect(data.error).toBe("Process crashed");
+  });
+
+  it("returns process-error status with recovery command hint", async () => {
+    mockedOrchestrateIteration.mockResolvedValue({
+      status: "process-error",
+      error: { message: "Cannot read properties of undefined" },
+      metadata: {},
+    } as Awaited<ReturnType<typeof orchestrateIteration>>);
+
+    const handler = getToolHandler(server, "run_iterate");
+    const result = await handler({ runId: "01ITER", runsDir: "/tmp/runs" });
+
+    const data = parseResult(result) as { status: string; recoverable: boolean; recoveryCommand: string };
+    expect(data.status).toBe("process-error");
+    expect(data.recoverable).toBe(true);
+    expect(data.recoveryCommand).toBe("run:recover-process-error");
   });
 });
 

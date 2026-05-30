@@ -62,8 +62,9 @@ The event stream is append-only and centers on:
 - `EFFECT_RESOLVED`
 - `RUN_COMPLETED`
 - `RUN_FAILED`
+- `PROCESS_RUNTIME_ERROR`
 
-The state cache is derived data. If it drifts from the journal, repair with `run:rebuild-state`. If journal entries are malformed or partially written, use `run:repair-journal` carefully after inspecting the affected run.
+The state cache is derived data. If it drifts from the journal, repair with `run:rebuild-state`. If process code threw and the journal contains `PROCESS_RUNTIME_ERROR`, use `run:recover-process-error` to clear that typed marker and optionally patch the offending task result. If journal entries are malformed or partially written, use `run:repair-journal` carefully after inspecting the affected run.
 
 ## Effects
 

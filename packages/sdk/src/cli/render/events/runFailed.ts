@@ -7,7 +7,7 @@ export function renderRunFailedMessage(event: JournalEvent): string {
     error?: { message?: string; name?: string; stack?: string };
   };
   const lines = [
-    `${renderStatusBadge("failed")}  ${colorize("RUN_FAILED", colors.bold, colors.red)}`,
+    `${renderStatusBadge("failed")}  ${colorize(event.type, colors.bold, colors.red)}`,
     colorize(`  ${event.recordedAt}`, colors.dim),
   ];
   if (error?.name) lines.push(`  Error: ${colorize(String(error.name), colors.red)}`);
