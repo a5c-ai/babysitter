@@ -126,7 +126,7 @@ describe('Jitsi sidecar runtime command/event contract', () => {
     assert.equal(sent[1].reason, 'network');
   });
 
-  it('disconnect command performs graceful Jitsi leave', async () => {
+  it('disconnect command sends configured goodbye chat before graceful Jitsi leave', async () => {
     const jitsi = adapter();
     const runtime = createJitsiSidecarRuntime({
       config: {
