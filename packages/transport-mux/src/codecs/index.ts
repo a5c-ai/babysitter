@@ -12,6 +12,11 @@ const codecRegistry = new Map<TransportId, TransportCodec>();
 
 type ToolSchemaFormat = CodecCapabilities['toolSchemaFormat'];
 
+export interface RegisterCodecOptions {
+  aliases?: TransportId[];
+  override?: boolean;
+}
+
 export interface TransportDescriptorLike {
   transportId?: string;
   runtimeId?: string;
@@ -34,17 +39,51 @@ function normalizeTransportId(transportId: string): string {
     .replace(/^google$/, 'google');
 }
 
-function register(codec: TransportCodec, aliases: TransportId[] = []): void {
-  for (const id of [codec.transportId, ...aliases]) {
-    codecRegistry.set(id, codec);
-  }
+function codecIds(codec: TransportCodec, aliases: TransportId[] = []): TransportId[] {
+  return Array.from(
+    new Set(
+      [codec.transportId, ...aliases]
+        .map((id) => id.trim())
+        .filter(Boolean)
+        .flatMap((id) => {
+          const normalized = normalizeTransportId(id);
+          return normalized === id ? [id] : [id, normalized];
+        }),
+    ),
+  );
 }
 
-register(new AnthropicCodec());
-register(new GoogleCodec(), ['vertex-native']);
-register(new OpenAiChatCodec(), ['azure-foundry', 'openai-chat-completions']);
-register(new OpenAiResponsesCodec());
-register(new BedrockConverseCodec(), ['bedrock']);
+export function registerCodec(
+  codec: TransportCodec,
+  options: RegisterCodecOptions = {},
+): readonly TransportId[] {
+  const ids = codecIds(codec, options.aliases);
+  if (ids.length === 0) {
+    throw new Error('Cannot register codec without a transport id.');
+  }
+
+  for (const id of ids) {
+    const existing = codecRegistry.get(id);
+    if (existing && existing !== codec && options.override !== true) {
+      throw new Error(`Codec already registered for transport id ${id}.`);
+    }
+  }
+
+  for (const id of ids) {
+    codecRegistry.set(id, codec);
+  }
+  return ids;
+}
+
+export function listRegisteredCodecs(): readonly TransportCodec[] {
+  return Array.from(new Set(codecRegistry.values()));
+}
+
+registerCodec(new AnthropicCodec());
+registerCodec(new GoogleCodec(), { aliases: ['vertex-native'] });
+registerCodec(new OpenAiChatCodec(), { aliases: ['azure-foundry', 'openai-chat-completions'] });
+registerCodec(new OpenAiResponsesCodec());
+registerCodec(new BedrockConverseCodec(), { aliases: ['bedrock'] });
 
 /**
  * Look up a TransportCodec by transport identifier.
