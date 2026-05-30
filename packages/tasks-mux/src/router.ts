@@ -1,6 +1,6 @@
 import type { BreakpointBackend } from "./backend.js";
 import type { ResponderProfile, ResponderType } from "./types.js";
-import type { TaskRoutingHints } from "./responders/types.js";
+import type { RoutedResponder, TaskRoutingHints } from "./responders/types.js";
 
 export interface RoutableTaskDef {
   kind: string;
@@ -20,27 +20,27 @@ export interface TaskRouteContext {
 export type TaskRouteDecision =
   | {
       responderType: "internal";
-      responder: ResponderProfile;
+      responder: RoutedResponder;
       route: "agent-core";
       reason: string;
     }
   | {
       responderType: "human";
-      responder: ResponderProfile;
+      responder: RoutedResponder;
       route: "breakpoint";
       backend?: BreakpointBackend;
       reason: string;
     }
   | {
       responderType: "agent";
-      responder: ResponderProfile;
+      responder: RoutedResponder;
       route: "agent-mux";
       backend?: BreakpointBackend;
       reason: string;
     }
   | {
       responderType: "tracker";
-      responder?: ResponderProfile;
+      responder?: RoutedResponder;
       route: "external-tracker";
       backend?: BreakpointBackend;
       unavailable?: boolean;
@@ -48,44 +48,61 @@ export type TaskRouteDecision =
     };
 
 export function routeTask(task: RoutableTaskDef, context: TaskRouteContext = {}): TaskRouteDecision {
-  const hints = routingHints(task);
-  const requested = hints.responderType ?? (hints.external ? "agent" : defaultResponderType(task));
+  return new TaskRouter(context).routeTask(task);
+}
 
-  if (requested === "auto") {
-    const agent = selectResponder(context.responders, "agent", hints.adapter);
-    if (agent || context.agentBackend) {
-      return agentDecision(hints, context, agent, "auto selected available agent responder");
+export class TaskRouter {
+  private readonly context: TaskRouteContext;
+
+  constructor(context: TaskRouteContext = {}) {
+    this.context = context;
+  }
+
+  routeTask(task: RoutableTaskDef, context: TaskRouteContext = {}): TaskRouteDecision {
+    const mergedContext = { ...this.context, ...context };
+    const hints = routingHints(task);
+    const requested = hints.responderType ?? (hints.external ? "agent" : defaultResponderType(task));
+
+    if (requested === "auto") {
+      const agent = selectResponder(mergedContext.responders, "agent", preferredResponder(hints), requiredCapabilities(hints));
+      if (agent || (mergedContext.agentBackend && !hasResponderInventory(mergedContext))) {
+        return agentDecision(hints, mergedContext, agent, "auto selected available agent responder");
+      }
+      return humanDecision(mergedContext, "auto fell back to human responder", hints);
     }
-    return humanDecision(context, "auto fell back to human responder");
-  }
 
-  if (requested === "agent") {
-    const responder = selectResponder(context.responders, "agent", hints.adapter);
-    if (!responder && !context.agentBackend && hints.fallbackType && hints.fallbackType !== "agent") {
-      return fallbackDecision(hints.fallbackType, task, context, `agent responder unavailable; fell back to ${hints.fallbackType}`);
+    if (requested === "agent") {
+      const responder = selectResponder(mergedContext.responders, "agent", preferredResponder(hints), requiredCapabilities(hints));
+      if (!responder && !mergedContext.agentBackend && hints.fallbackType && hints.fallbackType !== "agent") {
+        return fallbackDecision(hints.fallbackType, task, mergedContext, `agent responder unavailable; fell back to ${hints.fallbackType}`);
+      }
+      return agentDecision(hints, mergedContext, responder, "agent responder requested");
     }
-    return agentDecision(hints, context, responder, "agent responder requested");
+
+    if (requested === "human") {
+      return humanDecision(mergedContext, "human responder requested", hints);
+    }
+
+    if (requested === "tracker") {
+      const responder = selectResponder(mergedContext.responders, "tracker", hints.trackerBackend, requiredCapabilities(hints));
+      return {
+        responderType: "tracker",
+        responder,
+        route: "external-tracker",
+        backend: mergedContext.trackerBackend,
+        unavailable: !mergedContext.trackerBackend,
+        reason: mergedContext.trackerBackend
+          ? "tracker responder requested"
+          : `ExternalTrackerBackend unavailable for ${hints.trackerBackend ?? "default tracker"}`,
+      };
+    }
+
+    return internalDecision("internal responder requested");
   }
 
-  if (requested === "human") {
-    return humanDecision(context, "human responder requested");
+  matchResponder(type: Exclude<ResponderType, "auto">, hints: TaskRoutingHints = {}): RoutedResponder | undefined {
+    return selectResponder(this.context.responders, type, preferredResponder(hints), requiredCapabilities(hints));
   }
-
-  if (requested === "tracker") {
-    const responder = selectResponder(context.responders, "tracker", hints.trackerBackend);
-    return {
-      responderType: "tracker",
-      responder,
-      route: "external-tracker",
-      backend: context.trackerBackend,
-      unavailable: !context.trackerBackend,
-      reason: context.trackerBackend
-        ? "tracker responder requested"
-        : `ExternalTrackerBackend unavailable for ${hints.trackerBackend ?? "default tracker"}`,
-    };
-  }
-
-  return internalDecision("internal responder requested");
 }
 
 function fallbackDecision(
@@ -95,11 +112,11 @@ function fallbackDecision(
   reason: string,
 ): TaskRouteDecision {
   if (fallbackType === "human") {
-    return humanDecision(context, reason);
+    return humanDecision(context, reason, routingHints(task));
   }
   if (fallbackType === "tracker") {
     const hints = routingHints(task);
-    const responder = selectResponder(context.responders, "tracker", hints.trackerBackend);
+    const responder = selectResponder(context.responders, "tracker", hints.trackerBackend, requiredCapabilities(hints));
     return {
       responderType: "tracker",
       responder,
@@ -120,6 +137,9 @@ export function routingHints(task: RoutableTaskDef): TaskRoutingHints {
   return {
     responderType: source.responderType ?? task.metadata?.responderType,
     external: source.external ?? task.metadata?.external,
+    preferredResponderId: source.preferredResponderId ?? task.metadata?.preferredResponderId,
+    capabilities: source.capabilities ?? task.metadata?.capabilities,
+    requiredCapabilities: source.requiredCapabilities ?? task.metadata?.requiredCapabilities,
     adapter: source.adapter ?? task.metadata?.adapter,
     model: source.model ?? task.metadata?.model,
     provider: source.provider ?? task.metadata?.provider,
@@ -147,6 +167,7 @@ function internalDecision(reason: string): TaskRouteDecision {
       type: "internal",
       name: "Internal Agent",
       title: "Internal Agent",
+      capabilities: ["text", "agent-core", "internal"],
       domains: [],
       tags: ["internal"],
       availability: true,
@@ -155,12 +176,13 @@ function internalDecision(reason: string): TaskRouteDecision {
   };
 }
 
-function humanDecision(context: TaskRouteContext, reason: string): TaskRouteDecision {
-  const responder = selectResponder(context.responders, "human") ?? {
+function humanDecision(context: TaskRouteContext, reason: string, hints: TaskRoutingHints = {}): TaskRouteDecision {
+  const responder = selectResponder(context.responders, "human", preferredResponder(hints), requiredCapabilities(hints)) ?? {
     id: "human",
     type: "human" as const,
     name: "Human Responder",
     title: "Human Responder",
+    capabilities: ["text", "review", "approval"],
     domains: [],
     tags: ["human"],
     availability: true,
@@ -172,7 +194,7 @@ function humanDecision(context: TaskRouteContext, reason: string): TaskRouteDeci
 function agentDecision(
   hints: TaskRoutingHints,
   context: TaskRouteContext,
-  responder: ResponderProfile | undefined,
+  responder: RoutedResponder | undefined,
   reason: string,
 ): TaskRouteDecision {
   return {
@@ -185,6 +207,7 @@ function agentDecision(
       type: "agent",
       name: hints.adapter ?? "AgentMux Responder",
       title: "AgentMux Responder",
+      capabilities: requiredCapabilities(hints),
       domains: [],
       tags: ["agent"],
       availability: true,
@@ -198,18 +221,69 @@ function agentDecision(
 
 function selectResponder(
   responders: ResponderProfile[] | undefined,
-  type: ResponderType,
+  type: Exclude<ResponderType, "auto">,
   preferred?: string,
-): ResponderProfile | undefined {
-  const available = responders?.filter((responder) =>
-    (responder.type ?? "human") === type && responder.availability
-  ) ?? [];
+  capabilities: string[] = [],
+): RoutedResponder | undefined {
+  const available = responders
+    ?.map((responder) => normalizeResponder(responder))
+    .filter((responder) =>
+      responder.type === type &&
+      responder.availability &&
+      hasCapabilities(responder, capabilities)
+    ) ?? [];
   if (preferred) {
-    return available.find((responder) =>
+    const preferredMatch = available.find((responder) =>
       responder.id === preferred ||
       responder.adapter === preferred ||
       responder.trackerBackend === preferred
     );
+    if (preferredMatch) return preferredMatch;
   }
-  return available[0];
+  return available.sort(compareResponderPriority)[0];
+}
+
+function normalizeResponder(responder: ResponderProfile): RoutedResponder {
+  const type = responder.type ?? "human";
+  return {
+    ...responder,
+    type,
+    capabilities: normalizedCapabilities(responder),
+  } as RoutedResponder;
+}
+
+function normalizedCapabilities(responder: ResponderProfile): string[] {
+  return uniqueLowercase([
+    ...(responder.capabilities ?? []),
+    ...responder.domains,
+    ...responder.tags,
+  ]);
+}
+
+function hasCapabilities(responder: RoutedResponder, capabilities: string[]): boolean {
+  if (capabilities.length === 0) return true;
+  const available = new Set(responder.capabilities.map((capability) => capability.toLowerCase()));
+  return capabilities.every((capability) => available.has(capability.toLowerCase()));
+}
+
+function requiredCapabilities(hints: TaskRoutingHints): string[] {
+  return uniqueLowercase(hints.requiredCapabilities ?? hints.capabilities ?? []);
+}
+
+function preferredResponder(hints: TaskRoutingHints): string | undefined {
+  return hints.preferredResponderId ?? hints.adapter ?? hints.trackerBackend;
+}
+
+function hasResponderInventory(context: TaskRouteContext): boolean {
+  return Array.isArray(context.responders);
+}
+
+function compareResponderPriority(a: RoutedResponder, b: RoutedResponder): number {
+  const sla = a.responseTimeSla - b.responseTimeSla;
+  if (sla !== 0) return sla;
+  return a.id.localeCompare(b.id);
+}
+
+function uniqueLowercase(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean).map((value) => value.toLowerCase()))];
 }

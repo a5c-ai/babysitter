@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { routeTask, isHostDelegableRoute } from "../router.js";
+import { TaskRouter, routeTask, isHostDelegableRoute } from "../router.js";
 
 describe("routeTask", () => {
   it("defaults agent tasks to internal agent-core routing", () => {
@@ -23,7 +23,7 @@ describe("routeTask", () => {
     expect(decision.responderType).toBe("agent");
     expect(decision.route).toBe("agent-mux");
     expect(decision.responder.adapter).toBe("codex");
-    expect(isHostDelegableRoute(decision)).toBe(true);
+    expect(isHostDelegableRoute(decision)).toBe(false);
   });
 
   it("routes external agent tasks to agent-mux", () => {
@@ -119,6 +119,7 @@ describe("routeTask", () => {
             title: "Human",
             domains: [],
             tags: [],
+            capabilities: ["review"],
             availability: true,
             responseTimeSla: 60_000,
           },
@@ -129,6 +130,7 @@ describe("routeTask", () => {
             title: "Codex",
             domains: [],
             tags: [],
+            capabilities: ["code"],
             availability: true,
             responseTimeSla: 1_000,
             adapter: "codex",
@@ -139,5 +141,102 @@ describe("routeTask", () => {
 
     expect(decision.responderType).toBe("agent");
     expect(decision.responder.id).toBe("codex");
+  });
+
+  it("TaskRouter matches responders by type, availability, preferred adapter, and capabilities", () => {
+    const router = new TaskRouter({
+      responders: [
+        {
+          id: "codex-offline",
+          type: "agent",
+          name: "Codex Offline",
+          title: "Codex Offline",
+          capabilities: ["code", "test"],
+          domains: [],
+          tags: [],
+          availability: false,
+          responseTimeSla: 100,
+          adapter: "codex",
+        },
+        {
+          id: "codex-docs",
+          type: "agent",
+          name: "Codex Docs",
+          title: "Codex Docs",
+          capabilities: ["docs"],
+          domains: [],
+          tags: [],
+          availability: true,
+          responseTimeSla: 50,
+          adapter: "codex",
+        },
+        {
+          id: "codex-code",
+          type: "agent",
+          name: "Codex Code",
+          title: "Codex Code",
+          capabilities: ["code", "test"],
+          domains: [],
+          tags: [],
+          availability: true,
+          responseTimeSla: 200,
+          adapter: "codex",
+        },
+      ],
+    });
+
+    const decision = router.routeTask({
+      kind: "agent",
+      agent: {
+        responderType: "agent",
+        adapter: "codex",
+        requiredCapabilities: ["code", "test"],
+      },
+    });
+
+    expect(decision.responderType).toBe("agent");
+    expect(decision.responder.id).toBe("codex-code");
+  });
+
+  it("auto routing falls back to a capable human when no capable agent is available", () => {
+    const decision = routeTask(
+      {
+        kind: "agent",
+        agent: {
+          responderType: "auto",
+          requiredCapabilities: ["security-review"],
+        },
+      },
+      {
+        responders: [
+          {
+            id: "codex",
+            type: "agent",
+            name: "Codex",
+            title: "Codex",
+            capabilities: ["code"],
+            domains: [],
+            tags: [],
+            availability: true,
+            responseTimeSla: 1_000,
+            adapter: "codex",
+          },
+          {
+            id: "security-human",
+            type: "human",
+            name: "Security Human",
+            title: "Security Human",
+            capabilities: ["security-review"],
+            domains: [],
+            tags: [],
+            availability: true,
+            responseTimeSla: 60_000,
+          },
+        ],
+      },
+    );
+
+    expect(decision.responderType).toBe("human");
+    expect(decision.responder.id).toBe("security-human");
   });
 });
