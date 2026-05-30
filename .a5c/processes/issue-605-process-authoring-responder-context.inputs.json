@@ -1,0 +1,36 @@
+{
+  "issueNumber": 605,
+  "discoveryIssueNumber": 602,
+  "responderTypeIssueNumber": 635,
+  "hostIdentityIssueNumber": 619,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-605-process-authoring-responder-context",
+  "maxImplementationAttempts": 3,
+  "autoProceedWhenDependenciesMissing": false,
+  "expectRedTestsToFail": true,
+  "targetedTestCommand": "npm exec --workspace=@a5c-ai/agent-platform -- vitest run src/harness/internal/createRun/__tests__/prompts.test.ts src/harness/internal/createRun/__tests__/createRun.test.ts",
+  "qualityCommands": [
+    "npm exec --workspace=@a5c-ai/agent-platform -- vitest run src/harness/internal/createRun/__tests__/prompts.test.ts src/harness/internal/createRun/__tests__/createRun.test.ts",
+    "npm exec --workspace=@a5c-ai/babysitter-sdk -- vitest run src/tasks/__tests__/defineTask.test.ts src/tasks/__tests__/kinds.test.ts src/harness/__tests__/externalAgentDiscovery.test.ts",
+    "npm run build:runtime",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "targetFiles": [
+    "packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts",
+    "packages/agent-platform/src/harness/internal/createRun/planProcess/prompts.ts",
+    "packages/agent-platform/src/harness/internal/createRun/prompts.ts",
+    "packages/agent-platform/src/harness/internal/createRun/planProcess/validation.ts",
+    "packages/agent-platform/src/harness/internal/createRun/planProcess/validationSource.ts",
+    "packages/agent-platform/src/harness/internal/createRun/__tests__/prompts.test.ts",
+    "packages/agent-platform/src/harness/internal/createRun/__tests__/createRun.test.ts",
+    "packages/sdk/src/harness/externalAgentDiscovery.ts",
+    "packages/sdk/src/tasks/types.ts",
+    "packages/sdk/src/tasks/kinds/index.ts",
+    "packages/sdk/src/harness/unified/promptContext.ts",
+    "docs/agent-mux-babysitter-integrations/process-authoring.md",
+    "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md",
+    "docs/agent-mux-babysitter-integrations/plugin-mode.md"
+  ]
+}
