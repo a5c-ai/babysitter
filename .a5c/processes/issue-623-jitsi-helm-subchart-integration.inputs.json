@@ -21,7 +21,29 @@
     ],
     "crds": "packages/krate/charts/crds/jitsi-resources.yaml",
     "chartReadme": "packages/krate/charts/README.md",
-    "coreReadme": "packages/krate/core/README.md"
+    "coreReadme": "packages/krate/core/README.md",
+    "existingJitsiModel": "packages/krate/core/src/resource-model.js",
+    "existingJitsiCliTools": "packages/krate/cli/src/mcp-server.js",
+    "existingJitsiWebRoutes": "packages/krate/web/app/api/orgs/[org]/jitsi"
+  },
+  "reuseAuditSeedFindings": {
+    "chartSurfaceMissing": [
+      "packages/krate/charts/Chart.yaml currently has vela-core and kyverno dependencies but no jitsi-meet dependency",
+      "packages/krate/charts/values.yaml currently has no top-level jitsi section",
+      "packages/krate/charts/crds/jitsi-resources.yaml is absent",
+      "packages/krate/charts/templates/networkpolicy.yaml currently has only generic namespace ingress/egress and no JVB UDP 10000-specific behavior"
+    ],
+    "existingReusableJitsiSurfaces": [
+      "packages/krate/core/src/resource-model.js already defines JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, and JitsiRecording resource definitions",
+      "packages/krate/cli/src/mcp-server.js already exposes Jitsi meeting MCP tools and uses KRATE_JITSI_JWT_SECRET for local JWT signing fallback",
+      "packages/krate/cli/tests/jitsi-mcp-tools.test.js already covers the CLI/MCP Jitsi meeting tool contract",
+      "packages/krate/web/app/api/orgs/[org]/jitsi and packages/krate/web/tests/jitsi-structure.test.js already provide web/API Jitsi surfaces from adjacent work"
+    ],
+    "planningImplications": [
+      "Do not duplicate controller, CLI, or web Jitsi work that exists or belongs to adjacent issues",
+      "Anchor issue #623 implementation on Helm dependency, chart values, chart CRDs, secret wiring, network policy/media behavior, and package validation",
+      "Update or extend package validation only where it verifies chart/deployment artifacts, not to reimplement application controllers"
+    ]
   },
   "issueScope": [
     "Add jitsi-meet as a Helm dependency with condition jitsi.install",

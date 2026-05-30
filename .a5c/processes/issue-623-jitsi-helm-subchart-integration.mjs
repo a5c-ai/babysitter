@@ -244,7 +244,9 @@ export const runReuseAuditTask = defineTask('issue-623.reuse-audit', (args, task
       instructions: [
         'Extract keyword nouns and verbs from issue #623 and the Jitsi docs: jitsi, jitsi-meet, meet, prosody, jicofo, jvb, jibri, jwt, webhook, recording, UDP 10000, external, install, subchart, CRD.',
         'Check for .a5c/reuse-audit.json. If present, use it to shape scan globs and keyword extraction; if absent, state that explicitly.',
+        'Use inputs.reuseAuditSeedFindings as authoring-time research, then re-scan the live repository because staging may have moved since this plan was created.',
         'Scan existing chart dependencies, values, templates, CRDs, package validation, docs, API routes, environment variables, SDK dependencies, imports, and graph metadata for matching Jitsi or adjacent Helm infrastructure.',
+        'Pay special attention to the distinction between existing Jitsi application surfaces and the still-missing Helm chart/deployment surface.',
         'Render a top-level section named exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
         'List direct Jitsi matches, adjacent reusable infrastructure, and any conflicting partial implementations. If none exist, include a concise "No matching existing Jitsi chart infrastructure found" note.',
         'Set needsMaintainerDecision true only if the audit finds conflicting chart semantics that cannot be resolved from the issue and docs.',
