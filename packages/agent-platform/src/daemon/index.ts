@@ -16,6 +16,7 @@ export {
   readDaemonLoopStatus,
   appendDaemonLog,
   readDaemonLog,
+  DurableTriggerQueue,
   type DaemonConfig,
   type DaemonStartOptions,
   type DaemonStartOutput,
@@ -33,10 +34,17 @@ export {
   type WebhookListenerOptions,
   type WebhookListenerHandle,
   type TriggerCallback,
+  type TriggerAdmissionConfig,
+  type TriggerAdmissionResult,
+  type TriggerAdmissionStatus,
+  type TriggerRateLimitConfig,
   type TimerSchedulerHandle,
   type DaemonLoopOptions,
   type DaemonLoopStatus,
   type DaemonLogEntry,
+  type DurableTriggerQueueOptions,
+  type DurableTriggerRecord,
+  type DurableTriggerState,
 } from "@a5c-ai/agent-runtime/daemon";
 export { executeAutomationTrigger } from "./automationExecutor";
 export { isAutomationTriggerEvent } from "./types";

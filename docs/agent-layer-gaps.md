@@ -57,8 +57,7 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 |-----|------|-------------|
 | K8s executor is stub | `execution/modes/kubernetes.ts:52-94` | Manifest builder only. No `kubectl apply`, no log streaming, no completion polling. Marks "running" without executing. |
 | No crash recovery | `daemon/lifecycle.ts:78-148` | Daemon death loses all pending work. No auto-restart, no watchdog. |
-| Queue is in-memory only | `daemon/loop.ts:37-52` | `const queue: TriggerEvent[] = []`. Lost on restart. No disk-backed persistence. |
-| onTrigger errors crash daemon | `daemon/loop.ts:57-70` | Callback errors are unhandled rejections. Single bad trigger crashes everything. |
+| Crash recovery is partial | `daemon/lifecycle.ts`, `daemon/durableQueue.ts` | Trigger events can persist and replay through `DurableTriggerQueue`, but daemon death still has no auto-restart supervisor/watchdog flow. |
 | Resource budgets not enforced | `resources/manager.ts` | Limits checked but not blocking. Agents can exceed budgets. |
 | Telemetry has no export | `telemetry/provider.ts` | InMemoryTelemetryProvider only. Traces lost on process exit. No OTLP, no file export. |
 
@@ -71,8 +70,7 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 | No hot reload | `daemon/lifecycle.ts` | Config changes require full restart. Queue/active runs lost. |
 | SSH — partial verification | `execution/modes/ssh.ts` | Strict host-key checking is now the default and `StrictHostKeyChecking=no` requires an explicit insecure policy opt-in. Retry, pooling, and keepalive are still missing. |
 | Docker — partial sandbox policy | `execution/modes/docker.ts` | Docker args now include secure defaults plus resource/network/DNS policy support. Live daemon availability and image verification preflight remain missing. |
-| No dead letter queue | `daemon/loop.ts` | Failed triggers not recorded or retried. No backoff, no failure metrics. |
-| No trigger deduplication | `daemon/fileWatcher.ts`, `daemon/timerScheduler.ts` | Same file matching multiple patterns fires multiple times. |
+| External trigger sources are incomplete | `daemon/types.ts`, `daemon/loop.ts` | File/webhook/timer are hardened with durable retry/DLQ, dedupe windows, queue depth admission, and webhook rate limiting. Broker/chat/git trigger adapters are still missing. |
 | Background process isolation/backpressure is partial | `backgroundProcessRegistry.ts` | Background execution now uses ExecutionPolicy env/cwd handling, retained/dropped stream byte metadata, optional process-group termination with grace escalation, timeout status, pause/resume capability checks, dependency queueing, and lifecycle hook diagnostics. Remaining gaps are OS-enforced isolation and daemon-level graceful drain/crash recovery. |
 
 ### Medium
@@ -81,9 +79,9 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 |-----|-------------|
 | No CPU/memory/disk tracking | Only token/cost budgets. No system resource quotas. |
 | No admission control | No pre-flight budget check before effect dispatch. |
-| Cron — no named days/months, no timezone | Basic 5-field only. No `JAN`, `MON`, `L`, `#N`, `@reboot`. |
+| Cron advanced syntax is partial | Named days/months, timezone evaluation, standard macros, and `@reboot` are supported. `L` and `#N` calendar syntax remain unsupported. |
 | No event-driven triggers | File/webhook/timer only. No message queue (RabbitMQ/Kafka/SQS). |
-| No trigger rate limiting | Runaway sender can spam queue. |
+| Trigger rate limiting is local only | Webhook/loop admission supports local rate limits, dedupe windows, and queue caps. Distributed/adaptive throttling is still missing. |
 | No structured logging | Append-only JSON log. No levels, no filtering, no rotation. |
 | Health checks — no percentiles | Average latency only. No P50/P95/P99. |
 | No metrics export | Snapshots computed but never sent to monitoring (Prometheus, CloudWatch). |

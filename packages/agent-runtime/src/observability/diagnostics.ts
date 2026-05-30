@@ -80,6 +80,18 @@ export function renderPrometheusMetrics(context: Pick<DiagnosticsContext, "healt
     "# HELP babysitter_daemon_queue_pending_runs Pending daemon runs.",
     "# TYPE babysitter_daemon_queue_pending_runs gauge",
     `babysitter_daemon_queue_pending_runs ${context.queue?.pendingRuns ?? 0}`,
+    "# HELP babysitter_daemon_queue_dead_letter_runs Dead-lettered daemon runs.",
+    "# TYPE babysitter_daemon_queue_dead_letter_runs gauge",
+    `babysitter_daemon_queue_dead_letter_runs ${context.queue?.deadLetterRuns ?? 0}`,
+    "# HELP babysitter_daemon_trigger_rejections_total Trigger admissions rejected by the daemon.",
+    "# TYPE babysitter_daemon_trigger_rejections_total counter",
+    `babysitter_daemon_trigger_rejections_total ${context.queue?.rejectedTriggers ?? 0}`,
+    "# HELP babysitter_daemon_trigger_duplicates_total Trigger admissions suppressed as duplicates by the daemon.",
+    "# TYPE babysitter_daemon_trigger_duplicates_total counter",
+    `babysitter_daemon_trigger_duplicates_total ${context.queue?.duplicateTriggers ?? 0}`,
+    "# HELP babysitter_daemon_trigger_rate_limited_total Trigger admissions rejected by rate limiting.",
+    "# TYPE babysitter_daemon_trigger_rate_limited_total counter",
+    `babysitter_daemon_trigger_rate_limited_total ${context.queue?.rateLimitedTriggers ?? 0}`,
   ];
   return `${lines.join("\n")}\n`;
 }
