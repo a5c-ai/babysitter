@@ -10,7 +10,19 @@ export type {
   ToolDispatchPolicy,
   ToolCallContext,
   ToolCallResult,
+  ToolApprovalPolicy,
+  ToolCacheCapability,
+  ToolCategory,
+  ToolCostHint,
+  ToolErrorCode,
+  ToolExecutionLimits,
+  ToolExecutionPolicy,
+  ToolRateLimitHint,
+  SerializedToolError,
+  UnifiedToolEvent,
+  UnifiedToolMetadata,
 } from './types.js';
+export { ToolExecutionError, serializeToolError } from './types.js';
 
 /* ------------------------------------------------------------------ */
 /*  Registry                                                           */

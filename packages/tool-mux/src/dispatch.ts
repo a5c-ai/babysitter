@@ -1,9 +1,12 @@
+import { ToolExecutionError, serializeToolError } from './types.js';
 import type {
   ToolCallContext,
   ToolCallResult,
   ToolDescriptor,
   ToolDispatchPolicy,
   ToolDispatchRule,
+  ToolExecutionPolicy,
+  ToolExecutionLimits,
 } from './types.js';
 import type { ToolHookBridge } from './hooks.js';
 import type { ToolRegistry } from './registry.js';
@@ -39,6 +42,7 @@ export type ToolExecutor = (
 export interface ToolDispatcherOptions {
   registry: ToolRegistry;
   policy?: ToolDispatchPolicy;
+  executionPolicy?: ToolExecutionPolicy;
   hooks?: ToolHookBridge;
 }
 
@@ -50,11 +54,16 @@ export interface ToolDispatcherOptions {
 export class ToolDispatcher {
   private readonly registry: ToolRegistry;
   private readonly policy: ToolDispatchPolicy;
+  private readonly executionPolicy: ToolExecutionPolicy;
   private readonly hooks: ToolHookBridge | undefined;
 
   constructor(options: ToolDispatcherOptions) {
     this.registry = options.registry;
     this.policy = options.policy ?? { rules: [] };
+    this.executionPolicy = options.executionPolicy ?? {
+      defaultTimeoutMs: 120_000,
+      defaultMaxOutputBytes: 50 * 1024 * 1024,
+    };
     this.hooks = options.hooks;
   }
 
@@ -98,6 +107,15 @@ export class ToolDispatcher {
     }
 
     return this.policy.defaultServer;
+  }
+
+  getExecutionLimits(toolName: string): ToolExecutionLimits {
+    const perTool = this.executionPolicy.perTool?.[toolName] ?? {};
+    return {
+      timeoutMs: perTool.timeoutMs ?? this.executionPolicy.defaultTimeoutMs,
+      maxOutputBytes: perTool.maxOutputBytes ?? this.executionPolicy.defaultMaxOutputBytes,
+      ...(perTool.maxEvents !== undefined ? { maxEvents: perTool.maxEvents } : {}),
+    };
   }
 
   /* ---------------------------------------------------------------- */
@@ -145,7 +163,9 @@ export class ToolDispatcher {
     try {
       output = await executor(descriptor, context);
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : String(err);
+      error = err instanceof ToolExecutionError
+        ? serializeToolError(err)
+        : err instanceof Error ? err.message : String(err);
     }
 
     const durationMs = Date.now() - start;

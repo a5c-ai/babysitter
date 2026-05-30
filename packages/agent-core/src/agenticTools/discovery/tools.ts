@@ -29,6 +29,7 @@ export function createDiscoveryTools(options: AgenticToolOptions): CustomToolDef
             description: tool.description,
             source: tool.source,
             sourceQualifier: tool.sourceQualifier,
+            metadata: tool.metadata,
           })),
         });
       },
@@ -70,6 +71,7 @@ export function createDiscoveryTools(options: AgenticToolOptions): CustomToolDef
           description: resolved.description,
           source: resolved.source,
           sourceQualifier: resolved.sourceQualifier,
+          metadata: resolved.metadata,
           inputSchema: resolved.schema.inputSchema,
           outputSchema: resolved.schema.outputSchema,
         });
