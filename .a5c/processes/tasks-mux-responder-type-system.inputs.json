@@ -1,0 +1,48 @@
+{
+  "projectRoot": "/home/runner/work/babysitter/babysitter",
+  "targetScore": 90,
+  "maxAttempts": 3,
+  "analysisModel": "claude-sonnet-4-6",
+  "implementationModel": "claude-opus-4-6",
+  "reviewModel": "claude-sonnet-4-6",
+  "expectedArtifactPaths": [
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/src/responders/types.ts",
+    "packages/tasks-mux/src/router.ts",
+    "packages/tasks-mux/src/index.ts",
+    "packages/tasks-mux/src/__tests__/router.test.ts",
+    "packages/tasks-mux/src/__tests__/shared-types-backend-interface.test.ts"
+  ],
+  "verificationCommands": [
+    {
+      "title": "Targeted router and type tests",
+      "slug": "targeted-tests",
+      "command": "npm run test --workspace=@a5c-ai/tasks-mux -- src/__tests__/router.test.ts src/__tests__/shared-types-backend-interface.test.ts",
+      "timeoutMs": 600000
+    },
+    {
+      "title": "tasks-mux typecheck",
+      "slug": "typecheck",
+      "command": "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+      "timeoutMs": 600000
+    },
+    {
+      "title": "tasks-mux lint",
+      "slug": "lint",
+      "command": "npm run lint --workspace=@a5c-ai/tasks-mux",
+      "timeoutMs": 600000
+    },
+    {
+      "title": "Full tasks-mux test suite",
+      "slug": "full-tests",
+      "command": "npm run test --workspace=@a5c-ai/tasks-mux",
+      "timeoutMs": 900000
+    },
+    {
+      "title": "ResponderType artifact existence and exports",
+      "slug": "exports-grep",
+      "command": "test -f packages/tasks-mux/src/router.ts && test -f packages/tasks-mux/src/responders/types.ts && rg -n \"ResponderType|TaskRouter|routeTask|responderType\" packages/tasks-mux/src/types.ts packages/tasks-mux/src/router.ts packages/tasks-mux/src/responders/types.ts packages/tasks-mux/src/index.ts",
+      "timeoutMs": 120000
+    }
+  ]
+}
