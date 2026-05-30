@@ -132,6 +132,30 @@ auth:
 
 Krate stores `User`, `Team`, `Invite`, `IdentityMapping`, `RepositoryPermission`, and `SSHKey` resources. OAuth callbacks and delegated identity headers auto-register the Krate user plus identity mapping, and controllers reconcile those resources into workspace access, repository account mappings, team membership, SSH keys, and repository permissions while the UI exposes only Krate people and access flows.
 
+### Configure Staging Service Bindings
+
+Assistant and Gitea tokens must come from Kubernetes Secrets. The chart renders only `secretKeyRef` names and keys, never token values:
+
+```yaml
+assistant:
+  anthropic:
+    existingSecret: krate-assistant
+    key: anthropic-api-key
+  krateAssistant:
+    existingSecret: krate-assistant
+    key: krate-assistant-api-key
+gitea:
+  httpUrl: http://krate-gitea-http.krate-system.svc.cluster.local:3000/krate
+  token:
+    existingSecret: krate-gitea-token
+    key: token
+agentMux:
+  url: http://agent-mux.krate-system.svc.cluster.local:8080
+  gatewayUrl: http://agent-gateway.krate-system.svc.cluster.local:8080
+```
+
+Leave any value empty to keep the corresponding env var out of the rendered workloads. Staging deployments should create the referenced Secrets through the approved secret manager or cluster operations flow before enabling these values.
+
 ## Kyverno policy integration
 
 Krate supports three Kyverno modes through `externalDependencies.kyverno`:

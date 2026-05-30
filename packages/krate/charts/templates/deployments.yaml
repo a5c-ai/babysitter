@@ -2,6 +2,11 @@
 {{- $kubevelaNamespace := $kubevela.namespace | default "vela-system" -}}
 {{- $kyverno := .Values.externalDependencies.kyverno | default dict -}}
 {{- $kyvernoReporter := $kyverno.policyReporter | default dict -}}
+{{- $assistant := .Values.assistant | default dict -}}
+{{- $assistantAnthropic := $assistant.anthropic | default dict -}}
+{{- $assistantKrate := $assistant.krateAssistant | default dict -}}
+{{- $giteaToken := .Values.gitea.token | default dict -}}
+{{- $agentMux := .Values.agentMux | default dict -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -57,6 +62,22 @@ spec:
               value: {{ $kyverno.discoverExisting | default true | quote }}
             - name: KRATE_GITEA_HTTP_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/krate" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            {{- if $giteaToken.existingSecret }}
+            - name: KRATE_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $giteaToken.existingSecret | quote }}
+                  key: {{ default "token" $giteaToken.key | quote }}
+                  optional: true
+            {{- end }}
+            {{- if $agentMux.url }}
+            - name: AGENT_MUX_URL
+              value: {{ $agentMux.url | quote }}
+            {{- end }}
+            {{- if $agentMux.gatewayUrl }}
+            - name: AGENT_GATEWAY_URL
+              value: {{ $agentMux.gatewayUrl | quote }}
+            {{- end }}
             - name: KRATE_AUTH_COOKIE_NAME
               value: {{ .Values.auth.session.cookieName | quote }}
             - name: KRATE_AUTH_DELEGATED_IDENTITY_ENABLED
@@ -188,6 +209,22 @@ spec:
               value: {{ $kyverno.discoverExisting | default true | quote }}
             - name: KRATE_GITEA_HTTP_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/krate" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            {{- if $giteaToken.existingSecret }}
+            - name: KRATE_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $giteaToken.existingSecret | quote }}
+                  key: {{ default "token" $giteaToken.key | quote }}
+                  optional: true
+            {{- end }}
+            {{- if $agentMux.url }}
+            - name: AGENT_MUX_URL
+              value: {{ $agentMux.url | quote }}
+            {{- end }}
+            {{- if $agentMux.gatewayUrl }}
+            - name: AGENT_GATEWAY_URL
+              value: {{ $agentMux.gatewayUrl | quote }}
+            {{- end }}
             - name: KRATE_AUTH_COOKIE_NAME
               value: {{ .Values.auth.session.cookieName | quote }}
             - name: KRATE_AUTH_DELEGATED_IDENTITY_ENABLED
@@ -321,6 +358,38 @@ spec:
               value: {{ printf "http://%s-api.%s.svc.cluster.local:%v" (include "krate.fullname" .) .Release.Namespace (.Values.api.service.port | int) | quote }}
             - name: KRATE_GITEA_HTTP_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/krate" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            {{- if $giteaToken.existingSecret }}
+            - name: KRATE_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $giteaToken.existingSecret | quote }}
+                  key: {{ default "token" $giteaToken.key | quote }}
+                  optional: true
+            {{- end }}
+            {{- if $agentMux.url }}
+            - name: AGENT_MUX_URL
+              value: {{ $agentMux.url | quote }}
+            {{- end }}
+            {{- if $agentMux.gatewayUrl }}
+            - name: AGENT_GATEWAY_URL
+              value: {{ $agentMux.gatewayUrl | quote }}
+            {{- end }}
+            {{- if $assistantAnthropic.existingSecret }}
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $assistantAnthropic.existingSecret | quote }}
+                  key: {{ default "anthropic-api-key" $assistantAnthropic.key | quote }}
+                  optional: true
+            {{- end }}
+            {{- if $assistantKrate.existingSecret }}
+            - name: KRATE_ASSISTANT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $assistantKrate.existingSecret | quote }}
+                  key: {{ default "krate-assistant-api-key" $assistantKrate.key | quote }}
+                  optional: true
+            {{- end }}
             - name: KRATE_AUTH_COOKIE_NAME
               value: {{ .Values.auth.session.cookieName | quote }}
             - name: KRATE_AUTH_DELEGATED_IDENTITY_ENABLED
@@ -434,6 +503,14 @@ spec:
               value: {{ .Release.Namespace | quote }}
             - name: KRATE_GITEA_HTTP_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/krate" (include "krate.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+            {{- if $giteaToken.existingSecret }}
+            - name: KRATE_GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $giteaToken.existingSecret | quote }}
+                  key: {{ default "token" $giteaToken.key | quote }}
+                  optional: true
+            {{- end }}
             - name: KRATE_AUTH_COOKIE_NAME
               value: {{ .Values.auth.session.cookieName | quote }}
           {{- with .Values.webhookWorker.resources }}
