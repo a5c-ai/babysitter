@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { agentIdentityOptions } from '../../lib/agent-identity.js';
 
 const btnBase = { padding: '4px 12px', borderRadius: 5, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600 };
 const primaryBtn = { ...btnBase, backgroundColor: '#2563eb', color: '#fff' };
@@ -11,12 +12,15 @@ const disabledStyle = { opacity: 0.55, cursor: 'not-allowed' };
  * ManualDispatchButton — dropdown stack selector + "Dispatch" button.
  * POSTs to /api/orgs/{org}/agents/dispatch with { stackRef }.
  */
-export function ManualDispatchButton({ org, stacks = [] }) {
+export function ManualDispatchButton({ org, stacks = [], agents = [] }) {
   const [open, setOpen] = useState(false);
   const [selectedStack, setSelectedStack] = useState('');
   const [repository, setRepository] = useState('');
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [message, setMessage] = useState('');
+
+  const identityOptions = agentIdentityOptions(agents, stacks);
+  const selectedIdentity = identityOptions.find((option) => option.value === selectedStack);
 
   async function handleDispatch() {
     if (!selectedStack) return;
@@ -26,7 +30,7 @@ export function ManualDispatchButton({ org, stacks = [] }) {
       const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/agents/dispatch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stackRef: selectedStack, repository: repository || 'default' }),
+        body: JSON.stringify({ ...(selectedIdentity?.type === 'agentDefinition' ? { agentDefinition: selectedStack } : { stackRef: selectedStack }), repository: repository || 'default' }),
       });
       const data = await res.json();
       if (data.error) {
@@ -85,10 +89,10 @@ export function ManualDispatchButton({ org, stacks = [] }) {
         value={selectedStack}
         onChange={e => setSelectedStack(e.target.value)}
         style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }}
-        aria-label="Select agent stack"
+        aria-label="Select agent persona or stack"
       >
-        <option value="">Select stack…</option>
-        {stacks.map(s => <option key={s} value={s}>{s}</option>)}
+        <option value="">Select agent…</option>
+        {identityOptions.map(option => <option key={`${option.type}-${option.value}`} value={option.value}>{option.label}{option.hint ? ` - ${option.hint}` : ''}</option>)}
       </select>
       <input
         placeholder="Repository (optional)"

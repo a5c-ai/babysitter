@@ -7,6 +7,7 @@ import { SessionShell } from '../components/agent/session-shell.jsx';
 import { SessionCost } from '../components/agent/session-cost.jsx';
 import { ResourceActions } from '../components/resource-crud-actions.jsx';
 import { phaseTone } from './agent-helpers.jsx';
+import { resolveSessionAgentIdentity, agentIdentityLabel } from '../lib/agent-identity.js';
 
 export async function AgentSessionsPage({ org = null } = {}) {
   const ui = await loadKrateUi(org);
@@ -21,10 +22,12 @@ export async function AgentSessionsPage({ org = null } = {}) {
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}><LiveUpdates org={activeOrg} /></div>
     <div className="card">
       <div className="cardTitle"><h2>Sessions</h2><StatusPill tone={sessions.length ? 'good' : 'neutral'}>{sessions.length} sessions</StatusPill></div>
-      {sessions.length ? <div className="resourceTable">{sessions.map((session) => <div key={session.metadata?.name} className="resourceRow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+      {sessions.length ? <div className="resourceTable">{sessions.map((session) => {
+        const identity = resolveSessionAgentIdentity(session, ui.model);
+        return <div key={session.metadata?.name} className="resourceRow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
         <a href={orgHref(activeOrg, `/agents/sessions/${session.metadata?.name}`)} style={{ textDecoration: 'none', display: 'contents' }}>
           <strong>{session.metadata?.name}</strong>
-          <span>{session.spec?.agentStack || session.spec?.stackRef || 'unassigned'}</span>
+          <span>{agentIdentityLabel(identity, session.spec?.agentStack || session.spec?.stackRef || 'unassigned')}</span>
           <StatusPill tone={phaseTone(session.status?.phase)}>{session.status?.phase || 'Pending'}</StatusPill>
         </a>
         {session.spec?.dispatchRun ? (
@@ -40,7 +43,8 @@ export async function AgentSessionsPage({ org = null } = {}) {
         ) : (
           <ResourceActions org={activeOrg} apiPath={`resources/AgentSession/${session.metadata?.name}`} actions={['delete']} />
         )}
-      </div>)}</div> : <EmptyState title="No agent sessions" text="Sessions are created automatically when agents run. Configure agent stacks and trigger rules to start sessions." cta={orgHref(activeOrg, '/agents/stacks/new')} ctaLabel="Create a stack" />}
+      </div>;
+      })}</div> : <EmptyState title="No agent sessions" text="Sessions are created automatically when agents run. Configure agent stacks and trigger rules to start sessions." cta={orgHref(activeOrg, '/agents/stacks/new')} ctaLabel="Create a stack" />}
     </div>
   </PageFrame>;
 }
@@ -54,6 +58,7 @@ export async function AgentSessionDetailPage({ org = null, sessionId } = {}) {
   const messages = transcriptRecord?.spec?.messages || [];
   const dispatchRunName = session?.spec?.dispatchRun || null;
   const stackName = session?.spec?.agentStack || session?.spec?.stackRef || null;
+  const identity = resolveSessionAgentIdentity(session, ui.model);
   const allRuns = agentView.runs?.items || [];
   const allTranscripts = agentView.transcripts?.items || [];
   const sessionRuns = allRuns.filter((r) => r.status?.sessionRef === sessionId || r.spec?.sessionRef === sessionId || r.metadata?.name === dispatchRunName);
@@ -69,6 +74,7 @@ export async function AgentSessionDetailPage({ org = null, sessionId } = {}) {
       runs={sessionRuns}
       transcripts={allTranscripts}
       transcriptRecord={transcriptRecord}
+      identity={identity}
     />
   </PageFrame>;
 }

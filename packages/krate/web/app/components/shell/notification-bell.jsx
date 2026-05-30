@@ -38,10 +38,11 @@ function mapEventToNotification(event) {
 
   if (evType.includes('AgentDispatchRun')) {
     type = 'run-complete';
-    title = (event?.status === 'failed' ? 'Run failed: ' : 'Run completed: ') + (event?.name || evType);
+    const personaName = event?.persona?.displayName || event?.agentIdentity?.displayName || event?.spec?.agentDefinition || event?.spec?.agentStack || event?.name || evType;
+    title = (event?.status === 'failed' ? 'Run failed: ' : 'Run completed: ') + personaName;
   } else if (evType.includes('AgentApproval')) {
     type = 'approval-needed';
-    title = 'Approval needed: ' + (event?.spec?.action || event?.action || 'action');
+    title = 'Approval needed: ' + (event?.persona?.displayName || event?.spec?.action || event?.action || 'action');
   } else if (evType.includes('ExternalSyncConflict') || evType.includes('Conflict')) {
     type = 'conflict-detected';
     title = 'Sync conflict detected';

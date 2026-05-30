@@ -143,3 +143,21 @@ test('every component subdirectory has at least one file referenced by barrel', 
     `subdirectories not referenced by barrel: ${unreferenced.join(', ')}`
   );
 });
+
+test('barrel index exports agent identity components', () => {
+  const expected = [
+    'AgentDirectory',
+    'AgentProfileCard',
+    'AgentProfilePage',
+    'AgentPersonaEditor',
+    'AgentSoulEditor',
+    'AgentAppearanceEditor',
+    'AgentVoiceEditor',
+    'AgentDefinitionForm',
+    'AgentCreateWizard',
+    'AgentPersonalityTraits',
+  ];
+  for (const symbol of expected) {
+    assert.ok(barrelSrc.includes(symbol), `components barrel must export ${symbol}`);
+  }
+});
