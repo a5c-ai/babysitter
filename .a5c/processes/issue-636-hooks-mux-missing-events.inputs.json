@@ -1,0 +1,170 @@
+{
+  "issueNumber": 636,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-636-hooks-mux-missing-events",
+  "targetEvents": [
+    {
+      "nativeName": "PostToolUseFailure",
+      "canonicalPhase": "tool.after_failure",
+      "priority": 1,
+      "scope": "tool",
+      "expectedPayload": ["tool_name", "tool_input", "error", "exit_code"],
+      "blocking": false,
+      "additionalContext": true
+    },
+    {
+      "nativeName": "PostToolBatch",
+      "canonicalPhase": "tool.after_batch",
+      "priority": 1,
+      "scope": "tool",
+      "expectedPayload": ["batch_results"],
+      "blocking": true,
+      "additionalContext": true
+    },
+    {
+      "nativeName": "StopFailure",
+      "canonicalPhase": "turn.stop_failure",
+      "priority": 1,
+      "scope": "turn",
+      "expectedPayload": ["error_type", "error_message", "retry_after"],
+      "blocking": false,
+      "additionalContext": true,
+      "matcher": "error_type"
+    },
+    {
+      "nativeName": "UserPromptExpansion",
+      "canonicalPhase": "turn.prompt_expansion",
+      "priority": 1,
+      "scope": "turn",
+      "expectedPayload": ["expansion_type", "command_name", "command_args", "command_source", "prompt"],
+      "blocking": true,
+      "additionalContext": true,
+      "matcher": "command_name"
+    },
+    {
+      "nativeName": "TaskCreated",
+      "canonicalPhase": "task.created",
+      "priority": 2,
+      "scope": "task",
+      "expectedPayload": ["task_id", "task_kind", "task_title", "task_labels"],
+      "blocking": true,
+      "metadataMutation": true
+    },
+    {
+      "nativeName": "TaskCompleted",
+      "canonicalPhase": "task.completed",
+      "priority": 2,
+      "scope": "task",
+      "expectedPayload": ["task_id", "task_kind", "task_status", "task_result"],
+      "blocking": true
+    },
+    {
+      "nativeName": "TeammateIdle",
+      "canonicalPhase": "team.idle",
+      "priority": 2,
+      "scope": "team",
+      "expectedPayload": ["agent_id", "agent_type", "idle_reason"],
+      "blocking": true
+    },
+    {
+      "nativeName": "Setup",
+      "canonicalPhase": "session.setup",
+      "priority": 3,
+      "scope": "session",
+      "expectedPayload": ["trigger"],
+      "blocking": false,
+      "additionalContext": true
+    },
+    {
+      "nativeName": "InstructionsLoaded",
+      "canonicalPhase": "session.instructions_loaded",
+      "priority": 3,
+      "scope": "session",
+      "expectedPayload": ["file_path", "memory_type", "load_reason", "globs", "trigger_file_path", "parent_file_path"],
+      "blocking": false,
+      "additionalContext": true,
+      "matcher": "load_reason"
+    },
+    {
+      "nativeName": "ConfigChange",
+      "canonicalPhase": "session.config_changed",
+      "priority": 3,
+      "scope": "session",
+      "expectedPayload": ["config_path", "change_type", "setting_key"],
+      "blocking": true,
+      "note": "Event exists; add/verify blocking decision support."
+    },
+    {
+      "nativeName": "MessageDisplay",
+      "canonicalPhase": "message.received",
+      "priority": 4,
+      "scope": "notification",
+      "expectedPayload": ["turn_id", "message_id", "index", "final", "delta"],
+      "blocking": false,
+      "note": "Formalize existing custom coverage as a canonical hookable event."
+    },
+    {
+      "nativeName": "model.before_request / model.after_response",
+      "canonicalPhases": ["model.before_request", "model.after_response"],
+      "priority": 4,
+      "scope": "model",
+      "expectedPayload": ["request", "response"],
+      "blocking": "phase-specific",
+      "adapterFamily": "gemini",
+      "note": "Gemini-specific atlas gap counted as one advanced item in docs/agent-stack/hooks/missing-events.md; reconcile phase-specific behavior during contract work."
+    },
+    {
+      "nativeName": "planner.before_tool_selection",
+      "canonicalPhase": "planner.before_tool_selection",
+      "priority": 4,
+      "scope": "planner",
+      "expectedPayload": ["candidate_tools", "context"],
+      "blocking": true,
+      "adapterFamily": "gemini",
+      "note": "Gemini-specific atlas event; include only where hooks-mux contract is currently incomplete."
+    }
+  ],
+  "targetFiles": [
+    "docs/agent-stack/hooks/missing-events.md",
+    "docs/agent-stack/hooks/coverage-matrix.md",
+    "packages/hooks-mux/core/src/types/lifecycle.ts",
+    "packages/hooks-mux/core/src/types/event.ts",
+    "packages/hooks-mux/core/src/types/result.ts",
+    "packages/hooks-mux/core/src/normalizer/normalize.ts",
+    "packages/hooks-mux/core/src/merge-engine/merge.ts",
+    "packages/hooks-mux/adapter-claude/src/mappings.ts",
+    "packages/hooks-mux/adapter-claude/src/normalizer.ts",
+    "packages/hooks-mux/adapter-claude/src/renderer.ts",
+    "packages/hooks-mux/adapter-claude/src/__tests__/claude-adapter.test.ts",
+    "packages/hooks-mux/core/src/__tests__/fixtures/claude-v1.json",
+    "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
+    "packages/atlas/graph/channels-hooks/hook-mappings/extended-mappings.yaml",
+    "packages/atlas/graph/channels-hooks/hook-surfaces/native/claude-code-extended-hooks.yaml",
+    "packages/agent-catalog/src/sdk.ts",
+    "packages/sdk/src/runtime/hooks/runtime.ts",
+    "packages/sdk/src/runtime/intrinsics/task.ts",
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/runtime/processContext.ts",
+    "packages/sdk/src/prompts/babysitterMdDiscovery.ts",
+    "packages/agent-platform/src",
+    "packages/agent-core/src"
+  ],
+  "verificationCommands": [
+    "npm run build:hooks-mux",
+    "npm run test:hooks-mux",
+    "npm run lint:hooks-mux",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "qualityGates": [
+    "Reuse audit is rendered before implementation planning.",
+    "All 13 target events have reconciled canonical contracts before production code changes.",
+    "Known docs-vs-atlas conflicts are resolved or gated by maintainer breakpoint.",
+    "Regression tests cover mapping, normalization, rendering, CLI invoke behavior, and runtime emission where applicable.",
+    "Blockable events enforce block semantics; non-blocking events fail open.",
+    "Verification passes fresh before delivery.",
+    "Code review approves the implementation against the event contract."
+  ]
+}
