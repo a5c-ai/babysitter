@@ -535,6 +535,21 @@ export async function handleStopHookCommon(
     return makeExit(log, 0, "breakpoint_waiting", { sessionId: activeSessionId, filePath, state, prompt, resolvedPluginRoot, runsDir });
   }
 
+  if (runState === "waiting" && pendingKinds && !currentPendingEffectId) {
+    log.info(`Run waiting on non-host-delegable effects only (${pendingKinds}) — allowing exit`);
+    await appendStopHookEvent(runEventDir, {
+      sessionId: activeSessionId,
+      iteration: state.iteration,
+      decision: "approve",
+      reason: "external_waiting",
+      runState,
+      pendingKinds,
+      hasPromise,
+    }, options.harness);
+    process.stdout.write("{}\n");
+    return makeExit(log, 0, "external_waiting", { sessionId: activeSessionId, filePath, state, prompt, resolvedPluginRoot, runsDir });
+  }
+
   if (hasPromise && completionProof && promiseValue === completionProof) {
     log.info("Promise matches completion proof — allowing exit");
     if (verbose) {
@@ -611,5 +626,4 @@ function makeExit(log: HookLogger, exitCode: number, reason: string, extra?: Par
     updatedTimes: [], nextIteration: 0, log, ...extra,
   };
 }
-
 
