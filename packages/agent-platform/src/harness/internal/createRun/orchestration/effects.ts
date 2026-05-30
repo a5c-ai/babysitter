@@ -908,9 +908,10 @@ async function invokeSubprocessEffect(
       };
     }
 
-    const message = iterationResult.error instanceof Error
-      ? iterationResult.error.message
-      : summarizeSubprocessValue(iterationResult.error);
+    const rawError = "error" in iterationResult ? iterationResult.error : iterationResult;
+    const message = rawError instanceof Error
+      ? rawError.message
+      : summarizeSubprocessValue(rawError);
     emitAmuxEvent(
       {
         type: "subagent_error",
