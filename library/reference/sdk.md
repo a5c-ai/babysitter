@@ -1294,10 +1294,10 @@ Recover from the latest typed process exception without hand-editing the journal
 
 ```bash
 babysitter run:recover-process-error <runDir> --dry-run --json
-babysitter run:recover-process-error <runDir> --patch-effect '<effectId>:value.checks=[]'
+babysitter run:recover-process-error <runDir> --patch-effect '<effectId>:checks=[]'
 ```
 
-The command finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/<effectId>/result.json` with a scoped dot-path assignment, rewrites the journal with only that marker removed, rebuilds the state cache, and leaves the run ready for `run:iterate`. Without `--patch-effect`, recovery is honest: if the bad task result is still malformed, the next `run:iterate` rethrows and records a new `PROCESS_RUNTIME_ERROR`. Malformed patch flags, missing result artifacts, and runs without a typed marker fail with exit code `1` and do not mutate artifacts.
+The command finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/<effectId>/result.json` with a scoped dot-path assignment, rewrites the journal with only that marker removed, rebuilds the state cache, and leaves the run ready for `run:iterate`. Patch paths without a leading `value` or `result` segment are applied to the task value returned by `ctx.task`, so `<effectId>:checks=[]` fixes a process that reads `verifyResult.checks`. Use `value.checks` or `result.checks` only when you need to address the stored artifact wrapper explicitly. Without `--patch-effect`, recovery is honest: if the bad task result is still malformed, the next `run:iterate` rethrows and records a new `PROCESS_RUNTIME_ERROR`. Malformed patch flags, missing result artifacts, and runs without a typed marker fail with exit code `1` and do not mutate artifacts.
 
 #### `babysitter run:iterate <runDir>`
 

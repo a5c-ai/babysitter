@@ -588,7 +588,7 @@ babysitter run:recover-process-error <runId> \
 
 #### Description
 
-Use this when process code threw after consuming a bad result. The command finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/<effectId>/result.json`, rewrites the journal with only that typed marker removed, rebuilds state, and leaves the run ready for `run:iterate`.
+Use this when process code threw after consuming a bad result. The command finds the latest `PROCESS_RUNTIME_ERROR`, optionally patches `tasks/<effectId>/result.json`, rewrites the journal with only that typed marker removed, rebuilds state, and leaves the run ready for `run:iterate`. Patch paths without a leading `value` or `result` segment apply to the value returned by `ctx.task`; use `value.<path>` or `result.<path>` only when patching the stored wrapper explicitly.
 
 Without `--patch-effect`, recovery is honest: if the underlying result is still bad, the next `run:iterate` records a new `PROCESS_RUNTIME_ERROR`.
 
@@ -596,7 +596,7 @@ Without `--patch-effect`, recovery is honest: if the underlying result is still 
 
 ```bash
 babysitter run:recover-process-error run-20260125-143012 --dry-run --json
-babysitter run:recover-process-error run-20260125-143012 --patch-effect 'ef-live:value.checks=[]' --json
+babysitter run:recover-process-error run-20260125-143012 --patch-effect 'ef-live:checks=[]' --json
 ```
 
 ---

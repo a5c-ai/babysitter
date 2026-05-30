@@ -1310,6 +1310,31 @@ describe("run lifecycle inspection commands", () => {
       expect(journal.some((event) => event.type === "PROCESS_RUNTIME_ERROR")).toBe(false);
     });
 
+    it("patches returned task value paths without requiring the stored artifact wrapper key", async () => {
+      const runDir = await createRunWithProcessRuntimeError();
+
+      const exitCode = await cli.run([
+        "run:recover-process-error",
+        runDir,
+        "--patch-effect",
+        "ef-process:checks=[]",
+        "--json",
+      ]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({
+        recovered: true,
+        patchedEffect: {
+          effectId: "ef-process",
+          path: "checks",
+        },
+      });
+      const result = JSON.parse(await fs.readFile(path.join(runDir, "tasks", "ef-process", "result.json"), "utf8"));
+      expect(result.value.checks).toEqual([]);
+      expect(result.checks).toBeUndefined();
+    });
+
     it("clears the marker without a patch so the next iterate can honestly rethrow", async () => {
       const runDir = await createRunWithProcessRuntimeError();
 

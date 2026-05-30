@@ -9,7 +9,7 @@ targeted recovery command before manual journal edits:
 
 ```bash
 $CLI run:recover-process-error <runId> --dry-run --json
-$CLI run:recover-process-error <runId> --patch-effect '<effectId>:value.checks=[]' --json
+$CLI run:recover-process-error <runId> --patch-effect '<effectId>:checks=[]' --json
 ```
 
 Patch the offending task result only when the fix is clear. Running recovery

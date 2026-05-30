@@ -443,7 +443,7 @@ export async function handleRunRecoverProcessError(parsed: ParsedArgs): Promise<
     const resultPath = path.join(runDir, "tasks", patch.effectId, "result.json");
     try {
       const parsedResult = JSON.parse(await fs.readFile(resultPath, "utf8")) as unknown;
-      applyJsonPath(parsedResult, patch.path, patch.value);
+      applyTaskResultPatch(parsedResult, patch.path, patch.value);
     } catch (error) {
       console.error(`[run:recover-process-error] ${error instanceof Error ? error.message : String(error)}`);
       return 1;
@@ -471,7 +471,7 @@ export async function handleRunRecoverProcessError(parsed: ParsedArgs): Promise<
   if (patch) {
     const resultPath = path.join(runDir, "tasks", patch.effectId, "result.json");
     const parsedResult = JSON.parse(await fs.readFile(resultPath, "utf8")) as unknown;
-    applyJsonPath(parsedResult, patch.path, patch.value);
+    applyTaskResultPatch(parsedResult, patch.path, patch.value);
     await writeFileAtomic(resultPath, JSON.stringify(parsedResult, null, 2) + "\n");
   }
 
@@ -546,6 +546,31 @@ function applyJsonPath(target: unknown, segments: string[], value: unknown): voi
     cursor = cursor[segment] as JsonRecord;
   }
   cursor[segments.at(-1) as string] = value;
+}
+
+function applyTaskResultPatch(target: unknown, segments: string[], value: unknown): void {
+  if (!isJsonRecord(target)) {
+    throw new Error("task result artifact must contain a JSON object");
+  }
+
+  if (isStoredResultValuePatch(target, segments)) {
+    const valueKey = isJsonRecord(target.value) ? "value" : "result";
+    applyJsonPath(target[valueKey], segments, value);
+    return;
+  }
+
+  applyJsonPath(target, segments, value);
+}
+
+function isStoredResultValuePatch(target: JsonRecord, segments: string[]): boolean {
+  const firstSegment = segments[0];
+  if (firstSegment === "value" || firstSegment === "result") {
+    return false;
+  }
+  if (Object.prototype.hasOwnProperty.call(target, firstSegment)) {
+    return false;
+  }
+  return isJsonRecord(target.value) || isJsonRecord(target.result);
 }
 
 async function rewriteJournalWithoutEvent(runDir: string, target: JournalEvent): Promise<string> {
