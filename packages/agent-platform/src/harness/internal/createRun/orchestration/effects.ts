@@ -203,7 +203,13 @@ export async function resolveEffect(
     return resolveMcpEffect(action, options);
   }
 
-  const tasksMuxResult = await resolveViaTasksMuxIfRoutable(action, options);
+  const tasksMuxResult = await resolveViaTasksMuxIfRoutable(
+    action,
+    options,
+    rl,
+    json,
+    askUserQuestionHandler,
+  );
   if (tasksMuxResult) {
     return tasksMuxResult;
   }
@@ -292,27 +298,7 @@ export async function resolveEffect(
         },
       };
     }
-    const question = (action.taskDef as Record<string, unknown>)?.question as string | undefined
-      ?? action.taskDef?.title
-      ?? "Breakpoint reached. Continue?";
-    const approvalPrompt = createApprovalAskUserQuestion(question);
-    const approvalKey = approvalPrompt.questions[0]?.header ?? "Decision";
-    if (options.interactive && rl) {
-      if (!json) {
-        process.stderr.write(`\n${YELLOW}${BOLD}BREAKPOINT ${question}\n`);
-      }
-      const { promptAskUserQuestionWithReadline } = await import("../../../../interaction");
-      const response = await promptAskUserQuestionWithReadline(rl, approvalPrompt);
-      return buildBreakpointResult(response, approvalKey);
-    }
-    if (options.interactive && askUserQuestionHandler) {
-      const response = await askUserQuestionHandler(approvalPrompt) as AskUserQuestionResponse;
-      return buildBreakpointResult(response, approvalKey);
-    }
-    return buildBreakpointResult(
-      createAskUserQuestionResponse(approvalPrompt, { [approvalKey]: "Approve" }),
-      approvalKey,
-    );
+    return resolveBreakpointLikeEffect(action, options, rl, json, askUserQuestionHandler);
   }
   if (kind === "sleep") {
     const targetMs = action.taskDef?.sleep?.targetEpochMs;
@@ -587,6 +573,9 @@ export async function applyPostEffectOrchestrationOverlays(
 async function resolveViaTasksMuxIfRoutable(
   action: EffectAction,
   options: EffectResolverOptions,
+  rl?: readline.Interface | null,
+  json?: boolean,
+  askUserQuestionHandler?: ((params: unknown) => Promise<unknown>) | null,
 ): Promise<ResolveEffectResult | undefined> {
   if (action.kind !== "agent" && action.kind !== "breakpoint") {
     return undefined;
@@ -621,7 +610,7 @@ async function resolveViaTasksMuxIfRoutable(
     return undefined;
   }
   if (decision.responderType === "human") {
-    return undefined;
+    return resolveBreakpointLikeEffect(action, options, rl, json, askUserQuestionHandler);
   }
   if (decision.responderType === "tracker") {
     if (decision.unavailable) {
@@ -679,6 +668,36 @@ async function resolveViaTasksMuxIfRoutable(
     value: coerceAgentResultValue(action.taskDef as Record<string, unknown>, answer?.text ?? ""),
     stdout: answer?.text ?? "",
   };
+}
+
+async function resolveBreakpointLikeEffect(
+  action: EffectAction,
+  options: EffectResolverOptions,
+  rl?: readline.Interface | null,
+  json?: boolean,
+  askUserQuestionHandler?: ((params: unknown) => Promise<unknown>) | null,
+): Promise<ResolveEffectResult> {
+  const question = (action.taskDef as Record<string, unknown>)?.question as string | undefined
+    ?? action.taskDef?.title
+    ?? "Breakpoint reached. Continue?";
+  const approvalPrompt = createApprovalAskUserQuestion(question);
+  const approvalKey = approvalPrompt.questions[0]?.header ?? "Decision";
+  if (options.interactive && rl) {
+    if (!json) {
+      process.stderr.write(`\n${YELLOW}${BOLD}BREAKPOINT ${question}\n`);
+    }
+    const { promptAskUserQuestionWithReadline } = await import("../../../../interaction");
+    const response = await promptAskUserQuestionWithReadline(rl, approvalPrompt);
+    return buildBreakpointResult(response, approvalKey);
+  }
+  if (options.interactive && askUserQuestionHandler) {
+    const response = await askUserQuestionHandler(approvalPrompt) as AskUserQuestionResponse;
+    return buildBreakpointResult(response, approvalKey);
+  }
+  return buildBreakpointResult(
+    createAskUserQuestionResponse(approvalPrompt, { [approvalKey]: "Approve" }),
+    approvalKey,
+  );
 }
 
 function parseSubprocessSpec(
