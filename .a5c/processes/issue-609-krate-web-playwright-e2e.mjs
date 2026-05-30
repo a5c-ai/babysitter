@@ -12,14 +12,20 @@
  * - packages/krate/web/README.md
  * - packages/krate/web/playwright.config.js
  * - packages/krate/web/e2e/smoke.spec.js
+ * - library/methodologies/atdd-tdd/README.md
+ * - library/methodologies/bdd-specification-by-example/README.md
+ * - library/specializations/qa-testing-automation/README.md
+ * - library/specializations/web-development/README.md
  * - .a5c/processes/issue-625-jitsi-web-console-plan.mjs
  * - .a5c/processes/issue-608-staging-env-vars.mjs
  *
- * Process-library note: this checkout did not contain .a5c/process-library/,
- * methodologies/, or specializations/ directories at authoring time. The
- * process still includes an explicit research task that must report whether
- * those sources are present at execution time and fall back to the repo-local
- * process examples and process-authoring policy when absent.
+ * Process-library note: this checkout does not contain .a5c/process-library/.
+ * The matching methodology and specialization sources are available under the
+ * repo-local library/ tree, especially ATDD/TDD, BDD/specification-by-example,
+ * QA testing automation, and web development. The process still includes an
+ * explicit research task that must report source availability at execution time
+ * and fall back to repo-local process examples and process-authoring policy
+ * when a requested source is absent.
  *
  * Repo policy note: direct babysitter processes in this repo should avoid
  * shell-task subtasks unless explicitly requested. This process therefore uses
@@ -262,11 +268,16 @@ export const researchProcessLibraryTask = defineTask('issue-609.process-library-
       role: 'Babysitter process architect',
       task: 'Research process-library guidance relevant to Playwright E2E implementation.',
       instructions: [
-        'Inspect .a5c/process-library/, methodologies/, and specializations/ if present in this checkout.',
-        'Look specifically for ATDD/TDD, brownfield feature work, Playwright E2E, web full-stack, test-strategy, and verification-before-completion guidance.',
-        'If those directories are absent, say so explicitly and fall back to docs/agent-reference/process-authoring.md plus existing process examples under .a5c/processes/.',
+        'Inspect .a5c/process-library/ if present. In this repo, also inspect library/methodologies/ and library/specializations/ for the local process library.',
+        'Use library/methodologies/atdd-tdd/README.md for outside-in acceptance tests and executable "done" criteria.',
+        'Use library/methodologies/bdd-specification-by-example/README.md for concrete workflow examples, user-visible behavior, and living documentation.',
+        'Use library/specializations/qa-testing-automation/README.md for E2E testing strategy, maintainable automation, CI feedback, and flakiness controls.',
+        'Use library/specializations/web-development/README.md for full-stack browser/API integration, auth, routing, and frontend-backend workflow considerations.',
+        'Look specifically for brownfield feature work, Playwright E2E, web full-stack, test-strategy, staging-environment management, and verification-before-completion guidance.',
+        'If .a5c/process-library/ is absent, say so explicitly but do not treat that as total process-library absence when library/methodologies or library/specializations exist.',
+        'Fall back to docs/agent-reference/process-authoring.md plus existing process examples under .a5c/processes/ only for guidance not covered by the local library sources.',
         'Summarize the methodology constraints this run must follow: tests before implementation where practical, isolated staging resources, env-gated service-dependent flows, retries only after diagnosing flake causes, and evidence-backed quality gates.',
-        'Return JSON: { sourcesFound, sourcesMissing, selectedMethodologies, selectedSpecializations, constraints, processShape, breakpointPolicy }.',
+        'Return JSON: { sourcesFound, sourcesMissing, selectedMethodologies, selectedSpecializations, constraints, processShape, breakpointPolicy, fallbacksUsed }.',
       ],
     },
   },
