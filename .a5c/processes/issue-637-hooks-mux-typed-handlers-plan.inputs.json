@@ -38,13 +38,14 @@
     "A previous closed PR #695 contains useful prior art and implementation notes, but current staging still shows HandlerRef typed only as command/shell and runHandler dispatching unconditionally to runShellHandler."
   ],
   "processLibraryFindings": {
-    "requestedPath": ".a5c/process-library/",
-    "requestedPathPresent": false,
-    "fallbackPathsUsed": [
-      "library/methodologies/atdd-tdd/atdd-tdd.js",
-      "library/methodologies/process-hardening/process-hardening-patterns.js",
-      "library/methodologies/superpowers/verification-before-completion.js",
-      "library/tdd-quality-convergence.js"
+    "activeBinding": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "repoLocalPath": ".a5c/process-library/",
+    "repoLocalPathPresent": false,
+    "methodologyPathsUsed": [
+      "methodologies/atdd-tdd/atdd-tdd.js",
+      "methodologies/process-hardening/process-hardening-patterns.js",
+      "methodologies/superpowers/verification-before-completion.js",
+      "tdd-quality-convergence.js"
     ],
     "methodologySummary": [
       "ATDD/TDD: establish acceptance and contract tests before production code.",

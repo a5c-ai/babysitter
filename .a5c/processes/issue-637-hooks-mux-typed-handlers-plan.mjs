@@ -7,9 +7,10 @@
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
  * - Matching existing infrastructure found in hooks-mux plan types, plan resolver ordering, normalizer runner shell execution, merge/result parsing,
  *   programmatic engine fanout, CLI invoke parsing, hooks-mux tests, agent-platform AMUX bridge, and agent-platform MCP/tool registry surfaces.
- * - `.a5c/process-library/` was not present in this checkout. Matching methodology guidance is available under `library/`, especially
- *   `library/methodologies/atdd-tdd/atdd-tdd.js`, `library/methodologies/process-hardening/process-hardening-patterns.js`,
- *   `library/methodologies/superpowers/verification-before-completion.js`, and `library/tdd-quality-convergence.js`.
+ * - The active process-library binding is `/home/runner/.a5c/process-library/babysitter-repo/library`. Matching methodology guidance is
+ *   available there under `methodologies/atdd-tdd/atdd-tdd.js`, `methodologies/process-hardening/process-hardening-patterns.js`,
+ *   `methodologies/superpowers/verification-before-completion.js`, and `tdd-quality-convergence.js`.
+ * - Repo-local `.a5c/process-library/` is not present; use the active process-library binding above for library methodology lookups.
  * - No `.a5c/reuse-audit.json` was present in this checkout; keyword scan used: HandlerRef, handler type, command, shell, http, mcp_tool,
  *   prompt, agent, runHandler, runShellHandler, allowedEnvVars, MCP, tool registry, agent-platform, amuxBridge, timeout, fail-open, fail-closed.
  * - Current `staging` still treats `HandlerRef.type` as `command | shell` only and `runHandler` unconditionally dispatches to
@@ -305,8 +306,9 @@ export const reuseAuditAndPriorArtTask = defineTask('issue-637.reuse-audit-and-p
         'Follow docs/agent-reference/process-authoring.md for `babysitter:plan` reuse audit requirements.',
         'Extract keyword nouns and verbs from issue #637 and scan matching code, tests, docs, SDK dependencies, imports, and bridge surfaces.',
         'Check whether `.a5c/reuse-audit.json` exists; if it does not, record that and use focused scans over packages/hooks-mux, packages/agent-platform, packages/sdk, docs/agent-stack/hooks, and package metadata.',
-        'Check whether `.a5c/process-library/` exists; if absent, record that and use relevant `library/` methodology files instead.',
-        'Read `library/methodologies/atdd-tdd/atdd-tdd.js`, `library/methodologies/process-hardening/process-hardening-patterns.js`, `library/methodologies/superpowers/verification-before-completion.js`, and `library/tdd-quality-convergence.js` only enough to extract process guidance.',
+        'Resolve the active process-library binding with `babysitter process-library:active --json`; use that binding for methodology lookups.',
+        'Record whether repo-local `.a5c/process-library/` exists, but do not treat its absence as a blocker when the active process-library binding is available.',
+        'Read `methodologies/atdd-tdd/atdd-tdd.js`, `methodologies/process-hardening/process-hardening-patterns.js`, `methodologies/superpowers/verification-before-completion.js`, and `tdd-quality-convergence.js` from the active process-library binding only enough to extract process guidance.',
         'Inspect current base branch files, especially packages/hooks-mux/core/src/types/plan.ts, packages/hooks-mux/core/src/normalizer/runner.ts, packages/hooks-mux/core/src/normalizer/plan-resolver.ts, packages/hooks-mux/core/src/api.ts, packages/hooks-mux/core/src/index.ts, and packages/agent-platform/src/harness/amux/amuxBridge.ts.',
         'Inspect PR #695 files and summary as prior art. Treat it as a reference, not source of truth, unless it is merged into the current base branch.',
         'Render a section exactly titled: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
