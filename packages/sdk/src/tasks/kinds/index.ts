@@ -139,7 +139,6 @@ export function externalAgentTask<TArgs = unknown, TResult = unknown>(
 ): DefinedTask<TArgs, TResult> {
   return agentTask<TArgs, TResult>(id, {
     ...options,
-    external: true,
     responderType: "agent",
   });
 }

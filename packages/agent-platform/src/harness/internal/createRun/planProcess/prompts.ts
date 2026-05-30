@@ -4,7 +4,7 @@ import {
   type ExternalWorkspaceAssessment,
   type HarnessPromptContext as SessionCreatePromptContext,
 } from "../utils";
-import { formatSessionContextForPlanning } from "../prompts";
+import { formatResponderContext, formatSessionContextForPlanning } from "../prompts";
 
 export { formatSessionContextForPlanning };
 
@@ -29,6 +29,7 @@ export function buildExternalProcessDefinitionPrompt(args: {
   const preferAgentOnlyTasks = args.preferAgentOnlyTasks === true;
   const hostAgentContext = formatHostAgentContext(args.promptContext);
   const sessionPlanningContext = formatSessionContextForPlanning(args.promptContext.sessionContext);
+  const responderContext = formatResponderContext(args.promptContext);
   const emptyWorkspaceAuthoringGuide = [
     "",
     "Empty-workspace authoring guide:",
@@ -91,6 +92,8 @@ export function buildExternalProcessDefinitionPrompt(args: {
     "- Do not set `task.metadata.bashSandbox`, `task.metadata.isolated`, or `task.metadata.enableCompaction` for ordinary internal agent-core work. Leave them unset unless the task truly requires stronger guardrails or long-running compaction.",
     "- External harnesses do not provide agent-core worker guardrails for their own tool execution. Keep security-sensitive shell work on the internal agent-core worker by using shell effects without routing them to an external harness.",
     ...(hostAgentContext.length > 0 ? ["", ...hostAgentContext] : []),
+    "",
+    ...responderContext,
     ...(sessionPlanningContext.length > 0 ? ["", ...sessionPlanningContext] : []),
     "",
     "Output rules:",
@@ -153,6 +156,7 @@ export function buildExternalProcessConformancePrompt(args: {
     "- Define at least one `agent` task for the main work. Use shell tasks only for concrete runnable commands.",
     "- Put instructions inside `agent.prompt.task`, `agent.prompt.instructions`, and related prompt fields rather than top-level `instructions` fields.",
     "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`.",
+    "- Agent responder tasks must use `kind: \"agent\"` with `agent: { name, prompt, responderType: \"agent\", adapter: \"...\" }`; `adapter` must be a non-empty installed agent-mux adapter name.",
     "- Shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`.",
     "- Do not introduce `kind: \"node\"` task definitions in generated or repaired processes. If logic would have been a node task, convert it to an `agent` or `skill` task instead.",
     "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; do not pass plain object task definitions or ad-hoc task objects.",
@@ -192,6 +196,7 @@ export function buildInternalProcessConformancePrompt(args: {
     "- Inside the named `process(inputs, ctx)` export, do not reference Node's global process object as `process.*`; use `globalThis.process` or an imported alias like `nodeProcess` instead.",
     "- If the process needs the workspace root, do not assume `ctx.workspaceDir` or `ctx.cwd` exists. Resolve it from the module location using `import.meta.url`, for example with `path.dirname(fileURLToPath(import.meta.url))`.",
     "- Agent tasks must use `kind: \"agent\"` with `agent: { name, prompt, outputSchema }`.",
+    "- Agent responder tasks must use `kind: \"agent\"` with `agent: { name, prompt, responderType: \"agent\", adapter: \"...\" }`; `adapter` must be a non-empty installed agent-mux adapter name.",
     "- Shell tasks must use `kind: \"shell\"` with `shell: { command: \"...\" }`.",
     "- Do not introduce `kind: \"node\"` task definitions in generated or repaired processes. If logic would have been a node task, convert it to an `agent` or `skill` task instead.",
     "- The exported `process(inputs, ctx)` function must call tasks with `await ctx.task(definedTask, args)`.",

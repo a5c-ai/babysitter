@@ -32,10 +32,6 @@ type TasksMuxModuleLike = {
   isHostDelegableRoute?: (route: unknown) => boolean;
 };
 
-const importOptionalModule = new Function("specifier", "return import(specifier)") as (
-  specifier: string,
-) => Promise<unknown>;
-
 // ---------------------------------------------------------------------------
 // Assistant state parsing
 // ---------------------------------------------------------------------------
@@ -217,7 +213,7 @@ export async function resolveStopHookRunState(
   };
 }
 
-async function onlyExternallyRoutedEffectsPending(
+export async function onlyExternallyRoutedEffectsPending(
   runDir: string,
   pendingRecords: Array<{ effectId: string; kind?: string }>,
 ): Promise<boolean> {
@@ -225,7 +221,7 @@ async function onlyExternallyRoutedEffectsPending(
   return classified.length > 0 && classified.every((delegable) => !delegable);
 }
 
-async function hostDelegablePendingRecords<T extends { effectId: string; kind?: string }>(
+export async function hostDelegablePendingRecords<T extends { effectId: string; kind?: string }>(
   runDir: string,
   pendingRecords: T[],
 ): Promise<T[]> {
@@ -246,7 +242,7 @@ async function isHostDelegableEffect(
   try {
     const taskDef = await readTaskDefinition(runDir, record.effectId);
     if (!taskDef) return record.kind !== "breakpoint";
-    const mux = await importOptionalModule("@a5c-ai/tasks-mux") as TasksMuxModuleLike;
+    const mux = await import("@a5c-ai/tasks-mux") as TasksMuxModuleLike;
     const routeTask = mux.routeTask;
     const isHostDelegableRoute = mux.isHostDelegableRoute;
     if (typeof routeTask !== "function" || typeof isHostDelegableRoute !== "function") {

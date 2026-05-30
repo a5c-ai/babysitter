@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { promises as fs } from "node:fs";
 import { pathToFileURL } from "node:url";
-import { resetGlobalTaskRegistry } from "@a5c-ai/babysitter-sdk";
+import { discoverExternalAgents, resetGlobalTaskRegistry } from "@a5c-ai/babysitter-sdk";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
@@ -13,15 +13,18 @@ import {
 } from "./validationText";
 import {
   getDefineTaskIdsByKind,
+  getAgentResponderTasksMissingAdapter,
   getDefineTaskIdsMissingKind,
   getDefineTaskKindShapeMismatches,
   getInvalidCtxTaskTargets,
   getUnresolvedTemplatePlaceholders,
+  hasAgentResponderTasks,
   hasDefineTaskBlocks,
   hasCtxTaskInvocation,
 } from "./validationSource";
 
 let processValidationImportNonce = 0;
+let discoverExternalAgentsForValidation: typeof discoverExternalAgents = discoverExternalAgents;
 
 const dynamicImportModule: (specifier: string) => Promise<Record<string, unknown>> = (() => {
   if (process.env.VITEST) {
@@ -210,6 +213,34 @@ export async function validateProcessExport(filePath: string): Promise<void> {
       },
     );
   }
+  const agentResponderTasksMissingAdapter = getAgentResponderTasksMissingAdapter(source);
+  if (agentResponderTasksMissingAdapter.length > 0) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} defines agent responder task(s) without a non-empty adapter: ${agentResponderTasksMissingAdapter.join(", ")}`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          "Agent responder tasks must use kind: \"agent\" with agent.responderType: \"agent\"",
+          "Set agent.adapter to a non-empty agent-mux adapter name such as \"codex\" or \"claude-code\"",
+          "If adapter routing is optional, set fallbackType: \"internal\" but keep adapter present for the preferred agent responder",
+        ],
+      },
+    );
+  }
+  if (hasAgentResponderTasks(source)) {
+    try {
+      const externalAgents = await discoverExternalAgentsForValidation({
+        cwd: path.dirname(path.resolve(filePath)),
+        timeout: 1000,
+      });
+      if (!externalAgents.available) {
+        console.warn("[babysitter] process uses agent responder tasks but agent-mux is not detected; validation will continue");
+      }
+    } catch {
+      console.warn("[babysitter] process uses agent responder tasks but agent-mux discovery failed; validation will continue");
+    }
+  }
   const agentTaskIds = getDefineTaskIdsByKind(source, "agent");
   if (agentTaskIds.length === 0) {
     throw new BabysitterRuntimeError(
@@ -253,4 +284,10 @@ export async function validateProcessExport(filePath: string): Promise<void> {
       },
     );
   }
+}
+
+export function _setDiscoverExternalAgentsForValidationTesting(
+  fn?: typeof discoverExternalAgents,
+): void {
+  discoverExternalAgentsForValidation = fn ?? discoverExternalAgents;
 }
