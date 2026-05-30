@@ -156,8 +156,13 @@ function normalizeHostTools(
   if (!Array.isArray(hostTools)) return undefined;
 
   const normalized = hostTools
-    .filter((tool): tool is HostToolDescriptor => {
-      return Boolean(tool) && typeof tool.name === "string" && tool.name.trim() !== "";
+    .filter((tool: unknown): tool is HostToolDescriptor => {
+      return (
+        tool != null &&
+        typeof tool === "object" &&
+        typeof (tool as { name?: unknown }).name === "string" &&
+        (tool as { name: string }).name.trim() !== ""
+      );
     })
     .map((tool) => ({
       ...tool,

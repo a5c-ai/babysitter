@@ -6,6 +6,10 @@ import type { CanonicalPhase } from '../types/lifecycle';
 import type { AdapterCapabilities } from '../types/adapter';
 import { HandlerError, HandlerTimeoutError } from './errors';
 import { evaluateWhen } from './plan-resolver';
+import { runHttpHandler } from '../handlers/http';
+import { runMcpToolHandler, type McpToolExecutor } from '../handlers/mcp-tool';
+import { runPromptHandler, type PromptExecutor } from '../handlers/prompt';
+import { runAgentHandler, type AgentExecutor } from '../handlers/agent';
 
 /**
  * Error handling policy for handler failures.
@@ -21,6 +25,17 @@ export type ErrorPolicy = 'fail-open' | 'fail-closed' | 'fail-open-bootstrap-onl
  */
 export type HandlerFn = (event: UnifiedHookEvent) => Promise<UnifiedHookResult> | UnifiedHookResult;
 
+export interface HandlerExecutors {
+  mcpTool?: McpToolExecutor;
+  prompt?: PromptExecutor;
+  agent?: AgentExecutor;
+}
+
+export interface HandlerExecutionOptions {
+  executors?: HandlerExecutors;
+  currentDepth?: number;
+}
+
 /**
  * Options for runPlan execution.
  */
@@ -35,6 +50,10 @@ export interface RunPlanOptions {
   handlerTimeoutMs?: number;
   /** Adapter capabilities to inject as AGENT_CAPABILITIES_JSON into handler subprocess env. */
   capabilities?: AdapterCapabilities;
+  /** Injectable typed-handler executors supplied by host integrations. */
+  executors?: HandlerExecutors;
+  /** Current typed-handler recursion depth. */
+  currentDepth?: number;
 }
 
 /**
@@ -202,8 +221,34 @@ export async function runHandler(
   handler: HandlerRef,
   timeoutMs?: number,
   capabilities?: AdapterCapabilities,
+  options?: HandlerExecutionOptions,
 ): Promise<UnifiedHookResult> {
-  return runShellHandler(handler.source, event, timeoutMs, capabilities);
+  const context = {
+    event,
+    timeoutMs: timeoutMs ?? 30000,
+    currentDepth: options?.currentDepth ?? 0,
+  };
+
+  if (handler.type == null || handler.type === 'command') {
+    return runShellHandler(handler.source, event, timeoutMs, capabilities);
+  }
+
+  switch (handler.type) {
+    case 'http':
+      return runHttpHandler(handler, context);
+    case 'mcp_tool':
+      return runMcpToolHandler(handler, context, options?.executors?.mcpTool);
+    case 'prompt':
+      return runPromptHandler(handler, context, options?.executors?.prompt);
+    case 'agent':
+      return runAgentHandler(handler, context, options?.executors?.agent);
+  }
+
+  throw new HandlerError(`Unsupported handler type: ${String((handler as { type?: unknown }).type)}`, {
+    source: String((handler as { type?: unknown }).type ?? 'unknown'),
+    handler: 'unknown',
+    code: 'UNSUPPORTED_HANDLER_TYPE',
+  });
 }
 
 /**
@@ -236,7 +281,10 @@ export async function runPlan(
     const timeout = entry.timeoutMs ?? options?.handlerTimeoutMs;
 
     try {
-      const result = await runHandler(event, entry.handler, timeout, options?.capabilities);
+      const result = await runHandler(event, entry.handler, timeout, options?.capabilities, {
+        executors: options?.executors,
+        currentDepth: options?.currentDepth,
+      });
       results.push(result);
     } catch (err) {
       const shouldFailOpen = resolveFailOpen(policy, event.phase);

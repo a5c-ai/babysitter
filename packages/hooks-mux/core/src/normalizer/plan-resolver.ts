@@ -69,6 +69,35 @@ export function sortPlanEntries(entries: HookPlanEntry[]): HookPlanEntry[] {
   });
 }
 
+function handlerSortSource(handler: HandlerRef): string {
+  switch (handler.type) {
+    case 'http':
+      return `http:${handler.url}`;
+    case 'mcp_tool':
+      return `mcp_tool:${handler.server}:${handler.tool}`;
+    case 'prompt':
+      return `prompt:${handler.prompt}`;
+    case 'agent':
+      return `agent:${handler.agent ?? ''}:${handler.prompt}`;
+    case 'command':
+    case undefined:
+      return `command:${handler.source}`;
+    default:
+      return String((handler as { type?: unknown }).type ?? 'unknown');
+  }
+}
+
+function handlerSortName(handler: HandlerRef): string {
+  if (handler.type === 'command' || handler.type == null) {
+    return handler.handler ?? 'handler';
+  }
+  return handler.type;
+}
+
+function handlerPluginId(handler: HandlerRef): string {
+  return handlerSortSource(handler);
+}
+
 /**
  * Sort handler refs by: priority ascending, then source ascending,
  * then handler ascending.  (Legacy convenience for external callers.)
@@ -78,9 +107,9 @@ export function sortHandlers(handlers: HandlerRef[]): HandlerRef[] {
     const pa = a.priority ?? 1000;
     const pb = b.priority ?? 1000;
     if (pa !== pb) return pa - pb;
-    const sa = a.source.localeCompare(b.source);
+    const sa = handlerSortSource(a).localeCompare(handlerSortSource(b));
     if (sa !== 0) return sa;
-    return a.handler.localeCompare(b.handler);
+    return handlerSortName(a).localeCompare(handlerSortName(b));
   });
 }
 
@@ -100,7 +129,7 @@ export function resolveHookPlan(options: PlanResolverOptions): HookPlanEntry[] {
   for (const h of handlers) {
     entries.push({
       id: `explicit-${counter++}`,
-      pluginId: h.source,
+      pluginId: handlerPluginId(h),
       phase,
       priority: h.priority ?? 1000,
       handler: h,

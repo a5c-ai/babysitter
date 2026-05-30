@@ -9,7 +9,16 @@ export type {
   HostToolCategory,
   HostToolDescriptor,
 } from './types/adapter';
-export type { HookPlanEntry, HandlerRef } from './types/plan';
+export type {
+  AgentHandlerRef,
+  CommandHandlerRef,
+  HandlerRef,
+  HandlerType,
+  HookPlanEntry,
+  HttpHandlerRef,
+  McpToolHandlerRef,
+  PromptHandlerRef,
+} from './types/plan';
 export type { SessionState, ContextFragment } from './types/session';
 
 // Normalizer
@@ -27,7 +36,14 @@ export {
   HandlerTimeoutError,
   NormalizationError,
 } from './normalizer';
-export type { NormalizeOptions, PlanResolverOptions, ErrorPolicy, RunPlanOptions } from './normalizer';
+export type {
+  ErrorPolicy,
+  HandlerExecutionOptions,
+  HandlerExecutors,
+  NormalizeOptions,
+  PlanResolverOptions,
+  RunPlanOptions,
+} from './normalizer';
 
 // Session store
 export {

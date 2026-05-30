@@ -8,7 +8,7 @@ export type { PlanResolverOptions } from './plan-resolver';
 
 // Runner
 export { runHandler, runPlan } from './runner';
-export type { ErrorPolicy, RunPlanOptions, HandlerFn } from './runner';
+export type { ErrorPolicy, RunPlanOptions, HandlerFn, HandlerExecutionOptions, HandlerExecutors } from './runner';
 
 // Errors
 export { HandlerError, HandlerTimeoutError, NormalizationError } from './errors';

@@ -8,6 +8,7 @@ import type { UnifiedHookEvent } from './types/event';
 import type { UnifiedHookResult } from './types/result';
 import type { AdapterCapabilities } from './types/adapter';
 import type { HookPlanEntry } from './types/plan';
+import type { RunPlanOptions } from './normalizer/runner';
 import { mergeResults, type MergedExecutionResult } from './merge-engine';
 
 /**
@@ -66,6 +67,7 @@ export function registerHandler(planEntry: HookPlanEntry): void {
  */
 export async function runNormalized(
   event: UnifiedHookEvent,
+  options?: RunPlanOptions,
 ): Promise<MergedExecutionResult> {
   const matchingEntries = handlerRegistry
     .filter((e) => e.phase === event.phase)
@@ -79,10 +81,12 @@ export async function runNormalized(
   const results: UnifiedHookResult[] = [];
 
   for (const entry of matchingEntries) {
-    // Handler.source is the shell command to execute as a child process.
     const { runHandler } = await import('./normalizer/runner');
     try {
-      const result = await runHandler(event, entry.handler);
+      const result = await runHandler(event, entry.handler, entry.timeoutMs ?? options?.handlerTimeoutMs, options?.capabilities, {
+        executors: options?.executors,
+        currentDepth: options?.currentDepth,
+      });
       results.push(result);
     } catch (_err) {
       // Fail-open by default in programmatic API

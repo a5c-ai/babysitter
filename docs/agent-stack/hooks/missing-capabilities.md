@@ -2,30 +2,32 @@
 
 Beyond the 13 missing events, the agent stack lacks several hook capabilities that Claude Code supports.
 
-## 1. Handler Types (4/5 missing)
+## 1. Handler Types (core support implemented; platform executors pending)
 
-Claude Code supports 5 hook handler types. Agent-platform/hooks-mux only support `command`.
+Claude Code supports 5 hook handler types. hooks-mux core now models and dispatches all 5 handler types. `command` remains the legacy default when `type` is omitted.
 
 | Handler Type | Claude Code | Agent Stack | Gap |
 |-------------|------------|-------------|-----|
 | `command` | ✅ Shell subprocess | ✅ hooks-mux runner.ts | — |
-| `http` | ✅ POST to webhook URL | ❌ | Need HTTP handler in hooks-mux runner |
-| `mcp_tool` | ✅ Call MCP server tool | ❌ | Need MCP tool handler in hooks-mux |
-| `prompt` | ✅ LLM evaluates prompt | ❌ | Need prompt handler (model call) |
-| `agent` | ✅ Spawn subagent to evaluate | ❌ | Need agent handler (subagent spawn) |
+| `http` | ✅ POST to webhook URL | ✅ hooks-mux core | Platform policy may still restrict private URLs; local/private endpoints require explicit opt-in |
+| `mcp_tool` | ✅ Call MCP server tool | Partial | hooks-mux has the typed handler and injectable executor seam; live tool-mux/MCP registry wiring remains tied to #576 |
+| `prompt` | ✅ LLM evaluates prompt | Partial | hooks-mux has the typed handler and bounded executor seam; host model invocation must be supplied by agent-platform/agent-mux |
+| `agent` | ✅ Spawn subagent to evaluate | Partial | hooks-mux has the typed handler and bounded executor seam; host agent spawning must be supplied by agent-platform/agent-mux |
 
-### Changes needed
+### Implemented
 
 **hooks-mux/core:**
-- `src/normalizer/runner.ts` — Add handler dispatch by type (currently shell-only)
-- `src/types/plan.ts` — Extend `HandlerRef` with `type` field and type-specific config
-- New: `src/handlers/http.ts` — HTTP POST handler with header interpolation
-- New: `src/handlers/mcp-tool.ts` — MCP tool invocation handler
-- New: `src/handlers/prompt.ts` — LLM prompt evaluation handler
-- New: `src/handlers/agent.ts` — Subagent spawn handler
+- `src/normalizer/runner.ts` — Dispatches by handler type and preserves command fail-open/fail-closed semantics
+- `src/types/plan.ts` — `HandlerRef` is a backward-compatible typed union; omitted `type` behaves as `command`
+- `src/handlers/http.ts` — HTTP POST handler with allowed-env header interpolation, URL validation, timeout, and JSON result parsing
+- `src/handlers/mcp-tool.ts` — MCP tool handler through an injected executor seam
+- `src/handlers/prompt.ts` — Prompt handler through an injected, timeout/depth-bounded executor seam
+- `src/handlers/agent.ts` — Agent handler through an injected, timeout/depth/max-turn bounded executor seam
+
+### Remaining integration work
 
 **agent-platform:**
-- `src/harness/amux/amuxBridge.ts` — Pass hook handler type config through bridge
+- `src/harness/amux/amuxBridge.ts` already forwards opaque hook config to agent-mux. Live `mcp_tool`, `prompt`, and `agent` execution still needs platform wiring that supplies hooks-mux executor seams from the unified tool registry/model/agent invocation surfaces.
 
 ## 2. Decision Types (3 missing)
 
