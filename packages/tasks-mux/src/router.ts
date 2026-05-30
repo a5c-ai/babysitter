@@ -61,6 +61,9 @@ export function routeTask(task: RoutableTaskDef, context: TaskRouteContext = {})
 
   if (requested === "agent") {
     const responder = selectResponder(context.responders, "agent", hints.adapter);
+    if (!responder && !context.agentBackend && hints.fallbackType && hints.fallbackType !== "agent") {
+      return fallbackDecision(hints.fallbackType, task, context, `agent responder unavailable; fell back to ${hints.fallbackType}`);
+    }
     return agentDecision(hints, context, responder, "agent responder requested");
   }
 
@@ -85,6 +88,33 @@ export function routeTask(task: RoutableTaskDef, context: TaskRouteContext = {})
   return internalDecision("internal responder requested");
 }
 
+function fallbackDecision(
+  fallbackType: Exclude<ResponderType, "agent">,
+  task: RoutableTaskDef,
+  context: TaskRouteContext,
+  reason: string,
+): TaskRouteDecision {
+  if (fallbackType === "human") {
+    return humanDecision(context, reason);
+  }
+  if (fallbackType === "tracker") {
+    const hints = routingHints(task);
+    const responder = selectResponder(context.responders, "tracker", hints.trackerBackend);
+    return {
+      responderType: "tracker",
+      responder,
+      route: "external-tracker",
+      backend: context.trackerBackend,
+      unavailable: !context.trackerBackend,
+      reason,
+    };
+  }
+  if (fallbackType === "auto") {
+    return humanDecision(context, reason);
+  }
+  return internalDecision(reason);
+}
+
 export function routingHints(task: RoutableTaskDef): TaskRoutingHints {
   const source = task.agent ?? task.breakpoint ?? {};
   return {
@@ -99,7 +129,7 @@ export function routingHints(task: RoutableTaskDef): TaskRoutingHints {
 }
 
 export function isHostDelegableRoute(decision: TaskRouteDecision): boolean {
-  return decision.responderType === "internal" || decision.responderType === "agent";
+  return decision.responderType === "internal";
 }
 
 function defaultResponderType(task: RoutableTaskDef): ResponderType {

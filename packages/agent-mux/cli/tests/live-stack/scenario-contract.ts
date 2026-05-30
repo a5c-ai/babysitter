@@ -93,6 +93,38 @@ export function primaryLiveStackScenario(): LiveStackScenario {
   });
 }
 
+export function externalAgentDispatchLiveStackScenario(): LiveStackScenario {
+  return createLiveStackScenario({
+    scenarioId: 'live.omni.claude-code-external-agent.foundry-openai.gpt-5.5',
+    agentPath: 'omni',
+    agent: 'omni',
+    agentMuxAgent: 'omni',
+    integrationType: 'runtime-cli',
+    babysitterHarness: 'omni',
+    installMode: 'vanilla',
+    provider: 'foundry-openai',
+    amuxProvider: 'foundry',
+    model: 'gpt-5.5',
+    credentialMode: 'github-org-secrets-and-vars',
+    requiredEnv: ['LIVE_STACK_EXTERNAL_AGENT', 'AZURE_API_KEY', 'AMUX_API_BASE'],
+    layers: [
+      'omni runtime-cli',
+      'tasks-mux responder routing',
+      'agent-mux claude-code adapter',
+      'external agent cost event',
+      'provider/model trace',
+    ],
+    requiredTraceIds: ['babysitterRunId', 'babysitterEffectId', 'agentMuxRunId', 'transportTraceId'],
+    expectedArtifacts: [
+      'babysitter-run-summary',
+      'babysitter-task-bundle',
+      'agent-mux-events',
+      'external-agent-cost-event',
+      'provider-trace-redacted',
+    ],
+  });
+}
+
 export function liveStackScenarioFromEnv(env: Record<string, string | undefined>): LiveStackScenario {
   if (!env['LIVE_STACK_SCENARIO_ID']) return primaryLiveStackScenario();
   return createLiveStackScenario({
