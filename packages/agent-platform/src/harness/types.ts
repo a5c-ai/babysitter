@@ -171,6 +171,8 @@ export interface AgentCoreSessionOptions {
   enableCompaction?: boolean;
   /** Global pi agent config directory (default: ~/.pi/agent). */
   agentDir?: string;
+  /** Minimum delay before retrying PI session initialization after a failure. */
+  initFailureBackoffMs?: number;
 }
 
 /**

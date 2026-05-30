@@ -20,6 +20,7 @@ const mockLoadPiModule = vi.fn();
 
 let defaultResourceLoaderOptions: Record<string, unknown> | undefined;
 let createAgentSessionOptions: Record<string, unknown> | undefined;
+let defaultPiModule: Record<string, unknown>;
 const mockCreateBashToolDefinition = vi.fn((cwd: string, options?: Record<string, unknown>) => ({
   name: "bash",
   cwd,
@@ -54,7 +55,7 @@ describe("AgentCoreSessionHandle", () => {
     delete process.env.PI_CODING_AGENT_DIR;
     vi.clearAllMocks();
 
-    mockLoadPiModule.mockResolvedValue({
+    defaultPiModule = {
       createAgentSession: vi.fn((options?: Record<string, unknown>) => {
         createAgentSessionOptions = options;
         return Promise.resolve({
@@ -114,7 +115,8 @@ describe("AgentCoreSessionHandle", () => {
       createReadOnlyTools: vi.fn(() => []),
       codingTools: [],
       readOnlyTools: [],
-    });
+    };
+    mockLoadPiModule.mockResolvedValue(defaultPiModule);
   });
 
   it("defaults agentDir for resource loading when none is provided", async () => {
@@ -185,5 +187,55 @@ describe("AgentCoreSessionHandle", () => {
     expect(mockResolvePiModel).toHaveBeenCalled();
     expect(mockDescribePiModelResolutionFailure).toHaveBeenCalledWith("gemini-3.1-pro-preview");
     expect(createAgentSessionOptions).toBeUndefined();
+  });
+
+  it("backs off immediate initialization retries after a failure and recovers after the delay", async () => {
+    const { AgentCoreSessionHandle } = await import("./piWrapper");
+    const createAgentSession = vi.fn()
+      .mockRejectedValueOnce(new Error("transient init failure"))
+      .mockResolvedValueOnce({
+        session: {
+          prompt: vi.fn(() => Promise.resolve(undefined)),
+          steer: vi.fn(() => Promise.resolve(undefined)),
+          followUp: vi.fn(() => Promise.resolve(undefined)),
+          subscribe: vi.fn(() => () => {}),
+          executeBash: vi.fn(() => Promise.resolve({
+            output: "",
+            exitCode: 0,
+            cancelled: false,
+            truncated: false,
+          })),
+          abort: vi.fn(() => Promise.resolve(undefined)),
+          dispose: vi.fn(),
+          getLastAssistantText: vi.fn(() => ""),
+          get sessionId() {
+            return "session-2";
+          },
+          get isStreaming() {
+            return false;
+          },
+          get messages() {
+            return [];
+          },
+        },
+      });
+
+    mockLoadPiModule.mockResolvedValue({
+      ...defaultPiModule,
+      createAgentSession,
+    });
+
+    const session = new AgentCoreSessionHandle({
+      workspace: process.cwd(),
+      initFailureBackoffMs: 50,
+    });
+
+    await expect(session.initialize()).rejects.toThrow("transient init failure");
+    await expect(session.initialize()).rejects.toThrow("transient init failure");
+    expect(createAgentSession).toHaveBeenCalledTimes(1);
+
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    await expect(session.initialize()).resolves.toBeUndefined();
+    expect(createAgentSession).toHaveBeenCalledTimes(2);
   });
 });

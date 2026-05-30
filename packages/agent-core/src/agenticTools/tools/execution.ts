@@ -59,8 +59,6 @@ export function createExecutionTools(options: AgenticToolOptions): CustomToolDef
           });
         }
 
-        // HERE BE DRAGONS: Assumes /bin/bash exists on non-Windows. macOS Catalina+
-        // defaults to zsh, and some containers may not have bash at this path.
         const shellInvocation = buildShellInvocation(String(params.command));
         const result = await spawnAsync(shellInvocation.command, shellInvocation.args, {
           cwd,

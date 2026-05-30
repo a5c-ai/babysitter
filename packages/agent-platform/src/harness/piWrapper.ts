@@ -31,6 +31,7 @@ import {
 import type { PiAgentSession } from "./piWrapper/moduleSupport";
 
 const DEFAULT_TIMEOUT_MS = 900_000;
+const DEFAULT_INIT_FAILURE_BACKOFF_MS = 1_000;
 const DEFAULT_BASH_SANDBOX_MODE: NonNullable<AgentCoreSessionOptions["bashSandbox"]> = "local";
 const AGENT_END_PROMPT_SETTLE_GRACE_MS = 250;
 const PI_AGENT_DIR_ENV = "PI_CODING_AGENT_DIR";
@@ -69,6 +70,8 @@ export class AgentCoreSessionHandle {
   private readonly options: AgentCoreSessionOptions;
   private session: PiAgentSession | null = null;
   private initPromise: Promise<void> | null = null;
+  private initFailure: unknown = null;
+  private initRetryAfterMs = 0;
   private readonly cleanupTasks: Array<() => Promise<void> | void> = [];
   constructor(options: AgentCoreSessionOptions = {}) {
     this.options = options;
@@ -81,15 +84,21 @@ export class AgentCoreSessionHandle {
    */
   async initialize(): Promise<void> {
     if (this.session) return;
+    if (this.initFailure && Date.now() < this.initRetryAfterMs) {
+      throw this.initFailure;
+    }
+    if (this.initFailure) {
+      this.initFailure = null;
+      this.initRetryAfterMs = 0;
+    }
     if (this.initPromise) {
       await this.initPromise;
       return;
     }
-    // HERE BE DRAGONS: initPromise is cleared on failure so subsequent callers retry.
-    // This means N concurrent callers can all trigger N parallel init attempts
-    // with no backoff. If init fails persistently, this creates a retry storm.
     this.initPromise = this.doInitialize().catch((err: unknown) => {
       this.initPromise = null;
+      this.initFailure = err;
+      this.initRetryAfterMs = Date.now() + (this.options.initFailureBackoffMs ?? DEFAULT_INIT_FAILURE_BACKOFF_MS);
       throw err;
     });
     await this.initPromise;
@@ -250,6 +259,8 @@ export class AgentCoreSessionHandle {
       session.dispose();
       this.session = null;
       this.initPromise = null;
+      this.initFailure = null;
+      this.initRetryAfterMs = 0;
     }
     while (this.cleanupTasks.length > 0) {
       const cleanup = this.cleanupTasks.pop();

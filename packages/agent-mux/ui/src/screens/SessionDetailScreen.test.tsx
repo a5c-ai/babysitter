@@ -10,17 +10,37 @@ import { SessionDetailScreen } from './SessionDetailScreen.js';
 
 const mockUseGateway = vi.fn();
 
+function normalizeStyle(style: unknown): React.CSSProperties | undefined {
+  if (Array.isArray(style)) {
+    return Object.assign({}, ...style.map((item) => normalizeStyle(item)).filter(Boolean));
+  }
+  if (style && typeof style === 'object') {
+    return style as React.CSSProperties;
+  }
+  return undefined;
+}
+
 vi.mock('react-native', () => {
   return {
-    View: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
-    ScrollView: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
+    View: ({ children, style, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+      <div {...props} style={normalizeStyle(style)}>{children}</div>
+    ),
+    ScrollView: ({
+      children,
+      style,
+      contentContainerStyle: _contentContainerStyle,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement> & { contentContainerStyle?: unknown }) => (
+      <div {...props} style={normalizeStyle(style)}>{children}</div>
+    ),
     Pressable: ({
       children,
       onPress,
       accessibilityLabel,
+      style,
       ...props
     }: React.ButtonHTMLAttributes<HTMLButtonElement> & { onPress?: () => void; accessibilityLabel?: string }) => (
-      <button type="button" onClick={onPress} aria-label={accessibilityLabel} {...props}>
+      <button type="button" onClick={onPress} aria-label={accessibilityLabel} style={normalizeStyle(style)} {...props}>
         {children}
       </button>
     ),
@@ -79,7 +99,7 @@ describe('SessionDetailScreen', () => {
     mockUseGateway.mockReset();
   });
 
-  it.skip('renders realtime flow data and switches into transcript/files tabs', async () => {
+  it('renders realtime flow data and switches into transcript/files tabs', async () => {
     const gateway = createMockGateway();
     gateway.store.getState().actions.mergeSession('session-1', {
       sessionId: 'session-1',
@@ -132,7 +152,7 @@ describe('SessionDetailScreen', () => {
     expect(await screen.findByText('src/app.tsx')).toBeTruthy();
   });
 
-  it.skip('shows the per-tab empty states when no realtime data exists', async () => {
+  it('shows the per-tab empty states when no realtime data exists', async () => {
     const gateway = createMockGateway();
     gateway.store.getState().actions.mergeSession('session-empty', {
       sessionId: 'session-empty',

@@ -26,6 +26,24 @@ export function getRgPath(): string {
   return rgPath;
 }
 
+export function resolveShellCommand(env: NodeJS.ProcessEnv = process.env): {
+  shell: string;
+  argsFor(command: string): string[];
+} {
+  if (process.platform === "win32") {
+    return {
+      shell: env["ComSpec"] || "cmd.exe",
+      argsFor: (command) => ["/c", command],
+    };
+  }
+
+  const shell = env["BABYSITTER_BASH_PATH"] || env["SHELL"] || "/bin/sh";
+  return {
+    shell,
+    argsFor: (command) => ["-c", command],
+  };
+}
+
 export function spawnAsync(
   command: string,
   args: string[],

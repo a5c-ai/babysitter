@@ -1,7 +1,7 @@
 /**
  * @process repo/issue-601-remaining-dragons-plan
  * @description Implementation plan for issue #601: remaining here-be-dragons debt, process.env coupling coordination, and missing caveats.
- * @inputs { issueNumber: number, baseBranch: string, workBranch: string, relatedIssues: number[], maxImplementationLoops?: number }
+ * @inputs { issueNumber: number, baseBranch: string, workBranch: string, prNumber?: number, relatedIssues: number[], maxImplementationLoops?: number }
  * @outputs { success: boolean, decomposition: object, implementation: object, verification: object, review: object }
  *
  * @process methodologies/spec-kit-brownfield
@@ -13,7 +13,7 @@
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
 function taskStdout(result) {
-  return result?.stdout ?? result?.value?.stdout ?? '';
+  return result?.stdout ?? result?.value?.stdout ?? result?.result?.stdout ?? '';
 }
 
 const collectContextTask = defineTask('issue-601.collect-context', (args, taskCtx) => ({
@@ -249,19 +249,26 @@ const deliveryTask = defineTask('issue-601.delivery', (args, taskCtx) => ({
     command: [
       'set -euo pipefail',
       'git status --short --branch',
-      'git add docs/here-be-dragons.md tsconfig.json packages/agent-core packages/agent-platform packages/agent-mux .a5c/processes/issue-601-remaining-dragons-plan.mjs .a5c/processes/issue-601-remaining-dragons-plan.inputs.json',
+      'git add docs/here-be-dragons.md package-lock.json packages/agent-core/src/agenticTools/index.ts packages/agent-core/src/agenticTools/shared/process.ts packages/agent-core/src/agenticTools/tools/execution.ts packages/agent-core/src/session.ts packages/agent-core/src/tools.test.ts packages/agent-platform/src/harness/agenticTools/index.ts packages/agent-platform/src/harness/agenticTools/shared/process.ts packages/agent-platform/src/harness/agenticTools/tools/execution.ts packages/agent-platform/src/harness/backgroundProcessRegistry.ts packages/agent-platform/src/harness/piWrapper.ts packages/agent-platform/src/harness/piWrapper.test.ts packages/agent-platform/src/harness/types.ts packages/agent-runtime/src/backgroundProcessRegistry.ts packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx',
+      'git add -f .a5c/processes/issue-601-remaining-dragons-plan.mjs .a5c/processes/issue-601-remaining-dragons-plan.inputs.json',
       'git diff --cached --check',
       'git diff --cached --quiet && { echo "No staged changes to commit" >&2; exit 1; }',
       'git commit -m "fix: address remaining here-be-dragons debt"',
       `git push -u origin ${args.workBranch}`,
-      'PR_URL=$(gh pr create --base "${BASE_BRANCH}" --head "${WORK_BRANCH}" --title "Fix remaining here-be-dragons debt" --body "Closes #${ISSUE_NUMBER}\\n\\n## Summary\\n- coordinate #601 with existing #584 and #586 plans\\n- address approved residual here-be-dragons streams with focused tests\\n- update docs/here-be-dragons.md to reflect fixed and deferred items\\n\\n## Quality Gates\\n- npm run test --workspace=@a5c-ai/agent-core\\n- npm run test --workspace=@a5c-ai/agent-platform\\n- npm run test:realtime --workspace=@a5c-ai/agent-mux-ui\\n- npm run build:runtime\\n- npm run test:agent-mux\\n- npm run verify:metadata")',
-      'gh issue comment "${ISSUE_NUMBER}" --body "Implementation PR opened for #601: ${PR_URL}\\n\\nThe run coordinated with #584/#586, handled approved residual here-be-dragons streams with tests, and updated documentation to reflect fixed or deferred items."',
+      'PR_URL=$(gh pr view "${PR_NUMBER}" --json url --jq .url)',
+      'gh pr comment "${PR_NUMBER}" --body "Implemented the #601 plan on this PR branch.\\n\\nSummary:\\n- coordinated #601 with existing #584 and #586 plans\\n- addressed approved residual here-be-dragons streams with focused tests\\n- updated docs/here-be-dragons.md to reflect fixed and deferred items\\n\\nQuality gates:\\n- PASS: npm run test --workspace=@a5c-ai/agent-core\\n- PASS: npm run test --workspace=@a5c-ai/agent-platform\\n- PASS: npm run test:realtime --workspace=@a5c-ai/agent-mux-ui\\n- PASS: npm run build:runtime\\n- PASS: npm run verify:metadata\\n- PASS: git diff --check and SessionDetailScreen it.skip guard\\n- BLOCKED: npm run test:agent-mux still fails in unrelated agent-catalog tests: missing ./evidence-projection and stale catalog expectations for Hermes/Claude/OpenCode/Pi/Gemini."',
+      'gh issue comment "${ISSUE_NUMBER}" --body "Implemented the #601 plan on PR #${PR_NUMBER}: ${PR_URL}\\n\\nThe run coordinated with #584/#586, handled approved residual here-be-dragons streams with tests, and updated documentation to reflect fixed or deferred items.\\n\\nVerification note: the focused gates passed, but npm run test:agent-mux remains blocked by unrelated agent-catalog failures (missing ./evidence-projection and stale catalog expectations)."',
       'printf "%s\\n" "$PR_URL"',
     ].join('\n'),
     env: {
       BASE_BRANCH: args.baseBranch,
       WORK_BRANCH: args.workBranch,
       ISSUE_NUMBER: String(args.issueNumber),
+      PR_NUMBER: String(args.prNumber),
+      GIT_AUTHOR_NAME: 'a5c-ai',
+      GIT_AUTHOR_EMAIL: 'a5c-ai@users.noreply.github.com',
+      GIT_COMMITTER_NAME: 'a5c-ai',
+      GIT_COMMITTER_EMAIL: 'a5c-ai@users.noreply.github.com',
     },
     expectedExitCode: 0,
     timeout: 180000,
@@ -275,7 +282,8 @@ const deliveryTask = defineTask('issue-601.delivery', (args, taskCtx) => ({
 export async function process(inputs, ctx) {
   const issueNumber = inputs?.issueNumber ?? 601;
   const baseBranch = inputs?.baseBranch ?? 'staging';
-  const workBranch = inputs?.workBranch ?? 'agent/issue-601-remaining-dragons';
+  const workBranch = inputs?.workBranch ?? 'plan/issue-601';
+  const prNumber = inputs?.prNumber ?? 683;
   const maxImplementationLoops = inputs?.maxImplementationLoops ?? 2;
 
   const context = await ctx.task(collectContextTask, { issueNumber }, {
@@ -357,6 +365,7 @@ export async function process(inputs, ctx) {
     issueNumber,
     baseBranch,
     workBranch,
+    prNumber,
   }, {
     key: 'issue-601.delivery',
   });

@@ -12,6 +12,7 @@ import { createExecutionTools } from "./tools/execution";
 import { createFileSystemTools } from "./tools/fileSystem";
 
 const toolDefinitionScopes = new WeakMap<CustomToolDefinition[], AgenticToolOptions>();
+const toolDefinitionOwners = new WeakMap<CustomToolDefinition, AgenticToolOptions>();
 
 export function createAgentCoreToolDefinitions(options: AgenticToolOptions): CustomToolDefinition[] {
   const tools = [
@@ -27,14 +28,21 @@ export function createAgentCoreToolDefinitions(options: AgenticToolOptions): Cus
   ].map((tool) => wrapToolDefinition(tool, options.onToolUse));
 
   toolDefinitionScopes.set(tools, options);
+  for (const tool of tools) {
+    toolDefinitionOwners.set(tool, options);
+  }
   return tools;
 }
 
 export function disposeAgentCoreToolDefinitions(definitions: CustomToolDefinition[]): void {
-  const options = toolDefinitionScopes.get(definitions);
+  const options = toolDefinitionScopes.get(definitions)
+    ?? definitions.map((definition) => toolDefinitionOwners.get(definition)).find(Boolean);
   if (!options) {
     return;
   }
   disposeBackgroundRegistry(options);
   toolDefinitionScopes.delete(definitions);
+  for (const definition of definitions) {
+    toolDefinitionOwners.delete(definition);
+  }
 }

@@ -17,7 +17,7 @@ Files/modules that concentrate the most danger across multiple categories.
 | `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts` | hazard, coupling, caveat | Double-cast type assertions, process.env mutations *(retry loop now logged)* |
 | `packages/agent-platform/src/harness/piWrapper/moduleSupport.ts` | coupling, caveat | Azure env mutations *(URL parse + import error now logged)* |
 | `packages/agent-mux/core/src/spawn-runner.ts` | hazard | 8+ PTY kill/write failures *(4 now logged in spawn-runner)* |
-| `packages/agent-core/src/agenticTools/shared/process.ts` | caveat, hazard | Silent 50MB stdout truncation, ripgrep path cached at module load |
+| `packages/agent-core/src/agenticTools/shared/process.ts` | caveat, hazard | Ripgrep path cached at module load |
 | `packages/agent-mux/webui/src/lib/global-registry.ts` | coupling | globalThis shared mutable state, duplicated in observer-dashboard |
 | `packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts` | hazard | 3-layer recovery chain invisible without verbose *(code block extraction now rejects non-process blocks)* |
 | ~~`packages/sdk/src/storage/journal.ts`~~ | ~~fallback~~ | ~~Atomicity abandoned~~ → now throws on ENOENT. Queue errors logged. |
@@ -143,20 +143,20 @@ The timeout sets an abort signal but doesn't guarantee the request stops. Fetch 
 ### ~~DEFAULT_TIMEOUT_MS = 900_000 (15 minutes) — unexplained~~
 **FIXED:** Comment added: accommodates long-running model responses and Azure cold-start latency.
 
-### Tool dispose requires exact array reference — *annotated*
+### ~~Tool dispose requires exact array reference~~
 **File:** `packages/agent-core/src/agenticTools/index.ts:40-50`
 
-HERE BE DRAGONS comment added. WeakMap keyed by exact tool array reference — pass a copy and dispose silently fails. Risk remains but is now visible.
+**FIXED:** Tool definitions are now tracked by both returned array and individual tool object ownership. Passing a shallow-copied definitions array to `disposeAgentCoreToolDefinitions()` still resolves the owning options and clears retained background task state.
 
-### Lazy init race on piWrapper failure — *annotated*
+### ~~Lazy init race on piWrapper failure~~
 **File:** `packages/agent-platform/src/harness/piWrapper.ts:82-92`
 
-HERE BE DRAGONS comment added. N concurrent callers can trigger N parallel init attempts with no backoff. Risk remains but is now visible.
+**FIXED:** Initialization failures now record the failure and retry-after timestamp. Immediate retries rethrow the recorded failure instead of hammering session creation, while retries after the backoff window can recover from transient failures.
 
-### Platform-specific shell path assumption — *annotated*
+### ~~Platform-specific shell path assumption~~
 **File:** `packages/agent-core/src/agenticTools/tools/execution.ts:53-56`
 
-Shell invocation now uses the shared runtime helper. `/bin/bash` remains the non-Windows contract, and the risk is covered by focused argv tests.
+**FIXED:** Shell invocation now uses the shared runtime helper in `@a5c-ai/agent-runtime`, so agentic shell execution paths share one argv construction contract instead of hardcoding `/bin/bash` in each caller.
 
 ---
 
@@ -170,13 +170,13 @@ Shell invocation now uses the shared runtime helper. `/bin/bash` remains the non
 | `eslint-disable` comments | 69 | Low — mostly `no-explicit-any`, `no-var-requires`, `react/no-danger` |
 | Explicit `any` type annotations | 207 | Acceptable — concentrated in adapters/serialization, not business logic |
 | Commented-out code blocks | 20+ files | Low accumulation — comments often explain why removed |
-| Skipped/conditional tests | 22+ suites | Mostly justified; 2 unexplained UI test skips |
+| Skipped/conditional tests | 20+ suites | Mostly justified; unexplained `SessionDetailScreen` skips fixed |
 | E2E/integration tests | 6 files | Gap: no E2E for orchestration, hook-mux lifecycle, or trigger dispatch |
 | Pre-release packages (0.1.0) | 5 | atlas, atlas/webui, krate/cli, krate/sdk, compendium |
 
-### Unexplained skipped tests
+### ~~Unexplained skipped tests~~
 
-**`packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx:82,135`** — "renders realtime flow data" and "shows empty states" skipped with no explanation. Should be fixed or converted to `test.todo()`.
+**FIXED:** `packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx` now runs the realtime flow and empty-state tests instead of unconditionally skipping them.
 
 ### Duplicated utility patterns (no shared module)
 
