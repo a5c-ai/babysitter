@@ -1,0 +1,182 @@
+{
+  "issueNumber": 592,
+  "baseBranch": "staging",
+  "targetBranch": "feature/issue-592-agent-runtime-trigger-hardening",
+  "title": "agent-runtime: scheduling gaps - cron, event triggers, rate limiting",
+  "labels": [
+    "ready-for-dev",
+    "feature",
+    "priority:medium",
+    "automated-triage",
+    "effort:large",
+    "triggers",
+    "agent-runtime",
+    "P2",
+    "risk:medium"
+  ],
+  "summary": "Issue #592 tracks daemon trigger hardening for packages/agent-runtime and the duplicated packages/agent-platform daemon implementation. The current daemon supports only file/webhook/timer triggers, parses a small five-field local-time cron subset, queues triggers in memory behind maxConcurrentRuns, and lacks trigger admission control, deduplication, retry metadata, dead letter handling, and failure metrics.",
+  "issueContext": {
+    "issueBodyReference": "docs/agent-layer-gaps.md",
+    "relatedIssues": [
+      {
+        "number": 585,
+        "reason": "Crash recovery and persistent queue work should own durable replay primitives that retry/DLQ behavior can integrate with."
+      },
+      {
+        "number": 593,
+        "reason": "Background process lifecycle and backpressure overlap with scheduled background task execution, but issue #592 is specifically trigger admission and scheduling."
+      }
+    ],
+    "triageFindings": [
+      "packages/agent-runtime/src/daemon/config.ts validates only file, webhook, and timer trigger types.",
+      "packages/agent-runtime/src/daemon/timerScheduler.ts parses five cron fields and uses local Date getters.",
+      "packages/agent-runtime/src/daemon/fileWatcher.ts debounces per watcher but does not deduplicate overlapping rules.",
+      "packages/agent-runtime/src/daemon/webhookListener.ts accepts valid webhook bodies and immediately calls onTrigger with a 200 response; it has request body limits and bearer auth but no admission policy.",
+      "packages/agent-runtime/src/daemon/loop.ts stores pending triggers in an in-memory TriggerEvent[] and gates only by maxConcurrentRuns.",
+      "packages/agent-platform/src/daemon/* duplicates the daemon implementation and currently has richer daemon test coverage than agent-runtime.",
+      "docs/agent-layer-gaps.md records the same gaps under no event-driven triggers, no trigger rate limiting, no trigger deduplication, no dead letter queue, and in-memory-only queue limitations."
+    ]
+  },
+  "processLibraryResearch": {
+    "requestedPath": ".a5c/process-library/",
+    "status": "not-present-in-checkout",
+    "localAlternativesUsed": [
+      "docs/agent-reference/process-authoring.md",
+      "library/methodologies/atdd-tdd/atdd-tdd.js",
+      "library/methodologies/spec-kit/spec-kit-planning.js",
+      "library/methodologies/event-storming/event-storming.js",
+      "library/processes/shared/tdd-triplet.js",
+      "library/processes/shared/deterministic-quality-gate.js",
+      "library/processes/shared/cycle-aware-verification.js",
+      "library/specializations/sdk-platform-development/sdk-architecture-design.js",
+      "library/specializations/sdk-platform-development/api-design-specification.js",
+      "library/specializations/sdk-platform-development/backward-compatibility-management.js",
+      "library/specializations/sdk-platform-development/sdk-testing-strategy.js",
+      "library/specializations/network-programming/event-driven-socket-handler.js",
+      "library/specializations/network-programming/realtime-messaging-system.js",
+      "library/specializations/web-development/nestjs-microservices.js",
+      "library/specializations/collaboration/github/issue-linking.js"
+    ],
+    "methodologyReferencesToPreserve": [
+      "reuse-audit",
+      "ATDD/TDD",
+      "spec-driven staged capability design",
+      "event-source abstraction",
+      "deterministic quality gate",
+      "cycle-aware verification",
+      "backward compatibility review",
+      "security and abuse-resistance review"
+    ]
+  },
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "packages/agent-runtime/README.md",
+    "packages/agent-runtime/package.json",
+    "packages/agent-runtime/src/index.ts",
+    "packages/agent-runtime/src/daemon/types.ts",
+    "packages/agent-runtime/src/daemon/config.ts",
+    "packages/agent-runtime/src/daemon/timerScheduler.ts",
+    "packages/agent-runtime/src/daemon/fileWatcher.ts",
+    "packages/agent-runtime/src/daemon/webhookListener.ts",
+    "packages/agent-runtime/src/daemon/loop.ts",
+    "packages/agent-runtime/src/daemon/lifecycle.ts",
+    "packages/agent-runtime/src/daemon/daemonLog.ts",
+    "packages/agent-runtime/src/daemon/automationExecutor.ts",
+    "packages/agent-runtime/src/daemon/__tests__/timerScheduler.test.ts",
+    "packages/agent-runtime/src/daemon/__tests__/fileWatcher.test.ts",
+    "packages/agent-runtime/src/daemon/__tests__/webhookListener.test.ts",
+    "packages/agent-runtime/src/daemon/__tests__/loop.test.ts",
+    "packages/agent-runtime/src/daemon/__tests__/config.test.ts",
+    "packages/agent-runtime/src/daemon/__tests__/daemonLog.test.ts",
+    "packages/agent-platform/src/daemon/types.ts",
+    "packages/agent-platform/src/daemon/config.ts",
+    "packages/agent-platform/src/daemon/timerScheduler.ts",
+    "packages/agent-platform/src/daemon/fileWatcher.ts",
+    "packages/agent-platform/src/daemon/webhookListener.ts",
+    "packages/agent-platform/src/daemon/loop.ts",
+    "packages/agent-platform/src/daemon/__tests__/timerScheduler.test.ts",
+    "packages/agent-platform/src/daemon/__tests__/fileWatcher.test.ts",
+    "packages/agent-platform/src/daemon/__tests__/webhookListener.test.ts",
+    "packages/agent-platform/src/daemon/__tests__/loop.test.ts",
+    "packages/agent-platform/src/daemon/__tests__/config.test.ts",
+    "packages/agent-mux/core/src/automation.ts"
+  ],
+  "acceptanceFocus": [
+    "Cron handling preserves current five-field numeric, comma, range, and step behavior while adding explicitly tested support for named months/days, timezone-aware matching, supported macros such as @daily, and well-defined unsupported behavior for L/#/@reboot if deferred.",
+    "Trigger config and runtime support an extensible event-source abstraction for queue, git, and chat-style sources without forcing unavailable external services or credentials for local daemon startup.",
+    "Webhook and event-source admission control exposes bounded queue depth, max-per-window rate limiting, defer/reject outcomes, backpressure-aware responses, and queue/rate-limit metrics or log events.",
+    "Deduplication uses stable fingerprints and logs every suppressed duplicate while avoiding false suppression of legitimate distinct rules or payloads.",
+    "Failed triggers do not crash the daemon; retry attempts, backoff metadata, and DLQ-style failed-trigger records are persisted or recorded in a way that can later integrate with #585 durable queue work.",
+    "packages/agent-runtime and packages/agent-platform daemon behavior are centralized or protected by parity tests so the duplicate implementations cannot drift silently.",
+    "Existing file/webhook/timer configurations remain backward compatible unless the capability spec identifies an explicit migration path.",
+    "docs/agent-layer-gaps.md and runtime README text reflect only the capabilities actually implemented and leave coordinated #585/#593 work as follow-ups."
+  ],
+  "nonGoals": [
+    "Do not implement full crash recovery or restart replay from #585.",
+    "Do not implement full background process lifecycle management from #593.",
+    "Do not require RabbitMQ, Kafka, SQS, Slack, Discord, or git provider credentials for unit tests or daemon startup.",
+    "Do not introduce a competing durable queue design if #585 owns the shared persistence primitive.",
+    "Do not silently accept unsupported cron syntax with ambiguous behavior.",
+    "Do not generate shell-oriented process subtasks for this repository workflow."
+  ],
+  "qualityGates": [
+    "Phase 0 reuse audit is rendered before new trigger infrastructure is added.",
+    "A staged capability spec defines accepted scope and non-goals before implementation.",
+    "Regression tests are written before implementation for cron semantics, event-source abstraction, admission control, deduplication, retry/DLQ handling, and daemon parity.",
+    "Targeted daemon tests pass for both agent-runtime and agent-platform or for a shared centralized daemon module with package-level parity coverage.",
+    "Full agent-runtime and agent-platform test suites pass, or unrelated pre-existing failures are documented with exact evidence.",
+    "Builds pass for affected runtime/platform packages.",
+    "Repository metadata verification passes.",
+    "Security review confirms trigger payloads, logs, and DLQ records avoid leaking secrets and request limits/backpressure resist trivial denial-of-service.",
+    "Compatibility review confirms existing daemon config and automation rules keep working."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-runtime/vitest.config.ts packages/agent-runtime/src/daemon/__tests__/timerScheduler.test.ts packages/agent-runtime/src/daemon/__tests__/fileWatcher.test.ts packages/agent-runtime/src/daemon/__tests__/webhookListener.test.ts packages/agent-runtime/src/daemon/__tests__/loop.test.ts packages/agent-runtime/src/daemon/__tests__/config.test.ts packages/agent-runtime/src/daemon/__tests__/daemonLog.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-platform/vitest.config.ts packages/agent-platform/src/daemon/__tests__/timerScheduler.test.ts packages/agent-platform/src/daemon/__tests__/fileWatcher.test.ts packages/agent-platform/src/daemon/__tests__/webhookListener.test.ts packages/agent-platform/src/daemon/__tests__/loop.test.ts packages/agent-platform/src/daemon/__tests__/config.test.ts packages/agent-platform/src/daemon/__tests__/automationExecutor.test.ts",
+    "npm run test --workspace=@a5c-ai/agent-runtime",
+    "npm run test --workspace=@a5c-ai/agent-platform",
+    "npm run build --workspace=@a5c-ai/agent-runtime",
+    "npm run build --workspace=@a5c-ai/agent-platform",
+    "npm run build:runtime",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "plannedPhases": [
+    {
+      "name": "Issue context",
+      "purpose": "Read #592, comments, labels, and related issue references to lock scope and boundaries."
+    },
+    {
+      "name": "Reuse audit",
+      "purpose": "Render repo-required reuse-audit findings before adding trigger infrastructure."
+    },
+    {
+      "name": "Trigger runtime trace",
+      "purpose": "Map daemon trigger call paths, duplicated platform code, reusable automation types, and existing test coverage."
+    },
+    {
+      "name": "Capability spec",
+      "purpose": "Define staged cron, event-source, admission, deduplication, retry/DLQ, and parity semantics before code changes."
+    },
+    {
+      "name": "Regression coverage",
+      "purpose": "Add failing acceptance and unit tests for every accepted trigger hardening slice."
+    },
+    {
+      "name": "Incremental implementation",
+      "purpose": "Implement the accepted slices in small test-backed changes, preserving existing trigger behavior."
+    },
+    {
+      "name": "Verification loop",
+      "purpose": "Run targeted and full package gates, iterating up to three attempts when tests or review find regressions."
+    },
+    {
+      "name": "Security and compatibility review",
+      "purpose": "Review denial-of-service surfaces, secret handling, cron compatibility, false deduplication, and runtime/platform parity."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm issue acceptance, documented deferred work, clean scoped diff, and delivery-ready PR/issue summaries."
+    }
+  ]
+}
