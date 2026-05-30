@@ -1,0 +1,204 @@
+{
+  "issueNumber": 593,
+  "baseBranch": "staging",
+  "targetBranch": "feature/issue-593-background-process-lifecycle-followup",
+  "branchForPlanPr": "plan/issue-593",
+  "processEntry": ".a5c/processes/issue-593-background-process-lifecycle-plan.mjs#process",
+  "title": "agent-runtime: background process gaps - state transitions, signals, backpressure",
+  "trigger": "manual dispatch",
+  "summary": "Create and execute a current-state-aware implementation workflow for issue #593. The workflow must read the issue body, comments, and labels; perform a Phase 0 reuse audit; trace live runtime call paths; verify what staging already implements; then implement only remaining background process lifecycle gaps with tests, docs, compatibility review, and final spec guard.",
+  "labels": [
+    "ready-for-dev",
+    "feature",
+    "priority:medium",
+    "automated-triage",
+    "effort:large",
+    "agent-runtime",
+    "P2",
+    "risk:medium"
+  ],
+  "issueContext": {
+    "issueBodyReference": "docs/agent-layer-gaps.md",
+    "reportedGaps": [
+      "Missing paused/resumed and zombie/stale lifecycle states; cannot distinguish graceful exit from crash.",
+      "SIGTERM is not forwarded to child processes and graceful shutdown coordination is incomplete.",
+      "stdout/stderr retention can create memory pressure unless bounded and surfaced with explicit metadata.",
+      "Background processes are independent and lack dependency ordering.",
+      "No pre/post spawn, pre/post destroy, or timeout lifecycle hook contract.",
+      "Daemon start/stop exists, but session pause/resume semantics are distinct and not modeled as background process pause/resume."
+    ],
+    "triageNotes": [
+      "Primary implementation surface is packages/agent-runtime/src/backgroundProcessRegistry.ts.",
+      "Adjacent surfaces include daemon/lifecycle.ts, daemon/loop.ts, execution/modes/local.ts, and session/types.ts.",
+      "Related but non-duplicate issue #600 covers deduplicating background registry and shell invocation.",
+      "Related runtime gap issues #585, #590, #591, and #592 should be inspected only for scope boundaries."
+    ]
+  },
+  "currentStagingObservations": {
+    "backgroundRegistry": "packages/agent-runtime/src/backgroundProcessRegistry.ts currently exists and already includes lifecycle status values for paused, queued, timed-out, skipped, and hook-failed in addition to existing terminal states.",
+    "streamBackpressure": "The registry currently exposes stdoutTruncated, stderrTruncated, stdoutRetainedBytes, stderrRetainedBytes, stdoutDroppedBytes, and stderrDroppedBytes metadata backed by capped retention.",
+    "signalHandling": "The registry currently has process-group/direct-child signal paths and grace-period SIGKILL escalation, while LocalExecutor and daemon lifecycle retain separate direct process stop behavior.",
+    "pauseResume": "The registry currently exposes pause() and resume() with platform gating; daemon/session pause semantics remain adjacent and should not be conflated unless deliberately scoped.",
+    "dependenciesAndHooks": "The registry currently has dependsOn queueing, duplicate dependency validation, lifecycle hooks, and hook failure recording in the registry-focused tests.",
+    "tests": "packages/agent-runtime/src/__tests__/backgroundProcessRegistry.test.ts currently contains focused tests for output metadata, signal escalation, pause/resume, dependencies, and hooks."
+  },
+  "reuseAuditSeed": {
+    "keywordNounsAndVerbs": [
+      "BackgroundProcessRegistry",
+      "BackgroundTaskRecord",
+      "BackgroundCompletionEvent",
+      "SpawnOptions",
+      "maxOutputBytes",
+      "stdoutTruncated",
+      "stderrTruncated",
+      "stdoutDroppedBytes",
+      "stderrDroppedBytes",
+      "signal forwarding",
+      "process group",
+      "SIGTERM",
+      "SIGKILL",
+      "grace timeout",
+      "pause",
+      "resume",
+      "zombie",
+      "stale",
+      "orphan",
+      "dependsOn",
+      "dependency queue",
+      "preSpawn",
+      "postSpawn",
+      "preDestroy",
+      "postDestroy",
+      "onTimeout",
+      "hook failure"
+    ],
+    "existingInfrastructureToPrefer": [
+      "packages/agent-runtime/src/backgroundProcessRegistry.ts",
+      "packages/agent-runtime/src/background/state.ts",
+      "packages/agent-runtime/src/execution/policy.ts",
+      "packages/agent-runtime/src/resources/timeout-cascade.ts",
+      "packages/agent-runtime/src/resources/concurrency-guard.ts",
+      "packages/agent-runtime/src/__tests__/backgroundProcessRegistry.test.ts",
+      "packages/agent-runtime/src/execution/modes/local.ts",
+      "packages/agent-runtime/src/daemon/lifecycle.ts",
+      "packages/agent-runtime/src/daemon/loop.ts"
+    ],
+    "newInfrastructureConstraint": "Do not introduce a competing process manager. Extend or verify existing registry, executor, daemon, and docs surfaces only when the runtime trace proves they are live scope for issue #593."
+  },
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "packages/agent-runtime/README.md",
+    "packages/agent-runtime/package.json",
+    "packages/agent-runtime/src/index.ts",
+    "packages/agent-runtime/src/backgroundProcessRegistry.ts",
+    "packages/agent-runtime/src/background/state.ts",
+    "packages/agent-runtime/src/__tests__/backgroundProcessRegistry.test.ts",
+    "packages/agent-runtime/src/execution/types.ts",
+    "packages/agent-runtime/src/execution/policy.ts",
+    "packages/agent-runtime/src/execution/modes/local.ts",
+    "packages/agent-runtime/src/execution/__tests__/provider.test.ts",
+    "packages/agent-runtime/src/daemon/types.ts",
+    "packages/agent-runtime/src/daemon/lifecycle.ts",
+    "packages/agent-runtime/src/daemon/loop.ts",
+    "packages/agent-runtime/src/resources/timeout-cascade.ts",
+    "packages/agent-runtime/src/resources/concurrency-guard.ts"
+  ],
+  "plannedPhases": [
+    {
+      "name": "Issue spec read",
+      "purpose": "Read issue #593 body, comments, labels, docs/agent-layer-gaps.md, and related issues enough to lock source-of-truth scope."
+    },
+    {
+      "name": "Reuse and remaining-gap audit",
+      "purpose": "Classify each issue requirement as already implemented, partially implemented, missing, unclear, or out of scope before proposing changes."
+    },
+    {
+      "name": "Runtime call-path trace",
+      "purpose": "Trace live paths through registry spawn, stream retention, completion, cancel, killAll, dispose, pause, resume, dependencies, hooks, LocalExecutor destroy, daemon lifecycle, and daemon loop queueing."
+    },
+    {
+      "name": "Acceptance matrix",
+      "purpose": "Map every issue requirement to source text, implementation files, tests, docs, and pass/fail rules."
+    },
+    {
+      "name": "Regression plan",
+      "purpose": "Author or confirm tests before production edits, preferring existing BackgroundProcessRegistry tests and fake process seams."
+    },
+    {
+      "name": "Plan review",
+      "purpose": "Challenge duplicate infrastructure, compatibility risk, platform behavior, hook/dependency deadlocks, and scope expansion."
+    },
+    {
+      "name": "Remaining-gap implementation",
+      "purpose": "Implement only missing or partial issue #593 behavior on traced live paths, or harden tests/docs for behavior already present."
+    },
+    {
+      "name": "Verification loop",
+      "purpose": "Run focused and package-level validation, then iterate up to three attempts on failing criteria."
+    },
+    {
+      "name": "Compatibility and scope review",
+      "purpose": "Review public API changes, race risks, platform gating, documentation claims, and boundaries with adjacent runtime issues."
+    },
+    {
+      "name": "Final spec guard",
+      "purpose": "Compare issue text to final artifacts and command results before accepting completion."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "Only if a public lifecycle API decision, unsupported-platform behavior, or scope expansion into daemon crash recovery/durable queues needs maintainer input.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with recommended issue #593 scope",
+        "Pause for maintainer guidance"
+      ]
+    },
+    {
+      "when": "Only if final acceptance requires explicit deferral of an in-scope issue requirement.",
+      "owner": "maintainer",
+      "options": [
+        "Accept documented remaining scope",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "qualityGates": [
+    "Phase 0 reuse-audit findings are rendered before implementation recommendations.",
+    "Each issue requirement is classified against current staging before code changes.",
+    "runtimeCallPaths are recorded and implementation edits stay on traced live paths.",
+    "Tests are added or confirmed before production edits for every remaining or partially implemented criterion.",
+    "Stream retention tests prove bounded retained bytes and surfaced dropped/truncated metadata for stdout and stderr snapshots plus completion events.",
+    "Signal tests prove process-group or direct-child target selection, grace timeout, escalation, and idempotency without hanging.",
+    "Lifecycle tests prove valid status transitions, timeout behavior, pause/resume platform gating, dependency ordering/skip behavior, and hook failure recording.",
+    "Docs claims are updated only for behavior actually implemented and verified.",
+    "Focused BackgroundProcessRegistry tests pass.",
+    "agent-runtime package tests/build pass.",
+    "npm run verify:metadata passes.",
+    "Compatibility review approves public API changes and rejects unapproved expansion into crash recovery, sandboxing, observability exporters, or cross-package deduplication.",
+    "Final spec guard confirms every in-scope issue #593 criterion is implemented or explicitly approved for deferral."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-runtime/vitest.config.ts packages/agent-runtime/src/__tests__/backgroundProcessRegistry.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-runtime/vitest.config.ts packages/agent-runtime/src/execution/__tests__/provider.test.ts packages/agent-runtime/src/resources/__tests__/manager.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-runtime/vitest.config.ts",
+    "npm run build --workspace=@a5c-ai/agent-runtime",
+    "npm run verify:metadata"
+  ],
+  "processLibraryResearch": {
+    "activeRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "referencesUsed": [
+      "methodologies/pilot-shell/pilot-shell-feature.js",
+      "methodologies/planning-with-files/planning-orchestrator.js",
+      "methodologies/feature-driven-development/feature-driven-development.js",
+      "processes/shared/tdd-triplet.js",
+      "processes/shared/completeness-gate.js",
+      "reference/ADVANCED_PATTERNS.md",
+      "specializations/collaboration/github/pr-policies.js",
+      "specializations/collaboration/github/branch-policies.js",
+      "specializations/collaboration/github/issue-linking.js"
+    ],
+    "shapeSelected": "Flat phase list with sparse breakpoints because the issue is a known feature/architecture bundle with identifiable runtime surfaces. A remaining-gap audit is first because current staging already contains substantial issue #593 implementation.",
+    "repoPolicyApplied": "Use agent tasks instead of kind:shell subtasks for direct Babysitter work in this repository; verification agents must run concrete commands and report exact command outputs."
+  }
+}
