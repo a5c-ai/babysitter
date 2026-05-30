@@ -165,7 +165,7 @@ function categorizeEvents(events: JournalEvent[]): {
       if (effectId) {
         requestedEffects.set(effectId, { effectId, kind, title, status: 'pending' });
       }
-    } else if (['RUN_CREATED', 'RUN_COMPLETED', 'RUN_FAILED'].includes(event.type)) {
+    } else if (['RUN_CREATED', 'RUN_COMPLETED', 'RUN_HALTED', 'RUN_FAILED'].includes(event.type)) {
       stateTransitions.push({ event: event.type, recordedAt: event.recordedAt });
     }
   }

@@ -9,7 +9,7 @@ import { resolveExistingRunDir } from "../../config";
 import { countPendingByKind, isOnlyBreakpoints } from "./utils";
 
 export interface HookRunStateSummary {
-  runState: "" | "completed" | "failed" | "waiting" | "created";
+  runState: "" | "completed" | "halted" | "failed" | "waiting" | "created";
   completionProof: string;
   pendingKinds: string;
   onlyBreakpointsPending: boolean;

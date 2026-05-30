@@ -66,7 +66,7 @@ export async function handleSessionAssociate(args: SessionAssociateArgs): Promis
         const runDir = resolveExistingRunDir(oldRunId, { override: args.runsDir ?? resolveRunsDir() });
         const journal = await loadJournal(runDir);
         isTerminal = journal.some(
-          (event) => event.type === "RUN_COMPLETED" || event.type === "RUN_FAILED",
+          (event) => event.type === "RUN_COMPLETED" || event.type === "RUN_HALTED" || event.type === "RUN_FAILED",
         );
       } catch {
         isTerminal = true;

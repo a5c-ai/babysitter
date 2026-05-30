@@ -205,6 +205,8 @@ export enum SessionErrorCode {
   RUN_NOT_FOUND = 'RUN_NOT_FOUND',
   /** Run already completed */
   RUN_COMPLETED = 'RUN_COMPLETED',
+  /** Run already halted */
+  RUN_HALTED = 'RUN_HALTED',
   /** State file corrupted */
   CORRUPTED_STATE = 'CORRUPTED_STATE',
   /** Invalid state value */

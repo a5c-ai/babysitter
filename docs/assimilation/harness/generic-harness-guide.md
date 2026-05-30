@@ -1105,7 +1105,7 @@ These are dispatched by the SDK runtime during orchestration. They are defined i
 |---|---|---|
 | `on-run-start` | 3 | Fires after `run:create` completes |
 | `on-run-complete` | 3 | Fires when `run:iterate` returns status=completed |
-| `on-run-fail` | 3 | Fires when `run:iterate` returns status=failed |
+| `on-run-fail` | 3 | Fires when `run:iterate` returns status=failed or status=halted |
 | `on-task-start` | 3 | Fires before executing each pending effect |
 | `on-task-complete` | 3 | Fires after `task:post` completes |
 | `on-step-dispatch` | 3 | Fires when `run:iterate` discovers a new effect |
@@ -1152,6 +1152,8 @@ commands. All examples assume `--json` is passed.
 ```json
 {
   "state": "waiting",
+  "reason": null,
+  "payload": null,
   "lastEvent": {
     "type": "EFFECT_REQUESTED",
     "recordedAt": "2026-03-02T10:05:00Z",
@@ -1174,13 +1176,15 @@ commands. All examples assume `--json` is passed.
 
 | Field | Type | Description |
 |---|---|---|
-| `state` | `"created" \| "waiting" \| "completed" \| "failed"` | Derived run lifecycle state |
+| `state` | `"created" \| "waiting" \| "completed" \| "halted" \| "failed"` | Derived run lifecycle state |
+| `reason` | string or null | Halt reason when state=halted |
+| `payload` | object or null | Halt payload when state=halted |
 | `lastEvent` | object or null | The most recent journal event (serialized) |
 | `pendingByKind` | `Record<string, number>` | Count of pending effects grouped by kind |
 | `pendingEffectsSummary.totalPending` | number | Total pending effects |
 | `pendingEffectsSummary.autoRunnableCount` | number | Effects that can be auto-executed (kind=node) |
 | `needsMoreIterations` | boolean | True if state=waiting and autoRunnableCount > 0 |
-| `completionProof` | string or null | SHA-256 proof hash (only when state=completed) |
+| `completionProof` | string or null | SHA-256 proof hash (only when state=completed; always null when halted) |
 
 ### `session:check-iteration` Output
 
@@ -1842,8 +1846,6 @@ main().catch(err => { console.error(err); process.exit(1); });
 | `babysitter session:check-iteration --session-id ID --state-dir DIR --json` | Check iteration guards | 2g |
 | `babysitter run:repair-journal RUNDIR --json` | Repair inconsistent journal | 7 |
 | `babysitter hook:run --hook-type TYPE --harness NAME --json` | Dispatch a lifecycle hook | 5 |
-
-
 
 
 

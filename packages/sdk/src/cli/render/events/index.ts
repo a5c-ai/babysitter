@@ -5,6 +5,7 @@ import { renderProcessAssignedMessage } from "./processAssigned";
 import { renderRunCompletedMessage } from "./runCompleted";
 import { renderRunCreatedMessage } from "./runCreated";
 import { renderRunFailedMessage } from "./runFailed";
+import { renderRunHaltedMessage } from "./runHalted";
 import type { JournalEvent } from "./types";
 
 const EVENT_RENDERERS: Record<string, (event: JournalEvent) => string> = {
@@ -13,6 +14,7 @@ const EVENT_RENDERERS: Record<string, (event: JournalEvent) => string> = {
   EFFECT_REQUESTED: renderEffectRequestedMessage,
   EFFECT_RESOLVED: renderEffectResolvedMessage,
   RUN_COMPLETED: renderRunCompletedMessage,
+  RUN_HALTED: renderRunHaltedMessage,
   RUN_FAILED: renderRunFailedMessage,
   PROCESS_RUNTIME_ERROR: renderRunFailedMessage,
 };

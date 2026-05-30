@@ -58,6 +58,9 @@ export function deriveIterationReason(
   if (iterationResult.status === "completed") {
     return "terminal-state";
   }
+  if (iterationResult.status === "halted") {
+    return "terminal-state";
+  }
   if (iterationResult.status === "failed") {
     return "terminal-state";
   }

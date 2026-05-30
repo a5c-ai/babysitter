@@ -53,7 +53,7 @@ export interface ExecutedFakeAction {
 }
 
 export interface RunToCompletionResult {
-  status: "completed" | "failed" | "waiting";
+  status: "completed" | "halted" | "failed" | "waiting";
   output?: unknown;
   error?: unknown;
   pending?: EffectAction[];
@@ -136,6 +136,18 @@ export async function runToCompletionWithFakeRunner(
         return {
           status: "failed",
           error: iteration.error,
+          metadata: iteration.metadata ?? null,
+          executed,
+          iterations,
+          executionLog,
+        };
+      }
+
+      if (iteration.status === "halted") {
+        executionLog.push(iterationLog);
+        return {
+          status: "halted",
+          error: { reason: iteration.reason, payload: iteration.payload },
           metadata: iteration.metadata ?? null,
           executed,
           iterations,

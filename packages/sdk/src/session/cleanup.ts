@@ -100,7 +100,7 @@ function isRunTerminal(runsDirs: string[], runId: string): boolean | undefined {
       const parsed = JSON.parse(
         readFileSync(path.join(journalDir, last), "utf8"),
       ) as { type?: string };
-      return parsed.type === "RUN_COMPLETED" || parsed.type === "RUN_FAILED";
+      return parsed.type === "RUN_COMPLETED" || parsed.type === "RUN_HALTED" || parsed.type === "RUN_FAILED";
     } catch {
       return false;
     }

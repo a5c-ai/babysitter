@@ -27,10 +27,11 @@ function parseEntrypoint(entrypoint: string): { importPath: string; exportName?:
 
 function deriveRunState(
   events: JournalEvent[],
-): "created" | "running" | "waiting" | "completed" | "failed" {
+): "created" | "running" | "waiting" | "completed" | "halted" | "failed" {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const type = events[index].type;
     if (type === "RUN_COMPLETED") return "completed";
+    if (type === "RUN_HALTED") return "halted";
     if (type === "RUN_FAILED") return "failed";
     if (type === "PROCESS_RUNTIME_ERROR") return "failed";
   }
@@ -217,6 +218,15 @@ export function registerRunTools(server: McpServer): void {
           return toolResult({
             status: "failed",
             error: result.error instanceof Error ? result.error.message : result.error,
+            metadata: result.metadata,
+          });
+        }
+
+        if (result.status === "halted") {
+          return toolResult({
+            status: "halted",
+            reason: result.reason,
+            payload: result.payload,
             metadata: result.metadata,
           });
         }

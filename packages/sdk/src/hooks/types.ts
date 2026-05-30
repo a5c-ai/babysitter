@@ -65,8 +65,10 @@ export interface OnRunCompletePayload {
 export interface OnRunFailPayload {
   hookType: "on-run-fail";
   runId: string;
-  status: "failed";
+  status: "failed" | "halted";
   error: string;
+  reason?: string;
+  payload?: Record<string, unknown>;
   duration: number;
   timestamp: string;
 }
@@ -111,7 +113,9 @@ export interface OnIterationEndPayload {
   hookType: "on-iteration-end";
   runId: string;
   iteration: number;
-  status: "completed" | "failed" | "waiting";
+  status: "completed" | "halted" | "failed" | "waiting";
+  reason?: string;
+  payload?: Record<string, unknown>;
   timestamp: string;
 }
 
