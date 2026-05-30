@@ -18,15 +18,25 @@
  */
 export interface CostEventData {
   model: string;
+  provider?: string;
+  runId?: string;
+  sessionId?: string;
   inputTokens: number;
   outputTokens: number;
   cacheCreationTokens: number;
   cacheReadTokens: number;
+  /** Compatibility alias consumed by the runtime effect index. */
+  cacheCreationInputTokens?: number;
+  /** Compatibility alias consumed by the runtime effect index. */
+  cacheReadInputTokens?: number;
   cacheCreation5mTokens: number;
   cacheCreation1hTokens: number;
   serviceTier?: string;
   effectId?: string;
+  taskId?: string;
   taskKind?: string;
+  source?: string;
+  idempotencyKey?: string;
   durationMs?: number;
   costUsd?: number;
   timestamp?: string;

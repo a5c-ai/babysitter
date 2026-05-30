@@ -59,6 +59,13 @@ export interface AgentCorePromptResult<TParsed = unknown> {
   parsed?: TParsed;
   /** JSON parse or schema validation failure detail for structured output modes. */
   validationError?: string;
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    provider?: string;
+    model?: string;
+  };
 }
 
 export interface AgentCoreHistoryEntry {

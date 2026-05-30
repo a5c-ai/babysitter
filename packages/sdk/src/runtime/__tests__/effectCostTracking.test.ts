@@ -59,6 +59,8 @@ describe("GAP-SUBOBS-003: Per-Effect Token/Cost Tracking", () => {
     outputTokens?: number;
     cacheCreationInputTokens?: number;
     cacheReadInputTokens?: number;
+    cacheCreationTokens?: number;
+    cacheReadTokens?: number;
     costUsd?: number;
     model?: string;
     taskKind?: string;
@@ -93,6 +95,25 @@ describe("GAP-SUBOBS-003: Per-Effect Token/Cost Tracking", () => {
       expect(record!.cacheReadInputTokens).toBe(100);
       expect(record!.costUsd).toBeCloseTo(0.015);
       expect(record!.costModel).toBe("claude-sonnet-4-20250514");
+    });
+
+    it("accepts SDK cache token field aliases on COST_TRACKED events", async () => {
+      await appendRunCreated();
+      await appendEffectRequested("eff-001");
+      await appendCostTracked({
+        effectId: "eff-001",
+        inputTokens: 1000,
+        outputTokens: 500,
+        cacheCreationTokens: 200,
+        cacheReadTokens: 100,
+        costUsd: 0.015,
+        model: "claude-sonnet-4-20250514",
+      });
+
+      const index = await buildEffectIndex({ runDir });
+      const record = index.getByEffectId("eff-001");
+      expect(record!.cacheCreationInputTokens).toBe(200);
+      expect(record!.cacheReadInputTokens).toBe(100);
     });
 
     it("accumulates multiple COST_TRACKED events for the same effectId", async () => {

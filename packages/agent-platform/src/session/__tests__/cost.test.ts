@@ -9,6 +9,7 @@ import {
   setSessionBudget,
   checkBudget,
   markThresholdsTriggered,
+  enforceSessionBudgetForRun,
 } from "../cost";
 import type { SessionCostState, SessionBudget } from "../cost";
 
@@ -185,6 +186,38 @@ describe("GAP-SESSION-004: Session-Level Cost Tracking", () => {
       await markThresholdsTriggered(stateDir, sessionId, [50, 80]);
       const state = await getSessionCost(stateDir, sessionId);
       expect(state.triggeredThresholds).toEqual([50, 80]);
+    });
+  });
+
+  describe("enforceSessionBudgetForRun", () => {
+    it("updates session cost, marks alerts once, and pauses with an explicit reason when over budget", async () => {
+      await setSessionBudget(stateDir, sessionId, {
+        maxCostUsd: 0.01,
+        alertThresholds: [50, 100],
+        autoPause: true,
+      });
+
+      const result = await enforceSessionBudgetForRun(stateDir, sessionId, {
+        runId: "run-1",
+        costUsd: 0.02,
+        inputTokens: 100,
+        outputTokens: 50,
+      });
+
+      expect(result.paused).toBe(true);
+      expect(result.pauseReason).toContain("Session cost budget exceeded");
+      expect(result.budget.alerts.map((alert) => alert.thresholdPct)).toEqual([50, 100]);
+      expect(result.costState.paused).toBe(true);
+
+      const second = await enforceSessionBudgetForRun(stateDir, sessionId, {
+        runId: "run-1",
+        costUsd: 0.02,
+        inputTokens: 100,
+        outputTokens: 50,
+      });
+
+      expect(second.budget.alerts).toEqual([]);
+      expect(second.costState.triggeredThresholds).toEqual([50, 100]);
     });
   });
 });

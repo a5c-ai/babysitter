@@ -45,6 +45,7 @@ export interface BudgetCheckResult {
   exceeded: boolean;
   alerts: SessionBudgetAlert[];
   shouldPause: boolean;
+  pauseReason?: string;
 }
 
 export interface RunCostUpdate {
@@ -52,6 +53,13 @@ export interface RunCostUpdate {
   costUsd: number;
   inputTokens: number;
   outputTokens: number;
+}
+
+export interface SessionBudgetEnforcementResult {
+  costState: SessionCostState;
+  budget: BudgetCheckResult;
+  paused: boolean;
+  pauseReason?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,6 +110,19 @@ async function writeRaw(filePath: string, data: SessionCostState): Promise<void>
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(tempPath, JSON.stringify(data, null, 2), "utf8");
   await fs.rename(tempPath, filePath);
+}
+
+async function setSessionPaused(
+  stateDir: string,
+  sessionId: string,
+  paused: boolean,
+): Promise<SessionCostState> {
+  const filePath = getSessionCostPath(stateDir, sessionId);
+  const data = await readRaw(filePath);
+  data.paused = paused;
+  data.lastUpdatedAt = new Date().toISOString();
+  await writeRaw(filePath, data);
+  return data;
 }
 
 // ---------------------------------------------------------------------------
@@ -198,6 +219,9 @@ export function checkBudget(costState: SessionCostState): BudgetCheckResult {
     exceeded,
     alerts,
     shouldPause: exceeded && autoPause,
+    pauseReason: exceeded && autoPause
+      ? `Session cost budget exceeded: $${costState.totalCostUsd.toFixed(4)} / $${maxCostUsd.toFixed(2)}`
+      : undefined,
   };
 }
 
@@ -218,4 +242,28 @@ export async function markThresholdsTriggered(
   data.triggeredThresholds = [...existing];
   data.lastUpdatedAt = new Date().toISOString();
   await writeRaw(filePath, data);
+}
+
+export async function enforceSessionBudgetForRun(
+  stateDir: string,
+  sessionId: string,
+  update: RunCostUpdate,
+): Promise<SessionBudgetEnforcementResult> {
+  const updated = await updateSessionCost(stateDir, sessionId, update);
+  const budget = checkBudget(updated);
+  await markThresholdsTriggered(
+    stateDir,
+    sessionId,
+    budget.alerts.map((alert) => alert.thresholdPct),
+  );
+  const costState = budget.shouldPause
+    ? await setSessionPaused(stateDir, sessionId, true)
+    : await getSessionCost(stateDir, sessionId);
+
+  return {
+    costState,
+    budget,
+    paused: budget.shouldPause,
+    pauseReason: budget.pauseReason,
+  };
 }

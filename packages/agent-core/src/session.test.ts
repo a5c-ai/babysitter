@@ -62,10 +62,12 @@ describe("AgentCoreSessionHandle", () => {
   function mockAnthropicResponse(text: string) {
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({
-        content: [{ type: "text", text }],
-        usage: { input_tokens: 12, output_tokens: 6 },
-      }),
+      body: textStream([
+        `event: message_start\ndata: ${JSON.stringify({ type: "message_start", message: { usage: { input_tokens: 12 } } })}\n\n`,
+        `event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", delta: { type: "text_delta", text } })}\n\n`,
+        `event: message_delta\ndata: ${JSON.stringify({ type: "message_delta", delta: { stop_reason: "end_turn" }, usage: { output_tokens: 6 } })}\n\n`,
+        `event: message_stop\ndata: ${JSON.stringify({ type: "message_stop" })}\n\n`,
+      ]),
     });
   }
 
@@ -85,6 +87,63 @@ describe("AgentCoreSessionHandle", () => {
     expect(body.model).toBe("gpt-5.5");
     expect(body.stream).toBe(true);
     expect(body.messages).toEqual([{ role: "user", content: "Say hello" }]);
+  });
+
+  it("returns normalized OpenAI token usage on prompt results", async () => {
+    mockApiResponse("hello world");
+    const session = createAgentCoreSession({ model: "gpt-5.5" });
+
+    const result = await session.prompt("Say hello");
+
+    expect(result.usage).toEqual({
+      inputTokens: 10,
+      outputTokens: 5,
+      totalTokens: 15,
+      provider: "openai",
+      model: "gpt-5.5",
+    });
+  });
+
+  it("returns normalized Anthropic token usage on prompt results", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-key");
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      body: textStream([
+        `event: message_start\ndata: ${JSON.stringify({ type: "message_start", message: { usage: { input_tokens: 12 } } })}\n\n`,
+        `event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", delta: { type: "text_delta", text: "anthropic response" } })}\n\n`,
+        `event: message_delta\ndata: ${JSON.stringify({ type: "message_delta", delta: { stop_reason: "end_turn" }, usage: { output_tokens: 8 } })}\n\n`,
+        `event: message_stop\ndata: ${JSON.stringify({ type: "message_stop" })}\n\n`,
+      ]),
+    });
+    const session = createAgentCoreSession({ model: "claude-sonnet-4-6" });
+
+    const result = await session.prompt("Say hello");
+
+    expect(result.success).toBe(true);
+    expect(result.usage).toEqual({
+      inputTokens: 12,
+      outputTokens: 8,
+      totalTokens: 20,
+      provider: "anthropic",
+      model: "claude-sonnet-4-6",
+    });
+  });
+
+  it("omits usage when the provider response does not include usage", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      body: textStream([
+        openAiDelta("done"),
+        `data: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: "stop" }] })}\n\ndata: [DONE]\n\n`,
+      ]),
+    });
+    const session = createAgentCoreSession({});
+
+    const result = await session.prompt("No usage");
+
+    expect(result.success).toBe(true);
+    expect(result.usage).toBeUndefined();
   });
 
   it("includes system prompt when provided", async () => {
@@ -527,7 +586,13 @@ describe("AgentCoreSessionHandle", () => {
       "Agent core session is already processing a prompt",
     );
 
-    resolveResponse({ ok: true, json: async () => ({ choices: [{ message: { content: "done" } }] }) });
+    resolveResponse({
+      ok: true,
+      body: textStream([
+        openAiDelta("done"),
+        `data: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: "stop" }] })}\n\ndata: [DONE]\n\n`,
+      ]),
+    });
     await firstPrompt;
     expect(session.isStreaming).toBe(false);
   });

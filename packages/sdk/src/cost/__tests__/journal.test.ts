@@ -1,7 +1,13 @@
 import { describe, expect, test } from "vitest";
+import { promises as fs } from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import { createRunDir, loadJournal } from "../../storage";
+import { nextUlid } from "../../storage/ulids";
 import type { JournalEvent } from "../../storage/types";
 import {
   COST_TRACKED_EVENT_TYPE,
+  appendCostEventOnce,
   extractCostEvents,
   computeRunCostStats,
 } from "../journal";
@@ -288,6 +294,66 @@ describe("computeRunCostStats", () => {
     const parts = stats.totalCostUsd.toString().split(".");
     if (parts.length > 1) {
       expect(parts[1].length).toBeLessThanOrEqual(6);
+    }
+  });
+});
+
+describe("appendCostEventOnce", () => {
+  test("appends only one COST_TRACKED event for the same idempotency key", async () => {
+    const runsRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cost-once-"));
+    try {
+      const { runDir } = await createRunDir({
+        runsRoot,
+        runId: nextUlid(),
+        request: "cost once",
+        processId: "cost-once",
+      });
+
+      const first = await appendCostEventOnce(runDir, {
+        runId: "run-1",
+        sessionId: "session-1",
+        effectId: "effect-1",
+        taskId: "task-1",
+        taskKind: "agent",
+        source: "transport-mux",
+        idempotencyKey: "transport:run-1:effect-1",
+        provider: "anthropic",
+        model: "claude-sonnet-4-6",
+        inputTokens: 12,
+        outputTokens: 8,
+        cacheCreationTokens: 2,
+        cacheReadTokens: 3,
+        cacheCreation5mTokens: 0,
+        cacheCreation1hTokens: 0,
+        costUsd: 0.001,
+      });
+      const second = await appendCostEventOnce(runDir, {
+        runId: "run-1",
+        effectId: "effect-1",
+        source: "transport-mux",
+        idempotencyKey: "transport:run-1:effect-1",
+        provider: "anthropic",
+        model: "claude-sonnet-4-6",
+        inputTokens: 99,
+        outputTokens: 99,
+        cacheCreationTokens: 0,
+        cacheReadTokens: 0,
+        cacheCreation5mTokens: 0,
+        cacheCreation1hTokens: 0,
+        costUsd: 9,
+      });
+
+      expect(first).not.toBeNull();
+      expect(second).toBeNull();
+      const costEvents = extractCostEvents(await loadJournal(runDir));
+      expect(costEvents).toHaveLength(1);
+      expect(costEvents[0].data).toMatchObject({
+        idempotencyKey: "transport:run-1:effect-1",
+        cacheCreationInputTokens: 2,
+        cacheReadInputTokens: 3,
+      });
+    } finally {
+      await fs.rm(runsRoot, { recursive: true, force: true }).catch(() => {});
     }
   });
 });

@@ -192,6 +192,14 @@ export interface AgentCorePromptResult {
   success: boolean;
   /** Exit code (0 = success, 1 = failure). */
   exitCode: number;
+  /** Provider-reported token usage, when available. */
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    provider?: string;
+    model?: string;
+  };
 }
 
 // ---------------------------------------------------------------------------

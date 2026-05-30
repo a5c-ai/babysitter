@@ -12,6 +12,8 @@ import type {
   CompletionRequest,
   CompletionResult,
   CompletionStreamEvent,
+  CostFeedbackMetadata,
+  CostFeedbackSink,
   CreateTransportMuxAppOptions,
   ProxyConfig,
   RunningProxyServer,
@@ -31,6 +33,75 @@ interface CompletionExecutionPlan {
   body: Record<string, unknown>;
   request: CompletionRequest;
   streamRequested: boolean;
+}
+
+function headerValue(req: Request, name: string): string | undefined {
+  const value = req.headers.get(name);
+  return value && value.length > 0 ? value : undefined;
+}
+
+function costFeedbackMetadataFromRequest(
+  req: Request,
+  defaults?: CostFeedbackMetadata,
+): CostFeedbackMetadata {
+  return {
+    ...defaults,
+    runId: headerValue(req, 'x-babysitter-run-id') ?? defaults?.runId,
+    sessionId: headerValue(req, 'x-babysitter-session-id') ?? defaults?.sessionId,
+    effectId: headerValue(req, 'x-babysitter-effect-id') ?? defaults?.effectId,
+    taskId: headerValue(req, 'x-babysitter-task-id') ?? defaults?.taskId,
+    taskKind: headerValue(req, 'x-babysitter-task-kind') ?? defaults?.taskKind,
+    source: headerValue(req, 'x-babysitter-cost-source') ?? defaults?.source,
+    idempotencyKey: headerValue(req, 'x-babysitter-cost-idempotency-key') ?? defaults?.idempotencyKey,
+  };
+}
+
+function shouldEmitCostFeedback(metadata?: CostFeedbackMetadata): boolean {
+  return Boolean(metadata?.runId || metadata?.sessionId || metadata?.effectId || metadata?.idempotencyKey);
+}
+
+function buildCostFeedbackRecord(
+  result: CompletionResult,
+  config: ProxyConfig,
+  metadata?: CostFeedbackMetadata,
+) {
+  const inputTokens = result.costRecord?.inputTokens ?? result.usage.promptTokens;
+  const outputTokens = result.costRecord?.outputTokens ?? result.usage.completionTokens;
+  return {
+    ...metadata,
+    provider: config.targetProvider,
+    model: result.costRecord ? (result.model || config.targetModel) : (result.model || config.targetModel),
+    inputTokens,
+    outputTokens,
+    cacheReadTokens: result.costRecord?.cacheReadTokens,
+    cacheCreationTokens: result.costRecord?.cacheWriteTokens,
+  };
+}
+
+async function emitCostFeedback(
+  sink: CostFeedbackSink | undefined,
+  result: CompletionResult,
+  config: ProxyConfig,
+  metadata?: CostFeedbackMetadata,
+): Promise<void> {
+  if (!sink || !shouldEmitCostFeedback(metadata)) return;
+  await sink(buildCostFeedbackRecord(result, config, metadata));
+}
+
+async function emitUsageCostFeedback(
+  sink: CostFeedbackSink | undefined,
+  usage: CompletionResult['usage'] | undefined,
+  config: ProxyConfig,
+  metadata?: CostFeedbackMetadata,
+): Promise<void> {
+  if (!sink || !usage || !shouldEmitCostFeedback(metadata)) return;
+  await sink({
+    ...metadata,
+    provider: config.targetProvider,
+    model: config.targetModel,
+    inputTokens: usage.promptTokens,
+    outputTokens: usage.completionTokens,
+  });
 }
 
 class MetricsTracker {
@@ -1094,7 +1165,7 @@ async function handleOpenAiResponsesWebSocketMessage(
     if (completionEngine.stream) {
       await sendOpenAiResponsesWebSocketStream(
         ws,
-        trackCompletionStream(completionEngine.stream(plan.request), metrics),
+        trackCompletionStream(completionEngine.stream(plan.request), metrics, config),
         config,
       );
       return;
@@ -1206,6 +1277,9 @@ function codecStreamResponse(
 function trackCompletionStream(
   stream: AsyncIterable<CompletionStreamEvent>,
   metrics: MetricsTracker,
+  config: ProxyConfig,
+  costFeedbackSink?: CostFeedbackSink,
+  costFeedbackMetadata?: CostFeedbackMetadata,
 ): AsyncIterable<CompletionStreamEvent> {
   return {
     async *[Symbol.asyncIterator]() {
@@ -1216,6 +1290,7 @@ function trackCompletionStream(
           if (event.type === 'done') {
             if (event.usage) {
               metrics.record(event.usage.promptTokens, event.usage.completionTokens);
+              await emitUsageCostFeedback(costFeedbackSink, event.usage, config, costFeedbackMetadata);
             } else {
               metrics.recordRequest();
             }
@@ -1236,11 +1311,16 @@ function trackCompletionStream(
   };
 }
 
-function trackCompletionOutcome<T extends CompletionResult | Response>(
+async function trackCompletionOutcome<T extends CompletionResult | Response>(
   result: T,
   metrics: MetricsTracker,
-  options: { countSuccessResponse?: boolean } = {},
-): T {
+  options: {
+    countSuccessResponse?: boolean;
+    config?: ProxyConfig;
+    costFeedbackSink?: CostFeedbackSink;
+    costFeedbackMetadata?: CostFeedbackMetadata;
+  } = {},
+): Promise<T> {
   if (result instanceof Response) {
     if (result.status >= 400) {
       metrics.recordError();
@@ -1251,6 +1331,9 @@ function trackCompletionOutcome<T extends CompletionResult | Response>(
   }
 
   metrics.record(result.usage.promptTokens, result.usage.completionTokens);
+  if (options.config) {
+    await emitCostFeedback(options.costFeedbackSink, result, options.config, options.costFeedbackMetadata);
+  }
   return result;
 }
 
@@ -1260,7 +1343,11 @@ async function resolveCompletion(
   completionEngine: CompletionEngine | undefined,
   plan: CompletionExecutionPlan,
   metrics: MetricsTracker,
-  options: { forceStreaming?: boolean } = {},
+  options: {
+    forceStreaming?: boolean;
+    costFeedbackSink?: CostFeedbackSink;
+    costFeedbackMetadata?: CostFeedbackMetadata;
+  } = {},
 ): Promise<CompletionResult | Response> {
   if (plan.streamRequested) {
     if (!config.stream) {
@@ -1281,7 +1368,7 @@ async function resolveCompletion(
 
     return renderStreamResponse(
       config.exposedTransport,
-      trackCompletionStream(completionEngine.stream(plan.request), metrics),
+      trackCompletionStream(completionEngine.stream(plan.request), metrics, config, options.costFeedbackSink, options.costFeedbackMetadata),
       config,
     );
   }
@@ -1434,7 +1521,7 @@ async function resolveTokenCount(
   }
 }
 
-export function createTransportMuxApp({ config, completionEngine }: CreateTransportMuxAppOptions) {
+export function createTransportMuxApp({ config, completionEngine, costFeedbackSink, costFeedbackMetadata }: CreateTransportMuxAppOptions) {
   const app = new Hono();
   const metrics = new MetricsTracker();
   const thoughtSignatureStore = new Map<string, string>();
@@ -1501,10 +1588,11 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
       return plan;
     }
     plan.request.model = config.targetModel;
-    const result = trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics),
+    const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
+    const result = await trackCompletionOutcome(
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
       metrics,
-      { countSuccessResponse: !plan.streamRequested || !completionEngine },
+      { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
     if (result instanceof Response) {
       return result;
@@ -1518,10 +1606,11 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
       return plan;
     }
     plan.request.model = config.targetModel;
-    const result = trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics),
+    const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
+    const result = await trackCompletionOutcome(
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
       metrics,
-      { countSuccessResponse: !plan.streamRequested || !completionEngine },
+      { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
     if (result instanceof Response) {
       return result;
@@ -1536,10 +1625,11 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
       return plan;
     }
     plan.request.model = config.targetModel;
-    const result = trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics),
+    const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
+    const result = await trackCompletionOutcome(
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
       metrics,
-      { countSuccessResponse: !plan.streamRequested || !completionEngine },
+      { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
     if (result instanceof Response) {
       return result;
@@ -1554,10 +1644,11 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
       return plan;
     }
     plan.request.model = config.targetModel;
-    const result = trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { forceStreaming }),
+    const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
+    const result = await trackCompletionOutcome(
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { forceStreaming, costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
       metrics,
-      { countSuccessResponse: !plan.streamRequested || !completionEngine },
+      { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
     if (result instanceof Response) {
       return result;
@@ -1577,10 +1668,11 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
       return plan;
     }
     plan.request.model = config.targetModel;
-    const result = trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics),
+    const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
+    const result = await trackCompletionOutcome(
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
       metrics,
-      { countSuccessResponse: !plan.streamRequested || !completionEngine },
+      { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
     if (result instanceof Response) {
       return result;
@@ -1596,10 +1688,11 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
       return plan;
     }
     plan.request.model = config.targetModel;
-    const result = trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics),
+    const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
+    const result = await trackCompletionOutcome(
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
       metrics,
-      { countSuccessResponse: !plan.streamRequested || !completionEngine },
+      { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
     if (result instanceof Response) {
       return result;
@@ -1613,10 +1706,11 @@ export function createTransportMuxApp({ config, completionEngine }: CreateTransp
       return plan;
     }
     plan.request.model = config.targetModel;
-    const result = trackCompletionOutcome(
-      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics),
+    const feedbackMetadata = costFeedbackMetadataFromRequest(c.req.raw, costFeedbackMetadata);
+    const result = await trackCompletionOutcome(
+      await resolveCompletion(c.req.raw, config, completionEngine, plan, metrics, { costFeedbackSink, costFeedbackMetadata: feedbackMetadata }),
       metrics,
-      { countSuccessResponse: !plan.streamRequested || !completionEngine },
+      { countSuccessResponse: !plan.streamRequested || !completionEngine, config, costFeedbackSink, costFeedbackMetadata: feedbackMetadata },
     );
     if (result instanceof Response) {
       return result;

@@ -43,6 +43,8 @@ interface CostTrackedPayload {
   effectId?: string;
   inputTokens?: number;
   outputTokens?: number;
+  cacheCreationTokens?: number;
+  cacheReadTokens?: number;
   cacheCreationInputTokens?: number;
   cacheReadInputTokens?: number;
   costUsd?: number;
@@ -301,11 +303,17 @@ export class EffectIndex {
     if (typeof payload.outputTokens === "number") {
       record.outputTokens = (record.outputTokens ?? 0) + payload.outputTokens;
     }
-    if (typeof payload.cacheCreationInputTokens === "number") {
-      record.cacheCreationInputTokens = (record.cacheCreationInputTokens ?? 0) + payload.cacheCreationInputTokens;
+    const cacheCreationInputTokens = typeof payload.cacheCreationInputTokens === "number"
+      ? payload.cacheCreationInputTokens
+      : payload.cacheCreationTokens;
+    if (typeof cacheCreationInputTokens === "number") {
+      record.cacheCreationInputTokens = (record.cacheCreationInputTokens ?? 0) + cacheCreationInputTokens;
     }
-    if (typeof payload.cacheReadInputTokens === "number") {
-      record.cacheReadInputTokens = (record.cacheReadInputTokens ?? 0) + payload.cacheReadInputTokens;
+    const cacheReadInputTokens = typeof payload.cacheReadInputTokens === "number"
+      ? payload.cacheReadInputTokens
+      : payload.cacheReadTokens;
+    if (typeof cacheReadInputTokens === "number") {
+      record.cacheReadInputTokens = (record.cacheReadInputTokens ?? 0) + cacheReadInputTokens;
     }
     if (typeof payload.costUsd === "number") {
       record.costUsd = (record.costUsd ?? 0) + payload.costUsd;

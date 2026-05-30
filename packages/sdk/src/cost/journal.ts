@@ -5,7 +5,7 @@
  * extract cost events from a journal, and compute aggregated cost statistics.
  */
 
-import { appendEvent } from "../storage";
+import { appendEvent, loadJournal } from "../storage";
 import type { AppendEventResult, JournalEvent } from "../storage/types";
 import type {
   CostEventData,
@@ -34,6 +34,12 @@ export async function appendCostEvent(
 ): Promise<AppendEventResult> {
   // Pre-compute costUsd if the caller did not supply it.
   const enriched: CostEventData = { ...costData };
+  if (enriched.cacheCreationInputTokens == null) {
+    enriched.cacheCreationInputTokens = enriched.cacheCreationTokens ?? 0;
+  }
+  if (enriched.cacheReadInputTokens == null) {
+    enriched.cacheReadInputTokens = enriched.cacheReadTokens ?? 0;
+  }
   if (enriched.costUsd == null) {
     const computed = calculateCostUsd(
       enriched.model,
@@ -57,6 +63,23 @@ export async function appendCostEvent(
     eventType: COST_TRACKED_EVENT_TYPE,
     event: enriched as unknown as Record<string, unknown>,
   });
+}
+
+export async function appendCostEventOnce(
+  runDir: string,
+  costData: CostEventData,
+): Promise<AppendEventResult | null> {
+  if (costData.idempotencyKey) {
+    const events = await loadJournal(runDir);
+    const exists = events.some((event) => {
+      if (event.type !== COST_TRACKED_EVENT_TYPE) return false;
+      const data = event.data as Record<string, unknown> | undefined;
+      return data?.idempotencyKey === costData.idempotencyKey;
+    });
+    if (exists) return null;
+  }
+
+  return appendCostEvent(runDir, costData);
 }
 
 /**

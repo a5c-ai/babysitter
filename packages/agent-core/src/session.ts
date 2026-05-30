@@ -47,7 +47,7 @@ interface NormalizedCompletionRequest {
   structuredOutput?: NormalizedStructuredOutput;
 }
 
-type CompletionUsage = { promptTokens: number; completionTokens: number };
+type CompletionUsage = NonNullable<AgentCorePromptResult["usage"]>;
 
 type CompletionStreamResult = { text: string; usage?: CompletionUsage };
 
@@ -568,8 +568,8 @@ async function callCompletionApi(
     }
 
     return endpoint.isAnthropic
-      ? readAnthropicStream(response, onDelta)
-      : readOpenAiStream(response, onDelta);
+      ? readAnthropicStream(response, onDelta, endpoint)
+      : readOpenAiStream(response, onDelta, endpoint);
   } finally {
     clearTimeout(timer);
     onController?.(undefined);
@@ -579,6 +579,7 @@ async function callCompletionApi(
 async function readOpenAiStream(
   response: Response,
   onDelta: (delta: string) => void,
+  endpoint: ResolvedEndpoint,
 ): Promise<CompletionStreamResult> {
   const reader = response.body?.getReader();
   if (!reader) throw new Error("No response body");
@@ -596,7 +597,7 @@ async function readOpenAiStream(
         delta?: { content?: string | null };
         finish_reason?: string | null;
       }>;
-      usage?: { prompt_tokens?: number; completion_tokens?: number };
+      usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
     };
     try {
       chunk = JSON.parse(payload);
@@ -612,9 +613,14 @@ async function readOpenAiStream(
       onDelta(delta);
     }
     if (chunk.usage) {
+      const inputTokens = chunk.usage.prompt_tokens ?? 0;
+      const outputTokens = chunk.usage.completion_tokens ?? 0;
       usage = {
-        promptTokens: chunk.usage.prompt_tokens ?? 0,
-        completionTokens: chunk.usage.completion_tokens ?? 0,
+        inputTokens,
+        outputTokens,
+        totalTokens: chunk.usage.total_tokens ?? inputTokens + outputTokens,
+        provider: endpoint.isAzure ? "azure" : "openai",
+        model: endpoint.model,
       };
     }
     return Boolean(choice?.finish_reason);
@@ -652,6 +658,7 @@ async function readOpenAiStream(
 async function readAnthropicStream(
   response: Response,
   onDelta: (delta: string) => void,
+  endpoint: ResolvedEndpoint,
 ): Promise<CompletionStreamResult> {
   const reader = response.body?.getReader();
   if (!reader) throw new Error("No response body");
@@ -680,9 +687,14 @@ async function readAnthropicStream(
     if (type === "message_start") {
       const message = event.message as { usage?: { input_tokens?: number } } | undefined;
       if (message?.usage) {
+        const inputTokens = message.usage.input_tokens ?? 0;
+        const outputTokens = usage?.outputTokens ?? 0;
         usage = {
-          promptTokens: message.usage.input_tokens ?? 0,
-          completionTokens: usage?.completionTokens ?? 0,
+          inputTokens,
+          outputTokens,
+          totalTokens: inputTokens + outputTokens,
+          provider: "anthropic",
+          model: endpoint.model,
         };
       }
       return;
@@ -700,9 +712,14 @@ async function readAnthropicStream(
     if (type === "message_delta") {
       const messageUsage = event.usage as { output_tokens?: number } | undefined;
       if (messageUsage) {
+        const inputTokens = usage?.inputTokens ?? 0;
+        const outputTokens = messageUsage.output_tokens ?? 0;
         usage = {
-          promptTokens: usage?.promptTokens ?? 0,
-          completionTokens: messageUsage.output_tokens ?? 0,
+          inputTokens,
+          outputTokens,
+          totalTokens: inputTokens + outputTokens,
+          provider: "anthropic",
+          model: endpoint.model,
         };
       }
       done = true;
@@ -813,6 +830,7 @@ export class AgentCoreSessionHandle {
         exitCode: structuredResult.exitCode,
         ...(structuredResult.parsed !== undefined ? { parsed: structuredResult.parsed } : {}),
         ...(structuredResult.validationError ? { validationError: structuredResult.validationError } : {}),
+        usage: result.usage,
       };
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);

@@ -58,6 +58,28 @@ export interface CompletionResult {
   costRecord?: { inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number };
 }
 
+export interface CostFeedbackMetadata {
+  runId?: string;
+  sessionId?: string;
+  effectId?: string;
+  taskId?: string;
+  taskKind?: string;
+  source?: string;
+  idempotencyKey?: string;
+}
+
+export interface CostFeedbackRecord extends CostFeedbackMetadata {
+  provider: string;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens?: number;
+  cacheCreationTokens?: number;
+  durationMs?: number;
+}
+
+export type CostFeedbackSink = (record: CostFeedbackRecord) => void | Promise<void>;
+
 export interface TokenCountResult {
   count: number;
 }
@@ -92,6 +114,8 @@ export interface CompletionEngine {
 export interface CreateTransportMuxAppOptions {
   config: ProxyConfig;
   completionEngine?: CompletionEngine;
+  costFeedbackSink?: CostFeedbackSink;
+  costFeedbackMetadata?: CostFeedbackMetadata;
 }
 
 export interface RunningProxyServer {
