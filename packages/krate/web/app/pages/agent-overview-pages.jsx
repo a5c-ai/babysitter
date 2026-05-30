@@ -17,7 +17,7 @@ export async function AgentsDashboardPage({ org = null } = {}) {
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent orchestration" title="Agent stacks, runs, and rules" text="View agent stacks, dispatch runs, trigger rules, and pending approvals from one place." actions={[['/agents/stacks', 'View stacks'], ['/agents/runs', 'View runs']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
-      <DispatchButton org={activeOrg} stacks={(agentView.stacks?.items || []).map(s => s.metadata?.name).filter(Boolean)} />
+      <DispatchButton org={activeOrg} stacks={agentView.stacks?.items || []} meetings={agentView.meetings?.active || []} />
       <LiveUpdates org={activeOrg} />
     </div>
     <section className="routeGrid two">

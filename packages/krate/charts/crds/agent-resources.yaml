@@ -47,6 +47,35 @@ spec:
                 type: string
               model:
                 type: string
+              jitsiCapability:
+                type: boolean
+                default: false
+              jitsiMeetingProviderRef:
+                type: string
+              jitsiConfig:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+                properties:
+                  participantName:
+                    type: string
+                  role:
+                    type: string
+                    enum: [observer, participant, moderator]
+                  capabilities:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  autoJoin:
+                    type: boolean
+                  autoLeave:
+                    type: boolean
+                  contextInjection:
+                    type: array
+                    items:
+                      type: string
+                  tools:
+                    type: array
+                    items:
+                      type: string
               prompt:
                 type: object
                 x-kubernetes-preserve-unknown-fields: true

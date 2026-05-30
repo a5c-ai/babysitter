@@ -10,6 +10,17 @@ export const AGENT_STACK_CONTROLLER_BOUNDARY = {
 };
 
 const MCP_HEALTH_TIMEOUT_MS = 3000;
+const JITSI_ROLES = new Set(['observer', 'participant', 'moderator']);
+const JITSI_TOOLS = new Set([
+  'krate_send_chat_message',
+  'krate_get_meeting_transcript',
+  'krate_get_participant_list',
+  'krate_raise_hand',
+  'krate_share_screen',
+  'krate_invite_to_meeting',
+  'krate_start_recording',
+  'krate_react',
+]);
 
 /**
  * Perform an HTTP health check for an MCP server endpoint.
@@ -208,6 +219,42 @@ export function createAgentStackController(options = {}) {
         reason: memoryRepositoryRefs.length === 0 ? 'NoMemoryRefsConfigured' : allMemoryReposFound ? 'AllMemoryReposResolved' : 'MissingMemoryRepos',
         message: memoryRepositoryRefs.length === 0 ? 'No memory repository references configured' : allMemoryReposFound ? 'All memory repositories resolved' : `Missing memory repositories: ${memoryRepositoryRefs.filter((ref) => !resolvedMemoryRepos.includes(ref)).join(', ')}`
       });
+
+      if (spec.jitsiCapability === true) {
+        const jitsiConfig = spec.jitsiConfig || {};
+        const role = jitsiConfig.role || 'observer';
+        const tools = jitsiConfig.tools || [];
+        const invalidTools = tools.filter((tool) => !JITSI_TOOLS.has(tool));
+        const providerRef = spec.jitsiMeetingProviderRef;
+        let providerFound = true;
+        if (providerRef) {
+          providerFound = (resources.JitsiMeetProvider || []).some((provider) => provider.metadata?.name === providerRef);
+          if (!providerFound) missing.push(`JitsiMeetProvider/${providerRef}`);
+        }
+        const observerCanSpeak = role === 'observer' && ['speak', 'both'].includes(jitsiConfig.capabilities?.audio);
+        const valid = Boolean(providerRef) && providerFound && JITSI_ROLES.has(role) && invalidTools.length === 0 && !observerCanSpeak;
+        conditions.push({
+          type: 'JitsiCapabilityReady',
+          status: valid ? 'True' : 'False',
+          reason: valid ? 'JitsiCapabilityValid' : 'InvalidJitsiCapability',
+          message: valid
+            ? 'Jitsi meeting capability is valid'
+            : [
+                !providerRef ? 'jitsiMeetingProviderRef is required' : null,
+                providerRef && !providerFound ? `JitsiMeetProvider/${providerRef} not found` : null,
+                !JITSI_ROLES.has(role) ? `Invalid role: ${role}` : null,
+                observerCanSpeak ? 'observer role cannot use speak or both audio modes' : null,
+                invalidTools.length ? `Invalid Jitsi tools: ${invalidTools.join(', ')}` : null,
+              ].filter(Boolean).join('; ')
+        });
+      } else {
+        conditions.push({
+          type: 'JitsiCapabilityReady',
+          status: 'True',
+          reason: 'JitsiCapabilityDisabled',
+          message: 'No Jitsi meeting capability configured'
+        });
+      }
 
       // --- Permission review conditions via permissionReviewer ---
       const serviceAccountRef = spec.runtimeIdentity?.serviceAccountRef || spec.runtimeIdentity;

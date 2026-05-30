@@ -34,7 +34,7 @@ export async function MeetingDetailPage({ org = 'default', id } = {}) {
       <div style={{ display: 'grid', gap: '1rem' }}>
         <JitsiEmbeddedMeeting roomUrl={meeting.status?.roomUrl} jwt={meeting.status?.jwtToken} displayName="Krate user" />
         <JitsiMeetingControls org={meeting.spec?.organizationRef || org} meetingRef={meeting.metadata?.name} recordingActive={meeting.status?.recording?.active} />
-        <JitsiParticipantList participants={meeting.status?.participants?.current || []} />
+        <JitsiParticipantList org={meeting.spec?.organizationRef || org} participants={meeting.status?.participants?.current || []} />
       </div>
     );
   });

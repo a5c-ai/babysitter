@@ -80,6 +80,14 @@ function makeSecretGrant(name, subject, purpose) {
   });
 }
 
+function makeJitsiProvider(name) {
+  return createResource('JitsiMeetProvider', { name, namespace: 'krate-org-default' }, {
+    organizationRef: 'default',
+    endpoint: 'https://meet.example.test',
+    authMode: 'jwt'
+  });
+}
+
 test('Stack with all refs present results in Ready=True', () => {
   const controller = createAgentStackController();
   const stack = makeStack('full-stack', {
@@ -177,6 +185,44 @@ test('Minimal stack with no capability refs results in Ready=True', () => {
   assert.equal(result.capabilities.skills.length, 0);
   assert.equal(result.capabilities.subagents.length, 0);
   assert.equal(result.capabilities.contextLabels.length, 0);
+});
+
+test('Jitsi-capable stack validates provider, role, tools, and observer audio mode', () => {
+  const controller = createAgentStackController();
+  const validStack = makeStack('jitsi-stack', {
+    jitsiCapability: true,
+    jitsiMeetingProviderRef: 'jitsi-prod',
+    jitsiConfig: {
+      role: 'observer',
+      capabilities: { audio: 'listen', chat: 'readwrite' },
+      tools: ['krate_send_chat_message', 'krate_get_participant_list'],
+    },
+  });
+  const resources = {
+    AgentStack: [validStack],
+    JitsiMeetProvider: [makeJitsiProvider('jitsi-prod')],
+    AgentServiceAccount: [makeServiceAccount('sa-default')],
+    AgentRoleBinding: [makeRoleBinding('rb-1', 'sa-default')],
+    AgentSecretGrant: [makeSecretGrant('sg-model', 'sa-default', 'model-provider')]
+  };
+  const valid = controller.reconcileStack(validStack, resources);
+  assert.equal(valid.conditions.find((c) => c.type === 'JitsiCapabilityReady').status, 'True');
+  assert.equal(valid.conditions.find((c) => c.type === 'Ready').status, 'True');
+
+  const invalidStack = makeStack('bad-jitsi-stack', {
+    jitsiCapability: true,
+    jitsiConfig: {
+      role: 'observer',
+      capabilities: { audio: 'speak' },
+      tools: ['krate_unknown_meeting_tool'],
+    },
+  });
+  const invalid = controller.reconcileStack(invalidStack, resources);
+  const condition = invalid.conditions.find((c) => c.type === 'JitsiCapabilityReady');
+  assert.equal(condition.status, 'False');
+  assert.match(condition.message, /jitsiMeetingProviderRef is required/);
+  assert.match(condition.message, /observer role cannot use speak/);
+  assert.match(condition.message, /Invalid Jitsi tools/);
 });
 
 test('listStackCapabilities returns correct normalized capability list', () => {

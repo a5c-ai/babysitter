@@ -1,11 +1,16 @@
 'use client';
 import { useState } from 'react';
 
-export function DispatchButton({ org, stacks = [] }) {
+export function DispatchButton({ org, stacks = [], meetings = [] }) {
   const [status, setStatus] = useState('idle');
   const [selectedStack, setSelectedStack] = useState('');
+  const [meetingRef, setMeetingRef] = useState('');
   const [repository, setRepository] = useState('');
   const [message, setMessage] = useState('');
+  const stackItems = stacks.map((stack) => typeof stack === 'string' ? { metadata: { name: stack }, spec: {} } : stack).filter(Boolean);
+  const selectedStackResource = stackItems.find((stack) => stack.metadata?.name === selectedStack);
+  const activeMeetings = meetings.filter((meeting) => meeting.status?.phase === 'Active');
+  const canSelectMeeting = selectedStackResource?.spec?.jitsiCapability === true && activeMeetings.length > 0;
 
   async function handleDispatch() {
     if (!selectedStack) return;
@@ -20,6 +25,7 @@ export function DispatchButton({ org, stacks = [] }) {
           ref: 'main',
           taskKind: 'diagnostic',
           actor: 'owner',
+          meetingRef: canSelectMeeting && meetingRef ? meetingRef : undefined,
         }),
       });
       const data = await res.json();
@@ -48,14 +54,21 @@ export function DispatchButton({ org, stacks = [] }) {
     return (
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 0', flexWrap: 'wrap' }}>
         <label htmlFor="dispatch-stack-select" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Agent stack</label>
-        <select id="dispatch-stack-select" value={selectedStack} onChange={e => setSelectedStack(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }} aria-label="Select agent stack">
+        <select id="dispatch-stack-select" value={selectedStack} onChange={e => { setSelectedStack(e.target.value); setMeetingRef(''); }} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }} aria-label="Select agent stack">
           <option value="">Select stack...</option>
-          {stacks.map(s => <option key={s} value={s}>{s}</option>)}
+          {stackItems.map(s => <option key={s.metadata?.name} value={s.metadata?.name}>{s.metadata?.name}</option>)}
         </select>
+        {canSelectMeeting ? <>
+          <label htmlFor="dispatch-meeting-select" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Meeting</label>
+          <select id="dispatch-meeting-select" value={meetingRef} onChange={e => setMeetingRef(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }} aria-label="Meeting">
+            <option value="">No meeting</option>
+            {activeMeetings.map((meeting) => <option key={meeting.metadata?.name} value={meeting.metadata?.name}>{meeting.spec?.displayName || meeting.metadata?.name}</option>)}
+          </select>
+        </> : null}
         <label htmlFor="dispatch-repo-input" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Repository</label>
         <input id="dispatch-repo-input" placeholder="Repository (optional)" value={repository} onChange={e => setRepository(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13, width: 180 }} aria-label="Repository (optional)" />
         <button onClick={handleDispatch} disabled={!selectedStack} aria-label="Launch dispatch" style={{ ...primaryStyle, opacity: selectedStack ? 1 : 0.5 }}>Launch</button>
-        <button onClick={() => { setStatus('idle'); setSelectedStack(''); setRepository(''); }} aria-label="Cancel dispatch" style={secondaryStyle}>Cancel</button>
+        <button onClick={() => { setStatus('idle'); setSelectedStack(''); setMeetingRef(''); setRepository(''); }} aria-label="Cancel dispatch" style={secondaryStyle}>Cancel</button>
       </div>
     );
   }

@@ -47,16 +47,52 @@ function parseToolResult(resp) {
   return JSON.parse(resp.result.content[0].text);
 }
 
-test('MCP_TOOLS includes the four Jitsi meeting tools with required schemas', () => {
-  assert.equal(MCP_TOOLS.length, 26);
+test('MCP_TOOLS includes Jitsi meeting management and in-meeting tools with required schemas', () => {
+  assert.equal(MCP_TOOLS.length, 33);
   const byName = new Map(MCP_TOOLS.map((tool) => [tool.name, tool]));
   for (const name of ['krate_create_meeting', 'krate_join_meeting', 'krate_list_meetings', 'krate_invite_to_meeting']) {
+    assert.ok(byName.has(name), `${name} must be registered`);
+    assert.equal(byName.get(name).inputSchema.type, 'object');
+  }
+  for (const name of ['krate_send_chat_message', 'krate_get_meeting_transcript', 'krate_get_participant_list', 'krate_raise_hand', 'krate_share_screen', 'krate_start_recording', 'krate_react']) {
     assert.ok(byName.has(name), `${name} must be registered`);
     assert.equal(byName.get(name).inputSchema.type, 'object');
   }
   assert.deepEqual(byName.get('krate_create_meeting').inputSchema.required, ['displayName']);
   assert.deepEqual(byName.get('krate_join_meeting').inputSchema.required, ['meetingRef']);
   assert.deepEqual(byName.get('krate_invite_to_meeting').inputSchema.required, ['meetingRef', 'participantType', 'participantRef']);
+});
+
+test('in-meeting MCP tools enforce Jitsi role and capability gates', async () => {
+  const server = createMcpServer({ controller: createMockController() });
+  const meetingContext = {
+    roomId: 'daily-room',
+    role: 'participant',
+    capabilities: { chat: 'readwrite', screenshare: 'none' },
+  };
+  const chat = parseToolResult(await server.handleMessage(rpc('tools/call', {
+    name: 'krate_send_chat_message',
+    arguments: { text: 'I will summarize this after standup.', meetingContext },
+  })));
+  assert.deepEqual(chat.command, { action: 'send_chat', text: 'I will summarize this after standup.' });
+
+  const denied = parseToolResult(await server.handleMessage(rpc('tools/call', {
+    name: 'krate_start_recording',
+    arguments: { meetingContext },
+  })));
+  assert.match(denied.error, /cannot perform start_recording/);
+
+  const moderator = parseToolResult(await server.handleMessage(rpc('tools/call', {
+    name: 'krate_start_recording',
+    arguments: { meetingContext: { ...meetingContext, role: 'moderator' } },
+  })));
+  assert.equal(moderator.command.action, 'start_recording');
+
+  const screenshareDenied = parseToolResult(await server.handleMessage(rpc('tools/call', {
+    name: 'krate_share_screen',
+    arguments: { url: 'https://krate.local/runs/dispatch-1', meetingContext },
+  })));
+  assert.match(screenshareDenied.error, /screenshare is not enabled/);
 });
 
 test('krate_create_meeting creates an org-scoped JitsiMeeting resource', async () => {

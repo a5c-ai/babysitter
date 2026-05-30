@@ -48,6 +48,8 @@ test('Jitsi agent bridge gates capability and prepares meeting context', async (
   assert.equal(context.role, 'observer');
   assert.equal(run.spec.meetingRef, 'daily');
   assert.equal(run.spec.meetingContext.roomId, 'daily-default');
+  assert.equal(run.spec.meetingContext.jwt, undefined);
+  assert.deepEqual(run.spec.meetingContext.tokenRef, { runtimeOnly: true });
 
   await bridge.onAgentJoined('dispatch-1', 'daily');
   await bridge.onAgentLeft('dispatch-1', 'daily', 'completed');

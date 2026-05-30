@@ -21,6 +21,7 @@ export const POST = withAuth(async (request, { params }) => {
       ref: body.ref || 'main',
       taskKind: body.taskKind || 'diagnostic',
       actor: body.actor || 'owner',
+      meetingRef: body.meetingRef || undefined,
       namespace,
       organizationRef: org,
     });

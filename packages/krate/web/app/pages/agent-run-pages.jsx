@@ -17,11 +17,13 @@ export async function AgentRunsPage({ org = null, linkToDetail = false } = {}) {
   const runs = allRuns.slice(0, PAGE_SIZE);
   const hasMore = allRuns.length > PAGE_SIZE;
   const availableStacks = (agentView.stacks?.items || []).map(s => s.metadata?.name).filter(Boolean);
+  const stackResources = agentView.stacks?.items || [];
+  const activeMeetings = agentView.meetings?.active || [];
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent dispatch runs" title="Dispatch runs" text="Track agent dispatch runs across stacks, repositories, and phases. Each run represents a dispatched agent task." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/runs', 'Dispatch runs']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
       <ManualDispatchButton org={activeOrg} stacks={availableStacks} />
-      <DispatchButton org={activeOrg} stacks={availableStacks} />
+      <DispatchButton org={activeOrg} stacks={stackResources} meetings={activeMeetings} />
       <LiveUpdates org={activeOrg} />
     </div>
     <div className="card">
@@ -30,9 +32,10 @@ export async function AgentRunsPage({ org = null, linkToDetail = false } = {}) {
         {linkToDetail ? <a href={orgHref(activeOrg, `/agents/runs/${run.metadata?.name}`)}><strong>{run.metadata?.name}</strong></a> : <strong>{run.metadata?.name}</strong>}
         <StatusPill tone={phaseTone(run.status?.phase)}>{run.status?.phase || 'Pending'}</StatusPill>
         <span>{run.spec?.stackRef || 'unassigned'} / {run.spec?.repository || 'no repository'}</span>
+        {run.spec?.meetingRef ? <small>Meeting: <a href={orgHref(activeOrg, `/meetings/${run.spec.meetingRef}`)}>{run.spec.meetingRef}</a></small> : null}
         <small>Phase: {run.status?.phase || 'Pending'}{run.status?.startedAt ? ` / Started: ${run.status.startedAt}` : ''}</small>
         <RunActions org={activeOrg} runName={run.metadata?.name} stackRef={run.spec?.stackRef || run.spec?.agentStack} phase={run.status?.phase} />
-      </li>)}</ul> : <EmptyState title="No dispatch runs" text="Dispatch runs appear when agent stacks are triggered by rules or manual dispatch. Configure trigger rules or dispatch manually to create runs."><DispatchButton org={activeOrg} stacks={availableStacks} /></EmptyState>}
+      </li>)}</ul> : <EmptyState title="No dispatch runs" text="Dispatch runs appear when agent stacks are triggered by rules or manual dispatch. Configure trigger rules or dispatch manually to create runs."><DispatchButton org={activeOrg} stacks={stackResources} meetings={activeMeetings} /></EmptyState>}
     </div>
   </PageFrame>;
 }
@@ -42,7 +45,9 @@ export async function AgentRunDetailPage({ org = null, runId } = {}) {
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { runs: { items: [] }, stacks: { items: [] }, sessions: { items: [] } };
   const run = (agentView.runs.items || []).find((r) => r.metadata?.name === runId) || null;
-  const stackName = run?.spec?.stackRef || run?.spec?.targetStack || null;
+  const stackName = run?.spec?.stackRef || run?.spec?.agentStack || run?.spec?.targetStack || null;
+  const meetingRef = run?.spec?.meetingRef || null;
+  const meetingUrl = run?.spec?.meetingContext?.roomUrl || null;
   const attempts = (agentView.attempts?.items || []).filter((a) => a.spec?.dispatchRun === runId || a.spec?.runRef === runId);
   const contextDigest = run?.spec?.contextBundle?.digest || run?.status?.contextDigest || null;
   const contextSourceCount = run?.spec?.contextBundle?.sourceCount ?? run?.spec?.contextBundle?.sources?.length ?? null;
@@ -74,6 +79,7 @@ export async function AgentRunDetailPage({ org = null, runId } = {}) {
         <div className="card">
           <div className="cardTitle"><h3>{runId}</h3><StatusPill tone={phaseTone(run.status?.phase)}>{run.status?.phase || 'Pending'}</StatusPill></div>
           {stackName ? <p>Agent stack: <a href={orgHref(activeOrg, `/agents/stacks/${stackName}`)}>{stackName}</a></p> : <p>Agent stack: not assigned</p>}
+          {meetingRef ? <p>Meeting: <a href={orgHref(activeOrg, `/meetings/${meetingRef}`)}>{meetingRef}</a>{meetingUrl ? <> / <a href={meetingUrl}>join room</a></> : null}</p> : null}
           <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <RunActions org={activeOrg} runName={runId} stackRef={stackName} phase={run.status?.phase} />
             <CopyButton text={resourceToYaml(run)} label="Copy as YAML" />

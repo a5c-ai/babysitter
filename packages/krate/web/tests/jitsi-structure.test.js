@@ -104,6 +104,24 @@ test('Jitsi forms and controls call org-scoped API routes', () => {
   assert.match(controls, /method:\s*'DELETE'/);
 });
 
+test('Agent dispatch UI forwards optional meetingRef for Jitsi-capable stacks', () => {
+  const component = read('app', 'components', 'agent', 'dispatch-button.jsx');
+  const route = read('app', 'api', 'orgs', '[org]', 'agents', 'dispatch', 'route.js');
+  const runPages = read('app', 'pages', 'agent-run-pages.jsx');
+  assert.match(component, /jitsiCapability/);
+  assert.match(component, /dispatch-meeting-select/);
+  assert.match(component, /meetingRef:\s*canSelectMeeting/);
+  assert.match(route, /meetingRef:\s*body\.meetingRef/);
+  assert.match(runPages, /\/meetings\/\$\{run\.spec\.meetingRef\}/);
+  assert.match(runPages, /run\?\.spec\?\.meetingContext\?\.roomUrl/);
+});
+
+test('Jitsi participant list links agent dispatch run refs', () => {
+  const src = read('app', 'components', 'jitsi', 'jitsi-participant-list.jsx');
+  assert.match(src, /dispatchRunRef/);
+  assert.match(src, /\/agents\/runs\/\$\{participant\.dispatchRunRef\}/);
+});
+
 test('Jitsi join and webhook helpers scope tokens and do not require development secrets in production', () => {
   const service = read('app', 'lib', 'jitsi-service.js');
   assert.match(service, /org:\s*meeting\.spec\?\.organizationRef/);

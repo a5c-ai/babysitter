@@ -1,6 +1,6 @@
 'use client';
 
-export function JitsiParticipantList({ participants = [] }) {
+export function JitsiParticipantList({ participants = [], org = 'default' }) {
   const items = Array.isArray(participants) ? participants : [];
   return (
     <section className="card">
@@ -10,6 +10,7 @@ export function JitsiParticipantList({ participants = [] }) {
           {items.map((participant) => (
             <li key={participant.id || participant.ref || participant.name}>
               {participant.name || participant.ref || participant.id} <span className="muted">{participant.type || 'user'}</span>
+              {participant.dispatchRunRef ? <> / <a href={`/orgs/${org}/agents/runs/${participant.dispatchRunRef}`}>{participant.dispatchRunRef}</a></> : null}
             </li>
           ))}
         </ul>

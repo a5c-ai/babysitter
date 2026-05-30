@@ -150,11 +150,12 @@ test('Meeting-aware dispatch injects meeting context only for Jitsi-capable stac
         run.spec.meetingContext = {
           roomUrl: 'https://meet.example/daily-default',
           roomId: 'daily-default',
-          jwt: 'krate-jitsi.jwt.sig',
+          participantName: 'Standup Bot',
           role: stack.spec.jitsiConfig.role,
           capabilities: stack.spec.jitsiConfig.capabilities,
+          tokenRef: { runtimeOnly: true },
         };
-        return run.spec.meetingContext;
+        return { ...run.spec.meetingContext, jwt: 'krate-jitsi.jwt.sig' };
       },
     },
   });
@@ -173,10 +174,48 @@ test('Meeting-aware dispatch injects meeting context only for Jitsi-capable stac
   assert.equal(result.error, false);
   assert.equal(result.run.spec.meetingRef, 'daily');
   assert.equal(result.run.spec.meetingContext.roomId, 'daily-default');
+  assert.equal(result.run.spec.meetingContext.jwt, undefined);
   assert.ok(gw.applied[0].spec.template.spec.containers.some((container) => container.name === 'jitsi-agent-sidecar'));
 });
 
-test('Non-Jitsi stack with meetingRef dispatches without sidecar regression', async () => {
+test('Meeting-aware dispatch resolves active meetings through default bridge without persisting JWT', async () => {
+  const gw = createMockResourceGateway();
+  const muxClient = createAgentMuxClient({ resourceGateway: gw });
+  const resources = buildValidResources('meeting-stack');
+  resources.AgentStack[0].spec.jitsiCapability = true;
+  resources.AgentStack[0].spec.jitsiConfig = { participantName: 'Standup Bot', role: 'observer', capabilities: { chat: 'readwrite', audio: 'listen' } };
+  resources.JitsiMeeting = [
+    createResource('JitsiMeeting', { name: 'daily', namespace: 'krate-org-default' }, {
+      organizationRef: 'default',
+      providerRef: 'jitsi-prod',
+      roomId: 'daily-default',
+      ttlMinutes: 30,
+    }, {
+      phase: 'Active',
+      roomUrl: 'https://meet.example/daily-default',
+    })
+  ];
+  const controller = createAgentDispatchController({ agentMuxClient: muxClient });
+
+  const result = await controller.createManualDispatch({
+    repository: 'test-repo',
+    ref: 'main',
+    agentStack: 'meeting-stack',
+    meetingRef: 'daily',
+    actor: 'test-user',
+    namespace: 'krate-org-default',
+    organizationRef: 'default',
+    resources
+  });
+
+  assert.equal(result.error, false);
+  assert.equal(result.run.spec.meetingContext.jwt, undefined);
+  const sidecar = gw.applied[0].spec.template.spec.containers.find((container) => container.name === 'jitsi-agent-sidecar');
+  const sidecarEnv = Object.fromEntries(sidecar.env.map((entry) => [entry.name, entry.value]));
+  assert.match(sidecarEnv.JITSI_JWT, /^krate-jitsi\./);
+});
+
+test('Non-Jitsi stack with meetingRef is rejected', async () => {
   const gw = createMockResourceGateway();
   const muxClient = createAgentMuxClient({ resourceGateway: gw });
   const resources = buildValidResources('plain-stack');
@@ -193,9 +232,9 @@ test('Non-Jitsi stack with meetingRef dispatches without sidecar regression', as
     resources
   });
 
-  assert.equal(result.error, false);
-  assert.equal(result.run.spec.meetingRef, undefined);
-  assert.equal(gw.applied[0].spec.template.spec.containers.length, 1);
+  assert.equal(result.error, true);
+  assert.equal(result.reason, 'meeting-not-supported');
+  assert.equal(gw.applied.length, 0);
 });
 
 test('Dispatch with Agent Mux unavailable (no resource gateway)', async () => {

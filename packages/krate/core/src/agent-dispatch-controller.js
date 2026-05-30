@@ -9,6 +9,7 @@ import { createAgentMemoryController } from './agent-memory-controller.js';
 import { createAgentApprovalController } from './agent-approval-controller.js';
 import { createAgentWorkspaceController } from './agent-workspace-controller.js';
 import { createHooksLifecycleEmitter } from './hooks-lifecycle.js';
+import { createJitsiAgentBridge } from './jitsi-agent-bridge.js';
 
 const MODEL_RATES = {
   'claude-sonnet-4-20250514': { inputPer1k: 0.003, outputPer1k: 0.015 },
@@ -48,7 +49,10 @@ export function createAgentDispatchController(options = {}) {
   const eventBus = options.eventBus || null;
   const lifecycleEmitter = options.lifecycleEmitter || (eventBus ? createHooksLifecycleEmitter(eventBus) : null);
   const hookBridge = options.hookBridge || null;
-  const jitsiAgentBridge = options.jitsiAgentBridge || null;
+  const jitsiAgentBridge = options.jitsiAgentBridge || createJitsiAgentBridge({
+    meetingController: options.jitsiMeetingController,
+    eventBus,
+  });
 
   return {
     role: 'agent-dispatch-controller',
@@ -304,6 +308,9 @@ export function createAgentDispatchController(options = {}) {
       // 1. Find stack
       const stack = (resources.AgentStack || []).find(s => s.metadata?.name === agentStack);
       if (!stack) return { error: true, reason: 'stack-not-found', message: `AgentStack '${agentStack}' not found` };
+      if (meetingRef && !jitsiAgentBridge.hasMeetingCapability(stack)) {
+        return { error: true, reason: 'meeting-not-supported', message: `AgentStack '${agentStack}' is not Jitsi-capable` };
+      }
 
       // 2. Permission review
       const review = permissionReviewer.reviewPermissions({ repository, ref, actor, agentStack, resources });
@@ -435,8 +442,13 @@ export function createAgentDispatchController(options = {}) {
       if (mountSpec) {
         run.spec.mountSpec = mountSpec;
       }
-      if (meetingRef && jitsiAgentBridge?.hasMeetingCapability?.(stack)) {
-        await jitsiAgentBridge.prepareMeetingContext(run, meetingRef, stack, { resources, organizationRef, namespace });
+      let runtimeMeetingContext = null;
+      if (meetingRef) {
+        try {
+          runtimeMeetingContext = await jitsiAgentBridge.prepareMeetingContext(run, meetingRef, stack, { resources, organizationRef, namespace });
+        } catch (err) {
+          return { error: true, reason: 'meeting-unavailable', message: err.message || `Meeting ${meetingRef} is not available` };
+        }
       }
 
       if (lifecycleEmitter) {
@@ -497,7 +509,7 @@ export function createAgentDispatchController(options = {}) {
           env: jobEnv,
           workspace: pvcName ? { pvcName } : undefined,
           resources: stack.spec?.resources,
-          meetingContext: run.spec.meetingContext,
+          meetingContext: runtimeMeetingContext || run.spec.meetingContext,
         });
 
         attempt.status.jobName = jobName;
