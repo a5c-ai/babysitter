@@ -103,6 +103,13 @@ export async function runHttpHandler(
   context: HandlerRuntimeContext,
 ): Promise<UnifiedHookResult> {
   const url = validateUrl(ref);
+  if (ref.method != null && ref.method !== 'POST') {
+    throw new HandlerError(`Unsupported HTTP handler method: ${String(ref.method)}`, {
+      source: ref.url,
+      handler: 'http',
+      code: 'HTTP_METHOD_ERROR',
+    });
+  }
   const timeoutMs = context.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const body = JSON.stringify({
     event: context.event,

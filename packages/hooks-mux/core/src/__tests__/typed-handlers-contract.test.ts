@@ -147,6 +147,21 @@ describe('typed HandlerRef contract', () => {
     await expect(runPlan(makeEvent(), plan, { defaultPolicy: 'fail-closed' })).rejects.toThrow(HandlerError);
   });
 
+  it('rejects unsupported http methods from runtime config', async () => {
+    const plan = [{
+      id: 'http-get',
+      pluginId: 'plugin',
+      phase: 'tool.before',
+      priority: 1,
+      handler: typedHandler({ type: 'http', url: 'https://hooks.example/hook', method: 'GET' }),
+    }];
+
+    const failOpen = await runPlan(makeEvent(), plan, { defaultPolicy: 'fail-open' });
+    expect(failOpen[0].metadata?.errorCode).toBe('HTTP_METHOD_ERROR');
+
+    await expect(runPlan(makeEvent(), plan, { defaultPolicy: 'fail-closed' })).rejects.toThrow(HandlerError);
+  });
+
   it('enforces http handler timeout with HandlerTimeoutError', async () => {
     const server = await withHttpServer(() => ({ body: '{"decision":"allow"}' }));
     const originalFetch = globalThis.fetch;
