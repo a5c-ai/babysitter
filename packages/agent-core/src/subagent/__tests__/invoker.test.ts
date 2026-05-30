@@ -123,6 +123,46 @@ describe("SubagentInvoker — delegate", () => {
     expect(result.success).toBe(true);
     expect(result.output).toBe("output");
   });
+
+  it("enforces oversight timeoutMs during delegation", async () => {
+    const invokeFn = vi.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      return "late output";
+    });
+    const invoker = new SubagentInvokerImpl(invokeFn);
+
+    const result = await invoker.delegate(makeDescriptor(), "task", {
+      oversight: { requireApproval: false, timeoutMs: 10 },
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/timed out/i);
+  });
+
+  it("reinvokes delegation with review feedback until oversight accepts", async () => {
+    const invokeFn = vi
+      .fn()
+      .mockResolvedValueOnce("draft")
+      .mockResolvedValueOnce("revised");
+    const reviewFn = vi
+      .fn()
+      .mockResolvedValueOnce({ accepted: false, feedback: "add sources" })
+      .mockResolvedValueOnce({ accepted: true });
+    const invoker = new SubagentInvokerImpl(invokeFn, reviewFn);
+
+    const result = await invoker.delegate(makeDescriptor(), "task", {
+      oversight: { requireApproval: true, maxRetries: 1 },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.output).toBe("revised");
+    expect(invokeFn).toHaveBeenCalledTimes(2);
+    expect(invokeFn.mock.calls[1][2]?.sharedContext).toContainEqual({
+      role: "user",
+      content: "Oversight feedback: add sources",
+    });
+    expect(reviewFn).toHaveBeenCalledTimes(2);
+  });
 });
 
 // ---------------------------------------------------------------------------

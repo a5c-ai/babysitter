@@ -90,6 +90,47 @@ describe("AgentLoop — concurrent strategy", () => {
     expect(output.results.map((r) => r.agentId)).toEqual(["a1", "a2", "a3"]);
     expect(promptFn).toHaveBeenCalledTimes(3);
   });
+
+  it("records per-agent timeouts without discarding completed results", async () => {
+    const promptFn = vi.fn(async (_input: string, agentId: string) => {
+      if (agentId === "slow") {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return "late";
+      }
+      if (agentId === "bad") {
+        throw new Error("agent failed");
+      }
+      return `${agentId}:ok`;
+    });
+    const loop = createAgentLoop<string, string>(
+      {
+        strategy: {
+          kind: "concurrent",
+          perAgentTimeoutMs: 10,
+        },
+        maxIterations: 1,
+      },
+      promptFn,
+      ["fast", "slow", "bad"],
+    );
+
+    const [result] = await collect(loop.run("data"));
+    const output = result.output as unknown as {
+      results: Array<{
+        status: string;
+        agentId: string;
+        output?: string;
+        reason?: unknown;
+      }>;
+    };
+
+    expect(output.results.map((r) => [r.agentId, r.status])).toEqual([
+      ["fast", "fulfilled"],
+      ["slow", "timed-out"],
+      ["bad", "rejected"],
+    ]);
+    expect(output.results[0].output).toBe("fast:ok");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -128,6 +169,61 @@ describe("AgentLoop — group-chat strategy", () => {
     // 2 rounds * 2 agents = 4 iterations.
     expect(results).toHaveLength(4);
     expect(results.map((r) => r.agentId)).toEqual(["x", "y", "x", "y"]);
+  });
+
+  it("uses structured moderator selection and validates configured speakers", async () => {
+    const promptFn = vi.fn(async (_input: string, agentId: string) => {
+      if (agentId === "mod") return { nextSpeakerId: "bob" };
+      return `${agentId}:spoke`;
+    });
+    const loop = createAgentLoop<string, unknown>(
+      {
+        strategy: { kind: "group-chat", maxRounds: 1, moderatorAgentId: "mod" },
+      },
+      promptFn,
+      ["alice", "bob"],
+    );
+
+    const [result] = await collect(loop.run("topic"));
+
+    expect(result.agentId).toBe("bob");
+    expect(result.output).toBe("bob:spoke");
+  });
+
+  it("rejects ambiguous moderator selections instead of falling back", async () => {
+    const promptFn = vi.fn(async (_input: string, agentId: string) => {
+      if (agentId === "mod") return "alice or bob";
+      return `${agentId}:spoke`;
+    });
+    const loop = createAgentLoop<string, string>(
+      {
+        strategy: { kind: "group-chat", maxRounds: 1, moderatorAgentId: "mod" },
+      },
+      promptFn,
+      ["alice", "bob"],
+    );
+
+    await expect(collect(loop.run("topic"))).rejects.toThrow(
+      /ambiguous moderator selection/i,
+    );
+  });
+
+  it("rejects moderator selections outside the configured agent list", async () => {
+    const promptFn = vi.fn(async (_input: string, agentId: string) => {
+      if (agentId === "mod") return { nextSpeakerId: "mallory" };
+      return `${agentId}:spoke`;
+    });
+    const loop = createAgentLoop<string, unknown>(
+      {
+        strategy: { kind: "group-chat", maxRounds: 1, moderatorAgentId: "mod" },
+      },
+      promptFn,
+      ["alice", "bob"],
+    );
+
+    await expect(collect(loop.run("topic"))).rejects.toThrow(
+      /invalid moderator selection/i,
+    );
   });
 });
 
@@ -188,6 +284,103 @@ describe("AgentLoop — handoff strategy", () => {
     expect(results[0].agentId).toBe("a");
     expect(results[1].agentId).toBe("b");
     expect(results[2].agentId).toBe("c");
+  });
+
+  it("passes structured handoff context to the target agent", async () => {
+    const seenContexts: unknown[] = [];
+    const promptFn = vi.fn(
+      async (_input: string, agentId: string, context?: { handoffContext?: unknown }) => {
+        seenContexts.push(context?.handoffContext);
+        if (agentId === "a") {
+          return {
+            handoffTarget: "b",
+            handoffContext: { summary: "a completed research" },
+          };
+        }
+        return { done: true };
+      },
+    );
+
+    const loop = createAgentLoop(
+      {
+        strategy: { kind: "handoff", entryAgentId: "a" },
+      },
+      promptFn,
+      ["a", "b"],
+    );
+
+    const results = await collect(loop.run("start"));
+
+    expect(results).toHaveLength(2);
+    expect(seenContexts).toEqual([
+      undefined,
+      { summary: "a completed research" },
+    ]);
+  });
+
+  it("rejects handoff targets outside the configured agent list", async () => {
+    const promptFn = vi.fn(async () => ({ handoffTarget: "missing" }));
+    const loop = createAgentLoop(
+      {
+        strategy: { kind: "handoff", entryAgentId: "a" },
+      },
+      promptFn,
+      ["a", "b"],
+    );
+
+    await expect(collect(loop.run("start"))).rejects.toThrow(
+      /invalid handoff target/i,
+    );
+  });
+});
+
+describe("AgentLoop — cancellation", () => {
+  it("can cancel run() from outside and transitions to cancelled", async () => {
+    const controller = new AbortController();
+    const loop = createAgentLoop<string, string>(
+      { strategy: { kind: "sequential" }, maxIterations: 5 },
+      async (_input, _agentId, context) => {
+        expect(context?.signal).toBe(controller.signal);
+        return "first";
+      },
+    );
+    loop.onIterationComplete(() => controller.abort());
+
+    const results = await collect(loop.run("x", { signal: controller.signal }));
+
+    expect(results).toHaveLength(1);
+    expect(loop.getState()).toBe("cancelled");
+  });
+});
+
+describe("AgentLoop — strategy composition", () => {
+  it("supports explicit fallback composition between strategies", async () => {
+    let calls = 0;
+    const promptFn = vi.fn(async (_input: string, agentId: string) => {
+      calls++;
+      if (agentId === "a" && calls === 1) return { handoffTarget: "missing" };
+      return `${agentId}:fallback`;
+    });
+    const loop = createAgentLoop<string, unknown>(
+      {
+        strategy: {
+          kind: "composite",
+          mode: "fallback",
+          strategies: [
+            { kind: "handoff", entryAgentId: "a" },
+            { kind: "sequential" },
+          ],
+        },
+        maxIterations: 1,
+      },
+      promptFn,
+      ["a", "b"],
+    );
+
+    const [result] = await collect(loop.run("x"));
+
+    expect(result.agentId).toBe("a");
+    expect(result.output).toBe("a:fallback");
   });
 });
 

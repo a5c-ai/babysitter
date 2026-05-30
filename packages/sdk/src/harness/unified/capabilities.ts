@@ -157,7 +157,13 @@ function normalizeHostTools(
 
   const normalized = hostTools
     .filter((tool): tool is HostToolDescriptor => {
-      return Boolean(tool) && typeof tool.name === "string" && tool.name.trim() !== "";
+      return (
+        tool !== null &&
+        typeof tool === "object" &&
+        "name" in tool &&
+        typeof tool.name === "string" &&
+        tool.name.trim() !== ""
+      );
     })
     .map((tool) => ({
       ...tool,

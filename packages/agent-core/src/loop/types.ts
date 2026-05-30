@@ -15,7 +15,8 @@ export type AgentLoopStrategyKind =
   | 'sequential'
   | 'concurrent'
   | 'group-chat'
-  | 'handoff';
+  | 'handoff'
+  | 'composite';
 
 /** Sequential: one agent processes turns in order. */
 export interface SequentialStrategy {
@@ -30,6 +31,8 @@ export interface ConcurrentStrategy {
   readonly kind: 'concurrent';
   /** Maximum number of agents that may run in parallel. */
   readonly maxParallelism?: number;
+  /** Per-agent timeout in milliseconds. Timed-out agents are recorded in the result envelope. */
+  readonly perAgentTimeoutMs?: number;
 }
 
 /**
@@ -57,12 +60,21 @@ export interface HandoffStrategy {
   readonly maxHandoffs?: number;
 }
 
-/** Union of all supported loop strategies. */
-export type AgentLoopStrategy =
+export type NonCompositeAgentLoopStrategy =
   | SequentialStrategy
   | ConcurrentStrategy
   | GroupChatStrategy
   | HandoffStrategy;
+
+/** Composite: try multiple strategies according to an explicit composition mode. */
+export interface CompositeStrategy {
+  readonly kind: 'composite';
+  readonly mode: 'fallback';
+  readonly strategies: readonly NonCompositeAgentLoopStrategy[];
+}
+
+/** Union of all supported loop strategies. */
+export type AgentLoopStrategy = NonCompositeAgentLoopStrategy | CompositeStrategy;
 
 // ---------------------------------------------------------------------------
 // Loop State
@@ -73,8 +85,18 @@ export type AgentLoopState =
   | 'idle'
   | 'running'
   | 'paused'
+  | 'cancelled'
   | 'completed'
   | 'errored';
+
+export interface AgentLoopPromptContext {
+  readonly signal?: AbortSignal;
+  readonly handoffContext?: unknown;
+}
+
+export interface AgentLoopRunOptions {
+  readonly signal?: AbortSignal;
+}
 
 // ---------------------------------------------------------------------------
 // Iteration Result
@@ -150,7 +172,10 @@ export interface AgentLoop<TInput = string, TOutput = unknown> {
    * @param input - The input payload for this iteration (e.g. a user prompt).
    * @returns The result of the iteration.
    */
-  iterate(input: TInput): Promise<AgentLoopIterationResult<TOutput>>;
+  iterate(
+    input: TInput,
+    options?: AgentLoopRunOptions,
+  ): Promise<AgentLoopIterationResult<TOutput>>;
 
   /**
    * Run the loop to completion, yielding results as an async iterable.
@@ -160,7 +185,10 @@ export interface AgentLoop<TInput = string, TOutput = unknown> {
    *
    * @param input - The initial input payload.
    */
-  run(input: TInput): AsyncIterable<AgentLoopIterationResult<TOutput>>;
+  run(
+    input: TInput,
+    options?: AgentLoopRunOptions,
+  ): AsyncIterable<AgentLoopIterationResult<TOutput>>;
 
   /** Return the current observable state of the loop. */
   getState(): AgentLoopState;

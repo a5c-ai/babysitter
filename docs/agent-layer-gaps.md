@@ -35,12 +35,7 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 
 | Gap | Description |
 |-----|-------------|
-| Concurrent strategy naive | `Promise.allSettled` with no per-agent timeout, no partial results, no graceful degradation |
-| Group-chat moderator fragile | String matching for agent selection, no validation against agent list |
-| Handoff has no state passing | Second agent doesn't know what first agent did. No context transfer. |
-| No loop cancellation token | `run()` generator can't be externally cancelled |
-| Oversight is single-pass | `maxRetries = 0` hardcoded. Reviewer can reject but no retry mechanism. |
-| Delegation timeout ignored | `timeout` parameter accepted but never enforced |
+| Agent loop strategy hardening follow-up | Issue #589 fixed the L4 agent-core gaps for concurrent per-agent timeout/partial results, group-chat target validation, handoff context transfer and target validation, external loop cancellation, delegation timeout enforcement, oversight reinvocation retries, and explicit fallback composition. Remaining work here should focus on broader platform scheduling or product-level orchestration, not these agent-core contracts. |
 | No plugin/extension API | DeferredToolRegistry exists but minimally integrated |
 | No caching anywhere | Tool results, web fetches, schema fetches — nothing cached |
 | Hardcoded limits | 50MB output, 120s bash, 30s search — not configurable |

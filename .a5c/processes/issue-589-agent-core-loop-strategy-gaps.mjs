@@ -427,7 +427,7 @@ export const runRedTestsTask = defineTask('issue-589.run-red-tests', (args, task
   shell: {
     command: [
       `cd "${args.inputs.projectRoot}"`,
-      'npm exec --yes --package=vitest -- vitest run --config packages/agent-core/vitest.config.ts packages/agent-core/src/loop/__tests__/agent-loop.test.ts packages/agent-core/src/subagent/__tests__/invoker.test.ts',
+      'cd packages/agent-core && npm exec --yes --package=vitest -- vitest run --config vitest.config.ts src/loop/__tests__/agent-loop.test.ts src/subagent/__tests__/invoker.test.ts',
     ].join(' && '),
     expectedExitCode: 1,
     timeout: 180000,
@@ -495,7 +495,8 @@ export const runTargetedVerificationTask = defineTask('issue-589.run-targeted-ve
   shell: {
     command: [
       `cd "${args.inputs.projectRoot}"`,
-      'npm exec --yes --package=vitest -- vitest run --config packages/agent-core/vitest.config.ts packages/agent-core/src/loop/__tests__/agent-loop.test.ts packages/agent-core/src/subagent/__tests__/invoker.test.ts',
+      'cd packages/agent-core && npm exec --yes --package=vitest -- vitest run --config vitest.config.ts src/loop/__tests__/agent-loop.test.ts src/subagent/__tests__/invoker.test.ts',
+      'cd ../..',
       'npm run build --workspace=@a5c-ai/agent-core',
       'git diff --check',
     ].join(' && '),

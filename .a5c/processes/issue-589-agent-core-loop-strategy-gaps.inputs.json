@@ -134,7 +134,7 @@
     "Final acceptance review confirms docs and docs/agent-layer-gaps.md match the implemented contract."
   ],
   "verificationCommands": [
-    "npm exec --yes --package=vitest -- vitest run --config packages/agent-core/vitest.config.ts packages/agent-core/src/loop/__tests__/agent-loop.test.ts packages/agent-core/src/subagent/__tests__/invoker.test.ts",
+    "cd packages/agent-core && npm exec --yes --package=vitest -- vitest run --config vitest.config.ts src/loop/__tests__/agent-loop.test.ts src/subagent/__tests__/invoker.test.ts",
     "npm run test --workspace=@a5c-ai/agent-core",
     "npm run build --workspace=@a5c-ai/agent-core",
     "npm run verify:metadata",

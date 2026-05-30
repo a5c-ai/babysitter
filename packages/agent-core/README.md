@@ -65,6 +65,17 @@ Key exports:
 - `resetRunScopedConfig()`: clears run-scoped state used by the `config` tool.
 - `parseSearchResults()`, `stripHtmlTags()`, `extractTextFromHtml()`, `filterByRelevance()`: helper exports used by web/search integrations.
 
+## Agent loop and subagent hardening
+
+The L4 loop strategy APIs include additive reliability contracts for advanced multi-agent runtimes:
+
+- `ConcurrentStrategy.perAgentTimeoutMs` records slow agents as `timed-out` per-agent results while retaining fulfilled and rejected results in configured agent order.
+- `AgentLoop.run(input, { signal })` and `iterate(input, { signal })` accept an `AbortSignal`, propagate it to prompt functions, and transition the loop to `cancelled` when external cancellation stops execution.
+- Group-chat moderator selection accepts exact agent IDs or structured `{ nextSpeakerId }` output and rejects invalid or ambiguous selections instead of silently falling back.
+- Handoff validates entry and target agent IDs and forwards structured `handoffContext` from one agent output to the next prompt call.
+- `CompositeStrategy` currently supports explicit `fallback` composition, trying configured strategies in order until one succeeds.
+- Delegation oversight enforces `OversightConfig.timeoutMs`; `maxRetries` reinvokes the subagent with reviewer feedback when approval is rejected.
+
 ## Session API
 
 `createAgentCoreSession()` returns an `AgentCoreSessionHandle` that wraps a shared `@a5c-ai/agent-mux` client with built-in adapters registered once per process.

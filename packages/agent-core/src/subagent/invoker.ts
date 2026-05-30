@@ -90,15 +90,44 @@ export class SubagentInvokerImpl<TOutput = unknown>
     const start = Date.now();
 
     try {
-      const output = await this.invokeFn(descriptor, input, options);
+      let attemptOptions: SubagentInvocationOptions = options;
+      let output = await this.invokeWithOversightTimeout(
+        descriptor,
+        input,
+        attemptOptions,
+        options.oversight.timeoutMs,
+      );
 
       // If oversight requires approval and we have a review function,
       // run the oversight loop.
       if (options.oversight.requireApproval && this.reviewFn) {
+        const maxRetries = options.oversight.maxRetries ?? 0;
         const runner = new OversightRunner<TOutput>(this.reviewFn);
-        // Use a single review pass (maxRetries = 0) — the orchestration
-        // layer above can retry with new subagent output if needed.
-        const oversightResult = await runner.review(output, 0);
+        let oversightResult = await runner.review(output, 0);
+
+        for (
+          let retry = 0;
+          !oversightResult.accepted && retry < maxRetries;
+          retry++
+        ) {
+          attemptOptions = {
+            ...options,
+            sharedContext: [
+              ...(options.sharedContext ?? []),
+              {
+                role: "user",
+                content: `Oversight feedback: ${oversightResult.lastFeedback ?? "revise output"}`,
+              },
+            ],
+          };
+          output = await this.invokeWithOversightTimeout(
+            descriptor,
+            input,
+            attemptOptions,
+            options.oversight.timeoutMs,
+          );
+          oversightResult = await runner.review(output, 0);
+        }
 
         return this.buildResult(
           descriptor,
@@ -167,6 +196,34 @@ export class SubagentInvokerImpl<TOutput = unknown>
       durationMs: Date.now() - startMs,
       turnsUsed: 0,
     };
+  }
+
+  private async invokeWithOversightTimeout(
+    descriptor: SubagentDescriptor,
+    input: string,
+    options: SubagentInvocationOptions,
+    timeoutMs: number | undefined,
+  ): Promise<TOutput> {
+    const promise = this.invokeFn(descriptor, input, options);
+    if (timeoutMs === undefined) {
+      return promise;
+    }
+
+    return new Promise<TOutput>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`Subagent ${descriptor.id} timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+
+      promise
+        .then((value) => {
+          clearTimeout(timer);
+          resolve(value);
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
   }
 
   private buildErrorResult(

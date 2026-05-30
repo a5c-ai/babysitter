@@ -9,11 +9,16 @@
  * returning a next-speaker selection as part of its output.
  */
 
-import type { AgentLoopIterationResult, GroupChatStrategy } from "../types";
+import type {
+  AgentLoopIterationResult,
+  AgentLoopPromptContext,
+  GroupChatStrategy,
+} from "../types";
 
 export type PromptFn<TInput, TOutput> = (
   input: TInput,
   agentId: string,
+  context?: AgentLoopPromptContext,
 ) => Promise<TOutput>;
 
 export interface GroupChatLoopRunnerConfig {
@@ -59,6 +64,7 @@ export class GroupChatLoopRunner<TInput, TOutput> {
   async run(
     input: TInput,
     iterationIndex: number,
+    context?: AgentLoopPromptContext,
   ): Promise<AgentLoopIterationResult<TOutput>> {
     if (this.isExhausted) {
       throw new Error(
@@ -69,17 +75,18 @@ export class GroupChatLoopRunner<TInput, TOutput> {
     let currentSpeaker: string;
 
     if (this.moderatorAgentId) {
-      // Ask the moderator to select the next speaker.
-      // The moderator's output is expected to be a string containing the agent id.
-      const moderatorOutput = await this.promptFn(input, this.moderatorAgentId);
-      const selectedAgent = this.resolveModeratorSelection(moderatorOutput);
-      currentSpeaker = selectedAgent ?? this.agentIds[this.speakerIndex]!;
+      const moderatorOutput = await this.promptFn(
+        input,
+        this.moderatorAgentId,
+        context,
+      );
+      currentSpeaker = this.resolveModeratorSelection(moderatorOutput);
     } else {
       currentSpeaker = this.agentIds[this.speakerIndex]!;
     }
 
     const start = Date.now();
-    const output = await this.promptFn(input, currentSpeaker);
+    const output = await this.promptFn(input, currentSpeaker, context);
     const durationMs = Date.now() - start;
 
     // Advance round-robin pointer
@@ -106,17 +113,42 @@ export class GroupChatLoopRunner<TInput, TOutput> {
   }
 
   /**
-   * Best-effort extraction of a selected agent from the moderator output.
-   * Returns the agent ID if the output contains exactly one known agent id,
-   * otherwise falls back to undefined (round-robin).
+   * Resolve a selected agent from structured output or an exact string id.
+   * Invalid and ambiguous selections are rejected instead of silently falling
+   * back to round-robin.
    */
-  private resolveModeratorSelection(output: TOutput): string | undefined {
-    const text = typeof output === "string" ? output : String(output);
-    for (const id of this.agentIds) {
-      if (text.includes(id)) {
-        return id;
+  private resolveModeratorSelection(output: TOutput): string {
+    if (
+      output !== null &&
+      typeof output === "object" &&
+      "nextSpeakerId" in output
+    ) {
+      const selected = (output as { nextSpeakerId?: unknown }).nextSpeakerId;
+      if (typeof selected !== "string" || !this.agentIds.includes(selected)) {
+        throw new Error(
+          `Invalid moderator selection: ${String(selected)} is not a configured agent`,
+        );
       }
+      return selected;
     }
-    return undefined;
+
+    if (typeof output !== "string") {
+      throw new Error("Invalid moderator selection: expected nextSpeakerId");
+    }
+
+    const exact = output.trim();
+    if (this.agentIds.includes(exact)) {
+      return exact;
+    }
+
+    const matches = this.agentIds.filter((id) => output.includes(id));
+    if (matches.length > 1) {
+      throw new Error(
+        `Ambiguous moderator selection: matched ${matches.join(", ")}`,
+      );
+    }
+    throw new Error(
+      `Invalid moderator selection: ${output} is not a configured agent`,
+    );
   }
 }

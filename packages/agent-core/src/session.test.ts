@@ -62,10 +62,11 @@ describe("AgentCoreSessionHandle", () => {
   function mockAnthropicResponse(text: string) {
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({
-        content: [{ type: "text", text }],
-        usage: { input_tokens: 12, output_tokens: 6 },
-      }),
+      body: textStream([
+        `event: message_start\ndata: ${JSON.stringify({ type: "message_start", message: { usage: { input_tokens: 12 } } })}\n\n`,
+        `event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", delta: { type: "text_delta", text } })}\n\n`,
+        `event: message_delta\ndata: ${JSON.stringify({ type: "message_delta", usage: { output_tokens: 6 } })}\n\n`,
+      ]),
     });
   }
 

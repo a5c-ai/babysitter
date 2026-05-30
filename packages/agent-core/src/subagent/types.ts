@@ -65,6 +65,9 @@ export interface OversightConfig {
    */
   readonly timeoutMs?: number;
 
+  /** Number of rejected outputs to retry by reinvoking the subagent with reviewer feedback. */
+  readonly maxRetries?: number;
+
   /**
    * When `true`, the parent can see the subagent's intermediate tool
    * calls and reasoning, not just the final result.

@@ -6,11 +6,16 @@
  * into groups that run sequentially.
  */
 
-import type { AgentLoopIterationResult, ConcurrentStrategy } from "../types";
+import type {
+  AgentLoopIterationResult,
+  AgentLoopPromptContext,
+  ConcurrentStrategy,
+} from "../types";
 
 export type PromptFn<TInput, TOutput> = (
   input: TInput,
   agentId: string,
+  context?: AgentLoopPromptContext,
 ) => Promise<TOutput>;
 
 export interface ConcurrentLoopRunnerConfig {
@@ -23,12 +28,14 @@ export interface ConcurrentIterationOutput<TOutput> {
   readonly results: ReadonlyArray<
     | { readonly status: "fulfilled"; readonly agentId: string; readonly output: TOutput }
     | { readonly status: "rejected"; readonly agentId: string; readonly reason: unknown }
+    | { readonly status: "timed-out"; readonly agentId: string; readonly timeoutMs: number }
   >;
 }
 
 export class ConcurrentLoopRunner<TInput, TOutput> {
   private readonly agentIds: readonly string[];
   private readonly maxParallelism: number;
+  private readonly perAgentTimeoutMs: number | undefined;
   private readonly promptFn: PromptFn<TInput, TOutput>;
 
   constructor(
@@ -37,12 +44,14 @@ export class ConcurrentLoopRunner<TInput, TOutput> {
   ) {
     this.agentIds = config.agentIds;
     this.maxParallelism = config.strategy.maxParallelism ?? config.agentIds.length;
+    this.perAgentTimeoutMs = config.strategy.perAgentTimeoutMs;
     this.promptFn = promptFn;
   }
 
   async run(
     input: TInput,
     iterationIndex: number,
+    context?: AgentLoopPromptContext,
   ): Promise<AgentLoopIterationResult<ConcurrentIterationOutput<TOutput>>> {
     const start = Date.now();
 
@@ -52,7 +61,7 @@ export class ConcurrentLoopRunner<TInput, TOutput> {
     for (let i = 0; i < this.agentIds.length; i += this.maxParallelism) {
       const batch = this.agentIds.slice(i, i + this.maxParallelism);
       const settled = await Promise.allSettled(
-        batch.map((agentId) => this.promptFn(input, agentId)),
+        batch.map((agentId) => this.runAgent(input, agentId, context)),
       );
 
       for (let j = 0; j < settled.length; j++) {
@@ -60,6 +69,12 @@ export class ConcurrentLoopRunner<TInput, TOutput> {
         const agentId = batch[j]!;
         if (s.status === "fulfilled") {
           allResults.push({ status: "fulfilled", agentId, output: s.value });
+        } else if (s.reason instanceof AgentTimeoutError) {
+          allResults.push({
+            status: "timed-out",
+            agentId,
+            timeoutMs: s.reason.timeoutMs,
+          });
         } else {
           allResults.push({ status: "rejected", agentId, reason: s.reason });
         }
@@ -74,5 +89,42 @@ export class ConcurrentLoopRunner<TInput, TOutput> {
       output: { results: allResults },
       durationMs,
     };
+  }
+
+  private runAgent(
+    input: TInput,
+    agentId: string,
+    context?: AgentLoopPromptContext,
+  ): Promise<TOutput> {
+    const promise = this.promptFn(input, agentId, context);
+    if (this.perAgentTimeoutMs === undefined) {
+      return promise;
+    }
+
+    return new Promise<TOutput>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new AgentTimeoutError(agentId, this.perAgentTimeoutMs!));
+      }, this.perAgentTimeoutMs);
+
+      promise
+        .then((value) => {
+          clearTimeout(timer);
+          resolve(value);
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
+  }
+}
+
+class AgentTimeoutError extends Error {
+  constructor(
+    readonly agentId: string,
+    readonly timeoutMs: number,
+  ) {
+    super(`Agent ${agentId} timed out after ${timeoutMs}ms`);
+    this.name = "AgentTimeoutError";
   }
 }
