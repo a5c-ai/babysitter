@@ -1,11 +1,15 @@
 const IDENTITY_KINDS = ['AgentPersona', 'AgentSoul', 'AgentAppearance', 'AgentVoiceProfile', 'AgentDefinition', 'AgentStack'];
 
 export function resourceItems(modelOrResources, kind) {
+  if (Array.isArray(modelOrResources?.[kind])) return modelOrResources[kind];
   const resources = Array.isArray(modelOrResources)
     ? modelOrResources
     : Array.isArray(modelOrResources?.resources)
       ? modelOrResources.resources
       : [];
+  if (resources.some((resource) => resource.kind === kind && !Array.isArray(resource.items))) {
+    return resources.filter((resource) => resource.kind === kind);
+  }
   const group = resources.find((resource) => resource.kind === kind);
   return Array.isArray(group?.items) ? group.items : [];
 }

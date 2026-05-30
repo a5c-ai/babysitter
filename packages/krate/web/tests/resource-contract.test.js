@@ -395,6 +395,10 @@ test('agent create wizard posts all identity resources with compensation', () =>
   assert.match(wizard, /createdResources/, 'wizard must track created resources for rollback');
   assert.match(wizard, /personaRef/, 'wizard must bind identity resources to personaRef');
   assert.match(wizard, /stackRef/, 'wizard must bind AgentDefinition to stackRef');
+  assert.match(wizard, /resources\/\$\{resource\.kind\}\/\$\{encodeURIComponent\(resource\.metadata\?\.name\)\}/, 'wizard rollback must target the generic resource DELETE route with kind and name');
+  const deleteRoute = readFile('app', 'api', 'orgs', '[org]', 'resources', '[kind]', '[name]', 'route.js');
+  assert.match(deleteRoute, /export\s+const\s+DELETE\s*=\s*withAuth/, 'generic resource route must expose authenticated DELETE for wizard rollback');
+  assert.match(deleteRoute, /deleteResourceForOrg\(\s*org\s*,\s*kind\s*,\s*name\s*\)/, 'generic resource DELETE must use org-scoped controller delete');
 });
 
 test('inference services GET route supports limit/offset pagination', () => {
