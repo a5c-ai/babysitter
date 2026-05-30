@@ -255,12 +255,16 @@ function resolvePolicySelectedHarness(
 
   const fallbackChain = arrayOfStrings(execution?.fallbackChain ?? meta?.fallbackChain);
   if (fallbackChain.length > 0) {
-    const failedHarnesses = arrayOfStrings(meta?.failedHarnesses);
+    const installedHarnesses = new Set(discovered.filter((h) => h.installed).map((h) => h.name));
+    const installedFallbackChain = fallbackChain
+      .map(normalizeBuiltInHarnessName)
+      .filter((harness) => installedHarnesses.has(harness));
+    const failedHarnesses = arrayOfStrings(execution?.failedHarnesses ?? meta?.failedHarnesses);
     const result = resolveFallbackHarness(
-      { harnesses: fallbackChain.map(normalizeBuiltInHarnessName), maxRetries: fallbackChain.length - 1 },
+      { harnesses: installedFallbackChain, maxRetries: Math.max(0, installedFallbackChain.length - 1) },
       failedHarnesses.map(normalizeBuiltInHarnessName),
     );
-    if (result.harness && discovered.some((h) => h.name === result.harness && h.installed)) {
+    if (result.harness) {
       return result.harness;
     }
   }

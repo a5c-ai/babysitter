@@ -288,4 +288,35 @@ describe("issue #580 orchestration effect routing", () => {
       pauseReason: "Session cost budget exceeded",
     });
   });
+
+  it("preserves no-budget and no-compaction behavior when overlay inputs are absent", async () => {
+    const updateSessionCost = vi.fn();
+    const checkBudget = vi.fn();
+    const compactSession = vi.fn();
+    const shouldAutoCompact = vi.fn();
+    const markThresholdsTriggered = vi.fn();
+    const setSessionPaused = vi.fn();
+
+    const result = await applyPostEffectOrchestrationOverlays({
+      runId: "run-1",
+      stateDir: "/state",
+      sessionId: "session-1",
+      updateSessionCost,
+      checkBudget,
+      compactSession,
+      shouldAutoCompact,
+      markThresholdsTriggered,
+      setSessionPaused,
+    });
+
+    expect(updateSessionCost).not.toHaveBeenCalled();
+    expect(checkBudget).not.toHaveBeenCalled();
+    expect(markThresholdsTriggered).not.toHaveBeenCalled();
+    expect(setSessionPaused).not.toHaveBeenCalled();
+    expect(shouldAutoCompact).not.toHaveBeenCalled();
+    expect(compactSession).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      compaction: { triggered: false, results: [] },
+    });
+  });
 });

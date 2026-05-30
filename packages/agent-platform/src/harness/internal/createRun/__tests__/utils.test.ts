@@ -308,6 +308,89 @@ describe("harnessUtils", () => {
     )).toBe("codex");
   });
 
+  it("uses execution model hints for opt-in model-aware routing", () => {
+    const discovered = [
+      {
+        name: "pi",
+        installed: true,
+        cliCommand: "pi",
+        configFound: true,
+        capabilities: [HarnessCapability.Programmatic],
+        supportedModels: ["pi-local"],
+        platform: "linux",
+      },
+      {
+        name: "codex",
+        installed: true,
+        cliCommand: "codex",
+        configFound: true,
+        capabilities: [HarnessCapability.Programmatic],
+        supportedModels: ["gpt-5.5"],
+        platform: "linux",
+      },
+    ];
+
+    expect(resolveTaskHarness(
+      {
+        effectId: "eff-model",
+        invocationKey: "inv-model",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          execution: { model: "gpt-5.5" },
+        },
+      },
+      "pi",
+      discovered,
+    )).toBe("codex");
+  });
+
+  it("uses execution fallback chains after the failed harness", () => {
+    const discovered = [
+      {
+        name: "pi",
+        installed: true,
+        cliCommand: "pi",
+        configFound: true,
+        capabilities: [HarnessCapability.Programmatic],
+        platform: "linux",
+      },
+      {
+        name: "codex",
+        installed: true,
+        cliCommand: "codex",
+        configFound: true,
+        capabilities: [HarnessCapability.Programmatic],
+        platform: "linux",
+      },
+      {
+        name: "claude-code",
+        installed: false,
+        cliCommand: "claude",
+        configFound: false,
+        capabilities: [HarnessCapability.Programmatic],
+        platform: "linux",
+      },
+    ];
+
+    expect(resolveTaskHarness(
+      {
+        effectId: "eff-fallback",
+        invocationKey: "inv-fallback",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          execution: {
+            fallbackChain: ["pi", "claude-code", "codex"],
+            failedHarnesses: ["pi"],
+          },
+        },
+      },
+      "pi",
+      discovered,
+    )).toBe("codex");
+  });
+
   describe("promptPiWithRetry", () => {
     function createMockSession(
       promptImpl: (text: string, timeout?: number) => Promise<{ success: boolean; output: string; exitCode: number; duration: number }>,
