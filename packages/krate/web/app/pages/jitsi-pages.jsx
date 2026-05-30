@@ -1,6 +1,6 @@
 import { loadKrateUi, DegradedBanner } from '../lib/krate-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
-import { JitsiCreateMeetingForm, JitsiEmbeddedMeeting, JitsiMeetingControls, JitsiMeetingManager, JitsiParticipantList, JitsiProviderConfig, JitsiRecordingList, JitsiTemplateForm } from '../components/index.js';
+import { JitsiCreateMeetingForm, JitsiMeetingExperience, JitsiMeetingManager, JitsiProviderConfig, JitsiRecordingList, JitsiTemplateForm } from '../components/index.js';
 
 function items(ui, kind) {
   return ui.model.resources?.find((resource) => resource.kind === kind)?.items || [];
@@ -30,13 +30,8 @@ export async function MeetingsPage({ org = 'default' } = {}) {
 export async function MeetingDetailPage({ org = 'default', id } = {}) {
   return jitsiFrame(org, `/meetings/${id}`, 'Meeting detail', 'Join the room and inspect Krate meeting context.', (ui) => {
     const meeting = findItem(ui, 'JitsiMeeting', id) || { metadata: { name: id }, spec: { roomId: id, displayName: id }, status: { phase: 'Scheduled', participants: { current: [] } } };
-    return (
-      <div style={{ display: 'grid', gap: '1rem' }}>
-        <JitsiEmbeddedMeeting roomUrl={meeting.status?.roomUrl} jwt={meeting.status?.jwtToken} displayName="Krate user" />
-        <JitsiMeetingControls org={meeting.spec?.organizationRef || org} meetingRef={meeting.metadata?.name} recordingActive={meeting.status?.recording?.active} />
-        <JitsiParticipantList participants={meeting.status?.participants?.current || []} />
-      </div>
-    );
+    const recordings = items(ui, 'JitsiRecording');
+    return <JitsiMeetingExperience org={meeting.spec?.organizationRef || org} meeting={meeting} recordings={recordings} />;
   });
 }
 

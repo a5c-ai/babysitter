@@ -32,6 +32,7 @@ const components = [
   ['jitsi-participant-list.jsx', 'JitsiParticipantList'],
   ['jitsi-recording-list.jsx', 'JitsiRecordingList'],
   ['jitsi-embedded-meeting.jsx', 'JitsiEmbeddedMeeting'],
+  ['jitsi-meeting-experience.jsx', 'JitsiMeetingExperience'],
   ['jitsi-meeting-controls.jsx', 'JitsiMeetingControls'],
   ['jitsi-provider-config.jsx', 'JitsiProviderConfig'],
 ];
@@ -102,6 +103,68 @@ test('Jitsi forms and controls call org-scoped API routes', () => {
     assert.match(controls, new RegExp(`\\$\\{meetingRef\\}\\$\\{path\\}|${suffix}`));
   }
   assert.match(controls, /method:\s*'DELETE'/);
+});
+
+test('Jitsi meeting detail performs authenticated embedded join before iframe rendering', () => {
+  const page = read('app', 'pages', 'jitsi-pages.jsx');
+  assert.match(page, /JitsiMeetingExperience/);
+  assert.doesNotMatch(page, /status\?\.jwtToken/);
+
+  const experience = read('app', 'components', 'jitsi', 'jitsi-meeting-experience.jsx');
+  assert.match(experience, /\/api\/orgs\/\$\{org\}\/jitsi\/meetings\/\$\{meetingRef\}\/join/);
+  assert.match(experience, /method:\s*'POST'/);
+  assert.match(experience, /credentials:\s*'same-origin'/);
+  assert.match(experience, /useEffect\(\(\)\s*=>\s*\{\s*requestJoin\(\)/s);
+  assert.match(experience, /roomUrl\s*=\s*joinPayload\?\.roomUrl\s*\|\|\s*''/);
+  assert.match(experience, /<JitsiEmbeddedMeeting/);
+  assert.match(experience, /<JitsiMeetingControls/);
+  assert.match(experience, /<JitsiParticipantList/);
+});
+
+test('Jitsi embedded meeting loads External API script and owns iframe lifecycle', () => {
+  const embedded = read('app', 'components', 'jitsi', 'jitsi-embedded-meeting.jsx');
+  assert.match(embedded, /JITSI_EXTERNAL_API_SRC\s*=\s*'https:\/\/meet\.krate\.local\/external_api\.js'/);
+  assert.match(embedded, /document\.createElement\('script'\)/);
+  assert.match(embedded, /window\.JitsiMeetExternalAPI/);
+  assert.match(embedded, /new window\.JitsiMeetExternalAPI/);
+  assert.match(embedded, /prejoinConfig:\s*\{\s*enabled:\s*false\s*\}/);
+  for (const button of ['microphone', 'camera', 'desktop', 'chat', 'recording', 'participants-pane']) {
+    assert.match(embedded, new RegExp(`'${button}'`));
+  }
+  for (const eventName of ['participantJoined', 'participantLeft', 'readyToClose', 'videoConferenceJoined', 'videoConferenceLeft']) {
+    assert.match(embedded, new RegExp(`addEventListener\\('${eventName}'`));
+  }
+  assert.match(embedded, /apiRef\.current\.dispose\(\)/);
+});
+
+test('Jitsi controls drive External API commands and Krate meeting actions', () => {
+  const controls = read('app', 'components', 'jitsi', 'jitsi-meeting-controls.jsx');
+  for (const command of ['toggleAudio', 'toggleVideo', 'toggleShareScreen', 'toggleChat', 'startRecording', 'stopRecording', 'hangup']) {
+    assert.match(controls, new RegExp(`'${command}'`));
+  }
+  assert.match(controls, /onRecordingChange\?\.\(!recordingActive\)/);
+  assert.match(controls, /onMeetingEnded\?\.\(\)/);
+  assert.match(controls, /Open direct Jitsi link/);
+});
+
+test('Jitsi context panel includes metadata, invited agents, dispatch links, and post-meeting links', () => {
+  const context = read('app', 'components', 'jitsi', 'jitsi-participant-list.jsx');
+  for (const label of ['Room', 'Template', 'Org', 'Phase', 'TTL']) {
+    assert.match(context, new RegExp(`\\['${label}'`));
+  }
+  assert.match(context, /agentStack/);
+  assert.match(context, /agents\/runs/);
+  assert.match(context, /meetings\/recordings/);
+  assert.match(context, /Transcript/);
+  assert.match(context, /Recording finalization/);
+});
+
+test('Jitsi embedded meeting layout collapses context below iframe on mobile', () => {
+  const css = read('app', 'globals.css');
+  assert.match(css, /\.jitsiMeetingExperience\s*\{/);
+  assert.match(css, /grid-template-columns:\s*minmax\(0,\s*1fr\)\s*minmax\(300px,\s*360px\)/);
+  assert.match(css, /@media\s*\(max-width:\s*960px\)[\s\S]*\.jitsiMeetingExperience\s*\{\s*grid-template-columns:\s*1fr;\s*\}/);
+  assert.match(css, /@media\s*\(max-width:\s*560px\)[\s\S]*\.jitsiEmbed,\s*\.jitsiEmbedFrame,\s*\.jitsiEmbedFrame iframe\s*\{\s*min-height:\s*430px;/);
 });
 
 test('Jitsi join and webhook helpers scope tokens and do not require development secrets in production', () => {

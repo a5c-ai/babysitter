@@ -83,6 +83,7 @@ export { JitsiTemplateForm } from './jitsi/jitsi-template-form.jsx';
 export { JitsiParticipantList } from './jitsi/jitsi-participant-list.jsx';
 export { JitsiRecordingList } from './jitsi/jitsi-recording-list.jsx';
 export { JitsiEmbeddedMeeting } from './jitsi/jitsi-embedded-meeting.jsx';
+export { JitsiMeetingExperience } from './jitsi/jitsi-meeting-experience.jsx';
 export { JitsiMeetingControls } from './jitsi/jitsi-meeting-controls.jsx';
 export { JitsiProviderConfig } from './jitsi/jitsi-provider-config.jsx';
 

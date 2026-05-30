@@ -530,6 +530,123 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .settingsGrid { margin-top: 12px; }
 .settingsGrid span { padding: 8px 10px; border-radius: var(--radius-sm); background: rgba(34, 197, 94, 0.08); color: var(--success); font-size: 0.8rem; }
 
+/* Jitsi embedded meeting */
+.jitsiMeetingExperience {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: 16px;
+  align-items: start;
+}
+.jitsiMeetingMain { display: grid; gap: 12px; min-width: 0; }
+.jitsiMeetingHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+.jitsiMeetingHeader h2 { margin-bottom: 4px; font-size: 1.25rem; }
+.jitsiMeetingHeader p { margin-bottom: 0; }
+.jitsiError { margin: 0; color: var(--danger); }
+.jitsiEmbed {
+  position: relative;
+  min-height: 560px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+.jitsiEmbedFrame {
+  width: 100%;
+  height: 100%;
+  min-height: 560px;
+}
+.jitsiEmbedFrame iframe {
+  display: block;
+  width: 100% !important;
+  min-height: 560px;
+  border: 0;
+}
+.jitsiEmbedState {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: var(--text-secondary);
+  text-align: center;
+  background: linear-gradient(180deg, rgba(9, 9, 11, 0.94), rgba(24, 24, 27, 0.94));
+}
+.jitsiEmbedState strong { color: var(--text); font-size: 1rem; }
+.jitsiControls {
+  display: grid;
+  gap: 10px;
+}
+.jitsiControlRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.jitsiControlRow input, .jitsiControlRow select { min-width: 160px; }
+.jitsiContextPanel {
+  position: sticky;
+  top: 84px;
+  display: grid;
+  gap: 12px;
+}
+.jitsiContextTitle { margin-top: 4px; }
+.jitsiMetadata {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.jitsiMetadata div {
+  display: grid;
+  grid-template-columns: minmax(72px, max-content) minmax(0, 1fr);
+  gap: 10px;
+}
+.jitsiMetadata dt {
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.jitsiMetadata dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.jitsiParticipantList li, .jitsiInviteList li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+.jitsiParticipantList li a { grid-column: 2; font-size: 0.8rem; }
+.jitsiAvatar {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 50%;
+  color: var(--accent);
+  background: rgba(59, 130, 246, 0.12);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.jitsiAvatar.agent {
+  color: var(--success);
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.12);
+}
+.jitsiAvatar.pending { opacity: 0.7; }
+
 /* ─── 9. Key-Value Pairs ───────────────────────────────────────────────────── */
 .kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; }
 .kv dt { color: var(--text-muted); font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -889,6 +1006,8 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 @media (max-width: 960px) {
   main { width: min(100% - 24px, 1320px); }
   .heroGrid, .split, .wideLeft, .fileView, .fileBrowser, .dashboardGrid, .flowGrid, .yamlGrid, .capabilityGrid, .routeHero, .routeGrid.two, .routeGrid.wideLeft, .endpointList a, .architectureLanes, .workQueue, .boardColumns, .metricGrid { grid-template-columns: 1fr; }
+  .jitsiMeetingExperience { grid-template-columns: 1fr; }
+  .jitsiContextPanel { position: static; }
 }
 
 @media (max-width: 768px) {
@@ -923,6 +1042,9 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   .heroCard, .formGrid, .webhookGrid, .stateStrip, .settingsGrid, .repositoryManageList li, .forgeFlowRail ol, .repoCommandBar { grid-template-columns: 1fr; }
   .heroChrome, .card, .panel { padding: 14px; }
   .appTopbar { margin-top: 0; padding: 8px 12px; }
+  .jitsiEmbed, .jitsiEmbedFrame, .jitsiEmbedFrame iframe { min-height: 430px; }
+  .jitsiMeetingHeader { display: grid; }
+  .jitsiControlRow input, .jitsiControlRow select, .jitsiControlRow button { width: 100%; }
 }
 
 /* ─── 18. Utilities ────────────────────────────────────────────────────────── */
