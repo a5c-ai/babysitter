@@ -26,6 +26,9 @@
  * - specializations/devops-sre-platform/iac-testing.js
  * - specializations/network-programming/health-check-system.js
  * - specializations/network-programming/realtime-messaging-system.js
+ * - specializations/web-development/server-sent-events.js
+ * - specializations/web-development/api-integration-testing.js
+ * - specializations/web-development/secrets-management.js
  * - cradle/feature-implementation-contribute.js
  *
  * @process methodologies/atdd-tdd/atdd-tdd
@@ -36,6 +39,9 @@
  * @process specializations/devops-sre-platform/iac-testing
  * @process specializations/network-programming/health-check-system
  * @process specializations/network-programming/realtime-messaging-system
+ * @process specializations/web-development/server-sent-events
+ * @process specializations/web-development/api-integration-testing
+ * @process specializations/web-development/secrets-management
  * @process cradle/feature-implementation-contribute
  */
 
@@ -115,12 +121,23 @@ export async function process(inputs, ctx) {
     key: 'issue-612.runtime-trace',
   });
 
+  const executionMode = await ctx.task(resolveExecutionModeTask, {
+    ...shared,
+    issueContext,
+    reuseAudit,
+    processResearch,
+    runtimeTrace,
+  }, {
+    key: 'issue-612.execution-mode',
+  });
+
   const architecture = await ctx.task(architectureTask, {
     ...shared,
     issueContext,
     reuseAudit,
     processResearch,
     runtimeTrace,
+    executionMode,
   }, {
     key: 'issue-612.architecture',
   });
@@ -130,6 +147,7 @@ export async function process(inputs, ctx) {
     issueContext,
     reuseAudit,
     runtimeTrace,
+    executionMode,
     architecture,
   }, {
     key: 'issue-612.contract-tests',
@@ -140,6 +158,7 @@ export async function process(inputs, ctx) {
     issueContext,
     reuseAudit,
     runtimeTrace,
+    executionMode,
     architecture,
     tests,
   }, {
@@ -178,6 +197,7 @@ export async function process(inputs, ctx) {
       issueContext,
       reuseAudit,
       runtimeTrace,
+      executionMode,
       architecture,
       tests,
       implementation,
@@ -209,6 +229,7 @@ export async function process(inputs, ctx) {
       issueContext,
       reuseAudit,
       runtimeTrace,
+      executionMode,
       architecture,
       tests,
       implementation,
@@ -225,6 +246,7 @@ export async function process(inputs, ctx) {
     reuseAudit,
     processResearch,
     runtimeTrace,
+    executionMode,
     architecture,
     tests,
     implementation,
@@ -257,6 +279,7 @@ export async function process(inputs, ctx) {
       'phase-0-reuse-audit',
       'process-library-research',
       'runtime-trace',
+      'prior-implementation-execution-mode',
       'architecture',
       'contract-tests',
       'implementation',
@@ -269,6 +292,7 @@ export async function process(inputs, ctx) {
     reuseAudit,
     processResearch,
     runtimeTrace,
+    executionMode,
     architecture,
     tests,
     implementation,
@@ -293,7 +317,7 @@ export const readIssueContextTask = defineTask('issue-612.read-issue-context', (
         `Confirm #${args.issueNumber} is not a PR with: gh pr view ${args.issueNumber} --json files,title,body,comments`,
         'Inspect related PRs from inputs only enough to identify prior plan or implementation work and whether it is merged, closed, or still pending.',
         'Treat the issue body and comments as source of truth, but verify against the current branch before coding.',
-        'If a prior implementation is already merged into the current branch, switch to acceptance verification and documentation cleanup rather than reimplementing.',
+        'If a prior implementation is already merged into the current branch, hand that evidence to the execution-mode phase so the run can switch to acceptance verification and documentation cleanup rather than reimplementing.',
         'Return JSON: { title, labels, issueSummary, commentsSummary, priorWork, acceptanceCriteria, nonGoals, dependencies, currentStatus, openQuestions }.',
       ],
     },
@@ -350,7 +374,7 @@ export const processLibraryResearchTask = defineTask('issue-612.process-library-
       task: 'Select the process-library methodologies and specializations that should guide implementation.',
       instructions: [
         'Research the local process library paths listed in this process header and any directly adjacent README files.',
-        'Prefer ATDD/TDD for acceptance and contract tests, network-programming health/realtime messaging for probe and SSE semantics, devops-sre-platform IaC testing for Helm/env wiring, and verification-before-completion for final gates.',
+        'Prefer ATDD/TDD for acceptance and contract tests, network-programming health/realtime messaging plus web-development/server-sent-events for probe and SSE semantics, web-development/api-integration-testing for route contract coverage, web-development/secrets-management for assistant key handling, devops-sre-platform IaC testing for Helm/env wiring, and verification-before-completion for final gates.',
         'Do not modify source files.',
         'Return JSON: { selectedReferences, rationale, patternsToApply, patternsToAvoid, noCodeChanges }.',
       ],
@@ -400,6 +424,37 @@ export const runtimeTraceTask = defineTask('issue-612.runtime-trace', (args, tas
   },
 }));
 
+export const resolveExecutionModeTask = defineTask('issue-612.resolve-execution-mode', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Resolve whether to implement or verify prior work',
+  labels: ['issue-612', 'prior-work', 'quality-gate'],
+  agent: {
+    name: 'krate-release-triager',
+    prompt: {
+      role: 'senior Krate release triager',
+      task: 'Determine whether this run should implement #612 from scratch or verify/finish prior work already present on the current branch.',
+      instructions: [
+        specBlock(args),
+        '',
+        'Use the issue context, reuse audit, process-library research, runtime trace, and related PRs to classify the current branch.',
+        'Inspect current files and tests for evidence from prior implementation PRs, especially #702: shared health probes, memory plus NATS/JetStream event transport, SSE replay, Helm env wiring, SDK exports, docs, and contract tests.',
+        'Return mode "implement" when required #612 behavior is absent or incomplete.',
+        'Return mode "acceptance-only" when the implementation is already present and the remaining work is verification, docs consistency, or small plan-safe cleanup.',
+        'Do not modify files in this phase.',
+        'Return JSON: { mode, evidence, missingItems, verificationFocus, documentationFocus, implementationAllowed, noCodeChanges }.',
+      ],
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['mode', 'evidence', 'missingItems', 'verificationFocus', 'implementationAllowed'],
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
 export const architectureTask = defineTask('issue-612.architecture', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Design health probe service and durable event transport',
@@ -415,12 +470,16 @@ export const architectureTask = defineTask('issue-612.architecture', (args, task
         'RUNTIME TRACE:',
         JSON.stringify(args.runtimeTrace ?? {}, null, 2),
         '',
+        'EXECUTION MODE:',
+        JSON.stringify(args.executionMode ?? {}, null, 2),
+        '',
         'Design a shared health probe module/service used by web health/snapshot paths and, where appropriate, controller health/status surfaces.',
         'Health probes must run concurrently with bounded timeouts and return partial structured results for Gitea /api/v1/version, Agent Mux /healthz, Krate Controller /healthz, Kubernetes connectivity, and assistant credentials.',
         'Use safe assistant credential validation by default: presence and format check without secret leakage; make live validation explicit, cached, or opt-in if implemented.',
         'Design event transport as a narrow abstraction preserving createEventBus/globalEventBus compatibility where practical, with in-memory local/test fallback and NATS JetStream production transport selected by env/Helm.',
         'Define durable event semantics: stable event IDs, subject/stream names, replay cursor behavior, retention, multi-replica fanout, slow-subscriber/backpressure handling, reconnect behavior, and broker outage status.',
         'Choose NATS/JetStream because the Helm chart already exposes optional NATS; do not add Redis unless the current chart or issue comments prove it is preferred.',
+        'If execution mode is acceptance-only, return a verification architecture that maps existing code and tests to each acceptance criterion and limits changes to missing docs or test evidence.',
         'Return JSON: { healthDesign, eventTransportDesign, publicContracts, envAndHelmDesign, migrationPlan, testPlan, docsPlan, risks, decisionsNeeded }.',
       ],
     },
@@ -450,11 +509,15 @@ export const contractTestsTask = defineTask('issue-612.contract-tests', (args, t
         'ARCHITECTURE:',
         JSON.stringify(args.architecture ?? {}, null, 2),
         '',
+        'EXECUTION MODE:',
+        JSON.stringify(args.executionMode ?? {}, null, 2),
+        '',
         'Add or update tests near existing Krate core/web/deployment tests. Keep test scaffolding minimal and deterministic with injectable fetch, broker clients, command runners, and clocks.',
         'Health tests must cover Gitea /api/v1/version, Agent Mux /healthz rather than /health, Krate Controller /healthz, bounded Kubernetes connectivity, assistant credential validation without leaking the key, timeouts, and partial failure results.',
         'Event tests must cover in-memory compatibility, NATS/JetStream transport behavior through injected clients, durable replay from cursor/last-event-id, cross-subscriber fanout, slow subscriber/backpressure semantics, broker-unavailable status, and SSE route replay behavior.',
         'Helm/deployment tests must cover NATS/event env wiring and no secret literals in templates.',
-        'Run the narrow tests and confirm the newly added tests fail for expected missing behavior before implementation unless the current branch already implements the feature.',
+        'Run the narrow tests and confirm the newly added tests fail for expected missing behavior before implementation unless execution mode is acceptance-only or the current branch already implements the feature.',
+        'If execution mode is acceptance-only, do not write duplicate tests; instead map existing tests and any missing narrow checks to the acceptance criteria.',
         'Return JSON: { testsAdded, testsUpdated, redCommands, redResults, failedForExpectedReason, alreadyImplementedEvidence, notes }.',
       ],
     },
@@ -487,6 +550,10 @@ export const implementationTask = defineTask('issue-612.implementation', (args, 
         'RED TESTS:',
         JSON.stringify(args.tests ?? {}, null, 2),
         '',
+        'EXECUTION MODE:',
+        JSON.stringify(args.executionMode ?? {}, null, 2),
+        '',
+        'If execution mode is acceptance-only, do not reimplement working behavior. Limit changes to missing documentation, narrowly missing tests, or verification evidence needed to prove #612 on the current branch.',
         'Implement only the scoped Krate health, event streaming, Helm/env, SDK export, and docs changes needed for #612.',
         'Health: create or reuse a shared probe service with injectable fetch/command runners, strict timeouts, redacted errors, concurrent execution, and structured per-dependency status.',
         'Health: update web snapshot/health route behavior without breaking current HealthMonitor shape; include controller /healthz and assistant credential status.',
@@ -635,4 +702,3 @@ export const finalAcceptanceTask = defineTask('issue-612.final-acceptance', (arg
     outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
   },
 }));
-

@@ -87,6 +87,9 @@
     "library/specializations/devops-sre-platform/iac-testing.js",
     "library/specializations/network-programming/health-check-system.js",
     "library/specializations/network-programming/realtime-messaging-system.js",
+    "library/specializations/web-development/server-sent-events.js",
+    "library/specializations/web-development/api-integration-testing.js",
+    "library/specializations/web-development/secrets-management.js",
     "library/cradle/feature-implementation-contribute.js"
   ],
   "maxRefinements": 2
