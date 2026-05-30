@@ -66,14 +66,14 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 
 | Gap | File | Description |
 |-----|------|-------------|
-| No process isolation | `execution/modes/local.ts:50-60` | Full parent env access. No namespaces, chroot, seccomp, or capabilities restriction. |
+| Process isolation is partial | `execution/modes/local.ts`, `execution/policy.ts` | ExecutionPolicy now removes default parent env inheritance and fails fast for unsupported local network/kernel sandbox guarantees. Local mode is still a host process and does not provide namespaces, chroot, seccomp, or capability isolation. |
 | No graceful drain | `daemon/lifecycle.ts:152-226` | SIGTERM + grace period, but no coordinated queue drain. Active runs waited but no cancellation signal. |
 | No hot reload | `daemon/lifecycle.ts` | Config changes require full restart. Queue/active runs lost. |
-| SSH — no verification | `execution/modes/ssh.ts` | StrictHostKeyChecking=no. No retry, no pooling, no keepalive. |
-| Docker — no daemon check | `execution/modes/docker.ts` | Assumes Docker running. No image pull check, no resource limits (--cpus/--memory). |
+| SSH — partial verification | `execution/modes/ssh.ts` | Strict host-key checking is now the default and `StrictHostKeyChecking=no` requires an explicit insecure policy opt-in. Retry, pooling, and keepalive are still missing. |
+| Docker — partial sandbox policy | `execution/modes/docker.ts` | Docker args now include secure defaults plus resource/network/DNS policy support. Live daemon availability and image verification preflight remain missing. |
 | No dead letter queue | `daemon/loop.ts` | Failed triggers not recorded or retried. No backoff, no failure metrics. |
 | No trigger deduplication | `daemon/fileWatcher.ts`, `daemon/timerScheduler.ts` | Same file matching multiple patterns fires multiple times. |
-| Background processes — no backpressure | `backgroundProcessRegistry.ts:137-142` | stdout/stderr appended with no size limit. OOM risk on high-output processes. |
+| Background process isolation/backpressure is partial | `backgroundProcessRegistry.ts` | Background execution now uses ExecutionPolicy env/cwd handling and optional stdout/stderr retention caps. Broader lifecycle backpressure, queueing, and state transitions remain incomplete. |
 
 ### Medium
 
