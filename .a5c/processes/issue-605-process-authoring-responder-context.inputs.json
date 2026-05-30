@@ -1,0 +1,33 @@
+{
+  "issueNumber": 605,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-605-process-authoring-responder-context",
+  "relatedIssues": [602, 603, 619, 635],
+  "targetFiles": [
+    "packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts",
+    "packages/agent-platform/src/harness/internal/createRun/planProcess/prompts.ts",
+    "packages/agent-platform/src/harness/internal/createRun/prompts.ts",
+    "packages/agent-platform/src/harness/internal/createRun/planProcess/validation.ts",
+    "packages/agent-platform/src/harness/internal/createRun/planProcess/validationSource.ts",
+    "packages/agent-platform/src/harness/internal/createRun/__tests__/prompts.test.ts",
+    "packages/sdk/src/harness/externalAgentDiscovery.ts",
+    "packages/sdk/src/tasks/types.ts",
+    "packages/sdk/src/tasks/kinds/index.ts"
+  ],
+  "designDocs": [
+    "docs/agent-reference/process-authoring.md",
+    "docs/agent-mux-babysitter-integrations/process-authoring.md",
+    "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md",
+    "docs/agent-mux-babysitter-integrations/external-agent-tasks.md",
+    "docs/agent-mux-babysitter-integrations/plugin-mode.md",
+    "docs/agent-mux-babysitter-integrations/testing.md"
+  ],
+  "verificationCommands": [
+    "npm exec --workspace=@a5c-ai/agent-platform -- vitest run src/harness/internal/createRun/__tests__/prompts.test.ts",
+    "npm run build:runtime",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "maxImplementationAttempts": 3
+}
