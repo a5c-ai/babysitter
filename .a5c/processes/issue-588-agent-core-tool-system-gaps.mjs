@@ -1,8 +1,8 @@
 /**
  * @process repo/issue-588-agent-core-tool-system-gaps
- * @description Implement the unified agent tool execution contract for AbortSignal cancellation, streaming updates, metadata, typed errors, SSH hardening, caching, and configurable limits.
+ * @description Plan and execute the unified agent tool execution contract for AbortSignal cancellation, streaming updates, metadata, typed errors, SSH hardening, caching, and configurable limits, with a prior-PR/current-state validation path.
  * @inputs { issueNumber: number, title: string, issueBody: string, issueComments: array, labels: string[], relatedIssues: array, targetFiles: string[], qualityCommands: string[], maxVerificationAttempts?: number }
- * @outputs { success, phases, reuseAudit, runtimeCallPaths, contractDesign, changedFiles, qualityGate, review }
+ * @outputs { success, phases, reuseAudit, runtimeCallPaths, implementationStatus, contractDesign, changedFiles, qualityGate, review }
  * @process methodologies/atdd-tdd/atdd-tdd
  * @process methodologies/superpowers/test-driven-development
  * @process methodologies/superpowers/systematic-debugging
@@ -21,22 +21,25 @@ const reuseAuditTask = defineTask(
   'issue-588.reuse-audit-and-runtime-trace',
   async ({ issueContext, targetFiles }) => ({
     kind: 'agent',
-    title: 'Phase 0 - Reuse audit and tool runtime trace',
+    title: 'Phase 0 - Reuse audit, prior attempt scan, and tool runtime trace',
     labels: ['agent-core', 'tool-mux', 'agent-platform', 'reuse-audit', 'phase:research'],
     agent: {
       name: 'tool-system-researcher',
       prompt: {
         role: 'senior TypeScript platform engineer',
-        task: 'Run the plan-only reuse audit and trace the live tool execution paths for issue #588.',
+        task: 'Run the plan-only reuse audit, prior attempt scan, and live tool execution trace for issue #588.',
         instructions: [
           'Do not edit source files in this phase.',
           'Render a section titled exactly "Reuse-audit findings (REVIEW BEFORE PROCEEDING)" in your result.',
+          'Read the issue comments carefully for prior work, especially the comments that mention plan PR #679 and implementation status.',
+          'Inspect the current branch for whether the #679 implementation is already present. If it is present and appears to satisfy #588, mark implementationStatus.alreadySatisfied true and recommend validation/remediation only.',
           'Extract keyword nouns and verbs from the issue context: AbortSignal, streaming, onUpdate, metadata, category, tags, cost hints, rateLimit, requiresApproval, typed errors, SSH, cache, web fetch, schema fetch, configurable limits, tool-mux, DeferredToolRegistry.',
           'Scan for matching migrations, API routes, environment variables, SDK dependencies, imports, registries, dispatchers, tool metadata, approval/governance hooks, cache facilities, and timeout/output-limit constants.',
+          'Scan Git history and issue/PR references for prior implementation attempts related to #588, #679, #576, and #587.',
           'Trace live runtime call paths from agent-core tool definition creation through built-in tool execution, deferred discovery/fetch, programmatic code_executor nested tool calls, tool-mux dispatch, MCP/client registry surfaces, and agent-platform host integration.',
           'Identify all already-existing infrastructure that should be reused rather than replaced.',
           'Identify which paths are directly on the live execution path and which are only adjacent documentation or tests.',
-          'Return JSON with: { reuseAudit: { keywords: array, findings: array, noMatchingInfrastructureNotes: array }, runtimeCallPaths: array, existingInfrastructure: array, affectedFiles: array, nonGoals: array, risks: array, confidence: number }.',
+          'Return JSON with: { reuseAudit: { keywords: array, findings: array, noMatchingInfrastructureNotes: array }, priorAttempts: array, runtimeCallPaths: array, implementationStatus: { alreadySatisfied: boolean, evidence: array, remainingGaps: array, recommendedMode: string }, existingInfrastructure: array, affectedFiles: array, nonGoals: array, risks: array, confidence: number }.',
           '',
           'ISSUE CONTEXT:',
           JSON.stringify(issueContext, null, 2),
@@ -61,7 +64,8 @@ const designUnifiedContractTask = defineTask(
         role: 'senior SDK API designer',
         task: 'Design the unified tool execution contract before tests and implementation.',
         instructions: [
-          'Base the design on the issue context and the reuse audit/runtime trace.',
+          'Base the design on the issue context, prior-attempt findings, current implementation status, and reuse audit/runtime trace.',
+          'If implementationStatus.alreadySatisfied is true, define the contract as the acceptance baseline for validation and only propose remediation for concrete remaining gaps.',
           'Define the shared execution context passed to all tool executors, including AbortSignal, toolCallId, caller, runId/sessionId when available, workspace, update emitter, policy metadata, and deadline/limit configuration.',
           'Define streaming update semantics: event shape, ordering relative to final result, backpressure/failure behavior, and how existing onUpdate is wired.',
           'Define structured ToolResult and ToolError types while preserving a migration path for existing text-only results.',
@@ -319,14 +323,29 @@ export async function process(inputs, ctx) {
     },
   });
 
-  const tests = await ctx.task(authorContractTestsTask, {
-    issueContext,
-    reuseAudit,
-    contractDesign,
-    testTargets: inputs?.testTargets ?? [],
-  }, { key: 'issue-588.contract-tests' });
+  const implementationStatus = reuseAudit?.implementationStatus ?? {};
+  const shouldValidateExistingImplementation = implementationStatus?.alreadySatisfied === true;
 
-  const slices = inputs?.implementationSlices ?? [
+  const tests = shouldValidateExistingImplementation
+    ? {
+        testFiles: [],
+        testNames: [],
+        redVerified: false,
+        redCommands: [],
+        redOutputSummary: 'Skipped red phase because Phase 0 found an existing implementation on the current branch. Quality gates must validate the existing implementation against issue #588 instead.',
+        failureMatchesIssue: false,
+        notes: 'Validation-only path for prior implementation, especially PR #679/current staging state.',
+      }
+    : await ctx.task(authorContractTestsTask, {
+        issueContext,
+        reuseAudit,
+        contractDesign,
+        testTargets: inputs?.testTargets ?? [],
+      }, { key: 'issue-588.contract-tests' });
+
+  const slices = shouldValidateExistingImplementation
+    ? []
+    : inputs?.implementationSlices ?? [
     {
       id: 'contract-types',
       title: 'shared execution context, AbortSignal, streaming event, ToolResult, ToolError, and metadata types',
@@ -347,9 +366,19 @@ export async function process(inputs, ctx) {
       title: 'metadata-driven policy, approval/rate/cost hints, SSH hardening, and opt-in read-only caching',
       focus: ['agent-platform governance bridge', 'tool-mux hooks', 'SSH options policy', 'fetch/schema cache behavior'],
     },
-  ];
+      ];
 
-  const implementationSlices = [];
+  const implementationSlices = shouldValidateExistingImplementation
+    ? [{
+        sliceId: 'existing-implementation-validation',
+        changedFiles: [],
+        summary: 'Phase 0 found an existing implementation on the current branch; skip implementation slices and validate the current state against the issue #588 contract.',
+        testsRun: [],
+        contractCriteriaCovered: [],
+        remainingRisks: implementationStatus?.remainingGaps ?? [],
+        needsFollowupSlice: false,
+      }]
+    : [];
   let verificationFeedback = null;
   for (const slice of slices) {
     const sliceResult = await ctx.task(implementContractSliceTask, {
@@ -425,15 +454,16 @@ export async function process(inputs, ctx) {
   return {
     success: qualityGate?.passed === true && review?.approved === true,
     phases: [
-      'reuse-audit-and-runtime-trace',
+      'reuse-audit-prior-attempt-scan-and-runtime-trace',
       'unified-contract-design',
-      'contract-tests-red-phase',
-      'sliced-implementation',
+      shouldValidateExistingImplementation ? 'existing-implementation-validation' : 'contract-tests-red-phase',
+      shouldValidateExistingImplementation ? 'implementation-slices-skipped' : 'sliced-implementation',
       'quality-gate',
       'final-review',
     ],
     reuseAudit: reuseAudit?.reuseAudit ?? reuseAudit,
     runtimeCallPaths: reuseAudit?.runtimeCallPaths ?? [],
+    implementationStatus,
     contractDesign,
     changedFiles: [
       ...new Set(

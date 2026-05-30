@@ -24,6 +24,16 @@
       "author": "a5c-ai",
       "createdAt": "2026-05-30T10:11:00Z",
       "body": "Triage says this is a valid umbrella issue for unifying and hardening the agent tool execution system across agent-core, tool-mux, and agent-platform. Recommended approach: define the unified tool contract first; add contract tests before implementation for built-in tools, custom/plugin tools, tool_search/tool_fetch, tool-mux dispatch, and MCP-backed tools; wire agent-core execution through shared tool-mux dispatcher/registry; implement slices for cancellation, typed results/errors, streaming/onUpdate, metadata/policy enforcement, SSH behavior, caching, and configurable limits. Keep cache behavior opt-in for read-only tools until side-effect metadata, cache keys, TTLs, and invalidation are explicit."
+    },
+    {
+      "author": "a5c-ai",
+      "createdAt": "2026-05-30T10:49:37Z",
+      "body": "Plan PR created: #679. Planned phases: Phase 0 reuse audit and runtime trace across agent-core, tool-mux, and agent-platform; Phase 1 unified tool contract design covering shared AbortSignal, streaming/onUpdate, structured results/errors, metadata/policy fields, dispatcher integration, SSH hardening, opt-in caching, and configurable limits; Phase 2 contract tests first; Phase 3 implementation slices for contract types, dispatcher/registry integration, built-in runtime behavior, and policy/SSH/cache hardening; Phase 4 quality gates; Phase 5 final review. Quality gates include npm run build:sdk, npm run test:sdk, npm run verify:metadata, and package-local tests for agent-core, tool-mux, and agent-platform."
+    },
+    {
+      "author": "tmuskal",
+      "createdAt": "2026-05-30T11:27:54Z",
+      "body": "Implementation complete in PR #679 (conflict-fix in progress for merge)."
     }
   ],
   "relatedIssues": [
@@ -41,7 +51,8 @@
     "Perform Phase 0 reuse audit before proposing new infrastructure.",
     "Treat DeferredToolRegistry as a migration surface, not the long-term target architecture.",
     "Keep cache behavior opt-in and limited to read-only tools until side-effect metadata and invalidation semantics are explicit.",
-    "Use sparse breakpoints: one after low-confidence runtime trace if needed, one mandatory unified contract review before implementation, one only if final gates fail."
+    "Use sparse breakpoints: one after low-confidence runtime trace if needed, one mandatory unified contract review before implementation, one only if final gates fail.",
+    "Current staging history includes commit a9864a7ae, feat: unify agent tool execution contract (#679). Phase 0 must detect this and switch to validation/remediation mode if the current branch already satisfies #588."
   ],
   "targetFiles": [
     "docs/agent-layer-gaps.md",
