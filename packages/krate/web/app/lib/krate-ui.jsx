@@ -47,6 +47,14 @@ export const orgNavigationGroups = [
     ]
   },
   {
+    title: 'Meetings',
+    items: [
+      ['/meetings', 'Meetings', 'Create and join video meetings'],
+      ['/meetings/templates', 'Templates', 'Reusable meeting configurations'],
+      ['/meetings/recordings', 'Recordings', 'Meeting recordings and transcripts'],
+    ]
+  },
+  {
     title: 'ML',
     items: [
       ['/models', 'Models', 'Browse and deploy models'],

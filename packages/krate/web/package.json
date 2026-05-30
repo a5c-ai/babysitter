@@ -11,7 +11,7 @@
     "lint": "echo 'no lint configured'",
     "test:e2e": "npx playwright test --config=playwright.config.js",
     "test:e2e:staging": "KRATE_E2E_URL=https://krate-staging.a5c.ai npx playwright test --config=playwright.config.js",
-    "test": "node --test tests/build-smoke.test.js tests/api-auth.test.js tests/status-tones.test.js tests/issue-workflow.test.js tests/krate-improvements.test.js tests/inference-routes.test.js tests/assistant-routes.test.js tests/artifact-routes.test.js tests/resource-contract.test.js tests/api-routes.test.js tests/component-exports.test.js tests/validator-edge-cases.test.js tests/component-structure.test.js tests/api-integration.test.js tests/page-structure.test.js tests/barrel-exports.test.js tests/lib-modules.test.js tests/security-edge-cases.test.js"
+    "test": "node --test tests/build-smoke.test.js tests/api-auth.test.js tests/status-tones.test.js tests/issue-workflow.test.js tests/krate-improvements.test.js tests/inference-routes.test.js tests/assistant-routes.test.js tests/artifact-routes.test.js tests/resource-contract.test.js tests/api-routes.test.js tests/component-exports.test.js tests/validator-edge-cases.test.js tests/component-structure.test.js tests/api-integration.test.js tests/page-structure.test.js tests/barrel-exports.test.js tests/lib-modules.test.js tests/security-edge-cases.test.js tests/jitsi-structure.test.js"
   },
   "dependencies": {
     "@a5c-ai/krate-sdk": "*",

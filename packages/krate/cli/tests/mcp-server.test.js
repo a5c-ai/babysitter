@@ -78,8 +78,8 @@ function rpc(method, params = {}, id = 1) {
 // Tests
 // ---------------------------------------------------------------------------
 
-test('MCP_TOOLS array has 19 entries', () => {
-  assert.equal(MCP_TOOLS.length, 19);
+test('MCP_TOOLS array has 23 entries', () => {
+  assert.equal(MCP_TOOLS.length, 23);
   const names = MCP_TOOLS.map((t) => t.name);
   assert.ok(names.includes('krate_list_resources'));
   assert.ok(names.includes('krate_get_resource'));
@@ -97,6 +97,10 @@ test('MCP_TOOLS array has 19 entries', () => {
   assert.ok(names.includes('krate_audit_query'));
   assert.ok(names.includes('krate_list_virtual_models'));
   assert.ok(names.includes('krate_create_virtual_model'));
+  assert.ok(names.includes('krate_create_meeting'));
+  assert.ok(names.includes('krate_join_meeting'));
+  assert.ok(names.includes('krate_list_meetings'));
+  assert.ok(names.includes('krate_invite_to_meeting'));
 });
 
 test('createMcpServer returns object with start, stop, handleMessage', () => {
@@ -117,10 +121,10 @@ test('handleMessage initialize returns capabilities with tools', async () => {
   assert.equal(resp.result.protocolVersion, '2024-11-05');
 });
 
-test('handleMessage tools/list returns all 19 tool definitions', async () => {
+test('handleMessage tools/list returns all 23 tool definitions', async () => {
   const server = createMcpServer({ controller: createMockController() });
   const resp = await server.handleMessage(rpc('tools/list'));
-  assert.equal(resp.result.tools.length, 19);
+  assert.equal(resp.result.tools.length, 23);
   for (const tool of resp.result.tools) {
     assert.ok(tool.name, 'each tool has a name');
     assert.ok(tool.description, 'each tool has a description');

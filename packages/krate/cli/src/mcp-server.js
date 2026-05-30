@@ -3,6 +3,7 @@ import { createKubernetesResourceGateway } from '../../core/src/kubernetes-resou
 import { createAgentSecretGrantController } from '../../core/src/agent-secret-config-grant-controller.js';
 import { createAuditController } from '../../core/src/audit-controller.js';
 import { orgNamespaceName } from '../../core/src/org-scoping.js';
+import crypto from 'node:crypto';
 
 export const MCP_TOOLS = [
   { name: 'krate_list_resources', description: 'List resources of a given kind', inputSchema: { type: 'object', properties: { kind: { type: 'string' } }, required: ['kind'] } },
@@ -24,6 +25,10 @@ export const MCP_TOOLS = [
   { name: 'krate_create_model_route', description: 'Create a KrateModelRoute for internal or external model routing', inputSchema: { type: 'object', properties: { name: { type: 'string' }, org: { type: 'string' }, modelName: { type: 'string' }, routeType: { type: 'string', enum: ['internal', 'external'] }, inferenceServiceRef: { type: 'string' }, provider: { type: 'string' }, endpoint: { type: 'string' }, modelId: { type: 'string' } }, required: ['name', 'org', 'modelName', 'routeType'] } },
   { name: 'krate_list_virtual_models', description: 'List KrateVirtualModel resources for programmable model abstraction', inputSchema: { type: 'object', properties: {} } },
   { name: 'krate_create_virtual_model', description: 'Create a KrateVirtualModel with declarative routing rules, hooks, and session config', inputSchema: { type: 'object', properties: { name: { type: 'string' }, org: { type: 'string' }, modelName: { type: 'string' }, routes: { type: 'array', items: { type: 'object', properties: { modelRouteRef: { type: 'string' }, weight: { type: 'number' }, priority: { type: 'number' } }, required: ['modelRouteRef'] } } }, required: ['name', 'org', 'modelName', 'routes'] } },
+  { name: 'krate_create_meeting', description: 'Create a Jitsi meeting room', inputSchema: { type: 'object', properties: { org: { type: 'string' }, displayName: { type: 'string' }, templateRef: { type: 'string' }, ttlMinutes: { type: 'number' }, inviteAgentStacks: { type: 'array', items: { type: 'string' } } }, required: ['displayName'] } },
+  { name: 'krate_join_meeting', description: 'Get a JWT and URL to join an active Jitsi meeting', inputSchema: { type: 'object', properties: { org: { type: 'string' }, meetingRef: { type: 'string' }, participantName: { type: 'string' }, participantRef: { type: 'string' } }, required: ['meetingRef'] } },
+  { name: 'krate_list_meetings', description: 'List active and recent Jitsi meetings', inputSchema: { type: 'object', properties: { org: { type: 'string' }, status: { type: 'string', enum: ['active', 'ended', 'all'] } } } },
+  { name: 'krate_invite_to_meeting', description: 'Invite a user or agent to an active Jitsi meeting', inputSchema: { type: 'object', properties: { org: { type: 'string' }, meetingRef: { type: 'string' }, participantType: { type: 'string', enum: ['user', 'agentStack'] }, participantRef: { type: 'string' }, role: { type: 'string' } }, required: ['meetingRef', 'participantType', 'participantRef'] } },
 ];
 
 export const MCP_PROMPTS = [
@@ -484,9 +489,130 @@ async function executeTool(controller, toolName, args) {
       });
     }
 
+    case 'krate_create_meeting': {
+      const org = args.org || 'default';
+      const name = toResourceName(args.name || args.displayName);
+      const roomId = args.roomId || `${name}-${org}`;
+      const resource = {
+        apiVersion: 'krate.a5c.ai/v1alpha1',
+        kind: 'JitsiMeeting',
+        metadata: { name, namespace: orgNamespaceName(org) },
+        spec: {
+          organizationRef: org,
+          providerRef: args.providerRef || 'default',
+          templateRef: args.templateRef,
+          roomId,
+          displayName: args.displayName,
+          ttlMinutes: args.ttlMinutes || 120,
+          participants: {
+            invited: (args.inviteAgentStacks || []).map((ref) => ({ type: 'agentStack', ref, role: 'observer' })),
+          },
+        },
+        status: {
+          phase: 'Active',
+          roomUrl: args.roomUrl || `https://meet.krate.local/${roomId}`,
+          participants: { current: [], total: 0, peak: 0 },
+          recording: { active: false, recordingId: null },
+        },
+      };
+      return applyOrgResource(controller, org, resource);
+    }
+
+    case 'krate_list_meetings': {
+      const org = args.org || 'default';
+      const result = await listOrgResources(controller, org, 'JitsiMeeting');
+      let items = result.items || [];
+      if (!args.status || args.status === 'all') return { ...result, items };
+      const phase = args.status === 'active' ? 'Active' : 'Ended';
+      items = items.filter((meeting) => meeting.status?.phase === phase);
+      return { ...result, items };
+    }
+
+    case 'krate_join_meeting': {
+      const org = args.org || 'default';
+      const result = await getOrgResource(controller, org, 'JitsiMeeting', args.meetingRef);
+      const meeting = result.resource || result;
+      if (meeting.status?.phase && meeting.status.phase !== 'Active') throw new Error(`Meeting ${args.meetingRef} is not active`);
+      return createMeetingJoinPayload(meeting, { ...args, org });
+    }
+
+    case 'krate_invite_to_meeting': {
+      const org = args.org || 'default';
+      const result = await getOrgResource(controller, org, 'JitsiMeeting', args.meetingRef);
+      const meeting = result.resource || result;
+      const invited = meeting.spec?.participants?.invited || [];
+      return applyOrgResource(controller, org, {
+        ...meeting,
+        spec: {
+          ...(meeting.spec || {}),
+          participants: {
+            ...(meeting.spec?.participants || {}),
+            invited: [
+              ...invited,
+              { type: args.participantType, ref: args.participantRef, role: args.role || (args.participantType === 'agentStack' ? 'observer' : 'participant') },
+            ],
+          },
+        },
+      });
+    }
+
     default:
       throw new Error(`Tool not implemented: ${toolName}`);
   }
+}
+
+function toResourceName(value) {
+  return String(value || 'meeting').trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 63) || 'meeting';
+}
+
+async function listOrgResources(controller, org, kind) {
+  if (controller.listResourceForOrg) return controller.listResourceForOrg(org, kind);
+  const result = await controller.listResource(kind);
+  const namespace = orgNamespaceName(org);
+  return {
+    ...result,
+    items: (result.items || []).filter((resource) => resource.spec?.organizationRef === org || resource.metadata?.namespace === namespace),
+  };
+}
+
+async function getOrgResource(controller, org, kind, name) {
+  if (controller.getResourceForOrg) return controller.getResourceForOrg(org, kind, name);
+  const result = await controller.getResource(kind, name);
+  const resource = result.resource || result;
+  const namespace = orgNamespaceName(org);
+  if (resource.spec?.organizationRef !== org && resource.metadata?.namespace !== namespace) {
+    throw new Error(`${kind}/${name} is not in org ${org}`);
+  }
+  return result;
+}
+
+async function applyOrgResource(controller, org, resource) {
+  if (controller.applyResourceForOrg) return controller.applyResourceForOrg(org, resource);
+  return controller.applyResource(resource);
+}
+
+function createMeetingJoinPayload(meeting, args = {}) {
+  const ttlMinutes = Math.max(1, Math.min(Number(args.ttlMinutes || meeting.spec?.ttlMinutes || 60), 60));
+  const exp = Math.floor(Date.now() / 1000) + ttlMinutes * 60;
+  const claims = {
+    aud: 'jitsi',
+    iss: 'krate',
+    room: meeting.spec?.roomId,
+    org: meeting.spec?.organizationRef || args.org,
+    exp,
+    context: { user: { name: args.participantName || 'Krate user', id: args.participantRef || 'krate-mcp' } },
+  };
+  const encoded = Buffer.from(JSON.stringify(claims)).toString('base64url');
+  const signature = crypto.createHmac('sha256', process.env.KRATE_JITSI_JWT_SECRET || 'dev-jitsi-secret').update(encoded).digest('base64url');
+  return {
+    meetingRef: meeting.metadata?.name,
+    org: meeting.spec?.organizationRef || args.org,
+    roomUrl: meeting.status?.roomUrl || `https://meet.krate.local/${meeting.spec?.roomId}`,
+    roomId: meeting.spec?.roomId,
+    jwt: `krate-jitsi.${encoded}.${signature}`,
+    expiresAt: new Date(exp * 1000).toISOString(),
+    expiresInSeconds: ttlMinutes * 60,
+  };
 }
 
 // --- MCP resource readers ----------------------------------------------------

@@ -75,6 +75,17 @@ export { ExternalProviderWizard } from './external/external-provider-wizard.jsx'
 export { ExternalSyncDashboard } from './external/external-sync-dashboard.jsx';
 export { ExternalConflictResolver } from './external/external-conflict-resolver.jsx';
 
+// ── Jitsi Meetings ──────────────────────────────────────────────────────────
+export { JitsiMeetingManager } from './jitsi/jitsi-meeting-manager.jsx';
+export { JitsiMeetingCard } from './jitsi/jitsi-meeting-card.jsx';
+export { JitsiCreateMeetingForm } from './jitsi/jitsi-create-meeting-form.jsx';
+export { JitsiTemplateForm } from './jitsi/jitsi-template-form.jsx';
+export { JitsiParticipantList } from './jitsi/jitsi-participant-list.jsx';
+export { JitsiRecordingList } from './jitsi/jitsi-recording-list.jsx';
+export { JitsiEmbeddedMeeting } from './jitsi/jitsi-embedded-meeting.jsx';
+export { JitsiMeetingControls } from './jitsi/jitsi-meeting-controls.jsx';
+export { JitsiProviderConfig } from './jitsi/jitsi-provider-config.jsx';
+
 // ── Deployments & CI ────────────────────────────────────────────────────────
 export { DeploymentPipeline } from './deployment-pipeline.jsx';
 export { RunnerPoolManager } from './runner-pool-manager.jsx';

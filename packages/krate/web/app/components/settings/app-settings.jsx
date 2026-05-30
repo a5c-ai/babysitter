@@ -34,6 +34,12 @@ export function AppSettingsForm() {
   const [cacheTtl, setCacheTtl] = useState('300');
   const [density, setDensity] = useState('default');
   const [saved, setSaved] = useState(false);
+  const [jitsiProvider, setJitsiProvider] = useState('default');
+  const [defaultRoomTTL, setDefaultRoomTTL] = useState('120');
+  const [autoRecord, setAutoRecord] = useState(false);
+  const [lobbyEnabled, setLobbyEnabled] = useState(true);
+  const [maxAgentsPerRoom, setMaxAgentsPerRoom] = useState('4');
+  const [agentAutoJoin, setAgentAutoJoin] = useState(false);
 
   // Notification preferences
   const [notifyRuns, setNotifyRuns] = useState(true);
@@ -49,6 +55,12 @@ export function AppSettingsForm() {
     setSseEnabled(getStoredValue('krate-sse-enabled', 'true') === 'true');
     setCacheTtl(getStoredValue('krate-cache-ttl', '300'));
     setDensity(getStoredValue('krate-density', 'default'));
+    setJitsiProvider(getStoredValue('krate-jitsi-provider', 'default'));
+    setDefaultRoomTTL(getStoredValue('krate-jitsi-default-room-ttl', '120'));
+    setAutoRecord(getStoredValue('krate-jitsi-auto-record', 'false') === 'true');
+    setLobbyEnabled(getStoredValue('krate-jitsi-lobby-enabled', 'true') === 'true');
+    setMaxAgentsPerRoom(getStoredValue('krate-jitsi-max-agents-per-room', '4'));
+    setAgentAutoJoin(getStoredValue('krate-jitsi-agent-auto-join', 'false') === 'true');
     setNotifyRuns(getStoredValue('krate-notify-runs', 'true') === 'true');
     setNotifyApprovals(getStoredValue('krate-notify-approvals', 'true') === 'true');
     setNotifyConflicts(getStoredValue('krate-notify-conflicts', 'true') === 'true');
@@ -89,6 +101,12 @@ export function AppSettingsForm() {
   function handleDensityChange(newDensity) {
     setDensity(newDensity);
     localStorage.setItem('krate-density', newDensity);
+    flashSaved();
+  }
+
+  function handleStoredValue(key, setter, value) {
+    setter(value);
+    localStorage.setItem(key, String(value));
     flashSaved();
   }
 
@@ -188,6 +206,38 @@ export function AppSettingsForm() {
           />
           <p style={descStyle}>Duration in seconds that snapshot data is cached before a refresh is required. Set to 0 to disable caching.</p>
         </div>
+      </div>
+
+      <div className="card" style={cardStyle}>
+        <div className="cardTitle"><h2>Meetings (Jitsi)</h2></div>
+        <div>
+          <label style={labelStyle}>Jitsi Provider</label>
+          <select value={jitsiProvider} onChange={e => handleStoredValue('krate-jitsi-provider', setJitsiProvider, e.target.value)} style={{ ...selectStyle, maxWidth: '320px' }}>
+            <option value="default">Default</option>
+            <option value="jitsi-prod">jitsi-prod</option>
+          </select>
+          <p style={descStyle}>Default provider used by new rooms.</p>
+        </div>
+        <div>
+          <label style={labelStyle}>Default room TTL (minutes)</label>
+          <input name="defaultRoomTTL" type="number" min="1" max="1440" value={defaultRoomTTL} onChange={e => handleStoredValue('krate-jitsi-default-room-ttl', setDefaultRoomTTL, e.target.value)} style={{ ...inputStyle, maxWidth: '200px' }} />
+        </div>
+        <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
+          <input name="autoRecord" type="checkbox" checked={autoRecord} onChange={() => handleStoredValue('krate-jitsi-auto-record', setAutoRecord, !autoRecord)} />
+          Auto-record meetings
+        </label>
+        <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
+          <input name="lobbyEnabled" type="checkbox" checked={lobbyEnabled} onChange={() => handleStoredValue('krate-jitsi-lobby-enabled', setLobbyEnabled, !lobbyEnabled)} />
+          Enable lobby for all rooms
+        </label>
+        <div>
+          <label style={labelStyle}>Max agents per room</label>
+          <input name="maxAgentsPerRoom" type="number" min="0" max="25" value={maxAgentsPerRoom} onChange={e => handleStoredValue('krate-jitsi-max-agents-per-room', setMaxAgentsPerRoom, e.target.value)} style={{ ...inputStyle, maxWidth: '200px' }} />
+        </div>
+        <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
+          <input name="agentAutoJoin" type="checkbox" checked={agentAutoJoin} onChange={() => handleStoredValue('krate-jitsi-agent-auto-join', setAgentAutoJoin, !agentAutoJoin)} />
+          Agents auto-join meetings
+        </label>
       </div>
 
       <div className="card" style={cardStyle}>
