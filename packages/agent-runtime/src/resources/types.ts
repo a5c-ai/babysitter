@@ -100,6 +100,17 @@ export interface ResourceWarning {
 /** Callback signature for resource warning notifications. */
 export type ResourceWarningCallback = (warning: ResourceWarning) => void;
 
+export interface ResourceAdmissionRequest {
+  readonly tokens?: number;
+  readonly cost?: number;
+}
+
+export interface ResourceAdmissionDecision {
+  readonly allowed: boolean;
+  readonly reason?: string;
+  readonly snapshot: ResourceSnapshot;
+}
+
 // ---------------------------------------------------------------------------
 // Manager
 // ---------------------------------------------------------------------------
@@ -121,6 +132,13 @@ export interface ResourceManager {
    * @param amount - Units to consume.
    */
   consume(kind: BudgetKind, amount: number): void;
+
+  /**
+   * Atomically check and reserve resources before dispatching new work.
+   *
+   * A denied decision must not mutate budget state.
+   */
+  admit(request: ResourceAdmissionRequest): ResourceAdmissionDecision;
 
   /**
    * Release previously consumed units back into a budget (e.g. on rollback).

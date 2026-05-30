@@ -7,6 +7,7 @@ export {
   type TelemetryEvent,
   type TelemetrySpan,
   type TelemetryProvider,
+  type TelemetryExporter,
   type TelemetryConfig,
   type TraceContext,
   type TelemetrySpanStartOptions,
@@ -14,7 +15,15 @@ export {
   type TelemetryExportResult,
 } from "./types";
 
-export { InMemoryTelemetryProvider } from "./provider";
+export {
+  FileTelemetryExporter,
+  HttpTelemetryExporter,
+  InMemoryTelemetryProvider,
+} from "./provider";
+export type {
+  HttpTelemetrySend,
+  InMemoryTelemetryProviderOptions,
+} from "./provider";
 
 export {
   AuditLog,

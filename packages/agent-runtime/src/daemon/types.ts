@@ -107,6 +107,19 @@ export interface DaemonStatusOutput {
   startedAt?: string;
   activeTriggers?: number;
   pendingRuns?: number;
+  deadLetterRuns?: number;
+}
+
+export interface DaemonWatchdogOptions {
+  daemonDir: string;
+  pollIntervalMs?: number;
+  maxRestarts?: number;
+  signal?: AbortSignal;
+}
+
+export interface DaemonWatchdogOutput {
+  restarts: number;
+  stoppedAt: string;
 }
 
 // ── File watcher types ──────────────────────────────────────────────────────

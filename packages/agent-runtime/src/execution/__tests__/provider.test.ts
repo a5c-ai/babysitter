@@ -202,8 +202,22 @@ describe("SshExecutor", () => {
 // ---------------------------------------------------------------------------
 
 describe("KubernetesExecutor", () => {
+  function createMockKubectl(results: Array<{ stdout?: string; stderr?: string } | Error> = []) {
+    const calls: Array<{ args: string[]; input?: string }> = [];
+    return {
+      calls,
+      invoker: vi.fn(async (args: string[], options?: { input?: string }) => {
+        calls.push({ args, input: options?.input });
+        const result = results.shift();
+        if (result instanceof Error) throw result;
+        return result ?? { stdout: "", stderr: "" };
+      }),
+    };
+  }
+
   it("generates a valid manifest with namespace, image, and command", async () => {
-    const executor = new KubernetesExecutor();
+    const kubectl = createMockKubectl([{ stdout: "job.batch/babysitter created" }]);
+    const executor = new KubernetesExecutor({ kubectl: kubectl.invoker });
 
     const config: KubernetesExecutionConfig = {
       mode: "kubernetes",
@@ -228,10 +242,12 @@ describe("KubernetesExecutor", () => {
     // Command includes both the executable and args
     expect(manifest).toContain('"node"');
     expect(manifest).toContain('"script.js"');
+    expect(kubectl.calls[0].args).toEqual(["apply", "-f", "-"]);
+    expect(kubectl.calls[0].input).toContain("kind: Job");
   });
 
   it("generates manifest without serviceAccount when not provided", async () => {
-    const executor = new KubernetesExecutor();
+    const executor = new KubernetesExecutor({ kubectl: createMockKubectl().invoker });
 
     const config: KubernetesExecutionConfig = {
       mode: "kubernetes",
@@ -247,7 +263,7 @@ describe("KubernetesExecutor", () => {
   });
 
   it("maps execution policy to security context and resources", async () => {
-    const executor = new KubernetesExecutor();
+    const executor = new KubernetesExecutor({ kubectl: createMockKubectl().invoker });
 
     const config: KubernetesExecutionConfig = {
       mode: "kubernetes",
@@ -271,7 +287,7 @@ describe("KubernetesExecutor", () => {
   });
 
   it("maps filesystem mounts into Kubernetes volume mounts", async () => {
-    const executor = new KubernetesExecutor();
+    const executor = new KubernetesExecutor({ kubectl: createMockKubectl().invoker });
 
     const config: KubernetesExecutionConfig = {
       mode: "kubernetes",
@@ -297,6 +313,68 @@ describe("KubernetesExecutor", () => {
     expect(handle.manifest).toContain("mountPath: /cache");
     expect(handle.manifest).toContain("volumes:");
     expect(handle.manifest).toContain("path: /workspace/cache");
+  });
+
+  it("polls Kubernetes job status to stopped on completion", async () => {
+    const kubectl = createMockKubectl([
+      { stdout: "created" },
+      { stdout: JSON.stringify({ status: { active: 1 } }) },
+      { stdout: JSON.stringify({ status: { succeeded: 1 } }) },
+    ]);
+    const executor = new KubernetesExecutor({ kubectl: kubectl.invoker, pollIntervalMs: 1 });
+
+    const handle = await executor.spawn("node", ["script.js"], {
+      mode: "kubernetes",
+      namespace: "ci-jobs",
+      image: "node:20-slim",
+    });
+
+    await executor.waitForCompletion(handle.id);
+
+    expect(handle.status).toBe("stopped");
+    expect(kubectl.calls.some((call) => call.args.includes("get") && call.args.includes("-o") && call.args.includes("json"))).toBe(true);
+  });
+
+  it("streams logs through attach and deletes the job on destroy", async () => {
+    const kubectl = createMockKubectl([
+      { stdout: "created" },
+      { stdout: "hello logs\n" },
+      { stdout: "deleted" },
+    ]);
+    const executor = new KubernetesExecutor({ kubectl: kubectl.invoker });
+    const handle = await executor.spawn("echo", ["hello"], {
+      mode: "kubernetes",
+      namespace: "default",
+      image: "alpine:latest",
+    });
+
+    const attached = await executor.attach(handle.id);
+    await attached?.attach();
+    await executor.destroy(handle.id);
+
+    expect(kubectl.calls.some((call) => call.args[0] === "logs")).toBe(true);
+    expect(kubectl.calls.some((call) => call.args[0] === "delete" && call.args[1] === "job")).toBe(true);
+  });
+
+  it("marks jobs failed on timeout", async () => {
+    const kubectl = createMockKubectl([
+      { stdout: "created" },
+      { stdout: JSON.stringify({ status: { active: 1 } }) },
+      { stdout: "deleted" },
+    ]);
+    const executor = new KubernetesExecutor({ kubectl: kubectl.invoker, pollIntervalMs: 1 });
+
+    const handle = await executor.spawn("sleep", ["10"], {
+      mode: "kubernetes",
+      namespace: "default",
+      image: "alpine:latest",
+      timeoutMs: 1,
+      cleanupAfterCompletion: true,
+    });
+
+    await expect(executor.waitForCompletion(handle.id)).rejects.toThrow("timed out");
+    expect(handle.status).toBe("failed");
+    expect(kubectl.calls.some((call) => call.args[0] === "delete")).toBe(true);
   });
 });
 

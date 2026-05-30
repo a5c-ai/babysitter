@@ -150,14 +150,20 @@ export interface KubernetesExecutionConfig {
   readonly namespace: string;
   /** Container image reference. */
   readonly image: string;
+  /** Optional environment variable overrides. */
+  readonly env?: Record<string, string>;
   /** Service account to run under. */
   readonly serviceAccount?: string;
   /** Resource requests/limits (e.g. `{ cpu: "500m", memory: "256Mi" }`). */
   readonly resources?: Record<string, string>;
-  /** Optional environment variable overrides. */
-  readonly env?: Record<string, string>;
   /** Shared execution policy. Secure defaults apply when omitted. */
   readonly policy?: ExecutionPolicy;
+  /** Maximum time to wait for Job completion. Defaults to 5 minutes. */
+  readonly timeoutMs?: number;
+  /** Maximum time for each kubectl invocation. */
+  readonly kubectlTimeoutMs?: number;
+  /** Delete the Job after terminal success, failure, or timeout. */
+  readonly cleanupAfterCompletion?: boolean;
 }
 
 // ---------------------------------------------------------------------------

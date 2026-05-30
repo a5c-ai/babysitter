@@ -8,6 +8,8 @@ import type {
   ConcurrencyLimits,
   CostBudget,
   ResourceManager,
+  ResourceAdmissionDecision,
+  ResourceAdmissionRequest,
   ResourceSnapshot,
   ResourceWarningCallback,
   TokenBudget,
@@ -91,6 +93,43 @@ export class ResourceManagerImpl implements ResourceManager {
 
   consume(kind: BudgetKind, amount: number): void {
     this._trackerFor(kind).consume(amount);
+  }
+
+  admit(request: ResourceAdmissionRequest): ResourceAdmissionDecision {
+    const tokens = request.tokens ?? 0;
+    const cost = request.cost ?? 0;
+    if (tokens < 0 || cost < 0) {
+      return {
+        allowed: false,
+        reason: "Resource admission amounts must be non-negative",
+        snapshot: this.getSnapshot(),
+      };
+    }
+
+    const tokenBudget = this._tokenBudget.check();
+    if (tokens > tokenBudget.remaining) {
+      return {
+        allowed: false,
+        reason: `tokens budget exceeded: requested ${tokens}, remaining ${tokenBudget.remaining}`,
+        snapshot: this.getSnapshot(),
+      };
+    }
+
+    const costBudget = this._costBudget.check();
+    if (cost > costBudget.remaining) {
+      return {
+        allowed: false,
+        reason: `cost budget exceeded: requested ${cost}, remaining ${costBudget.remaining}`,
+        snapshot: this.getSnapshot(),
+      };
+    }
+
+    if (tokens > 0) this._tokenBudget.consume(tokens);
+    if (cost > 0) this._costBudget.consume(cost);
+    return {
+      allowed: true,
+      snapshot: this.getSnapshot(),
+    };
   }
 
   release(kind: BudgetKind, amount: number): void {

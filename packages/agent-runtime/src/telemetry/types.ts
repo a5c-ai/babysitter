@@ -112,6 +112,10 @@ export interface TelemetryProvider {
   flush(): Promise<void>;
 }
 
+export interface TelemetryExporter {
+  export(spans: readonly TelemetrySpan[]): Promise<void>;
+}
+
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------

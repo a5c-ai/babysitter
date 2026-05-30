@@ -1,9 +1,24 @@
-import { describe, it, expect } from "vitest";
-import { InMemoryTelemetryProvider } from "../provider";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { FileTelemetryExporter, HttpTelemetryExporter, InMemoryTelemetryProvider } from "../provider";
 import { TelemetrySpanStatus } from "../types";
 import { AuditLog } from "../audit-log";
 import { SpanTree } from "../span-tree";
 import type { TelemetrySpan } from "../types";
+
+const tempDirs: string[] = [];
+
+async function makeTempDir(): Promise<string> {
+  const dir = await mkdtemp(path.join(tmpdir(), "agent-runtime-telemetry-"));
+  tempDirs.push(dir);
+  return dir;
+}
+
+afterEach(async () => {
+  await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
+});
 
 // ---------------------------------------------------------------------------
 // InMemoryTelemetryProvider
@@ -64,6 +79,47 @@ describe("InMemoryTelemetryProvider", () => {
     // drain should return empty after flush
     const drained = await provider.drain();
     expect(drained).toHaveLength(0);
+  });
+
+  it("exports completed spans to file with secret-like attributes redacted", async () => {
+    const dir = await makeTempDir();
+    const filePath = path.join(dir, "spans.jsonl");
+    const provider = new InMemoryTelemetryProvider({
+      exporters: [new FileTelemetryExporter(filePath)],
+    });
+    const span = await provider.startSpan("export-span");
+
+    await provider.recordEvent(span.spanId, {
+      name: "credentials",
+      timestamp: new Date().toISOString(),
+      attributes: { apiToken: "secret-value", safe: "kept" },
+    });
+    await provider.endSpan(span.spanId);
+    await provider.flush();
+
+    const lines = (await readFile(filePath, "utf-8")).trim().split("\n");
+    const exported = JSON.parse(lines[0]) as TelemetrySpan;
+
+    expect(exported.name).toBe("export-span");
+    expect(exported.events[0].attributes?.apiToken).toBe("[REDACTED]");
+    expect(exported.events[0].attributes?.safe).toBe("kept");
+    expect(await provider.drain()).toHaveLength(0);
+  });
+
+  it("exports completed spans to an OTLP-compatible HTTP sink", async () => {
+    const send = vi.fn(async () => {});
+    const provider = new InMemoryTelemetryProvider({
+      exporters: [new HttpTelemetryExporter("https://collector.example/v1/traces", send)],
+    });
+    const span = await provider.startSpan("http-span");
+    await provider.endSpan(span.spanId);
+
+    await provider.flush();
+
+    expect(send).toHaveBeenCalledTimes(1);
+    const [url, payload] = send.mock.calls[0];
+    expect(url).toBe("https://collector.example/v1/traces");
+    expect(payload.resourceSpans[0].scopeSpans[0].spans[0].name).toBe("http-span");
   });
 
   it("getActiveSpans returns only open spans", async () => {

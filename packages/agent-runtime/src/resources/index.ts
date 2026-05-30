@@ -12,6 +12,8 @@ export type {
   BudgetKind,
   ResourceWarning,
   ResourceWarningCallback,
+  ResourceAdmissionRequest,
+  ResourceAdmissionDecision,
   ResourceManager,
 } from "./types";
 

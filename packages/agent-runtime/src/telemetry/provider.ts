@@ -6,7 +6,10 @@
  */
 
 import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
 import type {
+  TelemetryExporter,
   TelemetryProvider,
   TelemetrySpan,
   TelemetryEvent,
@@ -32,8 +35,44 @@ interface MutableSpan {
   events: TelemetryEvent[];
 }
 
+export interface InMemoryTelemetryProviderOptions {
+  exporters?: TelemetryExporter[];
+}
+
+export class FileTelemetryExporter implements TelemetryExporter {
+  constructor(private readonly filePath: string) {}
+
+  async export(spans: readonly TelemetrySpan[]): Promise<void> {
+    if (spans.length === 0) return;
+    await fs.mkdir(path.dirname(this.filePath), { recursive: true });
+    const payload = spans.map((span) => JSON.stringify(redactSpan(span))).join("\n") + "\n";
+    await fs.appendFile(this.filePath, payload, "utf-8");
+  }
+}
+
+export type HttpTelemetrySend = (url: string, payload: unknown) => Promise<void>;
+
+export class HttpTelemetryExporter implements TelemetryExporter {
+  constructor(
+    private readonly url: string,
+    private readonly send: HttpTelemetrySend = defaultHttpSend,
+  ) {}
+
+  async export(spans: readonly TelemetrySpan[]): Promise<void> {
+    if (spans.length === 0) return;
+    await this.send(this.url, toOtlpPayload(spans.map(redactSpan)));
+  }
+}
+
 function toReadonly(span: MutableSpan): TelemetrySpan {
-  return { ...span, attributes: { ...span.attributes }, events: [...span.events] };
+  return {
+    ...span,
+    attributes: { ...span.attributes },
+    events: span.events.map((event) => ({
+      ...event,
+      attributes: event.attributes ? { ...event.attributes } : undefined,
+    })),
+  };
 }
 
 /**
@@ -52,6 +91,11 @@ export class InMemoryTelemetryProvider implements TelemetryProvider {
   private readonly completed: MutableSpan[] = [];
   /** Maps spanId -> traceId so child spans inherit the parent's trace. */
   private readonly traceIndex = new Map<string, string>();
+  private readonly exporters: TelemetryExporter[];
+
+  constructor(options?: InMemoryTelemetryProviderOptions) {
+    this.exporters = options?.exporters ?? [];
+  }
 
   // ---------- TelemetryProvider interface ----------
 
@@ -122,6 +166,10 @@ export class InMemoryTelemetryProvider implements TelemetryProvider {
   }
 
   async flush(): Promise<void> {
+    const spans = this.completed.map(toReadonly);
+    for (const exporter of this.exporters) {
+      await exporter.export(spans);
+    }
     this.completed.length = 0;
   }
 
@@ -140,5 +188,93 @@ export class InMemoryTelemetryProvider implements TelemetryProvider {
   /** Return a snapshot of all currently open (un-ended) spans. */
   getActiveSpans(): TelemetrySpan[] {
     return [...this.active.values()].map(toReadonly);
+  }
+}
+
+function redactSpan(span: TelemetrySpan): TelemetrySpan {
+  return {
+    ...span,
+    attributes: redactAttributes(span.attributes),
+    events: span.events.map((event) => ({
+      ...event,
+      attributes: event.attributes ? redactAttributes(event.attributes) : undefined,
+    })),
+  };
+}
+
+function redactAttributes(
+  attributes: Record<string, string | number | boolean>,
+): Record<string, string | number | boolean> {
+  return Object.fromEntries(
+    Object.entries(attributes).map(([key, value]) => [
+      key,
+      isSecretKey(key) || (typeof value === "string" && looksSecretValue(value))
+        ? "[REDACTED]"
+        : value,
+    ]),
+  );
+}
+
+function isSecretKey(key: string): boolean {
+  return /(token|secret|password|api[_-]?key|authorization|credential)/i.test(key);
+}
+
+function looksSecretValue(value: string): boolean {
+  return /(bearer\s+\S+|token=\S+|password=\S+|secret=\S+)/i.test(value);
+}
+
+function toOtlpPayload(spans: readonly TelemetrySpan[]): unknown {
+  return {
+    resourceSpans: [
+      {
+        resource: { attributes: [] },
+        scopeSpans: [
+          {
+            scope: { name: "@a5c-ai/agent-runtime" },
+            spans: spans.map((span) => ({
+              traceId: span.traceId,
+              spanId: span.spanId,
+              parentSpanId: span.parentSpanId,
+              name: span.name,
+              startTimeUnixNano: isoToUnixNano(span.startTime),
+              endTimeUnixNano: span.endTime ? isoToUnixNano(span.endTime) : undefined,
+              status: { code: span.status },
+              attributes: toOtlpAttributes(span.attributes),
+              events: span.events.map((event) => ({
+                name: event.name,
+                timeUnixNano: isoToUnixNano(event.timestamp),
+                attributes: event.attributes ? toOtlpAttributes(event.attributes) : [],
+              })),
+            })),
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function toOtlpAttributes(attributes: Record<string, string | number | boolean>): Array<{ key: string; value: unknown }> {
+  return Object.entries(attributes).map(([key, value]) => ({
+    key,
+    value: typeof value === "string"
+      ? { stringValue: value }
+      : typeof value === "number"
+        ? { doubleValue: value }
+        : { boolValue: value },
+  }));
+}
+
+function isoToUnixNano(value: string): string {
+  return String(BigInt(new Date(value).getTime()) * 1_000_000n);
+}
+
+async function defaultHttpSend(url: string, payload: unknown): Promise<void> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(`Telemetry export failed with HTTP ${response.status}`);
   }
 }

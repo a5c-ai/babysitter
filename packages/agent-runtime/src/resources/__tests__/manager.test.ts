@@ -215,4 +215,26 @@ describe("ResourceManagerImpl", () => {
     });
     expect(admission.unsupported).toEqual([]);
   });
+
+  it("admits and reserves work that fits configured budgets", () => {
+    const rm = new ResourceManagerImpl({ tokenLimit: 1000, costLimit: 50 });
+
+    const admission = rm.admit({ tokens: 250, cost: 10 });
+
+    expect(admission.allowed).toBe(true);
+    expect(rm.checkBudget("tokens").used).toBe(250);
+    expect(rm.checkBudget("cost").used).toBe(10);
+  });
+
+  it("rejects over-budget work before mutating budget state", () => {
+    const rm = new ResourceManagerImpl({ tokenLimit: 100, costLimit: 5 });
+    rm.consume("tokens", 80);
+
+    const admission = rm.admit({ tokens: 25, cost: 1 });
+
+    expect(admission.allowed).toBe(false);
+    expect(admission.reason).toContain("tokens");
+    expect(rm.checkBudget("tokens").used).toBe(80);
+    expect(rm.checkBudget("cost").used).toBe(0);
+  });
 });

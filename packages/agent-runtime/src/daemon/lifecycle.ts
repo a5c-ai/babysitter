@@ -19,10 +19,13 @@ import type {
   DaemonStatusOptions,
   DaemonStatusOutput,
   DaemonMetadata,
+  DaemonWatchdogOptions,
+  DaemonWatchdogOutput,
 } from "./types";
 import { appendDaemonLog } from "./daemonLog";
 
 const DEFAULT_GRACE_PERIOD_MS = 10_000;
+const DEFAULT_WATCHDOG_POLL_MS = 5_000;
 
 // ── Atomic write helper ─────────────────────────────────────────────────────
 
@@ -259,9 +262,84 @@ export async function getDaemonStatus(
       startedAt,
       activeTriggers: metadata?.triggers?.length ?? 0,
       pendingRuns: loopStatus?.pendingRuns ?? 0,
+      deadLetterRuns: loopStatus?.deadLetterRuns ?? 0,
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     return fail("INTERNAL_ERROR", msg);
   }
+}
+
+export async function watchDaemon(
+  options: DaemonWatchdogOptions,
+): Promise<ApiResult<DaemonWatchdogOutput>> {
+  try {
+    const {
+      daemonDir,
+      pollIntervalMs = DEFAULT_WATCHDOG_POLL_MS,
+      maxRestarts = Number.POSITIVE_INFINITY,
+      signal,
+    } = options;
+    let restarts = 0;
+
+    while (!signal?.aborted) {
+      const metadata = await readDaemonMetadata(daemonDir);
+      if (!metadata) {
+        return fail("DAEMON_NOT_CONFIGURED", "No daemon metadata found for watchdog restart");
+      }
+
+      const pid = await readPidFile(daemonDir);
+      if (pid === null || !isProcessAlive(pid)) {
+        if (restarts >= maxRestarts) {
+          return fail("WATCHDOG_RESTART_LIMIT", `Daemon restart limit reached: ${maxRestarts}`);
+        }
+
+        await appendDaemonLog(daemonDir, {
+          timestamp: new Date().toISOString(),
+          event: "DAEMON_WATCHDOG_RESTART",
+          data: { previousPid: pid, restarts },
+        }).catch(() => {});
+
+        const result = await startDaemon({
+          daemonDir,
+          workspace: metadata.workspace,
+          foreground: false,
+          config: {
+            workspace: metadata.workspace,
+            triggers: metadata.triggers,
+            maxConcurrentRuns: metadata.maxConcurrentRuns,
+          },
+        });
+        if (!result.ok) {
+          return fail(result.error.code, result.error.message);
+        }
+        restarts += 1;
+      }
+
+      await sleepOrAbort(pollIntervalMs, signal);
+    }
+
+    return ok({ restarts, stoppedAt: new Date().toISOString() });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return fail("INTERNAL_ERROR", msg);
+  }
+}
+
+async function sleepOrAbort(ms: number, signal?: AbortSignal): Promise<void> {
+  if (!signal) {
+    await sleep(ms);
+    return;
+  }
+  await new Promise<void>((resolve) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
+    const timeout = setTimeout(resolve, ms);
+    signal.addEventListener("abort", () => {
+      clearTimeout(timeout);
+      resolve();
+    }, { once: true });
+  });
 }
