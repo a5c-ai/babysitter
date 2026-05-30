@@ -134,7 +134,10 @@ export class ToolDispatcher {
     context: ToolCallContext,
     executor: ToolExecutor,
   ): Promise<ToolCallResult> {
-    const descriptor = this.registry.get(context.toolName);
+    const server = this.resolveServer(context.toolName);
+    const descriptor = server
+      ? this.registry.get(context.toolName, { server }) ?? this.registry.get(context.toolName)
+      : this.registry.get(context.toolName);
     if (!descriptor) {
       return {
         output: null,

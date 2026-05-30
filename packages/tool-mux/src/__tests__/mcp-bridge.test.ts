@@ -97,6 +97,27 @@ describe('McpBridge', () => {
     expect(tools.map((t) => t.name).sort()).toEqual(['q_list', 'q_search']);
   });
 
+  it('preserves duplicate MCP tool names across servers with qualified identity', () => {
+    bridge.registerServer(makeServerConfig({ id: 'docs', name: 'Docs' }), [
+      makeMcpTool({ name: 'search', description: 'Docs search' }),
+    ]);
+    bridge.registerServer(makeServerConfig({ id: 'web', name: 'Web' }), [
+      makeMcpTool({ name: 'search', description: 'Web search' }),
+    ]);
+
+    expect(registry.size).toBe(2);
+    expect(registry.get('search', { source: 'mcp', sourceQualifier: 'docs' })!.description)
+      .toBe('Docs search');
+    expect(registry.get('search', { source: 'mcp', sourceQualifier: 'web' })!.description)
+      .toBe('Web search');
+
+    bridge.unregisterServer('docs');
+
+    expect(registry.get('search', { source: 'mcp', sourceQualifier: 'docs' })).toBeUndefined();
+    expect(registry.get('search', { source: 'mcp', sourceQualifier: 'web' })!.description)
+      .toBe('Web search');
+  });
+
   it('getServerTools returns empty array for unknown server', () => {
     expect(bridge.getServerTools('ghost-server')).toEqual([]);
   });

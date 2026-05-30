@@ -165,10 +165,28 @@ export interface ToolDescriptor {
   description?: string;
   parameters?: Record<string, unknown>; // JSON Schema
   source: ToolSource;
+  sourceQualifier?: string;
   server?: string;
   permissions?: string[];
   metadata?: UnifiedToolMetadata | Record<string, unknown>;
 }
+
+export interface ToolLookupOptions {
+  source?: ToolSource;
+  sourceQualifier?: string;
+  server?: string;
+}
+
+export interface ToolSchema {
+  inputSchema: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
+}
+
+export interface ResolvedToolDescriptor extends ToolDescriptor {
+  schema: ToolSchema;
+}
+
+export type SchemaLoader = (tool: ToolDescriptor) => Promise<ToolSchema>;
 
 export interface ToolServer {
   id: string;

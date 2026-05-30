@@ -62,6 +62,7 @@ import {
   parseSearchResults,
   stripHtmlTags,
 } from "./tools";
+import { ToolDispatcher } from "@a5c-ai/tool-mux";
 import {
   createAgentCoreToolDefinitions as createAgentCoreToolDefinitionsFromIndex,
   DeferredToolRegistry,
@@ -418,6 +419,33 @@ describe("agent-core tools", () => {
       callId: "code-executor:1:bash",
       chunk: "nested stdout",
     }));
+  });
+
+  it("routes code_executor nested tool calls through ToolDispatcher", async () => {
+    const workspace = mkdtempSync(path.join(os.tmpdir(), "agent-core-code-mode-dispatcher-"));
+    writeFileSync(path.join(workspace, "note.txt"), "alpha\n", "utf8");
+    const dispatchSpy = vi.spyOn(ToolDispatcher.prototype, "dispatch");
+    const definitions = getToolDefinitions(workspace, {
+      programmaticToolCalling: true,
+    });
+    const codeExecutor = definitions.find((tool) => tool.name === "code_executor");
+    if (!codeExecutor) {
+      throw new Error("Expected code_executor to be registered");
+    }
+
+    const result = await codeExecutor.execute("code-mode-dispatch", {
+      code: "return await tools.read({ path: 'note.txt' });",
+    });
+
+    expect(getText(result)).not.toMatch(/^Error:/);
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        toolName: "read",
+        input: { path: "note.txt" },
+        caller: "code_executor",
+      }),
+      expect.any(Function),
+    );
   });
 
   it("enforces code_executor nested tool call limits", async () => {

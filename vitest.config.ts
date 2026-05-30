@@ -7,6 +7,10 @@ export default {
   resolve: {
     alias: {
       '@a5c-ai/agent-catalog': path.resolve(__dirname, 'packages/agent-catalog/src/index.ts'),
+      '@a5c-ai/agent-runtime': path.resolve(__dirname, 'packages/agent-runtime/src/index.ts'),
+      '@a5c-ai/tool-mux': path.resolve(__dirname, 'packages/tool-mux/src/index.ts'),
+      '@a5c-ai/transport-mux': path.resolve(__dirname, 'packages/transport-mux/src/index.ts'),
+      '@testing-library/react': path.resolve(__dirname, 'test-shims/testing-library-react.ts'),
       'next/server': path.resolve(__dirname, 'test-shims/next-server.ts'),
       'react-native': path.resolve(__dirname, 'test-shims/react-native.ts'),
       'react-native$': path.resolve(__dirname, 'test-shims/react-native.ts'),

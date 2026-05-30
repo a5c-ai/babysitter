@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { ToolRegistry } from '../registry.js';
 import type { ToolDescriptor, ToolServer } from '../types.js';
@@ -123,6 +123,104 @@ describe('ToolRegistry', () => {
     registry.register(makeTool({ name: 'dup', description: 'replaced' }));
     expect(registry.get('dup')!.description).toBe('replaced');
     expect(registry.size).toBe(1);
+  });
+
+  it('keeps duplicate names from different sources addressable by qualified identity', () => {
+    registry.register(makeTool({
+      name: 'search',
+      description: 'Builtin search',
+      source: 'builtin',
+    }));
+    registry.register(makeTool({
+      name: 'search',
+      description: 'Plugin search',
+      source: 'plugin',
+      sourceQualifier: 'plugin-a',
+    }));
+    registry.register(makeTool({
+      name: 'search',
+      description: 'MCP search',
+      source: 'mcp',
+      server: 'web',
+      sourceQualifier: 'web',
+    }));
+
+    expect(registry.size).toBe(3);
+    expect(registry.get('search')!.description).toBe('Builtin search');
+    expect(registry.get('search', { source: 'plugin', sourceQualifier: 'plugin-a' })!.description)
+      .toBe('Plugin search');
+    expect(registry.getByQualifiedName('mcp:web:search')!.description).toBe('MCP search');
+    expect(registry.list().map((tool) => tool.description)).toEqual([
+      'Builtin search',
+      'Plugin search',
+      'MCP search',
+    ]);
+  });
+
+  it('looks up duplicate names by server without requiring callers to know the source', () => {
+    registry.register(makeTool({
+      name: 'search',
+      description: 'Docs search',
+      source: 'mcp',
+      server: 'docs',
+    }));
+    registry.register(makeTool({
+      name: 'search',
+      description: 'Web search',
+      source: 'mcp',
+      server: 'web',
+    }));
+
+    expect(registry.get('search', { server: 'web' })!.description).toBe('Web search');
+    expect(registry.get('search', { server: 'docs' })!.description).toBe('Docs search');
+    expect(registry.get('search', { server: 'missing' })).toBeUndefined();
+  });
+
+  it('removes tools by source qualifier without deleting duplicate names from other sources', () => {
+    registry.register(makeTool({ name: 'fetch', source: 'plugin', sourceQualifier: 'plugin-a' }));
+    registry.register(makeTool({ name: 'fetch', source: 'plugin', sourceQualifier: 'plugin-b' }));
+    registry.register(makeTool({ name: 'fetch', source: 'mcp', server: 'web', sourceQualifier: 'web' }));
+
+    expect(registry.removeToolsBySource('plugin', 'plugin-a')).toBe(1);
+
+    expect(registry.get('fetch', { source: 'plugin', sourceQualifier: 'plugin-a' })).toBeUndefined();
+    expect(registry.get('fetch', { source: 'plugin', sourceQualifier: 'plugin-b' })).toBeDefined();
+    expect(registry.get('fetch', { source: 'mcp', sourceQualifier: 'web' })).toBeDefined();
+    expect(registry.size).toBe(2);
+  });
+
+  it('fetches lazy schemas once per qualified tool and caches them', async () => {
+    const loader = vi.fn(async (tool: ToolDescriptor) => ({
+      inputSchema: {
+        type: 'object',
+        title: `${tool.sourceQualifier}:${tool.name}`,
+      },
+      outputSchema: { type: 'string' },
+    }));
+
+    registry.registerLoader('plugin', loader);
+    registry.register(makeTool({
+      name: 'render',
+      source: 'plugin',
+      sourceQualifier: 'plugin-a',
+      parameters: undefined,
+    }));
+    registry.register(makeTool({
+      name: 'render',
+      source: 'plugin',
+      sourceQualifier: 'plugin-b',
+      parameters: undefined,
+    }));
+
+    const first = await registry.fetchSchema('render', 'plugin', 'plugin-a');
+    const second = await registry.fetchSchema('render', 'plugin', 'plugin-a');
+    const third = await registry.fetchSchema('render', 'plugin', 'plugin-b');
+
+    expect(first?.schema.inputSchema).toEqual({ type: 'object', title: 'plugin-a:render' });
+    expect(second?.schema.inputSchema).toEqual(first?.schema.inputSchema);
+    expect(third?.schema.inputSchema).toEqual({ type: 'object', title: 'plugin-b:render' });
+    expect(loader).toHaveBeenCalledTimes(2);
+    expect(registry.loadedSchemaCount).toBe(2);
   });
 
   it('size reflects the current tool count', () => {

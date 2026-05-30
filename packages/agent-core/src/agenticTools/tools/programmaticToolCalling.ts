@@ -1,5 +1,6 @@
 import vm from "node:vm";
 import { Type } from "@sinclair/typebox";
+import { ToolDispatcher, ToolRegistry, type ToolExecutor } from "@a5c-ai/tool-mux";
 import type { AgenticToolOptions, CustomToolDefinition, ToolResult } from "../types";
 import { jsonResult } from "../shared/results";
 
@@ -57,22 +58,48 @@ export function createProgrammaticToolCallingTool(
       const maxToolCalls = resolveInvocationLimit(params.max_tool_calls, config.maxToolCalls);
       const logs: string[] = [];
       const toolMap = new Map(callableTools.map((tool) => [tool.name, tool]));
+      const registry = new ToolRegistry();
+      registry.registerAll(callableTools.map((tool) => ({
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters as unknown as Record<string, unknown>,
+        source: "builtin" as const,
+        metadata: { label: tool.label },
+      })));
+      const dispatcher = new ToolDispatcher({ registry });
+      const executor: ToolExecutor = async (tool, context) => {
+        const definition = toolMap.get(tool.name);
+        if (!definition) {
+          throw new Error(`Tool "${tool.name}" is not available to code_executor.`);
+        }
+        return unwrapToolResult(await definition.execute(
+          `code-executor:${calls.length}:${tool.name}`,
+          context.input as Record<string, unknown>,
+          onUpdate,
+          toolContext,
+        ));
+      };
 
       const callTool = async (name: string, toolParams: Record<string, unknown> = {}) => {
         if (calls.length >= maxToolCalls) {
           throw new Error(`code_executor exceeded max_tool_calls (${maxToolCalls})`);
         }
-        const tool = toolMap.get(name);
-        if (!tool) {
+        if (!toolMap.has(name)) {
           throw new Error(`Tool "${name}" is not available to code_executor.`);
         }
         calls.push({ tool: name, params: toolParams });
-        return unwrapToolResult(await tool.execute(
-          `code-executor:${calls.length}:${name}`,
-          toolParams,
-          onUpdate,
-          toolContext,
-        ));
+        const dispatched = await dispatcher.dispatch(
+          {
+            toolName: name,
+            input: toolParams,
+            caller: "code_executor",
+          },
+          executor,
+        );
+        if (dispatched.error) {
+          throw new Error(dispatched.error);
+        }
+        return dispatched.output;
       };
 
       const tools = Object.create(null) as Record<string, (toolParams?: Record<string, unknown>) => Promise<unknown>>;

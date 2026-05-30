@@ -9,6 +9,7 @@
 
 import type { McpToolResult } from "./types";
 import type { McpClientManager } from "./manager";
+import type { ToolExecutor } from "@a5c-ai/tool-mux";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -81,4 +82,12 @@ export class McpToolExecutor {
       args,
     });
   }
+}
+
+export function createMcpToolDispatcherExecutor(executor: McpToolExecutor): ToolExecutor {
+  return async (tool, context) => executor.execute({
+    serverName: tool.server ?? tool.sourceQualifier ?? "",
+    toolName: tool.name,
+    args: context.input as Record<string, unknown>,
+  });
 }

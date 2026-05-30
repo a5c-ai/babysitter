@@ -181,29 +181,29 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 
 ---
 
-## tool-mux (Unified Tool Dispatch) — NOT INTEGRATED
+## tool-mux (Unified Tool Dispatch) — PARTIALLY INTEGRATED
 
-tool-mux provides ToolRegistry, ToolDispatcher (policy-driven routing), McpBridge, and schema translation for all providers (Anthropic, OpenAI, Google, Bedrock). None of it is wired into the agent stack.
+tool-mux provides ToolRegistry, ToolDispatcher (policy-driven routing), McpBridge, and schema translation for all providers (Anthropic, OpenAI, Google, Bedrock). The core registry split has been unified for agent-core discovery, code_executor nested calls, and agent-platform MCP indexing; broader SDK/task routing remains separate work.
 
 ### Critical
 
 | Gap | Description |
 |-----|-------------|
-| Not used by agent-core | agent-core has DeferredToolRegistry (custom two-tier registry). tool-mux's ToolDispatcher would provide unified dispatch policy across builtin, MCP, and plugin tools. |
-| Not used by agent-platform | agent-platform has McpToolRegistry + McpToolExecutor (separate from tool-mux). No unified tool dispatch mechanism. |
-| 3 registries, no unification | DeferredToolRegistry (L4) + McpToolRegistry (L6) + ToolRegistry (tool-mux). Should be one system. |
-| Hook bridge is no-op | `ToolHookBridge` is `NoopToolHookBridge`. PreToolUse/PostToolUse hooks never fire. No hooks-mux integration. |
-| McpBridge is declarative-only | Registers MCP tool definitions but no runtime server lifecycle management. |
+| agent-core integration partial | `DeferredToolRegistry` is now a compatibility facade over tool-mux semantics, and `code_executor` routes nested calls through `ToolDispatcher`. |
+| agent-platform MCP integration partial | `McpToolRegistry` is now a compatibility facade backed by `ToolRegistry`/`McpBridge` while `McpToolExecutor` keeps runtime execution on `McpClientManager`. |
+| Registry unification partial | Source-qualified duplicate names, lazy schema fetch, and MCP server-scoped registration live in tool-mux; old registry exports remain as compatibility shims. |
+| Hook bridge injection exists | `ProductionToolHookBridge` can adapt PreToolUse/PostToolUse processors into `ToolDispatcher`; full SDK hooks-mux lifecycle wiring remains tracked separately. |
+| McpBridge is declarative-only | Registers MCP tool definitions but intentionally does not own runtime server lifecycle management. |
 | No dynamic routing | Policy rules are static. No context-aware routing (by runId, sessionId, caller, cost). |
-| No plugin tool type | DeferredToolRegistry handles plugins but tool-mux doesn't. |
+| Plugin discovery not wired | tool-mux supports `plugin`/`custom` tool sources, but broader external plugin discovery and population remains separate work. |
 
 ### Where it should plug in
 
 ```
-agent-core tool_search/tool_fetch → tool-mux ToolRegistry (replaces DeferredToolRegistry)
+agent-core tool_search/tool_fetch → DeferredToolRegistry compatibility facade over tool-mux ToolRegistry
 agent-core code_executor → tool-mux ToolDispatcher.dispatch() (policy routing)
-agent-platform MCP tools → tool-mux McpBridge (unified registration)
-hooks-mux PreToolUse/PostToolUse → tool-mux ToolHookBridge (permission/audit)
+agent-platform MCP tools → McpToolRegistry compatibility facade over tool-mux McpBridge/ToolRegistry
+hooks-mux PreToolUse/PostToolUse → injectable ProductionToolHookBridge (permission/audit)
 ```
 
 ---
@@ -339,9 +339,9 @@ Only `GitHubIssuesBackend` exists. Basic mapping of breakpoints to GitHub issues
 | Breakpoint delegation disconnected | L6↔tasks-mux | agent-platform breakpoint system and tasks-mux backends are parallel implementations, not integrated |
 | MCP tools not registered | L6↔tasks-mux | tasks-mux MCP server has 8 tools but agent harness doesn't discover or register them |
 | Approval chains orphaned | L6↔tasks-mux | Sequential/quorum approval logic in L6 is not wired to tasks-mux routing/answering |
-| 3 separate tool registries | L4↔tool-mux↔L6 | DeferredToolRegistry (L4) + McpToolRegistry (L6) + ToolRegistry (tool-mux) — should be unified |
-| tool-mux dispatch not used | tool-mux↔L4 | ToolDispatcher exists with policy-driven routing but agent-core hardcodes tool execution |
-| tool-mux hooks stubbed | tool-mux↔hooks-mux | ToolHookBridge is NoopToolHookBridge. PreToolUse/PostToolUse never fire. |
+| ~~3 separate tool registries~~ | ~~L4↔tool-mux↔L6~~ | ~~DeferredToolRegistry (L4) + McpToolRegistry (L6) + ToolRegistry (tool-mux)~~ → old exports are compatibility facades over tool-mux |
+| ~~tool-mux dispatch not used~~ | ~~tool-mux↔L4~~ | ~~ToolDispatcher exists with policy-driven routing but agent-core hardcodes tool execution~~ → `code_executor` nested calls use `ToolDispatcher` |
+| tool-mux hooks partially wired | tool-mux↔hooks-mux | `ProductionToolHookBridge` supports injectable PreToolUse/PostToolUse behavior; full SDK lifecycle wiring remains in #598 |
 | No subagent effect type | SDK↔agent-mux | SDK journal has no effect type for cross-agent dispatch. agent-mux launches happen outside journal. |
 | SDK MCP server disconnected | SDK↔tool-mux↔L6 | SDK's `createBabysitterMcpServer()` never registered in tool-mux McpBridge or L6 MCP client |
 | SDK tasks ≠ tasks-mux | SDK↔tasks-mux | SDK has its own task system (defineTask, ctx.task). tasks-mux has BreakpointBackend. Neither knows about the other. |
@@ -357,7 +357,7 @@ Only `GitHubIssuesBackend` exists. Basic mapping of breakpoints to GitHub issues
 **P0 — Unblock production agent use:**
 1. Streaming responses in agent-core session
 2. Multi-turn conversation history
-3. Unify tool registries: tool-mux ToolDispatcher replaces DeferredToolRegistry + McpToolRegistry
+3. Complete remaining tool-mux lifecycle integrations after registry unification
 4. Wire tasks-mux into agent stack (native tools: todo, task, ask, approve, assign)
 5. Wire MCP into agent-platform orchestration (connect tool-mux McpBridge)
 6. Complete ConcurrentEffects coverage beyond grouped agent-platform dispatch
@@ -383,4 +383,4 @@ Only `GitHubIssuesBackend` exists. Basic mapping of breakpoints to GitHub issues
 7. Tool cancellation via AbortSignal
 8. tasks-mux notifications, escalation chains, backend plugin system
 9. SDK hooks → hooks-mux lifecycle wiring
-10. tool-mux hook bridge → hooks-mux PreToolUse/PostToolUse
+10. SDK hooks lifecycle → injected tool-mux ProductionToolHookBridge where tool dispatch is active

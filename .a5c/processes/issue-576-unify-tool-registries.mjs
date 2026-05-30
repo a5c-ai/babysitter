@@ -225,6 +225,7 @@ export async function process(inputs, ctx) {
 
   const delivery = await ctx.task(deliveryTask, {
     issueNumber,
+    deliveryPrNumber: inputs?.deliveryPrNumber ?? 687,
     baseBranch,
     implementationBranch,
     finalGate,
@@ -616,7 +617,7 @@ export const finalAcceptanceGateTask = defineTask('issue-576.final-acceptance', 
 
 export const deliveryTask = defineTask('issue-576.delivery', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Commit, push, open PR, and comment on issue #576',
+  title: 'Commit, push, update PR #687, and comment on PR #687',
   labels: ['issue-576', 'delivery', 'github'],
   agent: {
     name: 'github-delivery-maintainer',
@@ -626,6 +627,7 @@ export const deliveryTask = defineTask('issue-576.delivery', (args, taskCtx) => 
       instructions: [
         repositoryContext,
         `Issue number: ${args.issueNumber}`,
+        `Delivery PR number: ${args.deliveryPrNumber}`,
         `Base branch: ${args.baseBranch}`,
         `Implementation branch: ${args.implementationBranch}`,
         'Final gate JSON:',
@@ -638,9 +640,9 @@ export const deliveryTask = defineTask('issue-576.delivery', (args, taskCtx) => 
         'Stage only issue #576 implementation, tests, docs, and process artifacts if they were intentionally changed. Do not stage unrelated local changes.',
         'Commit with an issue-specific message.',
         'Push the implementation branch.',
-        'Create a PR against the base branch that links #576.',
-        'In the PR body, summarize unified registry/dispatch changes, MCP bridge/executor integration, ToolHookBridge behavior, compatibility strategy, and quality gates run.',
-        'Post a comment on issue #576 with the implementation PR link and the same concise quality-gate summary.',
+        'Do not create a new PR when deliveryPrNumber is present. Update the existing PR branch instead.',
+        'In the existing PR, summarize unified registry/dispatch changes, MCP bridge/executor integration, ToolHookBridge behavior, compatibility strategy, and quality gates run if the body needs updating.',
+        'Post a comment on PR #687 with the implementation summary and concise quality-gate summary.',
         'Return JSON: { delivered, commit, prUrl, issueCommentUrl, blockers }.',
       ],
     },
