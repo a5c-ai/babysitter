@@ -130,6 +130,61 @@ describe("task serializer", () => {
     expect(onDisk.outputSchema).toEqual(outputSchema);
   });
 
+  it("preserves inputSchema parameter declarations in task.json", async () => {
+    const inputSchema = {
+      type: "object",
+      required: ["query"],
+      properties: {
+        query: { type: "string" },
+        limit: { type: "integer", minimum: 1 },
+      },
+      additionalProperties: false,
+    };
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "shell-input-schema-task",
+      invocationKey: "proc:step-shell-input-schema",
+      task: {
+        kind: "shell",
+        title: "Search",
+        inputSchema,
+      },
+    });
+
+    expect(serialized.inputSchema).toEqual(inputSchema);
+    const onDisk = JSON.parse(await fs.readFile(path.join(runDir, `tasks/${EFFECT_ID}/task.json`), "utf8"));
+    expect(onDisk.inputSchema).toEqual(inputSchema);
+  });
+
+  it("preserves both inputSchema and outputSchema for tool discovery", async () => {
+    const inputSchema = {
+      type: "object",
+      properties: {
+        target: { type: "string" },
+      },
+    };
+    const outputSchema = {
+      type: "object",
+      properties: {
+        ok: { type: "boolean" },
+      },
+    };
+    const { serialized } = await serializeAndWriteTaskDefinition({
+      runDir,
+      effectId: EFFECT_ID,
+      taskId: "discovery-schema-task",
+      invocationKey: "proc:step-discovery-schema",
+      task: {
+        kind: "agent",
+        inputSchema,
+        outputSchema,
+      },
+    });
+
+    expect(serialized).toMatchObject({ inputSchema, outputSchema });
+  });
+
   it("preserves shell outputSchema false opt-out in task.json", async () => {
     const { serialized } = await serializeAndWriteTaskDefinition({
       runDir,

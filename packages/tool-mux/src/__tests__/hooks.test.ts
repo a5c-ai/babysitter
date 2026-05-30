@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { NoopToolHookBridge } from '../hooks.js';
+import { HooksMuxToolHookBridge, NoopToolHookBridge } from '../hooks.js';
 import type { ToolHookBridge, ToolHookResult } from '../hooks.js';
 import type { ToolCallContext, ToolCallResult, ToolDescriptor } from '../types.js';
 
@@ -122,5 +122,92 @@ describe('Custom ToolHookBridge', () => {
     expect(capturedResult).toBeDefined();
     expect(capturedResult!.output).toEqual({ data: [1, 2, 3] });
     expect(capturedResult!.durationMs).toBe(150);
+  });
+});
+
+describe('HooksMuxToolHookBridge', () => {
+  it('maps beforeToolUse to a hooks-mux PreToolUse event', async () => {
+    const events: unknown[] = [];
+    const bridge = new HooksMuxToolHookBridge({
+      adapter: 'codex',
+      engine: {
+        async processNormalizedEvent(event) {
+          events.push(event);
+          return {
+            mergedResult: {
+              decision: 'allow',
+              metadata: { checked: true },
+            },
+          };
+        },
+      },
+    });
+
+    const result = await bridge.beforeToolUse(
+      makeContext({ toolName: 'special_tool', input: { a: 1 }, sessionId: 'sess-1', runId: 'run-1' }),
+      makeDescriptor({ name: 'special_tool', source: 'mcp', server: 'srv-1' }),
+    );
+
+    expect(result).toMatchObject({ decision: 'allow', metadata: { checked: true } });
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      version: 'a5c.hooks.v1',
+      adapter: 'codex',
+      phase: 'tool.before',
+      rawEventName: 'PreToolUse',
+      execution: {
+        sessionId: 'sess-1',
+        nativeEventName: 'PreToolUse',
+        toolName: 'special_tool',
+      },
+      payload: {
+        toolName: 'special_tool',
+        input: { a: 1 },
+        runId: 'run-1',
+      },
+    });
+  });
+
+  it('maps afterToolUse to a hooks-mux PostToolUse event with result payload', async () => {
+    const events: unknown[] = [];
+    const bridge = new HooksMuxToolHookBridge({
+      engine: {
+        async processNormalizedEvent(event) {
+          events.push(event);
+          return { mergedResult: { decision: 'noop' } };
+        },
+      },
+    });
+
+    await bridge.afterToolUse(
+      makeContext({ toolName: 'test_tool' }),
+      makeDescriptor(),
+      makeResult({ output: { ok: true } }),
+    );
+
+    expect(events[0]).toMatchObject({
+      phase: 'tool.after',
+      rawEventName: 'PostToolUse',
+      payload: {
+        result: {
+          output: { ok: true },
+        },
+      },
+    });
+  });
+
+  it('normalizes hooks-mux block decisions to tool-mux deny decisions', async () => {
+    const bridge = new HooksMuxToolHookBridge({
+      engine: {
+        async processNormalizedEvent() {
+          return { mergedResult: { decision: 'block', reason: 'policy' } };
+        },
+      },
+    });
+
+    await expect(bridge.beforeToolUse(makeContext(), makeDescriptor())).resolves.toMatchObject({
+      decision: 'deny',
+      reason: 'policy',
+    });
   });
 });

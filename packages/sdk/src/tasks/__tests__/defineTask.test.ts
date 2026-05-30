@@ -113,6 +113,26 @@ describe("defineTask deterministic output", () => {
       outputSchema: false,
     });
   });
+
+  it("allows task definitions to declare inputSchema parameters", async () => {
+    const inputSchema = {
+      type: "object",
+      required: ["path"],
+      properties: {
+        path: { type: "string" },
+      },
+    };
+    const schemaTask = defineTask(
+      "shell-input-schema",
+      () => ({ kind: "shell" }),
+      { inputSchema }
+    );
+
+    await expect(schemaTask.build({}, fakeCtx())).resolves.toMatchObject({
+      kind: "shell",
+      inputSchema,
+    });
+  });
 });
 
 describe("defineTask label metadata", () => {
@@ -258,6 +278,38 @@ describe("defineTask object-form (backward-compat for legacy library processes)"
     expect(built).not.toHaveProperty("inputs");
     expect(built).not.toHaveProperty("outputs");
     expect(built).not.toHaveProperty("source");
+  });
+
+  it("maps legacy object-form inputs and outputs onto canonical schemas", async () => {
+    const inputSchema = {
+      type: "object",
+      required: ["foo"],
+      properties: {
+        foo: { type: "string" },
+      },
+    };
+    const outputSchema = {
+      type: "object",
+      required: ["bar"],
+      properties: {
+        bar: { type: "boolean" },
+      },
+    };
+    const defined = defineTask({
+      name: "legacy-schema-aliases",
+      kind: "agent",
+      title: "legacy schema aliases",
+      inputs: inputSchema,
+      outputs: outputSchema,
+    });
+
+    const built = await defined.build({}, fakeCtx());
+    const record = globalTaskRegistry.listDefinitions().find((entry) => entry.id === defined.id);
+
+    expect(built).toMatchObject({ inputSchema, outputSchema });
+    expect(built).not.toHaveProperty("inputs");
+    expect(built).not.toHaveProperty("outputs");
+    expect(record).toMatchObject({ inputSchema, outputSchema });
   });
 
   it("rejects object-form without id or name", () => {

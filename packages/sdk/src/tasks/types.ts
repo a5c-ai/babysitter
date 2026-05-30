@@ -95,6 +95,7 @@ export interface TaskDef {
   title?: string;
   description?: string;
   labels?: string[];
+  inputSchema?: Record<string, unknown>;
   outputSchema?: Record<string, unknown> | false | null;
   io?: TaskIOHints;
   metadata?: JsonRecord;

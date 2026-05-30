@@ -11,12 +11,20 @@ describe("TaskRegistry", () => {
   });
 
   it("registers definitions with deduped labels and rejects duplicates", () => {
+    const inputSchema = {
+      type: "object",
+      properties: {
+        path: { type: "string" },
+      },
+    };
     const first = registry.registerDefinition({
       id: "task-alpha",
       labels: ["build", "build", "ops"],
       kind: "node",
+      inputSchema,
     });
     expect(first.labels).toEqual(["build", "ops"]);
+    expect(first.inputSchema).toEqual(inputSchema);
     expect(registry.listDefinitions()).toEqual([first]);
     expect(() =>
       registry.registerDefinition({ id: "task-alpha", labels: [], kind: "node" })
