@@ -184,8 +184,8 @@ describe("harnessUtils", () => {
   });
 
   it("maps selected harnesses to the correct agent-core backend", () => {
-    expect(resolveAgentCoreBackendForHarness("internal")).toBeUndefined();
-    expect(resolveAgentCoreBackendForHarness("agent-core")).toBeUndefined();
+    expect(resolveAgentCoreBackendForHarness("internal")).toBe("agent-core");
+    expect(resolveAgentCoreBackendForHarness("agent-core")).toBe("agent-core");
     expect(resolveAgentCoreBackendForHarness("pi")).toBe("pi");
     expect(resolveAgentCoreBackendForHarness("codex")).toBe("codex");
     expect(resolveAgentCoreBackendForHarness("github-copilot")).toBe("copilot");

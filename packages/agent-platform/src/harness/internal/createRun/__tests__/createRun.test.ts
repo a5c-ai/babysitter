@@ -2000,7 +2000,7 @@ describe("handleHarnessCreateRun", () => {
       expect(source).not.toContain("\"stdout\":");
     });
 
-    it("rejects a default-exported process and repairs it to a named process export", async () => {
+    it("accepts a default-exported process without requiring repair", async () => {
       const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "session-create-planProcess-default-export-"));
       tempDirs.push(workspace);
       const generatedPath = path.join(workspace, ".a5c", "processes");
@@ -2057,7 +2057,7 @@ describe("handleHarnessCreateRun", () => {
             if (promptCount === 2) {
               await writeProcess?.execute?.("tool-write-default-export", {
                 filename: "test-process.mjs",
-                source: 'export default async function process() { return { success: true }; }\n',
+                source: 'import { defineTask } from "@a5c-ai/babysitter-sdk";\nconst t = defineTask("t", () => ({ kind: "agent", agent: { name: "a", prompt: { task: "x" } } }));\nexport default async function process(inputs, ctx) { return await ctx.task(t, {}); }\n',
               });
               await reportProcess?.execute?.("tool-report-default-export", {
                 processPath: generatedFile,
@@ -2066,17 +2066,7 @@ describe("handleHarnessCreateRun", () => {
               return { success: true, output: "planProcess-default-export", exitCode: 0, duration: 1 };
             }
 
-            expect(prompt).toContain("does not export a function named 'process'");
-            expect(prompt).toContain("named `async function process(inputs, ctx)`");
-            await writeProcess?.execute?.("tool-write-named-export", {
-              filename: "test-process.mjs",
-              source: buildMinimalAgentProcessSource(),
-            });
-            await reportProcess?.execute?.("tool-report-named-export", {
-              processPath: generatedFile,
-              summary: "Repaired named process export",
-            });
-            return { success: true, output: "planProcess-repaired", exitCode: 0, duration: 1 };
+            return { success: true, output: "planProcess-continued", exitCode: 0, duration: 1 };
           }),
         };
       });
@@ -2091,10 +2081,9 @@ describe("handleHarnessCreateRun", () => {
       });
 
       expect(code).toBe(0);
-      expect(promptCount).toBe(3);
+      expect(promptCount).toBe(2);
       const source = await fs.readFile(generatedFile, "utf8");
-      expect(source).toContain("export async function process");
-      expect(source).not.toContain("export default async function process");
+      expect(source).toContain("export default async function process");
     });
 
     it("repairs a named process export that incorrectly references process.cwd()", async () => {

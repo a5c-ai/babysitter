@@ -251,8 +251,11 @@ export function buildWorkerSessionOptions(args: {
 
 export function resolveAgentCoreBackendForHarness(harnessName?: string): string | undefined {
   const normalizedHarness = normalizeBuiltInHarnessName(harnessName?.trim() ?? "");
-  if (!normalizedHarness || normalizedHarness === "agent-core") {
+  if (!normalizedHarness) {
     return undefined;
+  }
+  if (normalizedHarness === "agent-core") {
+    return "agent-core";
   }
   if (normalizedHarness === "pi") {
     return "pi";

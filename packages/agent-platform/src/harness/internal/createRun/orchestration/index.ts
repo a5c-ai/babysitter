@@ -37,13 +37,6 @@ export async function runOrchestrationPhase(
     return externalExitCode;
   }
 
-  // Raw agent-core session (no Pi/amux backend) can't drive the orchestration
-  // loop via tool calls. Fall back to CLI-based orchestration.
-  const backend = resolveAgentCoreBackendForHarness(args.selectedHarnessName);
-  if (!backend) {
-    return runCliOrchestration(args);
-  }
-
   return runInternalOrchestrationPhase(args);
 }
 
