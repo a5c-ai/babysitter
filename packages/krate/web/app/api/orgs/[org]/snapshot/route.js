@@ -16,6 +16,7 @@ export const GET = withAuth(async (_request, { params }) => {
       agentGateway: healthStatusValue(probeDetails.agentGateway),
       controller: healthStatusValue(probeDetails.controller),
       assistant: healthStatusValue(probeDetails.assistant),
+      eventTransport: healthStatusValue(probeDetails.eventTransport),
       details: probeDetails,
       externalProviders: [],
     };

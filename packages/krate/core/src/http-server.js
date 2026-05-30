@@ -6,14 +6,33 @@ import { createKubernetesResourceGateway } from './kubernetes-resource-gateway.j
 import { orgNamespaceName } from './kubernetes-controller.js';
 import { globalEventBus } from './event-bus.js';
 import { clearSnapshotCache } from './snapshot-cache.js';
+import { collectKrateHealthProbes, healthStatusValue } from './health-probes.js';
 
 const jsonHeaders = { 'content-type': 'application/json; charset=utf-8' };
 
-export function createKrateHttpHandler({ runtime = createKrateRuntime(), controller = createKrateApiController({ resourceGateway: createKubernetesResourceGateway() }) } = {}) {
+export function createKrateHttpHandler({ runtime = createKrateRuntime(), controller = createKrateApiController({ resourceGateway: createKubernetesResourceGateway() }), healthProbeOptions = {} } = {}) {
   return async function handleKrateRequest(request, response) {
     try {
       const url = new URL(request.url || '/', 'http://localhost');
-      if (request.method === 'GET' && url.pathname === '/healthz') return send(response, 200, { ok: true, project: 'Krate' });
+      if (request.method === 'GET' && url.pathname === '/healthz') {
+        const probes = await collectKrateHealthProbes({ timeoutMs: 3000, eventBus: globalEventBus, ...healthProbeOptions });
+        const degraded = Object.values(probes).some((probe) => probe?.status === 'error');
+        return send(response, 200, {
+          ok: !degraded,
+          project: 'Krate',
+          status: degraded ? 'degraded' : 'ok',
+          health: {
+            kubernetes: healthStatusValue(probes.kubernetes),
+            gitea: healthStatusValue(probes.gitea),
+            agentMux: healthStatusValue(probes.agentMux),
+            agentGateway: healthStatusValue(probes.agentGateway),
+            controller: healthStatusValue(probes.controller),
+            assistant: healthStatusValue(probes.assistant),
+            eventTransport: healthStatusValue(probes.eventTransport),
+            details: probes,
+          },
+        });
+      }
       if (request.method === 'POST' && url.pathname === '/api/cache/invalidate') { clearSnapshotCache(); return send(response, 200, { ok: true, cleared: true }); }
       if (request.method === 'GET' && url.pathname === '/api/controller') return send(response, 200, createControllerUiModel(await controller.snapshot(), { organization: url.searchParams.get('org') || undefined }));
       if (url.pathname === '/api/orgs') {

@@ -9,6 +9,13 @@
 {{- $agentMux := .Values.agentMux | default dict -}}
 {{- $nats := .Values.externalDependencies.nats | default dict -}}
 {{- $natsEvents := $nats.eventTransport | default dict -}}
+{{- $demoNats := .Values.demo.nats | default dict -}}
+{{- $demoNatsEnabled := and (.Values.demo.enabled | default false) (eq ($demoNats.mode | default "disabled") "local-dev-nats") -}}
+{{- $natsUrl := $nats.url | default "" -}}
+{{- if and (not $natsUrl) $demoNatsEnabled -}}
+{{- $natsUrl = printf "nats://%s-nats.%s.svc.cluster.local:4222" (include "krate.fullname" .) .Release.Namespace -}}
+{{- end -}}
+{{- $natsTransportEnabled := or $natsEvents.enabled $natsUrl $nats.existingSecret -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -80,7 +87,7 @@ spec:
             - name: AGENT_GATEWAY_URL
               value: {{ $agentMux.gatewayUrl | quote }}
             {{- end }}
-            {{- if or $natsEvents.enabled $nats.url $nats.existingSecret }}
+            {{- if $natsTransportEnabled }}
             - name: KRATE_EVENT_TRANSPORT
               value: "nats"
             - name: KRATE_EVENT_NATS_URL
@@ -91,7 +98,7 @@ spec:
                   key: {{ default "url" $nats.key | quote }}
                   optional: true
               {{- else }}
-              value: {{ $nats.url | quote }}
+              value: {{ $natsUrl | quote }}
               {{- end }}
             - name: KRATE_EVENT_NATS_SUBJECT
               value: {{ $natsEvents.subject | default "krate.events" | quote }}
@@ -247,7 +254,7 @@ spec:
             - name: AGENT_GATEWAY_URL
               value: {{ $agentMux.gatewayUrl | quote }}
             {{- end }}
-            {{- if or $natsEvents.enabled $nats.url $nats.existingSecret }}
+            {{- if $natsTransportEnabled }}
             - name: KRATE_EVENT_TRANSPORT
               value: "nats"
             - name: KRATE_EVENT_NATS_URL
@@ -258,7 +265,7 @@ spec:
                   key: {{ default "url" $nats.key | quote }}
                   optional: true
               {{- else }}
-              value: {{ $nats.url | quote }}
+              value: {{ $natsUrl | quote }}
               {{- end }}
             - name: KRATE_EVENT_NATS_SUBJECT
               value: {{ $natsEvents.subject | default "krate.events" | quote }}
@@ -416,7 +423,7 @@ spec:
             - name: AGENT_GATEWAY_URL
               value: {{ $agentMux.gatewayUrl | quote }}
             {{- end }}
-            {{- if or $natsEvents.enabled $nats.url $nats.existingSecret }}
+            {{- if $natsTransportEnabled }}
             - name: KRATE_EVENT_TRANSPORT
               value: "nats"
             - name: KRATE_EVENT_NATS_URL
@@ -427,7 +434,7 @@ spec:
                   key: {{ default "url" $nats.key | quote }}
                   optional: true
               {{- else }}
-              value: {{ $nats.url | quote }}
+              value: {{ $natsUrl | quote }}
               {{- end }}
             - name: KRATE_EVENT_NATS_SUBJECT
               value: {{ $natsEvents.subject | default "krate.events" | quote }}

@@ -1,0 +1,62 @@
+{{- $demoNats := .Values.demo.nats | default dict -}}
+{{- if and (.Values.demo.enabled | default false) (eq ($demoNats.mode | default "disabled") "local-dev-nats") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "krate.fullname" . }}-nats
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: nats
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: nats
+    spec:
+      containers:
+        - name: nats
+          image: {{ default "nats:2.10-alpine" $demoNats.image | quote }}
+          args: ["--jetstream", "--store_dir=/data/jetstream"]
+          ports:
+            - name: client
+              containerPort: 4222
+            - name: monitor
+              containerPort: 8222
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: monitor
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          volumeMounts:
+            - name: nats-data
+              mountPath: /data
+      volumes:
+        - name: nats-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "krate.fullname" . }}-nats
+  labels:
+    {{- include "krate.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nats
+spec:
+  ports:
+    - name: client
+      port: 4222
+      targetPort: client
+    - name: monitor
+      port: 8222
+      targetPort: monitor
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: nats
+{{- end }}

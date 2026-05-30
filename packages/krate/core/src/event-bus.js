@@ -59,6 +59,22 @@ function createEventId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function redactSecretText(value) {
+  return String(value || '')
+    .replace(/([a-z][a-z0-9+.-]*:\/\/)([^:@/\s]+):([^@/\s]+)@/gi, '$1[redacted]:[redacted]@')
+    .replace(/sk-ant-[A-Za-z0-9_-]+/g, '[redacted]')
+    .replace(/sk-[A-Za-z0-9_-]{12,}/g, '[redacted]')
+    .replace(/(token|password|secret|api[_-]?key)=([^&\s]+)/gi, '$1=[redacted]');
+}
+
+function sanitizeBrokerStatus(status) {
+  if (!status || typeof status !== 'object') return status;
+  return Object.fromEntries(Object.entries(status).map(([key, value]) => {
+    if (key === 'reason' || key === 'error' || key === 'url') return [key, redactSecretText(value)];
+    return [key, value];
+  }));
+}
+
 function normalizeEvent(event) {
   const id = event?.id || createEventId();
   const timestamp = event?.timestamp || new Date().toISOString();
@@ -112,7 +128,7 @@ export function createNatsJetStreamBrokerClient(options = {}) {
       connectionPromise = import('@nats-io/transport-node')
         .then(({ connect }) => connect({ servers }))
         .catch((err) => {
-          state = { ...state, status: 'error', reason: err?.message || String(err) };
+          state = { ...state, status: 'error', reason: redactSecretText(err?.message || String(err)) };
           throw err;
         });
     }
@@ -149,7 +165,7 @@ export function createNatsJetStreamBrokerClient(options = {}) {
       const js = await jetstreamClient();
       const payload = new TextEncoder().encode(JSON.stringify(event));
       return js.publish(eventSubject || subject, payload, { msgID: event.id }).catch((err) => {
-        state = { ...state, status: 'error', reason: err?.message || String(err) };
+        state = { ...state, status: 'error', reason: redactSecretText(err?.message || String(err)) };
         throw err;
       });
     },
@@ -193,7 +209,7 @@ export function createNatsJetStreamBrokerClient(options = {}) {
     },
 
     status() {
-      return state;
+      return sanitizeBrokerStatus(state);
     },
   };
 }
@@ -245,7 +261,7 @@ export function createNatsJetStreamEventTransport(options = {}) {
   let unavailableReason = natsUrl || brokerClient ? null : 'missing-nats-url';
 
   function publishToBroker(event) {
-    const brokerStatus = brokerClient?.status?.();
+    const brokerStatus = sanitizeBrokerStatus(brokerClient?.status?.());
     if (required && brokerStatus && brokerStatus.status !== 'ok') {
       throw new Error(brokerStatus.reason || `broker-${brokerStatus.status}`);
     }
@@ -292,13 +308,13 @@ export function createNatsJetStreamEventTransport(options = {}) {
           deliverToLocalListeners(delivered);
           return normalized;
         }, (err) => {
-          unavailableReason = err?.message || String(err);
+          unavailableReason = redactSecretText(err?.message || String(err));
           throw err;
         });
       }
       persistEvent(normalized);
       if (published?.catch) {
-        published.then(() => { unavailableReason = null; }, (err) => { unavailableReason = err?.message || String(err); });
+        published.then(() => { unavailableReason = null; }, (err) => { unavailableReason = redactSecretText(err?.message || String(err)); });
       }
       deliverToLocalListeners(delivered);
       return normalized;
@@ -324,7 +340,7 @@ export function createNatsJetStreamEventTransport(options = {}) {
 
     status() {
       if (unavailableReason && required) return { transport: 'nats-jetstream', status: 'error', reason: unavailableReason, durable: true };
-      if (brokerClient?.status) return brokerClient.status();
+      if (brokerClient?.status) return sanitizeBrokerStatus(brokerClient.status());
       return { transport: 'nats-jetstream', status: unavailableReason ? 'degraded' : 'ok', reason: unavailableReason, durable: true, subject };
     },
   };

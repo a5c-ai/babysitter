@@ -248,6 +248,25 @@ test('required broker outage is exposed in event bus status', () => {
   assert.throws(() => bus.emit({ type: 'must-not-silently-fallback' }), /broker-unavailable/);
 });
 
+test('event transport status redacts broker credentials', () => {
+  const bus = createEventBus({
+    transport: createNatsJetStreamEventTransport({
+      required: true,
+      brokerClient: {
+        publish: () => {},
+        subscribe: () => () => {},
+        replaySince: () => [],
+        status: () => ({ transport: 'nats-jetstream', status: 'error', reason: 'connect nats://user:pass@nats:4222?token=secret-token', durable: true }),
+      },
+    }),
+  });
+
+  const serialized = JSON.stringify(bus.status());
+  assert.equal(bus.status().status, 'error');
+  assert.doesNotMatch(serialized, /user:pass|secret-token/);
+  assert.match(serialized, /\[redacted\]/);
+});
+
 test('required broker mode rejects publish while broker is not ready', () => {
   const bus = createEventBus({
     transport: createNatsJetStreamEventTransport({
