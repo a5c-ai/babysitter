@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createAgentTriggerController, createResource } from '../src/index.js';
+import { createAgentTriggerController, createResource, validateTriggerRule } from '../src/index.js';
 
 function makeTriggerRule(name, spec = {}) {
   return createResource('AgentTriggerRule', { name, namespace: 'krate-org-default' }, {
@@ -44,6 +44,21 @@ test('matchRule: event type matches rule sources', () => {
 
   assert.equal(result.matches, true);
   assert.equal(result.reason, 'All conditions met');
+});
+
+test('validateTriggerRule accepts agentDefinition target without agentStack', () => {
+  const rule = makeTriggerRule('identity-rule', { agentDefinition: 'aria-reviewer', agentStack: undefined });
+  const result = validateTriggerRule(rule);
+
+  assert.equal(result.valid, true);
+});
+
+test('validateTriggerRule rejects missing dispatch target', () => {
+  const rule = makeTriggerRule('missing-target', { agentStack: undefined });
+  const result = validateTriggerRule(rule);
+
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.includes('target: must include agentStack or agentDefinition'));
 });
 
 // 2. matchRule: event type doesn't match
@@ -149,6 +164,35 @@ test('processEvent: dispatches matching rules via dispatch controller', async ()
   assert.ok(result.executions[0].status.dispatchRunRef, 'Execution should reference the dispatch run');
 });
 
+test('processEvent: passes agentDefinition target to dispatch controller', async () => {
+  let dispatchInput = null;
+  const mockDispatchController = {
+    async createManualDispatch(input) {
+      dispatchInput = input;
+      const run = createResource('AgentDispatchRun', { name: 'dispatch-definition', namespace: input.namespace }, {
+        organizationRef: input.organizationRef,
+        repository: input.repository,
+        sourceRefs: input.sourceRefs,
+        agentDefinition: input.agentDefinition,
+        agentStack: input.agentStack,
+        taskKind: input.taskKind
+      });
+      run.status = { phase: 'Queued' };
+      return { error: false, run };
+    }
+  };
+  const controller = createAgentTriggerController({ dispatchController: mockDispatchController });
+  const rule = makeTriggerRule('rule-definition', { agentDefinition: 'aria-reviewer', agentStack: undefined });
+  const event = makeEvent();
+  const resources = { AgentTriggerRule: [rule], AgentTriggerExecution: [] };
+
+  const result = await controller.processEvent({ event, resources, namespace: 'krate-org-default', organizationRef: 'default' });
+
+  assert.equal(result.dispatched, 1);
+  assert.equal(dispatchInput.agentDefinition, 'aria-reviewer');
+  assert.equal(dispatchInput.agentStack, undefined);
+});
+
 // 8. processEvent: skips non-matching
 test('processEvent: skips non-matching rules', async () => {
   const controller = createAgentTriggerController();
@@ -208,4 +252,20 @@ test('processEvent: empty rules array', async () => {
   assert.equal(result.dispatched, 0);
   assert.equal(result.skipped, 0);
   assert.equal(result.executions.length, 0);
+});
+
+test('evaluateWebhookEvent includes agentDefinition in dispatch intents', () => {
+  const controller = createAgentTriggerController();
+  const rule = makeTriggerRule('webhook-definition', {
+    webhookTrigger: { events: ['push'] },
+    agentDefinition: 'aria-reviewer',
+    agentStack: undefined
+  });
+
+  const result = controller.evaluateWebhookEvent({ eventType: 'push', repository: 'myapp' }, [rule]);
+
+  assert.equal(result.matchingRules.length, 1);
+  assert.equal(result.dispatchIntents.length, 1);
+  assert.equal(result.dispatchIntents[0].agentDefinition, 'aria-reviewer');
+  assert.equal(result.dispatchIntents[0].agentStack, undefined);
 });

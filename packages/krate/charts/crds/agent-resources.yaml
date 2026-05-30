@@ -150,6 +150,256 @@ spec:
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  name: agentpersonas.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    kind: AgentPersona
+    plural: agentpersonas
+    singular: agentpersona
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - displayName
+            properties:
+              organizationRef:
+                type: string
+              displayName:
+                type: string
+              tagline:
+                type: string
+              soul:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              personality:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              role:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              skillRefs:
+                type: array
+                items:
+                  type: string
+              knowledgeRefs:
+                type: array
+                items:
+                  type: string
+              appearance:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              voiceProfile:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentsouls.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    kind: AgentSoul
+    plural: agentsouls
+    singular: agentsoul
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - content
+            properties:
+              organizationRef:
+                type: string
+              personaRef:
+                type: string
+              format:
+                type: string
+              content:
+                type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentappearances.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    kind: AgentAppearance
+    plural: agentappearances
+    singular: agentappearance
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            properties:
+              organizationRef:
+                type: string
+              personaRef:
+                type: string
+              avatar:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              theme:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              emoji:
+                type: string
+              badge:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentvoiceprofiles.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    kind: AgentVoiceProfile
+    plural: agentvoiceprofiles
+    singular: agentvoiceprofile
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - ttsProvider
+            properties:
+              organizationRef:
+                type: string
+              personaRef:
+                type: string
+              ttsProvider:
+                type: string
+              ttsConfig:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              speechStyle:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              sttProvider:
+                type: string
+              sttConfig:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agentdefinitions.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    kind: AgentDefinition
+    plural: agentdefinitions
+    singular: agentdefinition
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - personaRef
+            - stackRef
+            properties:
+              organizationRef:
+                type: string
+              personaRef:
+                type: string
+              stackRef:
+                type: string
+              scope:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              roleContext:
+                type: string
+              triggerRefs:
+                type: array
+                items:
+                  type: string
+              meetingConfig:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              limits:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
   name: agentsubagents.krate.a5c.ai
 spec:
   group: krate.a5c.ai
@@ -458,8 +708,12 @@ spec:
             required:
             - organizationRef
             - sources
-            - agentStack
             - taskKind
+            anyOf:
+            - required:
+              - agentStack
+            - required:
+              - agentDefinition
             properties:
               organizationRef:
                 type: string
@@ -473,6 +727,8 @@ spec:
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               agentStack:
+                type: string
+              agentDefinition:
                 type: string
               taskKind:
                 type: string

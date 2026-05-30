@@ -190,6 +190,10 @@ export function validateTriggerRule(rule) {
   const spec = rule?.spec || {};
   const sourceType = getTriggerSourceType(rule);
 
+  if (!spec.agentStack && !spec.agentDefinition) {
+    errors.push('target: must include agentStack or agentDefinition');
+  }
+
   if (sourceType === 'cron') {
     const cronResult = validateCronExpression(spec.cronExpression);
     if (!cronResult.valid) errors.push(`cronExpression: ${cronResult.error}`);
@@ -319,6 +323,7 @@ export function createAgentTriggerController(options = {}) {
         dispatchIntents.push({
           rule,
           event,
+          agentDefinition: rule.spec.agentDefinition,
           agentStack: rule.spec.agentStack,
           taskKind: rule.spec.taskKind || 'diagnostic',
         });
@@ -352,6 +357,7 @@ export function createAgentTriggerController(options = {}) {
             repository: event.repository,
             ref: event.ref,
             sourceRefs: [event.source],
+            agentDefinition: rule.spec?.agentDefinition,
             agentStack: rule.spec?.agentStack,
             taskKind: rule.spec?.taskKind || 'diagnostic',
             actor: event.actor,

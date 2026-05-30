@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 import {
   CONFIG_KINDS,
@@ -14,6 +15,11 @@ import {
 
 const AGENT_CONFIG_KINDS = [
   'AgentStack',
+  'AgentPersona',
+  'AgentSoul',
+  'AgentAppearance',
+  'AgentVoiceProfile',
+  'AgentDefinition',
   'AgentSubagent',
   'AgentToolProfile',
   'AgentMcpServer',
@@ -63,6 +69,11 @@ const ALL_AGENT_KINDS = [...AGENT_CONFIG_KINDS, ...AGENT_AGGREGATED_KINDS];
 function minimalSpecForKind(kind) {
   const specs = {
     AgentStack: { organizationRef: 'default', baseAgent: 'claude-code', adapter: 'babysitter', runtimeIdentity: 'sa-agent' },
+    AgentPersona: { organizationRef: 'default', displayName: 'Aria' },
+    AgentSoul: { organizationRef: 'default', content: 'You are Aria.' },
+    AgentAppearance: { organizationRef: 'default' },
+    AgentVoiceProfile: { organizationRef: 'default', ttsProvider: 'openai' },
+    AgentDefinition: { organizationRef: 'default', personaRef: 'aria', stackRef: 'default-stack' },
     AgentSubagent: { organizationRef: 'default', rolePrompt: 'Code reviewer', taskKinds: ['review'] },
     AgentToolProfile: { organizationRef: 'default', filesystemPolicy: 'read-write', approvalPolicyByTool: { shell: 'auto' } },
     AgentMcpServer: { organizationRef: 'default', transport: 'stdio', scope: 'workspace' },
@@ -210,19 +221,83 @@ describe('storageClassForKind for agent kinds', () => {
 });
 
 describe('kind set counts', () => {
-  it('CONFIG_KINDS has 60 members', () => {
-    assert.equal(CONFIG_KINDS.size, 60);
+  it('CONFIG_KINDS has 65 members', () => {
+    assert.equal(CONFIG_KINDS.size, 65);
   });
 
   it('AGGREGATED_KINDS has 33 members', () => {
     assert.equal(AGGREGATED_KINDS.size, 33);
   });
 
-  it('ALL_KINDS has 93 members', () => {
-    assert.equal(ALL_KINDS.size, 93);
+  it('ALL_KINDS has 98 members', () => {
+    assert.equal(ALL_KINDS.size, 98);
   });
 
-  it('listResourceDefinitions returns 93 definitions', () => {
-    assert.equal(listResourceDefinitions().length, 93);
+  it('listResourceDefinitions returns 98 definitions', () => {
+    assert.equal(listResourceDefinitions().length, 98);
+  });
+});
+
+describe('agent identity CRDs', () => {
+  const chart = readFileSync(new URL('../../charts/crds/agent-resources.yaml', import.meta.url), 'utf8');
+  const identityCrds = {
+    AgentPersona: ['agentpersonas', 'organizationRef', 'displayName'],
+    AgentSoul: ['agentsouls', 'organizationRef', 'content'],
+    AgentAppearance: ['agentappearances', 'organizationRef'],
+    AgentVoiceProfile: ['agentvoiceprofiles', 'organizationRef', 'ttsProvider'],
+    AgentDefinition: ['agentdefinitions', 'organizationRef', 'personaRef', 'stackRef']
+  };
+
+  for (const [kind, expected] of Object.entries(identityCrds)) {
+    it(`${kind} CRD is present with required identity fields`, () => {
+      assert.ok(chart.includes(`kind: ${kind}`), `${kind} kind should be present`);
+      for (const field of expected) {
+        assert.ok(chart.includes(field), `${kind} CRD should include ${field}`);
+      }
+    });
+  }
+
+  it('AgentDispatchRun and AgentTriggerRule CRDs allow agentDefinition targets', () => {
+    assert.ok(chart.includes('agentDefinition'), 'agent-resources CRD should include agentDefinition target fields');
+  });
+
+  it('AgentTriggerRule CRD requires agentStack or agentDefinition target', () => {
+    assert.ok(chart.includes('anyOf:'), 'AgentTriggerRule CRD should express target alternatives');
+    assert.ok(chart.includes('- agentStack'), 'AgentTriggerRule CRD should allow agentStack target');
+    assert.ok(chart.includes('- agentDefinition'), 'AgentTriggerRule CRD should allow agentDefinition target');
+  });
+});
+
+describe('agent dispatch and trigger target validation', () => {
+  it('AgentTriggerRule accepts agentDefinition without agentStack', () => {
+    const rule = createResource('AgentTriggerRule', { name: 'identity-trigger' }, {
+      organizationRef: 'default',
+      sources: ['ci-failure'],
+      agentDefinition: 'aria-reviewer',
+      taskKind: 'diagnostic'
+    });
+
+    assert.equal(validateResource(rule), rule);
+  });
+
+  it('AgentTriggerRule rejects missing agentStack and agentDefinition', () => {
+    const rule = createResource('AgentTriggerRule', { name: 'missing-target' }, {
+      organizationRef: 'default',
+      sources: ['ci-failure'],
+      taskKind: 'diagnostic'
+    });
+
+    assert.throws(() => validateResource(rule), /spec\.agentStack or spec\.agentDefinition is required/);
+  });
+
+  it('AgentDispatchRun rejects missing agentStack and agentDefinition', () => {
+    const run = createResource('AgentDispatchRun', { name: 'missing-target' }, {
+      organizationRef: 'default',
+      repository: 'repo',
+      sourceRefs: [],
+      taskKind: 'diagnostic'
+    });
+
+    assert.throws(() => validateResource(run), /spec\.agentStack or spec\.agentDefinition is required/);
   });
 });

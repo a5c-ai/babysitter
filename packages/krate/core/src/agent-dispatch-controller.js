@@ -1,5 +1,7 @@
 import { createPermissionReviewer } from './agent-permission-review.js';
 import { createAgentStackController } from './agent-stack-controller.js';
+import { createAgentPersonaController } from './agent-persona-controller.js';
+import { composeAgentPrompt } from './agent-prompt-composition.js';
 import { assembleContextBundle } from './agent-context-bundles.js';
 import { createResource, clone } from './resource-model.js';
 import { createAgentMuxClient } from './agent-mux-client.js';
@@ -38,6 +40,7 @@ export const AGENT_DISPATCH_CONTROLLER_BOUNDARY = {
 export function createAgentDispatchController(options = {}) {
   const permissionReviewer = options.permissionReviewer || createPermissionReviewer();
   const stackController = options.stackController || createAgentStackController();
+  const personaController = options.personaController || createAgentPersonaController();
   const agentMuxClient = options.agentMuxClient || createAgentMuxClient();
   const memoryController = options.memoryController || createAgentMemoryController();
   const approvalController = options.approvalController || createAgentApprovalController();
@@ -56,7 +59,7 @@ export function createAgentDispatchController(options = {}) {
      * @param {{ organizationRef?: string }} opts
      * @returns {{ adapter: string, provider: string, model: string, prompt: object, mcpServers: string[], skills: string[], approvalMode: string, env: Record<string,string> }}
      */
-    resolveStack(stack, { organizationRef = 'default' } = {}) {
+    resolveStack(stack, { organizationRef = 'default', identity = null } = {}) {
       if (!stack || !stack.spec) {
         throw new Error('resolveStack requires a valid AgentStack resource with spec');
       }
@@ -76,15 +79,19 @@ export function createAgentDispatchController(options = {}) {
         memoryConfig.memorySnapshotRef = spec.memorySnapshotRef;
       }
 
+      const prompt = identity
+        ? composeAgentPrompt({ ...identity, stack })
+        : {
+            system: spec.systemPrompt || null,
+            developer: spec.developerPrompt || null,
+            task: spec.taskPrompt || null,
+          };
+
       return {
         adapter: spec.adapter || spec.baseAgent || 'claude-code',
         provider: spec.provider || 'anthropic',
         model: spec.model || 'claude-sonnet-4-20250514',
-        prompt: {
-          system: spec.systemPrompt || null,
-          developer: spec.developerPrompt || null,
-          task: spec.taskPrompt || null,
-        },
+        prompt,
         mcpServers: clone(mergedMcpServers),
         skills: clone(spec.skillRefs || []),
         approvalMode: spec.approvalMode || 'prompt',
@@ -255,7 +262,27 @@ export function createAgentDispatchController(options = {}) {
       return { run, attempt, transcript, notification };
     },
 
-    async createManualDispatch({ repository, ref, sourceRefs = [], agentStack, taskKind, actor, namespace = 'default', organizationRef = 'default', resources = {}, callbackUrl } = {}, options = {}) {
+    async createManualDispatch({ repository, ref, sourceRefs = [], agentDefinition, agentStack, taskKind, actor, namespace = 'default', organizationRef = 'default', resources = {}, callbackUrl } = {}, options = {}) {
+      let identity = null;
+      if (agentDefinition) {
+        const resolved = personaController.resolveAgentDefinition(agentDefinition, { resources, organizationRef });
+        if (resolved.error) {
+          return { error: true, reason: 'agent-definition-invalid', message: resolved.errors.join('; '), errors: resolved.errors };
+        }
+        identity = {
+          definition: resolved.definition,
+          persona: resolved.persona,
+          soul: resolved.soul,
+          appearance: resolved.appearance,
+          voiceProfile: resolved.voiceProfile,
+        };
+        agentStack = resolved.stack.metadata?.name;
+      }
+
+      if (!agentStack) {
+        return { error: true, reason: 'dispatch-target-required', message: 'Dispatch requires agentDefinition or agentStack' };
+      }
+
       // 0. Virtual model PreModelResolution hook — can redirect to a different model/stack
       if (hookBridge) {
         const virtualModels = resources.KrateVirtualModel || [];
@@ -316,6 +343,7 @@ export function createAgentDispatchController(options = {}) {
           organizationRef,
           repository,
           sourceRefs: clone(sourceRefs),
+          ...(agentDefinition ? { agentDefinition } : {}),
           agentStack,
           taskKind: taskKind || 'diagnostic',
           contextBundleRef: null,
@@ -391,6 +419,7 @@ export function createAgentDispatchController(options = {}) {
         organizationRef,
         repository,
         sourceRefs: clone(sourceRefs),
+        ...(agentDefinition ? { agentDefinition } : {}),
         agentStack,
         taskKind: taskKind || 'diagnostic',
         contextBundleRef: contextBundle.metadata.name,
@@ -423,6 +452,8 @@ export function createAgentDispatchController(options = {}) {
         agentDispatchRun: runName,
         attemptReason: 'initial',
         agentStackSnapshot: clone(stack.spec),
+        ...(identity?.definition ? { agentDefinitionSnapshot: clone(identity.definition.spec) } : {}),
+        ...(identity?.persona ? { agentPersonaSnapshot: clone(identity.persona.spec) } : {}),
         contextBundleDigest: contextBundle.spec.digest,
       });
       attempt.status = { permissionSnapshot, queueEnteredAt: now };
@@ -431,7 +462,7 @@ export function createAgentDispatchController(options = {}) {
       let transcript = null;
       let jobResult = null;
 
-      const executionConfig = this.resolveStack(stack, { organizationRef });
+      const executionConfig = this.resolveStack(stack, { organizationRef, identity });
       const pvcName = workspaceResult?.workspace?.spec?.volumeClaimName || workspaceResult?.pvcManifest?.metadata?.name || null;
       const resolvedCallbackUrl = callbackUrl || process.env.KRATE_CALLBACK_URL || null;
 
@@ -490,7 +521,7 @@ export function createAgentDispatchController(options = {}) {
         run.status.conditions = [{ type: 'JobSubmitted', status: 'False', reason: 'ManifestFailed', message: err.message || 'Job manifest generation failed' }];
       }
 
-      return { error: false, run, attempt, contextBundle, permissionSnapshot, memorySnapshot, transcript, workspace: workspaceResult, mountSpec, jobResult };
+      return { error: false, run, attempt, contextBundle, permissionSnapshot, memorySnapshot, transcript, workspace: workspaceResult, mountSpec, jobResult, executionConfig, identity };
     }
   };
 }

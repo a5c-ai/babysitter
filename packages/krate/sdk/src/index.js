@@ -127,6 +127,20 @@ export {
   AGENT_STACK_CONTROLLER_BOUNDARY
 } from '../../core/src/agent-stack-controller.js';
 
+export {
+  createAgentPersonaController,
+  AGENT_PERSONA_CONTROLLER_BOUNDARY,
+  validateAgentPersona,
+  validateAgentDefinition,
+  resolveAgentPersona,
+  resolveAgentDefinition
+} from '../../core/src/agent-persona-controller.js';
+
+export {
+  composeAgentSystemPrompt,
+  composeAgentPrompt
+} from '../../core/src/agent-prompt-composition.js';
+
 /** Agent dispatch controller for creating and managing K8s Job-based agent runs. */
 export {
   createAgentDispatchController,

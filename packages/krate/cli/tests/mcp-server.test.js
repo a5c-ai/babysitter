@@ -13,6 +13,12 @@ function createMockController() {
   const stacks = [
     { kind: 'AgentStack', metadata: { name: 'review-bot', namespace: 'krate-org-default' }, spec: { organizationRef: 'default', baseAgent: 'claude-code' } },
   ];
+  const personas = [
+    { kind: 'AgentPersona', metadata: { name: 'aria', namespace: 'krate-org-default' }, spec: { organizationRef: 'default', displayName: 'Aria' } },
+  ];
+  const definitions = [
+    { kind: 'AgentDefinition', metadata: { name: 'aria-reviewer', namespace: 'krate-org-default' }, spec: { organizationRef: 'default', personaRef: 'aria', stackRef: 'review-bot' } },
+  ];
 
   return {
     role: 'mock-krate-api-controller',
@@ -24,6 +30,8 @@ function createMockController() {
         resources: {
           Repository: repositories,
           AgentStack: stacks,
+          AgentPersona: personas,
+          AgentDefinition: definitions,
         },
       };
     },
@@ -31,12 +39,18 @@ function createMockController() {
     async listResource(kind) {
       if (kind === 'Repository') return { items: repositories };
       if (kind === 'AgentStack') return { items: stacks };
+      if (kind === 'AgentPersona') return { items: personas };
+      if (kind === 'AgentDefinition') return { items: definitions };
       if (kind === 'KrateVirtualModel') return { items: [] };
       return { items: [] };
     },
 
     async getResource(kind, name) {
-      const all = kind === 'Repository' ? repositories : kind === 'AgentStack' ? stacks : [];
+      const all = kind === 'Repository' ? repositories
+        : kind === 'AgentStack' ? stacks
+          : kind === 'AgentPersona' ? personas
+            : kind === 'AgentDefinition' ? definitions
+              : [];
       const found = all.find((r) => r.metadata.name === name);
       return found ? { resource: found } : { error: 'not_found' };
     },
@@ -78,8 +92,8 @@ function rpc(method, params = {}, id = 1) {
 // Tests
 // ---------------------------------------------------------------------------
 
-test('MCP_TOOLS array has 23 entries', () => {
-  assert.equal(MCP_TOOLS.length, 23);
+test('MCP_TOOLS array has 26 entries', () => {
+  assert.equal(MCP_TOOLS.length, 26);
   const names = MCP_TOOLS.map((t) => t.name);
   assert.ok(names.includes('krate_list_resources'));
   assert.ok(names.includes('krate_get_resource'));
@@ -92,6 +106,9 @@ test('MCP_TOOLS array has 23 entries', () => {
   assert.ok(names.includes('krate_list_secrets'));
   assert.ok(names.includes('krate_create_secret'));
   assert.ok(names.includes('krate_create_stack'));
+  assert.ok(names.includes('krate_list_agents'));
+  assert.ok(names.includes('krate_get_agent_profile'));
+  assert.ok(names.includes('krate_create_agent'));
   assert.ok(names.includes('krate_sync_external'));
   assert.ok(names.includes('krate_resolve_conflict'));
   assert.ok(names.includes('krate_audit_query'));
@@ -121,10 +138,10 @@ test('handleMessage initialize returns capabilities with tools', async () => {
   assert.equal(resp.result.protocolVersion, '2024-11-05');
 });
 
-test('handleMessage tools/list returns all 23 tool definitions', async () => {
+test('handleMessage tools/list returns all 26 tool definitions', async () => {
   const server = createMcpServer({ controller: createMockController() });
   const resp = await server.handleMessage(rpc('tools/list'));
-  assert.equal(resp.result.tools.length, 23);
+  assert.equal(resp.result.tools.length, 26);
   for (const tool of resp.result.tools) {
     assert.ok(tool.name, 'each tool has a name');
     assert.ok(tool.description, 'each tool has a description');
@@ -269,6 +286,41 @@ test('handleMessage tools/call krate_create_stack returns apply result', async (
   assert.equal(parsed.resource.kind, 'AgentStack');
   assert.equal(parsed.resource.metadata.name, 'new-stack');
   assert.equal(parsed.resource.spec.organizationRef, 'default');
+});
+
+test('handleMessage tools/call krate_list_agents returns agent definitions enriched with personas', async () => {
+  const server = createMcpServer({ controller: createMockController() });
+  const resp = await server.handleMessage(rpc('tools/call', { name: 'krate_list_agents', arguments: {} }));
+  const parsed = JSON.parse(resp.result.content[0].text);
+
+  assert.equal(parsed.items.length, 1);
+  assert.equal(parsed.items[0].metadata.name, 'aria-reviewer');
+  assert.equal(parsed.items[0].persona.spec.displayName, 'Aria');
+});
+
+test('handleMessage tools/call krate_get_agent_profile returns definition and persona', async () => {
+  const server = createMcpServer({ controller: createMockController() });
+  const resp = await server.handleMessage(rpc('tools/call', { name: 'krate_get_agent_profile', arguments: { name: 'aria-reviewer' } }));
+  const parsed = JSON.parse(resp.result.content[0].text);
+
+  assert.equal(parsed.definition.metadata.name, 'aria-reviewer');
+  assert.equal(parsed.persona.metadata.name, 'aria');
+  assert.equal(parsed.stack.metadata.name, 'review-bot');
+});
+
+test('handleMessage tools/call krate_create_agent applies persona and definition', async () => {
+  const server = createMcpServer({ controller: createMockController() });
+  const resp = await server.handleMessage(rpc('tools/call', {
+    name: 'krate_create_agent',
+    arguments: { name: 'new-agent', org: 'default', displayName: 'New Agent', stackRef: 'review-bot' },
+  }));
+  const parsed = JSON.parse(resp.result.content[0].text);
+
+  assert.equal(parsed.applied.length, 2);
+  assert.equal(parsed.applied[0].resource.kind, 'AgentPersona');
+  assert.equal(parsed.applied[1].resource.kind, 'AgentDefinition');
+  assert.equal(parsed.applied[1].resource.spec.personaRef, 'new-agent');
+  assert.equal(parsed.applied[1].resource.spec.stackRef, 'review-bot');
 });
 
 test('handleMessage tools/call krate_sync_external returns sync result', async () => {

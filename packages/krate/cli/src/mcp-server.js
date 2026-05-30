@@ -14,6 +14,9 @@ export const MCP_TOOLS = [
   { name: 'krate_search', description: 'Search resources by query', inputSchema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] } },
   { name: 'krate_list_stacks', description: 'List agent stacks', inputSchema: { type: 'object', properties: {} } },
   { name: 'krate_dispatch_agent', description: 'Dispatch an agent run', inputSchema: { type: 'object', properties: { stackRef: { type: 'string' }, input: { type: 'object' } }, required: ['stackRef'] } },
+  { name: 'krate_list_agents', description: 'List agent definitions enriched with persona profiles', inputSchema: { type: 'object', properties: {} } },
+  { name: 'krate_get_agent_profile', description: 'Get a resolved agent definition profile', inputSchema: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] } },
+  { name: 'krate_create_agent', description: 'Create an AgentPersona and AgentDefinition binding', inputSchema: { type: 'object', properties: { name: { type: 'string' }, org: { type: 'string' }, displayName: { type: 'string' }, stackRef: { type: 'string' }, personaSpec: { type: 'object' }, definitionSpec: { type: 'object' } }, required: ['name', 'org', 'displayName', 'stackRef'] } },
   { name: 'krate_list_secrets', description: 'List AgentSecretGrant resources in an org namespace', inputSchema: { type: 'object', properties: { org: { type: 'string' } } } },
   { name: 'krate_create_secret', description: 'Create an AgentSecretGrant resource', inputSchema: { type: 'object', properties: { name: { type: 'string' }, org: { type: 'string' }, agentRef: { type: 'string' }, secretRef: { type: 'string' }, permissions: { type: 'array', items: { type: 'string' } } }, required: ['name', 'org', 'agentRef', 'secretRef'] } },
   { name: 'krate_create_stack', description: 'Create an AgentStack resource', inputSchema: { type: 'object', properties: { name: { type: 'string' }, org: { type: 'string' }, spec: { type: 'object' } }, required: ['name', 'org'] } },
@@ -375,6 +378,15 @@ async function executeTool(controller, toolName, args) {
         ...args.input,
       });
 
+    case 'krate_list_agents':
+      return listAgents(controller);
+
+    case 'krate_get_agent_profile':
+      return getAgentProfile(controller, args.name);
+
+    case 'krate_create_agent':
+      return createAgent(controller, args);
+
     case 'krate_list_secrets': {
       // List AgentSecretGrant resources, optionally filtering by org namespace.
       const result = await controller.listResource('AgentSecretGrant');
@@ -613,6 +625,61 @@ function createMeetingJoinPayload(meeting, args = {}) {
     expiresAt: new Date(exp * 1000).toISOString(),
     expiresInSeconds: ttlMinutes * 60,
   };
+}
+
+async function listAgents(controller) {
+  const definitions = await controller.listResource('AgentDefinition');
+  const personas = await controller.listResource('AgentPersona');
+  const personaByName = new Map((personas.items || []).map((persona) => [persona.metadata?.name, persona]));
+  return {
+    items: (definitions.items || []).map((definition) => ({
+      ...definition,
+      persona: personaByName.get(definition.spec?.personaRef) || null,
+    })),
+  };
+}
+
+async function getResourceOrNull(controller, kind, name) {
+  if (!name) return null;
+  const result = await controller.getResource(kind, name);
+  return result?.resource || null;
+}
+
+async function getAgentProfile(controller, name) {
+  const definition = await getResourceOrNull(controller, 'AgentDefinition', name);
+  if (!definition) return { error: `AgentDefinition not found: ${name}` };
+  const persona = await getResourceOrNull(controller, 'AgentPersona', definition.spec?.personaRef);
+  const stack = await getResourceOrNull(controller, 'AgentStack', definition.spec?.stackRef);
+  return { definition, persona, stack };
+}
+
+async function createAgent(controller, args) {
+  const namespace = orgNamespaceName(args.org);
+  const persona = {
+    apiVersion: 'krate.a5c.ai/v1alpha1',
+    kind: 'AgentPersona',
+    metadata: { name: args.name, namespace },
+    spec: {
+      organizationRef: args.org,
+      displayName: args.displayName,
+      ...(args.personaSpec || {}),
+    },
+  };
+  const definition = {
+    apiVersion: 'krate.a5c.ai/v1alpha1',
+    kind: 'AgentDefinition',
+    metadata: { name: args.name, namespace },
+    spec: {
+      organizationRef: args.org,
+      personaRef: args.name,
+      stackRef: args.stackRef,
+      ...(args.definitionSpec || {}),
+    },
+  };
+  const applied = [];
+  applied.push(await controller.applyResource(persona));
+  applied.push(await controller.applyResource(definition));
+  return { applied };
 }
 
 // --- MCP resource readers ----------------------------------------------------

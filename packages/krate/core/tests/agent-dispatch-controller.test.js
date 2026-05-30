@@ -58,6 +58,36 @@ function buildValidResources(stackName) {
   };
 }
 
+function addIdentityResources(resources, { definitionName = 'aria-reviewer', personaName = 'aria', stackName = 'dispatch-stack' } = {}) {
+  return {
+    ...resources,
+    AgentDefinition: [
+      createResource('AgentDefinition', { name: definitionName, namespace: 'krate-org-default' }, {
+        organizationRef: 'default',
+        personaRef: personaName,
+        stackRef: stackName,
+        roleContext: 'Review pull requests for authentication security.'
+      })
+    ],
+    AgentPersona: [
+      createResource('AgentPersona', { name: personaName, namespace: 'krate-org-default' }, {
+        organizationRef: 'default',
+        displayName: 'Aria',
+        personality: { communicationStyle: 'direct', tone: 'professional' },
+        role: { title: 'Senior Reviewer', domain: 'Security' },
+        soul: { ref: 'aria-soul' }
+      })
+    ],
+    AgentSoul: [
+      createResource('AgentSoul', { name: 'aria-soul', namespace: 'krate-org-default' }, {
+        organizationRef: 'default',
+        personaRef: personaName,
+        content: 'You are Aria, a security-focused code reviewer.'
+      })
+    ]
+  };
+}
+
 test('Successful dispatch with Agent Mux available', async () => {
   // Use a mux client with a mock resource gateway so job submission succeeds
   const gw = createMockResourceGateway();
@@ -158,6 +188,72 @@ test('Stack not found', async () => {
   assert.equal(result.error, true, 'Dispatch should fail');
   assert.equal(result.reason, 'stack-not-found', 'Reason should be stack-not-found');
   assert.ok(result.message.includes('nonexistent-stack'), 'Message should name the missing stack');
+});
+
+test('AgentDefinition dispatch resolves to AgentStack before permission review and job creation', async () => {
+  const gw = createMockResourceGateway();
+  const muxClient = createAgentMuxClient({ resourceGateway: gw });
+  const resources = addIdentityResources(buildValidResources('definition-stack'), { stackName: 'definition-stack' });
+  const reviewed = [];
+  const permissionReviewer = {
+    reviewPermissions(input) {
+      reviewed.push(input);
+      return { decision: 'allow', reasons: [], grants: [], capabilities: {}, agentStack: input.agentStack };
+    },
+    createPermissionSnapshot(review) {
+      return { decision: review.decision, agentStack: review.agentStack };
+    }
+  };
+  const controller = createAgentDispatchController({ agentMuxClient: muxClient, permissionReviewer });
+
+  const result = await controller.createManualDispatch({
+    repository: 'test-repo',
+    ref: 'main',
+    agentDefinition: 'aria-reviewer',
+    actor: 'test-user',
+    namespace: 'krate-org-default',
+    organizationRef: 'default',
+    resources
+  });
+
+  assert.equal(result.error, false);
+  assert.equal(reviewed[0].agentStack, 'definition-stack');
+  assert.equal(result.run.spec.agentDefinition, 'aria-reviewer');
+  assert.equal(result.run.spec.agentStack, 'definition-stack');
+  assert.equal(result.attempt.spec.agentStackSnapshot.baseAgent, 'claude-code');
+  assert.equal(result.attempt.spec.agentDefinitionSnapshot.personaRef, 'aria');
+  assert.equal(result.attempt.spec.agentPersonaSnapshot.displayName, 'Aria');
+  assert.ok(gw.applied[0].spec.template.spec.containers[0].env.some((entry) => entry.name === 'KRATE_STACK_NAME' && entry.value === 'definition-stack'));
+});
+
+test('AgentDefinition dispatch composes identity prompt for the job while legacy stack dispatch stays unchanged', async () => {
+  const gw = createMockResourceGateway();
+  const stackWithPrompt = makeStack('prompt-stack', { systemPrompt: 'Legacy stack system.', developerPrompt: 'Legacy developer.', taskPrompt: 'Legacy task.' });
+  const resources = addIdentityResources({
+    AgentStack: [stackWithPrompt],
+    AgentServiceAccount: [makeServiceAccount('sa-default')],
+    AgentRoleBinding: [makeRoleBinding('rb-1', 'sa-default')],
+    AgentSecretGrant: [makeSecretGrant('sg-model', 'sa-default', 'model-provider')]
+  }, { stackName: 'prompt-stack' });
+  const controller = createAgentDispatchController({ agentMuxClient: createAgentMuxClient({ resourceGateway: gw }) });
+
+  const result = await controller.createManualDispatch({
+    repository: 'test-repo',
+    ref: 'main',
+    agentDefinition: 'aria-reviewer',
+    actor: 'test-user',
+    namespace: 'krate-org-default',
+    organizationRef: 'default',
+    resources
+  });
+
+  assert.equal(result.error, false);
+  assert.ok(result.executionConfig.prompt.system.includes('You are Aria, a security-focused code reviewer.'));
+  assert.ok(result.executionConfig.prompt.system.includes('Aria'));
+  assert.ok(result.executionConfig.prompt.system.includes('Review pull requests for authentication security.'));
+  assert.ok(result.executionConfig.prompt.system.includes('Legacy stack system.'));
+  assert.equal(result.executionConfig.prompt.developer, 'Legacy developer.');
+  assert.equal(result.executionConfig.prompt.task, 'Legacy task.');
 });
 
 test('Context bundle referenced correctly', async () => {

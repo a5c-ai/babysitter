@@ -126,6 +126,17 @@ test('SDK exports agent stack controller', () => {
   assert.equal(sdk.AGENT_STACK_CONTROLLER_BOUNDARY.role, 'agent-stack-controller');
 });
 
+test('SDK exports agent persona controller and prompt composition helpers', () => {
+  assert.equal(typeof sdk.createAgentPersonaController, 'function');
+  assert.ok(sdk.AGENT_PERSONA_CONTROLLER_BOUNDARY);
+  assert.equal(typeof sdk.validateAgentPersona, 'function');
+  assert.equal(typeof sdk.validateAgentDefinition, 'function');
+  assert.equal(typeof sdk.resolveAgentPersona, 'function');
+  assert.equal(typeof sdk.resolveAgentDefinition, 'function');
+  assert.equal(typeof sdk.composeAgentSystemPrompt, 'function');
+  assert.equal(typeof sdk.composeAgentPrompt, 'function');
+});
+
 test('SDK exports agent dispatch controller', () => {
   assert.equal(typeof sdk.createAgentDispatchController, 'function');
   assert.ok(sdk.AGENT_DISPATCH_CONTROLLER_BOUNDARY);
