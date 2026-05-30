@@ -82,7 +82,7 @@ vi.mock("@a5c-ai/tasks-mux", () => {
     AgentMuxResponderBackend,
     routeTask,
     isHostDelegableRoute: (decision: { responderType: string }) =>
-      decision.responderType === "internal" || decision.responderType === "agent",
+      decision.responderType === "internal",
   };
 });
 
