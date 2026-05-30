@@ -65,15 +65,17 @@ describe('typed HandlerRef contract', () => {
     vi.restoreAllMocks();
   });
 
-  it('keeps omitted type as legacy command and supports explicit command type', async () => {
+  it('keeps omitted type as legacy command and supports explicit command/shell types', async () => {
     const event = makeEvent();
     const command = 'node -e "console.log(JSON.stringify({decision:\'allow\',reason:\'command-ok\'}))"';
 
     const legacy = await runHandler(event, { source: command, handler: 'legacy' });
     const explicit = await runHandler(event, typedHandler({ type: 'command', source: command, handler: 'explicit' }));
+    const shellAlias = await runHandler(event, typedHandler({ type: 'shell', source: command, handler: 'shell-alias' }));
 
     expect(legacy).toMatchObject({ decision: 'allow', reason: 'command-ok' });
     expect(explicit).toMatchObject({ decision: 'allow', reason: 'command-ok' });
+    expect(shellAlias).toMatchObject({ decision: 'allow', reason: 'command-ok' });
   });
 
   it('sorts mixed typed handlers by priority and stable target label', () => {
@@ -81,6 +83,7 @@ describe('typed HandlerRef contract', () => {
       typedHandler({ type: 'http', url: 'https://hooks.example/b', priority: 10 }),
       typedHandler({ type: 'prompt', prompt: 'check this', priority: 10 }),
       { source: 'cmd-z', handler: 'shell', priority: 10 },
+      typedHandler({ type: 'shell', source: 'cmd-a', handler: 'shell-alias', priority: 10 }),
       typedHandler({ type: 'mcp_tool', server: 'srv', tool: 'lookup', priority: 1 }),
     ]);
 
@@ -91,6 +94,7 @@ describe('typed HandlerRef contract', () => {
       return `command:${handler.source}`;
     })).toEqual([
       'mcp_tool:srv:lookup',
+      'command:cmd-a',
       'command:cmd-z',
       'http:https://hooks.example/b',
       'prompt:check this',

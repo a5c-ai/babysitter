@@ -131,6 +131,7 @@ function handlerSortSource(handler: HandlerRef): string {
     case 'agent':
       return `agent:${handler.agent ?? ''}:${handler.prompt}`;
     case 'command':
+    case 'shell':
     case undefined:
       return `command:${handler.source}`;
     default:
@@ -139,7 +140,7 @@ function handlerSortSource(handler: HandlerRef): string {
 }
 
 function handlerSortName(handler: HandlerRef): string {
-  if (handler.type === 'command' || handler.type == null) {
+  if (handler.type === 'command' || handler.type === 'shell' || handler.type == null) {
     return handler.handler ?? 'handler';
   }
   return handler.type;
