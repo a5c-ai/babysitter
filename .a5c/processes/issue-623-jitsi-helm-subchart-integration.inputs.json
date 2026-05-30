@@ -1,0 +1,41 @@
+{
+  "issueNumber": 623,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-623-jitsi-helm-subchart-integration",
+  "title": "Jitsi: Helm subchart integration and deployment",
+  "labels": [
+    "priority:high",
+    "ready-for-dev",
+    "feature",
+    "effort:large",
+    "krate",
+    "infrastructure",
+    "risk:high"
+  ],
+  "issueBody": "## Summary\n\nIntegrate [jitsi-helm](https://github.com/jitsi-contrib/jitsi-helm) as a Helm subchart into the krate chart. Support both in-cluster deployment and external Jitsi connection.\n\n## Scope\n\n1. Add jitsi-meet as Chart.yaml dependency with `condition: jitsi.install`\n2. Add jitsi section to values.yaml - web, prosody (JWT auth), jicofo, jvb, jibri (optional recording)\n3. Support external mode (`jitsi.external.enabled`) for existing Jitsi deployments\n4. Add CRD YAML file: `charts/crds/jitsi-resources.yaml` with JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, JitsiRecording\n5. Network policy for Jitsi media traffic (UDP 10000)\n6. JWT secret management for programmatic room access\n7. Verification: pods running, config.js accessible, health probe\n\n## Reference\n\n- [docs/jitsi/02-helm-deployment.md](packages/krate/docs/jitsi/02-helm-deployment.md) - full deployment spec\n- [docs/jitsi/01-architecture.md](packages/krate/docs/jitsi/01-architecture.md) - system overview\n\n## Dependencies\n\nNone - can start independently. Unblocks all other Jitsi work.",
+  "triageComment": "## Triage Summary\n- **One-line**: Add Jitsi Meet as a Krate Helm chart deployment option, with in-cluster subchart support and external Jitsi connection mode.\n\n## Critical Evaluation\n- The reporter's analysis is accurate: this is not implemented yet, and the repository currently contains requirements documentation rather than chart resources.\n- This is a feature/enabler rather than a bug. It is in scope for Krate infrastructure and unblocks the rest of the Jitsi issue chain.\n\n## Root Cause Analysis\n- Affected files:\n  - `packages/krate/charts/Chart.yaml`\n  - `packages/krate/charts/values.yaml`\n  - `packages/krate/charts/templates/networkpolicy.yaml`\n  - `packages/krate/charts/crds/jitsi-resources.yaml` (missing)\n  - `packages/krate/docs/jitsi/02-helm-deployment.md`\n  - `packages/krate/docs/jitsi/01-architecture.md`\n- Actual root cause: the Jitsi Helm deployment spec was added as docs only. The Krate chart has not been updated with the `jitsi-meet` subchart dependency, values, CRDs, JWT secret wiring, or Jitsi-specific network policy/media handling.\n- Code evidence: `Chart.yaml` currently lists `vela-core` and `kyverno` dependencies only; `values.yaml` has no `jitsi` section; `charts/crds/jitsi-resources.yaml` does not exist; the current chart network policy is generic and does not model JVB UDP 10000/media requirements.\n\n## Affected Components\n- Packages: krate, infrastructure\n- Effort: effort:large\n\n## Recommended Approach\nImplement this in stages:\n1. Add the `jitsi-meet` dependency to `packages/krate/charts/Chart.yaml` with `condition: jitsi.install` and an alias matching the deployment spec.\n2. Add a `jitsi` section to `values.yaml` covering in-cluster install, external mode, web/prosody/jicofo/jvb/jibri overrides, JWT settings, webhook secret settings, and Krate-specific defaults.\n3. Add `packages/krate/charts/crds/jitsi-resources.yaml` based on `packages/krate/docs/jitsi/03-crds-and-controllers.md`.\n4. Add secret and network-policy templates for JWT/webhook secret management and JVB UDP 10000 media traffic.\n5. Add Helm rendering/lint checks for both in-cluster and external modes.\n6. Document deployment verification for pods running, `config.js` accessibility, and Krate/Jitsi health checks.\n\n## Risk Analysis\n- **Risk Level**: risk:high\n- Helm dependency and packaging regressions: run `helm dependency build`, `helm lint`, and rendered manifest checks in CI for both `jitsi.install=true` and `jitsi.install=false`.\n- JWT secret handling and auth misconfiguration: support `existingSecret` and generated-secret paths; never require secret literals in committed values; add template tests for JWT wiring.\n- JVB UDP media path blocked in cluster networking: add explicit service/network-policy handling for UDP 10000 and document cloud/load-balancer requirements.\n- In-cluster and external modes conflict: define clear precedence/validation for `jitsi.install` versus `jitsi.external.enabled`; add render tests for both modes.\n- CRD schema mismatch with follow-up controller work: base CRDs directly on the Jitsi CRD/controller spec and coordinate field names with #624 before implementation.",
+  "specFiles": [
+    "packages/krate/docs/jitsi/01-architecture.md",
+    "packages/krate/docs/jitsi/02-helm-deployment.md",
+    "packages/krate/docs/jitsi/03-crds-and-controllers.md"
+  ],
+  "targetFiles": [
+    "packages/krate/charts/Chart.yaml",
+    "packages/krate/charts/values.yaml",
+    "packages/krate/charts/templates/networkpolicy.yaml",
+    "packages/krate/charts/templates/auth-secret.yaml",
+    "packages/krate/charts/crds/jitsi-resources.yaml",
+    "packages/krate/core/scripts/validate-package.mjs",
+    "packages/krate/core/tests/deployment.test.js"
+  ],
+  "qualityCommands": [
+    "npm --prefix packages/krate/core test",
+    "npm --prefix packages/krate/core run package:check",
+    "helm dependency build packages/krate/charts",
+    "helm lint packages/krate/charts",
+    "helm template krate packages/krate/charts -n krate-system --set jitsi.install=true --set argocd.enabled=false",
+    "helm template krate packages/krate/charts -n krate-system --set jitsi.install=false --set jitsi.external.enabled=true --set jitsi.external.url=https://meet.example.test --set argocd.enabled=false",
+    "npm run verify:metadata"
+  ],
+  "maxImplementationAttempts": 2
+}
