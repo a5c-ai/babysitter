@@ -6,15 +6,15 @@
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
- * - library/processes/shared/README.md
- * - library/processes/shared/runtime-call-tracer.js
- * - library/processes/shared/tdd-triplet.js
- * - library/processes/shared/deterministic-quality-gate.js
+ * - /home/runner/.a5c/process-library/babysitter-repo/library/processes/shared/README.md
+ * - /home/runner/.a5c/process-library/babysitter-repo/library/processes/shared/tdd-triplet.js
+ * - /home/runner/.a5c/process-library/babysitter-repo/library/tdd-quality-convergence.js
+ * - /home/runner/.a5c/process-library/babysitter-repo/library/reference/ADVANCED_PATTERNS.md
  * - packages/krate/docs/jitsi/03-crds-and-controllers.md
  * - packages/krate/docs/jitsi/01-architecture.md
  *
- * Note: the requested .a5c/process-library/ path was not present in this checkout;
- * the matching process-library material lives under library/processes/shared/.
+ * The active process-library root for this environment is:
+ * /home/runner/.a5c/process-library/babysitter-repo/library
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
@@ -35,6 +35,17 @@ function changedFilesFrom(...results) {
     const value = unwrap(result);
     return Array.isArray(value.changedFiles) ? value.changedFiles : [];
   }))];
+}
+
+function specReadInstructions(args) {
+  const specFiles = args.inputs?.specFiles ?? args.specFiles ?? [];
+  return [
+    'Before making task decisions, reread the authoritative sources directly in this execution:',
+    `- Run: gh issue view ${args.inputs?.issueNumber ?? args.issueNumber} --json title,body,labels,comments`,
+    `- Attempt: gh pr view ${args.inputs?.issueNumber ?? args.issueNumber} --json files,title,body,comments`,
+    ...specFiles.map((file) => `- Read spec file: ${file}`),
+    'Treat those freshly read issue/spec bytes as authoritative over any summary in task context.',
+  ];
 }
 
 export async function process(inputs, ctx) {
@@ -200,6 +211,7 @@ export const runReuseAuditTask = defineTask('issue-624.phase-0-reuse-audit', (ar
       task: 'Run the mandatory reuse audit before proposing new infrastructure or edits.',
       instructions: [
         'Do not implement changes in this task.',
+        ...specReadInstructions(args),
         'Extract keyword nouns and verbs from the issue and specs: Jitsi, meeting, provider, template, recording, participant, webhook, ingest, HMAC, dedup, JWT, room, sync, watermark, sidecar, event bus, dispatch.',
         'Check for .a5c/reuse-audit.json. If absent, say so explicitly and use repo-wide Krate globs.',
         'Scan for matching migrations, API routes, environment variables, package exports, imports, SDK dependencies, resource kinds, CRD manifests, controllers, tests, and docs.',
@@ -226,6 +238,7 @@ export const traceCurrentImplementationGapsTask = defineTask('issue-624.trace-cu
       task: 'Trace the live code paths and produce an exact gap map for issue #624.',
       instructions: [
         'Do not implement changes in this task.',
+        ...specReadInstructions(args),
         'Start from the reuse audit and read source files directly. Do not rely only on filenames or tests.',
         'Trace resource-model definitions, generic resource APIs, Jitsi web service helpers, /api/orgs/[org]/jitsi routes, external/sync-controller.js, external/webhook-controller.js, event-bus.js, agent-dispatch-controller.js, agent-mux-client.js, core and SDK exports, chart CRD manifests, and package tests.',
         'Classify each requested surface as complete, partial, missing, or out of scope: JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, JitsiRecording, chart CRDs, jitsi-meeting-controller.js, jitsi-sync-controller.js, jitsi-agent-bridge.js, webhook ingest, event bus events, and package exports.',
@@ -252,6 +265,7 @@ export const authorSpecDrivenTestsTask = defineTask('issue-624.author-tests-firs
       task: 'Add or repair focused failing tests for the missing issue #624 contract before production edits.',
       instructions: [
         'Edit the repository directly, but only add or update tests and test fixtures in this task.',
+        ...specReadInstructions(args),
         'Base tests on the issue, comments, and Jitsi specs, not on the current implementation shortcuts.',
         'Where a surface already has tests, strengthen them instead of duplicating shallow structure checks.',
         'Cover all four resource kinds for storage, context, plural, requiredSpec, validation, and schema behavior.',
@@ -282,6 +296,7 @@ export const implementMissingJitsiCoreTask = defineTask('issue-624.implementatio
       task: 'Implement only the missing or partial issue #624 backend/platform contract, preserving existing working Jitsi surfaces.',
       instructions: [
         'Edit the repository directly.',
+        ...specReadInstructions(args),
         `This is implementation attempt ${args.attempt}. Start by reading previous verification and review feedback if present.`,
         'Respect the gap matrix. Do not rewrite completed Jitsi web console or MCP features unless a backend contract break requires a small compatibility fix.',
         'Complete resource model, schema, chart CRD, and package export gaps for JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, and JitsiRecording.',
@@ -317,6 +332,7 @@ export const runQualityGatesTask = defineTask('issue-624.quality-gates', (args, 
       role: 'senior Krate verification engineer',
       task: 'Run focused and broad verification for the issue #624 implementation.',
       instructions: [
+        ...specReadInstructions(args),
         'Run the focused tests named by the acceptance test task and gap analysis.',
         'Run npm run test:sdk, npm run build:sdk, and npm run verify:metadata unless the repository state proves a narrower package command is the established gate. If a command cannot run, record the exact blocker.',
         'Run package-specific Krate tests that cover core resource model/controllers, web API webhook ingest, CLI/SDK exports, and event bus integration.',
@@ -346,6 +362,7 @@ export const reviewAgainstSpecTask = defineTask('issue-624.spec-security-review'
       task: 'Review the diff against the issue #624 contract and verification output.',
       instructions: [
         'Use a code-review stance. Findings must lead and be ordered by severity with file and line references.',
+        ...specReadInstructions(args),
         'Compare the diff directly to the issue body, issue comments, packages/krate/docs/jitsi/03-crds-and-controllers.md, and packages/krate/docs/jitsi/01-architecture.md.',
         'Block approval for missing controller methods, non-idempotent sync behavior, token or webhook secret leakage, missing timing-safe validation, missing duplicate delivery handling, missing event emissions, broken existing web/CLI surfaces, or untested non-meeting dispatch behavior.',
         'Check that #623, #625, and #627 scope boundaries were respected.',
@@ -372,6 +389,7 @@ export const finalDeliveryGateTask = defineTask('issue-624.final-delivery-gate',
       role: 'careful release handoff engineer',
       task: 'Prepare final delivery only after verification and review pass.',
       instructions: [
+        ...specReadInstructions(args),
         'Confirm verification.passed is true and review.approved is true. If either is false, return passed false with the remaining blockers.',
         'Inspect git status and diff. Ensure only issue #624 implementation and tests are included.',
         'Prepare a PR-ready summary with implemented surfaces, tests, security notes, and out-of-scope boundaries.',
