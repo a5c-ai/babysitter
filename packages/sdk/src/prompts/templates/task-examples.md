@@ -80,6 +80,34 @@ export const verificationGateTask = defineTask('verification-gate', (args, taskC
 }));
 ```
 
+When downstream process code reads fields from a shell task's JSON result,
+declare a top-level `outputSchema`. Successful posts that do not match are
+rejected before `result.json` or `EFFECT_RESOLVED` is written.
+
+```javascript
+export const liveVerifyTask = defineTask('live-verify', (args, taskCtx) => ({
+  kind: 'shell',
+  title: 'Live verification',
+  shell: {
+    command: `cd ${args.projectDir || '.'} && node scripts/live-verify.js`,
+    expectedExitCode: 0,
+    timeout: 60000
+  },
+  outputSchema: {
+    type: 'object',
+    required: ['verified', 'checks'],
+    properties: {
+      verified: { type: 'boolean' },
+      checks: { type: 'array' }
+    }
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
+  }
+}));
+```
+
 Use `library/processes/shared/deterministic-quality-gate.js` for composable
 preset gates (createGrepCheck, createCompilationGate, createTestSuiteGate,
 createRuntimeSmokeTest).

@@ -437,6 +437,7 @@ export interface TaskDef {
   kind: "node" | "breakpoint" | "orchestrator_task" | string;
   title?: string;
   description?: string;
+  outputSchema?: Record<string, unknown> | false | null; // shell result schema
 
   node?: {
     entry: string;                // path to node script
@@ -838,11 +839,12 @@ function commitEffectResult(
 
 Behavior:
 
+* For successful `kind="shell"` results with a top-level `outputSchema`, validates `value` before any hook, artifact, journal, registry, or state-cache mutation. `outputSchema: false`, `null`, or absence disables this validation.
 * Writes `tasks/<effectId>/result.json` with `value` or normalized error
 * Writes `stdout.txt` / `stderr.txt` if provided
 * Appends `EFFECT_RESOLVED` event
 * Updates `state/state.json` (best-effort)
-* Emits a `commit.effect` metric for both success and rejection (`unknown_effect`, `already_resolved`, `invocation_mismatch`, `invalid_payload`, etc.) including whether stdout/stderr artifacts were written.
+* Emits a `commit.effect` metric for both success and rejection (`unknown_effect`, `already_resolved`, `invocation_mismatch`, `invalid_payload`, `validation_error`, etc.) including whether stdout/stderr artifacts were written.
 
 Error semantics:
 
@@ -1361,6 +1363,26 @@ These commands operate on pending/resolved **effects** (tasks).
 Commit/post a task result after it was executed externally. The CLI validates that the effect exists and is still `status="requested"`, then appends `EFFECT_RESOLVED` + writes `tasks/<effectId>/result.json`.
 
 Human output logs `[task:post] status=<ok|error>` followed by stdout/stderr/result refs (when present). `--json` returns `{ status, committed, stdoutRef, stderrRef, resultRef }`. Exit codes follow the status: `ok` returns `0`, while `error` returns `1`. `--dry-run` returns `status=skipped` and makes no on-disk changes.
+
+For `kind="shell"` tasks, a top-level `outputSchema` validates successful posted values before commit:
+
+```ts
+export const liveVerifyTask = defineTask("live-verify", (args, taskCtx) => ({
+  kind: "shell",
+  title: "Live verification",
+  shell: { command: "node scripts/live-verify.js", expectedExitCode: 0 },
+  outputSchema: {
+    type: "object",
+    required: ["verified", "checks"],
+    properties: {
+      verified: { type: "boolean" },
+      checks: { type: "array" },
+    },
+  },
+}));
+```
+
+If `task:post --status ok --value-inline '{"verified":true}'` is used for that task, the shared SDK commit path rejects the post with `RunFailedError` details containing `reason: "validation_error"` and the schema errors. The rejected post does not write `result.json` or append `EFFECT_RESOLVED`.
 
 Options:
 

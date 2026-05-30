@@ -17,6 +17,7 @@ import { readTaskDefinition } from "../storage/tasks";
 import { rebuildStateCache } from "./replay/stateCache";
 import { checkRunWorkDirLeak } from "./workDirLeak";
 import { assertRuntimeHookAllowed, callRuntimeHook } from "./hooks/runtime";
+import { validateAgainstSchema } from "./schemaValidator";
 
 export async function commitEffectResult(options: CommitEffectResultOptions): Promise<CommitEffectResultArtifacts> {
   return await withRunLock(options.runDir, "runtime:commitEffectResult", async () => {
@@ -35,6 +36,7 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
     }
 
     ensureInvocationKeyMatches(options, record);
+    await validateTaskResultOutputSchema(options, record);
 
     const resultPayload = buildResultPayload(options);
     const taskCompletedHookResult = await callRuntimeHook(
@@ -183,6 +185,42 @@ export async function commitEffectCancellation(
 
     return { resultRef };
   });
+}
+
+async function validateTaskResultOutputSchema(options: CommitEffectResultOptions, record: EffectRecord) {
+  if (record.kind !== "shell" || options.result.status !== "ok") {
+    return;
+  }
+
+  const taskDef = await readTaskDefinition(options.runDir, options.effectId);
+  const outputSchema = taskDef?.outputSchema;
+  if (!isJsonSchemaRecord(outputSchema)) {
+    return;
+  }
+
+  const validation = validateAgainstSchema(options.result.value, outputSchema);
+  if (validation.valid) {
+    return;
+  }
+
+  logCommitFailure(options, "validation_error", {
+    taskId: record.taskId,
+    kind: record.kind,
+    errors: validation.errors,
+  });
+  throw new RunFailedError(`Shell task result failed outputSchema validation for effect ${options.effectId}`, {
+    details: {
+      reason: "validation_error",
+      effectId: options.effectId,
+      taskId: record.taskId,
+      kind: record.kind,
+      errors: validation.errors,
+    },
+  });
+}
+
+function isJsonSchemaRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function ensureInvocationKeyMatches(options: CommitEffectResultOptions, record: EffectRecord) {
