@@ -294,12 +294,12 @@ export class AgentCoreSessionHandle {
   }
   private async doInitialize(): Promise<void> {
     const mod = await loadPiModule();
-    // Bridge common Azure env var aliases that pi-coding-agent doesn't know
-    // about.  Pi expects AZURE_OPENAI_RESOURCE_NAME; the user's profile may
-    // set AZURE_OPENAI_PROJECT_NAME instead.
-    configureAzureOpenAiEnvDefaults(
+    const azureOpenAiEnv = configureAzureOpenAiEnvDefaults(
       typeof this.options.model === "string" ? this.options.model : undefined,
-    );
+    ) ?? {};
+    const piEnv = Object.keys(azureOpenAiEnv).length > 0
+      ? { ...process.env, ...azureOpenAiEnv }
+      : process.env;
     const createOpts: Record<string, unknown> = {};
     const cwd = this.options.workspace ?? process.cwd();
     const agentDir = resolvePiAgentDir(this.options.agentDir);
@@ -309,6 +309,9 @@ export class AgentCoreSessionHandle {
     const compactionSettings = buildCompactionSettings(compactionEnabled);
     createOpts.cwd = cwd;
     createOpts.agentDir = agentDir;
+    if (piEnv !== process.env) {
+      createOpts.env = piEnv;
+    }
     if (this.options.thinkingLevel) createOpts.thinkingLevel = this.options.thinkingLevel;
     const customTools = [...(this.options.customTools ?? [])];
     if (this.options.ephemeral) {
@@ -386,7 +389,7 @@ export class AgentCoreSessionHandle {
     //   "provider:modelId"  e.g. "azure-openai-responses:gpt-4.1"
     //   "modelId"           e.g. "gpt-4.1" (searches all providers)
     if (typeof this.options.model === "string") {
-      const resolved = await resolvePiModel(mod, this.options.model);
+      const resolved = await resolvePiModel(mod, this.options.model, piEnv);
       if (resolved) {
         createOpts.model = resolved;
       } else {
