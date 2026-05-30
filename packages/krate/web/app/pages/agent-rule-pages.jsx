@@ -2,6 +2,7 @@
 import { loadKrateUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/krate-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { TriggerRuleForm } from '../components/agent/trigger-rule-form.jsx';
+import { TriggerRuleEditForm } from '../components/agent/trigger-rule-edit-form.jsx';
 import { EnableDisableToggle, DeleteRuleButton } from '../components/agent/rule-actions.jsx';
 
 export async function AgentRulesPage({ org = null } = {}) {
@@ -63,6 +64,7 @@ export async function AgentRuleDetailPage({ org = null, ruleName } = {}) {
             <dt>Repository scope</dt><dd>{repository || 'All repositories'}</dd>
             <dt>Actor filter</dt><dd>{allowedActors && allowedActors.length ? allowedActors.join(', ') : 'Any actor'}</dd>
           </dl>
+          <TriggerRuleEditForm org={activeOrg} rule={rule} />
         </div>
         <div className="card">
           <div className="cardTitle"><h3>Metadata</h3><StatusPill tone="neutral">resource</StatusPill></div>

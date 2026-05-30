@@ -13,6 +13,7 @@ export { GraphStackBuilder } from './agent/stack-builder-graph.jsx';
 export { StackActions } from './agent/stack-actions.jsx';
 export { StackEditForm } from './agent/stack-edit-form.jsx';
 export { TriggerRuleForm } from './agent/trigger-rule-form.jsx';
+export { TriggerRuleEditForm } from './agent/trigger-rule-edit-form.jsx';
 export { EnableDisableToggle, DeleteRuleButton } from './agent/rule-actions.jsx';
 export { ApprovalDecisionButtons } from './agent/approval-actions.jsx';
 export { ApprovalModeToggle } from './agent/approval-mode-toggle.jsx';

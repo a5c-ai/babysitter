@@ -117,12 +117,15 @@ export function ManualDispatchButton({ org, stacks = [] }) {
 export function RunActions({ org, runName, stackRef, phase }) {
   const [cancelStatus, setCancelStatus] = useState('idle'); // idle | loading | done | error
   const [retryStatus, setRetryStatus] = useState('idle');   // idle | loading | done | error
+  const [deleteStatus, setDeleteStatus] = useState('idle'); // idle | confirm | loading | done | error
   const [cancelMsg, setCancelMsg] = useState('');
   const [retryMsg, setRetryMsg] = useState('');
+  const [deleteMsg, setDeleteMsg] = useState('');
 
   const isTerminal = phase === 'Completed' || phase === 'Succeeded' || phase === 'Cancelled' || phase === 'Failed';
   const canCancel = !isTerminal && cancelStatus === 'idle';
   const canRetry = (isTerminal || phase === 'Failed') && retryStatus === 'idle';
+  const canDelete = isTerminal && deleteStatus === 'idle';
 
   async function handleCancel() {
     setCancelStatus('loading');
@@ -143,6 +146,28 @@ export function RunActions({ org, runName, stackRef, phase }) {
     } catch (err) {
       setCancelStatus('error');
       setCancelMsg(err.message || 'Network error');
+    }
+  }
+
+  async function handleDelete() {
+    if (deleteStatus === 'idle') { setDeleteStatus('confirm'); return; }
+    setDeleteStatus('loading');
+    setDeleteMsg('');
+    try {
+      const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/AgentDispatchRun/${encodeURIComponent(runName)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setDeleteStatus('done');
+        setDeleteMsg('Deleted');
+      } else {
+        setDeleteStatus('error');
+        setDeleteMsg(data.message || data.error || 'Delete failed');
+      }
+    } catch (err) {
+      setDeleteStatus('error');
+      setDeleteMsg(err.message || 'Network error');
     }
   }
 
@@ -193,6 +218,25 @@ export function RunActions({ org, runName, stackRef, phase }) {
       {retryStatus === 'loading' && <span style={{ fontSize: 12, color: '#6b7280' }}>Retrying…</span>}
       {retryStatus === 'done' && <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 600 }}>{retryMsg}</span>}
       {retryStatus === 'error' && <span style={{ fontSize: 12, color: '#dc2626' }}>{retryMsg}</span>}
+
+      {canDelete && deleteStatus === 'idle' && (
+        <button onClick={handleDelete} style={dangerBtn} title="Delete this run" aria-label={`Delete run ${runName}`}>
+          Delete
+        </button>
+      )}
+      {deleteStatus === 'confirm' && (
+        <>
+          <button onClick={handleDelete} style={{ ...dangerBtn, fontSize: 11 }} aria-label={`Confirm delete run ${runName}`}>
+            Confirm delete
+          </button>
+          <button onClick={() => setDeleteStatus('idle')} style={secondaryBtn} aria-label="Cancel delete">
+            Cancel
+          </button>
+        </>
+      )}
+      {deleteStatus === 'loading' && <span style={{ fontSize: 12, color: '#6b7280' }}>Deleting…</span>}
+      {deleteStatus === 'done' && <span style={{ fontSize: 12, color: '#dc2626', fontWeight: 600 }}>{deleteMsg}</span>}
+      {deleteStatus === 'error' && <span style={{ fontSize: 12, color: '#dc2626' }}>{deleteMsg}</span>}
     </span>
   );
 }
