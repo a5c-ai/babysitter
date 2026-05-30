@@ -1109,12 +1109,19 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
   if (plan.harness === 'hermes') {
     const { homedir } = await import('node:os');
     const { join } = await import('node:path');
-    const pipBin = join(homedir(), '.local', 'bin');
+    const sep = process.platform === 'win32' ? ';' : ':';
+    const home = homedir();
+    const pipPaths = [
+      join(home, '.local', 'bin'),
+      ...(process.platform === 'darwin' ? [join(home, 'Library', 'Python', '3.12', 'bin'), join(home, 'Library', 'Python', '3.11', 'bin')] : []),
+    ];
     const currentPath = plan.env['PATH'] ?? process.env['PATH'] ?? '';
-    if (!currentPath.includes(pipBin)) {
-      const newPath = `${pipBin}${process.platform === 'win32' ? ';' : ':'}${currentPath}`;
+    const missingPaths = pipPaths.filter(p => !currentPath.includes(p));
+    if (missingPaths.length > 0) {
+      const newPath = `${missingPaths.join(sep)}${sep}${currentPath}`;
       plan.env['PATH'] = newPath;
       process.env['PATH'] = newPath;
+      console.error(`[amux launch] hermes: added pip paths to PATH: ${missingPaths.join(', ')}`);
     }
     if (process.platform === 'win32') {
       plan.env['TERM'] = '';
