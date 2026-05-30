@@ -36,6 +36,20 @@ const HOOK_EVENT_LABELS: Record<KnownHookType, string> = {
   "on-step-dispatch": "STEP_DISPATCH",
   "on-iteration-start": "ITERATION_START",
   "on-iteration-end": "ITERATION_END",
+  "session.setup": "SESSION_SETUP",
+  "turn.prompt_expansion": "TURN_PROMPT_EXPANSION",
+  "turn.stop_failure": "TURN_STOP_FAILURE",
+  "tool.after_failure": "TOOL_AFTER_FAILURE",
+  "tool.after_batch": "TOOL_AFTER_BATCH",
+  "task.created": "TASK_CREATED",
+  "task.completed": "TASK_COMPLETED",
+  "team.idle": "TEAM_IDLE",
+  "session.instructions_loaded": "SESSION_INSTRUCTIONS_LOADED",
+  "session.config_changed": "SESSION_CONFIG_CHANGED",
+  "message.received": "MESSAGE_RECEIVED",
+  "model.before_request": "MODEL_BEFORE_REQUEST",
+  "model.after_response": "MODEL_AFTER_RESPONSE",
+  "planner.before_tool_selection": "PLANNER_BEFORE_TOOL_SELECTION",
   "on-breakpoint": "BREAKPOINT",
   "on-permission-denied": "PERMISSION_DENIED",
   "pre-commit": "PRE_COMMIT",
@@ -138,6 +152,89 @@ const FIELD_EXTRACTORS: Record<KnownHookType, FieldExtractor> = {
     ["runId", str(p, "runId")],
     ["iteration", str(p, "iteration")],
     ["status", str(p, "status")],
+  ],
+
+  "session.setup": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["trigger", str(p, "trigger")],
+  ],
+
+  "turn.prompt_expansion": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["command", str(p, "command_name")],
+    ["source", str(p, "command_source")],
+  ],
+
+  "turn.stop_failure": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["errorType", str(p, "error_type")],
+    ["message", str(p, "error_message", "N/A")],
+  ],
+
+  "tool.after_failure": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["tool", str(p, "tool_name")],
+    ["exitCode", str(p, "exit_code", "N/A")],
+  ],
+
+  "tool.after_batch": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["batchResults", arrayLength(p, "batch_results")],
+    ["toolResults", arrayLength(p, "tool_results")],
+  ],
+
+  "task.created": (p) => [
+    ["runId", str(p, "runId")],
+    ["effectId", str(p, "effectId", str(p, "task_id"))],
+    ["taskId", str(p, "taskId", "N/A")],
+    ["kind", str(p, "kind", str(p, "task_kind"))],
+  ],
+
+  "task.completed": (p) => [
+    ["runId", str(p, "runId")],
+    ["effectId", str(p, "effectId", str(p, "task_id"))],
+    ["taskId", str(p, "taskId", "N/A")],
+    ["status", str(p, "status", str(p, "task_status"))],
+  ],
+
+  "team.idle": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["agentId", str(p, "agent_id")],
+    ["reason", str(p, "idle_reason", "N/A")],
+  ],
+
+  "session.instructions_loaded": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["file", str(p, "file_path")],
+    ["reason", str(p, "load_reason", "N/A")],
+  ],
+
+  "session.config_changed": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["path", str(p, "config_path")],
+    ["setting", str(p, "setting_key", "N/A")],
+  ],
+
+  "message.received": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["turnId", str(p, "turn_id", "N/A")],
+    ["messageId", str(p, "message_id", "N/A")],
+  ],
+
+  "model.before_request": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["model", str(p, "model", "N/A")],
+  ],
+
+  "model.after_response": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["model", str(p, "model", "N/A")],
+  ],
+
+  "planner.before_tool_selection": (p) => [
+    ["runId", str(p, "runId", "N/A")],
+    ["planner", str(p, "planner", "N/A")],
+    ["tools", arrayLength(p, "tools")],
   ],
 
   "on-breakpoint": (p) => [

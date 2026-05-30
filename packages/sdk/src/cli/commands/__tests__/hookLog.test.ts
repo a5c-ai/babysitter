@@ -274,6 +274,55 @@ describe("field extraction per hook type", () => {
     expect(content).toContain("kind=node");
   });
 
+  it("task.created: extracts canonical SDK task lifecycle fields", async () => {
+    const logFile = path.join(tmpDir, "task-created.log");
+    const payload = JSON.stringify({
+      runId: "run-636",
+      task_id: "eff-636",
+      task_kind: "shell",
+      taskId: "verify-task",
+    });
+
+    const code = await callWithStdin(payload, {
+      hookType: "task.created",
+      logFile,
+      json: false,
+    });
+    expect(code).toBe(0);
+
+    const content = await fs.readFile(logFile, "utf8");
+    expect(content).toContain("[TASK_CREATED]");
+    expect(content).toContain("runId=run-636");
+    expect(content).toContain("effectId=eff-636");
+    expect(content).toContain("taskId=verify-task");
+    expect(content).toContain("kind=shell");
+  });
+
+  it("task.completed: extracts canonical SDK task completion fields", async () => {
+    const logFile = path.join(tmpDir, "task-completed.log");
+    const payload = JSON.stringify({
+      runId: "run-637",
+      task_id: "eff-637",
+      task_kind: "agent",
+      task_status: "ok",
+      taskId: "review-task",
+    });
+
+    const code = await callWithStdin(payload, {
+      hookType: "task.completed",
+      logFile,
+      json: false,
+    });
+    expect(code).toBe(0);
+
+    const content = await fs.readFile(logFile, "utf8");
+    expect(content).toContain("[TASK_COMPLETED]");
+    expect(content).toContain("runId=run-637");
+    expect(content).toContain("effectId=eff-637");
+    expect(content).toContain("taskId=review-task");
+    expect(content).toContain("status=ok");
+  });
+
   it("on-step-dispatch: extracts runId, stepId, action", async () => {
     const logFile = path.join(tmpDir, "step-dispatch.log");
     const payload = JSON.stringify({

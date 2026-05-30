@@ -14,6 +14,21 @@ export type KnownHookType =
   | "on-step-dispatch"
   | "on-iteration-start"
   | "on-iteration-end"
+  // Canonical hook phases surfaced by hooks-mux / agent-mux.
+  | "session.setup"
+  | "turn.prompt_expansion"
+  | "turn.stop_failure"
+  | "tool.after_failure"
+  | "tool.after_batch"
+  | "task.created"
+  | "task.completed"
+  | "team.idle"
+  | "session.instructions_loaded"
+  | "session.config_changed"
+  | "message.received"
+  | "model.before_request"
+  | "model.after_response"
+  | "planner.before_tool_selection"
   // Process-Level Hooks
   | "on-breakpoint"
   | "on-permission-denied"
@@ -91,6 +106,148 @@ export interface OnTaskCompletePayload {
   status: "ok" | "error" | "timeout";
   result?: unknown;
   duration: number;
+  timestamp: string;
+}
+
+export interface SessionSetupPayload {
+  hookType: "session.setup";
+  runId?: string;
+  trigger?: "init" | "maintenance" | string;
+  timestamp: string;
+}
+
+export interface TurnPromptExpansionPayload {
+  hookType: "turn.prompt_expansion";
+  runId?: string;
+  expansion_type?: string;
+  command_name?: string;
+  command_args?: unknown;
+  command_source?: string;
+  prompt?: string;
+  timestamp: string;
+}
+
+export interface TurnStopFailurePayload {
+  hookType: "turn.stop_failure";
+  runId?: string;
+  error_type?: string;
+  error_message?: string;
+  retry_after?: number;
+  timestamp: string;
+}
+
+export interface ToolAfterFailurePayload {
+  hookType: "tool.after_failure";
+  runId?: string;
+  tool_name?: string;
+  tool_input?: unknown;
+  error?: unknown;
+  error_message?: string;
+  exit_code?: number;
+  timestamp: string;
+}
+
+export interface ToolAfterBatchPayload {
+  hookType: "tool.after_batch";
+  runId?: string;
+  batch_results?: unknown[];
+  tool_results?: unknown[];
+  timestamp: string;
+}
+
+export interface TaskCreatedPayload {
+  hookType: "task.created";
+  runId: string;
+  processId?: string;
+  task_id: string;
+  task_kind: string;
+  task_title?: string;
+  task_labels?: string[];
+  taskId?: string;
+  effectId?: string;
+  kind?: string;
+  title?: string;
+  labels?: string[];
+  timestamp: string;
+}
+
+export interface TaskCompletedPayload {
+  hookType: "task.completed";
+  runId: string;
+  task_id: string;
+  task_kind: string;
+  task_status: "ok" | "error" | "timeout" | string;
+  task_result?: unknown;
+  taskId?: string;
+  effectId?: string;
+  kind?: string;
+  status?: "ok" | "error" | "timeout" | string;
+  result?: unknown;
+  timestamp: string;
+}
+
+export interface TeamIdlePayload {
+  hookType: "team.idle";
+  runId?: string;
+  agent_id?: string;
+  agent_type?: string;
+  idle_reason?: string;
+  timestamp: string;
+}
+
+export interface SessionInstructionsLoadedPayload {
+  hookType: "session.instructions_loaded";
+  runId?: string;
+  file_path?: string;
+  memory_type?: string;
+  load_reason?: string;
+  globs?: string[];
+  trigger_file_path?: string;
+  parent_file_path?: string;
+  timestamp: string;
+}
+
+export interface SessionConfigChangedPayload {
+  hookType: "session.config_changed";
+  runId?: string;
+  config_path?: string;
+  change_type?: string;
+  setting_key?: string;
+  timestamp: string;
+}
+
+export interface MessageReceivedPayload {
+  hookType: "message.received";
+  runId?: string;
+  turn_id?: string;
+  message_id?: string;
+  index?: number;
+  final?: boolean;
+  delta?: string;
+  timestamp: string;
+}
+
+export interface ModelBeforeRequestPayload {
+  hookType: "model.before_request";
+  runId?: string;
+  model?: string;
+  request?: unknown;
+  timestamp: string;
+}
+
+export interface ModelAfterResponsePayload {
+  hookType: "model.after_response";
+  runId?: string;
+  model?: string;
+  response?: unknown;
+  timestamp: string;
+}
+
+export interface PlannerBeforeToolSelectionPayload {
+  hookType: "planner.before_tool_selection";
+  runId?: string;
+  planner?: string;
+  tools?: unknown[];
   timestamp: string;
 }
 
@@ -190,6 +347,20 @@ export type HookPayload =
   | OnRunFailPayload
   | OnTaskStartPayload
   | OnTaskCompletePayload
+  | SessionSetupPayload
+  | TurnPromptExpansionPayload
+  | TurnStopFailurePayload
+  | ToolAfterFailurePayload
+  | ToolAfterBatchPayload
+  | TaskCreatedPayload
+  | TaskCompletedPayload
+  | TeamIdlePayload
+  | SessionInstructionsLoadedPayload
+  | SessionConfigChangedPayload
+  | MessageReceivedPayload
+  | ModelBeforeRequestPayload
+  | ModelAfterResponsePayload
+  | PlannerBeforeToolSelectionPayload
   | OnStepDispatchPayload
   | OnIterationStartPayload
   | OnIterationEndPayload
