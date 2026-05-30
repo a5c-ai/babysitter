@@ -59,6 +59,16 @@ describe("AgentCoreSessionHandle", () => {
     });
   }
 
+  function mockAnthropicResponse(text: string) {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        content: [{ type: "text", text }],
+        usage: { input_tokens: 12, output_tokens: 6 },
+      }),
+    });
+  }
+
   it("makes a direct API call with the prompt", async () => {
     mockApiResponse("hello world");
     const session = createAgentCoreSession({ model: "gpt-5.5" });
@@ -89,6 +99,169 @@ describe("AgentCoreSessionHandle", () => {
     const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
     expect(body.messages[0]).toEqual({ role: "system", content: "You are helpful\n\nBe concise" });
     expect(body.messages[1]).toEqual({ role: "user", content: "Do something" });
+  });
+
+  it("maps OpenAI json_object structured output and returns parsed JSON", async () => {
+    mockApiResponse('{"status":"ok"}');
+    const session = createAgentCoreSession({ model: "gpt-5.5", outputFormat: "json_object" });
+
+    const result = await session.prompt<{ status: string }>("Return JSON");
+
+    expect(result.success).toBe(true);
+    expect(result.parsed).toEqual({ status: "ok" });
+    const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+    expect(body.response_format).toEqual({ type: "json_object" });
+    expect(body.messages).toEqual([{ role: "user", content: "Return JSON" }]);
+  });
+
+  it("maps OpenAI json_schema structured output from prompt options", async () => {
+    mockApiResponse('{"answer":42}');
+    const session = createAgentCoreSession({ model: "gpt-5.5" });
+
+    const result = await session.prompt<{ answer: number }>("Return schema JSON", {
+      outputFormat: "json_schema",
+      outputSchemaName: "answer_payload",
+      outputSchemaStrict: true,
+      outputSchema: {
+        type: "object",
+        required: ["answer"],
+        properties: { answer: { type: "number" } },
+      },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.parsed).toEqual({ answer: 42 });
+    const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+    expect(body.response_format).toEqual({
+      type: "json_schema",
+      json_schema: {
+        name: "answer_payload",
+        strict: true,
+        schema: {
+          type: "object",
+          required: ["answer"],
+          properties: { answer: { type: "number" } },
+        },
+      },
+    });
+  });
+
+  it("maps Azure json_schema structured output with OpenAI-compatible response_format", async () => {
+    vi.stubEnv("AMUX_PROVIDER", "foundry");
+    vi.stubEnv("AMUX_API_BASE", "https://myresource.services.ai.azure.com");
+    vi.stubEnv("AZURE_API_KEY", "az-key-123");
+
+    mockApiResponse('{"ok":true}');
+    const session = createAgentCoreSession({
+      model: "gpt-5.5",
+      outputFormat: "json_schema",
+      outputSchema: {
+        type: "object",
+        required: ["ok"],
+        properties: { ok: { type: "boolean" } },
+      },
+    });
+
+    const result = await session.prompt("Return JSON");
+
+    expect(result.success).toBe(true);
+    const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+    expect(body.response_format.type).toBe("json_schema");
+    expect(body.response_format.json_schema.name).toBe("agent_core_response");
+    expect(body.response_format.json_schema.schema.properties.ok.type).toBe("boolean");
+  });
+
+  it("uses an Anthropic system instruction as the structured output fallback", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-key");
+
+    mockAnthropicResponse('{"status":"ok"}');
+    const session = createAgentCoreSession({ outputFormat: "json_object" });
+
+    const result = await session.prompt("Return JSON");
+
+    expect(result.success).toBe(true);
+    expect(result.parsed).toEqual({ status: "ok" });
+    const [url, options] = mockFetch.mock.calls[0]!;
+    expect(url).toBe("https://api.anthropic.com/v1/messages");
+    const body = JSON.parse(options.body);
+    expect(body.system).toContain("Return only a valid JSON object");
+    expect(body.messages).toEqual([{ role: "user", content: "Return JSON" }]);
+    expect(body.response_format).toBeUndefined();
+  });
+
+  it("maps image URL and base64 parts for OpenAI-compatible providers", async () => {
+    mockApiResponse("described");
+    const session = createAgentCoreSession({ model: "gpt-5.5" });
+
+    await session.prompt([
+      { type: "text", text: "Describe these images" },
+      { type: "image_url", imageUrl: "https://example.com/image.png" },
+      { type: "image_base64", mediaType: "image/png", data: "aGVsbG8=" },
+    ]);
+
+    const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+    expect(body.messages[0].content).toEqual([
+      { type: "text", text: "Describe these images" },
+      { type: "image_url", image_url: { url: "https://example.com/image.png" } },
+      { type: "image_url", image_url: { url: "data:image/png;base64,aGVsbG8=" } },
+    ]);
+  });
+
+  it("maps image URL and base64 parts for Anthropic", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-key");
+
+    mockAnthropicResponse("described");
+    const session = createAgentCoreSession({ model: "claude-sonnet-4-6" });
+
+    await session.prompt([
+      { type: "text", text: "Describe these images" },
+      { type: "image_url", imageUrl: "https://example.com/image.png" },
+      { type: "image_base64", mediaType: "image/png", data: "aGVsbG8=" },
+    ]);
+
+    const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+    expect(body.messages[0].content).toEqual([
+      { type: "text", text: "Describe these images" },
+      { type: "image", source: { type: "url", url: "https://example.com/image.png" } },
+      { type: "image", source: { type: "base64", media_type: "image/png", data: "aGVsbG8=" } },
+    ]);
+  });
+
+  it("fails before dispatch for invalid structured output and image inputs", async () => {
+    const schemaSession = createAgentCoreSession({ outputFormat: "json_schema" });
+    const schemaResult = await schemaSession.prompt("Return JSON");
+    expect(schemaResult.success).toBe(false);
+    expect(schemaResult.output).toContain("requires outputSchema");
+
+    const imageSession = createAgentCoreSession({});
+    const imageResult = await imageSession.prompt([
+      { type: "text", text: "Describe this" },
+      { type: "image_url", imageUrl: "file:///tmp/image.png" },
+    ]);
+    expect(imageResult.success).toBe(false);
+    expect(imageResult.output).toContain("http(s)");
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("returns validationError when structured JSON does not match the schema", async () => {
+    mockApiResponse('{"answer":"forty-two"}');
+    const session = createAgentCoreSession({
+      outputFormat: "json_schema",
+      outputSchema: {
+        type: "object",
+        required: ["answer"],
+        properties: { answer: { type: "number" } },
+      },
+    });
+
+    const result = await session.prompt("Return JSON");
+
+    expect(result.success).toBe(false);
+    expect(result.exitCode).toBe(1);
+    expect(result.parsed).toEqual({ answer: "forty-two" });
+    expect(result.validationError).toBe("$.answer must be number");
   });
 
   it("routes to Azure foundry when AMUX_PROVIDER=foundry", async () => {

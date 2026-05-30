@@ -37,9 +37,18 @@ import {
   resetRunScopedConfig,
   stripHtmlTags,
   type AgentCoreEventListener,
+  type AgentCoreImageBase64PromptPart,
+  type AgentCoreImageUrlPromptPart,
+  type AgentCoreJsonSchema,
+  type AgentCoreOutputFormat,
+  type AgentCorePromptInput,
+  type AgentCorePromptOptions,
+  type AgentCorePromptPart,
   type AgentCorePromptResult,
   type AgentCoreSessionEvent,
   type AgentCoreSessionOptions,
+  type AgentCoreStructuredOutputOptions,
+  type AgentCoreTextPromptPart,
   type AgentCoreToolOptions,
   type CustomToolDefinition,
   type ToolResult,
@@ -64,6 +73,7 @@ Core handle methods:
 
 - `initialize()`: currently a no-op placeholder for compatibility.
 - `prompt(text, timeout?)`: starts a run, streams events to subscribers, and returns `{ output, duration, success, exitCode }`.
+- `prompt(input, options?)`: accepts text or multimodal prompt parts and optional structured-output settings.
 - `steer(text)`: sends immediate steering text while a prompt is active, or queues it for the next prompt.
 - `followUp(text)`: queues a post-response follow-up when streaming, or appends it to the next prompt when idle.
 - `getHistory()`: returns a defensive copy of persisted user/assistant turns for the session handle.
@@ -97,6 +107,64 @@ Session behavior that matters to host integrations:
 | `appendSystemPrompt` | Appended to the final `systemPrompt` before dispatch. |
 | `uiContext` | Switches run approval mode to `prompt`; when omitted, agent-core uses `yolo`. |
 | `backend` | Selects the agent-mux adapter/backend forwarded as `agent`. |
+| `outputFormat` | Optional structured-output mode: `text`, `json_object`, or `json_schema`. |
+| `outputSchema` | JSON Schema used when `outputFormat` is `json_schema`. |
+| `outputSchemaName` | Provider-visible schema name. Defaults to `agent_core_response`. |
+| `outputSchemaStrict` | Provider strictness flag for schema-capable APIs. Defaults to `true` for `json_schema`. |
+
+### Structured Output
+
+Structured output is opt-in. Plain `prompt(text, timeout?)` remains the default and returns only the text output fields used by existing callers.
+
+```ts
+const session = createAgentCoreSession({
+  model: "gpt-5.5",
+  outputFormat: "json_schema",
+  outputSchemaName: "answer_payload",
+  outputSchema: {
+    type: "object",
+    required: ["answer"],
+    properties: {
+      answer: { type: "string" },
+    },
+  },
+});
+
+const result = await session.prompt<{ answer: string }>("Answer as JSON");
+if (result.success) {
+  console.log(result.parsed?.answer);
+} else {
+  console.error(result.validationError ?? result.output);
+}
+```
+
+OpenAI-compatible and Azure endpoints receive `response_format` with either `{ type: "json_object" }` or a `json_schema` payload. Anthropic does not expose the same response-format field through this direct Messages API path, so agent-core injects a system instruction that requires JSON-only output and still parses/validates the returned text locally.
+
+`json_object` requires the model to return a JSON object. `json_schema` requires `outputSchema` and validates the parsed object for common JSON Schema constraints used by this package contract (`type`, `required`, `properties`, `items`, and `enum`). Parse or schema failures return `success: false`, `exitCode: 1`, the raw `output`, and `validationError`.
+
+Prompt-level options can override session defaults:
+
+```ts
+const result = await session.prompt<{ ok: boolean }>("Return status", {
+  outputFormat: "json_object",
+});
+```
+
+### Multimodal Input
+
+`prompt()` accepts an array of prompt parts for text plus image URL/base64 input:
+
+```ts
+await session.prompt([
+  { type: "text", text: "Describe the relevant details in these images." },
+  { type: "image_url", imageUrl: "https://example.com/screenshot.png" },
+  { type: "image_base64", mediaType: "image/png", data: rawBase64Png },
+]);
+```
+
+OpenAI-compatible and Azure endpoints receive Chat Completions content parts using `text` and `image_url`. Base64 images are converted to `data:<mediaType>;base64,...` URLs for those providers. Anthropic receives Messages API content blocks with `image` sources using either `url` or `base64`.
+
+Agent-core validates image URLs before dispatch (`http`/`https` only), requires `image/*` media types for base64 images, rejects data URLs in the base64 field, and caps raw base64 image payloads at 20 MiB. Image-bearing `ToolResult` support remains owned by #588; this API only covers direct session prompt input.
 
 ### Deprecated compatibility fields
 

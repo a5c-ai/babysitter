@@ -2,11 +2,63 @@ import type { TObject } from "@sinclair/typebox";
 import type { BackgroundProcessRegistry } from "@a5c-ai/agent-runtime";
 import type { DeferredToolRegistry } from "./deferredToolRegistry";
 
-export interface AgentCorePromptResult {
+export type AgentCoreOutputFormat = "text" | "json_object" | "json_schema";
+
+export interface AgentCoreJsonSchema {
+  [key: string]: unknown;
+}
+
+export interface AgentCoreStructuredOutputOptions {
+  /**
+   * Optional structured-output mode. The default `"text"` preserves the
+   * historical plain-string result path.
+   */
+  outputFormat?: AgentCoreOutputFormat;
+  /** JSON Schema used when `outputFormat` is `"json_schema"`. */
+  outputSchema?: AgentCoreJsonSchema;
+  /** Provider-visible schema name. Defaults to `agent_core_response`. */
+  outputSchemaName?: string;
+  /** Provider strictness flag for APIs that support schema strictness. */
+  outputSchemaStrict?: boolean;
+}
+
+export type AgentCorePromptInput = string | AgentCorePromptPart[];
+
+export type AgentCorePromptPart =
+  | AgentCoreTextPromptPart
+  | AgentCoreImageUrlPromptPart
+  | AgentCoreImageBase64PromptPart;
+
+export interface AgentCoreTextPromptPart {
+  type: "text";
+  text: string;
+}
+
+export interface AgentCoreImageUrlPromptPart {
+  type: "image_url";
+  imageUrl: string;
+  mediaType?: string;
+}
+
+export interface AgentCoreImageBase64PromptPart {
+  type: "image_base64";
+  data: string;
+  mediaType: string;
+}
+
+export interface AgentCorePromptOptions extends AgentCoreStructuredOutputOptions {
+  timeout?: number;
+}
+
+export interface AgentCorePromptResult<TParsed = unknown> {
   output: string;
   duration: number;
   success: boolean;
   exitCode: number;
+  /** Parsed JSON when a structured output mode is requested and parsing succeeds. */
+  parsed?: TParsed;
+  /** JSON parse or schema validation failure detail for structured output modes. */
+  validationError?: string;
 }
 
 export interface AgentCoreHistoryEntry {
@@ -19,7 +71,7 @@ export interface AgentCoreSessionEvent {
   [key: string]: unknown;
 }
 
-export interface AgentCoreSessionOptions {
+export interface AgentCoreSessionOptions extends AgentCoreStructuredOutputOptions {
   /** Working directory forwarded to agent-mux as `cwd`. */
   workspace?: string;
   /** Model identifier forwarded to agent-mux as `model`. */

@@ -2,9 +2,15 @@ import * as childProcess from "node:child_process";
 import { buildShellInvocation } from "@a5c-ai/agent-runtime";
 import type {
   AgentCoreHistoryEntry,
+  AgentCoreJsonSchema,
+  AgentCoreOutputFormat,
+  AgentCorePromptInput,
+  AgentCorePromptOptions,
+  AgentCorePromptPart,
   AgentCorePromptResult,
   AgentCoreSessionEvent,
   AgentCoreSessionOptions,
+  AgentCoreStructuredOutputOptions,
 } from "./types";
 import { estimateTokens } from "./context/token-estimator";
 
@@ -12,10 +18,34 @@ import { estimateTokens } from "./context/token-estimator";
 // and Azure Foundry cold-start latency. Override per-call via session.prompt(text, timeout).
 const DEFAULT_TIMEOUT_MS = 900_000;
 const DEFAULT_MAX_HISTORY_TURNS = 20;
+const DEFAULT_OUTPUT_SCHEMA_NAME = "agent_core_response";
+const MAX_BASE64_IMAGE_BYTES = 20 * 1024 * 1024;
 
 export type AgentCoreEventListener = (event: AgentCoreSessionEvent) => void;
 
-type ProviderMessage = { role: string; content: string };
+type ProviderMessageContent = string | NormalizedContentPart[];
+
+interface ProviderMessage {
+  role: string;
+  content: ProviderMessageContent;
+}
+
+type NormalizedContentPart =
+  | { type: "text"; text: string }
+  | { type: "image"; source: { type: "url"; url: string; mediaType?: string } }
+  | { type: "image"; source: { type: "base64"; data: string; mediaType: string } };
+
+interface NormalizedStructuredOutput {
+  outputFormat: AgentCoreOutputFormat;
+  schema?: AgentCoreJsonSchema;
+  name?: string;
+  strict?: boolean;
+}
+
+interface NormalizedCompletionRequest {
+  messages: ProviderMessage[];
+  structuredOutput?: NormalizedStructuredOutput;
+}
 
 type CompletionUsage = { promptTokens: number; completionTokens: number };
 
@@ -37,6 +67,165 @@ function buildSystemPrompt(options: AgentCoreSessionOptions): string | undefined
     return undefined;
   }
   return segments.join("\n\n");
+}
+
+function normalizePromptOptions(
+  sessionOptions: AgentCoreSessionOptions,
+  timeoutOrOptions?: number | AgentCorePromptOptions,
+): Required<Pick<AgentCorePromptOptions, "timeout">> & AgentCoreStructuredOutputOptions {
+  const promptOptions = typeof timeoutOrOptions === "number" ? { timeout: timeoutOrOptions } : timeoutOrOptions ?? {};
+  return {
+    timeout: promptOptions.timeout ?? sessionOptions.timeout ?? DEFAULT_TIMEOUT_MS,
+    outputFormat: promptOptions.outputFormat ?? sessionOptions.outputFormat ?? "text",
+    outputSchema: promptOptions.outputSchema ?? sessionOptions.outputSchema,
+    outputSchemaName: promptOptions.outputSchemaName ?? sessionOptions.outputSchemaName,
+    outputSchemaStrict: promptOptions.outputSchemaStrict ?? sessionOptions.outputSchemaStrict,
+  };
+}
+
+function normalizeStructuredOutput(options: AgentCoreStructuredOutputOptions): NormalizedStructuredOutput | undefined {
+  const outputFormat = options.outputFormat ?? "text";
+  if (outputFormat === "text") {
+    if (options.outputSchema) {
+      throw new Error("outputSchema requires outputFormat='json_schema'");
+    }
+    return undefined;
+  }
+
+  if (outputFormat === "json_object") {
+    if (options.outputSchema) {
+      throw new Error("outputSchema is only valid with outputFormat='json_schema'");
+    }
+    return { outputFormat };
+  }
+
+  if (outputFormat !== "json_schema") {
+    throw new Error(`Unsupported outputFormat '${String(outputFormat)}'`);
+  }
+
+  if (!isPlainObject(options.outputSchema)) {
+    throw new Error("outputFormat='json_schema' requires outputSchema to be a JSON Schema object");
+  }
+
+  const name = options.outputSchemaName?.trim() || DEFAULT_OUTPUT_SCHEMA_NAME;
+  if (!/^[a-zA-Z0-9_-]{1,64}$/.test(name)) {
+    throw new Error("outputSchemaName must be 1-64 characters and contain only letters, numbers, '_' or '-'");
+  }
+
+  return {
+    outputFormat,
+    schema: options.outputSchema,
+    name,
+    strict: options.outputSchemaStrict ?? true,
+  };
+}
+
+function normalizePromptInput(input: AgentCorePromptInput): ProviderMessageContent {
+  if (typeof input === "string") {
+    return input;
+  }
+
+  if (!Array.isArray(input) || input.length === 0) {
+    throw new Error("prompt input parts must be a non-empty array");
+  }
+
+  const content: NormalizedContentPart[] = [];
+  for (const part of input) {
+    content.push(normalizePromptPart(part));
+  }
+  return content;
+}
+
+function normalizePromptPart(part: AgentCorePromptPart): NormalizedContentPart {
+  if (part.type === "text") {
+    if (!part.text) {
+      throw new Error("text prompt parts require non-empty text");
+    }
+    return { type: "text", text: part.text };
+  }
+
+  if (part.type === "image_url") {
+    if (!isHttpUrl(part.imageUrl)) {
+      throw new Error("image_url prompt parts require an http(s) imageUrl");
+    }
+    validateImageMediaType(part.mediaType, false);
+    return { type: "image", source: { type: "url", url: part.imageUrl, mediaType: part.mediaType } };
+  }
+
+  if (part.type === "image_base64") {
+    validateImageMediaType(part.mediaType, true);
+    validateBase64ImageData(part.data);
+    return { type: "image", source: { type: "base64", data: part.data, mediaType: part.mediaType } };
+  }
+
+  throw new Error(`Unsupported prompt part type '${String((part as { type?: unknown }).type)}'`);
+}
+
+function buildNormalizedRequest(
+  input: AgentCorePromptInput,
+  sessionOptions: AgentCoreSessionOptions,
+  promptOptions: AgentCorePromptOptions,
+  historyMessages: ProviderMessage[] = [],
+): NormalizedCompletionRequest {
+  const messages: ProviderMessage[] = [];
+  const systemPrompt = buildSystemPrompt(sessionOptions);
+  if (systemPrompt) {
+    messages.push({ role: "system", content: systemPrompt });
+  }
+  messages.push(...historyMessages);
+  messages.push({ role: "user", content: normalizePromptInput(input) });
+
+  const structuredOutput = normalizeStructuredOutput(promptOptions);
+  return structuredOutput ? { messages, structuredOutput } : { messages };
+}
+
+function mergeFollowUps(input: AgentCorePromptInput, followUps: string[]): AgentCorePromptInput {
+  if (followUps.length === 0) {
+    return input;
+  }
+  const followUpText = followUps.map((item) => `Follow-up instruction:\n${item}`).join("\n\n");
+  if (typeof input === "string") {
+    return [input, followUpText].join("\n\n");
+  }
+  return [...input, { type: "text", text: followUpText }];
+}
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function validateImageMediaType(mediaType: string | undefined, required: boolean): void {
+  if (!mediaType) {
+    if (required) {
+      throw new Error("image_base64 prompt parts require mediaType");
+    }
+    return;
+  }
+  if (!/^image\/[a-zA-Z0-9.+-]+$/.test(mediaType)) {
+    throw new Error("image prompt mediaType must start with image/");
+  }
+}
+
+function validateBase64ImageData(data: string): void {
+  if (!data || data.startsWith("data:")) {
+    throw new Error("image_base64 prompt parts require raw base64 data, not a data URL");
+  }
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(data) || data.length % 4 !== 0) {
+    throw new Error("image_base64 prompt parts require valid base64 data");
+  }
+  const estimatedBytes = Math.floor((data.length * 3) / 4);
+  if (estimatedBytes > MAX_BASE64_IMAGE_BYTES) {
+    throw new Error(`image_base64 prompt parts must be <= ${MAX_BASE64_IMAGE_BYTES} bytes`);
+  }
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 interface ResolvedEndpoint {
@@ -106,9 +295,213 @@ function resolveEndpoint(options: AgentCoreSessionOptions): ResolvedEndpoint {
   return { apiBase: "https://api.openai.com/v1", apiKey: amuxApiKey, model, isAzure: false, isAnthropic: false };
 }
 
+function toOpenAiMessage(message: ProviderMessage): { role: string; content: string | Array<Record<string, unknown>> } {
+  if (typeof message.content === "string") {
+    return { role: message.role, content: message.content };
+  }
+  return {
+    role: message.role,
+    content: message.content.map((part) => {
+      if (part.type === "text") {
+        return { type: "text", text: part.text };
+      }
+      const url = part.source.type === "url"
+        ? part.source.url
+        : `data:${part.source.mediaType};base64,${part.source.data}`;
+      return { type: "image_url", image_url: { url } };
+    }),
+  };
+}
+
+function toAnthropicContent(content: ProviderMessageContent): string | Array<Record<string, unknown>> {
+  if (typeof content === "string") {
+    return content;
+  }
+  return content.map((part) => {
+    if (part.type === "text") {
+      return { type: "text", text: part.text };
+    }
+    if (part.source.type === "url") {
+      return {
+        type: "image",
+        source: {
+          type: "url",
+          url: part.source.url,
+        },
+      };
+    }
+    return {
+      type: "image",
+      source: {
+        type: "base64",
+        media_type: part.source.mediaType,
+        data: part.source.data,
+      },
+    };
+  });
+}
+
+function contentToText(content: ProviderMessageContent): string {
+  if (typeof content === "string") {
+    return content;
+  }
+  return content
+    .filter((part): part is { type: "text"; text: string } => part.type === "text")
+    .map((part) => part.text)
+    .join("\n\n");
+}
+
+function buildOpenAiResponseFormat(
+  structuredOutput: NormalizedStructuredOutput | undefined,
+): Record<string, unknown> {
+  if (!structuredOutput) {
+    return {};
+  }
+  if (structuredOutput.outputFormat === "json_object") {
+    return { response_format: { type: "json_object" } };
+  }
+  return {
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: structuredOutput.name ?? DEFAULT_OUTPUT_SCHEMA_NAME,
+        schema: structuredOutput.schema,
+        strict: structuredOutput.strict ?? true,
+      },
+    },
+  };
+}
+
+function buildAnthropicStructuredOutputPrompt(
+  structuredOutput: NormalizedStructuredOutput | undefined,
+): string | undefined {
+  if (!structuredOutput) {
+    return undefined;
+  }
+  if (structuredOutput.outputFormat === "json_object") {
+    return "Return only a valid JSON object. Do not include markdown fences, prose, or leading/trailing text.";
+  }
+  return [
+    "Return only JSON that conforms to the following JSON Schema.",
+    "Do not include markdown fences, prose, or leading/trailing text.",
+    JSON.stringify({
+      name: structuredOutput.name ?? DEFAULT_OUTPUT_SCHEMA_NAME,
+      strict: structuredOutput.strict ?? true,
+      schema: structuredOutput.schema,
+    }),
+  ].join("\n");
+}
+
+function applyStructuredOutputResult<TParsed>(
+  text: string,
+  structuredOutput: NormalizedStructuredOutput | undefined,
+): Pick<AgentCorePromptResult<TParsed>, "parsed" | "validationError" | "success" | "exitCode"> {
+  if (!structuredOutput) {
+    return { success: true, exitCode: 0 };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    return {
+      success: false,
+      exitCode: 1,
+      validationError: `Structured output JSON parse failed: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+
+  if (!isPlainObject(parsed)) {
+    return {
+      success: false,
+      exitCode: 1,
+      validationError: "Structured output must be a JSON object",
+    };
+  }
+
+  if (structuredOutput.outputFormat === "json_schema" && structuredOutput.schema) {
+    const validationError = validateJsonSchemaValue(parsed, structuredOutput.schema);
+    if (validationError) {
+      return { success: false, exitCode: 1, parsed: parsed as TParsed, validationError };
+    }
+  }
+
+  return { success: true, exitCode: 0, parsed: parsed as TParsed };
+}
+
+function validateJsonSchemaValue(value: unknown, schema: AgentCoreJsonSchema, path = "$"): string | undefined {
+  const type = schema["type"];
+  if (typeof type === "string" && !matchesJsonSchemaType(value, type)) {
+    return `${path} must be ${type}`;
+  }
+
+  const enumValues = schema["enum"];
+  if (Array.isArray(enumValues) && !enumValues.some((item) => Object.is(item, value))) {
+    return `${path} must be one of the schema enum values`;
+  }
+
+  if (type === "object" || (isPlainObject(value) && isPlainObject(schema["properties"]))) {
+    if (!isPlainObject(value)) {
+      return `${path} must be object`;
+    }
+    const required = Array.isArray(schema["required"]) ? schema["required"] : [];
+    for (const key of required) {
+      if (typeof key === "string" && !(key in value)) {
+        return `${path}.${key} is required`;
+      }
+    }
+    const properties = schema["properties"];
+    if (isPlainObject(properties)) {
+      for (const [key, propertySchema] of Object.entries(properties)) {
+        if (key in value && isPlainObject(propertySchema)) {
+          const error = validateJsonSchemaValue(value[key], propertySchema, `${path}.${key}`);
+          if (error) {
+            return error;
+          }
+        }
+      }
+    }
+  }
+
+  if (type === "array" && Array.isArray(value)) {
+    const items = schema["items"];
+    if (isPlainObject(items)) {
+      for (let index = 0; index < value.length; index += 1) {
+        const error = validateJsonSchemaValue(value[index], items, `${path}[${index}]`);
+        if (error) {
+          return error;
+        }
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function matchesJsonSchemaType(value: unknown, type: string): boolean {
+  switch (type) {
+    case "object":
+      return isPlainObject(value);
+    case "array":
+      return Array.isArray(value);
+    case "string":
+      return typeof value === "string";
+    case "number":
+      return typeof value === "number" && Number.isFinite(value);
+    case "integer":
+      return Number.isInteger(value);
+    case "boolean":
+      return typeof value === "boolean";
+    case "null":
+      return value === null;
+    default:
+      return true;
+  }
+}
+
 async function callCompletionApi(
   endpoint: ResolvedEndpoint,
-  messages: ProviderMessage[],
+  request: NormalizedCompletionRequest,
   timeout: number,
   onDelta: (delta: string) => void,
   onController?: (controller: AbortController | undefined) => void,
@@ -129,32 +522,36 @@ async function callCompletionApi(
       url = `${endpoint.apiBase}/v1/messages`;
       headers["x-api-key"] = endpoint.apiKey;
       headers["anthropic-version"] = "2023-06-01";
-      const systemMsg = messages.find(m => m.role === "system");
-      const nonSystemMsgs = messages.filter(m => m.role !== "system");
+      const systemPrompts = request.messages.filter(m => m.role === "system").map(m => contentToText(m.content));
+      const nonSystemMsgs = request.messages.filter(m => m.role !== "system");
+      const structuredPrompt = buildAnthropicStructuredOutputPrompt(request.structuredOutput);
+      const system = [...systemPrompts, structuredPrompt].filter(Boolean).join("\n\n");
       body = JSON.stringify({
         model: endpoint.model,
         max_tokens: 16384,
         stream: true,
-        ...(systemMsg ? { system: systemMsg.content } : {}),
-        messages: nonSystemMsgs.map(m => ({ role: m.role, content: m.content })),
+        ...(system ? { system } : {}),
+        messages: nonSystemMsgs.map(m => ({ role: m.role, content: toAnthropicContent(m.content) })),
       });
     } else if (endpoint.isAzure) {
       url = `${endpoint.apiBase}/deployments/${endpoint.model}/chat/completions?api-version=2025-04-01-preview`;
       headers["api-key"] = endpoint.apiKey;
       body = JSON.stringify({
         model: endpoint.model,
-        messages,
+        messages: request.messages.map(toOpenAiMessage),
         max_completion_tokens: 16384,
         stream: true,
+        ...buildOpenAiResponseFormat(request.structuredOutput),
       });
     } else {
       url = `${endpoint.apiBase}/chat/completions`;
       headers["Authorization"] = `Bearer ${endpoint.apiKey}`;
       body = JSON.stringify({
         model: endpoint.model,
-        messages,
+        messages: request.messages.map(toOpenAiMessage),
         max_completion_tokens: 16384,
         stream: true,
+        ...buildOpenAiResponseFormat(request.structuredOutput),
       });
     }
 
@@ -361,31 +758,29 @@ export class AgentCoreSessionHandle {
     return;
   }
 
-  async prompt(text: string, timeout?: number): Promise<AgentCorePromptResult> {
+  async prompt<TParsed = unknown>(text: string, timeout?: number): Promise<AgentCorePromptResult<TParsed>>;
+  async prompt<TParsed = unknown>(input: AgentCorePromptInput, options?: AgentCorePromptOptions): Promise<AgentCorePromptResult<TParsed>>;
+  async prompt<TParsed = unknown>(
+    input: AgentCorePromptInput,
+    timeoutOrOptions?: number | AgentCorePromptOptions,
+  ): Promise<AgentCorePromptResult<TParsed>> {
     if (this.isActive) {
       throw new Error("Agent core session is already processing a prompt");
     }
 
     this.isActive = true;
-    const effectiveTimeout = (timeout || this.options.timeout) || DEFAULT_TIMEOUT_MS;
+    const promptOptions = normalizePromptOptions(this.options, timeoutOrOptions);
+    const effectiveTimeout = promptOptions.timeout;
     const start = Date.now();
 
     const followUps = this.queuedFollowUps;
     this.queuedFollowUps = [];
-    const promptText = followUps.length > 0
-      ? [text, ...followUps.map((item) => `Follow-up instruction:\n${item}`)].join("\n\n")
-      : text;
+    const promptInput = mergeFollowUps(input, followUps);
 
     const endpoint = resolveEndpoint(this.options);
     try {
-      const messages: ProviderMessage[] = [];
-
-      const systemPrompt = buildSystemPrompt(this.options);
-      if (systemPrompt) {
-        messages.push({ role: "system", content: systemPrompt });
-      }
-      messages.push(...this.trimHistoryForPrompt());
-      messages.push({ role: "user", content: promptText });
+      const request = buildNormalizedRequest(promptInput, this.options, promptOptions, this.trimHistoryForPrompt());
+      const promptText = contentToText(request.messages[request.messages.length - 1]?.content ?? "");
 
       const sessionId = this.currentSessionId ?? `agent-core-${Date.now()}`;
       this.currentSessionId = sessionId;
@@ -397,7 +792,7 @@ export class AgentCoreSessionHandle {
 
       const result = await callCompletionApi(
         endpoint,
-        messages,
+        request,
         effectiveTimeout,
         (delta) => {
           this.emit({ type: "text_delta", delta });
@@ -406,6 +801,7 @@ export class AgentCoreSessionHandle {
           this.activeAbortController = controller;
         },
       );
+      const structuredResult = applyStructuredOutputResult<TParsed>(result.text, request.structuredOutput);
 
       this.appendSuccessfulTurn(promptText, result.text);
       this.emit({ type: "session_end", sessionId });
@@ -413,8 +809,10 @@ export class AgentCoreSessionHandle {
       return {
         output: result.text,
         duration: Date.now() - start,
-        success: true,
-        exitCode: 0,
+        success: structuredResult.success,
+        exitCode: structuredResult.exitCode,
+        ...(structuredResult.parsed !== undefined ? { parsed: structuredResult.parsed } : {}),
+        ...(structuredResult.validationError ? { validationError: structuredResult.validationError } : {}),
       };
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);

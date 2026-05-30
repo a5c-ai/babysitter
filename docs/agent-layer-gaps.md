@@ -13,14 +13,14 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 | No streaming | `session.ts:200-257` | `prompt()` waits for full response, emits single `text_delta` with everything. No token-by-token streaming. |
 | No multi-turn history | `session.ts:217-223` | Messages rebuilt from scratch each call. No persistent conversation context across `prompt()` calls. |
 | `abort()` is no-op | `session.ts:332-334` | In-flight API calls cannot be cancelled. AbortController exists but isn't exposed. |
-| No structured output | `session.ts`, `types.ts` | No JSON mode, schema validation, or typed returns. All responses are plain text. |
+| Structured output follow-up work | `session.ts`, `types.ts` | Agent-core now exposes opt-in `json_object`/`json_schema` prompt output, provider request mapping, local parsing, and focused schema validation. Remaining gaps: full JSON Schema validator coverage and streaming structured-output integration (#575). |
 | Token usage discarded | `session.ts:163-177` | Parsed from API response but never returned to caller or tracked cumulatively. |
 
 ### High (major feature gaps)
 
 | Gap | File | Description |
 |-----|------|-------------|
-| No vision/multimodal | `session.ts` | Only text prompts. No image input, no base64, no vision tools. |
+| Vision/multimodal follow-up work | `session.ts` | Agent-core now accepts direct prompt text/image URL/base64 content parts and maps them for OpenAI/Azure/Anthropic. Remaining gaps: streaming multimodal responses (#575), image-bearing `ToolResult` support (#588), and broader vision tool ergonomics. |
 | No tool AbortSignal | `types.ts:86-96` | Custom tools can't be cancelled by framework. Each must own its timeout. |
 | Token estimation broken | `context/token-estimator.ts` | Hardcoded `chars/4` for all models. Wrong for Claude (~3.5), GPT-4 (~4.2). Context overflow risk. |
 | `calc` tool missing | `types.ts:145` | Listed in `AGENT_CORE_TOOL_NAMES` but no implementation exists. Runtime error if called. |
@@ -369,8 +369,8 @@ Only `GitHubIssuesBackend` exists. Basic mapping of breakpoints to GitHub issues
 
 **P1 — Unblock platform features:**
 1. Subagent effect type in SDK journal + omni → agent-mux adapter dispatch
-2. Structured output / JSON mode in agent-core
-3. Vision/multimodal input
+2. Structured output / JSON mode hardening in agent-core (full schema validator coverage and streaming coordination)
+3. Vision/multimodal input follow-through (#575 streaming responses, #588 image-bearing `ToolResult`)
 4. Wire breakpoint delegation → tasks-mux backends
 5. Wire approval chains → tasks-mux routing
 6. Cost budget enforcement in orchestration (transport-mux cost feedback → SDK)
