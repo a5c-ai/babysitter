@@ -5,7 +5,7 @@ import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { buildEffectIndex, EffectIndex } from "./effectIndex";
 import { ReplayCursor } from "./replayCursor";
-import { ProcessContext } from "../types";
+import { ProcessContext, SubprocessSupportMode } from "../types";
 import { createProcessContext, InternalProcessContext } from "../processContext";
 import { replaySchemaVersion } from "../constants";
 import { RunFailedError } from "../exceptions";
@@ -22,7 +22,7 @@ export interface CreateReplayEngineOptions {
   now?: () => Date;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logger?: (...args: any[]) => void;
-  subprocessSupport?: "disabled" | "agent-platform";
+  subprocessSupport?: SubprocessSupportMode;
 }
 
 export interface ReplayEngine {

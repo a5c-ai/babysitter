@@ -3,6 +3,7 @@ import { appendEvent } from "../../storage/journal";
 import { buildEffectIndex } from "../replay/effectIndex";
 import { ReplayCursor } from "../replay/replayCursor";
 import { TaskIntrinsicContext } from "../intrinsics/task";
+import type { SubprocessSupportMode } from "../types";
 
 export interface TestRunInfo {
   runDir: string;
@@ -24,7 +25,7 @@ export interface BuildTaskContextOptions {
   now?: () => Date;
   processId?: string;
   logger?: (...args: any[]) => void;
-  subprocessSupport?: "disabled" | "agent-platform";
+  subprocessSupport?: SubprocessSupportMode;
 }
 
 export async function buildTaskContext(

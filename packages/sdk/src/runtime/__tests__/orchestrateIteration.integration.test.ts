@@ -116,6 +116,52 @@ describe("orchestrateIteration integration", () => {
     await expect(fs.stat(cleanupDir)).resolves.toBeDefined();
   });
 
+  test("allows plugin-local subprocess effects without running cleanup while waiting", async () => {
+    const processDir = path.join(tmpRoot, "processes-subprocess-cleanup-waiting");
+    const cleanupDir = path.join(tmpRoot, "scratch-subprocess-waiting");
+    await fs.mkdir(processDir, { recursive: true });
+    await fs.mkdir(cleanupDir, { recursive: true });
+
+    const processPath = path.join(processDir, "subprocess-cleanup-waiting.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      import { promises as fs } from "fs";
+
+      export async function process(inputs, ctx) {
+        ctx.onCleanup(async () => {
+          await fs.rm(inputs.cleanupDir, { recursive: true, force: true });
+        });
+        await ctx.subprocess({
+          processPath: "./child.mjs",
+          exportName: "process",
+          processId: "child-process",
+          prompt: "Run child process"
+        });
+        return { ok: true };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-subprocess-cleanup-waiting",
+      request: "subprocess cleanup waiting",
+      processPath,
+      inputs: { cleanupDir },
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-subprocess-cleanup-waiting" } });
+
+    const waiting = await orchestrateIteration({ runDir, subprocessSupport: "plugin-local" });
+    expect(waiting.status).toBe("waiting");
+    if (waiting.status !== "waiting") {
+      throw new Error("Expected waiting status");
+    }
+    expect(waiting.nextActions[0].kind).toBe("subprocess");
+    await expect(fs.stat(cleanupDir)).resolves.toBeDefined();
+  });
+
   test("runs ctx.onCleanup callbacks for failed and process-error terminal paths", async () => {
     const processDir = path.join(tmpRoot, "processes-cleanup-failures");
     const failedDir = path.join(tmpRoot, "scratch-failed");

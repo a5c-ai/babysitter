@@ -152,7 +152,7 @@ const runTargetedTestsTask = defineTask('issue-618.run-targeted-tests', (args, t
   shell: {
     command: [
       'set -euo pipefail',
-      'npm run test --workspace=@a5c-ai/babysitter-sdk -- src/runtime/__tests__/intrinsics.behaviors.test.ts src/runtime/__tests__/orchestrateIteration.integration.test.ts src/harness/unified/__tests__/e2e-integration.test.ts src/harness/__tests__/harness.test.ts',
+      'npm run test --workspace=@a5c-ai/babysitter-sdk -- src/runtime/__tests__/intrinsics.behaviors.test.ts src/runtime/__tests__/orchestrateIteration.integration.test.ts src/cli/__tests__/cliRuns.test.ts src/harness/unified/__tests__/e2e-integration.test.ts src/harness/__tests__/harness.test.ts',
     ].join('\n'),
     expectedExitCode: args.expectFailure ? 1 : 0,
     timeout: 600000,
@@ -213,7 +213,7 @@ const verifyTask = defineTask('issue-618.verify', (args, taskCtx) => ({
     command: [
       'set -euo pipefail',
       'git diff --check',
-      'npm run test --workspace=@a5c-ai/babysitter-sdk -- src/runtime/__tests__/intrinsics.behaviors.test.ts src/runtime/__tests__/orchestrateIteration.integration.test.ts src/harness/unified/__tests__/e2e-integration.test.ts src/harness/__tests__/harness.test.ts',
+      'npm run test --workspace=@a5c-ai/babysitter-sdk -- src/runtime/__tests__/intrinsics.behaviors.test.ts src/runtime/__tests__/orchestrateIteration.integration.test.ts src/cli/__tests__/cliRuns.test.ts src/harness/unified/__tests__/e2e-integration.test.ts src/harness/__tests__/harness.test.ts',
       'npm run build:sdk',
       'npm run test:sdk',
       'npm run verify:metadata',

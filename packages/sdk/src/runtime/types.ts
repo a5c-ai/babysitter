@@ -225,9 +225,11 @@ export interface OrchestrateOptions {
   now?: Date | (() => Date);
   context?: Record<string, unknown>;
   logger?: ProcessLogger;
-  /** Internal-only gate for subprocess effects resolved by agent-platform. */
-  subprocessSupport?: "disabled" | "agent-platform";
+  /** Internal-only gate for subprocess effects resolved by agent-platform or plugin-local orchestration. */
+  subprocessSupport?: SubprocessSupportMode;
 }
+
+export type SubprocessSupportMode = "disabled" | "agent-platform" | "plugin-local";
 
 export interface IterationMetadata {
   stateVersion?: number;

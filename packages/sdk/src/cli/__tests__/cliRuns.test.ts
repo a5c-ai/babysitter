@@ -689,6 +689,63 @@ describe("run lifecycle inspection commands", () => {
     await fs.rm(runsRoot, { recursive: true, force: true });
   });
 
+  describe("run:iterate", () => {
+    it("enables plugin-local subprocess support when iterating inside plugin mode", async () => {
+      const runDir = await createRunSkeleton("run-plugin-local-iterate");
+      const savedEnv = {
+        AGENT_PLUGIN_ROOT: process.env.AGENT_PLUGIN_ROOT,
+        AGENT_SESSION_ID: process.env.AGENT_SESSION_ID,
+        AGENT_CAPABILITIES_JSON: process.env.AGENT_CAPABILITIES_JSON,
+        BABYSITTER_STATE_DIR: process.env.BABYSITTER_STATE_DIR,
+      };
+      const orchestrateSpy = vi.spyOn(orchestrateIterationModule, "orchestrateIteration").mockResolvedValue({
+        status: "completed",
+        output: { ok: true },
+      });
+
+      process.env.AGENT_PLUGIN_ROOT = path.join(runsRoot, "plugin-root");
+      process.env.AGENT_SESSION_ID = "plugin-session";
+      process.env.AGENT_CAPABILITIES_JSON = JSON.stringify({ tools: ["bash"] });
+      process.env.BABYSITTER_STATE_DIR = path.join(runsRoot, "state");
+
+      try {
+        const exitCode = await cli.run(["run:iterate", runDir, "--json"]);
+
+        expect(exitCode).toBe(0);
+        expect(orchestrateSpy).toHaveBeenCalledWith(expect.objectContaining({
+          runDir,
+          subprocessSupport: "plugin-local",
+        }));
+      } finally {
+        for (const [key, value] of Object.entries(savedEnv)) {
+          if (value === undefined) {
+            delete process.env[key];
+          } else {
+            process.env[key] = value;
+          }
+        }
+        orchestrateSpy.mockRestore();
+      }
+    });
+
+    it("keeps subprocess support disabled for ordinary local iteration", async () => {
+      const runDir = await createRunSkeleton("run-local-iterate");
+      const orchestrateSpy = vi.spyOn(orchestrateIterationModule, "orchestrateIteration").mockResolvedValue({
+        status: "completed",
+        output: { ok: true },
+      });
+
+      const exitCode = await cli.run(["run:iterate", runDir, "--json"]);
+
+      expect(exitCode).toBe(0);
+      expect(orchestrateSpy).toHaveBeenCalledWith(expect.objectContaining({
+        runDir,
+      }));
+      expect(orchestrateSpy.mock.calls[0][0]).not.toHaveProperty("subprocessSupport");
+      orchestrateSpy.mockRestore();
+    });
+  });
+
   describe("run:status", () => {
     it("reports state, last event, and pending counts", async () => {
       const runDir = await createRunWithPendingEffects();

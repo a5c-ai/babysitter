@@ -51,9 +51,9 @@ export function runSubprocessIntrinsic(
   context: TaskIntrinsicContext,
   options?: TaskInvokeOptions,
 ): Promise<SubprocessResult> {
-  if (context.subprocessSupport !== "agent-platform") {
+  if (context.subprocessSupport === undefined || context.subprocessSupport === "disabled") {
     throw new RunFailedError(
-      "Subprocess effects are only supported when the run is iterated by agent-platform.",
+      "Subprocess effects are disabled for this orchestration context.",
       {
         runId: context.runId,
         processId: context.processId,
