@@ -537,7 +537,7 @@ function buildPrompt(scenario: LiveStackScenario, traceId: string, env: Record<s
     const processHint = 'A process definition is available at .a5c/processes/summarize-translate-test.mjs';
     if (scenario.agent.agent === 'claude-code') return `/babysitter:yolo ${coreTask}. ${processHint}`;
     if (scenario.agent.agent === 'codex') return `$babysitter:yolo ${coreTask}. ${processHint}`;
-    return `Invoke the babysitter:yolo command to: ${coreTask}. ${processHint}`;
+    return `Run the babysitter process to complete this task. Execute: babysitter run:iterate --process .a5c/processes/summarize-translate-test.mjs --non-interactive --json --prompt "${coreTask}". ${processHint}. The babysitter CLI is installed globally.`;
   }
 
   return coreTask;
