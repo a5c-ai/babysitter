@@ -25,7 +25,7 @@ export const POST = async (request, { params }) => {
     throw err;
   }
 
-  const replay = deliveries.checkAndRemember(normalized.deliveryId, JSON.parse(rawBody).timestamp);
+  const replay = deliveries.checkAndRemember(normalized.deliveryId, normalized.timestamp);
   if (replay.replay) {
     return Response.json({ error: 'stale_delivery' }, { status: 409 });
   }

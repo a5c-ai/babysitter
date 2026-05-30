@@ -158,14 +158,15 @@ export function createJoinPayload(meeting, args = {}) {
       },
     },
   };
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
   const encoded = Buffer.from(JSON.stringify(claims)).toString('base64url');
-  const signature = crypto.createHmac('sha256', jitsiJwtSecret()).update(encoded).digest('base64url');
+  const signature = crypto.createHmac('sha256', jitsiJwtSecret()).update(`${header}.${encoded}`).digest('base64url');
   return {
     meetingRef: meeting.metadata?.name,
     org: meeting.spec?.organizationRef,
     roomUrl: meeting.status?.roomUrl || `https://meet.krate.local/${meeting.spec?.roomId}`,
     roomId: meeting.spec?.roomId,
-    jwt: `krate-jitsi.${encoded}.${signature}`,
+    jwt: `${header}.${encoded}.${signature}`,
     expiresAt: new Date(exp * 1000).toISOString(),
     expiresInSeconds: ttlMinutes * 60,
   };
@@ -272,6 +273,7 @@ export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
   if (eventType === 'room-created') {
     return {
       deliveryId: effectiveDeliveryId,
+      timestamp,
       eventType: 'meeting-created',
       resource: createMeetingResource(org, {
         name: meetingRef,
@@ -294,7 +296,7 @@ export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
       phase: 'Ended',
     });
     resource.status.endedAt = timestamp;
-    return { deliveryId: effectiveDeliveryId, eventType: 'meeting-ended', resource };
+    return { deliveryId: effectiveDeliveryId, timestamp, eventType: 'meeting-ended', resource };
   }
 
   if (eventType === 'participant-joined' || eventType === 'participant-left') {
@@ -307,12 +309,13 @@ export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
       phase: 'Active',
     });
     resource.status.participants = participantList(resource, payload, eventType === 'participant-joined');
-    return { deliveryId: effectiveDeliveryId, eventType, resource };
+    return { deliveryId: effectiveDeliveryId, timestamp, eventType, resource };
   }
 
   if (eventType === 'recording-started') {
     return {
       deliveryId: effectiveDeliveryId,
+      timestamp,
       eventType: 'recording-started',
       resource: createRecordingResource(org, {
         name: payload.recordingId,
@@ -328,6 +331,7 @@ export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
   if (eventType === 'recording-stopped') {
     return {
       deliveryId: effectiveDeliveryId,
+      timestamp,
       eventType: 'recording-stopped',
       resource: createRecordingResource(org, {
         name: payload.recordingId,
@@ -341,5 +345,5 @@ export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
     };
   }
 
-  return { deliveryId: effectiveDeliveryId, eventType, resource: null, ignored: true };
+  return { deliveryId: effectiveDeliveryId, timestamp, eventType, resource: null, ignored: true };
 }
