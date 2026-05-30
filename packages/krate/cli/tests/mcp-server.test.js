@@ -64,7 +64,7 @@ function createMockController() {
     },
 
     async dispatchAgent(input) {
-      return { dispatched: true, stackRef: input.agentStack, input };
+      return { dispatched: true, stackRef: input.agentStack, agentDefinition: input.agentDefinition, input };
     },
 
     async syncExternalBinding(bindingName, options) {
@@ -217,6 +217,22 @@ test('handleMessage tools/call krate_dispatch_agent', async () => {
   const parsed = JSON.parse(resp.result.content[0].text);
   assert.ok(parsed.dispatched);
   assert.equal(parsed.stackRef, 'review-bot');
+});
+
+test('handleMessage tools/call krate_dispatch_agent accepts agentDefinition', async () => {
+  const server = createMcpServer({ controller: createMockController() });
+  const resp = await server.handleMessage(rpc('tools/call', { name: 'krate_dispatch_agent', arguments: { agentDefinition: 'aria-reviewer', input: { repository: 'web-app' } } }));
+  const parsed = JSON.parse(resp.result.content[0].text);
+  assert.ok(parsed.dispatched);
+  assert.equal(parsed.agentDefinition, 'aria-reviewer');
+  assert.equal(parsed.stackRef, undefined);
+});
+
+test('krate_dispatch_agent tool schema accepts definition or stack targets', () => {
+  const tool = MCP_TOOLS.find((item) => item.name === 'krate_dispatch_agent');
+  assert.equal(tool.inputSchema.required, undefined);
+  assert.ok(tool.inputSchema.anyOf.some((entry) => entry.required.includes('agentDefinition')));
+  assert.ok(tool.inputSchema.anyOf.some((entry) => entry.required.includes('stackRef')));
 });
 
 test('handleMessage with unknown method returns error', async () => {

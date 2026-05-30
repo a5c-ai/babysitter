@@ -102,6 +102,9 @@ test('trigger rule form emits all required AgentTriggerRule spec fields', () => 
       `trigger-rule-form.jsx does not reference required AgentTriggerRule field: ${field}`
     );
   }
+  assert.match(source, /agentIdentityOptions/, 'trigger rule form should expose AgentDefinition targets as well as stacks');
+  assert.match(source, /agentDefinition/, 'trigger rule form must be able to emit spec.agentDefinition');
+  assert.match(source, /agentStack/, 'trigger rule form must preserve legacy spec.agentStack fallback');
 });
 
 // ── Contract: external provider wizard sends typed provider kinds ─────────

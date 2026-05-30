@@ -26,6 +26,7 @@ export * from './agent-permission-review.js';
 export * from './agent-stack-controller.js';
 export * from './agent-persona-controller.js';
 export * from './agent-prompt-composition.js';
+export * from './agent-identity-migration.js';
 export * from './agent-context-bundles.js';
 export * from './agent-mux-client.js';
 export * from './agent-dispatch-controller.js';

@@ -13,7 +13,26 @@ export const MCP_TOOLS = [
   { name: 'krate_snapshot', description: 'Get full organization snapshot', inputSchema: { type: 'object', properties: {} } },
   { name: 'krate_search', description: 'Search resources by query', inputSchema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] } },
   { name: 'krate_list_stacks', description: 'List agent stacks', inputSchema: { type: 'object', properties: {} } },
-  { name: 'krate_dispatch_agent', description: 'Dispatch an agent run', inputSchema: { type: 'object', properties: { stackRef: { type: 'string' }, input: { type: 'object' } }, required: ['stackRef'] } },
+  {
+    name: 'krate_dispatch_agent',
+    description: 'Dispatch an agent run from an AgentDefinition or legacy AgentStack',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        agentDefinition: { type: 'string' },
+        definitionRef: { type: 'string' },
+        stackRef: { type: 'string' },
+        agentStack: { type: 'string' },
+        input: { type: 'object' },
+      },
+      anyOf: [
+        { required: ['agentDefinition'] },
+        { required: ['definitionRef'] },
+        { required: ['stackRef'] },
+        { required: ['agentStack'] },
+      ],
+    },
+  },
   { name: 'krate_list_agents', description: 'List agent definitions enriched with persona profiles', inputSchema: { type: 'object', properties: {} } },
   { name: 'krate_get_agent_profile', description: 'Get a resolved agent definition profile', inputSchema: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] } },
   { name: 'krate_create_agent', description: 'Create an AgentPersona and AgentDefinition binding', inputSchema: { type: 'object', properties: { name: { type: 'string' }, org: { type: 'string' }, displayName: { type: 'string' }, stackRef: { type: 'string' }, personaSpec: { type: 'object' }, definitionSpec: { type: 'object' } }, required: ['name', 'org', 'displayName', 'stackRef'] } },
@@ -372,11 +391,14 @@ async function executeTool(controller, toolName, args) {
     case 'krate_list_stacks':
       return controller.listResource('AgentStack');
 
-    case 'krate_dispatch_agent':
+    case 'krate_dispatch_agent': {
+      const agentDefinition = args.agentDefinition || args.definitionRef;
+      const agentStack = args.agentStack || args.stackRef;
       return controller.dispatchAgent({
-        agentStack: args.stackRef,
+        ...(agentDefinition ? { agentDefinition } : { agentStack }),
         ...args.input,
       });
+    }
 
     case 'krate_list_agents':
       return listAgents(controller);
