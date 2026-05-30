@@ -1,4 +1,5 @@
 import type { HarnessDiscoveryResult } from "../../types";
+import type { ExternalAgentDiscovery } from "@a5c-ai/babysitter-sdk";
 import {
   createPromptContextFromCatalog,
   composeProcessCreatePrompt,
@@ -20,6 +21,7 @@ export interface HarnessPromptContext {
   hostCapabilities?: string[];
   hostTools?: unknown[];
   discoveredHarnesses: HarnessDiscoveryResult[];
+  externalAgents?: ExternalAgentDiscovery;
   compressionEnabled: boolean;
   secureSandboxImage: string;
   piDefaultBashSandbox: "local" | "auto" | "secure";
@@ -102,6 +104,51 @@ function formatHostAgentContext(context: HarnessPromptContext): string[] {
   ];
 }
 
+export function formatAvailableResponderContext(context: Pick<HarnessPromptContext, "externalAgents">): string[] {
+  const discovery = context.externalAgents;
+  const installedAgents = (discovery?.agents ?? [])
+    .filter((agent) => agent.installed)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const lines = [
+    "Available responder context:",
+    "- Responder types: internal, human, agent, tracker, auto.",
+    '- Default `agent` tasks use the internal worker unless `agent.responderType` intentionally routes elsewhere.',
+    '- To route to an external agent responder, use `kind: "agent"` with `agent: { responderType: "agent", adapter: "codex" }`.',
+    '- Add `fallbackType: "internal"` only when internal fallback is acceptable for that task.',
+    "- Do not use legacy `agent.external = true` in newly authored processes.",
+  ];
+
+  if (installedAgents.length === 0) {
+    if (discovery && !discovery.available) {
+      lines.push("- Agent responder discovery is unavailable; do not invent adapter names.");
+    }
+    return lines;
+  }
+
+  const defaults = [
+    discovery?.defaultProvider ? `defaultProvider=${discovery.defaultProvider}` : null,
+    discovery?.defaultModel ? `defaultModel=${discovery.defaultModel}` : null,
+  ].filter((value): value is string => Boolean(value));
+  if (defaults.length > 0) {
+    lines.push(`- Discovery defaults: ${defaults.join(" | ")}.`);
+  }
+
+  lines.push("- Available agent responders:");
+  for (const agent of installedAgents) {
+    const parts = [
+      agent.name,
+      `display=${agent.displayName}`,
+      `authenticated=${agent.authenticated ? "yes" : "no"}`,
+    ];
+    if (agent.capabilities.length > 0) {
+      parts.push(`capabilities=${agent.capabilities.join(",")}`);
+    }
+    lines.push(`  - ${parts.join(" | ")}`);
+  }
+
+  return lines;
+}
+
 function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[] {
   const installedHarnesses = context.discoveredHarnesses
     .filter((h) => h.installed)
@@ -131,6 +178,7 @@ function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[
 
 function formatSharedContext(context: HarnessPromptContext): string[] {
   const hostAgentContext = formatHostAgentContext(context);
+  const responderContext = formatAvailableResponderContext(context);
 
   return [
     "",
@@ -138,6 +186,8 @@ function formatSharedContext(context: HarnessPromptContext): string[] {
     ...(hostAgentContext.length > 0
       ? ["", ...hostAgentContext]
       : []),
+    "",
+    ...responderContext,
     "",
     ...formatHarnessCatalog(context),
     "",

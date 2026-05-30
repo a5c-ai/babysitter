@@ -1,4 +1,5 @@
 import * as path from "node:path";
+import { discoverExternalAgents } from "@a5c-ai/babysitter-sdk";
 import { buildProcessDefinitionSystemPrompt, buildProcessDefinitionUserPrompt } from "../prompts";
 import {
   DIM,
@@ -70,6 +71,21 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
   );
   const workspaceAssessment = await assessWorkspaceForExternalAuthoring(args.workspace);
   writeVerboseData("phasePlanProcess workspace assessment", workspaceAssessment);
+  const externalAgents = await discoverExternalAgents({
+    cwd: args.workspace,
+    timeout: 2_000,
+    force: true,
+  }).catch(() => ({
+    available: false,
+    agents: [],
+    defaultProvider: null,
+    defaultModel: null,
+  }));
+  const promptContext = {
+    ...args.promptContext,
+    externalAgents,
+  };
+  writeVerboseData("phasePlanProcess external agent discovery", externalAgents);
   const resolvedBackend = resolveAgentCoreBackendForHarness(args.selectedHarnessName);
   const isRawTextSession = !resolvedBackend;
 
@@ -118,14 +134,14 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
       prompt: args.prompt,
       outputDir: args.outputDir,
       workspace: args.workspace,
-      promptContext: args.promptContext,
+      promptContext,
       workspaceAssessment,
       preferAgentOnlyTasks: args.invocationCommand === "call",
     });
   } else {
     processDefinitionSystemPrompt = await buildProcessDefinitionSystemPrompt(
       args.outputDir,
-      args.promptContext,
+      promptContext,
       args.interactive,
     );
     basePlanProcessPrompt = buildProcessDefinitionUserPrompt(

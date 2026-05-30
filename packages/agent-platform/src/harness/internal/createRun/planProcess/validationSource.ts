@@ -304,6 +304,63 @@ export function getDefineTaskKindShapeMismatches(source: string): Array<{ id: st
   return mismatches;
 }
 
+export interface AgentResponderTaskSourceIssue {
+  id: string;
+  adapter: string | null;
+  missingAdapter: boolean;
+}
+
+export function getAgentResponderTaskSourceIssues(source: string): AgentResponderTaskSourceIssue[] {
+  const issues: AgentResponderTaskSourceIssue[] = [];
+  for (const block of getDefineTaskBlocks(source)) {
+    const properties = getTopLevelTaskProperties(block.body);
+    const kindValue = properties.get("kind")?.trim();
+    if (kindValue !== "\"agent\"" && kindValue !== "'agent'" && kindValue !== "`agent`") {
+      continue;
+    }
+    const agentValue = properties.get("agent");
+    if (!agentValue) {
+      continue;
+    }
+    const agentProperties = getObjectLiteralProperties(agentValue);
+    if (!agentProperties) {
+      continue;
+    }
+    const responderType = readStaticString(agentProperties.get("responderType"));
+    if (responderType !== "agent") {
+      continue;
+    }
+    const adapterValue = agentProperties.get("adapter");
+    const adapter = readStaticString(adapterValue);
+    issues.push({
+      id: block.id,
+      adapter,
+      missingAdapter: adapterValue === undefined || adapter === "",
+    });
+  }
+  return issues;
+}
+
+function getObjectLiteralProperties(value: string): Map<string, string> | null {
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) {
+    return null;
+  }
+  return getTopLevelTaskProperties(trimmed.slice(1, -1));
+}
+
+function readStaticString(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const quote = trimmed[0];
+  if ((quote !== "\"" && quote !== "'" && quote !== "`") || trimmed[trimmed.length - 1] !== quote) {
+    return null;
+  }
+  return trimmed.slice(1, -1).trim();
+}
+
 export function getInvalidCtxTaskTargets(source: string): string[] {
   const normalized = source.replace(/\r\n/g, "\n");
   const definedTaskBindings = new Set<string>();

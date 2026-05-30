@@ -4,6 +4,7 @@ import {
   type ExternalWorkspaceAssessment,
   type HarnessPromptContext as SessionCreatePromptContext,
 } from "../utils";
+import { formatAvailableResponderContext } from "../prompts";
 
 export function buildExternalProcessDefinitionPrompt(args: {
   prompt: string;
@@ -25,6 +26,7 @@ export function buildExternalProcessDefinitionPrompt(args: {
     : "(no files)";
   const preferAgentOnlyTasks = args.preferAgentOnlyTasks === true;
   const hostAgentContext = formatHostAgentContext(args.promptContext);
+  const responderContext = formatAvailableResponderContext(args.promptContext);
   const emptyWorkspaceAuthoringGuide = [
     "",
     "Empty-workspace authoring guide:",
@@ -88,6 +90,8 @@ export function buildExternalProcessDefinitionPrompt(args: {
     "- External harnesses do not provide agent-core worker guardrails for their own tool execution. Keep security-sensitive shell work on the internal agent-core worker by using shell effects without routing them to an external harness.",
     ...(hostAgentContext.length > 0 ? ["", ...hostAgentContext] : []),
     "",
+    ...responderContext,
+    "",
     "Output rules:",
     `- Choose a descriptive kebab-case filename (e.g. "user-auth-tdd.mjs", "data-pipeline-setup.js") and write the file to the process output directory.`,
     "- Return a short summary that confirms what you wrote and the final path.",
@@ -144,6 +148,10 @@ export function buildExternalProcessConformancePrompt(args: {
     "- Never use `defineTask({ ... })` or helper factories that hide the required signature.",
     "- The module must orchestrate real work through those tasks; do not perform the main implementation directly in `process(inputs, ctx)`.",
     "- Agent tasks must use `agent: { name, prompt, outputSchema }`.",
+    '- Agent responder tasks must use `kind: "agent"` with `agent: { responderType: "agent", adapter: "..." }`.',
+    '- The adapter field is required and must be a non-empty agent-mux adapter name when `responderType` is `"agent"`.',
+    '- Use `fallbackType: "internal"` only when the task can safely fall back to the internal worker.',
+    "- Do not use legacy `agent.external = true`; repair modern external agent routing to `responderType` syntax.",
     "- Every task returned from `defineTask(...)` must include a top-level `kind` field.",
     "- Define at least one `agent` task for the main work. Use shell tasks only for concrete runnable commands.",
     "- Put instructions inside `agent.prompt.task`, `agent.prompt.instructions`, and related prompt fields rather than top-level `instructions` fields.",
@@ -181,6 +189,10 @@ export function buildInternalProcessConformancePrompt(args: {
     "- The module must orchestrate real work through defined tasks instead of doing the main implementation directly in `process(inputs, ctx)`.",
     "- Define at least one `agent` task for the main work. Use shell tasks only for concrete runnable commands.",
     "- Every task returned from `defineTask(...)` must include a top-level `kind` field.",
+    '- Agent responder tasks must use `kind: "agent"` with `agent: { responderType: "agent", adapter: "..." }`.',
+    '- The adapter field is required and must be a non-empty agent-mux adapter name when `responderType` is `"agent"`.',
+    '- Use `fallbackType: "internal"` only when the task can safely fall back to the internal worker.',
+    "- Do not use legacy `agent.external = true`; repair modern external agent routing to `responderType` syntax.",
     "- Any task passed to `ctx.task(...)` must be a DefinedTask created via `defineTask(...)`; do not pass plain object task definitions or ad-hoc task objects.",
     "- The rewritten module must be syntactically valid ESM and pass `node --check`.",
     "- If the process writes HTML/CSS/JS assets, do not embed raw nested template literals inside outer template literals; prefer arrays joined with \"\\n\", String.raw, or escaped inner backticks and \\${...} sequences.",

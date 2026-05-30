@@ -1,6 +1,14 @@
-import { describe, expect, test } from "vitest";
+import * as os from "node:os";
+import * as path from "node:path";
+import { promises as fs } from "node:fs";
+import { describe, expect, test, vi } from "vitest";
 import { HarnessCapability } from "../../../types";
-import { buildExternalProcessDefinitionPrompt } from "../planProcess/prompts";
+import {
+  buildExternalProcessConformancePrompt,
+  buildExternalProcessDefinitionPrompt,
+  buildInternalProcessConformancePrompt,
+} from "../planProcess/prompts";
+import { validateProcessExport } from "../planProcess/validation";
 import {
   buildOrchestrationSystemPrompt,
   buildOrchestrationTurnPrompt,
@@ -43,6 +51,27 @@ const context: HarnessPromptContext = {
       platform: "linux",
     },
   ],
+  externalAgents: {
+    available: true,
+    defaultProvider: "codex",
+    defaultModel: "gpt-5.3-codex",
+    agents: [
+      {
+        name: "codex",
+        displayName: "Codex",
+        installed: true,
+        authenticated: true,
+        capabilities: ["file-edit", "bash", "browser"],
+      },
+      {
+        name: "gemini",
+        displayName: "Gemini CLI",
+        installed: false,
+        authenticated: false,
+        capabilities: ["text"],
+      },
+    ],
+  },
 };
 
 describe("harnessPrompts", () => {
@@ -109,6 +138,28 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("Discovered external harnesses are routing options");
   });
 
+  test("PhasePlanProcess prompt includes available agent responder context", async () => {
+    const prompt = await buildProcessDefinitionSystemPrompt("/tmp/out.js", {
+      ...context,
+      selectedHarnessName: "agent-core",
+      hostAgentName: "codex",
+      hostAgentLabel: "Codex",
+      hostCapabilities: ["task-tool", "breakpoint-routing"],
+    });
+
+    expect(prompt).toContain("Host agent context:");
+    expect(prompt).toContain("Available responder context:");
+    expect(prompt).toContain("Responder types: internal, human, agent, tracker, auto.");
+    expect(prompt).toContain("Available agent responders:");
+    expect(prompt).toContain("codex | display=Codex | authenticated=yes | capabilities=file-edit,bash,browser");
+    expect(prompt).not.toContain("gemini | display=Gemini CLI");
+    expect(prompt).toContain('kind: "agent"');
+    expect(prompt).toContain('responderType: "agent"');
+    expect(prompt).toContain('adapter: "codex"');
+    expect(prompt).toContain('fallbackType: "internal"');
+    expect(prompt).toContain("Do not use legacy `agent.external = true`");
+  });
+
   test("PhasePlanProcess prompt includes Claude Code host identity", async () => {
     const prompt = await buildProcessDefinitionSystemPrompt("/tmp/out.js", {
       ...context,
@@ -147,6 +198,90 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("Host agent running this planning session: Codex (codex).");
     expect(prompt).toContain("selected orchestration binding harness is codex");
     expect(prompt).toContain("Discovered external harnesses are routing options");
+  });
+
+  test("external plan-process prompt includes available agent responder context", () => {
+    const prompt = buildExternalProcessDefinitionPrompt({
+      prompt: "implement the feature",
+      outputDir: "/tmp/processes",
+      workspace: "/repo/workspace",
+      workspaceAssessment: { kind: "non-empty", entries: ["package.json"] },
+      promptContext: context,
+    });
+
+    expect(prompt).toContain("Available responder context:");
+    expect(prompt).toContain("Available agent responders:");
+    expect(prompt).toContain("codex | display=Codex | authenticated=yes");
+    expect(prompt).toContain('responderType: "agent"');
+    expect(prompt).toContain('adapter: "codex"');
+  });
+
+  test("conformance repair prompts document agent responder syntax", () => {
+    const externalPrompt = buildExternalProcessConformancePrompt({
+      outputPath: "/tmp/processes/process.mjs",
+      prompt: "implement the feature",
+    });
+    const internalPrompt = buildInternalProcessConformancePrompt({
+      outputPath: "/tmp/processes/process.mjs",
+      prompt: "implement the feature",
+      validationError: "missing adapter",
+    });
+
+    for (const prompt of [externalPrompt, internalPrompt]) {
+      expect(prompt).toContain('agent: { responderType: "agent", adapter: "..." }');
+      expect(prompt).toContain("adapter field is required");
+      expect(prompt).toContain('fallbackType: "internal"');
+      expect(prompt).toContain("Do not use legacy `agent.external = true`");
+    }
+  });
+
+  test("validation accepts agent responder tasks and warns when discovery is unavailable", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const processPath = await writeTempProcess(`
+      import { defineTask } from "@a5c-ai/babysitter-sdk";
+
+      const responderTask = defineTask("agent-responder", () => ({
+        kind: "agent",
+        title: "Use missing test adapter",
+        agent: {
+          name: "Missing test adapter",
+          prompt: "Review the implementation",
+          responderType: "agent",
+          adapter: "definitely-missing-test-adapter",
+          fallbackType: "internal",
+        },
+      }));
+
+      export async function process(inputs, ctx) {
+        return await ctx.task(responderTask, inputs);
+      }
+    `);
+
+    await expect(validateProcessExport(processPath)).resolves.toBeUndefined();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("agent responder tasks"));
+    warn.mockRestore();
+  });
+
+  test("validation rejects agent responder tasks with missing adapter", async () => {
+    const processPath = await writeTempProcess(`
+      import { defineTask } from "@a5c-ai/babysitter-sdk";
+
+      const responderTask = defineTask("agent-responder", () => ({
+        kind: "agent",
+        title: "Use external agent",
+        agent: {
+          name: "External",
+          prompt: "Review the implementation",
+          responderType: "agent",
+        },
+      }));
+
+      export async function process(inputs, ctx) {
+        return await ctx.task(responderTask, inputs);
+      }
+    `);
+
+    await expect(validateProcessExport(processPath)).rejects.toThrow(/adapter/i);
   });
 
   test("PhaseOrchestration prompt includes selected harness and execution guidance", () => {
@@ -261,3 +396,10 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("do not implement the workspace deliverable directly before that iterate call returns");
   });
 });
+
+async function writeTempProcess(source: string): Promise<string> {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "issue-605-process-"));
+  const filePath = path.join(dir, "process.mjs");
+  await fs.writeFile(filePath, source);
+  return filePath;
+}

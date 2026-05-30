@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { promises as fs } from "node:fs";
 import { pathToFileURL } from "node:url";
-import { resetGlobalTaskRegistry } from "@a5c-ai/babysitter-sdk";
+import { discoverExternalAgents, resetGlobalTaskRegistry } from "@a5c-ai/babysitter-sdk";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
@@ -15,6 +15,7 @@ import {
   getDefineTaskIdsByKind,
   getDefineTaskIdsMissingKind,
   getDefineTaskKindShapeMismatches,
+  getAgentResponderTaskSourceIssues,
   getInvalidCtxTaskTargets,
   getUnresolvedTemplatePlaceholders,
   hasDefineTaskBlocks,
@@ -210,6 +211,24 @@ export async function validateProcessExport(filePath: string): Promise<void> {
       },
     );
   }
+  const agentResponderTaskIssues = getAgentResponderTaskSourceIssues(source);
+  const missingAdapterTaskIds = agentResponderTaskIssues
+    .filter((issue) => issue.missingAdapter)
+    .map((issue) => issue.id);
+  if (missingAdapterTaskIds.length > 0) {
+    throw new BabysitterRuntimeError(
+      "InvalidProcessSourceError",
+      `Process file at ${filePath} defines agent responder task(s) without a non-empty adapter: ${missingAdapterTaskIds.join(", ")}`,
+      {
+        category: ErrorCategory.Validation,
+        nextSteps: [
+          'For external agent responders, use kind: "agent" with agent: { responderType: "agent", adapter: "codex" }',
+          "The adapter must be a non-empty agent-mux adapter name",
+          'Use fallbackType: "internal" only when internal fallback is acceptable',
+        ],
+      },
+    );
+  }
   const agentTaskIds = getDefineTaskIdsByKind(source, "agent");
   if (agentTaskIds.length === 0) {
     throw new BabysitterRuntimeError(
@@ -251,6 +270,39 @@ export async function validateProcessExport(filePath: string): Promise<void> {
           "Do not pass plain object task definitions, inline literals, or ad-hoc task objects to ctx.task(...)",
         ],
       },
+    );
+  }
+  await warnIfAgentRespondersUnavailable(agentResponderTaskIssues);
+}
+
+async function warnIfAgentRespondersUnavailable(
+  agentResponderTaskIssues: Array<{ adapter: string | null }>,
+): Promise<void> {
+  const adapters = Array.from(new Set(
+    agentResponderTaskIssues
+      .map((issue) => issue.adapter)
+      .filter((adapter): adapter is string => Boolean(adapter)),
+  ));
+  if (adapters.length === 0) {
+    return;
+  }
+
+  try {
+    const discovery = await discoverExternalAgents({ timeout: 500, force: true });
+    const installed = new Set(
+      discovery.agents
+        .filter((agent) => agent.installed)
+        .map((agent) => agent.name),
+    );
+    const missing = adapters.filter((adapter) => !installed.has(adapter));
+    if (!discovery.available || missing.length > 0) {
+      console.warn(
+        `[babysitter] process uses agent responder tasks, but agent-mux/external agent discovery ${discovery.available ? `did not find installed adapter(s): ${missing.join(", ")}` : "is unavailable"}.`,
+      );
+    }
+  } catch {
+    console.warn(
+      "[babysitter] process uses agent responder tasks, but agent-mux/external agent discovery is unavailable.",
     );
   }
 }
