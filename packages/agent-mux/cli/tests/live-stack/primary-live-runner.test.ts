@@ -112,6 +112,25 @@ function claudeScenarioFor(modelCase: typeof CLAUDE_LIVE_MODEL_CASES[number], in
   });
 }
 
+function geminiPluginScenario(model = 'gemini-3.5-flash'): LiveStackScenario {
+  return liveStackScenarioFromEnv({
+    LIVE_STACK_SCENARIO_ID: `live.agent-mux.gemini-cli.google.${model}`,
+    LIVE_STACK_AGENT_PATH: 'agent-mux',
+    LIVE_STACK_AGENT: 'gemini-cli',
+    LIVE_STACK_AMUX_AGENT: 'gemini',
+    LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+    LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+    LIVE_STACK_PROVIDER: 'google',
+    LIVE_STACK_AMUX_PROVIDER: 'google',
+    LIVE_STACK_MODEL: model,
+    LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+    LIVE_STACK_REQUIRED_ENV: 'GOOGLE_API_KEY',
+    LIVE_STACK_LAYERS: 'babysitter-plugin',
+    LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+    LIVE_STACK_EXPECTED_ARTIFACTS: 'agent-mux-events,plugin-command-transcript,transport-mux-trace,provider-trace-redacted',
+  });
+}
+
 function promptFor(scenario: LiveStackScenario, env: Record<string, string | undefined> = {}): string | undefined {
   const commands = buildPrimaryLiveStackCommands(scenario, {
     cwd: '/repo',
@@ -180,6 +199,19 @@ describe('primary live stack runner contract', () => {
 
     expect(codexPrompt).toMatch(/^\$babysitter:yolo /);
     expect(codexPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
+
+    const geminiCommands = buildPrimaryLiveStackCommands(geminiPluginScenario(), {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: { GOOGLE_API_KEY: 'google-secret', LIVE_STACK_TRACE_ID: 'trace-1' },
+    });
+    const geminiLaunch = geminiCommands.at(-1);
+    const geminiPrompt = geminiLaunch?.args[(geminiLaunch?.args.indexOf('--prompt') ?? -2) + 1];
+
+    expect(geminiPrompt).toMatch(/^\/babysitter:yolo /);
+    expect(geminiPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
+    const geminiMaxTurnsIndex = geminiLaunch?.args.indexOf('--max-turns') ?? -1;
+    expect(geminiLaunch?.args[geminiMaxTurnsIndex + 1]).toBe('60');
   });
 
   it('invokes non-interactive Babysitter orchestration for pi create-mode plugin lanes', () => {
@@ -224,6 +256,11 @@ describe('primary live stack runner contract', () => {
         amuxAgent: 'pi',
         prefix: /^\/babysitter:yolo /,
       },
+      {
+        agent: 'gemini-cli',
+        amuxAgent: 'gemini',
+        prefix: /^\/babysitter:yolo /,
+      },
     ] as const;
 
     for (const { agent, amuxAgent, prefix } of cases) {
@@ -250,6 +287,27 @@ describe('primary live stack runner contract', () => {
       expect(prompt).toContain('Use only .a5c/processes/odyssey-live-test.mjs');
       expect(prompt).not.toContain('babysitter:call');
     }
+  });
+
+  it('uses native Gemini babysitter commands for every plugin process mode', () => {
+    const predefinedPrompt = promptFor(geminiPluginScenario());
+    const createPrompt = promptFor(geminiPluginScenario(), { LIVE_STACK_PROCESS_MODE: 'create' });
+    const resumePrompt = promptFor(geminiPluginScenario(), {
+      LIVE_STACK_PROCESS_MODE: 'resume',
+      LIVE_STACK_RESUME_RUN_ID: 'resume-trace-1',
+    });
+
+    expect(predefinedPrompt).toMatch(/^\/babysitter:yolo /);
+    expect(predefinedPrompt).toContain('.a5c-live-test/trace-1-odyssey.md');
+    expect(predefinedPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
+
+    expect(createPrompt).toMatch(/^\/babysitter:yolo /);
+    expect(createPrompt).toContain('CREATE odyssey-live-test.mjs');
+    expect(createPrompt).toContain('.a5c-live-test/trace-1-odyssey.md');
+
+    expect(resumePrompt).toMatch(/^\/babysitter:resume /);
+    expect(resumePrompt).toContain('resume-trace-1');
+    expect(resumePrompt).toContain('.a5c-live-test/trace-1-odyssey.md');
   });
 
   it('uses babysitter instructions for yolo plugin commands', async () => {
@@ -690,6 +748,71 @@ describe('primary live stack runner contract', () => {
     expect(result.status).toBe('passed');
     const hookCheck = result.verifications?.find(v => v.name === 'stop-hooks');
     expect(hookCheck?.detail).toContain('hooks-mux log files found');
+  });
+
+  it('fails plugin lanes when the model emits substantial Odyssey text but no artifact file', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-plugin-missing-artifact-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const traceId = 'trace-plugin-missing-artifact';
+    const runId = '01KRNFFW81BT433PT8HSTA32Q2';
+
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        GOOGLE_API_KEY: 'google-secret',
+        LIVE_STACK_TRACE_ID: traceId,
+        LIVE_STACK_SCENARIO_ID: 'live.agent-mux.gemini-cli.google.gemini-3.5-flash',
+        LIVE_STACK_AGENT_PATH: 'agent-mux',
+        LIVE_STACK_AGENT: 'gemini-cli',
+        LIVE_STACK_AMUX_AGENT: 'gemini',
+        LIVE_STACK_INTEGRATION_TYPE: 'third-party-plugin',
+        LIVE_STACK_INSTALL_MODE: 'babysitter-plugin',
+        LIVE_STACK_PROVIDER: 'google',
+        LIVE_STACK_AMUX_PROVIDER: 'google',
+        LIVE_STACK_MODEL: 'gemini-3.5-flash',
+        LIVE_STACK_CREDENTIAL_MODE: 'github-org-secrets-and-vars',
+        LIVE_STACK_REQUIRED_ENV: 'GOOGLE_API_KEY',
+        LIVE_STACK_LAYERS: 'babysitter-plugin',
+        LIVE_STACK_REQUIRED_TRACE_IDS: 'agentMuxRunId,agentMuxSessionId,transportTraceId',
+        LIVE_STACK_EXPECTED_ARTIFACTS: 'agent-mux-events,plugin-command-transcript,transport-mux-trace,provider-trace-redacted',
+      },
+      executeCommand: async (command) => {
+        if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
+
+        const runDir = path.join(cwd, '.a5c', 'runs', runId);
+        await fs.mkdir(path.join(runDir, 'journal'), { recursive: true });
+        await fs.writeFile(path.join(runDir, 'run.json'), JSON.stringify({ processId: 'processes/live-stack/summarize-translate-test', metadata: { completionProof: `${runId}-proof` } }));
+        await writeMinimalJournal(path.join(runDir, 'journal'), true);
+
+        return {
+          status: 0,
+          stdout: [
+            'agentMuxRunId: amux-run-1',
+            'agentMuxSessionId: amux-session-1',
+            `babysitterRunId: ${runId}`,
+            'babysitterEffectId: effect-1',
+            `transportTraceId: ${traceId}`,
+            'Model response output follows:',
+            "# Homer's Odyssey",
+            '## The voyage home',
+            'Ο Οδυσσέας αναζητά την Ιθάκη μέσα από θύελλες και δοκιμασίες.',
+            'The Greek epic unfolds across multiple books. '.repeat(200),
+          ].join('\n'),
+          stderr: '',
+        };
+      },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.verifications?.find(v => v.name === 'model-response')).toMatchObject({
+      status: 'passed',
+    });
+    expect(result.verifications?.find(v => v.name === 'file-creation')).toMatchObject({
+      status: 'failed',
+      detail: expect.stringContaining(`agent did not create .a5c-live-test/${traceId}-odyssey.md`),
+    });
   });
 
   it('fails create-mode plugin lanes when the agent does not persist the created process file', async () => {
