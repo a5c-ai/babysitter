@@ -344,6 +344,7 @@ describe('createAgentMuxClient — Jitsi sidecar job contract from docs/jitsi/06
         roomId: 'standup',
         participantName: 'Standup Bot',
         role: 'observer',
+        goodbyeMessage: 'Standup Bot leaving.',
         capabilities: { audio: 'listen', chat: 'readwrite', screenshare: 'none' },
         tts: { provider: 'openai', voice: 'nova', speed: '1.0' },
         stt: { provider: 'deepgram' },
@@ -367,6 +368,7 @@ describe('createAgentMuxClient — Jitsi sidecar job contract from docs/jitsi/06
     assert.equal(sidecarEnv.JITSI_ROOM_ID, 'standup');
     assert.equal(sidecarEnv.JITSI_PARTICIPANT_NAME, 'Standup Bot');
     assert.equal(sidecarEnv.JITSI_PARTICIPANT_ROLE, 'observer');
+    assert.equal(sidecarEnv.JITSI_GOODBYE_MESSAGE, 'Standup Bot leaving.');
     assert.equal(sidecarEnv.JITSI_AUDIO_MODE, 'listen');
     assert.equal(sidecarEnv.JITSI_CHAT_MODE, 'readwrite');
     assert.equal(sidecarEnv.JITSI_SCREENSHARE_MODE, 'none');
