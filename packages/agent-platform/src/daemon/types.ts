@@ -14,6 +14,18 @@ export interface DaemonConfig {
   workspace: string;
   triggers: TriggerConfig[];
   maxConcurrentRuns?: number;
+  triggerAdmission?: TriggerAdmissionConfig;
+}
+
+export interface TriggerRateLimitConfig {
+  maxTriggers: number;
+  windowMs: number;
+}
+
+export interface TriggerAdmissionConfig {
+  maxPendingRuns?: number;
+  rateLimit?: TriggerRateLimitConfig;
+  dedupeWindowMs?: number;
 }
 
 export interface FileTriggerConfig {
@@ -107,6 +119,19 @@ export interface DaemonStatusOutput {
   startedAt?: string;
   activeTriggers?: number;
   pendingRuns?: number;
+  deadLetterRuns?: number;
+}
+
+export interface DaemonWatchdogOptions {
+  daemonDir: string;
+  pollIntervalMs?: number;
+  maxRestarts?: number;
+  signal?: AbortSignal;
+}
+
+export interface DaemonWatchdogOutput {
+  restarts: number;
+  stoppedAt: string;
 }
 
 // ── File watcher types ──────────────────────────────────────────────────────
@@ -129,7 +154,19 @@ export interface WebhookListenerHandle {
 
 // ── Shared types ────────────────────────────────────────────────────────────
 
-export type TriggerCallback = (trigger: TriggerEvent) => void | Promise<void>;
+export type TriggerAdmissionStatus = "accepted" | "deferred" | "rejected" | "duplicate";
+
+export interface TriggerAdmissionResult {
+  status: TriggerAdmissionStatus;
+  reason?: string;
+  retryAfterMs?: number;
+  queueDepth?: number;
+  fingerprint?: string;
+}
+
+export type TriggerCallback = (
+  trigger: TriggerEvent,
+) => void | TriggerAdmissionResult | Promise<void | TriggerAdmissionResult>;
 
 // ── Daemon metadata (persisted to daemon.json) ──────────────────────────────
 

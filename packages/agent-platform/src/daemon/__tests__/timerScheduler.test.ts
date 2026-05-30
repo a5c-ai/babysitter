@@ -4,6 +4,7 @@ import { createTimerScheduler } from "../timerScheduler";
 function timerRule(overrides: Partial<{
   id: string;
   cron: string;
+  timezone: string;
   projectId: string;
   title: string;
 }> = {}) {
@@ -15,6 +16,7 @@ function timerRule(overrides: Partial<{
     trigger: {
       type: "timer" as const,
       cron: overrides.cron ?? "30 10 * * *",
+      timezone: overrides.timezone,
     },
     target: {
       projectId,
@@ -202,6 +204,71 @@ describe("timerScheduler", () => {
     vi.advanceTimersByTime(30_000);
     expect(onTrigger).toHaveBeenCalledTimes(1);
 
+    handle.dispose();
+  });
+
+  it("supports named months and weekdays", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 15, 10, 30, 0));
+
+    const onTrigger = vi.fn();
+    const handle = createTimerScheduler(
+      [timerRule({ cron: "30 10 * JAN THU" })],
+      onTrigger,
+    );
+
+    vi.advanceTimersByTime(30_000);
+    expect(onTrigger).toHaveBeenCalledTimes(1);
+
+    handle.dispose();
+  });
+
+  it("supports standard cron macros", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 15, 0, 0, 0));
+
+    const onTrigger = vi.fn();
+    const handle = createTimerScheduler(
+      [timerRule({ cron: "@daily" })],
+      onTrigger,
+    );
+
+    vi.advanceTimersByTime(30_000);
+    expect(onTrigger).toHaveBeenCalledTimes(1);
+
+    handle.dispose();
+  });
+
+  it("evaluates cron in the rule timezone", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T05:00:00.000Z"));
+
+    const onTrigger = vi.fn();
+    const handle = createTimerScheduler(
+      [timerRule({ cron: "0 0 * * *", timezone: "America/New_York" })],
+      onTrigger,
+    );
+
+    vi.advanceTimersByTime(30_000);
+    expect(onTrigger).toHaveBeenCalledTimes(1);
+
+    handle.dispose();
+  });
+
+  it("fires @reboot once when the scheduler starts", async () => {
+    const onTrigger = vi.fn();
+    const handle = createTimerScheduler(
+      [timerRule({ cron: "@reboot" })],
+      onTrigger,
+    );
+
+    await Promise.resolve();
+
+    expect(onTrigger).toHaveBeenCalledWith({
+      type: "automation",
+      rule: timerRule({ cron: "@reboot" }),
+      inputs: { scheduledBy: "@reboot" },
+    });
     handle.dispose();
   });
 

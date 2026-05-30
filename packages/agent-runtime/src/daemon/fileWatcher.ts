@@ -15,6 +15,7 @@ interface WatchEntry {
   trigger: FileTriggerConfig;
   watcher: ReturnType<typeof fsSync.watch> | null;
   debounceTimer: ReturnType<typeof setTimeout> | null;
+  lastPath: string | null;
 }
 
 /**
@@ -72,6 +73,7 @@ export function createFileWatcher(
       trigger,
       watcher: null,
       debounceTimer: null,
+      lastPath: null,
     };
 
     try {
@@ -79,6 +81,7 @@ export function createFileWatcher(
         if (disposed || !filename) return;
 
         if (!matchesExtension(filename, trigger.pattern)) return;
+        entry.lastPath = path.resolve(watchDir, filename.toString());
 
         // Debounce: clear previous timer and set a new one
         if (entry.debounceTimer) {
@@ -90,6 +93,7 @@ export function createFileWatcher(
             type: "file",
             processId: trigger.processId,
             entrypoint: trigger.entrypoint,
+            inputs: entry.lastPath ? { path: entry.lastPath } : undefined,
           });
         }, debounceMs);
       });
