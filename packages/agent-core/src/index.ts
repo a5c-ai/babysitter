@@ -1,4 +1,5 @@
 export type {
+  AgentCoreHistoryEntry,
   AgentCorePromptResult,
   AgentCoreSessionEvent,
   AgentCoreSessionOptions,

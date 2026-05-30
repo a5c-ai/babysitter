@@ -66,6 +66,8 @@ Core handle methods:
 - `prompt(text, timeout?)`: starts a run, streams events to subscribers, and returns `{ output, duration, success, exitCode }`.
 - `steer(text)`: sends immediate steering text while a prompt is active, or queues it for the next prompt.
 - `followUp(text)`: queues a post-response follow-up when streaming, or appends it to the next prompt when idle.
+- `getHistory()`: returns a defensive copy of persisted user/assistant turns for the session handle.
+- `clearHistory()`: clears persisted user/assistant turns without changing listeners, options, or the current session id.
 - `subscribe(listener)`: receives normalized `AgentCoreSessionEvent` payloads, including `session_start`.
 - `abort()`: aborts the active run if one is in progress.
 - `dispose()`: aborts the active run, clears listeners, and drops queued follow-ups.
@@ -75,6 +77,8 @@ Core handle methods:
 Session behavior that matters to host integrations:
 
 - Agent-core reuses the `sessionId` learned from prior runs, so later prompts continue the same agent-mux session when the backend supports it.
+- Agent-core also keeps successful user/assistant turns on the session handle and includes bounded prior history in later direct provider prompts. System prompts are rebuilt from options for each request and are not stored in mutable history.
+- Failed prompts, timed-out requests, aborted requests, and malformed streams do not append partial assistant output to history.
 - Concurrent `prompt()` calls on the same handle are rejected.
 - Event payloads are normalized before subscribers see them. Non-object payloads become `{ type: "unknown", value }`.
 - Approval mode is `prompt` only when `uiContext` is present; otherwise agent-core uses `yolo`.
@@ -86,6 +90,8 @@ Session behavior that matters to host integrations:
 | `workspace` | Forwarded to agent-mux as `cwd`. |
 | `model` | Forwarded to agent-mux as `model`. |
 | `timeout` | Forwarded to agent-mux as `timeout`. |
+| `maxHistoryTurns` | Maximum persisted user/assistant history entries retained on the session handle. Defaults to 20. |
+| `maxHistoryTokens` | Maximum estimated tokens from prior history sent with a prompt. Uses the package's rough token estimator and drops oldest entries first. |
 | `thinkingLevel` | Translated to agent-mux `thinkingEffort` (`minimal`/`low` -> `low`, `medium` -> `medium`, `high` -> `high`, `xhigh` -> `max`). |
 | `systemPrompt` | Used as the base `systemPrompt`. |
 | `appendSystemPrompt` | Appended to the final `systemPrompt` before dispatch. |

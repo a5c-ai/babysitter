@@ -9,6 +9,11 @@ export interface AgentCorePromptResult {
   exitCode: number;
 }
 
+export interface AgentCoreHistoryEntry {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export interface AgentCoreSessionEvent {
   type: string;
   [key: string]: unknown;
@@ -21,6 +26,10 @@ export interface AgentCoreSessionOptions {
   model?: string;
   /** Prompt timeout in milliseconds forwarded to agent-mux as `timeout`. */
   timeout?: number;
+  /** Maximum persisted history entries retained on the session handle. Defaults to 20. */
+  maxHistoryTurns?: number;
+  /** Maximum estimated tokens from prior history sent with a prompt. */
+  maxHistoryTokens?: number;
   /** Translated to agent-mux `thinkingEffort`. */
   thinkingLevel?: "minimal" | "low" | "medium" | "high" | "xhigh";
   /**

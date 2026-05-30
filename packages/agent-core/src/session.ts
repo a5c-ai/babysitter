@@ -1,15 +1,24 @@
 import * as childProcess from "node:child_process";
 import type {
+  AgentCoreHistoryEntry,
   AgentCorePromptResult,
   AgentCoreSessionEvent,
   AgentCoreSessionOptions,
 } from "./types";
+import { estimateTokens } from "./context/token-estimator";
 
 // 15 minutes — accommodates long-running model responses (e.g., gpt-5.5 thinking)
 // and Azure Foundry cold-start latency. Override per-call via session.prompt(text, timeout).
 const DEFAULT_TIMEOUT_MS = 900_000;
+const DEFAULT_MAX_HISTORY_TURNS = 20;
 
 export type AgentCoreEventListener = (event: AgentCoreSessionEvent) => void;
+
+type ProviderMessage = { role: string; content: string };
+
+type CompletionUsage = { promptTokens: number; completionTokens: number };
+
+type CompletionStreamResult = { text: string; usage?: CompletionUsage };
 
 function buildSystemPrompt(options: AgentCoreSessionOptions): string | undefined {
   const segments: string[] = [];
@@ -98,10 +107,13 @@ function resolveEndpoint(options: AgentCoreSessionOptions): ResolvedEndpoint {
 
 async function callCompletionApi(
   endpoint: ResolvedEndpoint,
-  messages: Array<{ role: string; content: string }>,
+  messages: ProviderMessage[],
   timeout: number,
-): Promise<{ text: string; usage?: { promptTokens: number; completionTokens: number } }> {
+  onDelta: (delta: string) => void,
+  onController?: (controller: AbortController | undefined) => void,
+): Promise<CompletionStreamResult> {
   const controller = new AbortController();
+  onController?.(controller);
   const startTime = Date.now();
   const timer = setTimeout(() => {
     controller.abort(new Error(`Request timed out after ${Math.round((Date.now() - startTime) / 1000)}s (limit: ${Math.round(timeout / 1000)}s)`));
@@ -121,6 +133,7 @@ async function callCompletionApi(
       body = JSON.stringify({
         model: endpoint.model,
         max_tokens: 16384,
+        stream: true,
         ...(systemMsg ? { system: systemMsg.content } : {}),
         messages: nonSystemMsgs.map(m => ({ role: m.role, content: m.content })),
       });
@@ -131,6 +144,7 @@ async function callCompletionApi(
         model: endpoint.model,
         messages,
         max_completion_tokens: 16384,
+        stream: true,
       });
     } else {
       url = `${endpoint.apiBase}/chat/completions`;
@@ -139,6 +153,7 @@ async function callCompletionApi(
         model: endpoint.model,
         messages,
         max_completion_tokens: 16384,
+        stream: true,
       });
     }
 
@@ -154,39 +169,187 @@ async function callCompletionApi(
       throw new Error(`API request failed (${response.status}) at ${url}: ${errorText.slice(0, 500)}`);
     }
 
-    if (endpoint.isAnthropic) {
-      const data = await response.json() as {
-        content?: Array<{ type: string; text?: string }>;
-        usage?: { input_tokens?: number; output_tokens?: number };
-      };
-      const text = data.content?.find(c => c.type === "text")?.text ?? "";
-      const usage = data.usage
-        ? { promptTokens: data.usage.input_tokens ?? 0, completionTokens: data.usage.output_tokens ?? 0 }
-        : undefined;
-      return { text, usage };
-    }
-
-    const data = await response.json() as {
-      choices?: Array<{ message?: { content?: string } }>;
-      usage?: { prompt_tokens?: number; completion_tokens?: number };
-    };
-
-    const text = data.choices?.[0]?.message?.content ?? "";
-    const usage = data.usage
-      ? { promptTokens: data.usage.prompt_tokens ?? 0, completionTokens: data.usage.completion_tokens ?? 0 }
-      : undefined;
-
-    return { text, usage };
+    return endpoint.isAnthropic
+      ? readAnthropicStream(response, onDelta)
+      : readOpenAiStream(response, onDelta);
   } finally {
     clearTimeout(timer);
+    onController?.(undefined);
   }
+}
+
+async function readOpenAiStream(
+  response: Response,
+  onDelta: (delta: string) => void,
+): Promise<CompletionStreamResult> {
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("No response body");
+
+  const decoder = new TextDecoder();
+  const chunks: string[] = [];
+  let usage: CompletionUsage | undefined;
+  let buffer = "";
+
+  const handlePayload = (payload: string): boolean => {
+    if (payload === "[DONE]") return true;
+
+    let chunk: {
+      choices?: Array<{
+        delta?: { content?: string | null };
+        finish_reason?: string | null;
+      }>;
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
+    };
+    try {
+      chunk = JSON.parse(payload);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to parse OpenAI stream chunk: ${message}`);
+    }
+
+    const choice = chunk.choices?.[0];
+    const delta = choice?.delta?.content;
+    if (delta) {
+      chunks.push(delta);
+      onDelta(delta);
+    }
+    if (chunk.usage) {
+      usage = {
+        promptTokens: chunk.usage.prompt_tokens ?? 0,
+        completionTokens: chunk.usage.completion_tokens ?? 0,
+      };
+    }
+    return Boolean(choice?.finish_reason);
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith("data:")) continue;
+      const complete = handlePayload(trimmed.slice(5).trim());
+      if (complete) {
+        return { text: chunks.join(""), usage };
+      }
+    }
+  }
+
+  buffer += decoder.decode();
+  for (const line of buffer.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || !trimmed.startsWith("data:")) continue;
+    const complete = handlePayload(trimmed.slice(5).trim());
+    if (complete) break;
+  }
+
+  return { text: chunks.join(""), usage };
+}
+
+async function readAnthropicStream(
+  response: Response,
+  onDelta: (delta: string) => void,
+): Promise<CompletionStreamResult> {
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("No response body");
+
+  const decoder = new TextDecoder();
+  const chunks: string[] = [];
+  let usage: CompletionUsage | undefined;
+  let buffer = "";
+  let done = false;
+
+  const handlePayload = (payload: string): void => {
+    if (payload === "[DONE]") {
+      done = true;
+      return;
+    }
+
+    let event: Record<string, unknown>;
+    try {
+      event = JSON.parse(payload) as Record<string, unknown>;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to parse Anthropic stream chunk: ${message}`);
+    }
+
+    const type = event.type;
+    if (type === "message_start") {
+      const message = event.message as { usage?: { input_tokens?: number } } | undefined;
+      if (message?.usage) {
+        usage = {
+          promptTokens: message.usage.input_tokens ?? 0,
+          completionTokens: usage?.completionTokens ?? 0,
+        };
+      }
+      return;
+    }
+
+    if (type === "content_block_delta") {
+      const delta = event.delta as { type?: string; text?: string } | undefined;
+      if (delta?.type === "text_delta" && delta.text) {
+        chunks.push(delta.text);
+        onDelta(delta.text);
+      }
+      return;
+    }
+
+    if (type === "message_delta") {
+      const messageUsage = event.usage as { output_tokens?: number } | undefined;
+      if (messageUsage) {
+        usage = {
+          promptTokens: usage?.promptTokens ?? 0,
+          completionTokens: messageUsage.output_tokens ?? 0,
+        };
+      }
+      done = true;
+      return;
+    }
+
+    if (type === "message_stop") {
+      done = true;
+    }
+  };
+
+  while (!done) {
+    const { done: streamDone, value } = await reader.read();
+    if (streamDone) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith("data:")) continue;
+      handlePayload(trimmed.slice(5).trim());
+      if (done) break;
+    }
+  }
+
+  buffer += decoder.decode();
+  for (const line of buffer.split("\n")) {
+    if (done) break;
+    const trimmed = line.trim();
+    if (!trimmed || !trimmed.startsWith("data:")) continue;
+    handlePayload(trimmed.slice(5).trim());
+  }
+
+  return { text: chunks.join(""), usage };
 }
 
 export class AgentCoreSessionHandle {
   private readonly options: AgentCoreSessionOptions;
   private readonly listeners = new Set<AgentCoreEventListener>();
+  private history: AgentCoreHistoryEntry[] = [];
   private queuedFollowUps: string[] = [];
   private currentSessionId: string | undefined;
+  private activeAbortController: AbortController | undefined;
   private isActive = false;
 
   constructor(options: AgentCoreSessionOptions = {}) {
@@ -214,12 +377,13 @@ export class AgentCoreSessionHandle {
 
     const endpoint = resolveEndpoint(this.options);
     try {
-      const messages: Array<{ role: string; content: string }> = [];
+      const messages: ProviderMessage[] = [];
 
       const systemPrompt = buildSystemPrompt(this.options);
       if (systemPrompt) {
         messages.push({ role: "system", content: systemPrompt });
       }
+      messages.push(...this.trimHistoryForPrompt());
       messages.push({ role: "user", content: promptText });
 
       const sessionId = this.currentSessionId ?? `agent-core-${Date.now()}`;
@@ -230,9 +394,19 @@ export class AgentCoreSessionHandle {
       const providerLabel = endpoint.isAnthropic ? "anthropic" : endpoint.isAzure ? "azure/foundry" : "openai";
       process.stderr.write(`[agent-core] ${providerLabel} → ${endpoint.apiBase} model=${endpoint.model} timeout=${Math.round(effectiveTimeout / 1000)}s\n`);
 
-      const result = await callCompletionApi(endpoint, messages, effectiveTimeout);
+      const result = await callCompletionApi(
+        endpoint,
+        messages,
+        effectiveTimeout,
+        (delta) => {
+          this.emit({ type: "text_delta", delta });
+        },
+        (controller) => {
+          this.activeAbortController = controller;
+        },
+      );
 
-      this.emit({ type: "text_delta", delta: result.text });
+      this.appendSuccessfulTurn(promptText, result.text);
       this.emit({ type: "session_end", sessionId });
 
       return {
@@ -268,6 +442,14 @@ export class AgentCoreSessionHandle {
 
   async followUp(text: string): Promise<void> {
     this.queuedFollowUps.push(text);
+  }
+
+  getHistory(): AgentCoreHistoryEntry[] {
+    return this.history.map((entry) => ({ ...entry }));
+  }
+
+  clearHistory(): void {
+    this.history = [];
   }
 
   subscribe(listener: AgentCoreEventListener): () => void {
@@ -330,12 +512,15 @@ export class AgentCoreSessionHandle {
   }
 
   async abort(): Promise<void> {
-    // Direct API calls don't support mid-request abort easily
+    this.activeAbortController?.abort(new Error("Agent core session aborted"));
   }
 
   dispose(): void {
+    this.activeAbortController?.abort(new Error("Agent core session disposed"));
+    this.activeAbortController = undefined;
     this.listeners.clear();
     this.queuedFollowUps = [];
+    this.history = [];
   }
 
   get sessionId(): string | undefined {
@@ -345,6 +530,43 @@ export class AgentCoreSessionHandle {
   get isStreaming(): boolean {
     return this.isActive;
   }
+
+  private appendSuccessfulTurn(userContent: string, assistantContent: string): void {
+    this.history.push({ role: "user", content: userContent });
+    this.history.push({ role: "assistant", content: assistantContent });
+    this.history = this.limitHistoryByTurns(this.history);
+  }
+
+  private trimHistoryForPrompt(): ProviderMessage[] {
+    let entries = this.limitHistoryByTurns(this.history);
+    entries = this.limitHistoryByTokens(entries);
+    return entries.map((entry) => ({ role: entry.role, content: entry.content }));
+  }
+
+  private limitHistoryByTurns(entries: AgentCoreHistoryEntry[]): AgentCoreHistoryEntry[] {
+    const maxHistoryTurns = this.options.maxHistoryTurns ?? DEFAULT_MAX_HISTORY_TURNS;
+    if (maxHistoryTurns <= 0) return [];
+    return entries.slice(-maxHistoryTurns);
+  }
+
+  private limitHistoryByTokens(entries: AgentCoreHistoryEntry[]): AgentCoreHistoryEntry[] {
+    const maxHistoryTokens = this.options.maxHistoryTokens;
+    if (maxHistoryTokens === undefined) return entries;
+    if (maxHistoryTokens <= 0) return [];
+
+    const selected = entries.slice();
+    while (selected.length > 0 && historyTokenCount(selected) > maxHistoryTokens) {
+      selected.shift();
+      if (selected[0]?.role === "assistant") {
+        selected.shift();
+      }
+    }
+    return selected;
+  }
+}
+
+function historyTokenCount(entries: AgentCoreHistoryEntry[]): number {
+  return entries.reduce((total, entry) => total + estimateTokens(entry.content), 0);
 }
 
 export function createAgentCoreSession(options?: AgentCoreSessionOptions): AgentCoreSessionHandle {
