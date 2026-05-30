@@ -339,8 +339,8 @@ export const researchProcessLibraryTask = defineTask('issue-627.process-library-
       role: 'Babysitter process library researcher',
       task: 'Select the methodology and specialization patterns this run should follow.',
       instructions: [
-        'First check .a5c/process-library/. If that path is absent, state that explicitly and research the repository library/ tree instead.',
-        'Read matching methodology files: library/methodologies/atdd-tdd/atdd-tdd.js, library/cradle/feature-implementation-contribute.js, and any brownfield/spec-driven methodology files that fit this feature.',
+        'First check the active process-library root from babysitter process-library:active --json. If repo-local .a5c/process-library/ is absent, state that explicitly and use the active root instead.',
+        'Read matching methodology files under the active root: methodologies/atdd-tdd/atdd-tdd.js, cradle/feature-implementation-contribute.js, methodologies/spec-kit-brownfield.js, and any brownfield/spec-driven methodology files that fit this feature.',
         'Read matching specializations for API/resource design, secrets handling, MCP tool implementation/security, Next.js full-stack UI, Playwright E2E, Kubernetes/IaC review, and quality gates.',
         'Translate the library guidance into concrete constraints for this issue: tests first, contract boundaries, no raw JWT persistence, no duplicate dependency contracts, and broad integration verification.',
         'Return JSON: { processLibraryPathChecked, selectedMethodologies, selectedSpecializations, constraints, qualityGatePattern }.',

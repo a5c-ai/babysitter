@@ -14,9 +14,9 @@
     "planOnlyArtifact": true,
     "doNotModifySourceDuringPlanning": true,
     "processEntrypoint": ".a5c/processes/issue-627-jitsi-agent-meeting-participation.mjs#process",
-    "processLibraryRequestedPath": ".a5c/process-library/",
-    "processLibraryRequestedPathStatus": "absent in this checkout; use library/methodologies and library/specializations as the local process library fallback",
-    "existingIssueCommentObservation": "Issue comments mention an earlier closed planning PR #670; this process should still read current issue/PR state before execution and not assume prior artifacts are authoritative."
+    "processLibraryRequestedPath": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "processLibraryRequestedPathStatus": "active process library reported by babysitter process-library:active --json; repo-local .a5c/process-library is absent in this checkout",
+    "existingIssueCommentObservation": "Issue comments mention earlier planning PR #670 and open planning PR #715. This process should still read current issue/PR state before execution and not assume prior artifacts are authoritative."
   },
   "specFiles": [
     "packages/krate/docs/jitsi/06-agent-meeting-participation.md",
