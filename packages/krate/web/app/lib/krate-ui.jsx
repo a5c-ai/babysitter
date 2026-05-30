@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { createAuthProviderConfig, listEnabledAuthProviders, parseSessionCookie, fetchControllerUiModel, createKrateApiController, orgNamespaceName, resourceToYaml } from '@a5c-ai/krate-sdk';
 import { KrateControllerRecovery } from '../components/shell/krate-loading.jsx';
 
-const ORG_HYDRATED_RESOURCE_KINDS = ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject', 'Issue'];
+const ORG_HYDRATED_RESOURCE_KINDS = ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject', 'Issue', 'AgentPersona', 'AgentSoul', 'AgentAppearance', 'AgentVoiceProfile', 'AgentDefinition', 'AgentSkill', 'AgentStack'];
 
 export const orgNavigationGroups = [
   {
@@ -35,6 +35,7 @@ export const orgNavigationGroups = [
     title: 'Agents',
     items: [
       ['/agents', 'Agents', 'Agent stacks and dispatch'],
+      ['/agents/directory', 'Directory', 'Agent personas and profiles'],
       ['/agents/stacks', 'Stacks', 'Agent stack configurations'],
       ['/agents/sessions', 'Sessions', 'Agent chat sessions'],
       ['/agents/runs', 'Dispatch runs', 'Agent dispatch runs'],

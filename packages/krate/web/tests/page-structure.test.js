@@ -280,6 +280,23 @@ test('root page.jsx and orgs/page.jsx have metadata and dynamic exports', () => 
   }
 });
 
+test('agent identity directory pages exist and use page conventions', () => {
+  const pages = [
+    ['agents', 'directory', 'page.jsx'],
+    ['agents', 'directory', '[name]', 'page.jsx'],
+    ['agents', 'directory', 'new', 'page.jsx'],
+  ];
+  for (const parts of pages) {
+    const file = path.join(orgPagesDir, ...parts);
+    assert.ok(fs.existsSync(file), `Missing ${path.relative(webRoot, file)}`);
+    const src = fs.readFileSync(file, 'utf8');
+    assert.match(src, /export\s+const\s+metadata\s*=/, `${path.relative(webRoot, file)} missing metadata`);
+    assert.match(src, /title\s*:/, `${path.relative(webRoot, file)} missing metadata title`);
+    assert.match(src, /dynamic\s*=\s*'force-dynamic'/, `${path.relative(webRoot, file)} missing force-dynamic`);
+    assert.match(src, /export\s+default\s+async\s+function/, `${path.relative(webRoot, file)} missing async default page`);
+  }
+});
+
 // ---------------------------------------------------------------------------
 // 9. Page metadata titles all include "Krate"
 // ---------------------------------------------------------------------------

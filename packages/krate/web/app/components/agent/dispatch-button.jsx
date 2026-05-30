@@ -1,21 +1,24 @@
 'use client';
 import { useState } from 'react';
+import { agentIdentityOptions } from '../../lib/agent-identity.js';
 
-export function DispatchButton({ org, stacks = [] }) {
+export function DispatchButton({ org, stacks = [], agents = [] }) {
   const [status, setStatus] = useState('idle');
-  const [selectedStack, setSelectedStack] = useState('');
+  const [selectedTarget, setSelectedTarget] = useState('');
   const [repository, setRepository] = useState('');
   const [message, setMessage] = useState('');
+  const options = agentIdentityOptions(agents, stacks);
+  const selectedOption = options.find((option) => option.value === selectedTarget);
 
   async function handleDispatch() {
-    if (!selectedStack) return;
+    if (!selectedTarget) return;
     setStatus('dispatching');
     try {
       const res = await fetch(`/api/orgs/${org}/agents/dispatch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          agentStack: selectedStack,
+          ...(selectedOption?.type === 'agentDefinition' ? { agentDefinition: selectedTarget } : { agentStack: selectedTarget }),
           repository: repository || 'default',
           ref: 'main',
           taskKind: 'diagnostic',
@@ -48,14 +51,14 @@ export function DispatchButton({ org, stacks = [] }) {
     return (
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 0', flexWrap: 'wrap' }}>
         <label htmlFor="dispatch-stack-select" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Agent stack</label>
-        <select id="dispatch-stack-select" value={selectedStack} onChange={e => setSelectedStack(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }} aria-label="Select agent stack">
-          <option value="">Select stack...</option>
-          {stacks.map(s => <option key={s} value={s}>{s}</option>)}
+        <select id="dispatch-stack-select" value={selectedTarget} onChange={e => setSelectedTarget(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }} aria-label="Select agent persona or stack">
+          <option value="">Select agent...</option>
+          {options.map(option => <option key={`${option.type}-${option.value}`} value={option.value}>{option.label}{option.hint ? ` - ${option.hint}` : ''}</option>)}
         </select>
         <label htmlFor="dispatch-repo-input" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Repository</label>
         <input id="dispatch-repo-input" placeholder="Repository (optional)" value={repository} onChange={e => setRepository(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13, width: 180 }} aria-label="Repository (optional)" />
-        <button onClick={handleDispatch} disabled={!selectedStack} aria-label="Launch dispatch" style={{ ...primaryStyle, opacity: selectedStack ? 1 : 0.5 }}>Launch</button>
-        <button onClick={() => { setStatus('idle'); setSelectedStack(''); setRepository(''); }} aria-label="Cancel dispatch" style={secondaryStyle}>Cancel</button>
+        <button onClick={handleDispatch} disabled={!selectedTarget} aria-label="Launch dispatch" style={{ ...primaryStyle, opacity: selectedTarget ? 1 : 0.5 }}>Launch</button>
+        <button onClick={() => { setStatus('idle'); setSelectedTarget(''); setRepository(''); }} aria-label="Cancel dispatch" style={secondaryStyle}>Cancel</button>
       </div>
     );
   }
@@ -68,7 +71,7 @@ export function DispatchButton({ org, stacks = [] }) {
     return (
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <span style={{ fontSize: 13, color: '#16a34a' }}>{message}</span>
-        <button onClick={() => { setStatus('idle'); setMessage(''); }} style={secondaryStyle}>Dispatch Another</button>
+            <button onClick={() => { setStatus('idle'); setMessage(''); }} style={secondaryStyle}>Dispatch Another</button>
       </div>
     );
   }

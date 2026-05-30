@@ -9,15 +9,17 @@ import { StackActions } from '../components/agent/stack-actions.jsx';
 import { StackEditForm } from '../components/agent/stack-edit-form.jsx';
 import { CopyButton } from '../components/inference/inference-helpers.jsx';
 import { phaseTone } from './agent-helpers.jsx';
+import { buildAgentIdentityProfiles, resolveRunAgentIdentity, agentIdentityLabel } from '../lib/agent-identity.js';
 
 export async function AgentsDashboardPage({ org = null } = {}) {
   const ui = await loadKrateUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { stacks: { count: 0 }, runs: { count: 0, active: [] }, rules: { count: 0 }, approvals: { count: 0, pending: [] } };
+  const agentProfiles = buildAgentIdentityProfiles(ui.model);
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent orchestration" title="Agent stacks, runs, and rules" text="View agent stacks, dispatch runs, trigger rules, and pending approvals from one place." actions={[['/agents/stacks', 'View stacks'], ['/agents/runs', 'View runs']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
-      <DispatchButton org={activeOrg} stacks={(agentView.stacks?.items || []).map(s => s.metadata?.name).filter(Boolean)} />
+      <DispatchButton org={activeOrg} stacks={(agentView.stacks?.items || []).map(s => s.metadata?.name).filter(Boolean)} agents={agentProfiles} />
       <LiveUpdates org={activeOrg} />
     </div>
     <section className="routeGrid two">
@@ -33,7 +35,10 @@ export async function AgentsDashboardPage({ org = null } = {}) {
       </div>
       <div className="card">
         <div className="cardTitle"><h2>Recent activity</h2><StatusPill tone={agentView.runs.active?.length ? 'warn' : 'neutral'}>{agentView.runs.active?.length || 0} active</StatusPill></div>
-        {agentView.runs.items?.length ? <ul className="resourceList">{agentView.runs.items.slice(0, 5).map((run) => <li key={run.metadata?.name}><a href={orgHref(activeOrg, `/agents/runs/${run.metadata?.name}`)}><strong>{run.metadata?.name}</strong></a><span>{run.spec?.stackRef || 'unassigned'} {run.spec?.repository ? `/ ${run.spec.repository}` : ''}</span><small>Phase: {run.status?.phase || 'Pending'}{run.status?.startedAt ? ` / Started: ${run.status.startedAt}` : ''}</small></li>)}</ul> : <EmptyState title="No dispatch runs yet" text="Dispatch runs appear when agent stacks are triggered by rules or manual dispatch." cta={orgHref(activeOrg, '/agents/runs')} ctaLabel="Dispatch an agent" />}
+        {agentView.runs.items?.length ? <ul className="resourceList">{agentView.runs.items.slice(0, 5).map((run) => {
+          const identity = resolveRunAgentIdentity(run, ui.model);
+          return <li key={run.metadata?.name}><a href={orgHref(activeOrg, `/agents/runs/${run.metadata?.name}`)}><strong>{run.metadata?.name}</strong></a><span>{agentIdentityLabel(identity, run.spec?.stackRef || 'unassigned')} {run.spec?.repository ? `/ ${run.spec.repository}` : ''}</span><small>Phase: {run.status?.phase || 'Pending'}{run.status?.startedAt ? ` / Started: ${run.status.startedAt}` : ''}</small></li>;
+        })}</ul> : <EmptyState title="No dispatch runs yet" text="Dispatch runs appear when agent stacks are triggered by rules or manual dispatch." cta={orgHref(activeOrg, '/agents/runs')} ctaLabel="Dispatch an agent" />}
       </div>
     </section>
   </PageFrame>;

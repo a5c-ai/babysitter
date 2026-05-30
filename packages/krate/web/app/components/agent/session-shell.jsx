@@ -286,7 +286,7 @@ function StatCard({ label, value, accent = false }) {
   );
 }
 
-function RuntimePanel({ session, transcriptRecord }) {
+function RuntimePanel({ session, transcriptRecord, identity }) {
   const phase = session?.status?.phase || 'Pending';
   const model = session?.spec?.model || session?.status?.model || 'default';
   const cost = session?.status?.cost != null
@@ -316,6 +316,7 @@ function RuntimePanel({ session, transcriptRecord }) {
           {cost && <StatCard label="Total Cost" value={cost} accent />}
           {costPerTurn && <StatCard label="Cost / Turn" value={costPerTurn} />}
           {messageCount != null && <StatCard label="Messages" value={messageCount} />}
+          {identity && <StatCard label="Agent Persona" value={identity.displayName || identity.name} accent={!identity.fallback} />}
           {stackName && <StatCard label="Agent Stack" value={stackName} />}
           {dispatchRun && <StatCard label="Dispatch Run" value={dispatchRun} />}
           {workspace && <StatCard label="Workspace" value={workspace} />}
@@ -331,9 +332,10 @@ function RuntimePanel({ session, transcriptRecord }) {
 // Main SessionShell export
 // ---------------------------------------------------------------------------
 
-export function SessionShell({ session, messages = [], runs = [], transcripts = [], transcriptRecord = null }) {
+export function SessionShell({ session, messages = [], runs = [], transcripts = [], transcriptRecord = null, identity = null }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {identity ? <div className="card" style={{ marginBottom: 12 }}><strong>{identity.displayName || identity.name}</strong><span style={{ marginLeft: 8, color: 'var(--text-muted)' }}>{identity.roleTitle || 'Agent identity'} / stack fallback: {session?.spec?.agentStack || session?.spec?.stackRef || 'none'}</span></div> : null}
       {/* Top 3-column grid */}
       <div style={{
         display: 'grid',
@@ -348,7 +350,7 @@ export function SessionShell({ session, messages = [], runs = [], transcripts = 
       </div>
 
       {/* Bottom full-width runtime panel */}
-      <RuntimePanel session={session} transcriptRecord={transcriptRecord} />
+      <RuntimePanel session={session} transcriptRecord={transcriptRecord} identity={identity} />
     </div>
   );
 }

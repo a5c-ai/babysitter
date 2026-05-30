@@ -107,6 +107,13 @@ test('agent-pages.jsx re-exports AgentSettingsPage', () => {
   assert.ok(agentPagesSrc.includes('AgentSettingsPage'), 'AgentSettingsPage should be re-exported');
 });
 
+test('agent-pages.jsx re-exports agent identity directory pages', () => {
+  assert.ok(agentPagesSrc.includes('AgentDirectoryPage'), 'AgentDirectoryPage should be re-exported');
+  assert.ok(agentPagesSrc.includes('AgentProfileRoutePage'), 'AgentProfileRoutePage should be re-exported');
+  assert.ok(agentPagesSrc.includes('AgentCreateRoutePage'), 'AgentCreateRoutePage should be re-exported');
+  assert.ok(agentPagesSrc.includes('agent-identity-pages.jsx'), 'agent identity pages module should be referenced');
+});
+
 test('agent-pages.jsx re-exports shared helpers from agent-helpers', () => {
   assert.ok(agentPagesSrc.includes('phaseTone'), 'phaseTone should be re-exported');
   assert.ok(agentPagesSrc.includes('relativeTime'), 'relativeTime should be re-exported');
