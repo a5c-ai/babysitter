@@ -65,6 +65,16 @@ export interface OversightConfig {
    */
   readonly timeoutMs?: number;
 
+  /** Number of oversight retries after the first rejected review. */
+  readonly maxRetries?: number;
+
+  /**
+   * Retry mode for rejected oversight.
+   * `review-only` re-runs the reviewer against the same output.
+   * `reinvoke` invokes the subagent again with feedback in sharedContext.
+   */
+  readonly retryMode?: 'review-only' | 'reinvoke';
+
   /**
    * When `true`, the parent can see the subagent's intermediate tool
    * calls and reasoning, not just the final result.

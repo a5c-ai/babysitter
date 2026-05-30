@@ -5,11 +5,16 @@
  * single agent and returns the result directly.
  */
 
-import type { AgentLoopIterationResult, SequentialStrategy } from "../types";
+import type {
+  AgentLoopIterationResult,
+  AgentLoopPromptContext,
+  SequentialStrategy,
+} from "../types";
 
 export type PromptFn<TInput, TOutput> = (
   input: TInput,
   agentId: string,
+  context?: AgentLoopPromptContext<TInput>,
 ) => Promise<TOutput>;
 
 export interface SequentialLoopRunnerConfig {
@@ -32,9 +37,10 @@ export class SequentialLoopRunner<TInput, TOutput> {
   async run(
     input: TInput,
     iterationIndex: number,
+    context?: AgentLoopPromptContext<TInput>,
   ): Promise<AgentLoopIterationResult<TOutput>> {
     const start = Date.now();
-    const output = await this.promptFn(input, this.agentId);
+    const output = await this.promptFn(input, this.agentId, context);
     const durationMs = Date.now() - start;
 
     return {

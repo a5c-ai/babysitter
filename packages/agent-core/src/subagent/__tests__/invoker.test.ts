@@ -15,6 +15,12 @@ function makeDescriptor(overrides?: Partial<SubagentDescriptor>): SubagentDescri
   };
 }
 
+function slow<T>(value: T, ms = 25): Promise<T> {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(value), ms);
+  });
+}
+
 // ---------------------------------------------------------------------------
 // invoke()
 // ---------------------------------------------------------------------------
@@ -122,6 +128,78 @@ describe("SubagentInvoker — delegate", () => {
 
     expect(result.success).toBe(true);
     expect(result.output).toBe("output");
+  });
+
+  it("enforces oversight timeoutMs for delegation", async () => {
+    const invokeFn = vi.fn(
+      async () => slow("late result"),
+    );
+    const invoker = new SubagentInvokerImpl(invokeFn);
+
+    const result = await invoker.delegate(
+      makeDescriptor({ id: "slow-subagent" }),
+      "task",
+      {
+        oversight: { requireApproval: false, timeoutMs: 5 },
+      },
+    );
+
+    expect(result).toMatchObject({
+      agentId: "slow-subagent",
+      mode: "delegation",
+      success: false,
+    });
+    expect(result.error).toMatch(/timed out after 5ms/i);
+  });
+
+  it("uses configurable review-only oversight retries", async () => {
+    const invokeFn = vi.fn(async () => "review me");
+    const reviewFn = vi
+      .fn()
+      .mockResolvedValueOnce({ accepted: false, feedback: "try again" })
+      .mockResolvedValueOnce({ accepted: true });
+    const invoker = new SubagentInvokerImpl(invokeFn, reviewFn);
+
+    const result = await invoker.delegate(makeDescriptor(), "task", {
+      oversight: { requireApproval: true, maxRetries: 1 } as any,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.output).toBe("review me");
+    expect(invokeFn).toHaveBeenCalledTimes(1);
+    expect(reviewFn).toHaveBeenCalledTimes(2);
+  });
+
+  it("can reinvoke the subagent with reviewer feedback between retries", async () => {
+    const invokeFn = vi
+      .fn()
+      .mockResolvedValueOnce("first output")
+      .mockResolvedValueOnce("revised output");
+    const reviewFn = vi
+      .fn()
+      .mockResolvedValueOnce({ accepted: false, feedback: "include sources" })
+      .mockResolvedValueOnce({ accepted: true });
+    const invoker = new SubagentInvokerImpl(invokeFn, reviewFn);
+
+    const result = await invoker.delegate(makeDescriptor(), "task", {
+      oversight: {
+        requireApproval: true,
+        maxRetries: 1,
+        retryMode: "reinvoke",
+      } as any,
+      sharedContext: [{ role: "system", content: "parent context" }],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.output).toBe("revised output");
+    expect(invokeFn).toHaveBeenCalledTimes(2);
+    expect(invokeFn.mock.calls[1][2]).toMatchObject({
+      sharedContext: [
+        { role: "system", content: "parent context" },
+        { role: "user", content: expect.stringContaining("include sources") },
+      ],
+    });
+    expect(reviewFn).toHaveBeenCalledTimes(2);
   });
 });
 

@@ -90,15 +90,31 @@ export class SubagentInvokerImpl<TOutput = unknown>
     const start = Date.now();
 
     try {
-      const output = await this.invokeFn(descriptor, input, options);
+      const output = await this.invokeWithTimeout(
+        descriptor,
+        input,
+        options,
+        options.oversight.timeoutMs,
+      );
 
       // If oversight requires approval and we have a review function,
       // run the oversight loop.
       if (options.oversight.requireApproval && this.reviewFn) {
+        if (options.oversight.retryMode === "reinvoke") {
+          return this.delegateWithReinvokeRetry(
+            descriptor,
+            input,
+            options,
+            output,
+            start,
+          );
+        }
+
         const runner = new OversightRunner<TOutput>(this.reviewFn);
-        // Use a single review pass (maxRetries = 0) — the orchestration
-        // layer above can retry with new subagent output if needed.
-        const oversightResult = await runner.review(output, 0);
+        const oversightResult = await runner.review(
+          output,
+          options.oversight.maxRetries ?? 0,
+        );
 
         return this.buildResult(
           descriptor,
@@ -185,5 +201,115 @@ export class SubagentInvokerImpl<TOutput = unknown>
       durationMs: Date.now() - startMs,
       turnsUsed: 0,
     };
+  }
+
+  private async delegateWithReinvokeRetry(
+    descriptor: SubagentDescriptor,
+    input: string,
+    options: SubagentInvocationOptions & {
+      readonly oversight: OversightConfig;
+    },
+    initialOutput: TOutput,
+    start: number,
+  ): Promise<SubagentResult<TOutput>> {
+    const maxRetries = options.oversight.maxRetries ?? 0;
+    let output = initialOutput;
+    let lastFeedback: string | undefined;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const verdict = await this.reviewFn!(output, {
+        attempt: attempt + 1,
+        feedback: lastFeedback,
+      });
+
+      if (verdict.accepted) {
+        return this.buildResult(descriptor, "delegation", output, start, true);
+      }
+
+      lastFeedback = verdict.feedback;
+      if (attempt >= maxRetries) {
+        return this.buildResult(
+          descriptor,
+          "delegation",
+          output,
+          start,
+          false,
+          `Oversight rejected: ${lastFeedback ?? "no feedback"}`,
+        );
+      }
+
+      output = await this.invokeWithTimeout(
+        descriptor,
+        input,
+        this.withOversightFeedback(options, lastFeedback),
+        options.oversight.timeoutMs,
+      );
+    }
+
+    return this.buildResult(
+      descriptor,
+      "delegation",
+      output,
+      start,
+      false,
+      `Oversight rejected: ${lastFeedback ?? "no feedback"}`,
+    );
+  }
+
+  private withOversightFeedback(
+    options: SubagentInvocationOptions & {
+      readonly oversight: OversightConfig;
+    },
+    feedback: string | undefined,
+  ): SubagentInvocationOptions & { readonly oversight: OversightConfig } {
+    return {
+      ...options,
+      sharedContext: [
+        ...(options.sharedContext ?? []),
+        {
+          role: "user",
+          content: `Oversight feedback: ${feedback ?? "revise and retry"}`,
+        },
+      ],
+    };
+  }
+
+  private async invokeWithTimeout(
+    descriptor: SubagentDescriptor,
+    input: string,
+    options: SubagentInvocationOptions | undefined,
+    timeoutMs: number | undefined,
+  ): Promise<TOutput> {
+    const invocation = this.invokeFn(descriptor, input, options);
+    if (timeoutMs === undefined) {
+      return invocation;
+    }
+
+    return new Promise<TOutput>((resolve, reject) => {
+      let settled = false;
+      const timer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        reject(
+          new Error(
+            `Subagent ${descriptor.id} timed out after ${timeoutMs}ms`,
+          ),
+        );
+      }, timeoutMs);
+
+      invocation
+        .then((value) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          resolve(value);
+        })
+        .catch((err) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
   }
 }

@@ -50,8 +50,18 @@ import {
   type AgentCoreStructuredOutputOptions,
   type AgentCoreTextPromptPart,
   type AgentCoreToolOptions,
+  type AgentLoop,
+  type AgentLoopPromptContext,
+  type AgentLoopRunOptions,
+  type AgentLoopStrategy,
+  type CompositeStrategy,
+  type ConcurrentStrategy,
   type CustomToolDefinition,
+  type HandoffPromptContext,
+  type OversightConfig,
+  type SubagentInvoker,
   type ToolResult,
+  createAgentLoop,
 } from "@a5c-ai/agent-core";
 ```
 
@@ -64,6 +74,8 @@ Key exports:
 - `AgenticToolOptions` and `AGENTIC_TOOL_NAMES`: compatibility aliases for older host integrations.
 - `resetRunScopedConfig()`: clears run-scoped state used by the `config` tool.
 - `parseSearchResults()`, `stripHtmlTags()`, `extractTextFromHtml()`, `filterByRelevance()`: helper exports used by web/search integrations.
+- `createAgentLoop()` and loop strategy types: low-level sequential, concurrent, group-chat, handoff, and composite loop orchestration.
+- `SubagentInvokerImpl` / `OversightRunner` and subagent types: low-level delegation, handoff, timeout, and oversight contracts.
 
 ## Session API
 
@@ -165,6 +177,53 @@ await session.prompt([
 OpenAI-compatible and Azure endpoints receive Chat Completions content parts using `text` and `image_url`. Base64 images are converted to `data:<mediaType>;base64,...` URLs for those providers. Anthropic receives Messages API content blocks with `image` sources using either `url` or `base64`.
 
 Agent-core validates image URLs before dispatch (`http`/`https` only), requires `image/*` media types for base64 images, rejects data URLs in the base64 field, and caps raw base64 image payloads at 20 MiB. Image-bearing `ToolResult` support remains owned by #588; this API only covers direct session prompt input.
+
+## AgentLoop Strategy API
+
+`createAgentLoop(config, promptFn, agentIds?)` provides a low-level orchestration primitive for hosts that need strategy-specific prompt dispatch without taking a dependency on the full SDK run journal. The prompt function remains source-compatible with the original two-argument form and can optionally receive an `AgentLoopPromptContext` as the third argument:
+
+```ts
+const loop = createAgentLoop<string, string>(
+  {
+    strategy: { kind: "concurrent", maxParallelism: 2, perAgentTimeoutMs: 5_000 },
+    maxIterations: 1,
+  },
+  async (input, agentId, context) => {
+    context?.signal?.throwIfAborted?.();
+    return `${agentId}: ${input}`;
+  },
+  ["planner", "reviewer"],
+);
+
+for await (const result of loop.run("Draft plan", { signal })) {
+  console.log(result.output);
+}
+```
+
+Supported strategy hardening:
+
+- Concurrent loops preserve `output.results` ordering by configured agent id and can record `fulfilled`, `rejected`, `timed-out`, or `cancelled` per-agent outcomes when `perAgentTimeoutMs` or an external `AbortSignal` is used.
+- Group-chat moderator output prefers structured `{ nextSpeakerId }`, `{ agentId }`, or `{ speakerId }`, validates against configured agents, and rejects ambiguous prose unless `invalidSelectionBehavior: "fallback"` is set.
+- Handoff loops validate `entryAgentId` and every `handoffTarget`, and transfer `HandoffPromptContext` to the next prompt through `context.handoff`.
+- `run(input, { signal })` and `iterate(input, { signal })` propagate cancellation to prompt functions and mark the loop state as `cancelled` when cancellation stops further iterations.
+- Composite pipeline strategies run child strategies in order and return an aggregate `{ results }` payload.
+
+## Subagent Invocation API
+
+`SubagentInvokerImpl` supports tool-call invocation, delegation with oversight, and handoff. Delegation now enforces `oversight.timeoutMs` directly and supports configurable oversight retries:
+
+```ts
+const result = await invoker.delegate(descriptor, "Review this patch", {
+  oversight: {
+    requireApproval: true,
+    timeoutMs: 30_000,
+    maxRetries: 1,
+    retryMode: "review-only",
+  },
+});
+```
+
+`retryMode: "review-only"` re-runs reviewer validation against the same output. `retryMode: "reinvoke"` runs the subagent again with the previous reviewer feedback appended to `sharedContext`; use it only for idempotent or replay-safe delegated work.
 
 ### Deprecated compatibility fields
 

@@ -9,11 +9,17 @@
  * switches to prevent infinite delegation chains.
  */
 
-import type { AgentLoopIterationResult, HandoffStrategy } from "../types";
+import type {
+  AgentLoopIterationResult,
+  AgentLoopPromptContext,
+  HandoffPromptContext,
+  HandoffStrategy,
+} from "../types";
 
 export type PromptFn<TInput, TOutput> = (
   input: TInput,
   agentId: string,
+  context?: AgentLoopPromptContext<TInput>,
 ) => Promise<TOutput>;
 
 /**
@@ -23,6 +29,10 @@ export type PromptFn<TInput, TOutput> = (
  */
 export interface HandoffCapableOutput {
   handoffTarget?: string;
+  handoffContext?: unknown;
+  context?: unknown;
+  summary?: unknown;
+  reason?: unknown;
 }
 
 export interface HandoffLoopRunnerConfig {
@@ -34,9 +44,12 @@ export class HandoffLoopRunner<TInput, TOutput> {
   private readonly entryAgentId: string;
   private readonly agentIds: ReadonlySet<string>;
   private readonly maxHandoffs: number;
+  private readonly contextFormatter: HandoffStrategy["contextFormatter"];
   private readonly promptFn: PromptFn<TInput, TOutput>;
 
   private currentAgentId: string;
+  private currentInput: TInput | undefined;
+  private pendingHandoffContext: HandoffPromptContext | undefined;
   private handoffCount = 0;
   private _terminated = false;
 
@@ -47,7 +60,14 @@ export class HandoffLoopRunner<TInput, TOutput> {
     this.entryAgentId = config.strategy.entryAgentId;
     this.agentIds = new Set(config.agentIds);
     this.maxHandoffs = config.strategy.maxHandoffs ?? Infinity;
+    this.contextFormatter = config.strategy.contextFormatter;
     this.promptFn = promptFn;
+    if (!this.agentIds.has(this.entryAgentId)) {
+      throw new Error(
+        `HandoffLoopRunner: entryAgentId '${this.entryAgentId}' is not in configured agents: ` +
+        `${config.agentIds.join(", ")}`,
+      );
+    }
     this.currentAgentId = this.entryAgentId;
   }
 
@@ -59,26 +79,59 @@ export class HandoffLoopRunner<TInput, TOutput> {
   async run(
     input: TInput,
     iterationIndex: number,
+    context?: AgentLoopPromptContext<TInput>,
   ): Promise<AgentLoopIterationResult<TOutput>> {
     if (this._terminated) {
       throw new Error("HandoffLoopRunner: loop has already terminated");
     }
 
     const agentId = this.currentAgentId;
+    const promptInput = this.currentInput ?? input;
+    const promptContext: AgentLoopPromptContext<TInput> = {
+      ...(context ?? {
+        iterationIndex,
+        strategy: "handoff" as const,
+        input: promptInput,
+      }),
+      input: promptInput,
+      handoff: this.pendingHandoffContext,
+    };
     const start = Date.now();
-    const output = await this.promptFn(input, agentId);
+    const output = await this.promptFn(promptInput, agentId, promptContext);
     const durationMs = Date.now() - start;
 
     // Determine if a handoff was requested
     const handoffTarget = this.extractHandoffTarget(output);
 
     if (handoffTarget) {
+      if (!this.agentIds.has(handoffTarget)) {
+        throw new Error(
+          `HandoffLoopRunner: handoff target '${handoffTarget}' is not in configured agents: ` +
+          `${Array.from(this.agentIds).join(", ")}`,
+        );
+      }
+
+      const nextHandoffCount = this.handoffCount + 1;
+      const handoffContext: HandoffPromptContext = {
+        previousAgentId: agentId,
+        handoffTarget,
+        handoffCount: nextHandoffCount,
+        previousOutput: output,
+        handoffContext: this.extractHandoffContext(output),
+      };
+
       if (this.handoffCount >= this.maxHandoffs) {
         // Max handoffs reached — terminate after this iteration
         this._terminated = true;
       } else {
         this.currentAgentId = handoffTarget;
-        this.handoffCount++;
+        this.handoffCount = nextHandoffCount;
+        this.pendingHandoffContext = handoffContext;
+        this.currentInput = this.formatNextInput(
+          promptInput,
+          output,
+          handoffContext,
+        );
       }
     } else {
       // No handoff requested — signal termination
@@ -96,6 +149,8 @@ export class HandoffLoopRunner<TInput, TOutput> {
 
   reset(): void {
     this.currentAgentId = this.entryAgentId;
+    this.currentInput = undefined;
+    this.pendingHandoffContext = undefined;
     this.handoffCount = 0;
     this._terminated = false;
   }
@@ -116,5 +171,31 @@ export class HandoffLoopRunner<TInput, TOutput> {
       return typeof target === "string" ? target : undefined;
     }
     return undefined;
+  }
+
+  private extractHandoffContext(output: TOutput): unknown {
+    if (output === null || typeof output !== "object") {
+      return undefined;
+    }
+
+    const capable = output as HandoffCapableOutput;
+    return (
+      capable.handoffContext ??
+      capable.context ??
+      capable.summary ??
+      capable.reason
+    );
+  }
+
+  private formatNextInput(
+    input: TInput,
+    output: TOutput,
+    context: HandoffPromptContext,
+  ): TInput {
+    if (!this.contextFormatter) {
+      return input;
+    }
+
+    return this.contextFormatter(input, output, context) as TInput;
   }
 }

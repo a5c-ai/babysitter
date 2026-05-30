@@ -9,11 +9,16 @@
  * returning a next-speaker selection as part of its output.
  */
 
-import type { AgentLoopIterationResult, GroupChatStrategy } from "../types";
+import type {
+  AgentLoopIterationResult,
+  AgentLoopPromptContext,
+  GroupChatStrategy,
+} from "../types";
 
 export type PromptFn<TInput, TOutput> = (
   input: TInput,
   agentId: string,
+  context?: AgentLoopPromptContext<TInput>,
 ) => Promise<TOutput>;
 
 export interface GroupChatLoopRunnerConfig {
@@ -25,6 +30,7 @@ export class GroupChatLoopRunner<TInput, TOutput> {
   private readonly agentIds: readonly string[];
   private readonly maxRounds: number;
   private readonly moderatorAgentId: string | undefined;
+  private readonly invalidSelectionBehavior: "throw" | "fallback";
   private readonly promptFn: PromptFn<TInput, TOutput>;
 
   /** Index into agentIds for the next speaker (round-robin). */
@@ -43,6 +49,8 @@ export class GroupChatLoopRunner<TInput, TOutput> {
     this.agentIds = config.agentIds;
     this.maxRounds = config.strategy.maxRounds ?? Infinity;
     this.moderatorAgentId = config.strategy.moderatorAgentId;
+    this.invalidSelectionBehavior =
+      config.strategy.invalidSelectionBehavior ?? "throw";
     this.promptFn = promptFn;
   }
 
@@ -59,6 +67,7 @@ export class GroupChatLoopRunner<TInput, TOutput> {
   async run(
     input: TInput,
     iterationIndex: number,
+    context?: AgentLoopPromptContext<TInput>,
   ): Promise<AgentLoopIterationResult<TOutput>> {
     if (this.isExhausted) {
       throw new Error(
@@ -71,7 +80,11 @@ export class GroupChatLoopRunner<TInput, TOutput> {
     if (this.moderatorAgentId) {
       // Ask the moderator to select the next speaker.
       // The moderator's output is expected to be a string containing the agent id.
-      const moderatorOutput = await this.promptFn(input, this.moderatorAgentId);
+      const moderatorOutput = await this.promptFn(
+        input,
+        this.moderatorAgentId,
+        context,
+      );
       const selectedAgent = this.resolveModeratorSelection(moderatorOutput);
       currentSpeaker = selectedAgent ?? this.agentIds[this.speakerIndex]!;
     } else {
@@ -79,7 +92,7 @@ export class GroupChatLoopRunner<TInput, TOutput> {
     }
 
     const start = Date.now();
-    const output = await this.promptFn(input, currentSpeaker);
+    const output = await this.promptFn(input, currentSpeaker, context);
     const durationMs = Date.now() - start;
 
     // Advance round-robin pointer
@@ -106,17 +119,68 @@ export class GroupChatLoopRunner<TInput, TOutput> {
   }
 
   /**
-   * Best-effort extraction of a selected agent from the moderator output.
-   * Returns the agent ID if the output contains exactly one known agent id,
-   * otherwise falls back to undefined (round-robin).
+   * Extract a selected agent from the moderator output.
+   * Structured output is preferred; string output must exactly equal one agent id.
    */
   private resolveModeratorSelection(output: TOutput): string | undefined {
-    const text = typeof output === "string" ? output : String(output);
-    for (const id of this.agentIds) {
-      if (text.includes(id)) {
-        return id;
+    const selected = this.extractStructuredSelection(output);
+    if (selected !== undefined) {
+      return this.validateSelection(selected, "structured");
+    }
+
+    if (typeof output === "string") {
+      const text = output.trim();
+      if (this.agentIds.includes(text)) {
+        return text;
+      }
+
+      const mentioned = this.agentIds.filter((id) => output.includes(id));
+      if (mentioned.length > 0) {
+        return this.handleInvalidSelection(
+          `GroupChatLoopRunner: ambiguous moderator selection '${output}'. ` +
+          `Return exactly one agent id or structured { nextSpeakerId }.`,
+        );
       }
     }
-    return undefined;
+
+    return this.handleInvalidSelection(
+      `GroupChatLoopRunner: moderator did not select a valid speaker`,
+    );
+  }
+
+  private extractStructuredSelection(output: TOutput): string | undefined {
+    if (output === null || typeof output !== "object") {
+      return undefined;
+    }
+
+    const candidate = output as {
+      nextSpeakerId?: unknown;
+      agentId?: unknown;
+      speakerId?: unknown;
+    };
+    const selected =
+      candidate.nextSpeakerId ?? candidate.agentId ?? candidate.speakerId;
+    return typeof selected === "string" ? selected : undefined;
+  }
+
+  private validateSelection(
+    selected: string,
+    source: "structured" | "string",
+  ): string | undefined {
+    if (this.agentIds.includes(selected)) {
+      return selected;
+    }
+
+    return this.handleInvalidSelection(
+      `GroupChatLoopRunner: ${source} moderator selection '${selected}' ` +
+      `is not in configured agents: ${this.agentIds.join(", ")}`,
+    );
+  }
+
+  private handleInvalidSelection(message: string): undefined {
+    if (this.invalidSelectionBehavior === "fallback") {
+      return undefined;
+    }
+    throw new Error(message);
   }
 }

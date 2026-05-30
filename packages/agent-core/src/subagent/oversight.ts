@@ -17,6 +17,10 @@
  */
 export type ReviewFn<TOutput> = (
   result: TOutput,
+  context?: {
+    readonly attempt: number;
+    readonly feedback?: string;
+  },
 ) => Promise<{ accepted: boolean; feedback?: string }>;
 
 // ---------------------------------------------------------------------------
@@ -69,7 +73,10 @@ export class OversightRunner<TOutput = unknown> {
 
     for (let i = 0; i <= maxRetries; i++) {
       attempts++;
-      const verdict = await this.reviewFn(current);
+      const verdict = await this.reviewFn(current, {
+        attempt: attempts,
+        feedback: lastFeedback,
+      });
 
       if (verdict.accepted) {
         return {

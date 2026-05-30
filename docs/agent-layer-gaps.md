@@ -35,12 +35,12 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 
 | Gap | Description |
 |-----|-------------|
-| Concurrent strategy naive | `Promise.allSettled` with no per-agent timeout, no partial results, no graceful degradation |
-| Group-chat moderator fragile | String matching for agent selection, no validation against agent list |
-| Handoff has no state passing | Second agent doesn't know what first agent did. No context transfer. |
-| No loop cancellation token | `run()` generator can't be externally cancelled |
-| Oversight is single-pass | `maxRetries = 0` hardcoded. Reviewer can reject but no retry mechanism. |
-| Delegation timeout ignored | `timeout` parameter accepted but never enforced |
+| Concurrent strategy follow-up work | AgentLoop concurrent strategy now supports opt-in per-agent timeout, ordered aggregate partial results, and cancelled/timed-out records (#589). Remaining gap: no incremental streaming partial-result emission. |
+| Group-chat moderator follow-up work | Moderator selection now supports structured output, configured-agent validation, and ambiguous-output rejection with opt-in fallback (#589). Remaining gap: no richer schema negotiation with model providers. |
+| Handoff context follow-up work | Handoff now validates entry/target agents and passes structured handoff context to the next prompt (#589). Remaining gap: no cross-runtime handoff persistence outside this in-process loop. |
+| Loop cancellation follow-up work | `AgentLoop.run()`/`iterate()` now accept an external `AbortSignal` and pass it to prompt functions (#589). Session-level `abort()` limitations are tracked separately above. |
+| Oversight retry follow-up work | Delegation oversight now supports configurable review-only retries and opt-in subagent reinvocation with feedback (#589). Remaining gap: caller-owned idempotency policy for reinvoked side effects. |
+| Delegation timeout follow-up work | `SubagentInvokerImpl.delegate()` now enforces `oversight.timeoutMs` (#589). Remaining gap: broader external task dispatch timeouts remain owned by tasks-mux/agent-mux integration. |
 | No plugin/extension API | DeferredToolRegistry exists but minimally integrated |
 | No caching anywhere | Tool results, web fetches, schema fetches — nothing cached |
 | Hardcoded limits | 50MB output, 120s bash, 30s search — not configurable |
