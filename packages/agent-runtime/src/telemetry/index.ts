@@ -11,12 +11,10 @@ export {
   type TelemetryConfig,
   type TraceContext,
   type TelemetrySpanStartOptions,
-  type TelemetryExporter,
   type TelemetryExportResult,
 } from "./types";
 
 export {
-  FileTelemetryExporter,
   HttpTelemetryExporter,
   InMemoryTelemetryProvider,
 } from "./provider";

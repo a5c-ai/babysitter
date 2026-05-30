@@ -10,6 +10,7 @@ import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import type {
   TelemetryExporter,
+  TelemetryExportResult,
   TelemetryProvider,
   TelemetrySpan,
   TelemetryEvent,
@@ -42,11 +43,12 @@ export interface InMemoryTelemetryProviderOptions {
 export class FileTelemetryExporter implements TelemetryExporter {
   constructor(private readonly filePath: string) {}
 
-  async export(spans: readonly TelemetrySpan[]): Promise<void> {
-    if (spans.length === 0) return;
+  async export(spans: readonly TelemetrySpan[]): Promise<TelemetryExportResult> {
+    if (spans.length === 0) return { ok: true, exported: 0 };
     await fs.mkdir(path.dirname(this.filePath), { recursive: true });
     const payload = spans.map((span) => JSON.stringify(redactSpan(span))).join("\n") + "\n";
     await fs.appendFile(this.filePath, payload, "utf-8");
+    return { ok: true, exported: spans.length };
   }
 }
 
@@ -58,9 +60,10 @@ export class HttpTelemetryExporter implements TelemetryExporter {
     private readonly send: HttpTelemetrySend = defaultHttpSend,
   ) {}
 
-  async export(spans: readonly TelemetrySpan[]): Promise<void> {
-    if (spans.length === 0) return;
+  async export(spans: readonly TelemetrySpan[]): Promise<TelemetryExportResult> {
+    if (spans.length === 0) return { ok: true, exported: 0 };
     await this.send(this.url, toOtlpPayload(spans.map(redactSpan)));
+    return { ok: true, exported: spans.length };
   }
 }
 

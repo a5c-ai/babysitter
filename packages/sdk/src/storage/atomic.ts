@@ -14,32 +14,33 @@ async function fsyncPath(targetPath: string) {
 
 export async function writeFileAtomic(targetPath: string, data: string | Buffer, retries = 3) {
   await fs.mkdir(path.dirname(targetPath), { recursive: true });
-  const tempPath = `${targetPath}.tmp-${process.pid}-${Date.now()}`;
-  const handle = await fs.open(tempPath, "w");
-  try {
-    if (typeof data === "string") {
-      await handle.writeFile(data, "utf8");
-    } else {
-      await handle.writeFile(data);
-    }
-    await handle.sync();
-  } finally {
-    await handle.close();
-  }
 
   for (let attempt = 0; attempt <= retries; attempt++) {
+    const tempPath = `${targetPath}.tmp-${process.pid}-${Date.now()}-${attempt}`;
     try {
+      const handle = await fs.open(tempPath, "w");
+      try {
+        if (typeof data === "string") {
+          await handle.writeFile(data, "utf8");
+        } else {
+          await handle.writeFile(data);
+        }
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
       await fs.rename(tempPath, targetPath);
-      await fsyncPath(path.dirname(targetPath));
+      try { await fsyncPath(path.dirname(targetPath)); } catch { /* fsync dir may fail on Windows */ }
       return;
     } catch (error) {
       const err = error as NodeJS.ErrnoException;
-      if (err.code === "ENOENT") {
-        await fs.rm(tempPath, { force: true });
-        throw new Error(`atomic write: rename failed with ENOENT for ${targetPath} (temp file or target dir vanished)`);
+      await fs.rm(tempPath, { force: true }).catch(() => {});
+      if (err.code === "ENOENT" && attempt < retries) {
+        await fs.mkdir(path.dirname(targetPath), { recursive: true });
+        await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 50));
+        continue;
       }
-      if (attempt === retries || !err.code || !RETRYABLE_ERRORS.has(err.code)) {
-        await fs.rm(tempPath, { force: true });
+      if (attempt === retries || (!err.code || (!RETRYABLE_ERRORS.has(err.code) && err.code !== "ENOENT"))) {
         throw err;
       }
       await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 25));

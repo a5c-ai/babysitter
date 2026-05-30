@@ -6,6 +6,7 @@ export type McpToolConfig = {
   inputSchema: Record<string, z.ZodTypeAny>;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type McpToolHandler = (args: any) => unknown;
 
 export function registerMcpTool(
