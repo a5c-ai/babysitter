@@ -4,6 +4,12 @@
  * @inputs { issueNumber: number, baseBranch: string, branchName: string }
  * @outputs { success: boolean, audit: object, architecture: object, testPlan: object, implementation: object, verification: object, review: object, delivery: object }
  *
+ * Planning dispatch notes:
+ * - Created for manual planning dispatch on issue #580 against base branch staging.
+ * - Prior plan/implementation history exists in merged PR #682; this process remains
+ *   an executable implementation workflow and re-collects issue/code context at run time.
+ * - The planning PR for this refresh must contain only this process definition and its inputs.
+ *
  * References searched before authoring:
  * - docs/agent-reference/process-authoring.md
  * - docs/agent-layer-gaps.md
@@ -431,6 +437,7 @@ export async function process(inputs, ctx) {
   const issueNumber = inputs?.issueNumber ?? 580;
   const baseBranch = inputs?.baseBranch ?? 'staging';
   const branchName = inputs?.branchName ?? 'agent/issue-580-mcp-orchestration';
+  const priorPlanPr = inputs?.priorPlanPr ?? 682;
 
   const context = await ctx.task(collectContextTask, { issueNumber }, {
     key: 'issue-580.context',
@@ -531,6 +538,7 @@ export async function process(inputs, ctx) {
       success: false,
       issueNumber,
       branchName,
+      priorPlanPr,
       audit: context,
       architecture,
       testPlan,
@@ -552,6 +560,7 @@ export async function process(inputs, ctx) {
     success: true,
     issueNumber,
     branchName,
+    priorPlanPr,
     audit: context,
     architecture,
     testPlan,

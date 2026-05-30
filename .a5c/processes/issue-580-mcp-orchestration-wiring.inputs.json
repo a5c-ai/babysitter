@@ -1,5 +1,11 @@
 {
   "issueNumber": 580,
   "baseBranch": "staging",
-  "branchName": "agent/issue-580-mcp-orchestration"
+  "branchName": "agent/issue-580-mcp-orchestration",
+  "priorPlanPr": 682,
+  "planningDispatch": {
+    "trigger": "manual dispatch",
+    "requestedBranch": "plan/issue-580",
+    "artifactScope": "process-definition-and-inputs-only"
+  }
 }
