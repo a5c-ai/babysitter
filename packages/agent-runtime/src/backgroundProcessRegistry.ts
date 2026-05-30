@@ -30,6 +30,7 @@ export type BackgroundTaskStatus =
   | "killed"
   | "timed_out"
   | "skipped"
+  | "stale"
   | "failed";
 
 export interface BackgroundStreamMetadata {
@@ -131,7 +132,9 @@ interface TrackedProcess {
   terminationTimer?: NodeJS.Timeout;
   terminating?: boolean;
   terminalIntent?: Extract<BackgroundTaskStatus, "cancelled" | "killed" | "timed_out">;
-  maxOutputBytes?: number;
+  maxOutputBytes: number;
+  destroyHookRun?: boolean;
+  completionNotified?: boolean;
   opts: SpawnOptions;
   dependsOn: string[];
   dependencyFailure?: string;
@@ -144,6 +147,7 @@ interface TrackedProcess {
 // ---------------------------------------------------------------------------
 
 const DEFAULT_MAX_CONCURRENT = 16;
+const DEFAULT_MAX_OUTPUT_BYTES = 1_048_576;
 const DEFAULT_TERMINATION_GRACE_MS = 3_000;
 const TERMINAL_STATUSES = new Set<BackgroundTaskStatus>([
   "completed",
@@ -152,6 +156,7 @@ const TERMINAL_STATUSES = new Set<BackgroundTaskStatus>([
   "killed",
   "timed_out",
   "skipped",
+  "stale",
   "failed",
 ]);
 
@@ -221,7 +226,7 @@ export class BackgroundProcessRegistry {
       stdout: createRetainedStream(),
       stderr: createRetainedStream(),
       durationMs: null,
-      maxOutputBytes: resources.maxOutputBytes,
+      maxOutputBytes: resources.maxOutputBytes ?? DEFAULT_MAX_OUTPUT_BYTES,
       opts,
       dependsOn,
       hookErrors: [],
@@ -290,34 +295,17 @@ export class BackgroundProcessRegistry {
     }
 
     child.on("close", (code) => {
-      if (tracked.timeout) clearTimeout(tracked.timeout);
-      if (tracked.terminationTimer) clearTimeout(tracked.terminationTimer);
       if (tracked.status === "running" || tracked.status === "paused") {
         tracked.status = code === 0 ? "completed" : "exited";
       }
-      tracked.exitCode = code ?? 1;
-      tracked.durationMs = Date.now() - tracked.startMs;
-      this.runHook(tracked, "postDestroy");
-      if (tracked.onComplete) {
-        try {
-          tracked.onComplete(this.completionEvent(tracked));
-        } catch {
-          // Fire-and-forget — callback errors must not crash.
-        }
-      }
-      this.resolveDependents(tracked.backgroundTaskId);
+      this.finalizeTrackedProcess(tracked, code ?? 1);
     });
 
     child.on("error", () => {
-      if (tracked.timeout) clearTimeout(tracked.timeout);
-      if (tracked.terminationTimer) clearTimeout(tracked.terminationTimer);
       if (tracked.status === "running" || tracked.status === "paused") {
         tracked.status = "exited";
       }
-      tracked.exitCode = 1;
-      tracked.durationMs = Date.now() - tracked.startMs;
-      this.runHook(tracked, "postDestroy");
-      this.resolveDependents(tracked.backgroundTaskId);
+      this.finalizeTrackedProcess(tracked, 1);
     });
 
     this.runHook(tracked, "postSpawn");
@@ -327,12 +315,16 @@ export class BackgroundProcessRegistry {
   get(backgroundTaskId: string): BackgroundTaskRecord | undefined {
     const tracked = this.processes.get(backgroundTaskId);
     if (!tracked) return undefined;
+    this.refreshStaleProcess(tracked);
     return this.snapshot(tracked);
   }
 
   /** List snapshots of all tracked processes. */
   list(): BackgroundTaskRecord[] {
-    return [...this.processes.values()].map((t) => this.snapshot(t));
+    return [...this.processes.values()].map((t) => {
+      this.refreshStaleProcess(t);
+      return this.snapshot(t);
+    });
   }
 
   /** Cancel (SIGTERM) a running process. Returns true if found and killed. */
@@ -421,6 +413,28 @@ export class BackgroundProcessRegistry {
     };
   }
 
+  private finalizeTrackedProcess(tracked: TrackedProcess, exitCode: number): void {
+    if (tracked.timeout) clearTimeout(tracked.timeout);
+    if (tracked.terminationTimer) clearTimeout(tracked.terminationTimer);
+    tracked.exitCode = exitCode;
+    tracked.durationMs = Date.now() - tracked.startMs;
+    this.runDestroyHook(tracked, "postDestroy");
+    this.notifyComplete(tracked);
+    this.resolveDependents(tracked.backgroundTaskId);
+  }
+
+  private notifyComplete(tracked: TrackedProcess): void {
+    if (tracked.completionNotified || !tracked.onComplete) {
+      return;
+    }
+    tracked.completionNotified = true;
+    try {
+      tracked.onComplete(this.completionEvent(tracked));
+    } catch {
+      // Fire-and-forget — callback errors must not crash.
+    }
+  }
+
   private terminate(
     tracked: TrackedProcess,
     intent: Extract<BackgroundTaskStatus, "cancelled" | "killed" | "timed_out">,
@@ -438,7 +452,7 @@ export class BackgroundProcessRegistry {
     if (intent === "timed_out") {
       this.runHook(tracked, "onTimeout");
     }
-    this.runHook(tracked, "preDestroy");
+    this.runDestroyHook(tracked, "preDestroy");
 
     if (wasPaused) {
       this.sendSignal(tracked, "SIGCONT");
@@ -490,6 +504,21 @@ export class BackgroundProcessRegistry {
     return child.exitCode === null && child.killed !== true;
   }
 
+  private refreshStaleProcess(tracked: TrackedProcess): void {
+    if (tracked.status !== "running" && tracked.status !== "paused") {
+      return;
+    }
+    const child = tracked.child as (childProcess.ChildProcess & {
+      killed?: boolean;
+      exitCode?: number | null;
+    }) | undefined;
+    if (!child || (child.exitCode === null && child.killed !== true)) {
+      return;
+    }
+    tracked.status = "stale";
+    this.finalizeTrackedProcess(tracked, child.exitCode ?? 1);
+  }
+
   private resolveDependents(backgroundTaskId: string): void {
     for (const candidate of this.processes.values()) {
       if (candidate.status !== "queued" || !candidate.dependsOn.includes(backgroundTaskId)) {
@@ -520,10 +549,7 @@ export class BackgroundProcessRegistry {
     try {
       const result = fn(this.snapshot(tracked)) as unknown;
       if (result != null && typeof (result as Promise<void>).then === "function") {
-        tracked.hookErrors.push({
-          hook,
-          message: "Async lifecycle hooks are not supported by synchronous spawn",
-        });
+        this.trackAsyncHook(tracked, hook, result as Promise<void>);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -532,6 +558,60 @@ export class BackgroundProcessRegistry {
         tracked.status = "failed";
       }
     }
+  }
+
+  private runDestroyHook(
+    tracked: TrackedProcess,
+    hook: Extract<keyof BackgroundLifecycleHooks, "preDestroy" | "postDestroy">,
+  ): void {
+    if (hook === "postDestroy" && tracked.destroyHookRun) {
+      return;
+    }
+    this.runHook(tracked, hook);
+    if (hook === "postDestroy") {
+      tracked.destroyHookRun = true;
+    }
+  }
+
+  private trackAsyncHook(
+    tracked: TrackedProcess,
+    hook: keyof BackgroundLifecycleHooks,
+    promise: Promise<void>,
+  ): void {
+    let settled = false;
+    const timeoutMs = tracked.opts.hookTimeoutMs;
+    let timer: NodeJS.Timeout | undefined;
+    if (timeoutMs !== undefined) {
+      timer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        tracked.hookErrors.push({
+          hook,
+          message: `Lifecycle hook timed out after ${timeoutMs}ms`,
+        });
+        if (hook === "preSpawn") {
+          tracked.status = "failed";
+        }
+      }, timeoutMs);
+    }
+
+    promise.then(
+      () => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+      },
+      (error) => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        const message = error instanceof Error ? error.message : String(error);
+        tracked.hookErrors.push({ hook, message });
+        if (hook === "preSpawn") {
+          tracked.status = "failed";
+        }
+      },
+    );
   }
 }
 
@@ -543,13 +623,7 @@ function createRetainedStream(): RetainedStream {
   };
 }
 
-function appendCapped(stream: RetainedStream, chunk: Buffer, maxBytes?: number): void {
-  if (maxBytes === undefined) {
-    stream.chunks.push(chunk);
-    stream.retainedBytes += chunk.byteLength;
-    return;
-  }
-
+function appendCapped(stream: RetainedStream, chunk: Buffer, maxBytes: number): void {
   const remaining = maxBytes - stream.retainedBytes;
   if (remaining <= 0) {
     stream.droppedBytes += chunk.byteLength;

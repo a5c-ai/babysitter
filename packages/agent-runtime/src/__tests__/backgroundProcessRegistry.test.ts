@@ -125,6 +125,44 @@ describe("BackgroundProcessRegistry lifecycle hardening", () => {
       stderrRetainedBytes: 5,
       stdoutDroppedBytes: 6,
       stderrDroppedBytes: 7,
+      stdoutTruncated: true,
+      stderrTruncated: true,
+    }));
+  });
+
+  it("caps retained output by default", () => {
+    const child = createMockChild();
+    const onComplete = vi.fn();
+    const registry = new BackgroundProcessRegistry({
+      spawnFn: vi.fn(() => child) as any,
+    });
+
+    const initial = registry.spawn({
+      command: "yes",
+      cwd: "/tmp",
+      onComplete,
+    } as any);
+
+    child.stdout.emit("data", Buffer.alloc(1_048_580, "a"));
+    child.stderr.emit("data", Buffer.alloc(1_048_581, "b"));
+
+    const record = registry.get(initial.backgroundTaskId) as any;
+    expect(record.stdoutRetainedBytes).toBe(1_048_576);
+    expect(record.stderrRetainedBytes).toBe(1_048_576);
+    expect(record.stdoutDroppedBytes).toBe(4);
+    expect(record.stderrDroppedBytes).toBe(5);
+    expect(record.stdoutTruncated).toBe(true);
+    expect(record.stderrTruncated).toBe(true);
+
+    child.emit("close", 0);
+
+    expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({
+      stdoutRetainedBytes: 1_048_576,
+      stderrRetainedBytes: 1_048_576,
+      stdoutDroppedBytes: 4,
+      stderrDroppedBytes: 5,
+      stdoutTruncated: true,
+      stderrTruncated: true,
     }));
   });
 
@@ -256,6 +294,58 @@ describe("BackgroundProcessRegistry lifecycle hardening", () => {
       cwd: "/tmp",
       dependsOn: [second.backgroundTaskId, second.backgroundTaskId],
     } as any)).toThrow(/cycle|duplicate/i);
+
+    expect(() => registry.spawn({
+      command: "missing",
+      cwd: "/tmp",
+      dependsOn: ["missing-task"],
+    } as any)).toThrow(/unknown background process dependency/i);
+  });
+
+  it("marks tracked children stale when they exit without a close or error event", () => {
+    const child = createMockChild();
+    const onComplete = vi.fn();
+    const registry = new BackgroundProcessRegistry({
+      spawnFn: vi.fn(() => child) as any,
+    });
+
+    const initial = registry.spawn({
+      command: "stale",
+      cwd: "/tmp",
+      onComplete,
+    } as any);
+
+    child.exitCode = 2;
+
+    const record = registry.get(initial.backgroundTaskId);
+    expect(record?.status).toBe("stale");
+    expect(record?.exitCode).toBe(2);
+    expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({
+      status: "stale",
+      exitCode: 2,
+    }));
+  });
+
+  it("reports child errors through completion callbacks", () => {
+    const child = createMockChild();
+    const onComplete = vi.fn();
+    const registry = new BackgroundProcessRegistry({
+      spawnFn: vi.fn(() => child) as any,
+    });
+
+    const initial = registry.spawn({
+      command: "error",
+      cwd: "/tmp",
+      onComplete,
+    } as any);
+
+    child.emit("error", new Error("spawn failed"));
+
+    expect(registry.get(initial.backgroundTaskId)?.status).toBe("exited");
+    expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({
+      status: "exited",
+      exitCode: 1,
+    }));
   });
 
   it("runs lifecycle hooks and records hook failures without crashing the registry", () => {
@@ -301,5 +391,30 @@ describe("BackgroundProcessRegistry lifecycle hardening", () => {
     expect(postDestroy).toHaveBeenCalledWith(expect.objectContaining({
       status: "cancelled",
     }));
+  });
+
+  it("records async lifecycle hook timeout diagnostics", async () => {
+    const child = createMockChild();
+    const registry = new BackgroundProcessRegistry({
+      spawnFn: vi.fn(() => child) as any,
+    });
+
+    const initial = registry.spawn({
+      command: "async-hook",
+      cwd: "/tmp",
+      hookTimeoutMs: 10,
+      hooks: {
+        postSpawn: () => new Promise<void>(() => {}),
+      },
+    } as any);
+
+    vi.advanceTimersByTime(10);
+
+    expect(registry.get(initial.backgroundTaskId)?.hookErrors).toEqual([
+      expect.objectContaining({
+        hook: "postSpawn",
+        message: "Lifecycle hook timed out after 10ms",
+      }),
+    ]);
   });
 });

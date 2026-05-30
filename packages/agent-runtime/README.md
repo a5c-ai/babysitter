@@ -37,13 +37,14 @@ Secure defaults are intentionally conservative:
   container `securityContext` where structurally supported by the manifest
   builder.
 - Background processes use the same environment and cwd policy semantics and
-  can cap retained stdout/stderr with `policy.resources.maxOutputBytes`.
-  Snapshots and completion events include retained and dropped byte counts so
-  truncation is explicit.
+  retain bounded stdout/stderr by default. `policy.resources.maxOutputBytes`
+  can lower or raise the retained-byte cap. Snapshots and completion events
+  include retained and dropped byte counts so truncation is explicit.
 - Background process lifecycle controls support opt-in process-group signaling
   on POSIX, direct-child fallback, grace-period SIGKILL escalation, timeout
-  status, platform-gated pause/resume, dependency queueing, and lifecycle hook
-  diagnostics. These controls are separate from daemon start/stop and session
+  and stale status, platform-gated pause/resume, dependency queueing, and
+  lifecycle hook diagnostics, including async hook timeout reporting through
+  `hookErrors`. These controls are separate from daemon start/stop and session
   pause policy.
 
 The policy layer records OS resource intent through `ResourceManagerImpl` but
