@@ -12,6 +12,10 @@
  * @outputs { success: boolean, reuseAudit: object, runtimeCallPaths: object, plan: object, verification: object, delivery: object }
  *
  * Process-library research:
+ * - .a5c/process-library/ was not present in this checkout; use the repository's SDK-managed library/ tree per docs/user-guide/features/process-library.md.
+ * - library/processes/shared/runtime-call-tracer.js
+ * - library/processes/shared/tdd-triplet.js
+ * - library/processes/shared/completeness-gate.js
  * - specializations/sdk-platform-development/sdk-testing-strategy
  * - specializations/sdk-platform-development/cli-tool-development
  * - specializations/qa-testing-automation/contract-testing
@@ -21,8 +25,11 @@
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
  * - Design docs already exist under docs/agent-mux-babysitter-integrations/, including tasks-mux-routing.md, effect-resolution.md, and testing.md.
  * - tasks-mux already exposes ResponderType, routeTask, AgentMuxResponderBackend, ExternalTrackerBackend, and BreakpointBackend seams on the current checkout.
+ * - Current staging has routeTask in packages/tasks-mux/src/router.ts, AgentMuxResponderBackend in packages/tasks-mux/src/backends/agent-mux.ts, and ExternalTrackerBackend in packages/tasks-mux/src/backends/external-tracker.ts.
+ * - Current staging has agent-platform resolveEffect delegating routable agent effects through tasks-mux in packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts.
  * - agent-platform already imports/mocks routeTask and AgentMuxResponderBackend in createRun orchestration tests, so implementation must audit current behavior before adding duplicate routing layers.
  * - SDK stop-hook continuation already references routeTask/isHostDelegableRoute, so plugin-mode work should be verified against that live path rather than recreating a separate decision path.
+ * - Current staging has SDK task responderType serialization/validation in packages/sdk/src/tasks/types.ts, packages/sdk/src/tasks/defineTask.ts, and packages/sdk/src/tasks/kinds/index.ts.
  * - Existing process .a5c/processes/issue-633-route-effect-resolution-through-tasks-mux.mjs covers a broad implementation flow. This process is a fresh, plan-scoped artifact for issue #633 with an explicit completed-work audit and current-staging gap analysis.
  *
  * Repo-specific authoring note:

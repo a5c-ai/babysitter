@@ -51,9 +51,18 @@
     ]
   },
   "planningNotes": {
+    "processLibraryResearch": ".a5c/process-library/ is not present in this checkout; matching methodology research should use the repository library/ tree and docs/user-guide/features/process-library.md lookup guidance.",
     "existingPlan": ".a5c/processes/issue-633-route-effect-resolution-through-tasks-mux.mjs already exists on staging; this artifact is a fresh plan-scoped process with an explicit completed-work audit.",
     "issueDependencyCorrection": "Issue body references older dependency issue numbers, but the latest issue comment states dependencies are #630 and #631.",
     "currentIssueCommentState": "Issue #633 contains a comment that implementation is complete in PR #685; execution should verify current checkout state before adding or changing implementation code.",
+    "currentStagingEvidence": [
+      "packages/tasks-mux/src/router.ts exposes routeTask and route decisions for internal, human, agent, tracker, and auto.",
+      "packages/tasks-mux/src/backends/agent-mux.ts exposes AgentMuxResponderBackend.",
+      "packages/tasks-mux/src/backends/external-tracker.ts exposes ExternalTrackerBackend.",
+      "packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts contains resolveViaTasksMuxIfRoutable.",
+      "packages/sdk/src/harness/hooks/stopHookContinuation.ts imports routeTask/isHostDelegableRoute before host delegation.",
+      "packages/sdk/src/tasks/types.ts and packages/sdk/src/tasks/defineTask.ts preserve and validate responderType routing metadata."
+    ],
     "repoProcessOverride": "Use agent tasks for implementation and verification phases, and keep breakpoints sparse.",
     "doNotImplementDuringPlanningArtifactCreation": true
   }
