@@ -1,7 +1,7 @@
 {
   "issueNumber": 609,
   "baseBranch": "staging",
-  "branchName": "agent/issue-609-krate-web-playwright-e2e",
+  "branchName": "plan/issue-609",
   "title": "Add Playwright E2E tests for krate web console",
   "stagingUrl": "https://krate-staging.a5c.ai",
   "e2eRoot": "packages/krate/web/e2e",

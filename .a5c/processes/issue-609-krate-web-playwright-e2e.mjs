@@ -2,7 +2,7 @@
  * @process repo/issue-609-krate-web-playwright-e2e
  * @description Implement issue #609: add Playwright E2E coverage for the Krate web console against staging.
  * @inputs { issueNumber: number, baseBranch: string, branchName: string, stagingUrl: string, e2eRoot: string, dependencyIssues: number[], routeSmokeMatrix: string[], crudFlows: object[], serviceDependentFlows: object[], qualityGateCommands: string[] }
- * @outputs { success: boolean, phases: string[], changedFiles: string[], testPlan: object, verification: object, review: object, finalGate: object }
+ * @outputs { success: boolean, phases: string[], changedFiles: string[], testPlan: object, verification: object, review: object, finalGate: object, delivery: object }
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
@@ -159,6 +159,17 @@ export async function process(inputs, ctx) {
     key: 'issue-609.final-acceptance',
   });
 
+  const delivery = await ctx.task(deliverIssue609Task, {
+    inputs,
+    issueNumber,
+    branchName: inputs?.branchName ?? 'plan/issue-609',
+    finalGate,
+    verification,
+    review,
+  }, {
+    key: 'issue-609.delivery',
+  });
+
   return {
     success: finalGate?.passed === true,
     phases: [
@@ -172,6 +183,7 @@ export async function process(inputs, ctx) {
       'quality-gates',
       'coverage-and-stability-review',
       'final-acceptance',
+      'delivery',
     ],
     changedFiles: finalGate?.changedFiles ?? implementation?.changedFiles ?? [],
     issueContext,
@@ -185,6 +197,7 @@ export async function process(inputs, ctx) {
     review,
     attempts,
     finalGate,
+    delivery,
   };
 }
 
@@ -452,6 +465,42 @@ export const finalAcceptanceGateTask = defineTask('issue-609.final-acceptance', 
         'Return JSON: { passed, changedFiles, coverageSummary, verificationSummary, gatedBy608, residualRisks, prSummary }.',
       ],
     },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+export const deliverIssue609Task = defineTask('issue-609.delivery', (args, taskCtx) => ({
+  kind: 'shell',
+  title: 'Commit, push, and comment on PR #688',
+  labels: ['issue-609', 'issue-688', 'delivery', 'github'],
+  shell: {
+    command: [
+      'set -euo pipefail',
+      'git status --short --branch',
+      'git add packages/krate/web .a5c/processes/issue-609-krate-web-playwright-e2e.mjs .a5c/processes/issue-609-krate-web-playwright-e2e.inputs.json',
+      'git diff --cached --check',
+      'if ! git diff --cached --quiet; then git commit -m "test(krate-web): add Playwright E2E coverage"; else echo "No staged changes to commit"; fi',
+      'git push -u origin "$BRANCH_NAME"',
+      'gh issue comment 688 --body "$COMMENT_BODY"',
+    ].join('\n'),
+    env: {
+      BRANCH_NAME: args.branchName,
+      COMMENT_BODY: [
+        'Implemented the plan in PR #688 for issue #609.',
+        '',
+        'Summary:',
+        '- Added Krate web Playwright E2E coverage for browser-rendered navigation and workflow surfaces.',
+        '- Included isolated issue-609 test data patterns, cleanup, and #608-aware service gates.',
+        '- Ran the process verification gates recorded in the Babysitter run.',
+        '',
+        `Final gate: ${args.finalGate?.passed === true ? 'passed' : 'not passed'}`,
+      ].join('\n'),
+    },
+    expectedExitCode: 0,
+    timeout: 180000,
   },
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,

@@ -7,6 +7,7 @@ export default defineConfig({
   use: {
     baseURL: process.env.KRATE_E2E_URL || 'http://localhost:3000',
     ignoreHTTPSErrors: true,
+    storageState: process.env.KRATE_E2E_AUTH_STATE || undefined,
   },
   webServer: process.env.KRATE_E2E_URL ? undefined : {
     command: 'npm run dev',

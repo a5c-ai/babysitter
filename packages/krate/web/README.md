@@ -186,3 +186,17 @@ All server-side API routes live under `app/api/`:
 | `KRATE_GITEA_TOKEN` | — | Admin token for Gitea API access |
 | `KRATE_KYVERNO_ENABLED` | — | Set to `true` to enable Kyverno discovery |
 | `NEXT_PUBLIC_APP_URL` | — | Public base URL (used for OAuth redirects) |
+
+## Playwright E2E
+
+The Playwright suite lives in `packages/krate/web/e2e`, matching
+`playwright.config.js`.
+
+| Variable | Description |
+|----------|-------------|
+| `KRATE_E2E_URL` | Base URL for staging or another running Krate web instance. When unset, Playwright starts `npm run dev`. |
+| `KRATE_E2E_ORG` | Organization slug for org-scoped tests. Defaults to `default`. |
+| `KRATE_E2E_AUTH_STATE` | Optional Playwright storage state JSON for signed staging sessions. |
+| `KRATE_E2E_ENABLE_MUTATING_STAGING` | Set to `1` to run shared-staging CRUD tests. Tests use `issue-609-e2e` names and exact cleanup only. |
+| `KRATE_E2E_ENABLE_SERVICE_FLOWS` | Set to `1` after #608-backed assistant, playground, and Agent Mux services are configured. |
+| `KRATE_E2E_ENABLE_MUTATING_LOCAL` | Optional local override for CRUD tests when running against a local dev server. |
