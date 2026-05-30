@@ -1,0 +1,43 @@
+{
+  "issueNumber": 634,
+  "canonicalIssueNumber": 596,
+  "packageName": "@a5c-ai/tasks-mux",
+  "targetPaths": [
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/src/backend.ts",
+    "packages/tasks-mux/src/backends/git-native.ts",
+    "packages/tasks-mux/src/backends/server.ts",
+    "packages/tasks-mux/src/backends/github-issues.ts",
+    "packages/tasks-mux/src/client/",
+    "packages/tasks-mux/src/cli/commands/breakpoints.ts",
+    "packages/tasks-mux/src/mcp/",
+    "packages/tasks-mux/src/__tests__/",
+    "packages/tasks-mux/README.md",
+    "packages/tasks-mux/docs/setup-guide.md",
+    "packages/tasks-mux/docs/expert-guide.md",
+    "packages/tasks-mux/specs/architecture.md",
+    "docs/agent-layer-gaps.md",
+    "docs/agent-mux-babysitter-integrations/tasks-mux-routing.md"
+  ],
+  "constraints": [
+    "Do not implement outside tasks-mux package and directly related docs unless runtime tracing proves the path is required.",
+    "Preserve compatibility with existing breakpoint JSON and existing CLI/MCP consumers.",
+    "Use runtime-read spec blocks from GitHub issues and docs for acceptance prompts.",
+    "Write failing tests before implementation.",
+    "Use shell tasks for deterministic quality gates.",
+    "Keep breakpoints sparse; no user breakpoint is needed unless the spec is contradictory or a backend cannot support a required operation."
+  ],
+  "maxRefinementAttempts": 2,
+  "targetedTestCommand": "npm run test --workspace=@a5c-ai/tasks-mux -- --run packages/tasks-mux/src/__tests__/shared-types-backend-interface.test.ts packages/tasks-mux/src/__tests__/git-native-backend.test.ts packages/tasks-mux/src/__tests__/server-backend.test.ts packages/tasks-mux/src/__tests__/github-issues-backend.test.ts packages/tasks-mux/src/__tests__/mcp-server.test.ts packages/tasks-mux/src/__tests__/cli-program.test.ts",
+  "contractVerificationCommand": "npm run typecheck --workspace=@a5c-ai/tasks-mux && npm run test --workspace=@a5c-ai/tasks-mux -- --run packages/tasks-mux/src/__tests__/shared-types-backend-interface.test.ts",
+  "gitNativeVerificationCommand": "npm run test --workspace=@a5c-ai/tasks-mux -- --run packages/tasks-mux/src/__tests__/git-native-backend.test.ts packages/tasks-mux/src/__tests__/git-native-proven-integration.test.ts",
+  "backendParityVerificationCommand": "npm run test --workspace=@a5c-ai/tasks-mux -- --run packages/tasks-mux/src/__tests__/server-backend.test.ts packages/tasks-mux/src/__tests__/github-issues-backend.test.ts packages/tasks-mux/src/__tests__/client-server-client.test.ts",
+  "surfaceVerificationCommand": "npm run test --workspace=@a5c-ai/tasks-mux -- --run packages/tasks-mux/src/__tests__/cli-program.test.ts packages/tasks-mux/src/__tests__/cli-output.test.ts packages/tasks-mux/src/__tests__/mcp-server.test.ts packages/tasks-mux/src/__tests__/mcp-http-transport.test.ts && npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-mux",
+  "fullTestCommand": "npm run test --workspace=@a5c-ai/tasks-mux",
+  "lintCommand": "npm run lint --workspace=@a5c-ai/tasks-mux",
+  "typecheckCommand": "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+  "buildCommand": "npm run build --workspace=@a5c-ai/tasks-mux",
+  "packagedSurfaceCommand": "npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-mux",
+  "packCommand": "npm pack --json --dry-run --workspace=@a5c-ai/tasks-mux",
+  "metadataCommand": "npm run verify:metadata"
+}
