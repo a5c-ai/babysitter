@@ -1,0 +1,169 @@
+{
+  "issueNumber": 573,
+  "baseBranch": "staging",
+  "targetBranch": "agent/issue-573-process-runtime-error-recovery",
+  "title": "sdk: distinguish process_runtime_error from effect_failed + first-class recovery CLI",
+  "summary": "Implement durable SDK support for process-code exceptions as PROCESS_RUNTIME_ERROR events, keep task effect failures represented by EFFECT_RESOLVED status error, and add a conservative run:recover-process-error CLI workflow that avoids manual journal surgery.",
+  "labels": [
+    "enhancement",
+    "sdk",
+    "priority:high",
+    "ready-for-dev",
+    "effort:large"
+  ],
+  "processLibraryResearch": {
+    "requestedPath": ".a5c/process-library/",
+    "status": "not-present-in-checkout",
+    "localAlternativesUsed": [
+      "library/methodologies/rpikit/skills/test-driven-development/SKILL.md",
+      "library/methodologies/rpikit/skills/verification/SKILL.md",
+      "library/methodologies/planning-with-files/skills/session-recovery/SKILL.md",
+      "library/methodologies/maestro/skills/code-review-gate/SKILL.md",
+      "library/methodologies/maestro/skills/test-enforcement/SKILL.md",
+      "docs/agent-reference/process-authoring.md",
+      ".a5c/processes/issue-575-agent-core-streaming-history.mjs",
+      ".a5c/processes/issue-606-tasks-mux-integration-tests.mjs"
+    ],
+    "methodologyReferencesToPreserve": [
+      "test-driven-development",
+      "verification-before-completion",
+      "session-recovery",
+      "code-review-gate",
+      "test-enforcement"
+    ]
+  },
+  "issueFindings": [
+    "orchestrateIteration currently returns transient status process-error for non-RunFailedError exceptions but does not journal a durable typed lifecycle event.",
+    "run:iterate currently maps process-error to CLI status failed with a process-error reason and no actionable recovery handle.",
+    "EFFECT_RESOLVED status error represents task effect failure and must remain distinct from process runtime exception handling.",
+    "run:rebuild-state and run:repair-journal exist, but no targeted command recovers a process exception without manual journal editing.",
+    "MCP run_iterate already exposes process-error with recoverable: true, so the new journaled classification should align CLI and MCP behavior.",
+    "Docs and recovery prompt templates still contain manual journal surgery guidance that should be replaced with a first-class CLI workflow."
+  ],
+  "targetFiles": [
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/runtime/types.ts",
+    "packages/sdk/src/runtime/replay/effectIndex.ts",
+    "packages/sdk/src/runtime/replay/stateCache.ts",
+    "packages/sdk/src/runtime/runLifecycleState.ts",
+    "packages/sdk/src/runtime/commitEffectResult.ts",
+    "packages/sdk/src/cli/commands/runIterate.ts",
+    "packages/sdk/src/cli/main/runCreate.ts",
+    "packages/sdk/src/cli/main/program.ts",
+    "packages/sdk/src/cli/main/argPositionals.ts",
+    "packages/sdk/src/cli/main/dispatchRunSession.ts",
+    "packages/sdk/src/cli/main/usage.ts",
+    "packages/sdk/src/cli/main/runState.ts",
+    "packages/sdk/src/cli/main/runInspection.ts",
+    "packages/sdk/src/cli/render/events/index.ts",
+    "packages/sdk/src/mcp/tools/runs.ts",
+    "packages/sdk/src/runtime/errorSuggestions.ts",
+    "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "packages/sdk/src/runtime/__tests__/effectIndex.test.ts",
+    "packages/sdk/src/runtime/replay/__tests__/stateCache.test.ts",
+    "packages/sdk/src/cli/__tests__/cliRuns.test.ts",
+    "packages/sdk/src/mcp/__tests__/tools/runs.test.ts",
+    "library/reference/sdk.md",
+    "docs/user-guide/reference/cli-reference.md",
+    "docs/reference/babysitter_cli_surface_spec.md",
+    "packages/sdk/src/prompts/templates/recovery.md",
+    "packages/sdk/src/prompts/templates/critical-rules.md",
+    "packages/sdk/src/prompts/templates/breakpoint-handling.md"
+  ],
+  "acceptanceFocus": [
+    "A process function exception records a durable PROCESS_RUNTIME_ERROR journal event rather than being only a transient process-error result.",
+    "PROCESS_RUNTIME_ERROR includes serialized error details, iteration metadata, runId/processId when available, journal head, and best-effort last effect context.",
+    "Task failures posted through task:post --status error remain EFFECT_RESOLVED status error and are not reported as process_runtime_error.",
+    "RunFailedError/infrastructure failures continue to use RUN_FAILED where appropriate.",
+    "run:iterate, run:status, run:events, MCP run tools, and any relevant renderers expose process runtime errors distinctly from effect failures.",
+    "run:recover-process-error <runDir> supports --dry-run and --json, identifies the latest typed process error, optionally patches a task result artifact, removes or supersedes only that typed marker, rebuilds state, and leaves the run ready for run:iterate.",
+    "Recovery without fixing the bad task result is honest: the marker can be cleared, but the next iterate rethrows and records a new PROCESS_RUNTIME_ERROR.",
+    "Malformed recovery arguments fail without mutating journal or task artifacts.",
+    "Docs and recovery prompt templates describe the new CLI workflow and stop recommending manual journal entry deletion as the default."
+  ],
+  "nonGoals": [
+    "Do not implement generic journal surgery beyond the targeted process-error recovery flow.",
+    "Do not redesign effect result posting or shell task status semantics.",
+    "Do not implement process-level defineProcess({ onProcessError }) unless maintainers explicitly pull it into scope.",
+    "Do not add shell-oriented subtasks to this process definition.",
+    "Do not broaden the change into unrelated observer/TUI redesign unless required to avoid misclassification."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config packages/sdk/vitest.config.ts packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts packages/sdk/src/runtime/__tests__/effectIndex.test.ts packages/sdk/src/runtime/replay/__tests__/stateCache.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config packages/sdk/vitest.config.ts packages/sdk/src/cli/__tests__/cliRuns.test.ts packages/sdk/src/mcp/__tests__/tools/runs.test.ts",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "plannedPhases": [
+    {
+      "name": "Issue context",
+      "purpose": "Read #573, labels, all comments, and related issues #572, #191, and #132 to lock the acceptance criteria and non-goals."
+    },
+    {
+      "name": "Reuse audit",
+      "purpose": "Map existing transient process-error handling, EFFECT_RESOLVED error semantics, run state derivation, CLI command registration, MCP output, docs, and recovery prompt templates."
+    },
+    {
+      "name": "Runtime and recovery architecture",
+      "purpose": "Define the PROCESS_RUNTIME_ERROR event contract, recovery command grammar, state model, CLI/MCP output, compatibility plan, and implementation order."
+    },
+    {
+      "name": "Regression plan",
+      "purpose": "Write failing tests first for durable process-error journaling, effect-failure separation, recovery happy path, honest rethrow, malformed recovery inputs, and CLI/MCP/status output."
+    },
+    {
+      "name": "Implementation loop",
+      "purpose": "Implement event journaling, state/replay consumers, run:iterate/status/events/MCP classification, run:recover-process-error, and command registration with up to three repair attempts."
+    },
+    {
+      "name": "Verification gate",
+      "purpose": "Run targeted runtime/CLI/MCP tests, SDK build and test suites, metadata verification, and diff hygiene checks."
+    },
+    {
+      "name": "Review gate",
+      "purpose": "Review journal invariants, recovery mutation safety, effect-vs-process classification, CLI compatibility, missing tests, and unrelated churn."
+    },
+    {
+      "name": "Documentation gate",
+      "purpose": "Document the recovery workflow and update prompt templates so targeted CLI recovery replaces manual journal deletion guidance."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm every acceptance point, quality gate, changed-file boundary, release-note candidate, and residual risk."
+    }
+  ],
+  "breakpoints": [
+    {
+      "when": "Only if the architecture phase finds a genuine maintainer contract decision, such as whether PROCESS_RUNTIME_ERROR should be a terminal lifecycle state or which patch CLI grammar is acceptable.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with recommended conservative contract",
+        "Pause for maintainer guidance"
+      ]
+    },
+    {
+      "when": "Only if final acceptance finds a blocking contract or verification concern that cannot be resolved within the implementation loop.",
+      "owner": "maintainer",
+      "options": [
+        "Iterate on the reported issues",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "qualityGates": [
+    "Typed PROCESS_RUNTIME_ERROR journaling is covered by integration tests.",
+    "Effect failure remains represented by EFFECT_RESOLVED status error and is covered separately.",
+    "Recovery CLI dry-run, json output, patch success, no-patch honest rethrow, malformed input failure, and no-marker failure paths are covered.",
+    "State cache/replay/status/events/MCP consumers classify the new event consistently.",
+    "Docs and recovery prompts explain the first-class workflow and remove unsafe default journal surgery guidance.",
+    "npm run build:sdk passes.",
+    "npm run test:sdk passes.",
+    "npm run verify:metadata passes.",
+    "git diff --check passes.",
+    "Code review approves journal mutation safety and backward compatibility."
+  ],
+  "expectedProcessEntrypoint": ".a5c/processes/issue-573-process-runtime-error-recovery.mjs#process",
+  "maxImplementationAttempts": 3
+}
