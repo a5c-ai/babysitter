@@ -1,6 +1,7 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { ZodRawShapeCompat } from "@modelcontextprotocol/sdk/server/zod-compat.js";
+import { SubscribeRequestSchema, UnsubscribeRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 import type { HttpMcpServerOptions, HttpMcpServerResult } from "./http-transport.js";
 import {
@@ -315,6 +316,8 @@ export function createBreakpointMcpServer(): McpServer {
     },
   );
 
+  const subscriptions = new Map<string, () => void>();
+
   server.registerResource(
     "breakpoint",
     new ResourceTemplate(breakpointResourceTemplate, {
@@ -330,6 +333,33 @@ export function createBreakpointMcpServer(): McpServer {
       return readBreakpointResource(uri, backend);
     },
   );
+
+  server.server.setRequestHandler(SubscribeRequestSchema, async (request) => {
+    const uri = request.params.uri;
+    if (!uri.startsWith("breakpoint://")) {
+      throw new Error(`Unsupported resource subscription URI: ${uri}`);
+    }
+    if (subscriptions.has(uri)) {
+      return {};
+    }
+    const backend = resolveToolBackend();
+    const unsubscribe = backend.subscribeToTaskChanges?.((event) => {
+      if (event.uri === uri) {
+        void server.server.sendResourceUpdated({ uri: event.uri });
+      }
+    });
+    if (unsubscribe) {
+      subscriptions.set(uri, unsubscribe);
+    }
+    return {};
+  });
+
+  server.server.setRequestHandler(UnsubscribeRequestSchema, async (request) => {
+    const unsubscribe = subscriptions.get(request.params.uri);
+    unsubscribe?.();
+    subscriptions.delete(request.params.uri);
+    return {};
+  });
 
   return server;
 }

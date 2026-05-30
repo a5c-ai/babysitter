@@ -1447,6 +1447,27 @@ describe("GitNativeBackend", () => {
   // ── Isolation ───────────────────────────────────────────────────────────
 
   describe("isolation", () => {
+    it("should notify subscribers registered on another instance for the same directory", async () => {
+      const subscriber = new GitNativeBackend({ breakpointsDir });
+      const writer = new GitNativeBackend({ breakpointsDir });
+      const listener = vi.fn();
+      const unsubscribe = subscriber.subscribeToTaskChanges(listener);
+
+      const bp = await writer.submitBreakpoint(makeSubmitParams());
+      await writer.assignTask(bp.id, { responderId: "alice" });
+
+      expect(listener).toHaveBeenCalledWith(expect.objectContaining({
+        uri: `breakpoint://${bp.id}`,
+        breakpointId: bp.id,
+      }));
+
+      listener.mockClear();
+      unsubscribe();
+      await writer.cancelBreakpoint(bp.id);
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
     it("should isolate data between separate backend instances with different dirs", async () => {
       const dir1 = path.join(tmpDir, "backend1");
       const dir2 = path.join(tmpDir, "backend2");

@@ -21,6 +21,7 @@ import type {
   TaskSearchParams,
   TaskSearchResult,
   TaskTemplate,
+  TaskChangeEvent,
 } from "../types.js";
 import {
   generateBreakpointId,
@@ -51,6 +52,8 @@ export interface GitNativeBackendOptions {
 export class GitNativeBackend implements BreakpointBackend {
   readonly name = "git-native";
 
+  private static listenersByDir = new Map<string, Set<(event: TaskChangeEvent) => void>>();
+
   private breakpointsDir: string;
   private defaultPollIntervalMs: number;
   private defaultTimeoutMs: number;
@@ -72,12 +75,29 @@ export class GitNativeBackend implements BreakpointBackend {
     return path.join(this.breakpointsDir, `${id}.answer.json`);
   }
 
+  private async writeJsonFile(filePath: string, value: unknown): Promise<void> {
+    const tempPath = `${filePath}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`;
+    await fs.writeFile(tempPath, JSON.stringify(value, null, 2) + "\n", "utf-8");
+    await fs.rename(tempPath, filePath);
+  }
+
   private async writeBreakpoint(breakpoint: Breakpoint): Promise<void> {
-    await fs.writeFile(
-      this.breakpointPath(breakpoint.id),
-      JSON.stringify(breakpoint, null, 2) + "\n",
-      "utf-8",
-    );
+    await this.writeJsonFile(this.breakpointPath(breakpoint.id), breakpoint);
+    this.notifyTaskChange(breakpoint.id);
+  }
+
+  private notifyTaskChange(breakpointId: string): void {
+    const listeners = GitNativeBackend.listenersByDir.get(this.breakpointsDir);
+    if (!listeners) return;
+    const event: TaskChangeEvent = {
+      breakpointId,
+      uri: `breakpoint://${breakpointId}`,
+      changedAt: new Date().toISOString(),
+      change: "updated",
+    };
+    for (const listener of listeners) {
+      listener(event);
+    }
   }
 
   private provenPath(id: string): string {
@@ -152,11 +172,7 @@ export class GitNativeBackend implements BreakpointBackend {
     // Validate before writing
     BreakpointSchema.parse(breakpoint);
 
-    await fs.writeFile(
-      this.breakpointPath(id),
-      JSON.stringify(breakpoint, null, 2) + "\n",
-      "utf-8",
-    );
+    await this.writeBreakpoint(breakpoint);
 
     return breakpoint;
   }
@@ -358,18 +374,10 @@ export class GitNativeBackend implements BreakpointBackend {
 
     BreakpointPublicAnswerSchema.parse(publicAnswer);
 
-    await fs.writeFile(
-      this.answerPath(id),
-      JSON.stringify(publicAnswer, null, 2) + "\n",
-      "utf-8",
-    );
+    await this.writeJsonFile(this.answerPath(id), publicAnswer);
 
     if (isProvenBreakpointAnswer(publicAnswer)) {
-      await fs.writeFile(
-        this.provenPath(id),
-        JSON.stringify(publicAnswer, null, 2) + "\n",
-        "utf-8",
-      );
+      await this.writeJsonFile(this.provenPath(id), publicAnswer);
     } else {
       await fs.rm(this.provenPath(id), { force: true });
     }
@@ -379,11 +387,7 @@ export class GitNativeBackend implements BreakpointBackend {
     delete breakpoint.provenVerification;
     breakpoint.status = "answered";
     breakpoint.updatedAt = now;
-    await fs.writeFile(
-      this.breakpointPath(id),
-      JSON.stringify(breakpoint, null, 2) + "\n",
-      "utf-8",
-    );
+    await this.writeBreakpoint(breakpoint);
 
     return publicAnswer;
   }
@@ -394,11 +398,7 @@ export class GitNativeBackend implements BreakpointBackend {
     breakpoint.status = "cancelled";
     breakpoint.updatedAt = new Date().toISOString();
 
-    await fs.writeFile(
-      this.breakpointPath(id),
-      JSON.stringify(breakpoint, null, 2) + "\n",
-      "utf-8",
-    );
+    await this.writeBreakpoint(breakpoint);
   }
 
   async claimBreakpoint(id: string, responderId: string): Promise<Breakpoint> {
@@ -408,11 +408,7 @@ export class GitNativeBackend implements BreakpointBackend {
     breakpoint.claimedByResponderId = responderId;
     breakpoint.updatedAt = new Date().toISOString();
 
-    await fs.writeFile(
-      this.breakpointPath(id),
-      JSON.stringify(breakpoint, null, 2) + "\n",
-      "utf-8",
-    );
+    await this.writeBreakpoint(breakpoint);
 
     return breakpoint;
   }
@@ -567,6 +563,21 @@ export class GitNativeBackend implements BreakpointBackend {
   }
 
   async removeTaskRule(_id: string): Promise<void> {}
+
+  subscribeToTaskChanges(listener: (event: TaskChangeEvent) => void): () => void {
+    let listeners = GitNativeBackend.listenersByDir.get(this.breakpointsDir);
+    if (!listeners) {
+      listeners = new Set();
+      GitNativeBackend.listenersByDir.set(this.breakpointsDir, listeners);
+    }
+    listeners.add(listener);
+    return () => {
+      listeners?.delete(listener);
+      if (listeners?.size === 0) {
+        GitNativeBackend.listenersByDir.delete(this.breakpointsDir);
+      }
+    };
+  }
 
   /**
    * Verify the selected public answer against trusted public keys.
