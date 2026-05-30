@@ -45,6 +45,9 @@ interface InvokeArgs {
   'bootstrap-only'?: boolean;
   'native-event'?: string;
   'session-id'?: string;
+  'disable-all-hooks'?: boolean;
+  'handler-timeout-ms'?: number;
+  shell?: string;
   json?: boolean;
 }
 
@@ -195,16 +198,19 @@ function findWindowsPathPrefixLength(value: string): number {
   return 0;
 }
 
-function parseHandlerArgs(handlers: string[]): Array<{ source: string; handler: string }> {
+function parseHandlerArgs(handlers: string[], shell?: string): Array<{ source: string; handler: string; shell?: string }> {
   return handlers.map((h) => {
     const windowsPrefixLength = findWindowsPathPrefixLength(h);
     const colonIdx = windowsPrefixLength > 0
       ? h.indexOf(':', windowsPrefixLength)
       : h.indexOf(':');
+    const withShell = (handler: { source: string; handler: string }) => (
+      shell ? { ...handler, shell } : handler
+    );
     if (colonIdx >= 0) {
-      return { source: h.slice(0, colonIdx), handler: h.slice(colonIdx + 1) };
+      return withShell({ source: h.slice(0, colonIdx), handler: h.slice(colonIdx + 1) });
     }
-    return { source: h, handler: 'handler' };
+    return withShell({ source: h, handler: 'handler' });
   });
 }
 
@@ -235,6 +241,19 @@ export const invokeCommand: CommandModule<object, InvokeArgs> = {
       .option('session-id', {
         type: 'string',
         describe: 'Explicit session ID override',
+      })
+      .option('disable-all-hooks', {
+        type: 'boolean',
+        default: false,
+        describe: 'Skip hook execution and return a disabled noop diagnostic result',
+      })
+      .option('handler-timeout-ms', {
+        type: 'number',
+        describe: 'Default timeout in milliseconds for command handlers',
+      })
+      .option('shell', {
+        type: 'string',
+        describe: 'Shell executable to use for explicit command handlers',
       })
       .option('json', {
         type: 'boolean',
@@ -344,7 +363,7 @@ export const invokeCommand: CommandModule<object, InvokeArgs> = {
     }
 
     // 6. Resolve execution plan
-    const handlers = args.handler ? parseHandlerArgs(args.handler) : [];
+    const handlers = args.handler ? parseHandlerArgs(args.handler, args.shell) : [];
     const plan = resolveHookPlan({
       phase: event.phase,
       handlers,
@@ -353,7 +372,11 @@ export const invokeCommand: CommandModule<object, InvokeArgs> = {
     // 7. Run plan and merge
     let merged: MergedExecutionResult;
     if (plan.length > 0) {
-      const results = await runPlan(event, plan, { capabilities: loaded.capabilities });
+      const results = await runPlan(event, plan, {
+        capabilities: loaded.capabilities,
+        disableAllHooks: args['disable-all-hooks'] || undefined,
+        handlerTimeoutMs: args['handler-timeout-ms'],
+      });
       merged = mergeResults(results);
     } else {
       // No handlers: produce a noop result

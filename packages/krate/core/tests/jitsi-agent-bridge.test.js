@@ -48,10 +48,39 @@ test('Jitsi agent bridge gates capability and prepares meeting context', async (
   assert.equal(context.role, 'observer');
   assert.equal(run.spec.meetingRef, 'daily');
   assert.equal(run.spec.meetingContext.roomId, 'daily-default');
+  assert.equal(run.spec.meetingContext.jwt, undefined);
+  assert.deepEqual(run.spec.meetingContext.tokenRef, { runtimeOnly: true });
 
   await bridge.onAgentJoined('dispatch-1', 'daily');
   await bridge.onAgentLeft('dispatch-1', 'daily', 'completed');
-  assert.deepEqual(emitted.map((event) => event.type), ['agent-joined-meeting', 'agent-left-meeting']);
+  assert.deepEqual(emitted.map((event) => event.type), ['agent-joined-meeting', 'agent-left-meeting', 'participant-left']);
+});
+
+test('Jitsi agent bridge can resolve meetings from resources and keeps generated JWT runtime-only', async () => {
+  const bridge = createJitsiAgentBridge({ now: () => new Date('2026-05-30T12:00:00Z') });
+  const run = { metadata: { name: 'dispatch-1' }, spec: {}, status: {} };
+  const context = await bridge.prepareMeetingContext(run, 'daily', stack({
+    jitsiCapability: true,
+    jitsiConfig: { role: 'participant', capabilities: { chat: 'readwrite', audio: 'listen' } },
+  }), {
+    resources: {
+      JitsiMeeting: [
+        createResource('JitsiMeeting', { name: 'daily', namespace: 'krate-org-default' }, {
+          organizationRef: 'default',
+          providerRef: 'jitsi-prod',
+          roomId: 'daily-default',
+          ttlMinutes: 30,
+        }, {
+          phase: 'Active',
+          roomUrl: 'https://meet.example/daily-default',
+        }),
+      ],
+    },
+  });
+
+  assert.match(context.jwt, /^krate-jitsi\./);
+  assert.equal(run.spec.meetingContext.jwt, undefined);
+  assert.equal(run.spec.meetingContext.role, 'participant');
 });
 
 test('Jitsi agent bridge builds sidecar specs and Agent Mux injects them only for meeting runs', () => {

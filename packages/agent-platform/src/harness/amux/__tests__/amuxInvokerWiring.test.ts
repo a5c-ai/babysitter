@@ -2,7 +2,7 @@
  * Tests for the wiring between invokeHarness and the amux bridge.
  *
  * External harnesses are routed through agent-mux exclusively.
- * Pi / agent-core harnesses always use agent-core / direct invocation.
+ * Pi remains direct; agent-core/internal route through create-run orchestration.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { AmuxClient, AmuxRunHandle, AmuxAgentEvent, AmuxInteractionChannel } from "../amuxTypes";
@@ -21,12 +21,31 @@ vi.mock("../amuxBridge", () => ({
   invokeViaAgentMux: vi.fn(),
 }));
 
+// Mock create-run orchestration so agent-core invoke does not start a real run.
+vi.mock("../../internal/createRun", () => ({
+  handleHarnessCreateRun: vi.fn().mockImplementation(async () => {
+    process.stdout.write("orchestrated-output");
+    return 0;
+  }),
+}));
+
 // Mock the babysitter-sdk checkCliAvailable so the direct path doesn't
 // actually probe the filesystem
-vi.mock("@a5c-ai/babysitter-sdk", async (importOriginal) => {
-  const actual = await importOriginal() as Record<string, unknown>;
+vi.mock("@a5c-ai/babysitter-sdk", () => {
+  class BabysitterRuntimeError extends Error {
+    constructor(name: string, message: string, public details?: unknown) {
+      super(message);
+      this.name = name;
+    }
+  }
   return {
-    ...actual,
+    BabysitterRuntimeError,
+    ErrorCategory: {
+      Configuration: "configuration",
+      External: "external",
+      Runtime: "runtime",
+      Validation: "validation",
+    },
     checkCliAvailable: vi.fn().mockResolvedValue({ available: true, path: "/usr/bin/pi" }),
   };
 });
@@ -72,6 +91,8 @@ vi.mock("../../invoker/launch", () => ({
 import { invokeHarness } from "../../invoker";
 import { getAmuxClient } from "../amuxClientFactory";
 import { invokeViaAgentMux } from "../amuxBridge";
+import { handleHarnessCreateRun } from "../../internal/createRun";
+import { createAgentCoreSession } from "@a5c-ai/agent-core";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -167,21 +188,34 @@ describe("invokeHarness amux wiring", () => {
     expect(result.harness).toBe("pi");
   });
 
-  it("uses direct invocation for agent-core harness even when amux is available", async () => {
+  it("routes agent-core harness through create-run orchestration even when amux is available", async () => {
     const mockClient = createMockAmuxClient();
     vi.mocked(getAmuxClient).mockResolvedValue(mockClient);
 
     const result = await invokeHarness("agent-core", {
       prompt: "test prompt",
+      workspace: "/tmp/workspace",
+      model: "gpt-test",
     });
 
-    // "agent-core" is handled by agent-core in invokeHarnessDirect
     expect(getAmuxClient).not.toHaveBeenCalled();
     expect(invokeViaAgentMux).not.toHaveBeenCalled();
+    expect(createAgentCoreSession).not.toHaveBeenCalled();
+    expect(handleHarnessCreateRun).toHaveBeenCalledWith(expect.objectContaining({
+      invocationCommand: "invoke",
+      prompt: "test prompt",
+      harness: "agent-core",
+      workspace: "/tmp/workspace",
+      model: "gpt-test",
+      json: false,
+      verbose: false,
+      interactive: false,
+    }));
     expect(result.harness).toBe("agent-core");
+    expect(result.output).toBe("orchestrated-output");
   });
 
-  it("uses direct invocation for internal harness alias even when amux is available", async () => {
+  it("routes internal harness alias through create-run orchestration even when amux is available", async () => {
     const mockClient = createMockAmuxClient();
     vi.mocked(getAmuxClient).mockResolvedValue(mockClient);
 
@@ -191,7 +225,14 @@ describe("invokeHarness amux wiring", () => {
 
     expect(getAmuxClient).not.toHaveBeenCalled();
     expect(invokeViaAgentMux).not.toHaveBeenCalled();
+    expect(createAgentCoreSession).not.toHaveBeenCalled();
+    expect(handleHarnessCreateRun).toHaveBeenCalledWith(expect.objectContaining({
+      invocationCommand: "invoke",
+      prompt: "test prompt",
+      harness: "agent-core",
+    }));
     expect(result.harness).toBe("agent-core");
+    expect(result.output).toBe("orchestrated-output");
   });
 
   it("routes codex through amux", async () => {

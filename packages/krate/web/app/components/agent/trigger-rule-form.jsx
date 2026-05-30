@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { agentIdentityOptions } from '../../lib/agent-identity.js';
 
 const EVENT_TYPES = ['push', 'pull_request', 'issue', 'comment', 'schedule', 'webhook', 'manual'];
 const TASK_KINDS = ['diagnostic', 'repair', 'review', 'custom'];
@@ -10,13 +11,15 @@ const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '0.375rem',
 const selectStyle = { ...inputStyle, background: 'var(--surface)' };
 const fieldGroupStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' };
 
-export function TriggerRuleForm({ org, stacks = [] }) {
+export function TriggerRuleForm({ org, stacks = [], agents = [] }) {
   const [name, setName] = useState('');
   const [selectedSources, setSelectedSources] = useState([]);
-  const [stackRef, setStackRef] = useState('');
+  const [targetRef, setTargetRef] = useState('');
   const [taskKind, setTaskKind] = useState('diagnostic');
   const [repository, setRepository] = useState('');
   const [condition, setCondition] = useState('');
+  const targetOptions = agentIdentityOptions(agents, stacks);
+  const selectedTarget = targetOptions.find((option) => option.value === targetRef);
 
   const [status, setStatus] = useState('idle'); // idle | saving | success | error
   const [message, setMessage] = useState('');
@@ -31,9 +34,9 @@ export function TriggerRuleForm({ org, stacks = [] }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!name || !stackRef) {
+    if (!name || !targetRef) {
       setStatus('error');
-      setMessage(!name ? 'Name is required.' : 'Target stack is required.');
+      setMessage(!name ? 'Name is required.' : 'Agent target is required.');
       return;
     }
     setStatus('saving');
@@ -45,7 +48,7 @@ export function TriggerRuleForm({ org, stacks = [] }) {
       metadata: { name },
       spec: {
         sources: selectedSources,
-        agentStack: stackRef,
+        ...(selectedTarget?.type === 'agentDefinition' ? { agentDefinition: targetRef } : { agentStack: targetRef }),
         taskKind,
         ...(repository.trim() ? { repository: repository.trim() } : {}),
         ...(condition.trim() ? { condition: condition.trim() } : {}),
@@ -75,7 +78,7 @@ export function TriggerRuleForm({ org, stacks = [] }) {
   const buttonStyle = { padding: '8px 20px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600 };
   const primaryStyle = { ...buttonStyle, backgroundColor: '#2563eb', color: '#fff' };
   const disabledPrimaryStyle = { ...primaryStyle, opacity: 0.5, cursor: 'not-allowed' };
-  const canSubmit = name && stackRef && status !== 'saving';
+  const canSubmit = name && targetRef && status !== 'saving';
 
   return (
     <form onSubmit={handleSubmit}>
@@ -119,18 +122,18 @@ export function TriggerRuleForm({ org, stacks = [] }) {
           </div>
 
           <div>
-            <label htmlFor="trigger-stack" style={labelStyle}>Target stack <span aria-hidden="true" style={{ color: 'var(--danger)' }}>*</span></label>
+            <label htmlFor="trigger-stack" style={labelStyle}>Agent target <span aria-hidden="true" style={{ color: 'var(--danger)' }}>*</span></label>
             <select
               id="trigger-stack"
-              value={stackRef}
-              onChange={e => setStackRef(e.target.value)}
+              value={targetRef}
+              onChange={e => setTargetRef(e.target.value)}
               required
               aria-required="true"
               style={selectStyle}
             >
-              <option value="">Select a stack...</option>
-              {stacks.map(stack => (
-                <option key={stack} value={stack}>{stack}</option>
+              <option value="">Select an agent...</option>
+              {targetOptions.map(option => (
+                <option key={`${option.type}-${option.value}`} value={option.value}>{option.label}{option.hint ? ` - ${option.hint}` : ''}</option>
               ))}
             </select>
           </div>

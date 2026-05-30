@@ -26,7 +26,10 @@ const readmeDoc = read('packages/transport-mux/README.md');
 const architectureDoc = read('packages/transport-mux/architecture.md');
 const packageJson = JSON.parse(read('packages/transport-mux/package.json'));
 const packageEntrypoint = read('packages/transport-mux/src/index.ts');
-const launchCommand = read('packages/agent-mux/cli/src/commands/launch.ts');
+const launchCommand = [
+  read('packages/agent-mux/cli/src/commands/launch.ts'),
+  read('packages/agent-mux/launch/src/launch.ts'),
+].join('\n');
 
 const legacyPythonTests = countFiles('packages/agent-mux/amux-proxy/tests', '.py');
 const jsContractTests =

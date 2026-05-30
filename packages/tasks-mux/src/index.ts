@@ -129,6 +129,7 @@ export type {
 } from "./types.js";
 
 export {
+  TaskRouter,
   routeTask,
   routingHints,
   isHostDelegableRoute,
@@ -141,6 +142,12 @@ export type {
 } from "./router.js";
 
 export type {
+  Responder,
+  BaseResponder,
+  HumanResponder,
+  AgentResponder,
+  TrackerResponder,
+  InternalResponder,
   TaskRoutingHints,
   RoutedResponder,
 } from "./responders/types.js";

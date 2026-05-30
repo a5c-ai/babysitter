@@ -13,7 +13,26 @@ export const MCP_TOOLS = [
   { name: 'krate_snapshot', description: 'Get full organization snapshot', inputSchema: { type: 'object', properties: {} } },
   { name: 'krate_search', description: 'Search resources by query', inputSchema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] } },
   { name: 'krate_list_stacks', description: 'List agent stacks', inputSchema: { type: 'object', properties: {} } },
-  { name: 'krate_dispatch_agent', description: 'Dispatch an agent run', inputSchema: { type: 'object', properties: { stackRef: { type: 'string' }, input: { type: 'object' } }, required: ['stackRef'] } },
+  {
+    name: 'krate_dispatch_agent',
+    description: 'Dispatch an agent run from an AgentDefinition or legacy AgentStack',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        agentDefinition: { type: 'string' },
+        definitionRef: { type: 'string' },
+        stackRef: { type: 'string' },
+        agentStack: { type: 'string' },
+        input: { type: 'object' },
+      },
+      anyOf: [
+        { required: ['agentDefinition'] },
+        { required: ['definitionRef'] },
+        { required: ['stackRef'] },
+        { required: ['agentStack'] },
+      ],
+    },
+  },
   { name: 'krate_list_agents', description: 'List agent definitions enriched with persona profiles', inputSchema: { type: 'object', properties: {} } },
   { name: 'krate_get_agent_profile', description: 'Get a resolved agent definition profile', inputSchema: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] } },
   { name: 'krate_create_agent', description: 'Create an AgentPersona and AgentDefinition binding', inputSchema: { type: 'object', properties: { name: { type: 'string' }, org: { type: 'string' }, displayName: { type: 'string' }, stackRef: { type: 'string' }, personaSpec: { type: 'object' }, definitionSpec: { type: 'object' } }, required: ['name', 'org', 'displayName', 'stackRef'] } },
@@ -32,6 +51,13 @@ export const MCP_TOOLS = [
   { name: 'krate_join_meeting', description: 'Get a JWT and URL to join an active Jitsi meeting', inputSchema: { type: 'object', properties: { org: { type: 'string' }, meetingRef: { type: 'string' }, participantName: { type: 'string' }, participantRef: { type: 'string' } }, required: ['meetingRef'] } },
   { name: 'krate_list_meetings', description: 'List active and recent Jitsi meetings', inputSchema: { type: 'object', properties: { org: { type: 'string' }, status: { type: 'string', enum: ['active', 'ended', 'all'] } } } },
   { name: 'krate_invite_to_meeting', description: 'Invite a user or agent to an active Jitsi meeting', inputSchema: { type: 'object', properties: { org: { type: 'string' }, meetingRef: { type: 'string' }, participantType: { type: 'string', enum: ['user', 'agentStack'] }, participantRef: { type: 'string' }, role: { type: 'string' } }, required: ['meetingRef', 'participantType', 'participantRef'] } },
+  { name: 'krate_send_chat_message', description: 'Send a chat message to the current Jitsi meeting', inputSchema: { type: 'object', properties: { text: { type: 'string' }, meetingContext: { type: 'object' } }, required: ['text'] } },
+  { name: 'krate_get_meeting_transcript', description: 'Read the current Jitsi meeting transcript from the sidecar', inputSchema: { type: 'object', properties: { meetingContext: { type: 'object' } } } },
+  { name: 'krate_get_participant_list', description: 'Read the current Jitsi participant list from the sidecar', inputSchema: { type: 'object', properties: { meetingContext: { type: 'object' } } } },
+  { name: 'krate_raise_hand', description: 'Raise or lower the agent hand in the current Jitsi meeting', inputSchema: { type: 'object', properties: { raised: { type: 'boolean' }, meetingContext: { type: 'object' } } } },
+  { name: 'krate_share_screen', description: 'Share a URL or surface into the current Jitsi meeting', inputSchema: { type: 'object', properties: { url: { type: 'string' }, meetingContext: { type: 'object' } }, required: ['url'] } },
+  { name: 'krate_start_recording', description: 'Start recording the current Jitsi meeting', inputSchema: { type: 'object', properties: { meetingContext: { type: 'object' } } } },
+  { name: 'krate_react', description: 'Send a reaction to the current Jitsi meeting', inputSchema: { type: 'object', properties: { emoji: { type: 'string' }, meetingContext: { type: 'object' } }, required: ['emoji'] } },
 ];
 
 export const MCP_PROMPTS = [
@@ -372,11 +398,14 @@ async function executeTool(controller, toolName, args) {
     case 'krate_list_stacks':
       return controller.listResource('AgentStack');
 
-    case 'krate_dispatch_agent':
+    case 'krate_dispatch_agent': {
+      const agentDefinition = args.agentDefinition || args.definitionRef;
+      const agentStack = args.agentStack || args.stackRef;
       return controller.dispatchAgent({
-        agentStack: args.stackRef,
+        ...(agentDefinition ? { agentDefinition } : { agentStack }),
         ...args.input,
       });
+    }
 
     case 'krate_list_agents':
       return listAgents(controller);
@@ -472,11 +501,17 @@ async function executeTool(controller, toolName, args) {
         routeType: args.routeType,
       };
       if (args.routeType === 'internal') {
-        routeSpec.internal = { inferenceServiceRef: args.inferenceServiceRef || args.modelName, protocol: 'v2' };
+        routeSpec.inferenceServiceRef = args.inferenceServiceRef || args.modelName;
+        routeSpec.protocol = 'v2';
       } else {
-        routeSpec.external = { provider: args.provider || 'custom', endpoint: args.endpoint, model: args.modelId || args.modelName };
+        routeSpec.external = {
+          provider: args.provider || 'custom',
+          endpoint: args.endpoint,
+          modelId: args.modelId || args.modelName,
+          protocol: args.protocol || 'openai',
+        };
       }
-      return controller.applyResource({
+      return controller.applyModelRoute({
         apiVersion: 'krate.a5c.ai/v1alpha1',
         kind: 'KrateModelRoute',
         metadata: { name: args.name, namespace: orgNamespaceName(args.org) },
@@ -549,6 +584,12 @@ async function executeTool(controller, toolName, args) {
     }
 
     case 'krate_invite_to_meeting': {
+      if (args.meetingContext) {
+        return meetingToolCommand('invite_to_meeting', args, {
+          requireModerator: true,
+          payload: { participantType: args.participantType, participantRef: args.participantRef, role: args.role || 'participant' },
+        });
+      }
       const org = args.org || 'default';
       const result = await getOrgResource(controller, org, 'JitsiMeeting', args.meetingRef);
       const meeting = result.resource || result;
@@ -567,6 +608,27 @@ async function executeTool(controller, toolName, args) {
         },
       });
     }
+
+    case 'krate_send_chat_message':
+      return meetingToolCommand('send_chat', args, { requireChatWrite: true, payload: { text: args.text } });
+
+    case 'krate_get_meeting_transcript':
+      return meetingToolCommand('get_transcript', args);
+
+    case 'krate_get_participant_list':
+      return meetingToolCommand('get_participants', args);
+
+    case 'krate_raise_hand':
+      return meetingToolCommand(args.raised === false ? 'lower_hand' : 'raise_hand', args, { requireParticipant: true });
+
+    case 'krate_share_screen':
+      return meetingToolCommand('share_screen', args, { requireScreenshare: true, payload: { url: args.url } });
+
+    case 'krate_start_recording':
+      return meetingToolCommand('start_recording', args, { requireModerator: true });
+
+    case 'krate_react':
+      return meetingToolCommand('react', args, { payload: { emoji: args.emoji } });
 
     default:
       throw new Error(`Tool not implemented: ${toolName}`);
@@ -624,6 +686,49 @@ function createMeetingJoinPayload(meeting, args = {}) {
     jwt: `krate-jitsi.${encoded}.${signature}`,
     expiresAt: new Date(exp * 1000).toISOString(),
     expiresInSeconds: ttlMinutes * 60,
+  };
+}
+
+function resolveMeetingToolContext(args = {}) {
+  const context = args.meetingContext || {};
+  const capabilities = context.capabilities || {};
+  const role = context.role || process.env.JITSI_PARTICIPANT_ROLE || 'observer';
+  return {
+    active: context.active !== false && Boolean(context.roomId || process.env.JITSI_ROOM_ID || process.env.JITSI_MEETING_ACTIVE === 'true'),
+    roomId: context.roomId || process.env.JITSI_ROOM_ID || '',
+    socketPath: context.socketPath || process.env.JITSI_AGENT_SOCKET || process.env.AGENT_SOCKET_PATH || '/tmp/jitsi-agent.sock',
+    role,
+    capabilities: {
+      chat: capabilities.chat || process.env.JITSI_CHAT_MODE || 'read',
+      audio: capabilities.audio || process.env.JITSI_AUDIO_MODE || 'listen',
+      screenshare: capabilities.screenshare || process.env.JITSI_SCREENSHARE_MODE || 'none',
+    },
+  };
+}
+
+function meetingToolCommand(action, args = {}, gates = {}) {
+  const context = resolveMeetingToolContext(args);
+  if (!context.active) throw new Error('No active Jitsi meeting context is available');
+  if (gates.requireChatWrite && context.capabilities.chat !== 'readwrite') {
+    throw new Error('Jitsi chat is not writable for this agent');
+  }
+  if (gates.requireParticipant && !['participant', 'moderator'].includes(context.role)) {
+    throw new Error(`Jitsi role ${context.role} cannot perform ${action}`);
+  }
+  if (gates.requireScreenshare && context.capabilities.screenshare !== 'share') {
+    throw new Error('Jitsi screenshare is not enabled for this agent');
+  }
+  if (gates.requireModerator && context.role !== 'moderator') {
+    throw new Error(`Jitsi role ${context.role} cannot perform ${action}`);
+  }
+  return {
+    meetingRef: args.meetingRef || context.roomId,
+    roomId: context.roomId,
+    socketPath: context.socketPath,
+    command: {
+      action,
+      ...(gates.payload || {}),
+    },
   };
 }
 

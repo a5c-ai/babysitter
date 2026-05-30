@@ -32,6 +32,10 @@ type TasksMuxModuleLike = {
   isHostDelegableRoute?: (route: unknown) => boolean;
 };
 
+async function importOptionalModule(specifier: string): Promise<unknown> {
+  return import(specifier);
+}
+
 // ---------------------------------------------------------------------------
 // Assistant state parsing
 // ---------------------------------------------------------------------------
@@ -239,19 +243,49 @@ async function isHostDelegableEffect(
   if (record.kind && record.kind !== "agent" && record.kind !== "breakpoint") {
     return true;
   }
+  let fallbackDelegable = record.kind !== "breakpoint";
   try {
     const taskDef = await readTaskDefinition(runDir, record.effectId);
     if (!taskDef) return record.kind !== "breakpoint";
-    const mux = await import("@a5c-ai/tasks-mux") as TasksMuxModuleLike;
+    fallbackDelegable = inferHostDelegableFromTaskDef(taskDef, record.kind);
+    const mux = await importOptionalModule("@a5c-ai/tasks-mux") as TasksMuxModuleLike;
     const routeTask = mux.routeTask;
     const isHostDelegableRoute = mux.isHostDelegableRoute;
     if (typeof routeTask !== "function" || typeof isHostDelegableRoute !== "function") {
-      return record.kind !== "breakpoint";
+      return fallbackDelegable;
     }
-    return isHostDelegableRoute(routeTask(taskDef));
+    const decision = routeTask(taskDef) as Record<string, unknown>;
+    if (decision?.unavailable) return false;
+    return isHostDelegableRoute(decision);
   } catch {
-    return record.kind !== "breakpoint";
+    return fallbackDelegable;
   }
+}
+
+function inferHostDelegableFromTaskDef(taskDef: Record<string, unknown>, recordKind?: string): boolean {
+  if (recordKind === "breakpoint" || taskDef.kind === "breakpoint") {
+    return false;
+  }
+  const agent = asRecord(taskDef.agent);
+  const metadata = asRecord(taskDef.metadata);
+  const responderType = asString(agent?.responderType) ?? asString(metadata?.responderType);
+  if (responderType === "tracker") {
+    return false;
+  }
+  if ((responderType === "agent" || agent?.external === true || metadata?.external === true) && agent?.fallbackToInternal !== true) {
+    return false;
+  }
+  return true;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === "string" && value ? value : undefined;
 }
 
 // ---------------------------------------------------------------------------

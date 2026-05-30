@@ -79,7 +79,7 @@ export const POST = withAuth(async (request, { params }) => {
         enabled: body.enabled !== false,
       },
     };
-    const result = await controller.applyResource(resource);
+    const result = await controller.applyModelRoute(resource);
     clearSnapshotCache();
     invalidateApiCache();
     return Response.json(result, { status: 201, headers: { 'Cache-Control': 'no-store' } });

@@ -22,6 +22,7 @@ export function createJitsiSyncController(options = {}) {
   const meetings = new Map();
   const recordings = new Map();
   const watermarks = new Map();
+  const processedDeliveries = new Set();
 
   async function persist(resource) {
     if (typeof persistFn === 'function') await persistFn(resource);
@@ -34,6 +35,13 @@ export function createJitsiSyncController(options = {}) {
 
   function meetingName(roomId, state = {}) {
     return state.meetingRef || state.name || roomId;
+  }
+
+  function rememberDelivery(event = {}) {
+    if (!event.deliveryId) return false;
+    if (processedDeliveries.has(event.deliveryId)) return true;
+    processedDeliveries.add(event.deliveryId);
+    return false;
   }
 
   return {
@@ -56,6 +64,7 @@ export function createJitsiSyncController(options = {}) {
     },
 
     async syncRoom(roomId, jitsiState = {}) {
+      if (rememberDelivery(jitsiState)) return meetings.get(roomId) || null;
       const eventType = canonicalType(jitsiState.eventType || jitsiState.type || 'room-created');
       const key = roomId;
       const existing = meetings.get(key);
@@ -91,6 +100,7 @@ export function createJitsiSyncController(options = {}) {
     },
 
     async syncParticipant(roomId, participantEvent = {}) {
+      if (rememberDelivery(participantEvent)) return meetings.get(roomId) || null;
       const eventType = canonicalType(participantEvent.eventType || participantEvent.type || 'participant-joined');
       const meeting = meetings.get(roomId) || await this.syncRoom(roomId, participantEvent);
       const participant = {
@@ -123,6 +133,7 @@ export function createJitsiSyncController(options = {}) {
     },
 
     async syncRecording(roomId, recordingEvent = {}) {
+      if (rememberDelivery(recordingEvent)) return recordings.get(recordingEvent.recordingId || `rec-${roomId}`) || null;
       const eventType = canonicalType(recordingEvent.eventType || recordingEvent.type || 'recording-started');
       const recordingId = recordingEvent.recordingId || `rec-${roomId}`;
       const existing = recordings.get(recordingId);
@@ -161,15 +172,20 @@ export function createJitsiSyncController(options = {}) {
       return resource;
     },
 
-    updateWatermark(providerRef, timestamp) {
+    async updateWatermark(providerRef, timestamp, options = {}) {
       const current = watermarks.get(providerRef);
       if (!current || timestamp > current) {
         watermarks.set(providerRef, timestamp);
-        persist({
+        await persist({
           apiVersion: 'krate.a5c.ai/v1alpha1',
           kind: 'ExternalSyncState',
-          metadata: { name: `jitsi-watermark-${providerRef}`, namespace: 'default', labels: {}, annotations: {} },
-          spec: { organizationRef: 'default', providerRef, resourceRef: 'jitsi', phase: 'Synced', watermark: timestamp },
+          metadata: {
+            name: `jitsi-watermark-${providerRef}`,
+            namespace: options.namespace || `krate-org-${options.organizationRef || 'default'}`,
+            labels: {},
+            annotations: {},
+          },
+          spec: { organizationRef: options.organizationRef || 'default', providerRef, resourceRef: 'jitsi', phase: 'Synced', watermark: timestamp },
           status: { phase: 'Synced', lastSuccessfulSyncAt: isoNow(now) },
         });
       }

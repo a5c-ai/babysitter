@@ -16,10 +16,11 @@ export async function AgentsDashboardPage({ org = null } = {}) {
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { stacks: { count: 0 }, runs: { count: 0, active: [] }, rules: { count: 0 }, approvals: { count: 0, pending: [] } };
   const agentProfiles = buildAgentIdentityProfiles(ui.model);
+  const meetings = agentView.meetings?.active || (ui.model.resources || []).find((resource) => resource.kind === 'JitsiMeeting')?.items || [];
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent orchestration" title="Agent stacks, runs, and rules" text="View agent stacks, dispatch runs, trigger rules, and pending approvals from one place." actions={[['/agents/stacks', 'View stacks'], ['/agents/runs', 'View runs']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
-      <DispatchButton org={activeOrg} stacks={(agentView.stacks?.items || []).map(s => s.metadata?.name).filter(Boolean)} agents={agentProfiles} />
+      <DispatchButton org={activeOrg} stacks={agentView.stacks?.items || []} agents={agentProfiles} meetings={meetings} />
       <LiveUpdates org={activeOrg} />
     </div>
     <section className="routeGrid two">

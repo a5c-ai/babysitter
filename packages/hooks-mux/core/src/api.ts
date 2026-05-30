@@ -10,7 +10,7 @@ import type { AdapterCapabilities } from './types/adapter';
 import type { HookPlanEntry } from './types/plan';
 import type { RunPlanOptions } from './normalizer/runner';
 import { mergeResults, type MergedExecutionResult } from './merge-engine';
-import { evaluateWhen } from './normalizer/plan-resolver';
+import { runPlan } from './normalizer/runner';
 
 /**
  * Implementation callbacks provided by an adapter.
@@ -79,32 +79,7 @@ export async function runNormalized(
       return a.id.localeCompare(b.id);
     });
 
-  const results: UnifiedHookResult[] = [];
-
-  for (const entry of matchingEntries) {
-    if (!evaluateWhen(entry.when, event) || !evaluateWhen(entry.if, event)) {
-      continue;
-    }
-
-    const { runHandler } = await import('./normalizer/runner');
-    try {
-      const result = await runHandler(
-        event,
-        entry.handler,
-        entry.timeoutMs ?? options?.handlerTimeoutMs,
-        options?.capabilities,
-        {
-          executors: options?.executors,
-          currentDepth: options?.currentDepth,
-          shell: entry.shell ?? entry.handler.shell,
-        },
-      );
-      results.push(result);
-    } catch (_err) {
-      // Fail-open by default in programmatic API
-      results.push({ decision: 'noop', reason: 'handler error (fail-open)' });
-    }
-  }
+  const results: UnifiedHookResult[] = await runPlan(event, matchingEntries, options);
 
   return mergeResults(results);
 }

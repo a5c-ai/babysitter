@@ -12,6 +12,12 @@ vi.mock("node:child_process", () => ({
 
 vi.mock("@a5c-ai/babysitter-sdk", () => ({
   nextUlid: vi.fn(() => `background-task-id-${++backgroundTaskCounter}`),
+  createScopedRuntimeConfigState: vi.fn(() => ({
+    get: vi.fn(() => undefined),
+    set: vi.fn(),
+    reset: vi.fn(),
+    snapshot: vi.fn(() => ({})),
+  })),
   CONFIG_ENV_VARS: {
     RUNS_DIR: "BABYSITTER_RUNS_DIR",
     MAX_ITERATIONS: "BABYSITTER_MAX_ITERATIONS",

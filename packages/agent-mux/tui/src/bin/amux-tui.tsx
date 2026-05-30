@@ -3,7 +3,7 @@ import React from 'react';
 import { render } from 'ink';
 import { createClient } from '@a5c-ai/agent-comm-mux';
 import { registerBuiltInAdapters } from '@a5c-ai/agent-mux-cli/bootstrap';
-import { reconfigureLogger } from '@a5c-ai/agent-mux-observability';
+import { reconfigureLogger, setObservabilityMode } from '@a5c-ai/agent-mux-observability';
 import { App, builtinPlugins, defaultExternalPluginsDir, loadExternalPlugins } from '../index.js';
 import { runWithArgs } from './runtime.js';
 
@@ -22,14 +22,14 @@ function initialViewId(): string | undefined {
   return value && value.trim() ? value.trim() : undefined;
 }
 
-function configureLoggingFromEnv(): void {
+export function configureLoggingFromEnv(): void {
   const logLevel = process.env.AMUX_LOG_LEVEL?.trim();
   const logFile = process.env.AMUX_LOG_FILE?.trim();
   if (!logFile) {
     return;
   }
   if (!process.env.AMUX_OBSERVABILITY_MODE) {
-    process.env.AMUX_OBSERVABILITY_MODE = 'full';
+    setObservabilityMode('full');
   }
   reconfigureLogger({
     level: logLevel,

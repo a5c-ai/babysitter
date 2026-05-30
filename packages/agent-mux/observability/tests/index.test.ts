@@ -41,4 +41,37 @@ describe('Observability Integration', () => {
     expect((loggerFull as any).name).toBe('real-logger');
     expect((telemetryFull as any).name).toBe('real-telemetry');
   });
+
+  it('supports process-local mode overrides without mutating env', async () => {
+    vi.doMock('../src/logger.js', () => ({
+      logger: { name: 'real-logger' },
+      createLogger: () => ({ name: 'real-logger' }),
+      createComponentLogger: () => ({ name: 'real-logger' }),
+    }));
+    vi.doMock('../src/logger-simple.js', () => ({
+      logger: { name: 'simple-logger' },
+      createSimpleLogger: () => ({ name: 'simple-logger' }),
+      createComponentLogger: () => ({ name: 'simple-logger' }),
+    }));
+    vi.doMock('../src/telemetry.js', () => ({
+      telemetry: { name: 'real-telemetry' },
+      initializeTelemetry: vi.fn(),
+      shutdownTelemetry: vi.fn(),
+    }));
+    vi.doMock('../src/telemetry-simple.js', () => ({
+      telemetry: { name: 'simple-telemetry' },
+      initializeTelemetry: vi.fn(),
+      shutdownTelemetry: vi.fn(),
+    }));
+
+    delete process.env.AMUX_OBSERVABILITY_MODE;
+
+    const observability = await import('../src/index.js');
+    expect((observability.logger as any).name).toBe('simple-logger');
+
+    observability.setObservabilityMode('full');
+
+    expect(process.env.AMUX_OBSERVABILITY_MODE).toBeUndefined();
+    expect((observability.logger as any).name).toBe('real-logger');
+  });
 });

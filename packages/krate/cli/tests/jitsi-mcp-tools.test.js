@@ -47,16 +47,31 @@ function parseToolResult(resp) {
   return JSON.parse(resp.result.content[0].text);
 }
 
-test('MCP_TOOLS includes the four Jitsi meeting tools with required schemas', () => {
-  assert.equal(MCP_TOOLS.length, 26);
+test('MCP_TOOLS includes Jitsi meeting management and in-meeting tools with required schemas', () => {
+  assert.equal(MCP_TOOLS.length, 33);
   const byName = new Map(MCP_TOOLS.map((tool) => [tool.name, tool]));
-  for (const name of ['krate_create_meeting', 'krate_join_meeting', 'krate_list_meetings', 'krate_invite_to_meeting']) {
+  for (const name of [
+    'krate_create_meeting',
+    'krate_join_meeting',
+    'krate_list_meetings',
+    'krate_invite_to_meeting',
+    'krate_send_chat_message',
+    'krate_get_meeting_transcript',
+    'krate_get_participant_list',
+    'krate_raise_hand',
+    'krate_share_screen',
+    'krate_start_recording',
+    'krate_react',
+  ]) {
     assert.ok(byName.has(name), `${name} must be registered`);
     assert.equal(byName.get(name).inputSchema.type, 'object');
   }
   assert.deepEqual(byName.get('krate_create_meeting').inputSchema.required, ['displayName']);
   assert.deepEqual(byName.get('krate_join_meeting').inputSchema.required, ['meetingRef']);
   assert.deepEqual(byName.get('krate_invite_to_meeting').inputSchema.required, ['meetingRef', 'participantType', 'participantRef']);
+  assert.deepEqual(byName.get('krate_send_chat_message').inputSchema.required, ['text']);
+  assert.deepEqual(byName.get('krate_share_screen').inputSchema.required, ['url']);
+  assert.deepEqual(byName.get('krate_react').inputSchema.required, ['emoji']);
 });
 
 test('krate_create_meeting creates an org-scoped JitsiMeeting resource', async () => {
@@ -129,4 +144,33 @@ test('krate_invite_to_meeting appends participant invites through resource apply
 
   assert.equal(result.operation, 'apply');
   assert.deepEqual(result.resource.spec.participants.invited, [{ type: 'user', ref: 'alice', role: 'participant' }]);
+});
+
+test('in-meeting MCP tools return sidecar socket commands and enforce role/capability gates', async () => {
+  const server = createMcpServer({ controller: createMockController() });
+  const meetingContext = {
+    roomId: 'daily-room',
+    role: 'participant',
+    capabilities: { chat: 'readwrite', audio: 'listen', screenshare: 'share' },
+  };
+
+  const chat = parseToolResult(await server.handleMessage(rpc('tools/call', {
+    name: 'krate_send_chat_message',
+    arguments: { text: 'hello', meetingContext },
+  })));
+  assert.equal(chat.socketPath, '/tmp/jitsi-agent.sock');
+  assert.deepEqual(chat.command, { action: 'send_chat', text: 'hello' });
+
+  const hand = parseToolResult(await server.handleMessage(rpc('tools/call', {
+    name: 'krate_raise_hand',
+    arguments: { meetingContext },
+  })));
+  assert.equal(hand.command.action, 'raise_hand');
+
+  const denied = await server.handleMessage(rpc('tools/call', {
+    name: 'krate_start_recording',
+    arguments: { meetingContext },
+  }));
+  assert.equal(denied.result.isError, true);
+  assert.match(JSON.parse(denied.result.content[0].text).error, /cannot perform start_recording/);
 });

@@ -85,6 +85,38 @@ describe('Handler timeout enforcement', () => {
       expect(results[0].metadata?.errorCode).toBe('HANDLER_TIMEOUT');
     }, 10000);
 
+    it('should preserve statusMessage metadata when a handler fails open', async () => {
+      const event = makeEvent();
+
+      const results = await runPlan(
+        event,
+        [
+          {
+            id: 'slow-status',
+            pluginId: 'plugin-slow',
+            phase: 'tool.before',
+            priority: 1,
+            timeoutMs: 500,
+            statusMessage: 'Checking policy',
+            handler: {
+              source: 'node -e "setTimeout(() => console.log(JSON.stringify({decision:\'allow\'})), 5000)"',
+              handler: 'slow-handler',
+              priority: 1,
+            },
+          },
+        ],
+        { defaultPolicy: 'fail-open' },
+      );
+
+      expect(results).toHaveLength(1);
+      expect(results[0].metadata).toMatchObject({
+        error: true,
+        errorCode: 'HANDLER_TIMEOUT',
+        handlerId: 'slow-status',
+        statusMessage: 'Checking policy',
+      });
+    }, 10000);
+
     it('should propagate HandlerTimeoutError under fail-closed policy', async () => {
       const event = makeEvent();
 

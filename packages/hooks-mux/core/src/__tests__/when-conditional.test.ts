@@ -120,6 +120,27 @@ describe('evaluateWhen', () => {
     expect(evaluateWhen({ 'payload.tool_name': '/^mcp__.*__write_file$/' }, event)).toBe(false);
   });
 
+  it('should match Claude-style bare regex string conditions', () => {
+    const event = makeEvent({ payload: { tool_name: 'mcp__filesystem__read_file' } });
+
+    expect(evaluateWhen({ 'payload.tool_name': 'mcp__.*' }, event)).toBe(true);
+    expect(evaluateWhen({ 'payload.tool_name': 'mcp__.*__write_file$' }, event)).toBe(false);
+  });
+
+  it('should preserve exact matching before bare regex fallback', () => {
+    const event = makeEvent({ payload: { tool_name: 'toolXbefore' } });
+
+    expect(evaluateWhen({ 'payload.tool_name': 'tool.before' }, event)).toBe(false);
+  });
+
+  it('should support bare regex negation conditions', () => {
+    const safe = makeEvent({ payload: { tool_input: { command: 'ls -la' } } });
+    const dangerous = makeEvent({ payload: { tool_input: { command: 'rm -rf /tmp/example' } } });
+
+    expect(evaluateWhen({ 'payload.tool_input.command': '^(?!rm\\b).*' }, safe)).toBe(true);
+    expect(evaluateWhen({ 'payload.tool_input.command': '^(?!rm\\b).*' }, dangerous)).toBe(false);
+  });
+
   it('should support negated string conditions', () => {
     const event = makeEvent({ payload: { tool_name: 'Read' } });
 

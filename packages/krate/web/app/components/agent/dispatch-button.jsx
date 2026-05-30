@@ -2,13 +2,20 @@
 import { useState } from 'react';
 import { agentIdentityOptions } from '../../lib/agent-identity.js';
 
-export function DispatchButton({ org, stacks = [], agents = [] }) {
+export function DispatchButton({ org, stacks = [], agents = [], meetings = [] }) {
   const [status, setStatus] = useState('idle');
   const [selectedTarget, setSelectedTarget] = useState('');
+  const [meetingRef, setMeetingRef] = useState('');
   const [repository, setRepository] = useState('');
   const [message, setMessage] = useState('');
   const options = agentIdentityOptions(agents, stacks);
   const selectedOption = options.find((option) => option.value === selectedTarget);
+  const selectedStackName = selectedOption?.stackRef || selectedOption?.value;
+  const selectedStack = (stacks || []).find((stack) => (
+    typeof stack !== 'string' && stack.metadata?.name === selectedStackName
+  )) || (typeof selectedOption?.stack === 'object' ? selectedOption.stack : null);
+  const canJoinMeeting = selectedStack?.spec?.jitsiCapability === true;
+  const activeMeetings = (meetings || []).filter((meeting) => meeting.status?.phase === 'Active');
 
   async function handleDispatch() {
     if (!selectedTarget) return;
@@ -19,6 +26,7 @@ export function DispatchButton({ org, stacks = [], agents = [] }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...(selectedOption?.type === 'agentDefinition' ? { agentDefinition: selectedTarget } : { agentStack: selectedTarget }),
+          ...(canJoinMeeting && meetingRef ? { meetingRef } : {}),
           repository: repository || 'default',
           ref: 'main',
           taskKind: 'diagnostic',
@@ -51,14 +59,21 @@ export function DispatchButton({ org, stacks = [], agents = [] }) {
     return (
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 0', flexWrap: 'wrap' }}>
         <label htmlFor="dispatch-stack-select" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Agent stack</label>
-        <select id="dispatch-stack-select" value={selectedTarget} onChange={e => setSelectedTarget(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }} aria-label="Select agent persona or stack">
+        <select id="dispatch-stack-select" value={selectedTarget} onChange={e => { setSelectedTarget(e.target.value); setMeetingRef(''); }} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }} aria-label="Select agent persona or stack">
           <option value="">Select agent...</option>
           {options.map(option => <option key={`${option.type}-${option.value}`} value={option.value}>{option.label}{option.hint ? ` - ${option.hint}` : ''}</option>)}
         </select>
+        {canJoinMeeting ? <>
+          <label htmlFor="dispatch-meeting-select" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Meeting</label>
+          <select id="dispatch-meeting-select" value={meetingRef} onChange={e => setMeetingRef(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13 }} aria-label="Meeting">
+            <option value="">No meeting</option>
+            {activeMeetings.map(meeting => <option key={meeting.metadata?.name || meeting.spec?.roomId} value={meeting.metadata?.name || meeting.spec?.roomId}>{meeting.spec?.displayName || meeting.metadata?.name || meeting.spec?.roomId}</option>)}
+          </select>
+        </> : null}
         <label htmlFor="dispatch-repo-input" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Repository</label>
         <input id="dispatch-repo-input" placeholder="Repository (optional)" value={repository} onChange={e => setRepository(e.target.value)} style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 13, width: 180 }} aria-label="Repository (optional)" />
         <button onClick={handleDispatch} disabled={!selectedTarget} aria-label="Launch dispatch" style={{ ...primaryStyle, opacity: selectedTarget ? 1 : 0.5 }}>Launch</button>
-        <button onClick={() => { setStatus('idle'); setSelectedTarget(''); setRepository(''); }} aria-label="Cancel dispatch" style={secondaryStyle}>Cancel</button>
+        <button onClick={() => { setStatus('idle'); setSelectedTarget(''); setMeetingRef(''); setRepository(''); }} aria-label="Cancel dispatch" style={secondaryStyle}>Cancel</button>
       </div>
     );
   }

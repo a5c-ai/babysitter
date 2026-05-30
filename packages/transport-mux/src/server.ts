@@ -513,6 +513,14 @@ function injectPassthroughProviderAuth(
   }
 }
 
+function redactPassthroughInternalHeaders(headers: Headers): void {
+  for (const key of Array.from(headers.keys())) {
+    if (key.toLowerCase().startsWith('x-babysitter-')) {
+      headers.delete(key);
+    }
+  }
+}
+
 async function proxyUpstream(req: Request, config: ProxyConfig, forwardedPath?: string): Promise<Response> {
   const apiBase = resolvePassthroughApiBase(config);
   if (!apiBase) {
@@ -530,6 +538,7 @@ async function proxyUpstream(req: Request, config: ProxyConfig, forwardedPath?: 
   headers.delete('host');
   headers.delete('x-api-key');
   headers.delete('authorization');
+  redactPassthroughInternalHeaders(headers);
 
   injectPassthroughProviderAuth(config, headers);
 

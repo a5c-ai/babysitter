@@ -1157,11 +1157,27 @@ components:
 
     DispatchInput:
       type: object
-      required: [stackRef]
+      anyOf:
+        - required: [agentDefinition]
+        - required: [definitionRef]
+        - required: [stackRef]
+        - required: [agentStack]
       properties:
+        agentDefinition:
+          type: string
+          description: Name of the AgentDefinition to dispatch
+          example: aria-reviewer
+        definitionRef:
+          type: string
+          description: Alias for agentDefinition
+          example: aria-reviewer
         stackRef:
           type: string
-          description: Name of the AgentStack to dispatch
+          description: Name of the legacy AgentStack to dispatch
+          example: claude-code-stack
+        agentStack:
+          type: string
+          description: Alias for stackRef
           example: claude-code-stack
         repository:
           type: string

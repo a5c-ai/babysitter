@@ -80,18 +80,33 @@ test('Jitsi sync controller normalizes room, participant, and recording events',
 
   const ended = await controller.syncRoom('daily-default', { eventType: 'room-destroyed', organizationRef: 'default' });
   assert.equal(ended.status.phase, 'Ended');
+  const duplicate = await controller.syncParticipant('daily-default', {
+    eventType: 'participant-joined',
+    deliveryId: 'delivery-1',
+    participant: { id: 'bob', name: 'Bob', type: 'user' },
+    organizationRef: 'default',
+  });
+  const duplicateAgain = await controller.syncParticipant('daily-default', {
+    eventType: 'participant-joined',
+    deliveryId: 'delivery-1',
+    participant: { id: 'charlie', name: 'Charlie', type: 'user' },
+    organizationRef: 'default',
+  });
+  assert.deepEqual(duplicateAgain.status.participants.current, duplicate.status.participants.current);
   assert.ok(persisted.some((resource) => resource.kind === 'JitsiMeeting'));
   assert.ok(persisted.some((resource) => resource.kind === 'JitsiRecording'));
 });
 
-test('Jitsi sync controller maintains monotonic provider watermarks', () => {
+test('Jitsi sync controller maintains monotonic org-scoped provider watermarks', async () => {
   const persisted = [];
   const controller = createJitsiSyncController({ persistFn: (resource) => persisted.push(resource) });
 
-  controller.updateWatermark('jitsi-prod', '2026-05-30T12:00:00Z');
-  controller.updateWatermark('jitsi-prod', '2026-05-30T11:00:00Z');
-  controller.updateWatermark('jitsi-prod', '2026-05-30T12:05:00Z');
+  await controller.updateWatermark('jitsi-prod', '2026-05-30T12:00:00Z', { organizationRef: 'default' });
+  await controller.updateWatermark('jitsi-prod', '2026-05-30T11:00:00Z', { organizationRef: 'default' });
+  await controller.updateWatermark('jitsi-prod', '2026-05-30T12:05:00Z', { organizationRef: 'default' });
 
   assert.equal(controller.getWatermark('jitsi-prod'), '2026-05-30T12:05:00Z');
   assert.equal(persisted.filter((resource) => resource.kind === 'ExternalSyncState').length, 2);
+  assert.equal(persisted.at(-1).metadata.namespace, 'krate-org-default');
+  assert.equal(persisted.at(-1).spec.organizationRef, 'default');
 });

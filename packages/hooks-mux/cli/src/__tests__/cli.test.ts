@@ -381,6 +381,56 @@ describe('CLI Commands', () => {
         stdout.restore();
       }
     });
+
+    it('forwards hook runtime config to explicit handlers and runPlan', async () => {
+      const { invokeCommand } = await import('../cli/commands/invoke');
+      const stdout = captureStdout();
+      const planEntry = {
+        id: 'explicit-0',
+        pluginId: 'command:handler.js',
+        phase: 'session.start',
+        priority: 1000,
+        handler: { source: 'handler.js', handler: 'runHook', shell: '/bin/bash' },
+      };
+
+      mockResolveHookPlan.mockReturnValue([planEntry]);
+
+      try {
+        await (invokeCommand.handler as Function)({
+          adapter: 'claude',
+          handler: ['handler.js:runHook'],
+          shell: '/bin/bash',
+          'disable-all-hooks': true,
+          'handler-timeout-ms': 1234,
+          'bootstrap-only': false,
+          json: true,
+          _: [],
+          $0: 'a5c-hooks-mux',
+        });
+
+        expect(mockResolveHookPlan).toHaveBeenCalledWith({
+          phase: 'session.start',
+          handlers: [
+            {
+              source: 'handler.js',
+              handler: 'runHook',
+              shell: '/bin/bash',
+            },
+          ],
+        });
+        expect(mockRunPlan).toHaveBeenCalledWith(
+          expect.any(Object),
+          [planEntry],
+          expect.objectContaining({
+            capabilities: expect.objectContaining({ name: 'claude' }),
+            disableAllHooks: true,
+            handlerTimeoutMs: 1234,
+          }),
+        );
+      } finally {
+        stdout.restore();
+      }
+    });
   });
 
   describe('bootstrap', () => {

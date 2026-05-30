@@ -234,6 +234,22 @@ async function handleHarnessInvoke(parsed: HarnessParsedArgs): Promise<number> {
     return 1;
   }
   const normalizedHarnessName = normalizeBuiltInHarnessName(harnessName);
+  if (normalizedHarnessName === "agent-core") {
+    return await handleHarnessCreateRun({
+      invocationCommand: parsed.command,
+      prompt: parsed.prompt,
+      harness: "agent-core",
+      workspace: parsed.workspace,
+      model: parsed.model,
+      maxIterations: parsed.maxIterations,
+      runsDir: parsed.runsDir,
+      json: parsed.json,
+      verbose: parsed.verbose,
+      interactive: false,
+      outputMode: parsed.outputFormat === "amux-events" ? "amux-events" : undefined,
+    });
+  }
+
   const result = await invokeHarness(normalizedHarnessName, {
     prompt: parsed.prompt,
     workspace: parsed.workspace,

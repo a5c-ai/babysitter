@@ -76,21 +76,26 @@ function matchesStringExpected(actual: unknown, expected: string): boolean {
   if (actualString == null) {
     return false;
   }
+
+  if (actual === expected) {
+    return true;
+  }
+
   const regex = parseRegexMatcher(expected);
   if (regex) {
     return regex.test(actualString);
   }
 
   if (expected.includes('|')) {
-    return expected.split('|').some((part) => actualString === part);
+    return expected.split('|').some((part) => matchesStringExpected(actual, part));
   }
 
-  return actual === expected;
+  return false;
 }
 
 function parseRegexMatcher(expected: string): RegExp | null {
   if (!expected.startsWith('/') || expected.length < 2) {
-    return null;
+    return parseBareRegexMatcher(expected);
   }
 
   const lastSlash = expected.lastIndexOf('/');
@@ -105,6 +110,28 @@ function parseRegexMatcher(expected: string): RegExp | null {
   } catch {
     return null;
   }
+}
+
+function parseBareRegexMatcher(expected: string): RegExp | null {
+  if (!looksLikeBareRegex(expected)) {
+    return null;
+  }
+
+  try {
+    return new RegExp(expected);
+  } catch {
+    return null;
+  }
+}
+
+function looksLikeBareRegex(expected: string): boolean {
+  return (
+    expected.includes('.*') ||
+    expected.startsWith('^') ||
+    expected.endsWith('$') ||
+    /\\[dDsSwWbB]/.test(expected) ||
+    /[()[{+?]/.test(expected)
+  );
 }
 
 /**

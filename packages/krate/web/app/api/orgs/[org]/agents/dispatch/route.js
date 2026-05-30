@@ -21,6 +21,7 @@ export const POST = withAuth(async (request, { params }) => {
       ...(agentDefinition ? { agentDefinition } : { agentStack }),
       repository: body.repository || 'default',
       ref: body.ref || 'main',
+      meetingRef: body.meetingRef || undefined,
       taskKind: body.taskKind || 'diagnostic',
       actor: body.actor || 'owner',
       namespace,

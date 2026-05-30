@@ -717,6 +717,7 @@ export class ExternalTrackerBackend implements BreakpointBackend {
       type: "tracker" as const,
       name: id,
       title: `${this.config.provider} tracker responder`,
+      capabilities: ["tracking", "issue", this.config.provider],
       domains: [],
       tags: [this.config.provider, "tracker"],
       availability: true,

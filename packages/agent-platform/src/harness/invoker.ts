@@ -2,8 +2,9 @@
  * Harness invoker module.
  *
  * External harnesses are routed through agent-mux exclusively.
- * Only Pi and the "agent-core" programmatic harness use direct invocation
- * (Pi via CLI subprocess, agent-core in-process).
+ * Pi uses direct CLI subprocess invocation. The "agent-core" programmatic
+ * harness routes through agent-platform create-run orchestration so the full
+ * internal tool stack is available.
  */
 
 import { execFile } from "node:child_process";
@@ -13,7 +14,6 @@ import {
   ErrorCategory,
 } from "@a5c-ai/babysitter-sdk";
 import type { HarnessInvokeOptions, HarnessInvokeResult } from "./types";
-import { createAgentCoreSession } from "@a5c-ai/agent-core";
 import {
   buildLaunchSpec,
   type HarnessCliSpec,
@@ -112,8 +112,8 @@ const DEFAULT_TIMEOUT_MS = 900_000;
  * is installed and the harness has an amux adapter mapping). When agent-mux
  * is unavailable, it falls back to direct child-process invocation.
  *
- * Pi / agent-core harnesses always use agent-core directly and are never
- * routed through agent-mux.
+ * Pi uses direct invocation and agent-core uses create-run orchestration;
+ * neither is routed through agent-mux.
  *
  * @throws {BabysitterRuntimeError} if the harness is unknown or the CLI is
  *   not installed.
@@ -123,7 +123,7 @@ export async function invokeHarness(
   options: HarnessInvokeOptions,
 ): Promise<HarnessInvokeResult> {
   const harnessName = normalizeBuiltInHarnessName(name);
-  // Pi / agent-core always use agent-core directly
+  // Pi remains a direct subprocess; agent-core routes through internal orchestration.
   if (harnessName === "pi" || harnessName === "agent-core") {
     return invokeHarnessDirect(harnessName, options);
   }
@@ -142,11 +142,12 @@ export async function invokeHarness(
 }
 
 /**
- * Direct child-process invocation for Pi and agent-core harnesses.
+ * Direct invocation for Pi plus the internal agent-core orchestration path.
  *
- * "agent-core" uses agent-core (in-process). Pi uses CLI subprocess via
- * `child_process.execFile`. External harnesses should never reach this
- * function -- they are routed through agent-mux in {@link invokeHarness}.
+ * Pi uses CLI subprocess via `child_process.execFile`. "agent-core" delegates
+ * to create-run orchestration rather than a bare session. External harnesses
+ * should never reach this function -- they are routed through agent-mux in
+ * {@link invokeHarness}.
  *
  * @throws {BabysitterRuntimeError} if the harness is unknown or the CLI is
  *   not installed.
@@ -156,21 +157,7 @@ async function invokeHarnessDirect(
   options: HarnessInvokeOptions,
 ): Promise<HarnessInvokeResult> {
   if (name === "agent-core") {
-    const session = createAgentCoreSession({
-      workspace: options.workspace,
-      model: options.model,
-      timeout: options.timeout,
-      ephemeral: true,
-    });
-    try {
-      const result = await session.prompt(options.prompt, options.timeout);
-      return {
-        ...result,
-        harness: "agent-core",
-      };
-    } finally {
-      session.dispose();
-    }
+    return invokeAgentCoreThroughOrchestration(options);
   }
 
   const spec = HARNESS_CLI_MAP[name];
@@ -272,4 +259,64 @@ async function invokeHarnessDirect(
       );
     }
   });
+}
+
+async function invokeAgentCoreThroughOrchestration(
+  options: HarnessInvokeOptions,
+): Promise<HarnessInvokeResult> {
+  const startTime = Date.now();
+  const { handleHarnessCreateRun } = await import("./internal/createRun");
+  const { result: exitCode, output } = await captureProcessOutput(() =>
+    handleHarnessCreateRun({
+      invocationCommand: "invoke",
+      prompt: options.prompt,
+      harness: "agent-core",
+      workspace: options.workspace,
+      model: options.model,
+      json: false,
+      verbose: false,
+      interactive: false,
+    })
+  );
+
+  return {
+    success: exitCode === 0,
+    output: output.trim(),
+    exitCode,
+    duration: Date.now() - startTime,
+    harness: "agent-core",
+  };
+}
+
+async function captureProcessOutput<T>(
+  run: () => Promise<T>,
+): Promise<{ result: T; output: string }> {
+  const originalStdoutWrite = process.stdout.write.bind(process.stdout);
+  const originalStderrWrite = process.stderr.write.bind(process.stderr);
+  let output = "";
+
+  const captureWrite = (
+    chunk: unknown,
+    encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
+    callback?: (error?: Error | null) => void,
+  ): boolean => {
+    output += Buffer.isBuffer(chunk)
+      ? chunk.toString(typeof encodingOrCallback === "string" ? encodingOrCallback : "utf8")
+      : String(chunk);
+    if (typeof encodingOrCallback === "function") {
+      encodingOrCallback();
+    } else if (typeof callback === "function") {
+      callback();
+    }
+    return true;
+  };
+
+  process.stdout.write = captureWrite as typeof process.stdout.write;
+  process.stderr.write = captureWrite as typeof process.stderr.write;
+  try {
+    return { result: await run(), output };
+  } finally {
+    process.stdout.write = originalStdoutWrite as typeof process.stdout.write;
+    process.stderr.write = originalStderrWrite as typeof process.stderr.write;
+  }
 }
