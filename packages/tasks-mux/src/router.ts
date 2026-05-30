@@ -129,7 +129,7 @@ export function routingHints(task: RoutableTaskDef): TaskRoutingHints {
 }
 
 export function isHostDelegableRoute(decision: TaskRouteDecision): boolean {
-  return decision.responderType === "internal";
+  return decision.responderType === "internal" || (decision.responderType === "agent" && !decision.backend);
 }
 
 function defaultResponderType(task: RoutableTaskDef): ResponderType {
