@@ -12,6 +12,10 @@ import type {
   ExecutionHandle,
   LocalExecutionConfig,
 } from "../types";
+import {
+  resolveExecutionEnvironment,
+  validateLocalExecutionPolicy,
+} from "../policy";
 
 // ---------------------------------------------------------------------------
 // Internal state per spawned process
@@ -52,13 +56,25 @@ export class LocalExecutor implements Executor<LocalExecutionConfig> {
     args: string[],
     config: LocalExecutionConfig,
   ): Promise<ExecutionHandle> {
+    validateLocalExecutionPolicy(config);
+
     const id = randomUUID();
 
     const child = spawn(command, args, {
       cwd: config.cwd,
-      env: config.env ? { ...process.env, ...config.env } : process.env,
+      env: resolveExecutionEnvironment(config.env, config.policy),
       stdio: ["pipe", "pipe", "pipe"],
     });
+
+    const timeoutMs = config.policy?.resources?.timeoutMs;
+    let timeout: NodeJS.Timeout | undefined;
+    if (timeoutMs !== undefined) {
+      timeout = setTimeout(() => {
+        if (!child.killed && child.exitCode === null) {
+          child.kill("SIGTERM");
+        }
+      }, timeoutMs);
+    }
 
     const handle: MutableHandle = {
       id,
@@ -71,9 +87,11 @@ export class LocalExecutor implements Executor<LocalExecutionConfig> {
 
     // Update status when the child exits.
     child.on("exit", (code) => {
+      if (timeout) clearTimeout(timeout);
       handle.status = code === 0 ? "stopped" : "failed";
     });
     child.on("error", () => {
+      if (timeout) clearTimeout(timeout);
       handle.status = "failed";
     });
 

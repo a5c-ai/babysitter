@@ -13,6 +13,7 @@ import type {
   ExecutionHandle,
   KubernetesExecutionConfig,
 } from "../types";
+import { resolveExecutionEnvironment } from "../policy";
 import type { Executor } from "./local";
 
 // ---------------------------------------------------------------------------
@@ -102,8 +103,8 @@ export class KubernetesExecutor implements Executor<KubernetesExecutionConfig> {
     args: string[],
     config: KubernetesExecutionConfig,
   ): string {
-    const resourceBlock = config.resources
-      ? this._resourcesYaml(config.resources)
+    const resourceBlock = this._resourcesFromConfig(config)
+      ? this._resourcesYaml(this._resourcesFromConfig(config) as Record<string, string>)
       : "";
 
     const serviceAccountLine = config.serviceAccount
@@ -111,6 +112,8 @@ export class KubernetesExecutor implements Executor<KubernetesExecutionConfig> {
       : "";
 
     const commandYaml = `          command: ${JSON.stringify([command, ...args])}`;
+    const envBlock = this._envYaml(resolveExecutionEnvironment(config.env, config.policy));
+    const securityContextBlock = this._securityContextYaml(config);
 
     return [
       `apiVersion: batch/v1`,
@@ -130,6 +133,8 @@ export class KubernetesExecutor implements Executor<KubernetesExecutionConfig> {
       `        - name: main`,
       `          image: ${config.image}`,
       commandYaml,
+      envBlock || null,
+      securityContextBlock,
       resourceBlock || null,
     ]
       .filter((line): line is string => line !== null)
@@ -147,6 +152,41 @@ export class KubernetesExecutor implements Executor<KubernetesExecutionConfig> {
       ...lines,
       `            limits:`,
       ...lines,
+    ].join("\n");
+  }
+
+  private _resourcesFromConfig(config: KubernetesExecutionConfig): Record<string, string> | undefined {
+    const resources: Record<string, string> = { ...(config.resources ?? {}) };
+    if (config.policy?.resources?.cpuCount !== undefined) {
+      resources.cpu = String(config.policy.resources.cpuCount);
+    }
+    if (config.policy?.resources?.memoryBytes !== undefined) {
+      resources.memory = String(config.policy.resources.memoryBytes);
+    }
+    return Object.keys(resources).length > 0 ? resources : undefined;
+  }
+
+  private _envYaml(env: Record<string, string>): string {
+    const entries = Object.entries(env);
+    if (entries.length === 0) {
+      return "";
+    }
+    return [
+      `          env:`,
+      ...entries.flatMap(([key, value]) => [
+        `            - name: ${key}`,
+        `              value: ${JSON.stringify(value)}`,
+      ]),
+    ].join("\n");
+  }
+
+  private _securityContextYaml(config: KubernetesExecutionConfig): string {
+    const policy = config.policy?.kubernetes;
+    return [
+      `          securityContext:`,
+      `            runAsNonRoot: ${policy?.runAsNonRoot ?? true}`,
+      `            readOnlyRootFilesystem: ${policy?.readOnlyRootFilesystem ?? true}`,
+      `            allowPrivilegeEscalation: ${policy?.allowPrivilegeEscalation ?? false}`,
     ].join("\n");
   }
 

@@ -7,6 +7,12 @@
 
 import * as childProcess from "node:child_process";
 import { nextUlid } from "@a5c-ai/babysitter-sdk";
+import type { ExecutionPolicy } from "./execution";
+import {
+  normalizeResourceLimits,
+  resolveExecutionEnvironment,
+  validateFilesystemPolicy,
+} from "./execution";
 import { buildShellInvocation } from "./shellInvocation";
 
 // ---------------------------------------------------------------------------
@@ -24,6 +30,8 @@ export interface BackgroundTaskRecord {
   exitCode: number | null;
   stdout: string;
   stderr: string;
+  stdoutTruncated?: boolean;
+  stderrTruncated?: boolean;
   durationMs: number | null;
 }
 
@@ -37,6 +45,8 @@ export interface BackgroundCompletionEvent {
   exitCode: number;
   stdout: string;
   stderr: string;
+  stdoutTruncated?: boolean;
+  stderrTruncated?: boolean;
   durationMs: number;
 }
 
@@ -45,6 +55,7 @@ export interface SpawnOptions {
   command: string;
   cwd: string;
   env?: Record<string, string>;
+  executionPolicy?: ExecutionPolicy;
   description?: string;
   onComplete?: (event: BackgroundCompletionEvent) => void;
 }
@@ -64,8 +75,12 @@ interface TrackedProcess {
   exitCode: number | null;
   stdoutChunks: Buffer[];
   stderrChunks: Buffer[];
+  stdoutTruncated: boolean;
+  stderrTruncated: boolean;
   durationMs: number | null;
   child: childProcess.ChildProcess;
+  timeout?: NodeJS.Timeout;
+  maxOutputBytes?: number;
   onComplete?: (event: BackgroundCompletionEvent) => void;
 }
 
@@ -90,6 +105,8 @@ export class BackgroundProcessRegistry {
    * Returns a snapshot of the initial record.
    */
   spawn(opts: SpawnOptions): BackgroundTaskRecord {
+    validateFilesystemPolicy(opts.cwd, opts.executionPolicy);
+
     const runningCount = [...this.processes.values()].filter(
       (p) => p.status === "running",
     ).length;
@@ -103,10 +120,11 @@ export class BackgroundProcessRegistry {
     const backgroundTaskId = nextUlid();
     const startMs = Date.now();
     const shellInvocation = buildShellInvocation(opts.command);
+    const resources = normalizeResourceLimits(opts.executionPolicy);
 
     const child = this.spawnFn(shellInvocation.command, shellInvocation.args, {
       cwd: opts.cwd,
-      env: { ...process.env, ...opts.env },
+      env: resolveExecutionEnvironment(opts.env, opts.executionPolicy),
       shell: false,
       windowsHide: true,
       stdio: ["ignore", "pipe", "pipe"],
@@ -123,19 +141,45 @@ export class BackgroundProcessRegistry {
       exitCode: null,
       stdoutChunks: [],
       stderrChunks: [],
+      stdoutTruncated: false,
+      stderrTruncated: false,
       durationMs: null,
       child,
+      maxOutputBytes: resources.maxOutputBytes,
       onComplete: opts.onComplete,
     };
 
     child.stdout?.on("data", (chunk: Buffer) => {
-      tracked.stdoutChunks.push(chunk);
+      tracked.stdoutTruncated = appendCapped(
+        tracked.stdoutChunks,
+        chunk,
+        tracked.maxOutputBytes,
+      ) || tracked.stdoutTruncated;
     });
     child.stderr?.on("data", (chunk: Buffer) => {
-      tracked.stderrChunks.push(chunk);
+      tracked.stderrTruncated = appendCapped(
+        tracked.stderrChunks,
+        chunk,
+        tracked.maxOutputBytes,
+      ) || tracked.stderrTruncated;
     });
 
+    if (resources.timeoutMs !== undefined) {
+      tracked.timeout = setTimeout(() => {
+        if (tracked.status === "running") {
+          tracked.status = "killed";
+          tracked.durationMs = Date.now() - tracked.startMs;
+          try {
+            tracked.child.kill("SIGTERM");
+          } catch {
+            // Already dead.
+          }
+        }
+      }, resources.timeoutMs);
+    }
+
     child.on("close", (code) => {
+      if (tracked.timeout) clearTimeout(tracked.timeout);
       if (tracked.status === "running") {
         tracked.status = code === 0 ? "completed" : "exited";
       }
@@ -152,6 +196,8 @@ export class BackgroundProcessRegistry {
             exitCode: tracked.exitCode,
             stdout: Buffer.concat(tracked.stdoutChunks).toString("utf8"),
             stderr: Buffer.concat(tracked.stderrChunks).toString("utf8"),
+            stdoutTruncated: tracked.stdoutTruncated || undefined,
+            stderrTruncated: tracked.stderrTruncated || undefined,
             durationMs: tracked.durationMs,
           });
         } catch {
@@ -161,6 +207,7 @@ export class BackgroundProcessRegistry {
     });
 
     child.on("error", () => {
+      if (tracked.timeout) clearTimeout(tracked.timeout);
       if (tracked.status === "running") {
         tracked.status = "exited";
       }
@@ -235,7 +282,30 @@ export class BackgroundProcessRegistry {
       exitCode: t.exitCode,
       stdout: Buffer.concat(t.stdoutChunks).toString("utf8"),
       stderr: Buffer.concat(t.stderrChunks).toString("utf8"),
+      stdoutTruncated: t.stdoutTruncated || undefined,
+      stderrTruncated: t.stderrTruncated || undefined,
       durationMs: t.durationMs,
     };
   }
+}
+
+function appendCapped(chunks: Buffer[], chunk: Buffer, maxBytes?: number): boolean {
+  if (maxBytes === undefined) {
+    chunks.push(chunk);
+    return false;
+  }
+
+  const used = chunks.reduce((total, current) => total + current.byteLength, 0);
+  const remaining = maxBytes - used;
+  if (remaining <= 0) {
+    return chunk.byteLength > 0;
+  }
+
+  if (chunk.byteLength <= remaining) {
+    chunks.push(chunk);
+    return false;
+  }
+
+  chunks.push(chunk.subarray(0, remaining));
+  return true;
 }

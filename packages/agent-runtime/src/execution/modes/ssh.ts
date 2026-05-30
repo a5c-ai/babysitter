@@ -13,6 +13,7 @@ import type {
   ExecutionHandle,
   SshExecutionConfig,
 } from "../types";
+import { resolveExecutionEnvironment } from "../policy";
 import type { Executor } from "./local";
 
 // ---------------------------------------------------------------------------
@@ -124,8 +125,15 @@ export class SshExecutor implements Executor<SshExecutionConfig> {
       sshArgs.push("-p", String(config.port));
     }
 
-    // Disable strict host key checking for automated usage.
-    sshArgs.push("-o", "StrictHostKeyChecking=no");
+    const sshPolicy = config.policy?.ssh;
+    if (sshPolicy?.insecureSkipHostKeyChecking) {
+      sshArgs.push("-o", "StrictHostKeyChecking=no");
+    } else {
+      sshArgs.push("-o", `StrictHostKeyChecking=${sshPolicy?.strictHostKeyChecking ?? "yes"}`);
+      if (sshPolicy?.knownHostsFile) {
+        sshArgs.push("-o", `UserKnownHostsFile=${sshPolicy.knownHostsFile}`);
+      }
+    }
     sshArgs.push("-o", "BatchMode=yes");
 
     // Target: user@host.
@@ -134,8 +142,9 @@ export class SshExecutor implements Executor<SshExecutionConfig> {
     // Build the remote command string.
     // Prepend env vars if provided.
     let remoteCommand = "";
-    if (config.env) {
-      const envPrefix = Object.entries(config.env)
+    const env = resolveExecutionEnvironment(config.env, config.policy);
+    if (Object.keys(env).length > 0) {
+      const envPrefix = Object.entries(env)
         .map(([k, v]) => `${k}=${this._shellEscape(v)}`)
         .join(" ");
       remoteCommand = `${envPrefix} `;
