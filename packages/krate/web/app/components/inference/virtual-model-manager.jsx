@@ -6,6 +6,29 @@ import {
   cardStyle, btnStyle, btnOutlineStyle, inputStyle, labelStyle, badgeStyle,
 } from './inference-helpers.jsx';
 
+let localRowCounter = 0;
+
+function createLocalRowId(prefix = 'row') {
+  localRowCounter += 1;
+  return `${prefix}-${localRowCounter}`;
+}
+
+function createRouteRow() {
+  return { __rowId: createLocalRowId('route'), modelRouteRef: '', weight: 1, priority: 0 };
+}
+
+function createFallbackRow() {
+  return { __rowId: createLocalRowId('fallback'), modelRouteRef: '' };
+}
+
+function createConditionRow() {
+  return { __rowId: createLocalRowId('condition'), field: '', operator: 'eq', value: '' };
+}
+
+function createRuleRow() {
+  return { __rowId: createLocalRowId('rule'), name: '', conditions: [createConditionRow()], action: { route: '' } };
+}
+
 // ─── Virtual Model Card ─────────────────────────────────────────────────────
 
 export const VirtualModelCard = memo(function VirtualModelCard({ vm, onDelete }) {
@@ -69,21 +92,21 @@ export function CollapsibleSection({ title, children, defaultOpen = false }) {
 // ─── Create Virtual Model Form ──────────────────────────────────────────────
 
 export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCancel, loading }) {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState(() => ({
     modelName: '',
-    routes: [{ modelRouteRef: '', weight: 1, priority: 0 }],
+    routes: [createRouteRow()],
     fallbackChain: [],
     rules: [],
     hooks: { routeSelect: '', requestTransform: '', responseTransform: '', sessionLifecycle: '', observe: '', onSessionStart: '', onSessionEnd: '', onTurnEnd: '', onPreToolUse: '', onPostToolUse: '', onUserPromptSubmit: '', onError: '', onCompact: '' },
     sessionEnabled: false,
     maxTurns: 10,
     escalationThreshold: 100000,
-  });
+  }));
 
   const setField = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
   // Route management
-  const addRoute = () => setForm(f => ({ ...f, routes: [...f.routes, { modelRouteRef: '', weight: 1, priority: 0 }] }));
+  const addRoute = () => setForm(f => ({ ...f, routes: [...f.routes, createRouteRow()] }));
   const removeRoute = (idx) => setForm(f => ({ ...f, routes: f.routes.filter((_, i) => i !== idx) }));
   const updateRoute = (idx, field, value) => setForm(f => ({
     ...f,
@@ -91,17 +114,17 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
   }));
 
   // Fallback chain management
-  const addFallback = () => setForm(f => ({ ...f, fallbackChain: [...f.fallbackChain, ''] }));
+  const addFallback = () => setForm(f => ({ ...f, fallbackChain: [...f.fallbackChain, createFallbackRow()] }));
   const removeFallback = (idx) => setForm(f => ({ ...f, fallbackChain: f.fallbackChain.filter((_, i) => i !== idx) }));
   const updateFallback = (idx, value) => setForm(f => ({
     ...f,
-    fallbackChain: f.fallbackChain.map((v, i) => i === idx ? value : v),
+    fallbackChain: f.fallbackChain.map((v, i) => i === idx ? { ...v, modelRouteRef: value } : v),
   }));
 
   // Rules management
   const addRule = () => setForm(f => ({
     ...f,
-    rules: [...f.rules, { name: '', conditions: [{ field: '', operator: 'eq', value: '' }], action: { route: '' } }],
+    rules: [...f.rules, createRuleRow()],
   }));
   const removeRule = (idx) => setForm(f => ({ ...f, rules: f.rules.filter((_, i) => i !== idx) }));
   const updateRule = (idx, path, value) => setForm(f => {
@@ -114,7 +137,7 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
   });
   const addCondition = (ruleIdx) => setForm(f => {
     const rules = [...f.rules];
-    rules[ruleIdx] = { ...rules[ruleIdx], conditions: [...rules[ruleIdx].conditions, { field: '', operator: 'eq', value: '' }] };
+    rules[ruleIdx] = { ...rules[ruleIdx], conditions: [...rules[ruleIdx].conditions, createConditionRow()] };
     return { ...f, rules };
   });
   const removeCondition = (ruleIdx, condIdx) => setForm(f => {
@@ -146,8 +169,9 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
         priority: Number(r.priority) || 0,
       })),
     };
-    if (form.fallbackChain.filter(Boolean).length > 0) {
-      body.fallbackChain = form.fallbackChain.filter(Boolean);
+    const fallbackRefs = form.fallbackChain.map(r => r.modelRouteRef).filter(Boolean);
+    if (fallbackRefs.length > 0) {
+      body.fallbackChain = fallbackRefs;
     }
     if (form.rules.length > 0) {
       body.rules = form.rules.filter(r => r.name && r.conditions.length > 0).map(r => ({
@@ -190,7 +214,7 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
       <div>
         <label style={labelStyle}>Routes *</label>
         {form.routes.map((route, idx) => (
-          <div key={idx} style={{ display: 'flex', gap: '0.375rem', marginBottom: '0.375rem', alignItems: 'center' }}>
+          <div key={route.__rowId} style={{ display: 'flex', gap: '0.375rem', marginBottom: '0.375rem', alignItems: 'center' }}>
             <select style={{ ...inputStyle, flex: 2 }} value={route.modelRouteRef} onChange={(e) => updateRoute(idx, 'modelRouteRef', e.target.value)} required>
               <option value="">Select route...</option>
               {routeOptions.map(n => <option key={n} value={n}>{n}</option>)}
@@ -209,8 +233,8 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
       <div>
         <label style={labelStyle}>Fallback Chain</label>
         {form.fallbackChain.map((ref, idx) => (
-          <div key={idx} style={{ display: 'flex', gap: '0.375rem', marginBottom: '0.375rem', alignItems: 'center' }}>
-            <select style={{ ...inputStyle, flex: 1 }} value={ref} onChange={(e) => updateFallback(idx, e.target.value)}>
+          <div key={ref.__rowId} style={{ display: 'flex', gap: '0.375rem', marginBottom: '0.375rem', alignItems: 'center' }}>
+            <select style={{ ...inputStyle, flex: 1 }} value={ref.modelRouteRef} onChange={(e) => updateFallback(idx, e.target.value)}>
               <option value="">Select fallback...</option>
               {routeOptions.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
@@ -223,7 +247,7 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
       {/* Rules */}
       <CollapsibleSection title={`Rules (${form.rules.length})`}>
         {form.rules.map((rule, rIdx) => (
-          <div key={rIdx} style={{ ...cardStyle, padding: '0.75rem', background: '#f8fafc' }}>
+          <div key={rule.__rowId} style={{ ...cardStyle, padding: '0.75rem', background: '#f8fafc' }}>
             <div style={{ display: 'flex', gap: '0.375rem', marginBottom: '0.5rem' }}>
               <input style={{ ...inputStyle, flex: 2 }} value={rule.name} onChange={(e) => updateRule(rIdx, 'name', e.target.value)} placeholder="Rule name" aria-label={`Rule ${rIdx + 1} name`} />
               <select style={{ ...inputStyle, flex: 2 }} value={rule.action.route} onChange={(e) => updateRule(rIdx, 'action.route', e.target.value)}>
@@ -234,7 +258,7 @@ export function CreateVirtualModelForm({ routes: availableRoutes, onSubmit, onCa
             </div>
             <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Conditions:</div>
             {rule.conditions.map((cond, cIdx) => (
-              <div key={cIdx} style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem', alignItems: 'center' }}>
+              <div key={cond.__rowId} style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem', alignItems: 'center' }}>
                 <input style={{ ...inputStyle, flex: 1 }} value={cond.field} onChange={(e) => updateCondition(rIdx, cIdx, 'field', e.target.value)} placeholder="field" aria-label={`Rule ${rIdx + 1} condition ${cIdx + 1} field`} />
                 <select style={{ ...inputStyle, flex: 1 }} value={cond.operator} onChange={(e) => updateCondition(rIdx, cIdx, 'operator', e.target.value)}>
                   {['eq', 'neq', 'gt', 'lt', 'gte', 'lte', 'in', 'contains', 'matches'].map(op => <option key={op} value={op}>{op}</option>)}

@@ -8,6 +8,10 @@ const RESOLUTION_LABELS = {
   'ignore': 'Ignore',
 };
 
+function resolvedConflictKey(entry) {
+  return [entry.id, entry.resolution, entry.resolvedAt].filter(Boolean).join(':');
+}
+
 function ConflictCard({ conflict, onResolve, resolving }) {
   const id = conflict.metadata?.name || conflict.id || 'unknown';
   const spec = conflict.spec || conflict;
@@ -117,8 +121,8 @@ function ConflictHistory({ resolved }) {
     <div style={{ marginTop: '1rem' }}>
       <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)' }}>Resolved this session</h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-        {resolved.map((entry, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8125rem', color: 'var(--text-muted)', padding: '0.375rem 0.625rem', background: 'var(--bg-subtle)', borderRadius: '0.375rem' }}>
+        {resolved.map((entry) => (
+          <div key={resolvedConflictKey(entry)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8125rem', color: 'var(--text-muted)', padding: '0.375rem 0.625rem', background: 'var(--bg-subtle)', borderRadius: '0.375rem' }}>
             <span style={{ fontWeight: 500, color: 'var(--text)' }}>{entry.id}</span>
             <span style={{ padding: '0.0625rem 0.375rem', borderRadius: '9999px', fontSize: '0.75rem', background: '#e0e7ff', color: '#3730a3', fontWeight: 600 }}>{RESOLUTION_LABELS[entry.resolution] || entry.resolution}</span>
             <span style={{ marginLeft: 'auto' }}>{entry.resolvedAt}</span>

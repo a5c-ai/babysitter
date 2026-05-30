@@ -46,8 +46,8 @@ export function UnifiedModelCatalogSection({ org }) {
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '0.625rem' }}>
-        {catalog.models.map((m, i) => (
-          <div key={m.name + '-' + i} style={{ ...cardStyle, padding: '0.75rem' }}>
+        {catalog.models.map((m) => (
+          <div key={[m.provider, m.type, m.name].filter(Boolean).join(':')} style={{ ...cardStyle, padding: '0.75rem' }}>
             <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{m.name}</div>
             <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
               <ProviderBadge provider={m.provider} />
