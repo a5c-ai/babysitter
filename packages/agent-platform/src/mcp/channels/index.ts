@@ -2,8 +2,7 @@
  * MCP Channels — interactive messaging and approval routing.
  * Moved from @a5c-ai/babysitter-sdk.
  *
- * Status: NOT INTEGRATED YET — these modules are implemented but not wired
- * into the harness's interaction/governance layer.
+ * Status: Integrated with agent-platform MCP orchestration wiring.
  *
  * GAP-MCPC-001/002/003/004
  */

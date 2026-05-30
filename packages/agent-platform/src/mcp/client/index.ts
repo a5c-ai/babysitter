@@ -1,5 +1,5 @@
 /**
- * Status: NOT INTEGRATED YET
+ * Status: Integrated with agent-platform MCP orchestration wiring.
  * Moved from @a5c-ai/babysitter-sdk.
  * GAP-REMOTE-006: MCP Client barrel exports.
  */

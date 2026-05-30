@@ -1,5 +1,5 @@
 /**
- * Status: NOT INTEGRATED YET
+ * Status: Integrated with agent-platform breakpoint governance.
  * Moved from @a5c-ai/babysitter-sdk.
  * GAP-BRK-002: Breakpoint Delegation to External Systems.
  *
