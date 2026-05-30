@@ -4,16 +4,11 @@ import { errorResponse } from '../../../../../../../lib/api-errors.js';
 
 export const dynamic = 'force-dynamic';
 
-export const POST = withAuth(async (request, { params }, session) => {
+export const POST = withAuth(async (request, { params }) => {
   const { org, name } = await params;
   try {
     const controller = createKrateApiController({ namespace: orgNamespaceName(org) });
-    const body = await request.json();
-    const result = await controller.approveExternalWriteIntent({
-      intentName: name,
-      approvedBy: body.approvedBy || session?.user || 'system',
-      resources: body.resources || {}
-    });
+    const result = await controller.approveExternalWriteIntent(name);
     return Response.json(result);
   } catch (error) {
     return errorResponse(error.message, 500);

@@ -472,17 +472,11 @@ async function executeTool(controller, toolName, args) {
         routeType: args.routeType,
       };
       if (args.routeType === 'internal') {
-        routeSpec.inferenceServiceRef = args.inferenceServiceRef || args.modelName;
-        routeSpec.protocol = 'v2';
+        routeSpec.internal = { inferenceServiceRef: args.inferenceServiceRef || args.modelName, protocol: 'v2' };
       } else {
-        routeSpec.external = {
-          provider: args.provider || 'custom',
-          endpoint: args.endpoint,
-          modelId: args.modelId || args.modelName,
-          protocol: args.protocol || 'openai',
-        };
+        routeSpec.external = { provider: args.provider || 'custom', endpoint: args.endpoint, model: args.modelId || args.modelName };
       }
-      return controller.applyModelRoute({
+      return controller.applyResource({
         apiVersion: 'krate.a5c.ai/v1alpha1',
         kind: 'KrateModelRoute',
         metadata: { name: args.name, namespace: orgNamespaceName(args.org) },

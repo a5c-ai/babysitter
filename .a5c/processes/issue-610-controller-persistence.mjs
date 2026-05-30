@@ -21,8 +21,10 @@
  * - specializations/backend-development/README.md
  * - specializations/qa-testing-automation/agents/api-testing-expert/AGENT.md
  * - specializations/devops-sre-platform/agents/kubernetes-expert/AGENT.md
- * - specializations/collaboration/github/branch-policies.js
- * - specializations/collaboration/github/issue-linking.js
+ * - specializations/qa-testing-automation/api-testing.js
+ * - specializations/devops-sre-platform/kubernetes-setup.js
+ * - Active capability guidance from `babysitter instructions:babysit-skill --harness codex --no-interactive`
+ *   for branch policy, issue linking, and PR lifecycle behavior.
  *
  * Repo policy note: direct babysitter processes in this repo should avoid
  * shell-task subtasks unless explicitly requested. This process therefore uses
@@ -31,8 +33,8 @@
  *
  * @process methodologies/spec-kit-brownfield
  * @process methodologies/superpowers/verification-before-completion
- * @process specializations/collaboration/github/branch-policies
- * @process specializations/collaboration/github/issue-linking
+ * @process specializations/qa-testing-automation/api-testing
+ * @process specializations/devops-sre-platform/kubernetes-setup
  * @skill growing-outside-in-systems specializations/backend-development/skills/growing-outside-in-systems/SKILL.md
  * @skill verification-before-completion methodologies/superpowers/skills/verification-before-completion/SKILL.md
  * @agent api-testing-expert specializations/qa-testing-automation/agents/api-testing-expert/AGENT.md
@@ -206,6 +208,7 @@ export const collectIssueContextTask = defineTask('issue-610.collect-context', (
         'Run: gh issue view 610 --json title,body,labels,comments.',
         'If #610 is a pull request, also run: gh pr view 610 --json files,title,body,comments. If it is not a PR, record that fact.',
         'Read packages/krate/docs/gaps/controller-persistence.md and packages/krate/docs/gaps/api-route-issues.md.',
+        'Check issue comments for prior planning or implementation PRs. If a prior PR exists, verify which changes are already present on the current base branch before planning duplicate work.',
         'Summarize requested behavior, labels, dependencies, stale parts of the issue, and exact acceptance criteria.',
         'Do not edit source files.',
         'Return JSON: { title: string, labels: string[], dependencyNotes: array, acceptanceCriteria: array, staleOrAlreadyHandled: array, risks: array, summary: string }.',

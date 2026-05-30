@@ -66,6 +66,8 @@
     "createKrateApiController already constructs external sync/write/conflict controllers with persistFn callbacks.",
     "packages/krate/core/src/http-server.js already forwards full external sync options and object-shaped write-intent approve arguments.",
     "model-route-controller already validates KrateModelRoute resources and generates valid AIGatewayRoute manifests; the missing piece is applying them."
+    ,
+    "Issue comments mention a prior planning/implementation PR; rerun the runtime trace on the current base branch before changing code so already-applied fixes are not duplicated."
   ],
   "acceptanceCriteria": [
     "External sync POST through the live web route forwards bindingName, kind, localName, spec, externalEnvelope, and watermark to syncExternalBinding.",
@@ -105,8 +107,9 @@
     "specializations/backend-development/skills/growing-outside-in-systems/SKILL.md",
     "specializations/qa-testing-automation/agents/api-testing-expert/AGENT.md",
     "specializations/devops-sre-platform/agents/kubernetes-expert/AGENT.md",
-    "specializations/collaboration/github/branch-policies.js",
-    "specializations/collaboration/github/issue-linking.js"
+    "specializations/qa-testing-automation/api-testing.js",
+    "specializations/devops-sre-platform/kubernetes-setup.js",
+    "active babysitter capability guidance for branch policy, PR lifecycle, and issue linking"
   ],
   "delivery": {
     "prTitle": "Fix controller persistence wiring for external sync, memory, and model routes",
