@@ -30,9 +30,9 @@ import {
   createAskUserQuestionResponse,
 } from "../utils";
 
-const importOptionalModule = new Function("specifier", "return import(specifier)") as (
-  specifier: string,
-) => Promise<unknown>;
+async function importOptionalModule(specifier: string): Promise<unknown> {
+  return import(specifier);
+}
 
 export async function runOrchestrationPhase(
   args: RunOrchestrationPhaseArgs,

@@ -88,9 +88,9 @@ import {
   harnessSupportsConcurrentEffects,
 } from "./dispatch";
 
-const importOptionalModule = new Function("specifier", "return import(specifier)") as (
-  specifier: string,
-) => Promise<unknown>;
+async function importOptionalModule(specifier: string): Promise<unknown> {
+  return import(specifier);
+}
 
 type McpExecutorLike = {
   execute(request: McpToolExecutionRequest): Promise<McpToolResult>;

@@ -8,6 +8,8 @@ const taskMuxMock = vi.hoisted(() => ({
 
 vi.mock("@a5c-ai/tasks-mux", () => ({
   routeTask: taskMuxMock.routeTask,
+  isHostDelegableRoute: (decision: { responderType: string; backend?: string }) =>
+    decision.responderType === "internal" || (decision.responderType === "agent" && !decision.backend),
   AgentMuxResponderBackend: class {
     submitBreakpoint = taskMuxMock.submitBreakpoint;
   },
@@ -18,6 +20,7 @@ describe("issue #606 mocked tasks-mux external agent e2e", () => {
     taskMuxMock.routeTask.mockReturnValue({
       responderType: "agent",
       route: "agent-mux",
+      backend: "agent-mux",
       responder: { id: "codex", adapter: "codex", model: "gpt-5.4" },
     });
     taskMuxMock.submitBreakpoint.mockResolvedValue({

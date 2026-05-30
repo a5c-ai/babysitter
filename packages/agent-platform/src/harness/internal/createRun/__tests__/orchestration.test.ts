@@ -17,6 +17,8 @@ const childProcessMock = vi.hoisted(() => ({
 
 vi.mock("@a5c-ai/tasks-mux", () => ({
   routeTask: taskMuxMock.routeTask,
+  isHostDelegableRoute: (decision: { responderType: string; backend?: string }) =>
+    decision.responderType === "internal" || (decision.responderType === "agent" && !decision.backend),
   AgentMuxResponderBackend: class {
     submitBreakpoint = taskMuxMock.submitBreakpoint;
   },
@@ -130,6 +132,7 @@ describe("resolveEffect tasks-mux routing", () => {
     taskMuxMock.routeTask.mockReturnValue({
       responderType: "agent",
       route: "agent-mux",
+      backend: "agent-mux",
       responder: { id: "codex", adapter: "codex", model: "gpt-5.4" },
     });
     taskMuxMock.submitBreakpoint.mockResolvedValue({
@@ -209,6 +212,7 @@ describe("resolveEffect tasks-mux routing", () => {
     taskMuxMock.routeTask.mockReturnValue({
       responderType: "agent",
       route: "agent-mux",
+      backend: "agent-mux",
       responder: { id: "codex", adapter: "codex", model: "gpt-5.4" },
     });
     taskMuxMock.submitBreakpoint.mockRejectedValue(new Error("agent-mux unavailable"));
@@ -252,6 +256,7 @@ describe("resolveEffect tasks-mux routing", () => {
     taskMuxMock.routeTask.mockReturnValue({
       responderType: "agent",
       route: "agent-mux",
+      backend: "agent-mux",
       responder: { id: "codex", adapter: "codex" },
     });
     taskMuxMock.submitBreakpoint.mockRejectedValue(new Error("auth failed"));
@@ -283,6 +288,7 @@ describe("resolveEffect tasks-mux routing", () => {
     taskMuxMock.routeTask.mockReturnValue({
       responderType: "agent",
       route: "agent-mux",
+      backend: "agent-mux",
       responder: { id: "codex", adapter: "codex", model: "gpt-5.4" },
     });
     taskMuxMock.submitBreakpoint.mockResolvedValue({
