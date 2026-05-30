@@ -1,0 +1,45 @@
+{
+  "issueNumber": 586,
+  "title": "kanban.ts: add exhaustiveness checks to 6+ sealed switch statements",
+  "labels": [
+    "ready-for-dev",
+    "effort:small",
+    "priority:medium",
+    "agent-mux",
+    "automated-triage",
+    "refactor",
+    "P2",
+    "here-be-dragons",
+    "risk:medium"
+  ],
+  "issueBody": "## Summary\n`kanban.ts` (2518 lines) has 6+ switch statements on same status values without exhaustiveness checks. Adding a new status requires updating all 6+ functions manually.\n\n### Affected\ngetColumnName, getColumnWipLimit, getAllowedMoveStates, resolveKanbanWorkflowState, resolveKanbanStatusForWorkflowState, evaluateKanbanIssueMove\n\n### Fix\nAdd never assertion in default case. Extract status to const enum/array.\n\nRef: `docs/here-be-dragons.md`",
+  "comments": [
+    {
+      "author": "tmuskal",
+      "createdAt": "2026-05-30T06:54:50Z",
+      "body": "**Related:** #601 (here-be-dragons remaining — kanban switches are a maintenance minefield)"
+    },
+    {
+      "author": "a5c-ai",
+      "createdAt": "2026-05-30T10:09:56Z",
+      "body": "## Triage Summary\n\nIssue #586 is a focused type-safety/refactor task for `packages/agent-mux/core/src/kanban.ts`: kanban status and workflow-state behavior is encoded in several separate helpers without strong exhaustiveness guardrails.\n\n## Critical Evaluation\n\n- The report is valid. The exact \"6+ switch statements\" wording is a little broader than the current code shape, but the underlying hazard is real: multiple status/state mapping and move-policy helpers must stay synchronized manually.\n- This is preventative maintainability debt, not a current production outage.\n- The suggested direction is sound, but the implementation should stay narrow.\n\n## Root Cause Analysis\n\n- `packages/agent-mux/core/src/kanban.ts:16` defines `KanbanIssueStatus`.\n- `packages/agent-mux/core/src/kanban.ts:24` defines `KanbanWorkflowState`.\n- `packages/agent-mux/core/src/kanban.ts:1743` maps workflow states to column names with no explicit exhaustiveness assertion.\n- `packages/agent-mux/core/src/kanban.ts:1767` maps allowed workflow transitions with no explicit exhaustiveness assertion.\n- `packages/agent-mux/core/src/kanban.ts:1942` maps issue status to workflow state and currently has a broad `default` returning `todo`.\n- `packages/agent-mux/core/src/kanban.ts:1972` maps workflow state back to issue status with no explicit exhaustiveness assertion.\n- `packages/agent-mux/core/src/kanban.ts:1990` depends on these mappings for move validation, WIP checks, blocked flow, and acceptance completion.\n\nExisting tests in `packages/agent-mux/core/tests/kanban.test.ts:696` cover some move-policy behavior, but they do not lock down exhaustive status/state mapping coverage.\n\n## Affected Components\n\n- Packages: `agent-mux`\n- Files: `packages/agent-mux/core/src/kanban.ts`, `packages/agent-mux/core/tests/kanban.test.ts`\n- Effort: `effort:small`\n\n## Recommended Approach\n\nKeep this as a small type-safety refactor:\n\n1. Add an `assertNever` helper or `satisfies Record<...>` mapping tables for workflow-state labels and transitions.\n2. Remove the broad `default` from `resolveKanbanWorkflowState` so new `KanbanIssueStatus` members must be handled deliberately.\n3. Add focused tests that enumerate every `KanbanIssueStatus` and `KanbanWorkflowState` mapping.\n4. Avoid splitting or broadly rewriting the 2518-line file in this issue.\n\n## Reproduction\n\nAdd a hypothetical member to `KanbanIssueStatus` or `KanbanWorkflowState`. Today, the current mapping sites do not force every downstream helper to be consciously updated, and `resolveKanbanWorkflowState` can silently route an unhandled issue status to `todo`.\n\n## Related Issues/PRs\n\n- Related umbrella tracker: #601\n- #601 explicitly lists the kanban switch cleanup as covered by #586, so #586 should remain the focused implementation issue.\n\n## Priority\n\n`priority:medium`\n\nThis has meaningful maintainability impact in a core kanban workflow path, but it is not a production breakage or data-loss issue.\n\n## Risk Analysis\n\nRisk label: `risk:medium`\n\n- Changing workflow-state mapping behavior could alter board grouping, move validation, WIP-limit enforcement, or status persistence.\n  - Mitigation: keep changes scoped to exhaustiveness guards/mapping tables and run agent-mux core kanban tests plus typecheck/build.\n- Removing broad defaults can expose fixture or integration assumptions around fallback-to-`todo` behavior.\n  - Mitigation: add mapping tests before changing implementation.\n- Refactoring a large file can create unrelated churn.\n  - Mitigation: touch only the status/state helpers and focused tests.\n\n## Triage Decision\n\nMarking `ready-for-dev` and assigning `a5c-agent`. The scope is specific, code evidence is identified, and the recommended implementation path is constrained."
+    }
+  ],
+  "triageComment": "Keep this as a small type-safety refactor: add assertNever or satisfies Record mapping tables, remove the broad default from resolveKanbanWorkflowState, add focused tests that enumerate every KanbanIssueStatus and KanbanWorkflowState mapping, and avoid splitting or broadly rewriting kanban.ts.",
+  "relatedIssues": [
+    601
+  ],
+  "targetFiles": [
+    "packages/agent-mux/core/src/kanban.ts"
+  ],
+  "testFiles": [
+    "packages/agent-mux/core/tests/kanban.test.ts"
+  ],
+  "qualityCommands": [
+    "npm run test --workspace=@a5c-ai/agent-comm-mux -- packages/agent-mux/core/tests/kanban.test.ts",
+    "npm run build --workspace=@a5c-ai/agent-comm-mux",
+    "npm run test:agent-mux"
+  ],
+  "maxVerificationAttempts": 2,
+  "expectedProcessEntry": ".a5c/processes/issue-586-kanban-exhaustiveness-checks.mjs#process"
+}
