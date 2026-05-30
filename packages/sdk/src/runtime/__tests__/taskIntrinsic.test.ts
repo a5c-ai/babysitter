@@ -18,6 +18,7 @@ import { TaskIntrinsicContext } from "../intrinsics/task";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { serializeAndWriteTaskDefinition } from "../../tasks/serializer";
 import { hashInvocationKey } from "../invocation/hashInvocationKey";
+import * as runtimeHooks from "../hooks/runtime";
 
 const sampleTask: DefinedTask<{ value: number }, number> = {
   id: "sample-task",
@@ -53,6 +54,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   await fs.rm(tmpRoot, { recursive: true, force: true });
 });
 
@@ -82,6 +84,61 @@ async function buildContext(runDir: string, runId: string): Promise<TaskIntrinsi
 }
 
 describe("runTaskIntrinsic", () => {
+  test("emits task.created runtime hook with task metadata before requesting an effect", async () => {
+    const { runDir, runId } = await createRun("run-created-hook");
+    const context = await buildContext(runDir, runId);
+    const hookSpy = vi.spyOn(runtimeHooks, "callRuntimeHook").mockResolvedValue({
+      hookType: "task.created",
+      success: true,
+      executedHooks: [],
+    });
+
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 2 },
+        context,
+      }),
+    ).rejects.toThrow(EffectRequestedError);
+
+    expect(hookSpy).toHaveBeenCalledWith(
+      "task.created",
+      expect.objectContaining({
+        runId: "run-created-hook",
+        processId: "demo-process",
+        task_id: expect.any(String),
+        task_kind: "node",
+        task_title: "sample",
+        task_labels: undefined,
+        taskId: "sample-task",
+        effectId: expect.any(String),
+        kind: "node",
+        title: "sample",
+        labels: undefined,
+      }),
+      expect.objectContaining({ cwd: runDir }),
+    );
+  });
+
+  test("honors blocking task.created runtime hook decisions", async () => {
+    const { runDir, runId } = await createRun("run-created-blocked");
+    const context = await buildContext(runDir, runId);
+    vi.spyOn(runtimeHooks, "callRuntimeHook").mockResolvedValue({
+      hookType: "task.created",
+      success: true,
+      output: { decision: "deny", reason: "task blocked" },
+      executedHooks: [],
+    });
+
+    await expect(
+      runTaskIntrinsic({
+        task: sampleTask,
+        args: { value: 2 },
+        context,
+      }),
+    ).rejects.toThrow(/task blocked/);
+  });
+
   test("requests new effect, then short-circuits after resolution", async () => {
     const { runDir, runId } = await createRun();
     const context = await buildContext(runDir, runId);

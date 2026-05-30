@@ -1,5 +1,5 @@
 import type { UnifiedHookEvent, UnifiedExecutionContext } from '@a5c-ai/hooks-mux-core';
-import { GEMINI_PHASE_MAPPINGS, getGeminiPhaseMapping } from './mappings';
+import { getGeminiPhaseMapping } from './mappings';
 import { resolveSessionId } from './session-resolver';
 
 /** The default adapter name. */

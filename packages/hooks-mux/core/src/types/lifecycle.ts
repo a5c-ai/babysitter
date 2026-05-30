@@ -1,42 +1,61 @@
 /**
  * Canonical lifecycle phases covering all hook events in the unified hooks-mux system.
  */
-export type CanonicalPhase =
+export const CANONICAL_PHASES = [
   // Session lifecycle
-  | 'session.start'
-  | 'session.end'
-  | 'session.cwd_changed'
-  | 'session.file_changed'
-  | 'session.config_changed'
-  | 'session.compact.before'
-  | 'session.compact.after'
+  'session.start',
+  'session.setup',
+  'session.end',
+  'session.cwd_changed',
+  'session.file_changed',
+  'session.config_changed',
+  'session.instructions_loaded',
+  'session.idle',
+  'session.shell_env',
+  'session.worktree_create',
+  'session.worktree_remove',
+  'session.compact.before',
+  'session.compact.after',
   // Turn lifecycle
-  | 'turn.user_prompt_submitted'
-  | 'turn.before_agent'
-  | 'turn.after_agent'
-  | 'turn.stop'
-  | 'turn.error'
+  'turn.user_prompt_submitted',
+  'turn.before_prompt',
+  'turn.before_prompt_build',
+  'turn.prompt_expansion',
+  'turn.before_agent',
+  'turn.after_agent',
+  'turn.stop',
+  'turn.stop_failure',
+  'turn.error',
   // Model / planner
-  | 'model.before_request'
-  | 'model.after_response'
-  | 'planner.before_tool_selection'
+  'model.before_request',
+  'model.after_response',
+  'planner.before_tool_selection',
   // Tool lifecycle
-  | 'tool.before'
-  | 'tool.after'
-  | 'tool.error'
-  | 'tool.permission_request'
-  | 'tool.permission_denied'
+  'tool.before',
+  'tool.after',
+  'tool.after_failure',
+  'tool.after_batch',
+  'tool.error',
+  'tool.permission_request',
+  'tool.permission_denied',
+  // Task / team lifecycle
+  'task.created',
+  'task.completed',
+  'team.idle',
   // Subagent lifecycle
-  | 'subagent.start'
-  | 'subagent.end'
+  'subagent.start',
+  'subagent.end',
   // Notification / messaging
-  | 'notification'
-  | 'message.received'
-  | 'message.sending'
-  | 'message.sent'
+  'notification',
+  'message.received',
+  'message.sending',
+  'message.sent',
   // MCP
-  | 'mcp.elicitation'
-  | 'mcp.elicitation_result';
+  'mcp.elicitation',
+  'mcp.elicitation_result',
+] as const;
+
+export type CanonicalPhase = typeof CANONICAL_PHASES[number];
 
 /**
  * Support level indicating how faithfully a harness adapter can map
@@ -47,15 +66,20 @@ export type SupportLevel = 'native' | 'emulated' | 'lossy' | 'unsupported';
 /**
  * Describes the scope/category a lifecycle phase belongs to.
  */
-export type LifecycleScope =
-  | 'session'
-  | 'turn'
-  | 'model'
-  | 'planner'
-  | 'tool'
-  | 'subagent'
-  | 'notification'
-  | 'mcp';
+export const LIFECYCLE_SCOPES = [
+  'session',
+  'turn',
+  'model',
+  'planner',
+  'tool',
+  'task',
+  'team',
+  'subagent',
+  'notification',
+  'mcp',
+] as const;
+
+export type LifecycleScope = typeof LIFECYCLE_SCOPES[number];
 
 /**
  * Mapping from a canonical phase to a harness-native hook identifier

@@ -102,6 +102,18 @@ export function renderClaudeOutput(
       return renderPreToolUseOutput(result);
     case 'PostToolUse':
       return renderPostToolUseOutput(result);
+    case 'PostToolUseFailure':
+    case 'StopFailure':
+    case 'Setup':
+    case 'InstructionsLoaded':
+      return renderAdditionalContextOnlyOutput(result);
+    case 'PostToolBatch':
+    case 'UserPromptExpansion':
+    case 'TaskCreated':
+    case 'TaskCompleted':
+    case 'TeammateIdle':
+    case 'ConfigChange':
+      return renderBlockableOutput(result);
     case 'Stop':
       return renderStopOutput(result);
     case 'SessionStart':
@@ -111,6 +123,34 @@ export function renderClaudeOutput(
     default:
       return renderGenericOutput(result);
   }
+}
+
+function renderAdditionalContextOnlyOutput(result: UnifiedHookResult): Record<string, unknown> {
+  const output: Record<string, unknown> = {};
+
+  if (result.additionalContext != null) {
+    output['additionalContext'] = result.additionalContext;
+  }
+
+  return output;
+}
+
+function renderBlockableOutput(result: UnifiedHookResult): Record<string, unknown> {
+  const output: Record<string, unknown> = {};
+
+  if (result.decision === 'allow' || result.decision === 'deny' || result.decision === 'ask') {
+    output['decision'] = result.decision;
+  }
+
+  if (result.reason != null) {
+    output['reason'] = result.reason;
+  }
+
+  if (result.additionalContext != null) {
+    output['additionalContext'] = result.additionalContext;
+  }
+
+  return output;
 }
 
 function renderPreToolUseOutput(result: UnifiedHookResult): Record<string, unknown> {

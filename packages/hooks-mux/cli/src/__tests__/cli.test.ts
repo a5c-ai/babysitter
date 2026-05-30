@@ -16,6 +16,8 @@ vi.mock('../cli/adapter-loader', () => ({
 
 // Mock @a5c-ai/hooks-mux-core
 vi.mock('@a5c-ai/hooks-mux-core', () => ({
+  CANONICAL_PHASES: ['session.start', 'session.stop'],
+  LIFECYCLE_SCOPES: ['session', 'turn', 'tool', 'task'],
   normalizeEvent: vi.fn((opts: Record<string, unknown>) => ({
     version: 'a5c.hooks.v1',
     adapter: opts.adapter,

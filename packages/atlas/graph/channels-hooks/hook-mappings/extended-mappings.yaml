@@ -245,10 +245,10 @@ attributes:
   requiresRuntimeHooks: true
   adapterFamily: claude
   delivery: shell
-  blocking: false
+  blocking: true
   supportLevel: supported
   canonicalPhase: tool.after_batch
-  blockCapability: false
+  blockCapability: true
   mutationCapability: false
   scope: tool
 edges:
@@ -385,7 +385,7 @@ attributes:
   delivery: shell
   blocking: true
   supportLevel: supported
-  canonicalPhase: session.config_change
+  canonicalPhase: session.config_changed
   blockCapability: true
   mutationCapability: false
   scope: session

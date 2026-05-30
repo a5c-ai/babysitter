@@ -7,6 +7,7 @@
 
 import { callHook } from "../../hooks/dispatcher";
 import type { HookType, HookResult } from "../../hooks/types";
+import { RunFailedError } from "../exceptions";
 
 export interface RuntimeHookOptions {
   cwd: string;
@@ -70,6 +71,20 @@ export async function callRuntimeHook(
       error: errorMessage,
       executedHooks: [],
     };
+  }
+}
+
+export function assertRuntimeHookAllowed(result: HookResult, hookType: HookType): void {
+  const output = result.output;
+  if (!output || typeof output !== "object" || Array.isArray(output)) return;
+
+  const decision = (output as Record<string, unknown>).decision;
+  if (decision === "deny" || decision === "ask") {
+    const reason = (output as Record<string, unknown>).reason;
+    throw new RunFailedError(
+      `Runtime hook ${hookType} blocked execution${typeof reason === "string" && reason ? `: ${reason}` : ""}`,
+      { details: { hookType, decision, reason } },
+    );
   }
 }
 

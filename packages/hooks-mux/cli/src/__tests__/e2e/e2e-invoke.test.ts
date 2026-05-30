@@ -555,12 +555,116 @@ describe('invoke — full CLI pipeline (e2e)', { timeout: 30000 }, () => {
         },
       },
       {
+        nativeEventName: 'PostToolUseFailure',
+        expectedPhase: 'tool.after_failure',
+        stdin: {
+          session_id: 'e2e-phase-post-tool-failure',
+          tool_name: 'Bash',
+          tool_input: { command: 'npm test' },
+          error: 'Command failed',
+          exit_code: 1,
+        },
+      },
+      {
+        nativeEventName: 'PostToolBatch',
+        expectedPhase: 'tool.after_batch',
+        stdin: {
+          session_id: 'e2e-phase-post-tool-batch',
+          batch_results: [
+            { tool_name: 'Bash', tool_input: { command: 'npm test' }, success: true, output: 'ok' },
+          ],
+        },
+      },
+      {
         nativeEventName: 'Stop',
         expectedPhase: 'turn.stop',
         stdin: {
           session_id: 'e2e-phase-stop',
           reason: 'end_turn',
           last_assistant_message: 'Done.',
+        },
+      },
+      {
+        nativeEventName: 'StopFailure',
+        expectedPhase: 'turn.stop_failure',
+        stdin: {
+          session_id: 'e2e-phase-stop-failure',
+          error_type: 'rate_limit',
+          error_message: 'Too many requests',
+          retry_after: 60,
+        },
+      },
+      {
+        nativeEventName: 'UserPromptExpansion',
+        expectedPhase: 'turn.prompt_expansion',
+        stdin: {
+          session_id: 'e2e-phase-prompt-expansion',
+          expansion_type: 'slash_command',
+          command_name: 'review',
+          command_args: ['--quick'],
+          command_source: 'project',
+          prompt: '/review --quick',
+        },
+      },
+      {
+        nativeEventName: 'TaskCreated',
+        expectedPhase: 'task.created',
+        stdin: {
+          session_id: 'e2e-phase-task-created',
+          task_id: 'task-1',
+          task_kind: 'agent',
+          task_title: 'Implement hook',
+          task_labels: ['hooks-mux'],
+        },
+      },
+      {
+        nativeEventName: 'TaskCompleted',
+        expectedPhase: 'task.completed',
+        stdin: {
+          session_id: 'e2e-phase-task-completed',
+          task_id: 'task-1',
+          task_kind: 'agent',
+          task_status: 'ok',
+          task_result: { passed: true },
+        },
+      },
+      {
+        nativeEventName: 'TeammateIdle',
+        expectedPhase: 'team.idle',
+        stdin: {
+          session_id: 'e2e-phase-teammate-idle',
+          agent_id: 'agent-1',
+          agent_type: 'worker',
+          idle_reason: 'queue_empty',
+        },
+      },
+      {
+        nativeEventName: 'Setup',
+        expectedPhase: 'session.setup',
+        stdin: {
+          session_id: 'e2e-phase-setup',
+          trigger: 'init',
+        },
+      },
+      {
+        nativeEventName: 'InstructionsLoaded',
+        expectedPhase: 'session.instructions_loaded',
+        stdin: {
+          session_id: 'e2e-phase-instructions-loaded',
+          file_path: 'AGENTS.md',
+          memory_type: 'project',
+          load_reason: 'session_start',
+          globs: ['**/AGENTS.md'],
+        },
+      },
+      {
+        nativeEventName: 'ConfigChange',
+        expectedPhase: 'session.config_changed',
+        stdin: {
+          session_id: 'e2e-phase-config-change',
+          config_path: '.claude/settings.json',
+          change_type: 'update',
+          setting_key: 'hooks',
         },
       },
     ] as const;

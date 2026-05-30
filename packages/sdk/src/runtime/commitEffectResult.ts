@@ -1,4 +1,5 @@
 import { appendEvent } from "../storage/journal";
+import path from "node:path";
 import { withRunLock } from "../storage/lock";
 import { buildEffectIndex } from "./replay/effectIndex";
 import {
@@ -15,6 +16,7 @@ import { serializeAndWriteTaskResult } from "../tasks/serializer";
 import { readTaskDefinition } from "../storage/tasks";
 import { rebuildStateCache } from "./replay/stateCache";
 import { checkRunWorkDirLeak } from "./workDirLeak";
+import { assertRuntimeHookAllowed, callRuntimeHook } from "./hooks/runtime";
 
 export async function commitEffectResult(options: CommitEffectResultOptions): Promise<CommitEffectResultArtifacts> {
   return await withRunLock(options.runDir, "runtime:commitEffectResult", async () => {
@@ -35,6 +37,23 @@ export async function commitEffectResult(options: CommitEffectResultOptions): Pr
     ensureInvocationKeyMatches(options, record);
 
     const resultPayload = buildResultPayload(options);
+    const taskCompletedHookResult = await callRuntimeHook(
+      "task.completed",
+      {
+        runId: path.basename(options.runDir),
+        task_id: options.effectId,
+        task_kind: record.kind,
+        task_status: options.result.status,
+        task_result: options.result.status === "ok" ? options.result.value : options.result.error,
+        taskId: record.taskId,
+        effectId: options.effectId,
+        kind: record.kind,
+        status: options.result.status,
+        result: options.result.status === "ok" ? options.result.value : options.result.error,
+      },
+      { cwd: options.runDir, logger: options.logger },
+    );
+    assertRuntimeHookAllowed(taskCompletedHookResult, "task.completed");
 
     const { resultRef, stdoutRef: writtenStdoutRef, stderrRef: writtenStderrRef } = await serializeAndWriteTaskResult({
       runDir: options.runDir,

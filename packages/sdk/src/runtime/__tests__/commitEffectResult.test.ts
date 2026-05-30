@@ -1,7 +1,8 @@
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import os from "os";
 import path from "path";
 import { promises as fs } from "fs";
+import * as runtimeHooks from "../hooks/runtime";
 import { commitEffectResult } from "../commitEffectResult";
 import { runTaskIntrinsic } from "../intrinsics/task";
 import { DefinedTask } from "../types";
@@ -32,6 +33,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   await fs.rm(tmpRoot, { recursive: true, force: true });
 });
 
@@ -211,6 +213,62 @@ describe("commitEffectResult", () => {
 
     const taskResult = await readTaskResult(effect.runDir, effect.effectId);
     expect(taskResult?.sdkVersion).toBe(BABYSITTER_SDK_VERSION);
+  });
+
+  test("emits task.completed runtime hook with task and run metadata before resolving", async () => {
+    const effect = await requestSampleEffect("run-completed-hook");
+    const hookSpy = vi.spyOn(runtimeHooks, "callRuntimeHook").mockResolvedValue({
+      hookType: "task.completed",
+      success: true,
+      executedHooks: [],
+    });
+
+    await commitEffectResult({
+      runDir: effect.runDir,
+      effectId: effect.effectId,
+      result: {
+        status: "ok",
+        value: { doubled: 4 },
+      },
+    });
+
+    expect(hookSpy).toHaveBeenCalledWith(
+      "task.completed",
+      expect.objectContaining({
+        runId: "run-completed-hook",
+        task_id: effect.effectId,
+        task_kind: "node",
+        task_status: "ok",
+        task_result: { doubled: 4 },
+        taskId: "commit-test-task",
+        effectId: effect.effectId,
+        kind: "node",
+        status: "ok",
+        result: { doubled: 4 },
+      }),
+      expect.objectContaining({ cwd: effect.runDir }),
+    );
+  });
+
+  test("honors blocking task.completed runtime hook decisions", async () => {
+    const effect = await requestSampleEffect("run-completed-blocked");
+    vi.spyOn(runtimeHooks, "callRuntimeHook").mockResolvedValue({
+      hookType: "task.completed",
+      success: true,
+      output: { decision: "deny", reason: "completion blocked" },
+      executedHooks: [],
+    });
+
+    await expect(
+      commitEffectResult({
+        runDir: effect.runDir,
+        effectId: effect.effectId,
+        result: {
+          status: "ok",
+          value: { doubled: 4 },
+        },
+      }),
+    ).rejects.toThrow(/completion blocked/);
   });
 
   test("refreshes the state cache after resolving an effect", async () => {
@@ -466,8 +524,8 @@ describe("commitEffectCancellation", () => {
   });
 });
 
-async function requestSampleEffect() {
-  const { runDir, runId } = await createTestRun(tmpRoot);
+async function requestSampleEffect(runIdOverride?: string) {
+  const { runDir, runId } = await createTestRun(tmpRoot, runIdOverride);
   const context = await buildTaskContext(runDir, runId);
 
   try {
@@ -480,6 +538,7 @@ async function requestSampleEffect() {
     if (error instanceof EffectRequestedError) {
       return {
         runDir,
+        runId,
         effectId: error.action.effectId,
         invocationKey: error.action.invocationKey,
       };

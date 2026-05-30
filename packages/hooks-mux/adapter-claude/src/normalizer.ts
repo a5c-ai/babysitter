@@ -1,5 +1,5 @@
 import type { UnifiedHookEvent, UnifiedExecutionContext } from '@a5c-ai/hooks-mux-core';
-import { CLAUDE_PHASE_MAPPINGS, getClaudePhaseMapping } from './mappings';
+import { getClaudePhaseMapping } from './mappings';
 
 let _adapterName: string;
 
@@ -48,6 +48,20 @@ export interface ClaudePostToolUsePayload extends ClaudeStdinBase {
   tool_response?: unknown;
 }
 
+/** PostToolUseFailure-specific fields. */
+export interface ClaudePostToolUseFailurePayload extends ClaudeStdinBase {
+  tool_name?: string;
+  tool_call_id?: string;
+  tool_input?: unknown;
+  error?: unknown;
+  exit_code?: number;
+}
+
+/** PostToolBatch-specific fields. */
+export interface ClaudePostToolBatchPayload extends ClaudeStdinBase {
+  batch_results?: unknown[];
+}
+
 /** Stop-specific fields. */
 export interface ClaudeStopPayload extends ClaudeStdinBase {
   reason?: string;
@@ -55,8 +69,24 @@ export interface ClaudeStopPayload extends ClaudeStdinBase {
   stop_hook_active?: boolean;
 }
 
+/** StopFailure-specific fields. */
+export interface ClaudeStopFailurePayload extends ClaudeStdinBase {
+  error_type?: string;
+  error_message?: string;
+  retry_after?: number;
+}
+
 /** UserPromptSubmit-specific fields. */
 export interface ClaudeUserPromptSubmitPayload extends ClaudeStdinBase {
+  prompt?: string;
+}
+
+/** UserPromptExpansion-specific fields. */
+export interface ClaudeUserPromptExpansionPayload extends ClaudeStdinBase {
+  expansion_type?: string;
+  command_name?: string;
+  command_args?: unknown;
+  command_source?: string;
   prompt?: string;
 }
 
@@ -65,6 +95,51 @@ export interface ClaudeSubagentStopPayload extends ClaudeStdinBase {
   agent_type?: string;
   reason?: string;
   last_assistant_message?: string;
+}
+
+/** TaskCreated-specific fields. */
+export interface ClaudeTaskCreatedPayload extends ClaudeStdinBase {
+  task_id?: string;
+  task_kind?: string;
+  task_title?: string;
+  task_labels?: string[];
+}
+
+/** TaskCompleted-specific fields. */
+export interface ClaudeTaskCompletedPayload extends ClaudeStdinBase {
+  task_id?: string;
+  task_kind?: string;
+  task_status?: string;
+  task_result?: unknown;
+}
+
+/** TeammateIdle-specific fields. */
+export interface ClaudeTeammateIdlePayload extends ClaudeStdinBase {
+  agent_id?: string;
+  agent_type?: string;
+  idle_reason?: string;
+}
+
+/** Setup-specific fields. */
+export interface ClaudeSetupPayload extends ClaudeStdinBase {
+  trigger?: string;
+}
+
+/** InstructionsLoaded-specific fields. */
+export interface ClaudeInstructionsLoadedPayload extends ClaudeStdinBase {
+  file_path?: string;
+  memory_type?: string;
+  load_reason?: string;
+  globs?: string[];
+  trigger_file_path?: string;
+  parent_file_path?: string;
+}
+
+/** ConfigChange-specific fields. */
+export interface ClaudeConfigChangePayload extends ClaudeStdinBase {
+  config_path?: string;
+  change_type?: string;
+  setting_key?: string;
 }
 
 /** MessageDisplay-specific fields. */
@@ -178,13 +253,39 @@ export function buildPayload(
       if (stdinData.tool_response != null) payload.toolResponse = stdinData.tool_response;
       break;
 
+    case 'PostToolUseFailure':
+      if (stdinData.tool_name != null) payload.toolName = stdinData.tool_name;
+      if (stdinData.tool_call_id != null) payload.toolCallId = stdinData.tool_call_id;
+      if (stdinData.tool_input != null) payload.toolInput = stdinData.tool_input;
+      if (stdinData.error != null) payload.error = stdinData.error;
+      if (stdinData.exit_code != null) payload.exitCode = stdinData.exit_code;
+      break;
+
+    case 'PostToolBatch':
+      if (stdinData.batch_results != null) payload.batchResults = stdinData.batch_results;
+      break;
+
     case 'Stop':
       if (stdinData.reason != null) payload.reason = stdinData.reason;
       if (stdinData.last_assistant_message != null) payload.lastAssistantMessage = stdinData.last_assistant_message;
       if (stdinData.stop_hook_active != null) payload.stopHookActive = stdinData.stop_hook_active;
       break;
 
+    case 'StopFailure':
+      if (stdinData.error_type != null) payload.errorType = stdinData.error_type;
+      if (stdinData.error_message != null) payload.errorMessage = stdinData.error_message;
+      if (stdinData.retry_after != null) payload.retryAfter = stdinData.retry_after;
+      break;
+
     case 'UserPromptSubmit':
+      if (stdinData.prompt != null) payload.prompt = stdinData.prompt;
+      break;
+
+    case 'UserPromptExpansion':
+      if (stdinData.expansion_type != null) payload.expansionType = stdinData.expansion_type;
+      if (stdinData.command_name != null) payload.commandName = stdinData.command_name;
+      if (stdinData.command_args != null) payload.commandArgs = stdinData.command_args;
+      if (stdinData.command_source != null) payload.commandSource = stdinData.command_source;
       if (stdinData.prompt != null) payload.prompt = stdinData.prompt;
       break;
 
@@ -192,6 +293,45 @@ export function buildPayload(
       if (stdinData.agent_type != null) payload.agentType = stdinData.agent_type;
       if (stdinData.reason != null) payload.reason = stdinData.reason;
       if (stdinData.last_assistant_message != null) payload.lastAssistantMessage = stdinData.last_assistant_message;
+      break;
+
+    case 'TaskCreated':
+      if (stdinData.task_id != null) payload.taskId = stdinData.task_id;
+      if (stdinData.task_kind != null) payload.taskKind = stdinData.task_kind;
+      if (stdinData.task_title != null) payload.taskTitle = stdinData.task_title;
+      if (stdinData.task_labels != null) payload.taskLabels = stdinData.task_labels;
+      break;
+
+    case 'TaskCompleted':
+      if (stdinData.task_id != null) payload.taskId = stdinData.task_id;
+      if (stdinData.task_kind != null) payload.taskKind = stdinData.task_kind;
+      if (stdinData.task_status != null) payload.taskStatus = stdinData.task_status;
+      if (stdinData.task_result != null) payload.taskResult = stdinData.task_result;
+      break;
+
+    case 'TeammateIdle':
+      if (stdinData.agent_id != null) payload.agentId = stdinData.agent_id;
+      if (stdinData.agent_type != null) payload.agentType = stdinData.agent_type;
+      if (stdinData.idle_reason != null) payload.idleReason = stdinData.idle_reason;
+      break;
+
+    case 'Setup':
+      if (stdinData.trigger != null) payload.trigger = stdinData.trigger;
+      break;
+
+    case 'InstructionsLoaded':
+      if (stdinData.file_path != null) payload.filePath = stdinData.file_path;
+      if (stdinData.memory_type != null) payload.memoryType = stdinData.memory_type;
+      if (stdinData.load_reason != null) payload.loadReason = stdinData.load_reason;
+      if (stdinData.globs != null) payload.globs = stdinData.globs;
+      if (stdinData.trigger_file_path != null) payload.triggerFilePath = stdinData.trigger_file_path;
+      if (stdinData.parent_file_path != null) payload.parentFilePath = stdinData.parent_file_path;
+      break;
+
+    case 'ConfigChange':
+      if (stdinData.config_path != null) payload.configPath = stdinData.config_path;
+      if (stdinData.change_type != null) payload.changeType = stdinData.change_type;
+      if (stdinData.setting_key != null) payload.settingKey = stdinData.setting_key;
       break;
 
     case 'PreCompact':

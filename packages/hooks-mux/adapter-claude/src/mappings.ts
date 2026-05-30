@@ -1,3 +1,4 @@
+import { CANONICAL_PHASES, LIFECYCLE_SCOPES } from '@a5c-ai/hooks-mux-core';
 import type { PhaseMapping } from '@a5c-ai/hooks-mux-core';
 import { listHookMappingsByAdapterFamily } from '@a5c-ai/agent-catalog';
 import type { HookMappingDescriptor } from '@a5c-ai/agent-catalog';
@@ -20,15 +21,33 @@ const SUPPORT_LEVEL_MAP: Record<string, PhaseMapping['supportLevel']> = {
   unsupported: 'unsupported',
 };
 
+const CANONICAL_PHASE_SET = new Set<string>(CANONICAL_PHASES);
+const LIFECYCLE_SCOPE_SET = new Set<string>(LIFECYCLE_SCOPES);
+
+function asCanonicalPhase(value: string, nativeName: string): PhaseMapping['canonicalPhase'] {
+  if (CANONICAL_PHASE_SET.has(value)) {
+    return value as PhaseMapping['canonicalPhase'];
+  }
+  throw new Error(`hooks-mux adapter-claude: unknown canonical phase "${value}" for ${nativeName}`);
+}
+
+function asPhaseScope(value: string | undefined, nativeName: string): PhaseMapping['scope'] {
+  const scope = value ?? 'session';
+  if (LIFECYCLE_SCOPE_SET.has(scope) || scope === 'gateway') {
+    return scope as PhaseMapping['scope'];
+  }
+  throw new Error(`hooks-mux adapter-claude: unknown lifecycle scope "${scope}" for ${nativeName}`);
+}
+
 function hookMappingToPhaseMapping(mapping: HookMappingDescriptor): PhaseMapping | null {
   if (!mapping.canonicalPhase) return null;
   return {
-    canonicalPhase: mapping.canonicalPhase as PhaseMapping['canonicalPhase'],
+    canonicalPhase: asCanonicalPhase(mapping.canonicalPhase, mapping.nativeName),
     nativeHook: mapping.nativeName,
     supportLevel: SUPPORT_LEVEL_MAP[mapping.supportLevel] ?? 'native',
     blockCapability: mapping.blockCapability ?? false,
     mutationCapability: mapping.mutationCapability ?? false,
-    scope: (mapping.scope ?? 'session') as PhaseMapping['scope'],
+    scope: asPhaseScope(mapping.scope, mapping.nativeName),
   };
 }
 

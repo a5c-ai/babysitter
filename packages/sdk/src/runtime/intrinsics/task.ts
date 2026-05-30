@@ -21,6 +21,7 @@ import type {
   TaskInvokeOptions,
 } from "../types";
 import { emitRuntimeMetric } from "../instrumentation";
+import { assertRuntimeHookAllowed, callRuntimeHook } from "../hooks/runtime";
 import { createTaskBuildContext } from "../../tasks/context";
 import { globalTaskRegistry } from "../../tasks/registry";
 import { serializeAndWriteTaskDefinition } from "../../tasks/serializer";
@@ -119,6 +120,25 @@ async function requestNewEffect<TArgs, TResult>(
   if (!taskDef || typeof taskDef.kind !== "string") {
     throw new InvalidTaskDefinitionError(`Task ${options.task.id} did not provide a kind`);
   }
+
+  const taskCreatedHookResult = await callRuntimeHook(
+    "task.created",
+    {
+      runId: options.context.runId,
+      processId: options.context.processId,
+      task_id: effectId,
+      task_kind: taskDef.kind,
+      task_title: taskDef.title,
+      task_labels: taskDef.labels,
+      taskId: options.task.id,
+      effectId,
+      kind: taskDef.kind,
+      title: taskDef.title,
+      labels: taskDef.labels,
+    },
+    { cwd: options.context.runDir, logger: options.context.logger },
+  );
+  assertRuntimeHookAllowed(taskCreatedHookResult, "task.created");
 
   // Policy evaluation
   if (options.context.policyEngine) {

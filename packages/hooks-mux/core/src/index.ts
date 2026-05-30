@@ -1,4 +1,5 @@
 // Types
+export { CANONICAL_PHASES, LIFECYCLE_SCOPES } from './types/lifecycle';
 export type { CanonicalPhase, LifecycleScope, PhaseMapping, SupportLevel } from './types/lifecycle';
 export type { UnifiedHookEvent, UnifiedExecutionContext } from './types/event';
 export type { UnifiedHookResult } from './types/result';

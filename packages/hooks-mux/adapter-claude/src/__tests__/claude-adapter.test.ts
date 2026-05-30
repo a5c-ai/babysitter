@@ -40,13 +40,23 @@ describe('mappings', () => {
   it('maps all Claude events to canonical phases', () => {
     const expected: Record<string, string> = {
       SessionStart: 'session.start',
+      Setup: 'session.setup',
       SessionEnd: 'session.end',
       PreCompact: 'session.compact.before',
       UserPromptSubmit: 'turn.user_prompt_submitted',
+      UserPromptExpansion: 'turn.prompt_expansion',
       PreToolUse: 'tool.before',
       PostToolUse: 'tool.after',
+      PostToolUseFailure: 'tool.after_failure',
+      PostToolBatch: 'tool.after_batch',
       Stop: 'turn.stop',
+      StopFailure: 'turn.stop_failure',
       SubagentStop: 'subagent.end',
+      TaskCreated: 'task.created',
+      TaskCompleted: 'task.completed',
+      TeammateIdle: 'team.idle',
+      ConfigChange: 'session.config_changed',
+      InstructionsLoaded: 'session.instructions_loaded',
       Notification: 'notification',
       MessageDisplay: 'message.received',
     };
@@ -104,12 +114,48 @@ describe('mappings', () => {
     expect(mapping!.blockCapability).toBe(false);
   });
 
+  it('marks issue #636 blockable Claude events as blockable', () => {
+    for (const eventName of [
+      'PostToolBatch',
+      'UserPromptExpansion',
+      'TaskCreated',
+      'TaskCompleted',
+      'TeammateIdle',
+      'ConfigChange',
+    ]) {
+      expect(getClaudePhaseMapping(eventName)?.blockCapability, eventName).toBe(true);
+    }
+  });
+
+  it('marks issue #636 non-blocking Claude events as non-blocking', () => {
+    for (const eventName of [
+      'PostToolUseFailure',
+      'StopFailure',
+      'Setup',
+      'InstructionsLoaded',
+      'MessageDisplay',
+    ]) {
+      expect(getClaudePhaseMapping(eventName)?.blockCapability, eventName).toBe(false);
+    }
+  });
+
   it('getSupportedPhases returns all mapped phases', () => {
     const phases = getSupportedPhases();
     expect(phases).toContain('session.start');
+    expect(phases).toContain('session.setup');
+    expect(phases).toContain('session.instructions_loaded');
     expect(phases).toContain('tool.before');
     expect(phases).toContain('tool.after');
+    expect(phases).toContain('tool.after_failure');
+    expect(phases).toContain('tool.after_batch');
     expect(phases).toContain('turn.stop');
+    expect(phases).toContain('turn.stop_failure');
+    expect(phases).toContain('turn.prompt_expansion');
+    expect(phases).toContain('task.created');
+    expect(phases).toContain('task.completed');
+    expect(phases).toContain('team.idle');
+    expect(phases).toContain('session.config_changed');
+    expect(phases).not.toContain('session.config_change');
     expect(phases.length).toBe(CLAUDE_PHASE_MAPPINGS.length);
   });
 });
@@ -205,6 +251,131 @@ describe('normalizeClaude', () => {
       expect(event.phase).toBe('tool.after');
       expect(event.payload.toolName).toBe('Bash');
       expect(event.payload.toolResponse).toBe('All 42 tests passed.');
+    });
+  });
+
+  describe('Issue #636 extended event normalization', () => {
+    it('normalizes PostToolUseFailure payload fields', () => {
+      const event = normalizeClaude('PostToolUseFailure', {
+        session_id: 'sess_failure',
+        tool_name: 'Bash',
+        tool_input: { command: 'npm test' },
+        error: 'Command failed',
+        exit_code: 1,
+      });
+
+      expect(event.phase).toBe('tool.after_failure');
+      expect(event.execution.toolName).toBe('Bash');
+      expect(event.payload).toMatchObject({
+        toolName: 'Bash',
+        toolInput: { command: 'npm test' },
+        error: 'Command failed',
+        exitCode: 1,
+      });
+    });
+
+    it('normalizes PostToolBatch payload fields', () => {
+      const event = normalizeClaude('PostToolBatch', {
+        session_id: 'sess_batch',
+        batch_results: [
+          { tool_name: 'Bash', tool_input: { command: 'npm test' }, success: true, output: 'ok' },
+        ],
+      });
+
+      expect(event.phase).toBe('tool.after_batch');
+      expect(event.payload.batchResults).toEqual([
+        { tool_name: 'Bash', tool_input: { command: 'npm test' }, success: true, output: 'ok' },
+      ]);
+    });
+
+    it('normalizes StopFailure payload fields', () => {
+      const event = normalizeClaude('StopFailure', {
+        session_id: 'sess_stop_failure',
+        error_type: 'rate_limit',
+        error_message: 'Too many requests',
+        retry_after: 60,
+      });
+
+      expect(event.phase).toBe('turn.stop_failure');
+      expect(event.payload).toMatchObject({
+        errorType: 'rate_limit',
+        errorMessage: 'Too many requests',
+        retryAfter: 60,
+      });
+    });
+
+    it('normalizes UserPromptExpansion payload fields', () => {
+      const event = normalizeClaude('UserPromptExpansion', {
+        session_id: 'sess_prompt_expansion',
+        expansion_type: 'slash_command',
+        command_name: 'review',
+        command_args: ['--quick'],
+        command_source: 'project',
+        prompt: '/review --quick',
+      });
+
+      expect(event.phase).toBe('turn.prompt_expansion');
+      expect(event.payload).toMatchObject({
+        expansionType: 'slash_command',
+        commandName: 'review',
+        commandArgs: ['--quick'],
+        commandSource: 'project',
+        prompt: '/review --quick',
+      });
+    });
+
+    it('normalizes task, team, setup, instructions, and config events', () => {
+      expect(normalizeClaude('TaskCreated', {
+        task_id: 'task-1',
+        task_kind: 'agent',
+        task_title: 'Implement hook',
+        task_labels: ['hooks-mux'],
+      }).payload).toMatchObject({
+        taskId: 'task-1',
+        taskKind: 'agent',
+        taskTitle: 'Implement hook',
+        taskLabels: ['hooks-mux'],
+      });
+
+      expect(normalizeClaude('TaskCompleted', {
+        task_id: 'task-1',
+        task_kind: 'agent',
+        task_status: 'ok',
+        task_result: { passed: true },
+      }).phase).toBe('task.completed');
+
+      expect(normalizeClaude('TeammateIdle', {
+        agent_id: 'agent-1',
+        agent_type: 'worker',
+        idle_reason: 'queue_empty',
+      }).payload).toMatchObject({
+        agentId: 'agent-1',
+        agentType: 'worker',
+        idleReason: 'queue_empty',
+      });
+
+      expect(normalizeClaude('Setup', { trigger: 'init' }).phase).toBe('session.setup');
+      expect(normalizeClaude('InstructionsLoaded', {
+        file_path: 'AGENTS.md',
+        memory_type: 'project',
+        load_reason: 'session_start',
+        globs: ['**/AGENTS.md'],
+        trigger_file_path: 'src/index.ts',
+        parent_file_path: 'AGENTS.md',
+      }).payload).toMatchObject({
+        filePath: 'AGENTS.md',
+        memoryType: 'project',
+        loadReason: 'session_start',
+        globs: ['**/AGENTS.md'],
+        triggerFilePath: 'src/index.ts',
+        parentFilePath: 'AGENTS.md',
+      });
+
+      expect(normalizeClaude('ConfigChange', {
+        config_path: '.claude/settings.json',
+        change_type: 'update',
+        setting_key: 'hooks',
+      }).phase).toBe('session.config_changed');
     });
   });
 
@@ -388,6 +559,34 @@ describe('renderClaudeOutput', () => {
     it('renders empty object when no additional context', () => {
       const output = renderClaudeOutput({}, 'PostToolUse');
       expect(output).toEqual({});
+    });
+  });
+
+  describe('Issue #636 extended event rendering', () => {
+    it('renders non-blocking additional context for PostToolUseFailure, StopFailure, Setup, and InstructionsLoaded', () => {
+      for (const eventName of ['PostToolUseFailure', 'StopFailure', 'Setup', 'InstructionsLoaded']) {
+        expect(renderClaudeOutput({
+          decision: 'deny',
+          reason: 'ignored for non-blocking event',
+          additionalContext: 'diagnostic context',
+        }, eventName)).toEqual({ additionalContext: 'diagnostic context' });
+      }
+    });
+
+    it('renders blockable decisions for PostToolBatch, UserPromptExpansion, task/team, and ConfigChange', () => {
+      for (const eventName of [
+        'PostToolBatch',
+        'UserPromptExpansion',
+        'TaskCreated',
+        'TaskCompleted',
+        'TeammateIdle',
+        'ConfigChange',
+      ]) {
+        expect(renderClaudeOutput({ decision: 'deny', reason: 'blocked by policy' }, eventName)).toEqual({
+          decision: 'deny',
+          reason: 'blocked by policy',
+        });
+      }
     });
   });
 

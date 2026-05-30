@@ -7,7 +7,7 @@
 
 import type { CommandModule } from 'yargs';
 import type { AdapterCapabilities, PhaseMapping } from '@a5c-ai/hooks-mux-core';
-import { getDefaultSessionDir, getSessionFilePath } from '@a5c-ai/hooks-mux-core';
+import { CANONICAL_PHASES, getDefaultSessionDir } from '@a5c-ai/hooks-mux-core';
 import { loadAdapter, KNOWN_ADAPTERS } from '../adapter-loader';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -71,19 +71,7 @@ interface DoctorReport {
   sessionHealth: SessionHealthReport;
 }
 
-const ALL_CANONICAL_PHASES = [
-  'session.start', 'session.end', 'session.cwd_changed', 'session.file_changed',
-  'session.config_changed', 'session.compact.before', 'session.compact.after',
-  'turn.user_prompt_submitted', 'turn.before_agent', 'turn.after_agent',
-  'turn.stop', 'turn.error',
-  'model.before_request', 'model.after_response',
-  'planner.before_tool_selection',
-  'tool.before', 'tool.after', 'tool.error',
-  'tool.permission_request', 'tool.permission_denied',
-  'subagent.start', 'subagent.end',
-  'notification', 'message.received', 'message.sending', 'message.sent',
-  'mcp.elicitation', 'mcp.elicitation_result',
-];
+const ALL_CANONICAL_PHASES = [...CANONICAL_PHASES];
 
 function buildCapabilityProfile(mappings: PhaseMapping[]): CapabilityProfile {
   const supported = new Set<string>();
