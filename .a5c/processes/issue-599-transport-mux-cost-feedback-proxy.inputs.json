@@ -1,0 +1,35 @@
+{
+  "issueNumber": 599,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-599-transport-mux-cost-feedback-proxy",
+  "relatedIssues": [578, 591],
+  "scorecardGate": "packages/transport-mux scorecard:migration",
+  "planningMode": "flat-phase-list",
+  "implementationScope": [
+    "Wire transport-mux normalized cost records into an injected cost/event sink and SDK journal/L6 cost tracking integration boundary.",
+    "Add runId/sessionId/trace correlation request context for HTTP and WebSocket proxy requests without leaking internal metadata upstream by default.",
+    "Expose deterministic pluggable codec registration/discovery backed by explicit plugin or atlas metadata.",
+    "Share tool schema normalization between tool-mux and transport-mux without circular package coupling.",
+    "Update tests and scorecard-facing documentation or metadata needed to keep transport-mux provisional cutover truthful."
+  ],
+  "qualityGates": [
+    "Phase 0 reuse-audit findings are rendered before architecture work.",
+    "Runtime call paths are traced before implementation and recorded in the architecture output.",
+    "Tests are authored before implementation and cover buffered, streaming, WebSocket, passthrough, and codec/plugin behavior.",
+    "Cost emission is verified to happen exactly once per usage-bearing buffered completion or stream done event.",
+    "Session/run/trace context is available to sinks and traces and stripped from upstream passthrough unless explicitly allowed.",
+    "Codec discovery is deterministic and duplicate/unknown codec behavior is tested.",
+    "tool-mux and transport-mux schema translation share a canonical path with no circular dependency.",
+    "Architecture/privacy review and final acceptance review both approve before delivery."
+  ],
+  "requiredCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/transport-mux/src/__tests__/codecs.test.ts packages/transport-mux/tests/server.test.ts packages/transport-mux/tests/runtime.test.ts packages/transport-mux/tests/transports/anthropic.test.ts packages/transport-mux/tests/transports/openai-chat.test.ts packages/transport-mux/tests/transports/openai-responses.test.ts packages/transport-mux/tests/transports/google.test.ts packages/transport-mux/tests/transports/vertex-native.test.ts packages/transport-mux/tests/transports/bedrock-converse.test.ts packages/transport-mux/tests/transports/azure-foundry.test.ts packages/transport-mux/tests/transports/passthrough.test.ts",
+    "npm run build --workspace=@a5c-ai/transport-mux",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "node packages/transport-mux/scripts/migration-scorecard.mjs",
+    "git diff --check"
+  ],
+  "entry": ".a5c/processes/issue-599-transport-mux-cost-feedback-proxy.mjs#process"
+}
