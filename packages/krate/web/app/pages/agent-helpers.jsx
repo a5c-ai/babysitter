@@ -91,7 +91,7 @@ export function FlowLane({ run, transcript }) {
 }
 
 export function FlowVisualization({ runs = [], transcripts = [] }) {
-  if (!runs.length) return <EmptyState title="No execution flow data" text="Flow visualization appears when dispatch runs have been created for this session." />;
+  if (!runs.length) return <EmptyState title="No execution flow data" text="Flow visualization appears when dispatch runs have been created for this session." cta="/agents/runs" ctaLabel="View dispatch runs" />;
   return <div>{runs.map((run) => {
     const runName = run?.metadata?.name;
     const sessionRef = run?.status?.sessionRef || run?.spec?.sessionRef || null;
@@ -145,7 +145,7 @@ export function IssueKanbanView({ model, issues, repo = null, project = null }) 
 }
 
 export function IssueListView({ model, issues, repo = null, project = null }) {
-  if (!issues.length) return <EmptyState title="No scoped issues" text="Create or sync an issue with matching project and repository metadata to show it here." />;
+  if (!issues.length) return <EmptyState title="No scoped issues" text="Create or sync an issue with matching project and repository metadata to show it here." cta={repo ? orgHref(model?.org?.slug || 'default', `/repositories/${repo}/issues`) : '/agents/projects'} ctaLabel={repo ? 'View repository issues' : 'View projects'} />;
   return <ul className="resourceList issueList">{issues.map((issue) => <li key={issue.metadata?.name}><a href={issueDetailHref(model, issue, { repo, project })}><strong>{issue.spec?.title || issue.metadata?.name}</strong></a><span>{issue.status?.phase || issue.spec?.status || 'Open'}</span><small>{issueLabels(issue).join(', ') || 'no labels'} · repos: {issueRepositoryRefs(issue).join(', ') || 'none'}</small></li>)}</ul>;
 }
 

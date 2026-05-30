@@ -2,6 +2,7 @@
 import { loadKrateUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/krate-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { EnhancedKanbanBoard } from '../components/kanban/kanban-enhanced.jsx';
+import { ProjectEditForm } from '../components/agent/project-edit-form.jsx';
 import { ResourceActions, InlineCreateForm } from '../components/resource-crud-actions.jsx';
 import { IssueWorkspace, issuesForScope, IssueDetailView } from './agent-helpers.jsx';
 
@@ -37,7 +38,7 @@ export async function AgentProjectsPage({ org = null } = {}) {
               <ResourceActions org={activeOrg} apiPath={`resources/KrateProject/${name}`} actions={['archive', 'delete']} />
             </div>
           </div>;
-        })}</section> : <EmptyState title="No projects yet" text="Projects organize agent work into boards with columns. Use the form to create your first project." />}
+        })}</section> : <EmptyState title="No projects yet" text="Projects organize agent work into boards with columns. Use the form on the right to create your first project." cta={orgHref(activeOrg, '/agents')} ctaLabel="Agent overview" />}
       </div>
       <InlineCreateForm
         org={activeOrg}
@@ -77,10 +78,33 @@ export async function AgentProjectBoardPage({ org = null, projectId } = {}) {
   });
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`project / ${displayName}`} title={displayName} text={project ? (project.spec?.description || `Kanban board for project ${displayName}.`) : 'This project was not found in the current workspace.'} actions={[[`/agents/projects/${projectId}/issues`, 'Issue view'], ['/agents/projects', 'All projects'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/projects', 'Projects'], [`/agents/projects/${projectId}`, displayName]]}>
     <DegradedBanner model={ui.model} />
-    {project ? <div className="card">
-      <div className="cardTitle"><h2>Board</h2><StatusPill tone={enrichedItems.length ? 'good' : 'neutral'}>{enrichedItems.length} items</StatusPill></div>
-      <EnhancedKanbanBoard project={project} initialIssues={enrichedItems} org={activeOrg} workspaces={workspaces} sessions={sessions} />
-    </div> : <EmptyState title={`Project ${projectId} not found`} text="This project does not exist in the current workspace. Create it through Krate resource definitions." />}
+    {project ? <>
+      <section className="routeGrid two" style={{ alignItems: 'start' }}>
+        <div className="card">
+          <div className="cardTitle"><h3>Project details</h3><StatusPill tone={project.status?.phase === 'Active' ? 'good' : 'neutral'}>{project.status?.phase || 'Active'}</StatusPill></div>
+          <dl className="kv">
+            <dt>Name</dt><dd>{project.metadata?.name}</dd>
+            <dt>Display name</dt><dd>{project.spec?.displayName || project.metadata?.name}</dd>
+            <dt>Description</dt><dd>{project.spec?.description || 'No description'}</dd>
+            <dt>Workflow</dt><dd>{(project.spec?.workflow || project.spec?.workflowColumns || []).join(', ') || 'default'}</dd>
+          </dl>
+          <ProjectEditForm org={activeOrg} project={project} />
+        </div>
+        <div className="card">
+          <div className="cardTitle"><h3>Metadata</h3><StatusPill tone="neutral">resource</StatusPill></div>
+          <dl className="kv">
+            <dt>Namespace</dt><dd>{project.metadata?.namespace || 'krate-system'}</dd>
+            <dt>Organization</dt><dd>{project.spec?.organizationRef || activeOrg}</dd>
+            <dt>Created</dt><dd>{project.metadata?.creationTimestamp || 'unknown'}</dd>
+            <dt>Linked stacks</dt><dd>{(project.spec?.stackRefs || []).length || 0}</dd>
+          </dl>
+        </div>
+      </section>
+      <div className="card">
+        <div className="cardTitle"><h2>Board</h2><StatusPill tone={enrichedItems.length ? 'good' : 'neutral'}>{enrichedItems.length} items</StatusPill></div>
+        <EnhancedKanbanBoard project={project} initialIssues={enrichedItems} org={activeOrg} workspaces={workspaces} sessions={sessions} />
+      </div>
+    </> : <EmptyState title={`Project ${projectId} not found`} text="This project does not exist in the current workspace. Create it through Krate resource definitions." cta={orgHref(activeOrg, '/agents/projects')} ctaLabel="View all projects" />}
   </PageFrame>;
 }
 
@@ -104,6 +128,6 @@ export async function IssueDetailPage({ org = null, repo = null, projectId = nul
   const parentLabel = repo || projectId || 'Issues';
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath={repo ? '/repositories' : '/agents'} eyebrow={repo ? `repository issue / ${repo}` : `project issue / ${projectId}`} title={issue?.spec?.title || issueName} text="Edit the issue resource, review comments, and verify backend sync metadata from one full-page view." actions={[[parentHref, 'Back to issues'], [`${parentHref}?view=list`, 'List view']]} breadcrumbs={[[ '/', 'Krate' ], [ repo ? '/repositories' : '/agents/projects', repo ? 'Repositories' : 'Projects' ], [ parentHref, parentLabel ], [ `${parentHref}/${issueName}`, issueName ]]}>
     <DegradedBanner model={ui.model} />
-    {issue ? <IssueDetailView model={ui.model} issue={issue} repo={repo} project={projectId} /> : <EmptyState title="Issue is not linked to this scope" text="This issue is not associated with the selected repository or project, so it is hidden from this issue view." />}
+    {issue ? <IssueDetailView model={ui.model} issue={issue} repo={repo} project={projectId} /> : <EmptyState title="Issue is not linked to this scope" text="This issue is not associated with the selected repository or project, so it is hidden from this issue view." cta={orgHref(activeOrg, parentHref)} ctaLabel="Back to issues" />}
   </PageFrame>;
 }

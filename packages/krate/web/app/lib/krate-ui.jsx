@@ -316,7 +316,7 @@ export function PlanCard({ title, plan, compact = false, initiallyOpen = false }
 }
 
 export function ResourceTable({ resource }) {
-  if (!resource) return <EmptyState title="Resource unavailable" text="The Krate model did not include this resource definition." />;
+  if (!resource) return <EmptyState title="Resource unavailable" text="The Krate model did not include this resource definition." cta="/" ctaLabel="Go to dashboard" />;
   const label = displayKind(resource.kind);
   return <details className="card"><summary><span><h3>{label}</h3><p>{resource.count} records available. Expand for advanced details.</p></span><StatusPill tone={resource.count ? 'good' : 'neutral'}>{resource.count} returned</StatusPill></summary><code>{displayCommand(resource, 'list')}</code>{resource.names?.length ? <ul className="compactList">{resource.names.map((name) => <li key={name}>{name}</li>)}</ul> : <p className="emptyText">No {label} records returned by Krate.</p>}<PlanCard title={`${label} details`} plan={resource.yaml} command={displayCommand(resource, 'apply')} /></details>;
 }

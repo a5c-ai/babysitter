@@ -86,7 +86,7 @@ export async function AgentStackDetailPage({ org = null, name } = {}) {
           {stack.spec?.model ? <><dt>Model</dt><dd>{stack.spec.model}</dd></> : null}
           {stack.spec?.maxTokens ? <><dt>Max tokens</dt><dd>{stack.spec.maxTokens}</dd></> : null}
           {stack.spec?.budgetLimitUsd ? <><dt>Budget limit</dt><dd>${stack.spec.budgetLimitUsd}</dd></> : null}
-        </dl><StackEditForm org={activeOrg} stack={stack} /><div style={{ marginTop: 12, display: 'flex', gap: '0.5rem', alignItems: 'center' }}><StackActions org={activeOrg} stackName={name} /><CopyButton text={resourceToYaml(stack)} label="Copy as YAML" /></div></> : <EmptyState title={`Stack ${name} not found`} text="This agent stack does not exist in the current workspace. Create it through Krate resource definitions." />}
+        </dl><StackEditForm org={activeOrg} stack={stack} /><div style={{ marginTop: 12, display: 'flex', gap: '0.5rem', alignItems: 'center' }}><StackActions org={activeOrg} stackName={name} /><CopyButton text={resourceToYaml(stack)} label="Copy as YAML" /></div></> : <EmptyState title={`Stack ${name} not found`} text="This agent stack does not exist in the current workspace. Create it through Krate resource definitions." cta={orgHref(activeOrg, '/agents/stacks')} ctaLabel="View all stacks" />}
       </div>
       <div className="stack">
         <div className="card">

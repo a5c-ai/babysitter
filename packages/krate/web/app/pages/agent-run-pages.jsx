@@ -161,6 +161,6 @@ export async function AgentRunDetailPage({ org = null, runId } = {}) {
           </div> : <p className="emptyText">No transcript messages recorded. Messages appear after the agent session produces output.</p>}
         </div>
       </section>
-    </> : <EmptyState title={`Run ${runId} not found`} text="This dispatch run does not exist in the current workspace. Dispatch runs are created when agent stacks are triggered by rules or manual dispatch." />}
+    </> : <EmptyState title={`Run ${runId} not found`} text="This dispatch run does not exist in the current workspace. Dispatch runs are created when agent stacks are triggered by rules or manual dispatch." cta={orgHref(activeOrg, '/agents/runs')} ctaLabel="View all runs" />}
   </PageFrame>;
 }

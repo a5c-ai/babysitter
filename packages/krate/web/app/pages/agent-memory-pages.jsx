@@ -4,7 +4,17 @@ import { PageFrame } from '../lib/page-frame.jsx';
 import { MemorySearchForm } from '../components/workspace/memory-search-form.jsx';
 import { MemoryOntologyEditor } from '../components/workspace/memory-ontology-editor.jsx';
 import { MemoryImportReview } from '../components/workspace/memory-import-review.jsx';
+import { MemoryRepoEditForm } from '../components/workspace/memory-repo-edit-form.jsx';
 import { ResourceActions, InlineCreateForm } from '../components/resource-crud-actions.jsx';
+
+function buildMemoryRepoSpec(formData) {
+  const spec = {};
+  const repoUrl = formData.get('repoUrl');
+  if (repoUrl) spec.repoUrl = repoUrl;
+  const description = formData.get('description');
+  if (description) spec.description = description;
+  return spec;
+}
 
 export async function AgentMemoryPage({ org = null } = {}) {
   const ui = await loadKrateUi(org);
@@ -46,11 +56,14 @@ export async function AgentMemoryPage({ org = null } = {}) {
           <div className="cardTitle"><h3>Repositories</h3><StatusPill tone="good">{repoCount}</StatusPill></div>
           <div className="resourceTable">{(memoryView.repositories?.items || []).map((repo) => {
             const repoName = repo.metadata?.name;
-            return <div key={repoName} className="resourceRow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <strong>{repoName}</strong>
-              <span style={{ color: '#6b7280', fontSize: '0.8125rem' }}>{repo.spec?.repoUrl || repo.spec?.description || ''}</span>
-              <StatusPill tone={repo.status?.phase === 'Active' ? 'good' : 'neutral'}>{repo.status?.phase || 'Unknown'}</StatusPill>
-              <ResourceActions org={activeOrg} apiPath={`resources/AgentMemoryRepository/${repoName}`} actions={['delete']} />
+            return <div key={repoName} className="resourceRow" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <strong>{repoName}</strong>
+                <span style={{ color: '#6b7280', fontSize: '0.8125rem' }}>{repo.spec?.repoUrl || repo.spec?.description || ''}</span>
+                <StatusPill tone={repo.status?.phase === 'Active' ? 'good' : 'neutral'}>{repo.status?.phase || 'Unknown'}</StatusPill>
+                <MemoryRepoEditForm org={activeOrg} repo={repo} />
+                <ResourceActions org={activeOrg} apiPath={`resources/AgentMemoryRepository/${repoName}`} actions={['delete']} />
+              </div>
             </div>;
           })}</div>
         </div>
@@ -78,7 +91,7 @@ export async function AgentMemoryPage({ org = null } = {}) {
         </a>
       </section>
     </> : <section className="routeGrid two" style={{ alignItems: 'start' }}>
-      <EmptyState title="No memory repositories configured" text="Memory repositories store structured knowledge extracted from agent runs. Add one using the form." />
+      <EmptyState title="No memory repositories configured" text="Memory repositories store structured knowledge extracted from agent runs. Use the form on the right to add one." cta={orgHref(activeOrg, '/agents')} ctaLabel="Agent overview" />
       <InlineCreateForm
         org={activeOrg}
         kind="AgentMemoryRepository"
@@ -231,7 +244,7 @@ export async function AgentMemoryImportDetailPage({ org = null, importId } = {})
         <div className="cardTitle"><h3>Actions</h3><StatusPill tone={imp.status?.phase === 'AwaitingReview' ? 'info' : 'neutral'}>{imp.status?.phase === 'AwaitingReview' ? 'review required' : 'read-only'}</StatusPill></div>
         <MemoryImportReview org={activeOrg} imports={[imp]} />
       </div>
-    </> : <EmptyState title={`Import ${importId} not found`} text="This memory import does not exist in the current workspace. Memory imports are created when agent runs produce knowledge artifacts." />}
+    </> : <EmptyState title={`Import ${importId} not found`} text="This memory import does not exist in the current workspace. Memory imports are created when agent runs produce knowledge artifacts." cta={orgHref(activeOrg, '/agents/memory/imports')} ctaLabel="View all imports" />}
   </PageFrame>;
 }
 

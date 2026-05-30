@@ -113,7 +113,7 @@ export async function SSHKeysPage({ org = null } = {}) {
             {fingerprint ? <small style={{ color: '#6b7280', fontFamily: 'monospace', fontSize: '0.75rem' }}>{fingerprint.substring(0, 20)}</small> : null}
             <ResourceActions org={activeOrg} apiPath={`resources/SSHKey/${name}`} actions={phase === 'Revoked' ? ['delete'] : ['revoke', 'delete']} />
           </div>;
-        })}</div> : <EmptyState title="No SSH keys" text="Add deploy keys for CI/CD pipelines, user SSH keys for developer access, or automation keys for agent workspaces." />}
+        })}</div> : <EmptyState title="No SSH keys" text="Add deploy keys for CI/CD pipelines, user SSH keys for developer access, or automation keys for agent workspaces. Use the form on the right to add one." cta={orgHref(activeOrg, '/people')} ctaLabel="Manage people" />}
       </div>
       <InlineCreateForm
         org={activeOrg}
@@ -163,7 +163,7 @@ export async function RepositoryPermissionsPage({ org = null } = {}) {
               <ResourceActions org={activeOrg} apiPath={`resources/RepositoryPermission/${name}`} actions={phase === 'Revoked' ? ['delete'] : ['revoke', 'delete']} />
             </div>;
           })}
-        </div> : <EmptyState title="No repository permissions" text="Grant collaborator or team access to repositories. Permissions are reconciled with the repository hosting platform." />}
+        </div> : <EmptyState title="No repository permissions" text="Grant collaborator or team access to repositories. Permissions are reconciled with the repository hosting platform. Use the form on the right to grant access." cta={orgHref(activeOrg, '/people')} ctaLabel="Manage people" />}
       </div>
       <InlineCreateForm
         org={activeOrg}
@@ -206,7 +206,7 @@ export async function BranchProtectionPage({ org = null } = {}) {
               <StatusPill tone={phaseTone}>{phase}</StatusPill>
               <ResourceActions org={activeOrg} apiPath={`resources/BranchProtection/${name}`} actions={['delete']} />
             </div>;
-          })}</div> : <EmptyState title="No branch protection rules" text="Add branch protection rules to enforce review requirements, status checks, and merge policies on protected branches." />}
+          })}</div> : <EmptyState title="No branch protection rules" text="Add branch protection rules to enforce review requirements, status checks, and merge policies on protected branches. Use the form on the right to add a rule." cta={orgHref(activeOrg, '/repositories')} ctaLabel="View repositories" />}
         </div>
         <div className="card">
           <div className="cardTitle"><h2>Ref policies</h2><StatusPill tone={refPolicies.length ? 'good' : 'neutral'}>{refPolicies.length} policies</StatusPill></div>

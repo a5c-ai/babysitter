@@ -11,23 +11,37 @@ export async function AgentWorkspacesPage({ org = null } = {}) {
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { workspaces: { count: 0, items: [] } };
   const workspaces = agentView.workspaces?.items || [];
+  const workspaceFields = [
+    { name: 'name', label: 'Name', placeholder: 'my-workspace', required: true },
+    { name: 'description', label: 'Description', placeholder: 'What is this workspace for?', required: false },
+    { name: 'repositoryRef', label: 'Repository', placeholder: 'https://github.com/org/repo', required: false }
+  ];
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent workspaces" title="Agent workspaces" text="Volume-backed git workspaces with PVC lifecycle, repo binding, and runner mount specs. Workspaces are reusable across runs." actions={[['/agents', 'Overview'], ['/agents/sessions', 'Sessions']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/workspaces', 'Workspaces']]}>
     <DegradedBanner model={ui.model} />
-    <div className="card">
-      <div className="cardTitle"><h2>Workspaces</h2><StatusPill tone={workspaces.length ? 'good' : 'neutral'}>{workspaces.length} workspaces</StatusPill></div>
-      {workspaces.length ? <div className="resourceTable">{workspaces.map((ws) => <div key={ws.metadata?.name} className="resourceRow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <a href={orgHref(activeOrg, `/agents/workspaces/${ws.metadata?.name}`)} style={{ textDecoration: 'none', display: 'contents' }}>
-          <strong>{ws.metadata?.name}</strong>
-          <span>{ws.spec?.repository || 'no repository'}</span>
-          <StatusPill tone={phaseTone(ws.status?.phase)}>{ws.status?.phase || 'Pending'}</StatusPill>
-          <StatusPill tone={ws.status?.volumeStatus === 'Bound' ? 'good' : ws.status?.volumeStatus === 'Pending' ? 'warn' : 'neutral'}>{ws.status?.volumeStatus ? `PVC: ${ws.status.volumeStatus}` : 'PVC: Unknown'}</StatusPill>
-          <span>{ws.spec?.volumeSpec?.capacity || '10Gi'}</span>
-          <small>{ws.spec?.branch || 'main'}</small>
-          {ws.status?.runRef ? <small style={{ color: '#2563eb' }}>mounted: {ws.status.runRef}</small> : null}
-        </a>
-        <ResourceActions org={activeOrg} apiPath={`resources/KrateWorkspace/${ws.metadata?.name}`} actions={ws.status?.phase === 'Archived' ? ['delete'] : ws.status?.phase === 'InUse' ? ['archive', 'delete'] : ['archive', 'delete']} />
-      </div>)}</div> : <EmptyState title="No agent workspaces" text="Workspaces are provisioned when runs start. Configure agent stacks and dispatch runs to begin provisioning." cta={orgHref(activeOrg, '/agents/runs')} ctaLabel="Dispatch a run" />}
-    </div>
+    <section className="routeGrid two" style={{ alignItems: 'start' }}>
+      <div className="card">
+        <div className="cardTitle"><h2>Workspaces</h2><StatusPill tone={workspaces.length ? 'good' : 'neutral'}>{workspaces.length} workspaces</StatusPill></div>
+        {workspaces.length ? <div className="resourceTable">{workspaces.map((ws) => <div key={ws.metadata?.name} className="resourceRow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <a href={orgHref(activeOrg, `/agents/workspaces/${ws.metadata?.name}`)} style={{ textDecoration: 'none', display: 'contents' }}>
+            <strong>{ws.metadata?.name}</strong>
+            <span>{ws.spec?.repository || 'no repository'}</span>
+            <StatusPill tone={phaseTone(ws.status?.phase)}>{ws.status?.phase || 'Pending'}</StatusPill>
+            <StatusPill tone={ws.status?.volumeStatus === 'Bound' ? 'good' : ws.status?.volumeStatus === 'Pending' ? 'warn' : 'neutral'}>{ws.status?.volumeStatus ? `PVC: ${ws.status.volumeStatus}` : 'PVC: Unknown'}</StatusPill>
+            <span>{ws.spec?.volumeSpec?.capacity || '10Gi'}</span>
+            <small>{ws.spec?.branch || 'main'}</small>
+            {ws.status?.runRef ? <small style={{ color: '#2563eb' }}>mounted: {ws.status.runRef}</small> : null}
+          </a>
+          <ResourceActions org={activeOrg} apiPath={`resources/KrateWorkspace/${ws.metadata?.name}`} actions={ws.status?.phase === 'Archived' ? ['delete'] : ws.status?.phase === 'InUse' ? ['archive', 'delete'] : ['archive', 'delete']} />
+        </div>)}</div> : <EmptyState title="No agent workspaces" text="Workspaces are provisioned when runs start, or create one manually using the form." info />}
+      </div>
+      <InlineCreateForm
+        org={activeOrg}
+        kind="KrateWorkspace"
+        title="Create workspace"
+        fields={workspaceFields}
+        successText="Workspace created"
+      />
+    </section>
   </PageFrame>;
 }
 
@@ -50,6 +64,12 @@ export async function AgentWorkspaceDetailPage({ org = null, workspaceId } = {})
   const firstSession = firstSessionRef ? (agentView.sessions?.items || []).find((s) => s.metadata?.name === firstSessionRef) || null : null;
   return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`workspace / ${workspaceId}`} title={workspaceId || 'Workspace detail'} text={workspace ? `Agent workspace for ${workspace.spec?.repository || 'unknown repository'} with phase ${workspace.status?.phase || 'Pending'}.` : 'This agent workspace was not found in the current workspace.'} actions={[['/agents/workspaces', 'All workspaces'], ['/agents/sessions', 'Sessions']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/workspaces', 'Workspaces'], [`/agents/workspaces/${workspaceId}`, workspaceId || 'Detail']]}>
     <DegradedBanner model={ui.model} />
-    {workspace ? <WorkspacePanel workspace={workspace} runtime={runtime} session={firstSession} org={activeOrg} /> : <EmptyState title={`Workspace ${workspaceId} not found`} text="This agent workspace does not exist in the current workspace. Agent workspaces are provisioned when dispatch runs create git worktrees." />}
+    {workspace ? <>
+      <WorkspacePanel workspace={workspace} runtime={runtime} session={firstSession} org={activeOrg} />
+      <div className="card" style={{ marginTop: '1rem' }}>
+        <div className="cardTitle"><h3>Edit workspace</h3></div>
+        <WorkspaceEditForm org={activeOrg} workspace={workspace} />
+      </div>
+    </> : <EmptyState title={`Workspace ${workspaceId} not found`} text="This agent workspace does not exist in the current workspace. Agent workspaces are provisioned when dispatch runs create git worktrees." cta={orgHref(activeOrg, '/agents/workspaces')} ctaLabel="View all workspaces" />}
   </PageFrame>;
 }

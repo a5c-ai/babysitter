@@ -83,9 +83,9 @@ export async function AgentRuleDetailPage({ org = null, ruleName } = {}) {
           <StatusPill tone={decisionTone(exec.status?.decision || exec.spec?.decision)}>{exec.status?.decision || exec.spec?.decision || 'unknown'}</StatusPill>
           <span>{exec.status?.dispatchRun || exec.spec?.dispatchRun ? <a href={orgHref(activeOrg, `/agents/runs/${exec.status?.dispatchRun || exec.spec?.dispatchRun}`)}>{exec.status?.dispatchRun || exec.spec?.dispatchRun}</a> : 'no run'}</span>
           <small>{exec.metadata?.creationTimestamp || exec.status?.timestamp || ''}</small>
-        </div>)}</div> : <EmptyState title="No trigger executions yet" text="Execution records appear when events match this trigger rule. Each execution shows the event, decision, and any dispatched run." />}
+        </div>)}</div> : <EmptyState title="No trigger executions yet" text="Execution records appear when events match this trigger rule. Each execution shows the event, decision, and any dispatched run." cta={orgHref(activeOrg, '/agents/runs')} ctaLabel="View dispatch runs" />}
       </div>
-    </> : <EmptyState title={`Rule ${ruleName} not found`} text="This trigger rule does not exist in the current workspace. Trigger rules are created through resource definitions." />}
+    </> : <EmptyState title={`Rule ${ruleName} not found`} text="This trigger rule does not exist in the current workspace. Trigger rules are created through resource definitions." cta={orgHref(activeOrg, '/agents/rules')} ctaLabel="View all rules" />}
   </PageFrame>;
 }
 
