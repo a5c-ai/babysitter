@@ -129,6 +129,10 @@ All web UI pages and authenticated API routes require the `krate_session` login 
 
 Krate stores `User`, `Team`, `Invite`, `IdentityMapping`, `RepositoryPermission`, and `SSHKey` resources. OAuth callbacks and delegated identity headers auto-register the Krate user plus identity mapping, and controllers reconcile those resources into workspace access, repository account mappings, team membership, SSH keys, and repository permissions while the UI exposes only Krate people and access flows.
 
+### Staging service bindings
+
+The Helm chart can wire assistant, Gitea, and Agent Mux configuration into the deployed workloads without committing secret values. Use `assistant.*.existingSecret` for `ANTHROPIC_API_KEY` or `KRATE_ASSISTANT_API_KEY`, `gitea.token.existingSecret` for `KRATE_GITEA_TOKEN`, and `agentMux.url` or `agentMux.gatewayUrl` for the Agent Mux service endpoints. Empty values remain omitted so local/default renders keep their degraded-service behavior until real backing services are configured.
+
 ## Runtime API
 
 Start the local server with `npm run serve`, then use:

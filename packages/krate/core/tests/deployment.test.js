@@ -91,6 +91,9 @@ test('controller deployment assets build and publish the runnable controller', (
   const authSecret = read('../charts/templates/auth-secret.yaml');
   assert.ok(chartValues.includes('auth:'), 'chart values include auth configuration');
   assert.ok(chartValues.includes('github:') && chartValues.includes('sso:'), 'chart values expose GitHub and SSO configuration');
+  assert.ok(chartValues.includes('assistant:') && chartValues.includes('anthropic-api-key'), 'chart values expose assistant secret references');
+  assert.ok(chartValues.includes('agentMux:') && chartValues.includes('gatewayUrl'), 'chart values expose Agent Mux endpoint configuration');
+  assert.ok(chartValues.includes('token:') && chartValues.includes('existingSecret: ""'), 'chart values expose Gitea token secret reference');
   assert.ok(chartValues.includes('mode: auto') && chartValues.includes('policyReporter:'), 'chart values expose Kyverno auto-discovery modes and policy reporter settings');
   assert.ok(chartRbac.includes('"*"') && chartRbac.includes('policies.kyverno.io') && chartRbac.includes('policyreports'), 'RBAC covers all Krate resources via wildcard and Kyverno read/write surfaces');
   assert.ok(chartDeployment.includes('KRATE_KYVERNO_MODE') && chartDeployment.includes('KRATE_KYVERNO_POLICY_NAMESPACE') && chartDeployment.includes('KRATE_KYVERNO_DISCOVER_EXISTING'), 'deployments receive Kyverno discovery env');
@@ -101,6 +104,8 @@ test('controller deployment assets build and publish the runnable controller', (
   assert.ok(chartDeployment.includes('KRATE_AUTH_GITHUB_ENABLED') && chartDeployment.includes('KRATE_AUTH_SSO_ENABLED') && chartDeployment.includes('KRATE_AUTH_DELEGATED_EMAIL_HEADER'), 'workloads receive auth provider configuration');
   assert.ok(chartDeployment.includes('readinessProbe:') && chartDeployment.includes('path: /login'), 'web deployment has an HTTP readiness probe');
   assert.ok(chartDeployment.includes('KRATE_AUTH_DELEGATED_LOCAL_DEVELOPMENT') && chartDeployment.includes('KRATE_AUTH_DELEGATED_LOCAL_GROUPS'), 'workloads can opt into local delegated development login');
+  assert.ok(chartDeployment.includes('ANTHROPIC_API_KEY') && chartDeployment.includes('KRATE_ASSISTANT_API_KEY'), 'web workload can receive assistant API key references');
+  assert.ok(chartDeployment.includes('KRATE_GITEA_TOKEN') && chartDeployment.includes('AGENT_MUX_URL') && chartDeployment.includes('AGENT_GATEWAY_URL'), 'workloads can receive Gitea token and Agent Mux endpoint configuration');
   assert.ok(chartRbac.includes('core.oam.dev') && chartRbac.includes('applications') && chartRbac.includes('create'), 'delivery resources can be composed through Krate');
   assert.ok(chartValues.includes('localDevelopment:') && chartValues.includes('enabled: false'), 'local delegated development login is off by default');
   for (const token of ['command: ["node", "bin/krate-server.mjs"]', '--port=3080', 'app.kubernetes.io/component: controllers']) {
@@ -163,6 +168,40 @@ test('auth chart uses existing secrets without rendering empty provider keys', (
   assert.doesNotMatch(externalOnly, /name: krate-krate-auth/);
   assert.match(externalOnly, /name: "shared-auth"[\s\S]*?key: github-client-id/);
   assert.match(externalOnly, /name: "shared-auth"[\s\S]*?key: sso-client-secret/);
+});
+
+test('staging service env vars are opt-in and render secret references without plaintext values', () => {
+  const defaultRender = execFileSync('helm', [
+    'template', 'krate', '../charts', '-n', 'krate-system',
+    '--set', 'argocd.enabled=false'
+  ], { encoding: 'utf8' });
+  assert.doesNotMatch(defaultRender, /name: ANTHROPIC_API_KEY/);
+  assert.doesNotMatch(defaultRender, /name: KRATE_ASSISTANT_API_KEY/);
+  assert.doesNotMatch(defaultRender, /name: KRATE_GITEA_TOKEN/);
+  assert.doesNotMatch(defaultRender, /name: AGENT_MUX_URL/);
+  assert.doesNotMatch(defaultRender, /name: AGENT_GATEWAY_URL/);
+
+  const configured = execFileSync('helm', [
+    'template', 'krate', '../charts', '-n', 'krate-system',
+    '--set', 'argocd.enabled=false',
+    '--set', 'gitea.httpUrl=http://gitea-http.krate-system.svc.cluster.local:3000/krate',
+    '--set', 'gitea.token.existingSecret=krate-gitea-token',
+    '--set', 'gitea.token.key=token',
+    '--set', 'agentMux.url=http://agent-mux.krate-system.svc.cluster.local:8080',
+    '--set', 'agentMux.gatewayUrl=http://agent-gateway.krate-system.svc.cluster.local:8080',
+    '--set', 'assistant.anthropic.existingSecret=krate-assistant',
+    '--set', 'assistant.anthropic.key=anthropic-api-key',
+    '--set', 'assistant.krateAssistant.existingSecret=krate-assistant',
+    '--set', 'assistant.krateAssistant.key=krate-assistant-api-key'
+  ], { encoding: 'utf8' });
+
+  assert.match(configured, /name: KRATE_GITEA_HTTP_URL\s+value: "http:\/\/gitea-http\.krate-system\.svc\.cluster\.local:3000\/krate"/);
+  assert.match(configured, /name: KRATE_GITEA_TOKEN[\s\S]*?secretKeyRef:[\s\S]*?name: "krate-gitea-token"[\s\S]*?key: "token"[\s\S]*?optional: true/);
+  assert.match(configured, /name: ANTHROPIC_API_KEY[\s\S]*?secretKeyRef:[\s\S]*?name: "krate-assistant"[\s\S]*?key: "anthropic-api-key"[\s\S]*?optional: true/);
+  assert.match(configured, /name: KRATE_ASSISTANT_API_KEY[\s\S]*?secretKeyRef:[\s\S]*?name: "krate-assistant"[\s\S]*?key: "krate-assistant-api-key"[\s\S]*?optional: true/);
+  assert.match(configured, /name: AGENT_MUX_URL\s+value: "http:\/\/agent-mux\.krate-system\.svc\.cluster\.local:8080"/);
+  assert.match(configured, /name: AGENT_GATEWAY_URL\s+value: "http:\/\/agent-gateway\.krate-system\.svc\.cluster\.local:8080"/);
+  assert.doesNotMatch(configured, /sk-ant-|ghp_|github_pat_|glpat-|AKIA[0-9A-Z]{16}/);
 });
 
 

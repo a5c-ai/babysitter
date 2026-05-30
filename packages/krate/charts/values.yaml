@@ -83,6 +83,15 @@ web:
   resources: {}
 
 
+assistant:
+  anthropic:
+    existingSecret: ""
+    key: anthropic-api-key
+  krateAssistant:
+    existingSecret: ""
+    key: krate-assistant-api-key
+
+
 
 webhookWorker:
 
@@ -238,6 +247,9 @@ gitea:
   rootUrl: ""
   sshDomain: ""
   httpUrl: ""
+  token:
+    existingSecret: ""
+    key: token
   service:
     httpPort: 3000
     sshPort: 22
@@ -249,6 +261,10 @@ gitea:
     accessModes:
       - ReadWriteOnce
     storageClassName: ""
+
+agentMux:
+  url: ""
+  gatewayUrl: ""
 
 argocd:
   enabled: true

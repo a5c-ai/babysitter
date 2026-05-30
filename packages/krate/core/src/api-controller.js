@@ -2,6 +2,7 @@ import { createKubernetesResourceGateway } from './kubernetes-resource-gateway.j
 import { clearSnapshotCache } from './snapshot-cache.js';
 import { createPermissionReviewer } from './agent-permission-review.js';
 import { createAgentDispatchController } from './agent-dispatch-controller.js';
+import { createAgentMuxClient } from './agent-mux-client.js';
 import { createAgentApprovalController } from './agent-approval-controller.js';
 import { createAgentTriggerController } from './agent-trigger-controller.js';
 import { createAgentWorkspaceController } from './agent-workspace-controller.js';
@@ -220,7 +221,11 @@ export function createKrateApiController(options = {}) {
     },
     async dispatchAgent(input) {
       const snapshot = await this.snapshot();
-      const controller = createAgentDispatchController(input.controllerOptions || {});
+      const controllerOptions = input.controllerOptions || {};
+      const controller = createAgentDispatchController({
+        ...controllerOptions,
+        agentMuxClient: controllerOptions.agentMuxClient || createAgentMuxClient({ resourceGateway }),
+      });
       return controller.createManualDispatch({
         ...input,
         resources: snapshot.resources
@@ -246,7 +251,11 @@ export function createKrateApiController(options = {}) {
     },
     async processWebhookEvent(input) {
       const snapshot = await this.snapshot();
-      const dispatchController = createAgentDispatchController(input.controllerOptions || {});
+      const controllerOptions = input.controllerOptions || {};
+      const dispatchController = createAgentDispatchController({
+        ...controllerOptions,
+        agentMuxClient: controllerOptions.agentMuxClient || createAgentMuxClient({ resourceGateway }),
+      });
       const triggerController = createAgentTriggerController({ dispatchController });
       return triggerController.processEvent({
         event: input.event,
