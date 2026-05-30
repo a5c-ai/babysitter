@@ -602,19 +602,23 @@ describe("MCP HTTP Transport", () => {
       expect(toolNames).toContain("check_breakpoint_status");
       expect(toolNames).toContain("list_breakpoints");
       expect(toolNames).toContain("create_todo");
+      expect(toolNames).toContain("create_task");
       expect(toolNames).toContain("assign_task");
       expect(toolNames).toContain("search_tasks");
+      expect(toolNames).toContain("cancel_breakpoint");
       expect(toolNames).toContain("add_comment");
+      expect(toolNames).toContain("add_comment_to_breakpoint");
       expect(toolNames).toContain("bulk_update_tasks");
       expect(toolNames).toContain("task_stats");
       expect(toolNames).toContain("export_tasks");
       expect(toolNames).toContain("escalate");
+      expect(toolNames).toContain("escalate_breakpoint");
       expect(toolNames).toContain("answer_breakpoint");
       expect(toolNames).toContain("verify_breakpoint_answer");
       expect(toolNames).toContain("list_responders");
       expect(toolNames).toContain("claim_breakpoint");
       expect(toolNames).toContain("poll_breakpoints");
-      expect(toolNames.length).toBe(16);
+      expect(toolNames.length).toBe(20);
     });
   });
 

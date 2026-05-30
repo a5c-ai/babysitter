@@ -55,6 +55,18 @@ export const createTodoParams = {
   breakpointsDir: z.string().optional(),
 };
 
+export const createTaskDescription =
+  "Create a task routed through tasks-mux. This is an alias-friendly task surface backed by the same breakpoint storage as assign_task.";
+
+export const createTaskParams = {
+  title: z.string().min(1).describe("Task title."),
+  instructions: z.string().optional().describe("Task instructions or acceptance notes."),
+  ...nativeRoutingParams,
+  ...nativeContextParams,
+  backend: z.string().optional(),
+  breakpointsDir: z.string().optional(),
+};
+
 export const assignTaskDescription =
   "Assign a task through tasks-mux responder routing. Use this instead of direct agent delegation when the work should be visible to the task router.";
 
@@ -93,6 +105,19 @@ export const addCommentDescription =
 
 export const addCommentParams = {
   taskId: z.string().min(1),
+  authorId: z.string().min(1),
+  authorName: z.string().min(1).optional(),
+  text: z.string().min(1),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  backend: z.string().optional(),
+  breakpointsDir: z.string().optional(),
+};
+
+export const addCommentToBreakpointDescription =
+  "Add a discussion comment to a breakpoint through the configured BreakpointBackend.";
+
+export const addCommentToBreakpointParams = {
+  breakpointId: z.string().min(1),
   authorId: z.string().min(1),
   authorName: z.string().min(1).optional(),
   text: z.string().min(1),
@@ -158,8 +183,30 @@ export const escalateParams = {
   breakpointsDir: z.string().optional(),
 };
 
+export const cancelBreakpointDescription =
+  "Cancel a pending breakpoint through the configured BreakpointBackend.";
+
+export const cancelBreakpointParams = {
+  breakpointId: z.string().min(1),
+  backend: z.string().optional(),
+  breakpointsDir: z.string().optional(),
+};
+
+export const escalateBreakpointDescription =
+  "Escalate an existing breakpoint through tasks-mux routing and lifecycle state.";
+
+export const escalateBreakpointParams = {
+  breakpointId: z.string().min(1).describe("Existing breakpoint id to escalate."),
+  reason: z.string().min(1).describe("Why escalation is required."),
+  targetResponderId: z.string().min(1).optional().describe("Responder id that should receive the escalation."),
+  ...nativeRoutingParams,
+  ...nativeContextParams,
+  backend: z.string().optional(),
+  breakpointsDir: z.string().optional(),
+};
+
 export interface NativeTaskResult {
-  tool: "create_todo" | "assign_task" | "escalate";
+  tool: "create_todo" | "create_task" | "assign_task" | "escalate" | "escalate_breakpoint";
   taskId: string;
   breakpoint: Breakpoint;
   routing: BreakpointRouting;
@@ -237,6 +284,35 @@ export async function handleAssignTask(
   });
 
   return nativeResult("assign_task", breakpoint);
+}
+
+export async function handleCreateTask(
+  params: z.infer<z.ZodObject<typeof createTaskParams>>,
+  backend: BreakpointBackend,
+): Promise<NativeTaskResult> {
+  const parsed = z.object(createTaskParams).parse(params);
+  const breakpoint = await backend.submitBreakpoint({
+    text: parsed.title,
+    context: buildContext({
+      title: parsed.title,
+      description: parsed.instructions ?? parsed.title,
+      interactionKind: "handoff",
+      nativeTool: "create_task",
+      nativeKind: "task",
+      tags: parsed.tags,
+      domain: parsed.domain,
+      urgency: parsed.urgency,
+      sourceUrl: parsed.sourceUrl,
+      metadata: parsed.metadata,
+    }),
+    routing: buildRouting(parsed),
+    priority: parsed.priority,
+    dependsOn: parsed.dependsOn?.map((id) => ({ id, blocking: true })),
+    projectId: parsed.projectId,
+    repoId: parsed.repoId,
+  });
+
+  return nativeResult("create_task", breakpoint);
 }
 
 export async function handleSearchTasks(
@@ -332,6 +408,34 @@ export async function handleEscalate(
   return nativeResult("escalate", breakpoint);
 }
 
+export async function handleCancelBreakpoint(
+  params: z.infer<z.ZodObject<typeof cancelBreakpointParams>>,
+  backend: BreakpointBackend,
+) {
+  const parsed = z.object(cancelBreakpointParams).parse(params);
+  await backend.cancelBreakpoint(parsed.breakpointId);
+  return { tool: "cancel_breakpoint", breakpointId: parsed.breakpointId, cancelled: true };
+}
+
+export async function handleEscalateBreakpoint(
+  params: z.infer<z.ZodObject<typeof escalateBreakpointParams>>,
+  backend: BreakpointBackend,
+): Promise<NativeTaskResult> {
+  const parsed = z.object(escalateBreakpointParams).parse(params);
+  const result = await handleEscalate({
+    ...parsed,
+    taskId: parsed.breakpointId,
+  }, backend);
+  return {
+    ...result,
+    tool: "escalate_breakpoint",
+    metadata: {
+      ...result.metadata,
+      nativeTool: "escalate_breakpoint",
+    },
+  };
+}
+
 export async function handleAddComment(
   params: z.infer<z.ZodObject<typeof addCommentParams>>,
   backend: BreakpointBackend,
@@ -347,6 +451,21 @@ export async function handleAddComment(
     metadata: parsed.metadata,
   });
   return { tool: "add_comment", taskId: parsed.taskId, comment };
+}
+
+export async function handleAddCommentToBreakpoint(
+  params: z.infer<z.ZodObject<typeof addCommentToBreakpointParams>>,
+  backend: BreakpointBackend,
+) {
+  const parsed = z.object(addCommentToBreakpointParams).parse(params);
+  const result = await handleAddComment({
+    taskId: parsed.breakpointId,
+    authorId: parsed.authorId,
+    authorName: parsed.authorName,
+    text: parsed.text,
+    metadata: parsed.metadata,
+  }, backend);
+  return { ...result, tool: "add_comment_to_breakpoint", breakpointId: parsed.breakpointId };
 }
 
 export async function handleBulkUpdateTasks(
