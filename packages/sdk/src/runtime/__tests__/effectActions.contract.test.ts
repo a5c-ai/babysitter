@@ -100,6 +100,7 @@ describe("EffectAction contract", () => {
             kind: "agent",
             title: "external agent",
             agent: {
+              external: true,
               responderType: "agent",
               adapter: "codex",
               model: "gpt-5.4",
@@ -131,11 +132,13 @@ describe("EffectAction contract", () => {
     if (iteration.status !== "waiting") throw new Error("Expected waiting iteration");
 
     expect(iteration.nextActions[0]?.taskDef.agent).toMatchObject({
+      external: true,
       responderType: "agent",
       adapter: "codex",
       model: "gpt-5.4",
     });
     expect(iteration.nextActions[0]?.taskDef.metadata).toMatchObject({
+      externalDispatch: true,
       responderType: "agent",
       adapter: "codex",
     });

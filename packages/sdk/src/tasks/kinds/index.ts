@@ -16,6 +16,7 @@ import type {
   TaskIOHints,
 } from "../types";
 import { DEFAULTS } from "../../config/defaults";
+export { externalAgentTask } from "./externalAgent";
 import {
   resolveOptionalValue,
   resolveRequiredValue,
@@ -91,6 +92,7 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
       provider,
       approvalMode,
       maxTurns,
+      timeout,
       timeoutMs,
     ] = await Promise.all([
       resolveOptionalValue(options.title, args, ctx),
@@ -110,6 +112,7 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
       resolveOptionalValue(options.provider, args, ctx),
       resolveOptionalValue(options.approvalMode, args, ctx),
       resolveNumber(options.maxTurns, args, ctx),
+      resolveNumber(options.timeout, args, ctx),
       resolveNumber(options.timeoutMs, args, ctx),
     ]);
     const labels = mergeLabels(ctx, helperLabels, DEFAULT_AGENT_LABEL);
@@ -126,22 +129,12 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
       provider,
       approvalMode,
       maxTurns,
+      timeout,
       timeoutMs,
     });
     const resolvedTitle = title ?? ctx.label ?? labels?.[0] ?? DEFAULT_AGENT_LABEL;
     return { kind: "agent", title: resolvedTitle, description, labels, metadata, io, agent };
   }, { kind: "agent" });
-}
-
-export function externalAgentTask<TArgs = unknown, TResult = unknown>(
-  id: string,
-  options: AgentTaskDefinitionOptions<TArgs>
-): DefinedTask<TArgs, TResult> {
-  return agentTask<TArgs, TResult>(id, {
-    ...options,
-    external: true,
-    responderType: "agent",
-  });
 }
 
 export function autoTask<TArgs = unknown, TResult = unknown>(
@@ -317,6 +310,7 @@ function buildAgentOptions(options: AgentTaskOptions): AgentTaskOptions {
   if (typeof options.provider === "string" && options.provider.trim()) agent.provider = options.provider;
   if (typeof options.approvalMode === "string" && options.approvalMode.trim()) agent.approvalMode = options.approvalMode;
   if (typeof options.maxTurns === "number") agent.maxTurns = options.maxTurns;
+  if (typeof options.timeout === "number") agent.timeout = options.timeout;
   if (typeof options.timeoutMs === "number") agent.timeoutMs = options.timeoutMs;
   return agent;
 }

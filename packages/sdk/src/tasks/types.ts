@@ -24,6 +24,7 @@ export interface ResponderRoutingOptions {
   targetResponders?: string[];
   trackerBackend?: string;
   capabilities?: string[];
+  timeout?: number;
   timeoutMs?: number;
 }
 
@@ -231,6 +232,7 @@ export interface AgentTaskDefinitionOptions<TArgs = unknown> {
   provider?: TaskValueOrFactory<TArgs, string | undefined>;
   approvalMode?: TaskValueOrFactory<TArgs, string | undefined>;
   maxTurns?: TaskValueOrFactory<TArgs, number | undefined>;
+  timeout?: TaskValueOrFactory<TArgs, number | undefined>;
   timeoutMs?: TaskValueOrFactory<TArgs, number | undefined>;
 }
 
