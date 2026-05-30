@@ -1128,9 +1128,18 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     // Inject proxy baseURL into config if proxy is running
     if (proxyRuntime) {
       const proxyBase = `${proxyRuntime.url}/v1`;
-      configContent = configContent.replace('"baseURL":""', `"baseURL":"${proxyBase}"`);
+      try {
+        const parsed = JSON.parse(configContent);
+        if (parsed.provider?.openai?.options) {
+          parsed.provider.openai.options.baseURL = proxyBase;
+        }
+        configContent = JSON.stringify(parsed);
+      } catch {
+        configContent = configContent.replace(/"baseURL"\s*:\s*""/g, `"baseURL":"${proxyBase}"`);
+      }
       plan.env['OPENAI_API_KEY'] = proxyRuntime.authToken ?? 'proxy-token';
       plan.env['OPENAI_BASE_URL'] = proxyBase;
+      console.error(`[amux launch] opencode: injected proxy baseURL=${proxyBase}`);
     }
     writeFileSync(join(launchCwd, 'opencode.json'), configContent);
     const homeConfig = join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.config', 'opencode');
