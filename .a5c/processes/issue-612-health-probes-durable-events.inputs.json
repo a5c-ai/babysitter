@@ -1,0 +1,71 @@
+{
+  "issueNumber": 612,
+  "baseBranch": "staging",
+  "branchName": "issue/612-health-probes-durable-events",
+  "dependencyIssues": [608],
+  "brokerPreference": "nats",
+  "targetFiles": [
+    "packages/krate/core/src/event-bus.js",
+    "packages/krate/core/src/http-server.js",
+    "packages/krate/core/src/index.js",
+    "packages/krate/core/src/api-controller.js",
+    "packages/krate/core/src/agent-adapter-controller.js",
+    "packages/krate/core/src/agent-stack-controller.js",
+    "packages/krate/core/tests/sse-events.test.js",
+    "packages/krate/core/tests/event-bus-integration.test.js",
+    "packages/krate/core/tests/agent-mux-integration.test.js",
+    "packages/krate/web/app/api/orgs/[org]/snapshot/route.js",
+    "packages/krate/web/app/api/orgs/[org]/agents/events/stream/route.js",
+    "packages/krate/web/app/components/observability/health-monitor.jsx",
+    "packages/krate/web/tests/krate-improvements.test.js",
+    "packages/krate/web/tests/api-routes.test.js",
+    "packages/krate/charts/values.yaml",
+    "packages/krate/charts/templates/deployments.yaml",
+    "packages/krate/docs/gaps/staging-status.md",
+    "packages/krate/docs/gaps/infrastructure-deps.md",
+    "packages/krate/core/README.md",
+    "packages/krate/sdk/README.md"
+  ],
+  "verificationCommands": [
+    "npm --workspace @a5c-ai/krate test -- --test-name-pattern='health|event|sse|stream|adapter|stack'",
+    "npm --workspace @a5c-ai/krate test",
+    "npm --workspace @a5c-ai/krate build",
+    "npm --workspace @a5c-ai/krate package:check",
+    "npm --workspace @a5c-ai/krate-web test",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "liveSmokeChecks": [
+    "GET /api/orgs/default/snapshot returns structured statuses for kubernetes, gitea, agentMux, controller, assistant, and externalProviders without leaking secrets.",
+    "GET /api/orgs/default/agents/events/stream returns text/event-stream, emits a connected event, supports heartbeat, and closes cleanly.",
+    "Two process instances using the same NATS/JetStream configuration receive the same emitted resource-change event.",
+    "An SSE subscriber reconnecting with Last-Event-ID or the configured cursor receives missed durable events.",
+    "When NATS is unavailable in production mode, health/reporting surfaces show degraded or error state instead of silently claiming durable delivery."
+  ],
+  "qualityGates": {
+    "health": [
+      "Gitea probes KRATE_GITEA_HTTP_URL/api/v1/version with timeout and structured failure.",
+      "Agent Mux probes AGENT_MUX_URL/healthz or AGENT_GATEWAY_URL/healthz with timeout and structured failure.",
+      "Krate Controller probes KRATE_CONTROLLER_URL/healthz with timeout and structured failure.",
+      "Kubernetes connectivity is represented explicitly using bounded kubectl cluster-info or an injectable equivalent.",
+      "Assistant credential validation defaults to presence/format checks and never leaks key material.",
+      "Probe results are concurrent, partial, cache-control no-store, and compatible with HealthMonitor status rendering."
+    ],
+    "events": [
+      "Production event transport is broker-backed with NATS JetStream or an explicitly justified equivalent.",
+      "Event persistence is durable and queryable; production replay does not depend only on the old local JSONL ring buffer.",
+      "Core HTTP SSE and web SSE routes subscribe through the shared abstraction and support replay cursors.",
+      "Cross-replica fanout works when multiple server instances share broker configuration.",
+      "Slow subscribers and closed streams do not block emitters.",
+      "Broker-unavailable behavior is explicit in health/reporting and tests."
+    ],
+    "delivery": [
+      "No unrelated dirty worktree files are committed.",
+      "Helm values/templates wire NATS and probe env vars without committing secrets.",
+      "Docs are updated where behavior or env vars changed.",
+      "PR links #612 and summarizes verification evidence."
+    ]
+  }
+}
