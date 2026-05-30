@@ -1,0 +1,37 @@
+{
+  "issueNumber": 613,
+  "repo": "a5c-ai/babysitter",
+  "baseBranch": "staging",
+  "packagePath": "packages/krate/web",
+  "targetFiles": [
+    "packages/krate/web/app/components/agent/session-cost.jsx",
+    "packages/krate/web/app/components/external/external-conflict-resolver.jsx",
+    "packages/krate/web/app/components/inference/virtual-model-manager.jsx",
+    "packages/krate/web/app/components/inference/inference-service-list.jsx",
+    "packages/krate/web/app/components/settings/secret-manager.jsx",
+    "packages/krate/web/app/components/inference/curated-model-catalog.jsx",
+    "packages/krate/web/app/components/agent/approval-mode-toggle.jsx",
+    "packages/krate/web/app/globals.css",
+    "packages/krate/web/tests/ui-polish-issue-613.test.js",
+    "packages/krate/web/package.json"
+  ],
+  "acceptanceFocus": [
+    "Dynamic and mutable React lists in the issue scope use stable domain IDs or immutable generated local row IDs instead of array index keys.",
+    "CuratedModelCatalog surfaces post-service route creation failure as user-visible deploy feedback instead of console.warn-only logging.",
+    "ApprovalModeToggle implements standard radiogroup keyboard behavior for arrow keys, Home, and End while preserving pointer behavior.",
+    "Hardcoded colors are migrated incrementally in touched issue files to existing or newly named CSS variables, with visual/e2e verification.",
+    "Static markdown or render-only index keys outside the issue scope are not expanded into this work."
+  ],
+  "testStrategy": {
+    "framework": "node:test",
+    "focusedTestFile": "packages/krate/web/tests/ui-polish-issue-613.test.js",
+    "commands": [
+      "cd packages/krate/web && node --test tests/ui-polish-issue-613.test.js",
+      "cd packages/krate/web && npm test",
+      "cd packages/krate/web && npm run build",
+      "cd packages/krate/web && npm run test:e2e"
+    ]
+  },
+  "maxRedAttempts": 2,
+  "maxImplementationAttempts": 2
+}
