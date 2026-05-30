@@ -246,7 +246,7 @@ export const traceKrateAgentIdentityWebTask = defineTask('issue-621.trace-runtim
       task: 'Trace live execution paths that issue #621 must extend.',
       instructions: [
         'Start from the reuse audit and inspect the current branch before planning file edits.',
-        'Trace org-scoped web navigation from orgNavigationGroups to /orgs/[org] page barrels, ui-shell page components, and loadKrateUi data hydration.',
+        'Trace org-scoped web navigation from orgNavigationGroups to /orgs/[org] page barrels, packages/krate/web/app/ui-shell.jsx page components, and loadKrateUi data hydration.',
         'Trace authenticated org API route patterns: withAuth, errorResponse, orgNamespaceName, controller list/get/apply/delete helpers, validateResource, cache invalidation, and globalEventBus.',
         'Trace AgentPersona/AgentSoul/AgentAppearance/AgentVoiceProfile/AgentDefinition resource model support and controller helpers from Krate SDK/core.',
         'Trace existing agent UI surfaces that still show raw stacks: dispatch-button, run-actions/run lists, session-shell, notification-bell, command-palette, meeting participant list, and any adjacent page components.',

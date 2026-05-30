@@ -83,7 +83,7 @@
   },
   "knownExistingInfrastructure": {
     "navigation": "packages/krate/web/app/lib/krate-ui.jsx",
-    "uiShell": "packages/krate/web/app/orgs/[org]/ui-shell.jsx",
+    "uiShell": "packages/krate/web/app/ui-shell.jsx",
     "agentsPage": "packages/krate/web/app/orgs/[org]/agents/page.jsx",
     "agentComponents": "packages/krate/web/app/components/agent",
     "componentBarrel": "packages/krate/web/app/components/index.js",
@@ -140,7 +140,7 @@
   },
   "dependencyContext": {
     "issue620StateAtPlanning": "closed after PR #661 merge according to issue comments",
-    "issue621PriorPlanningContext": "issue comments mention closed planning PR #666 and incomplete implementation work; this process should re-read the current branch before implementation and treat current code as source of truth",
+    "issue621PriorPlanningContext": "issue comments mention closed planning PR #666, open planning PR #723 on plan/issue-621, and implementation work in progress; this process should re-read the current branch before implementation and treat current code as source of truth",
     "coreContractsObservedOnBranch": [
       "Krate SDK exports createAgentPersonaController, validateAgentPersona, validateAgentDefinition, resolveAgentPersona, and resolveAgentDefinition",
       "Krate core tests reference AgentPersona, AgentSoul, AgentAppearance, AgentVoiceProfile, and AgentDefinition",
