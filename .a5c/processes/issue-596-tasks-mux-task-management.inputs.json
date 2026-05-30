@@ -1,0 +1,82 @@
+{
+  "issueNumber": 596,
+  "baseBranch": "staging",
+  "targetBranch": "implement/issue-596-tasks-mux-task-management",
+  "relatedIssues": [577, 597, 634, 630],
+  "targetQuality": 90,
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/src/backend.ts",
+    "packages/tasks-mux/src/backends/git-native.ts",
+    "packages/tasks-mux/src/backends/server.ts",
+    "packages/tasks-mux/src/backends/github-issues.ts",
+    "packages/tasks-mux/src/backends/external-tracker.ts",
+    "packages/tasks-mux/src/backends/agent-mux.ts",
+    "packages/tasks-mux/src/cli/program.ts",
+    "packages/tasks-mux/src/cli/commands/breakpoints.ts",
+    "packages/tasks-mux/src/mcp/server.ts",
+    "packages/tasks-mux/src/mcp/tools",
+    "packages/tasks-mux/src/index.ts",
+    "packages/tasks-mux/README.md",
+    "packages/tasks-mux/src/__tests__"
+  ],
+  "referenceProcesses": [
+    ".a5c/processes/issue-606-tasks-mux-integration-tests.mjs",
+    ".a5c/processes/issue-631-agent-mux-responder-backend.mjs",
+    ".a5c/processes/issue-633-route-effect-resolution-through-tasks-mux.mjs",
+    ".a5c/processes/issue-635-sdk-task-responder-type-plan.mjs"
+  ],
+  "processLibraryAuditPaths": [
+    ".a5c/process-library",
+    "library/tdd-quality-convergence.md",
+    "library/specializations/sdk-platform-development/README.md",
+    "library/specializations/cli-mcp-development/README.md",
+    "library/specializations/software-architecture/README.md"
+  ],
+  "requestedCapabilities": [
+    "priority low/medium/high/critical",
+    "dependsOn task dependencies",
+    "search and filter API",
+    "bulk approve, close, and reassign operations",
+    "assigned, in-progress, blocked, and escalated states",
+    "status history and timeline tracking",
+    "discussion threads and comments",
+    "task metrics and SLA calculations",
+    "notification providers for email, Slack, Discord, and webhook targets",
+    "escalation chains with fallback responders on timeout",
+    "interactive structured forms",
+    "state machine validation",
+    "audit log",
+    "data export and backup"
+  ],
+  "nonGoals": [
+    "Do not wire tasks-mux into the full agent stack for #577 in this process unless required for local tests.",
+    "Do not enable real external notification delivery by default.",
+    "Do not remove or break existing breakpoint routing, proven answers, or current CLI/MCP commands.",
+    "Do not require credentials for the default test suite."
+  ],
+  "verificationCommands": [
+    "git diff --check",
+    "npm run test --workspace=@a5c-ai/tasks-mux",
+    "npm run typecheck --workspace=@a5c-ai/tasks-mux",
+    "npm run build --workspace=@a5c-ai/tasks-mux",
+    "npm run test:sdk",
+    "npm run verify:metadata"
+  ],
+  "qualityGates": [
+    "All issue-requested capabilities are either implemented with tests or explicitly documented as unsupported/deferred with rationale.",
+    "Existing breakpoint JSON, CLI, MCP, and backend behavior remains backward compatible.",
+    "Shared backend capability tests cover git-native plus server/GitHub support or explicit unsupported-feature behavior.",
+    "CLI and MCP surfaces have parity tests and README documentation.",
+    "External notification and escalation providers are disabled by default and covered only through mocked integration tests.",
+    "State transition validation rejects invalid transitions and records history/audit entries for valid mutations.",
+    "Export/backup tests verify deterministic output and credential redaction."
+  ],
+  "planningNotes": {
+    "issueStatus": "Issue #596 was marked work-in-progress in a comment after a prior planning PR, but this process is authored as the requested fresh implementation plan.",
+    "processShape": "Flat phased feature implementation with tests-first quality convergence; the issue gap is already known, so no HYPOTHESES tree is required.",
+    "repoOverride": "Use agent tasks instead of kind: shell subtasks for this repo request. Keep breakpoints sparse and only for real scope/dependency decisions.",
+    "doNotImplementDuringPlanning": true
+  }
+}
