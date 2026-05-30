@@ -12,7 +12,7 @@
     {
       "name": "babysitter",
       "description": "Babysitter orchestration plugin for Cursor IDE and headless CLI mode",
-      "version": "0.1.0",
+      "version": "5.0.1-staging.28347f861706",
       "source": "babysitter-cursor"
     }
   ]
