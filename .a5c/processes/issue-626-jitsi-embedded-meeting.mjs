@@ -30,6 +30,7 @@ function issueContext(inputs) {
     comments: inputs?.issueComments ?? [],
     dependencies: inputs?.dependencies ?? ['#623', '#625'],
     priorPlanPr: inputs?.priorPlanPr ?? null,
+    currentStagingFindings: inputs?.currentStagingFindings ?? [],
     specPaths: inputs?.specPaths ?? [],
   };
 }
@@ -48,6 +49,7 @@ const reuseAuditTask = defineTask(
         instructions: [
           'Extract keyword nouns and verbs from issue #626 and the target surfaces.',
           'Scan the repository for existing Jitsi meeting pages, API routes, components, service helpers, CRDs, tests, env vars, and package dependencies.',
+          'Treat currentStagingFindings as pre-flight evidence to verify, not as a substitute for scanning the working tree.',
           'Pay special attention to packages/krate/web/app/pages/jitsi-pages.jsx, packages/krate/web/app/components/jitsi, packages/krate/web/app/api/orgs/[org]/jitsi, packages/krate/web/app/lib/jitsi-service.js, packages/krate/docs/jitsi, and package manifests.',
           'Report findings under exactly this heading: "Reuse-audit findings (REVIEW BEFORE PROCEEDING)".',
           'Classify each finding as route, component, API, service, CRD, env var, dependency, test, or prior plan.',
@@ -275,6 +277,7 @@ const implementMeetingExperienceTask = defineTask(
         task: 'Complete the issue #626 in-console meeting detail experience on the traced live path.',
         instructions: [
           'Reuse existing /orgs/{org}/meetings/{id}, Jitsi service, and API route patterns.',
+          'Current staging has partial Jitsi meeting scaffolding; complete it in place rather than creating a second meeting-detail implementation.',
           'Ensure the page performs the authenticated join flow and renders the embedded iframe with JWT and room URL from POST /api/orgs/{org}/jitsi/meetings/{id}/join.',
           'Build the Krate context panel with participants, agents/persona avatars, recording controls, invite buttons, meeting metadata, and dispatch run links.',
           'Wire controls for mute/unmute, camera, screen share, chat, recording, end meeting, and invite through the External API integration or existing Krate Jitsi API endpoints.',

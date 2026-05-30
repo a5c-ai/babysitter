@@ -31,6 +31,11 @@
       "author": "tmuskal",
       "createdAt": "2026-05-30T11:31:09Z",
       "summary": "Implementation agent running on prior PR #668; issue comment stated work was in progress."
+    },
+    {
+      "author": "a5c-ai",
+      "createdAt": "2026-05-30T13:18:30Z",
+      "summary": "Planning PR #724 was opened from plan/issue-626 with process artifacts for the current staging state. It notes that staging already contains Jitsi routes, components, API scaffolding, and service helpers, so implementation should extend those surfaces rather than duplicate them."
     }
   ],
   "dependencies": [
@@ -38,13 +43,41 @@
     "#625 Jitsi web management pages and meeting API surface"
   ],
   "priorPlanPr": {
-    "number": 668,
-    "title": "feat: Jitsi embedded meeting External API",
-    "state": "CLOSED",
-    "url": "https://github.com/a5c-ai/babysitter/pull/668",
+    "number": 724,
+    "title": "Plan: Jitsi embedded meeting experience",
+    "state": "OPEN",
+    "url": "https://github.com/a5c-ai/babysitter/pull/724",
     "headRefName": "plan/issue-626",
     "baseRefName": "staging"
   },
+  "previousPlanPrs": [
+    {
+      "number": 668,
+      "title": "feat: Jitsi embedded meeting External API",
+      "state": "CLOSED",
+      "url": "https://github.com/a5c-ai/babysitter/pull/668",
+      "headRefName": "plan/issue-626",
+      "baseRefName": "staging"
+    },
+    {
+      "number": 724,
+      "title": "Plan: Jitsi embedded meeting experience",
+      "state": "OPEN",
+      "url": "https://github.com/a5c-ai/babysitter/pull/724",
+      "headRefName": "plan/issue-626",
+      "baseRefName": "staging"
+    }
+  ],
+  "currentStagingFindings": [
+    "packages/krate/web/app/orgs/[org]/meetings/[id]/page.jsx exists and delegates to MeetingDetailPage.",
+    "packages/krate/web/app/pages/jitsi-pages.jsx renders MeetingDetailPage with JitsiEmbeddedMeeting, JitsiMeetingControls, and JitsiParticipantList, but the current page passes meeting.status.jwtToken instead of performing the required POST join flow.",
+    "packages/krate/web/app/components/jitsi/jitsi-embedded-meeting.jsx currently instantiates window.JitsiMeetExternalAPI only if the API is already present; it does not yet load https://meet.krate.local/external_api.js, expose loading/error states, wire controls/events comprehensively, or handle script lifecycle.",
+    "packages/krate/web/app/components/jitsi/jitsi-meeting-controls.jsx currently calls join/invite/record/end API endpoints and produces a join link, but the issue requires in-console iframe join and External API command wiring for mute, camera, screen share, chat, and meeting end behavior.",
+    "packages/krate/web/app/components/jitsi/jitsi-participant-list.jsx exists but only renders a basic list; the issue requires a fuller context panel with humans plus agents, persona/avatar treatment, metadata, recording controls, invite buttons, and dispatch run links.",
+    "packages/krate/web/app/api/orgs/[org]/jitsi/meetings/[id]/join/route.js, invite, record, and meeting routes exist and should be reused as the authenticated org-scoped API boundary.",
+    "packages/krate/web/app/lib/jitsi-service.js already creates org-scoped Jitsi resources and short-lived JWT-shaped join payloads, with development fallbacks for JWT/webhook secrets that need security review for production behavior.",
+    "packages/krate/web/tests/jitsi-structure.test.js provides structural coverage only; acceptance tests still need mocked External API lifecycle, API integration, and responsive/browser assertions."
+  ],
   "specPaths": [
     "packages/krate/docs/jitsi/05-human-meeting-experience.md",
     "packages/krate/docs/jitsi/04-web-management.md",
@@ -101,6 +134,7 @@
       "packages/krate/web/app/globals.css"
     ],
     "tests": [
+      "packages/krate/web/tests/jitsi-structure.test.js",
       "packages/krate/web/tests",
       "packages/krate/cli/tests/jitsi-mcp-tools.test.js"
     ]
