@@ -23,7 +23,8 @@
     "#591 is related for observability and distributed tracing; #599 owns session-aware proxy context.",
     "Triage says this is staged integration/architecture work, not a quick single-file bug fix.",
     "Triage recommends a request context contract, narrow cost/event sink, usage-bearing buffered and streaming cost emission, passthrough metrics-only behavior unless upstream usage parsing exists, explicit plugin/atlas-backed codec discovery, route-level tests, and privacy controls.",
-    "A previous closed plan PR #660 existed for the same branch name; implementation was reported incomplete and should not be assumed complete without current-state validation."
+    "A previous closed plan PR #660 existed for the same branch name; implementation was reported in-progress and should not be assumed complete without current-state validation.",
+    "A later open plan PR #727 exists on plan/issue-599 and should be updated rather than overwritten if the branch already exists."
   ],
   "relatedIssues": [
     578,
@@ -151,7 +152,14 @@
   },
   "knownCurrentStateHints": {
     "processLibraryPath": ".a5c/process-library/ was not present in the planning checkout; use library/ and nearby process files as the local process-library source.",
-    "partialCostSessionImplementation": "Current staging may already contain CostFeedbackSink, CostFeedbackMetadata, x-babysitter-* extraction, appendCostEventOnce tests, normalizeUsage, convertTools, and codec descriptor lookup. The implementation process must validate and preserve usable partial work before adding new code.",
-    "priorPlanPr": "PR #660 was a previous closed plan PR for issue #599. It should be treated as context only, not proof of completion."
+    "partialCostSessionImplementation": "Current staging appears to contain CostFeedbackSink, CostFeedbackMetadata, x-babysitter-* extraction, cost feedback tests, appendCostEventOnce integration tests, normalizeUsage, convertTools, and codec descriptor lookup. The implementation process must validate and preserve usable partial or complete work before adding new code.",
+    "stagingEvidenceObservedDuringPlanning": [
+      "packages/transport-mux/src/types.ts defines CostFeedbackMetadata, CostFeedbackRecord, and CostFeedbackSink.",
+      "packages/transport-mux/src/server.ts extracts x-babysitter-run-id, x-babysitter-session-id, x-babysitter-effect-id, x-babysitter-task-id, x-babysitter-task-kind, x-babysitter-cost-source, and x-babysitter-cost-idempotency-key into cost feedback metadata.",
+      "packages/transport-mux/tests/server.test.ts covers buffered cost feedback, streaming final-usage feedback, SDK journal appendCostEventOnce idempotency, effect cost indexing, and session budget enforcement.",
+      "packages/transport-mux/src/codecs/index.ts exposes getCodecForDescriptor, convertTools, and normalizeUsage backed by built-in codecs and aliases."
+    ],
+    "currentStateRule": "Each implementation slice should begin by classifying the current staging state as complete, partial, or missing. Complete slices are preserve-and-verify work and should not trigger production rewrites.",
+    "priorPlanPr": "PR #660 was a previous closed plan PR for issue #599; PR #727 is the current open plan PR on plan/issue-599. Both should be treated as context only, not proof of completion."
   }
 }

@@ -1,6 +1,6 @@
 /**
  * @process repo/issue-599-transport-mux-integration-plan
- * @description Plan and execute issue #599: finish transport-mux cost feedback, session-aware proxy context, codec plugin discovery, and shared tool schema normalization.
+ * @description Plan and execute issue #599: validate and finish transport-mux cost feedback, session-aware proxy context, codec plugin discovery, and shared tool schema normalization.
  * @inputs { issueNumber: number, baseBranch: string, implementationBranch: string, maxAttempts?: number, targetFiles: string[], relatedIssues: number[], verificationCommands: string[] }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], reuseAudit: object, runtimeTrace: object, contractDesign: object, regressionPlan: object, implementation: object, verification: object, review: object, finalGate: object }
  *
@@ -24,6 +24,11 @@
  * Note: .a5c/process-library/ was not present in this checkout. Matching
  * methodologies and specializations were researched under the repository
  * library/ root and nearby .a5c/processes process files.
+ *
+ * Planning refresh note: current staging may already include partial or complete
+ * work for cost feedback and session metadata. Every implementation slice must
+ * first classify the slice as complete, partial, or missing and preserve working
+ * code instead of rewriting it.
  *
  * This process intentionally uses agent tasks rather than shell tasks to
  * respect the repository override for direct Babysitter workflows.
@@ -350,8 +355,9 @@ export const reuseAuditTask = defineTask('issue-599.reuse-audit', (args, taskCtx
         'Extract keyword nouns and verbs from issue #599: transport-mux, cost feedback, NormalizedCostRecord, extractCostRecord, SDK journal, COST_TRACKED, L6 cost tracking, runId, sessionId, traceparent, correlation ID, codec discovery, plugin descriptor, marketplace, tool schema normalization, tool-mux.',
         'Scan for matching migrations, API routes, environment variables, SDK dependencies, package exports, imports, plugin registry surfaces, route tests, transport codecs, and scorecard gates. Honor .a5c/reuse-audit.json if present.',
         'Inspect packages/transport-mux first, then follow imports and consumers through packages/sdk cost/session code, agent-mux launcher/adapter surfaces, docs/plugins.md, docs/agent-layer-gaps.md, and related issue process plans.',
-        'Call out existing staging implementation that may already cover part of the issue, especially costFeedbackSink, x-babysitter headers, appendCostEventOnce, and codec helper exports.',
-        'Return JSON: { renderedFindings, keywords, existingInfrastructure, partialImplementationAlreadyPresent, reusableModules, dependencyFindings, envVars, routeAndApiFindings, pluginFindings, gapsStillOpen, noMatchNotes, risksForNewInfrastructure }.',
+        'Call out existing staging implementation that may already cover part of the issue, especially costFeedbackSink, CostFeedbackMetadata, x-babysitter headers, appendCostEventOnce, session budget tests, normalizeUsage, convertTools, and codec descriptor lookup.',
+        'For each issue slice, classify current state as complete, partial, or missing and list evidence files and tests. Treat complete slices as preserve-and-verify work, not implementation work.',
+        'Return JSON: { renderedFindings, keywords, existingInfrastructure, sliceState: { costFeedback, sessionContext, codecDiscovery, schemaSharing }, partialImplementationAlreadyPresent, reusableModules, dependencyFindings, envVars, routeAndApiFindings, pluginFindings, gapsStillOpen, noMatchNotes, risksForNewInfrastructure }.',
       ],
       context: {
         inputs: args.inputs,
@@ -383,7 +389,8 @@ export const traceRuntimePathsTask = defineTask('issue-599.trace-runtime-paths',
         'Trace SDK journal cost helpers, run cost stats, effect index cost fields, and session budget enforcement enough to design a narrow sink boundary.',
         'Trace codec registry and descriptor lookup, including hardcoded built-ins, aliases, normalizeUsage, convertTools, and public exports.',
         'Trace tool schema normalization consumers in tool-mux or adjacent packages and identify a non-circular sharing strategy.',
-        'Return JSON: { currentState, runtimeCallPaths, publicContracts, liveVsAdjacentFiles, testFiles, missingSurfaces, compatibilityRisks, securityRisks, proposedImplementationSlices, outOfScope }.',
+        'For already-implemented-looking paths, trace both production code and assertions so later phases can distinguish true completion from superficial test fixtures.',
+        'Return JSON: { currentState, sliceState, runtimeCallPaths, publicContracts, liveVsAdjacentFiles, testFiles, missingSurfaces, compatibilityRisks, securityRisks, proposedImplementationSlices, outOfScope }.',
       ],
       context: {
         inputs: args.inputs,
@@ -414,7 +421,8 @@ export const designIntegrationContractsTask = defineTask('issue-599.design-integ
         'For passthrough routes, define metrics-only behavior unless upstream usage parsing is explicitly implemented and tested.',
         'For codec discovery, define explicit registration/discovery APIs, deterministic descriptor/plugin loading, duplicate behavior, alias behavior, unknown codec behavior, and package exports.',
         'For schema sharing, define where NormalizedToolDefinition, normalizeTools, denormalizeTools, convertTools, and any tool-mux adapter should live without circular dependencies.',
-        'Define migration notes for staging branches that already have partial cost/session plumbing so the implementation agent validates before rewriting.',
+        'Define migration notes for staging branches that already have partial or complete cost/session plumbing so the implementation agent validates before rewriting.',
+        'For any slice classified complete by the reuse audit and runtime trace, define preserve-and-verify acceptance criteria instead of new implementation tasks.',
         'Return JSON: { apiSurface, costFeedbackContract, requestContextContract, traceContract, codecDiscoveryContract, schemaSharingContract, migrationPlan, acceptanceCriteria, needsMaintainerDecision, question, risks }.',
       ],
       context: {
@@ -450,7 +458,7 @@ export const authorRegressionPlanTask = defineTask('issue-599.author-regression-
         'Cover request context extraction from headers and configured defaults, including traceparent/correlation IDs and malformed or missing metadata.',
         'Cover codec registration/discovery: built-ins, aliases, descriptor lookup, plugin/manifest descriptor loading, duplicate registration, unknown codec, and deterministic ordering.',
         'Cover shared tool schema normalization so tool-mux and transport-mux do not diverge on OpenAI/Anthropic/Google shapes.',
-        'Run narrow tests after writing them and record that failures match issue #599 rather than setup drift.',
+        'Run narrow tests after writing them and record that failures match issue #599 rather than setup drift. If a slice is already green on staging, record that as current-state validation and require only missing regression coverage.',
         'Return JSON: { testFiles, testNames, redPhaseCommands, expectedFailures, routeCoverage, sdkCoverage, codecCoverage, schemaCoverage, redVerified, risks }.',
       ],
       context: {
@@ -479,7 +487,8 @@ export const implementCostFeedbackTask = defineTask('issue-599.implement-cost-fe
       task: 'Implement or complete the cost feedback slice for issue #599.',
       instructions: [
         'Edit the repository directly, but keep changes scoped to issue #599.',
-        'First validate whether staging already has a costFeedbackSink or equivalent. Preserve working partial implementation instead of rewriting it.',
+        'First validate whether staging already has a costFeedbackSink or equivalent. Preserve working partial or complete implementation instead of rewriting it.',
+        'If the slice is complete, do not edit production code for this slice; add only missing focused tests or docs required by contractDesign.',
         'Wire normalized usage-bearing completion results and streaming done events into the approved cost/event sink.',
         'Use codec extractCostRecord or normalized usage consistently; do not double-count.',
         'Bridge to SDK journal through a narrow adapter/helper using appendCostEventOnce semantics when the run directory is available.',
@@ -508,6 +517,7 @@ export const implementSessionContextTask = defineTask('issue-599.implement-sessi
       instructions: [
         'Edit the repository directly, but keep changes scoped to issue #599.',
         'First validate whether staging already extracts x-babysitter-* metadata. Preserve compatible existing behavior.',
+        'If the slice is complete, do not edit production code for this slice; add only missing focused tests or docs required by contractDesign.',
         'Add or complete a typed request context contract for runId, sessionId, effectId, taskId, taskKind, traceparent, tracestate, request/correlation IDs, and source metadata.',
         'Propagate context only to internal metrics/cost/tracing sinks by default.',
         'Redact internal x-babysitter-* headers from upstream passthrough and provider requests unless the contract allows explicit forwarding.',
@@ -535,7 +545,9 @@ export const implementCodecDiscoveryTask = defineTask('issue-599.implement-codec
       task: 'Implement or complete deterministic codec registration and plugin-backed discovery for issue #599.',
       instructions: [
         'Edit the repository directly, but keep changes scoped to issue #599.',
+        'First validate existing descriptor lookup, normalizeUsage, convertTools, built-in aliases, and public exports. Preserve any complete current behavior.',
         'Preserve built-in codecs and existing aliases.',
+        'If the slice is complete, do not edit production code for this slice; add only missing focused tests or docs required by contractDesign.',
         'Expose supported registration/discovery APIs rather than relying on private static registry mutation.',
         'Load plugin or descriptor metadata deterministically through approved manifest/atlas/package configuration surfaces; do not add implicit arbitrary code execution.',
         'Define and test duplicate codec behavior, alias collision behavior, descriptor lookup, unknown codec behavior, and stable ordering.',
@@ -563,10 +575,11 @@ export const implementSchemaSharingTask = defineTask('issue-599.implement-schema
       task: 'Share tool schema normalization between tool-mux and transport-mux without circular coupling.',
       instructions: [
         'Edit the repository directly, but keep changes scoped to issue #599.',
-        'Reuse existing NormalizedToolDefinition, convertTools, normalizeTools, and denormalizeTools concepts where possible.',
+        'First validate existing NormalizedToolDefinition, convertTools, normalizeTools, and denormalizeTools concepts and any tool-mux overlap. Preserve any complete current behavior.',
         'Choose a package boundary that avoids circular dependencies and preserves public API compatibility.',
         'Add tests proving OpenAI, Anthropic, and Google tool schemas normalize and denormalize consistently through both consumers.',
         'Do not refactor unrelated tool-mux dispatch behavior.',
+        'If the slice is complete, do not edit production code for this slice; add only missing focused tests or docs required by contractDesign.',
         'Run focused schema/tool tests and report exact commands and outcomes.',
         'Return JSON: { changedFiles, summary, testsRun, sharedTypes, packageBoundary, compatibilityNotes, remainingRisks }.',
       ],
