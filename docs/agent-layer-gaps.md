@@ -69,7 +69,7 @@ Comprehensive inventory of missing capabilities, stub implementations, and archi
 | SSH — partial verification | `execution/modes/ssh.ts` | Strict host-key checking is now the default and `StrictHostKeyChecking=no` requires an explicit insecure policy opt-in. Retry, pooling, and keepalive are still missing. |
 | Docker — partial sandbox policy | `execution/modes/docker.ts` | Docker args now include secure defaults plus resource/network/DNS policy support. Live daemon availability and image verification preflight remain missing. |
 | External trigger sources are incomplete | `daemon/types.ts`, `daemon/loop.ts` | File/webhook/timer are hardened with durable retry/DLQ, dedupe windows, queue depth admission, and webhook rate limiting. Broker/chat/git trigger adapters are still missing. |
-| Background process isolation/backpressure is partial | `backgroundProcessRegistry.ts` | Background execution now uses ExecutionPolicy env/cwd handling, retained/dropped stream byte metadata, optional process-group termination with grace escalation, timeout status, pause/resume capability checks, dependency queueing, and lifecycle hook diagnostics. Remaining gaps are OS-enforced isolation and daemon-level graceful drain/crash recovery. |
+| Background process isolation/backpressure is partial | `backgroundProcessRegistry.ts` | Background execution now uses ExecutionPolicy env/cwd handling, default bounded retained stdout/stderr with retained/dropped stream byte metadata, optional process-group termination with grace escalation, timeout and stale status, pause/resume capability checks, dependency queueing, and lifecycle hook diagnostics with timeout reporting. Remaining gaps are OS-enforced isolation and daemon-level graceful drain/crash recovery. |
 
 ### Medium
 
