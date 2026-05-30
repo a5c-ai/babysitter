@@ -27,6 +27,18 @@ export interface PromptContext {
    */
   capabilities: string[];
 
+  /** Host agent identifier when Babysitter is running in plugin mode. */
+  hostAgentName?: string;
+
+  /** Human-readable host agent label when Babysitter is running in plugin mode. */
+  hostAgentLabel?: string;
+
+  /** Host-local capabilities derived from plugin capability context. */
+  hostCapabilities?: string[];
+
+  /** Optional host tool inventory when supplied by the host capability context. */
+  hostTools?: unknown[];
+
   /** Runtime platform: 'win32' | 'darwin' | 'linux' */
   platform: string;
 

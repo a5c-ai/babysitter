@@ -97,6 +97,30 @@ describe("buildPromptContextFromProxy", () => {
     expect(ctx.harnessLabel).toBe("My Cool Editor");
   });
 
+  it("exposes host identity and capabilities for a Codex proxy", () => {
+    const ctx = buildPromptContextFromProxy(
+      makeProxy({ name: "codex", supportsBlock: true, supportsAsk: true }),
+    );
+    expect(ctx.hostAgentName).toBe("codex");
+    expect(ctx.hostAgentLabel).toBe("Codex");
+    expect(ctx.hostCapabilities).toEqual([
+      "task-tool",
+      "breakpoint-routing",
+      "hooks",
+      "stop-hook",
+      "ask-user-question",
+    ]);
+  });
+
+  it("exposes host identity for a Claude Code proxy", () => {
+    const ctx = buildPromptContextFromProxy(
+      makeProxy({ name: "claude-code", supportsBlock: true }),
+    );
+    expect(ctx.hostAgentName).toBe("claude-code");
+    expect(ctx.hostAgentLabel).toBe("Claude Code");
+    expect(ctx.hostCapabilities).toContain("stop-hook");
+  });
+
   it("sets hookDriven=true when family is shell-hook and supportsBlock", () => {
     const ctx = buildPromptContextFromProxy(
       makeProxy({ family: "shell-hook", supportsBlock: true }),

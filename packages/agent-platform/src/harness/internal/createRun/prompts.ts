@@ -15,6 +15,10 @@ export interface HarnessPromptContext {
   cwd: string;
   workspace: string;
   selectedHarnessName?: string;
+  hostAgentName?: string;
+  hostAgentLabel?: string;
+  hostCapabilities?: string[];
+  hostTools?: unknown[];
   discoveredHarnesses: HarnessDiscoveryResult[];
   compressionEnabled: boolean;
   secureSandboxImage: string;
@@ -76,6 +80,28 @@ function formatRuntimeContext(context: HarnessPromptContext): string[] {
   ];
 }
 
+function formatHostAgentContext(context: HarnessPromptContext): string[] {
+  if (!context.hostAgentName && !context.hostAgentLabel) {
+    return [];
+  }
+
+  const hostName = context.hostAgentName ?? "unknown";
+  const hostLabel = context.hostAgentLabel ?? hostName;
+  const capabilities = context.hostCapabilities && context.hostCapabilities.length > 0
+    ? context.hostCapabilities.join(", ")
+    : "unknown";
+  const selectedHarness = context.selectedHarnessName ?? "not selected";
+
+  return [
+    "Host agent context:",
+    `- Host agent running this planning session: ${hostLabel} (${hostName}).`,
+    `- Host-local capabilities: ${capabilities}.`,
+    "- Use the host agent for work it can perform locally; use the internal agent-core worker for default task execution and shell effects unless a task intentionally routes elsewhere.",
+    `- The selected orchestration binding harness is ${selectedHarness}; this is distinct from the host agent identity.`,
+    "- Discovered external harnesses are routing options, not proof that the current host can perform their native tools.",
+  ];
+}
+
 function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[] {
   const installedHarnesses = context.discoveredHarnesses
     .filter((h) => h.installed)
@@ -104,9 +130,14 @@ function formatHarnessAssignmentGuidance(context: HarnessPromptContext): string[
 }
 
 function formatSharedContext(context: HarnessPromptContext): string[] {
+  const hostAgentContext = formatHostAgentContext(context);
+
   return [
     "",
     ...formatRuntimeContext(context),
+    ...(hostAgentContext.length > 0
+      ? ["", ...hostAgentContext]
+      : []),
     "",
     ...formatHarnessCatalog(context),
     "",

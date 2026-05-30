@@ -317,14 +317,17 @@ describe("unified adapter getPromptContext", () => {
     const ctx = adapter.getPromptContext!();
     expect(ctx.harness).toBe("unified");
     expect(ctx.harnessLabel).toBe("Unified");
+    expect(ctx.hostAgentName).toBeUndefined();
+    expect(ctx.hostAgentLabel).toBeUndefined();
+    expect(ctx.hostCapabilities).toBeUndefined();
   });
 
   it("derives PromptContext from AGENT_CAPABILITIES_JSON when set", () => {
     process.env.AGENT_CAPABILITIES_JSON = JSON.stringify({
-      name: "my-harness",
+      name: "codex",
       family: "shell-hook",
       supportsBlock: true,
-      supportsAsk: false,
+      supportsAsk: true,
       supportsToolInputMutation: false,
       supportsToolResultMutation: false,
       supportsPersistedEnv: false,
@@ -336,7 +339,10 @@ describe("unified adapter getPromptContext", () => {
     });
     const adapter = createUnifiedAdapter();
     const ctx = adapter.getPromptContext!();
-    expect(ctx.harness).toBe("my-harness");
+    expect(ctx.harness).toBe("codex");
+    expect(ctx.hostAgentName).toBe("codex");
+    expect(ctx.hostAgentLabel).toBe("Codex");
+    expect(ctx.hostCapabilities).toContain("ask-user-question");
     expect(ctx.hookDriven).toBe(true);
     expect(ctx.loopControlTerm).toBe("stop-hook");
   });
