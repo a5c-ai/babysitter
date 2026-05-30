@@ -1,0 +1,118 @@
+{
+  "issueNumber": 597,
+  "baseBranch": "staging",
+  "implementationBranch": "feature/issue-597-tasks-mux-cli-mcp-surface",
+  "relatedIssues": [596, 577],
+  "trigger": "manual dispatch",
+  "title": "tasks-mux: missing CLI commands and MCP tools",
+  "labels": [
+    "enhancement",
+    "ready-for-dev",
+    "priority:medium",
+    "effort:large",
+    "tasks-mux",
+    "P2",
+    "risk:medium"
+  ],
+  "requiredCliSurface": {
+    "breakpoints": [
+      "search",
+      "assign",
+      "reassign",
+      "close",
+      "approve",
+      "list --status"
+    ],
+    "responders": [
+      "search",
+      "stats"
+    ],
+    "templates": [
+      "list",
+      "show",
+      "create"
+    ],
+    "rules": [
+      "list",
+      "add",
+      "remove"
+    ]
+  },
+  "requiredMcpSurface": {
+    "tools": [
+      "create_todo",
+      "create_task",
+      "assign_task",
+      "search_tasks",
+      "cancel_breakpoint",
+      "escalate_breakpoint",
+      "add_comment_to_breakpoint"
+    ],
+    "resources": [
+      "breakpoint://[id]"
+    ],
+    "subscriptions": [
+      "state change notifications"
+    ]
+  },
+  "acceptanceCriteria": [
+    "The implementation starts with a reuse audit and contract/spec phase before production changes.",
+    "Shared backend/type contracts support the required task lifecycle operations or report explicit unsupported-backend errors.",
+    "The CLI exposes the requested breakpoints, responders, templates, and rules commands with JSON and table output coverage.",
+    "The MCP server exposes the requested tools with schema, handler, backend resolution, and transport coverage.",
+    "The MCP server exposes breakpoint://[id] resources and state-change subscriptions where supported by the current MCP SDK, with explicit documented fallback behavior if a transport cannot support subscriptions.",
+    "Existing CLI and MCP commands remain backward compatible.",
+    "Contract tests fail before implementation and pass after implementation.",
+    "Docs and package metadata match the implemented public surface."
+  ],
+  "explicitNonGoals": [
+    "Do not wire tasks-mux MCP tools into agent-platform or agent-core discovery unless required by issue #597; that is related to #577.",
+    "Do not implement unrelated task priority, dependency, notification provider, database backend, Slack, Linear, or Jira support unless it is necessary to expose an explicit unsupported capability boundary.",
+    "Do not replace the existing BreakpointBackend architecture."
+  ],
+  "targetFiles": [
+    "packages/tasks-mux/src/backend.ts",
+    "packages/tasks-mux/src/types.ts",
+    "packages/tasks-mux/src/backends/index.ts",
+    "packages/tasks-mux/src/backends/git-native.ts",
+    "packages/tasks-mux/src/backends/server.ts",
+    "packages/tasks-mux/src/backends/github-issues.ts",
+    "packages/tasks-mux/src/backends/external-tracker.ts",
+    "packages/tasks-mux/src/cli/program.ts",
+    "packages/tasks-mux/src/cli/commands/breakpoints.ts",
+    "packages/tasks-mux/src/cli/commands/responders.ts",
+    "packages/tasks-mux/src/cli/commands/templates.ts",
+    "packages/tasks-mux/src/cli/commands/rules.ts",
+    "packages/tasks-mux/src/cli/output.ts",
+    "packages/tasks-mux/src/client/server-client.ts",
+    "packages/tasks-mux/src/mcp/server.ts",
+    "packages/tasks-mux/src/mcp/backend-resolver.ts",
+    "packages/tasks-mux/src/mcp/tools",
+    "packages/tasks-mux/src/mcp/resources",
+    "packages/tasks-mux/src/__tests__/cli-program.test.ts",
+    "packages/tasks-mux/src/__tests__/cli-output.test.ts",
+    "packages/tasks-mux/src/__tests__/mcp-server.test.ts",
+    "packages/tasks-mux/src/__tests__/mcp-http-transport.test.ts",
+    "packages/tasks-mux/src/__tests__/shared-types-backend-interface.test.ts",
+    "docs/agent-layer-gaps.md",
+    "docs/agent-reference/command-surfaces.md"
+  ],
+  "verificationCommands": [
+    "npm run test:sdk -- --run packages/tasks-mux/src/__tests__/cli-program.test.ts",
+    "npm run test:sdk -- --run packages/tasks-mux/src/__tests__/mcp-server.test.ts packages/tasks-mux/src/__tests__/mcp-http-transport.test.ts",
+    "npm run test:sdk -- --run packages/tasks-mux/src/__tests__/shared-types-backend-interface.test.ts",
+    "npm run test:sdk -- --run packages/tasks-mux/src/__tests__",
+    "npm run build:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "qualityGates": [
+    "Focused RED proof for CLI, MCP, resource, subscription, and backend contract tests before implementation.",
+    "Green focused contract tests after implementation.",
+    "Full tasks-mux test pass.",
+    "SDK build/typecheck pass.",
+    "Packaged public surface and metadata verification pass.",
+    "Final adversarial review approves CLI/MCP/backend parity and backward compatibility."
+  ],
+  "processEntry": ".a5c/processes/issue-597-tasks-mux-cli-mcp-surface.mjs#process"
+}
