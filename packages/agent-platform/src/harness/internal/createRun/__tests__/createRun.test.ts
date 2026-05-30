@@ -4281,6 +4281,70 @@ describe("handleHarnessCreateRun", () => {
       );
     });
 
+    it("keeps explicit parallel groups sequential for external harnesses without concurrent-effects", async () => {
+      (discoverHarnesses as Mock).mockResolvedValue([
+        makeDiscoveryResult({ name: "claude-code", capabilities: [] }),
+      ]);
+      (createRun as Mock).mockResolvedValue({
+        runId: "run-1",
+        runDir: "/tmp/runs/run-1",
+        metadata: {},
+      });
+
+      const waitingResult: IterationResult = {
+        status: "waiting",
+        nextActions: [
+          {
+            effectId: "eff-1",
+            invocationKey: "key-1",
+            kind: "node",
+            schedulerHints: { parallelGroupId: "group-1", maxConcurrency: 2 },
+            taskDef: { kind: "node", title: "one" },
+          },
+          {
+            effectId: "eff-2",
+            invocationKey: "key-2",
+            kind: "node",
+            schedulerHints: { parallelGroupId: "group-1", maxConcurrency: 2 },
+            taskDef: { kind: "node", title: "two" },
+          },
+        ],
+      };
+      (orchestrateIteration as Mock)
+        .mockResolvedValueOnce(waitingResult)
+        .mockResolvedValueOnce({ status: "completed", output: "done" });
+      (commitEffectResult as Mock).mockResolvedValue({});
+      let active = 0;
+      let maxActive = 0;
+      (invokeHarness as Mock).mockImplementation(async () => {
+        active += 1;
+        maxActive = Math.max(maxActive, active);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        active -= 1;
+        return makeInvokeResult({ harness: "claude-code" });
+      });
+
+      const code = await handleHarnessCreateRun({
+        harness: "claude-code",
+        processPath: "/tmp/p.js",
+        runsDir: "/tmp/runs",
+        json: false,
+        verbose: false,
+        interactive: false,
+      });
+
+      expect(code).toBe(0);
+      expect(maxActive).toBe(1);
+      expect(commitEffectResult).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ effectId: "eff-1" }),
+      );
+      expect(commitEffectResult).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ effectId: "eff-2" }),
+      );
+    });
+
     it("commits sibling successes when a parallel sibling fails", async () => {
       (discoverHarnesses as Mock).mockResolvedValue([
         makeDiscoveryResult({ name: "claude-code", capabilities: [HarnessCapability.ConcurrentEffects] }),

@@ -77,7 +77,10 @@ import {
   EFFECT_RETRY_DELAYS_OVERRIDE,
   PROCESS_MODULE_LOAD_RETRY_DELAYS_MS,
 } from "./constants";
-import { dispatchEffectActions } from "./dispatch";
+import {
+  dispatchEffectActions,
+  harnessSupportsConcurrentEffects,
+} from "./dispatch";
 
 type McpExecutorLike = {
   execute(request: McpToolExecutionRequest): Promise<McpToolResult>;
@@ -756,6 +759,7 @@ async function invokeSubprocessEffect(
     if (iterationResult.status === "waiting") {
       await dispatchEffectActions({
         actions: iterationResult.nextActions,
+        concurrentEffects: harnessSupportsConcurrentEffects(childHarness, discovered),
         resolveAction: async (childAction) => {
           const effectiveHarness = discovered
             ? resolveTaskHarness(childAction, childHarness, discovered)
