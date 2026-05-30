@@ -1,0 +1,166 @@
+{
+  "issueNumber": 613,
+  "baseBranch": "staging",
+  "targetBranch": "feat/issue-613-krate-ui-polish",
+  "title": "UI polish: index-based keys, remaining console.warn, hardcoded colors",
+  "issueUrl": "https://github.com/a5c-ai/babysitter/issues/613",
+  "labels": [
+    "effort:medium",
+    "ready-for-dev",
+    "priority:medium",
+    "refactor",
+    "krate",
+    "krate-web",
+    "risk:medium"
+  ],
+  "summary": "Lower-severity Krate web UI quality work: replace issue-scoped dynamic index keys with stable identities, surface the user-initiated curated model deploy route-creation failure in visible UI state, migrate a bounded set of hardcoded colors in touched files to CSS variables, and add standard arrow/Home/End keyboard support for ApprovalModeToggle's radiogroup.",
+  "issueBody": "## Summary\n\nLower-severity UI quality issues that don't break functionality but affect maintainability and polish.\n\n## 1. Index-Based React Keys (30+ instances)\n\nComponents use array index as `key` prop in `.map()` calls. Harmless for static content (markdown rendering) but can cause rendering bugs for dynamic lists that get reordered or filtered.\n\nDynamic lists (medium risk - should fix):\n- `session-cost.jsx` - turn cost items\n- `external-conflict-resolver.jsx` - conflict field list\n- `virtual-model-manager.jsx` - route/rule entries\n- `inference-service-list.jsx` - service list\n- `secret-manager.jsx` - secret entries\n\nFix: Use stable domain identifiers where available and generated immutable local row IDs for editable form rows; avoid falling back to array position for mutable rows.\n\n## 2. Console.warn - One User-Facing Operation\n\nMost remaining `console.warn` calls are appropriate for background operations. One should be user-facing:\n- `curated-model-catalog.jsx` - model deploy follow-up route creation failure should show error or partial-success state.\n\n## 3. Hardcoded Colors\n\nComponents mix raw hex values with CSS variables. Full migration requires visual testing. Migrate incrementally by mapping high-impact hardcoded values in touched files to existing or new CSS variables.\n\n## 4. Keyboard Navigation\n\nApproval mode toggle uses `role=\"radiogroup\"` but is missing arrow-key navigation handlers. Users expect arrow keys in radio groups.",
+  "triageComment": "The issue is valid for Krate web UI polish. Tighten the suggested key strategy: use real stable domain identifiers where available and generated immutable local row IDs for editable rows without server IDs. Static markdown/render-only index keys are lower priority and should not dominate the fix. CuratedModelCatalog must not report unconditional success when the service deploy succeeds but route creation fails. ApprovalModeToggle needs standard radiogroup ArrowLeft/ArrowRight/ArrowUp/ArrowDown/Home/End behavior. Hardcoded color migration should be incremental with visual review, not a broad sweep.",
+  "existingPlanContext": {
+    "previousPlanPr": "https://github.com/a5c-ai/babysitter/pull/651",
+    "previousPlanPrState": "closed",
+    "currentPlanPr": "https://github.com/a5c-ai/babysitter/pull/718",
+    "currentPlanPrState": "open",
+    "previousIssueComment": "Issue #613 already has prior plan comments and was marked work-in-progress, but this manual dispatch requires the executable process artifacts to remain current against staging and the active process library.",
+    "currentBranchNote": "Current staging may already contain partial CuratedModelCatalog route-warning behavior. The process must audit current state before implementing to avoid duplicate or regressive changes."
+  },
+  "processLibraryResearch": {
+    "activeLibraryRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "repoPolicyReference": "docs/agent-reference/process-authoring.md says this repo should keep direct Babysitter workflows sparse on breakpoints and avoid kind:'shell' subtasks for babysitter:call processes unless explicitly requested.",
+    "methodologyReferences": [
+      "library/methodologies/superpowers/test-driven-development.js",
+      "library/methodologies/superpowers/verification-before-completion.js",
+      "library/specializations/web-development/keyboard-navigation-focus.js",
+      "library/specializations/web-development/e2e-testing-playwright.js",
+      "library/processes/shared/tdd-triplet.js",
+      "library/processes/shared/completeness-gate.js",
+      "library/processes/shared/prior-attempts-scanner.js",
+      "library/methodologies/spec-kit-brownfield.js",
+      "library/methodologies/feature-driven-development/feature-driven-development.js"
+    ],
+    "discoveryCommandsUsed": [
+      "babysitter instructions:babysit-skill --harness codex --no-interactive",
+      "rg --files /home/runner/.a5c/process-library/babysitter-repo/library",
+      "rg --files /home/runner/.a5c/process-library/babysitter-repo/library/specializations /home/runner/.a5c/process-library/babysitter-repo/library/processes /home/runner/.a5c/process-library/babysitter-repo/library/methodologies | rg -n \"react|web|keyboard|accessib|test|verification|quality|github|branch|issue|pr|ui|automaker|rpikit|spec-kit|planning-with-files\"",
+      "sed -n '1,240p' docs/agent-reference/process-authoring.md",
+      "sed -n '1,160p' /home/runner/.a5c/process-library/babysitter-repo/library/specializations/web-development/keyboard-navigation-focus.js",
+      "sed -n '1,160p' /home/runner/.a5c/process-library/babysitter-repo/library/specializations/web-development/e2e-testing-playwright.js",
+      "babysitter skill:discover --process-path .a5c/processes/issue-613-krate-ui-polish.mjs --json"
+    ]
+  },
+  "targetFiles": [
+    "packages/krate/docs/gaps/ui-ux-remaining.md",
+    "packages/krate/web/app/components/agent/approval-mode-toggle.jsx",
+    "packages/krate/web/app/components/agent/session-cost.jsx",
+    "packages/krate/web/app/components/external/external-conflict-resolver.jsx",
+    "packages/krate/web/app/components/inference/curated-model-catalog.jsx",
+    "packages/krate/web/app/components/inference/inference-service-list.jsx",
+    "packages/krate/web/app/components/inference/virtual-model-manager.jsx",
+    "packages/krate/web/app/components/settings/secret-manager.jsx",
+    "packages/krate/web/app/components/inference/inference-helpers.jsx",
+    "packages/krate/web/app/globals.css",
+    "packages/krate/web/tests/component-structure.test.js",
+    "packages/krate/web/tests/resource-contract.test.js",
+    "packages/krate/web/tests/ui-polish-issue-613.test.js"
+  ],
+  "plannedPhases": [
+    {
+      "name": "Issue context",
+      "purpose": "Read #613, every comment, labels, prior plan context, and the referenced Krate UI gap document."
+    },
+    {
+      "name": "Reuse audit",
+      "purpose": "Scan existing Krate web tests, helpers, color tokens, keyboard patterns, and dynamic list identity patterns before proposing new code."
+    },
+    {
+      "name": "Current-state scope",
+      "purpose": "Determine which #613 concerns remain unresolved on the execution branch and avoid reworking already-landed partial fixes."
+    },
+    {
+      "name": "Regression tests first",
+      "purpose": "Add focused node:test structural or component-level tests for unresolved key identity, visible deploy failure feedback, radiogroup keyboard behavior, and bounded color-token migration; verify RED."
+    },
+    {
+      "name": "Implementation loop",
+      "purpose": "Apply narrow Krate web UI changes and iterate up to three attempts based on verification and review."
+    },
+    {
+      "name": "Quality gates",
+      "purpose": "Run focused tests, full Krate web tests, build, Playwright smoke when available, diff hygiene, and issue-specific static guardrails."
+    },
+    {
+      "name": "Spec review",
+      "purpose": "Review the actual diff against the issue spec, triage comment, scope findings, and verification evidence."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm all unresolved #613 acceptance criteria are satisfied without unrelated UI churn."
+    }
+  ],
+  "acceptanceCriteria": [
+    "Issue-scoped dynamic lists no longer use array index as the React key when rows can be inserted, removed, reordered, filtered, or updated.",
+    "Editable local arrays without server IDs use immutable generated row IDs that are not derived solely from mutable field values.",
+    "Server-backed list rows use stable resource identity such as metadata.name, uid, id, or a documented stable composite key.",
+    "CuratedModelCatalog displays service deploy route-creation failure as visible partial-success or error state if that behavior is still incomplete on the execution branch.",
+    "ApprovalModeToggle supports ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Home, and End while preserving click/tap selection and ARIA state.",
+    "Hardcoded color cleanup is bounded to touched issue files and maps high-impact colors to existing CSS variables or narrowly added tokens.",
+    "Static markdown/render-only index keys and unrelated background console.warn calls are not pulled into this implementation unless scope audit proves they affect #613 acceptance.",
+    "Focused regression tests cover every unresolved behavior before implementation and pass after implementation."
+  ],
+  "nonGoals": [
+    "Do not perform a full 735-instance hardcoded color migration.",
+    "Do not refactor unrelated Krate web pages or component architecture.",
+    "Do not remove console.warn calls that are documented as background or optional operations.",
+    "Do not rewrite static markdown rendering solely to remove harmless index keys.",
+    "Do not introduce a new test framework unless existing node:test structural tests cannot express the regression."
+  ],
+  "breakpoints": [
+    {
+      "when": "Current-state audit finds the issue has already been fully implemented or the branch has conflicting partial changes that make scope ambiguous.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with unresolved issue-scoped fixes only",
+        "Pause for maintainer guidance"
+      ]
+    },
+    {
+      "when": "Final acceptance has unresolved visual/color-token risk after three implementation and verification attempts.",
+      "owner": "maintainer",
+      "options": [
+        "Accept documented residual risk",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "qualityGates": [
+    "New focused #613 tests fail for the expected missing behavior before production changes.",
+    "Focused #613 test passes after implementation.",
+    "Full Krate web node:test suite passes or any pre-existing unrelated failure is documented with exact evidence.",
+    "Krate web build passes.",
+    "Playwright e2e smoke runs successfully, or an environment limitation is documented with the exact command and failure.",
+    "Static guardrails show no issue-scoped dynamic index keys remain.",
+    "Static guardrails show ApprovalModeToggle has keyboard handling for ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Home, and End.",
+    "Static guardrails show CuratedModelCatalog route-creation failure is visible to the user when in scope.",
+    "git diff --check passes.",
+    "Final code review approves scope, tests, accessibility behavior, and color-token risk."
+  ],
+  "verificationCommands": [
+    "cd packages/krate/web && node --test tests/ui-polish-issue-613.test.js",
+    "cd packages/krate/web && npm test",
+    "cd packages/krate/web && npm run build",
+    "cd packages/krate/web && npm run test:e2e",
+    "git diff --check"
+  ],
+  "publishPlan": {
+    "implementationBranchName": "feat/issue-613-krate-ui-polish",
+    "implementationPrTitle": "Fix Krate UI polish issues for keys, deploy feedback, colors, and keyboard navigation",
+    "implementationPrBodyMustMention": [
+      "Links #613",
+      "Current-state audit results",
+      "RED/GREEN focused test evidence",
+      "Full Krate web test and build results",
+      "Playwright e2e or documented environment limitation",
+      "Bounded color migration scope"
+    ]
+  }
+}
