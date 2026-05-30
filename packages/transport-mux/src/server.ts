@@ -5,6 +5,7 @@ import { pipeline } from 'node:stream/promises';
 import { WebSocket, WebSocketServer } from 'ws';
 
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 
 import { getCodec } from './codecs/index.js';
 import type {
@@ -1661,7 +1662,7 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
     app.post(prefix, vertexNativeHandler);
   }
 
-  async function vertexNativeHandler(c: any) {
+  async function vertexNativeHandler(c: Context) {
     const forceStreaming = c.req.path.endsWith(':streamGenerateContent');
     const plan = await createExecutionPlan(c.req.raw, 'google', { forceStreaming });
     if (plan instanceof Response) {
@@ -1678,7 +1679,7 @@ export function createTransportMuxApp({ config, completionEngine, costFeedbackSi
       return result;
     }
     return forceStreaming
-      ? renderStreamResponse('google', result as any, config)
+      ? renderStreamResponse('google', result as unknown as AsyncIterable<CompletionStreamEvent>, config)
       : c.json(googleResponse(result));
   }
 

@@ -6,6 +6,8 @@ export interface DefineTaskOptions {
   labels?: string[];
   kind?: string;
   source?: string;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown> | false | null;
 }
 
 /**
@@ -73,11 +75,19 @@ export function defineTask<TArgs = unknown, TResult = unknown>(
     async build(args: TArgs, ctx: TaskBuildContext): Promise<TaskDef> {
       const taskDef = await Promise.resolve(impl(args, ctx));
       const normalized = normalizeTaskDef(taskDef);
+      if (normalized.inputSchema === undefined && options.inputSchema !== undefined) {
+        normalized.inputSchema = options.inputSchema;
+      }
+      if (normalized.outputSchema === undefined && options.outputSchema !== undefined) {
+        normalized.outputSchema = options.outputSchema;
+      }
       const mergedLabels = [...(options.labels ?? []), ...(normalized.labels ?? [])];
       globalTaskRegistry.recordDefinitionMetadata(taskId, {
         kind: normalized.kind,
         description: normalized.description ?? options.description,
         labels: mergedLabels,
+        inputSchema: normalized.inputSchema ?? options.inputSchema,
+        outputSchema: normalized.outputSchema ?? options.outputSchema,
       });
       return normalized;
     },
@@ -125,6 +135,8 @@ function defineTaskFromObject<TArgs, TResult>(
     labels: spec.labels,
     kind: spec.kind,
     source: spec.source,
+    inputSchema: normalizeSchemaAlias(spec.inputs),
+    outputSchema: normalizeOutputSchemaAlias(spec.outputs),
   };
 
   let impl: TaskImpl<TArgs, TResult>;
@@ -168,6 +180,18 @@ function normalizeTaskDef(taskDef: TaskDef): TaskDef {
     taskDef.labels = Array.from(new Set(labels.map((label) => label.trim())));
   }
   return taskDef;
+}
+
+function normalizeSchemaAlias(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+  return value as Record<string, unknown>;
+}
+
+function normalizeOutputSchemaAlias(value: unknown): Record<string, unknown> | false | null | undefined {
+  if (value === false || value === null) return value;
+  return normalizeSchemaAlias(value);
 }
 
 function validateAgentRouting(taskDef: TaskDef): void {

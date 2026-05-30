@@ -268,6 +268,62 @@ describe('ToolDispatcher', () => {
       expect(res.output).toBe('executed');
     });
 
+    it('applies replace toolMutation from beforeToolUse before execution', async () => {
+      registry.register(makeTool({ name: 'mutated' }));
+
+      const hooks: ToolHookBridge = {
+        async beforeToolUse(): Promise<ToolHookResult> {
+          return {
+            decision: 'allow',
+            toolMutation: {
+              mode: 'replace',
+              value: { patched: true },
+            },
+          };
+        },
+        async afterToolUse() {
+          return undefined;
+        },
+      };
+      const executor = vi.fn(async (_tool: ToolDescriptor, ctx: ToolCallContext) => ctx.input);
+      const dispatcher = new ToolDispatcher({ registry, hooks });
+
+      const result = await dispatcher.dispatch(
+        makeContext({ toolName: 'mutated', input: { original: true } }),
+        executor,
+      );
+
+      expect(result.output).toEqual({ patched: true });
+      expect(executor.mock.calls[0][1].input).toEqual({ patched: true });
+    });
+
+    it('applies patch toolMutation from beforeToolUse before execution and after hook', async () => {
+      registry.register(makeTool({ name: 'patched' }));
+
+      const afterSpy = vi.fn();
+      const hooks: ToolHookBridge = {
+        async beforeToolUse(): Promise<ToolHookResult> {
+          return {
+            decision: 'allow',
+            toolMutation: {
+              mode: 'patch',
+              value: { injected: 'yes' },
+            },
+          };
+        },
+        afterToolUse: afterSpy,
+      };
+      const dispatcher = new ToolDispatcher({ registry, hooks });
+
+      const result = await dispatcher.dispatch(
+        makeContext({ toolName: 'patched', input: { original: true } }),
+        async (_tool, ctx) => ctx.input,
+      );
+
+      expect(result.output).toEqual({ original: true, injected: 'yes' });
+      expect(afterSpy.mock.calls[0][0].input).toEqual({ original: true, injected: 'yes' });
+    });
+
     it('provides default deny message when hook reason is absent', async () => {
       registry.register(makeTool({ name: 'denied_no_reason' }));
 
