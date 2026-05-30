@@ -64,3 +64,4 @@ export * from './runner-controller.js';
 export * from './notification-controller.js';
 export * from './hooks-lifecycle.js';
 export * from './assistant-runtime.js';
+export * from './health-probes.js';

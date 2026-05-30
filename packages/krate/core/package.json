@@ -35,7 +35,6 @@
   "engines": {
     "node": ">=20"
   },
-  "dependencies": {},
   "author": "a5c.ai",
   "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/krate/core#readme",
   "repository": {
@@ -59,5 +58,9 @@
     "tests",
     "Dockerfile",
     "README.md"
-  ]
+  ],
+  "dependencies": {
+    "@nats-io/jetstream": "3.3.0",
+    "@nats-io/transport-node": "3.3.0"
+  }
 }

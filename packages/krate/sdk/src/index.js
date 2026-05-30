@@ -72,7 +72,18 @@ export {
 } from '../../core/src/external/provider-resource-factory.js';
 
 /** In-process event bus for publishing and subscribing to lifecycle events across controllers. */
-export { createEventBus, globalEventBus, loadPersistedEvents } from '../../core/src/event-bus.js';
+export {
+  createConfiguredEventTransport,
+  createEventBus,
+  createMemoryEventTransport,
+  createNatsJetStreamBrokerClient,
+  createNatsJetStreamEventTransport,
+  globalEventBus,
+  loadPersistedEvents
+} from '../../core/src/event-bus.js';
+
+/** Shared Krate dependency health probes for web/API health surfaces. */
+export { collectKrateHealthProbes, healthStatusValue } from '../../core/src/health-probes.js';
 
 /** Agent adapter controller for managing adapter definitions with transport type and capabilities. */
 export {

@@ -131,7 +131,7 @@ Krate stores `User`, `Team`, `Invite`, `IdentityMapping`, `RepositoryPermission`
 
 ### Staging service bindings
 
-The Helm chart can wire assistant, Gitea, and Agent Mux configuration into the deployed workloads without committing secret values. Use `assistant.*.existingSecret` for `ANTHROPIC_API_KEY` or `KRATE_ASSISTANT_API_KEY`, `gitea.token.existingSecret` for `KRATE_GITEA_TOKEN`, and `agentMux.url` or `agentMux.gatewayUrl` for the Agent Mux service endpoints. Empty values remain omitted so local/default renders keep their degraded-service behavior until real backing services are configured.
+The Helm chart can wire assistant, Gitea, Agent Mux, and NATS event transport configuration into the deployed workloads without committing secret values. Use `assistant.*.existingSecret` for `ANTHROPIC_API_KEY` or `KRATE_ASSISTANT_API_KEY`, `gitea.token.existingSecret` for `KRATE_GITEA_TOKEN`, `agentMux.url` or `agentMux.gatewayUrl` for the Agent Mux service endpoints, and `externalDependencies.nats.eventTransport.enabled` plus `externalDependencies.nats.url` for broker-backed event fanout/replay. `externalDependencies.nats.eventTransport.subject` and `stream` select the NATS subject and JetStream stream. Empty values remain omitted so local/default renders keep their degraded-service behavior until real backing services are configured.
 
 ## Runtime API
 

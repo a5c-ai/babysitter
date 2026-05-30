@@ -58,11 +58,10 @@ Without the Agent Mux Gateway:
 **Fix:** Deploy the agent-mux gateway and set `AGENT_MUX_URL` in the web deployment.
 
 ### Real-Time Events
-- SSE endpoint emits events within the web server process ✓
-- But events are scoped to the single server process — multi-replica deployments won't share events
-- Events are lost on server restart (JSONL ring buffer persists 1000 events to disk but isn't replicated)
+- SSE endpoint emits resource events and supports replay cursors via `Last-Event-ID` or `?cursor=...` ✓
+- Local/default deployments still use memory + JSONL event storage, so multi-replica fanout requires enabling NATS event transport
+- Set `externalDependencies.nats.eventTransport.enabled=true` and `externalDependencies.nats.url` in Helm to use the broker-backed transport path
 
 ### Health Checks
-- The health page shows "Connected"/"Error" based on whether env vars are set and simple fetch checks
-- No deep health probes (TCP/HTTP to actual service endpoints)
-- Adapter health check returns `{ status: 'unknown', reason: 'not-implemented' }`
+- Snapshot health now runs bounded probes for Kubernetes `kubectl cluster-info`, Gitea `/api/v1/version`, Agent Mux/Gateway `/healthz`, Krate Controller `/healthz`, and assistant key presence/format
+- Missing backing services are reported as `not configured`; failures are structured without leaking secret values

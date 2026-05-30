@@ -17,11 +17,14 @@ async function proxyControllerStream(org, request) {
     console.warn('[agent-events-stream] KRATE_CONTROLLER_URL not set, falling back to local event bus');
     return null;
   }
+  const requestUrl = new URL(request.url);
+  const cursor = request.headers.get('Last-Event-ID') || requestUrl.searchParams.get('cursor') || '';
   const target = new URL(`/api/orgs/${org}/agents/events/stream`, process.env.KRATE_CONTROLLER_URL);
+  if (cursor) target.searchParams.set('cursor', cursor);
   try {
     const upstream = await fetch(target, {
       cache: 'no-store',
-      headers: { Accept: 'text/event-stream' },
+      headers: cursor ? { Accept: 'text/event-stream', 'Last-Event-ID': cursor } : { Accept: 'text/event-stream' },
       signal: request.signal
     });
     if (!upstream.ok || !upstream.body) {
@@ -41,6 +44,8 @@ export async function GET(request, { params }) {
     return Response.json({ error: 'unauthorized', message: 'Authentication required' }, { status: 401 });
   }
   const { org } = await params;
+  const requestUrl = new URL(request.url);
+  const cursor = request.headers.get('Last-Event-ID') || requestUrl.searchParams.get('cursor') || '';
   const upstream = await proxyControllerStream(org, request);
   if (upstream) return upstream;
 
@@ -50,7 +55,7 @@ export async function GET(request, { params }) {
   let unsubscribe = () => {};
 
   const stream = new ReadableStream({
-    start(controller) {
+    async start(controller) {
       const send = (payload) => {
         if (closed) return;
         try {
@@ -62,6 +67,7 @@ export async function GET(request, { params }) {
       };
       const listener = (event) => send(event);
       send({ type: 'connected', org });
+      for (const event of await globalEventBus.replaySince(cursor)) send(event);
       globalEventBus.subscribe(listener);
       unsubscribe = () => globalEventBus.unsubscribe(listener);
       heartbeat = setInterval(() => send({ type: 'heartbeat', org }), 30000);

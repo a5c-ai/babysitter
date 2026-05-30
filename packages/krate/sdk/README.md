@@ -283,8 +283,12 @@ console.log(`Found ${total} events`);
 
 | Export | Description |
 |--------|-------------|
-| `createEventBus(options?)` | Create a new in-process event bus |
+| `createEventBus(options?)` | Create an event bus backed by memory/local JSONL or configured broker transport |
+| `createMemoryEventTransport(options?)` | Create the local/test event transport with replay cursors |
+| `createNatsJetStreamEventTransport(options?)` | Create the NATS-backed event transport adapter |
+| `createNatsJetStreamBrokerClient(options?)` | Create the default NATS/JetStream broker client for durable publish and replay |
 | `globalEventBus` | The shared global event bus instance |
+| `loadPersistedEvents(limit?)` | Load locally persisted JSONL events for compatibility and local replay |
 
 ### Agent Controllers
 

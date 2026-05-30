@@ -290,6 +290,7 @@ export function createKrateHttpHandler({ runtime = createKrateRuntime(), control
 
       const sseMatch = url.pathname.match(/^\/api\/orgs\/([^/]+)\/agents\/events\/stream$/);
       if (request.method === 'GET' && sseMatch) {
+        const replayCursor = request.headers['last-event-id'] || url.searchParams.get('cursor') || '';
         response.writeHead(200, {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
@@ -297,7 +298,12 @@ export function createKrateHttpHandler({ runtime = createKrateRuntime(), control
           'X-Accel-Buffering': 'no',
         });
         response.write('data: {"type":"connected"}\n\n');
+        for (const event of await globalEventBus.replaySince(replayCursor)) {
+          if (event?.id) response.write(`id: ${event.id}\n`);
+          response.write(`data: ${JSON.stringify(event)}\n\n`);
+        }
         const writer = (event) => {
+          if (event?.id) response.write(`id: ${event.id}\n`);
           response.write(`data: ${JSON.stringify(event)}\n\n`);
         };
         globalEventBus.subscribe(writer);
