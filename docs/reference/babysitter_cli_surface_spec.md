@@ -29,7 +29,7 @@ Behavior
 4. **Task introspection and execution**
    - `task:list` reads the effect index and prints `- <effectId> [<kind> <status>] <label?> (taskId=<taskId>)`. Flags: `--pending`, `--kind`. JSON payload is `{ tasks: TaskListEntry[] }` where every entry includes refs for task/result/stdout/stderr with POSIX paths.
    - `task:show` pretty-prints `task.json` and `result.json` (or `(not yet written)` if pending) and mirrors the list entry in JSON mode.
-   - `task:post` commits externally produced results for any effect kind. It validates the effect is still `requested`, writes `tasks/<effectId>/result.json`, and appends `EFFECT_RESOLVED` via `commitEffectResult`. `--dry-run` previews the mutation without committing. JSON response includes `{ status, committed, stdoutRef, stderrRef, resultRef }`.
+   - `task:post` commits externally produced results for any effect kind. It validates the effect is still `requested`; for successful shell results with a top-level `outputSchema`, `commitEffectResult` validates the value before mutation. Valid posts write `tasks/<effectId>/result.json` and append `EFFECT_RESOLVED`. `--dry-run` previews the mutation without committing. JSON response includes `{ status, committed, stdoutRef, stderrRef, resultRef }`; schema failures exit non-zero with structured `validation_error` details.
    - Manual breakpoint resolution stays manual: `task:list` highlights `kind="breakpoint"`. Dedicated `breakpoint:resolve`/`sleep:list` commands are tracked separately and are not required to ship with this part.
 
 5. **Output and UX conventions**
