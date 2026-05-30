@@ -9,7 +9,7 @@ import { withRunLock } from "../storage/lock";
 import { createReplayEngine, type ReplayEngine } from "./replay/createReplayEngine";
 import { rebuildStateCache } from "./replay/stateCache";
 import { flushProcessCleanup, withProcessContext } from "./processContext";
-import { RunFailedError } from "./exceptions";
+import { RunFailedError, RunHaltedError } from "./exceptions";
 import { validateAgainstSchema } from "./schemaValidator";
 import type {
   IterationResult,
@@ -130,6 +130,21 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
         const validation = validateAgainstSchema(output, outputSchema);
         if (!validation.valid) console.warn(`[babysitter] Output schema validation warning: ${validation.errors.join("; ")}`);
       }
+      const legacyHalt = normalizeLegacyHalt(output);
+      if (legacyHalt) {
+        console.warn("[babysitter] Deprecated process return { halt: true }; use return ctx.halt(reason, payload?) instead.");
+        const result = await appendRunHalted({
+          runDir: options.runDir,
+          engine,
+          projectRoot,
+          logger,
+          reason: legacyHalt.reason,
+          payload: legacyHalt.payload,
+          iterationStartedAt,
+        });
+        finalStatus = result.status;
+        return result;
+      }
       const outputRef = await writeRunOutput(options.runDir, output);
 
       let costStats: unknown = undefined;
@@ -147,6 +162,20 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
     } catch (error) {
       const waiting = asWaitingResult(error);
       if (waiting) { finalStatus = waiting.status; return { status: "waiting", nextActions: annotateWaitingActions(waiting.nextActions), metadata: createIterationMetadata(engine) }; }
+
+      if (error instanceof RunHaltedError) {
+        const result = await appendRunHalted({
+          runDir: options.runDir,
+          engine,
+          projectRoot,
+          logger,
+          reason: error.reason,
+          payload: error.payload,
+          iterationStartedAt,
+        });
+        finalStatus = result.status;
+        return result;
+      }
 
       const failure = serializeUnknownError(error);
       if (!(error instanceof RunFailedError)) {
@@ -254,6 +283,16 @@ async function getTerminalReplayResult(runDir: string, engine: ReplayEngine): Pr
     };
   }
 
+  if (terminalEvent.type === "RUN_HALTED") {
+    const reason = readStringField(terminalEvent.data, "reason") ?? "halted";
+    return {
+      status: "halted",
+      reason,
+      payload: readObjectField(terminalEvent.data, "payload"),
+      metadata,
+    };
+  }
+
   return {
     status: "failed",
     error: readObjectField(terminalEvent.data, "error") ?? { message: "Run failed" },
@@ -264,9 +303,51 @@ async function getTerminalReplayResult(runDir: string, engine: ReplayEngine): Pr
 function findLastTerminalEvent(events: JournalEvent[]): JournalEvent | undefined {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
-    if (event.type === "RUN_COMPLETED" || event.type === "RUN_FAILED" || event.type === "PROCESS_RUNTIME_ERROR") return event;
+    if (event.type === "RUN_COMPLETED" || event.type === "RUN_HALTED" || event.type === "RUN_FAILED" || event.type === "PROCESS_RUNTIME_ERROR") return event;
   }
   return undefined;
+}
+
+async function appendRunHalted(args: {
+  runDir: string;
+  engine: ReplayEngine;
+  projectRoot: string;
+  logger?: ProcessContext["log"];
+  reason: string;
+  payload?: Record<string, unknown>;
+  iterationStartedAt: number;
+}): Promise<IterationResult> {
+  const event: Record<string, unknown> = { reason: args.reason };
+  if (args.payload !== undefined) event.payload = args.payload;
+  await appendEvent({ runDir: args.runDir, eventType: "RUN_HALTED", event });
+  await rebuildStateCache(args.runDir, { reason: "post_halt" });
+  await callRuntimeHook(
+    "on-run-fail",
+    {
+      runId: args.engine.runId,
+      status: "halted",
+      error: args.reason,
+      reason: args.reason,
+      payload: args.payload,
+      duration: Date.now() - args.iterationStartedAt,
+    },
+    { cwd: args.projectRoot, logger: args.logger },
+  );
+  return {
+    status: "halted",
+    reason: args.reason,
+    payload: args.payload,
+    metadata: createIterationMetadata(args.engine),
+  };
+}
+
+function normalizeLegacyHalt(output: unknown): { reason: string; payload: Record<string, unknown> } | null {
+  if (!output || typeof output !== "object" || Array.isArray(output)) return null;
+  const record = output as Record<string, unknown>;
+  if (record.halt !== true) return null;
+  const reasonCandidate = record.reason ?? record.phase;
+  const reason = typeof reasonCandidate === "string" && reasonCandidate.trim() ? reasonCandidate.trim() : "legacy-halt";
+  return { reason, payload: record };
 }
 
 function readStringField(value: unknown, key: string): string | undefined {

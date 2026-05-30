@@ -8,7 +8,7 @@ import { runHookIntrinsic } from "./intrinsics/hook";
 import { callHook } from "../hooks/dispatcher";
 import { runParallelAll, runParallelMap } from "./intrinsics/parallel";
 import { ProcessContext, ParallelHelpers, SubprocessSupportMode } from "./types";
-import { MissingProcessContextError } from "./exceptions";
+import { MissingProcessContextError, RunHaltedError } from "./exceptions";
 import { appendRunLog } from "../logging/runLogger";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
@@ -90,6 +90,12 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
         throw new TypeError("ctx.onCleanup(callback) requires a function callback");
       }
       internal.cleanupCallbacks.push(callback);
+    },
+    halt: (reason, payload) => {
+      if (payload !== undefined && (!payload || typeof payload !== "object" || Array.isArray(payload))) {
+        throw new TypeError("ctx.halt(reason, payload?) payload must be an object when provided");
+      }
+      throw new RunHaltedError(reason, payload);
     },
     task: (task, args, options) =>
       runTaskIntrinsic({

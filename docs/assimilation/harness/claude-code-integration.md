@@ -594,6 +594,7 @@ The `reason` field (injected as context to Claude) is constructed from:
 1. **Iteration context** -- varies by run state:
    - Completed: `"Run completed! To finish: call 'run:status --json', extract 'completionProof', output in <promise>SECRET</promise> tags."`
    - Waiting: `"Waiting on: {pendingKinds}. Check if pending effects are resolved, then call run:iterate."`
+   - Halted: `"Run halted. Inspect run:status --json for the halt reason and payload, then fix the process or inputs before continuing."`
    - Failed: `"Run failed. Fix the run, journal or process and proceed."`
    - Default: `"Continue orchestration (run:iterate)."`
 
@@ -706,6 +707,7 @@ The iteration loop is not a programmatic loop within any single process. It is a
 | `executed` | Tasks were requested | Execute pending effects, post results, stop |
 | `waiting` | Breakpoint or sleep pending | Handle breakpoint/sleep, post result, stop |
 | `completed` | Run finished | Extract `completionProof`, output in `<promise>` tag |
+| `halted` | Process intentionally stopped early | Inspect `reason`/`payload`; fix process or inputs before continuing |
 | `failed` | Run errored | Inspect and fix, re-iterate |
 | `none` | No pending effects | Stop (hook may continue or allow exit) |
 

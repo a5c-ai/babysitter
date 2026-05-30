@@ -83,6 +83,9 @@ export async function handleSessionIterationMessage(
   } else if (runState === "waiting" && pendingKinds) {
     systemMessage =
       `\u{1F504} Babysitter iteration ${args.iteration} | Waiting on: ${pendingKinds}. Check if pending effects are resolved, then call run:iterate.`;
+  } else if (runState === "halted") {
+    systemMessage =
+      `\u{1F504} Babysitter iteration ${args.iteration} | Halted. agent must inspect run:status --json for the halt reason and payload, then fix the process or inputs before proceeding.`;
   } else if (runState === "failed") {
     systemMessage =
       `\u{1F504} Babysitter iteration ${args.iteration} | Failed. agent must fix the run, journal or process and proceed.`;
