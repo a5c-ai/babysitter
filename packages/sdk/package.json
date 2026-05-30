@@ -54,14 +54,19 @@
     "puppeteer": "^24.0.0"
   },
   "peerDependencies": {
+    "@a5c-ai/hooks-mux-core": "^5.0.0",
     "@a5c-ai/tasks-mux": "^5.0.0"
   },
   "peerDependenciesMeta": {
+    "@a5c-ai/hooks-mux-core": {
+      "optional": true
+    },
     "@a5c-ai/tasks-mux": {
       "optional": true
     }
   },
   "devDependencies": {
+    "@a5c-ai/hooks-mux-core": "5.0.0",
     "@a5c-ai/tasks-mux": "5.0.0",
     "@eslint/js": "^9.39.4",
     "@types/fs-extra": "^11.0.4",

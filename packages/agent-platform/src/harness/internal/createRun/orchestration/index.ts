@@ -29,9 +29,14 @@ import {
   resolveAgentCoreBackendForHarness,
 } from "../utils";
 
-const importOptionalModule = new Function("specifier", "return import(specifier)") as (
-  specifier: string,
-) => Promise<unknown>;
+const importOptionalModule: (specifier: string) => Promise<unknown> = (() => {
+  if (process.env.VITEST) {
+    return (specifier) => import(specifier);
+  }
+  return new Function("specifier", "return import(specifier)") as (
+    specifier: string,
+  ) => Promise<unknown>;
+})();
 
 export async function runOrchestrationPhase(
   args: RunOrchestrationPhaseArgs,
