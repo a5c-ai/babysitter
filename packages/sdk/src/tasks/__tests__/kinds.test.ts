@@ -102,13 +102,13 @@ describe("task kind helpers", () => {
       expect(def.labels).toEqual(["ctx-agent"]);
       expect(def.metadata).toMatchObject(externalAgentKindFixtures.metadata);
       expect(def.agent).toMatchObject({
-        external: true,
         responderType: "agent",
         adapter: externalAgentKindFixtures.adapter,
         prompt: externalAgentKindFixtures.prompt,
         fallbackType: externalAgentKindFixtures.fallbackType,
         fallbackToInternal: true,
       });
+      expect(def.agent).not.toHaveProperty("external");
     });
 
     it("humanTask emits breakpoint responder metadata", async () => {

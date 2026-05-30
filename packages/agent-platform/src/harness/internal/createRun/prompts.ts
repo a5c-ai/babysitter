@@ -1,5 +1,6 @@
 import type { HarnessDiscoveryResult } from "../../types";
 import type { SessionHistory } from "../../../session/types";
+import type { ExternalAgentDiscovery, ExternalAgentInfo } from "@a5c-ai/babysitter-sdk";
 import {
   createPromptContextFromCatalog,
   composeProcessCreatePrompt,
@@ -21,6 +22,7 @@ export interface HarnessPromptContext {
   hostCapabilities?: string[];
   hostTools?: unknown[];
   discoveredHarnesses: HarnessDiscoveryResult[];
+  externalAgents?: ExternalAgentDiscovery;
   compressionEnabled: boolean;
   secureSandboxImage: string;
   piDefaultBashSandbox: "local" | "auto" | "secure";
@@ -79,6 +81,50 @@ function formatRuntimeContext(context: HarnessPromptContext): string[] {
     `- pi_default_bash_sandbox=${context.piDefaultBashSandbox}`,
     `- pi_default_isolated=${context.piIsolationDefault ? "true" : "false"}`,
     ...context.envFlags.map((flag) => `- env.${flag.name}=${flag.value}`),
+  ];
+}
+
+function formatAgentResponder(agent: ExternalAgentInfo): string {
+  const auth = agent.authenticated ? "authenticated" : "not authenticated";
+  const capabilities = agent.capabilities.length > 0
+    ? ` | capabilities=${agent.capabilities.join(",")}`
+    : "";
+  return `- ${agent.name} (${agent.displayName}) | ${auth}${capabilities}`;
+}
+
+export function formatResponderContext(context: HarnessPromptContext): string[] {
+  const installedAgents = context.externalAgents?.agents
+    .filter((agent) => agent.installed)
+    .sort((a, b) => a.name.localeCompare(b.name)) ?? [];
+  const agentAvailability = context.externalAgents?.available === true
+    ? installedAgents.length > 0
+      ? installedAgents.map(formatAgentResponder)
+      : ["- agent-mux is available, but no installed agent responders were discovered."]
+    : ["- No agent-mux agent responders were discovered in this planning environment."];
+
+  return [
+    "Available responder context:",
+    "- Supported `agent.responderType` values: internal, human, agent, tracker, auto.",
+    "- Omit `agent.responderType` for the default internal agent-core worker.",
+    "- Use `agent.responderType: \"agent\"` only when a task should route to an installed agent-mux adapter.",
+    "- Agent responder tasks require a non-empty `agent.adapter` value. Prefer `fallbackType: \"internal\"` only when internal execution is an acceptable degradation.",
+    "- Do not confuse the host agent identity with an agent responder adapter; host context describes the current planner, while adapter chooses a routed task executor.",
+    "Available agent responders (agent-mux):",
+    ...agentAvailability,
+    "Agent responder task shape:",
+    "```javascript",
+    "defineTask(\"specialist-review\", (args) => ({",
+    "  kind: \"agent\",",
+    "  title: \"Specialist review\",",
+    "  agent: {",
+    "    name: \"Specialist reviewer\",",
+    "    prompt: \"Review the changed files and report issues.\",",
+    "    responderType: \"agent\",",
+    "    adapter: \"codex\",",
+    "    fallbackType: \"internal\",",
+    "  },",
+    "}));",
+    "```",
   ];
 }
 
@@ -200,6 +246,8 @@ function formatSharedContext(context: HarnessPromptContext): string[] {
       : []),
     "",
     ...formatHarnessCatalog(context),
+    "",
+    ...formatResponderContext(context),
     ...(sessionContext.length > 0
       ? ["", ...sessionContext]
       : []),

@@ -304,6 +304,25 @@ export function getDefineTaskKindShapeMismatches(source: string): Array<{ id: st
   return mismatches;
 }
 
+function isAgentResponderTaskBody(body: string): boolean {
+  return /\bresponderType\s*:\s*["'`]agent["'`]/.test(body)
+    || /\bexternal\s*:\s*true\b/.test(body);
+}
+
+function hasNonEmptyAdapterLiteral(body: string): boolean {
+  return /\badapter\s*:\s*["'`][^"'`\s][^"'`]*["'`]/.test(body);
+}
+
+export function getAgentResponderTasksMissingAdapter(source: string): string[] {
+  return getDefineTaskBlocks(source)
+    .filter((block) => isAgentResponderTaskBody(block.body) && !hasNonEmptyAdapterLiteral(block.body))
+    .map((block) => block.id);
+}
+
+export function hasAgentResponderTasks(source: string): boolean {
+  return getDefineTaskBlocks(source).some((block) => isAgentResponderTaskBody(block.body));
+}
+
 export function getInvalidCtxTaskTargets(source: string): string[] {
   const normalized = source.replace(/\r\n/g, "\n");
   const definedTaskBindings = new Set<string>();

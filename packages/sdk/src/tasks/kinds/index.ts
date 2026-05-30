@@ -137,6 +137,16 @@ export function agentTask<TArgs = unknown, TResult = unknown>(
   }, { kind: "agent" });
 }
 
+export function externalAgentTask<TArgs = unknown, TResult = unknown>(
+  id: string,
+  options: AgentTaskDefinitionOptions<TArgs>
+): DefinedTask<TArgs, TResult> {
+  return agentTask<TArgs, TResult>(id, {
+    ...options,
+    responderType: "agent",
+  });
+}
+
 export function autoTask<TArgs = unknown, TResult = unknown>(
   id: string,
   options: AgentTaskDefinitionOptions<TArgs>

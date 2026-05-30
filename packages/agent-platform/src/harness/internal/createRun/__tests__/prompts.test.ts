@@ -112,6 +112,71 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("Discovered external harnesses are routing options");
   });
 
+  test("PhasePlanProcess prompt includes available agent responders and task syntax", async () => {
+    const prompt = await buildProcessDefinitionSystemPrompt("/tmp/out.js", {
+      ...context,
+      externalAgents: {
+        available: true,
+        defaultProvider: "codex",
+        defaultModel: null,
+        agents: [
+          {
+            name: "codex",
+            displayName: "Codex",
+            installed: true,
+            authenticated: true,
+            capabilities: ["file-edit", "bash"],
+          },
+          {
+            name: "gemini-cli",
+            displayName: "Gemini CLI",
+            installed: false,
+            authenticated: false,
+            capabilities: [],
+          },
+        ],
+      },
+    });
+
+    expect(prompt).toContain("Available responder context:");
+    expect(prompt).toContain("Supported `agent.responderType` values: internal, human, agent, tracker, auto.");
+    expect(prompt).toContain("Available agent responders (agent-mux):");
+    expect(prompt).toContain("codex (Codex) | authenticated | capabilities=file-edit,bash");
+    expect(prompt).not.toContain("gemini-cli (Gemini CLI)");
+    expect(prompt).toContain("responderType: \"agent\"");
+    expect(prompt).toContain("adapter: \"codex\"");
+    expect(prompt).toContain("Do not confuse the host agent identity with an agent responder adapter");
+  });
+
+  test("external plan-process prompt includes available agent responder context", () => {
+    const prompt = buildExternalProcessDefinitionPrompt({
+      prompt: "implement the feature",
+      outputDir: "/tmp/processes",
+      workspace: "/repo/workspace",
+      workspaceAssessment: { kind: "non-empty", entries: ["package.json"] },
+      promptContext: {
+        ...context,
+        externalAgents: {
+          available: true,
+          defaultProvider: null,
+          defaultModel: null,
+          agents: [{
+            name: "claude-code",
+            displayName: "Claude Code",
+            installed: true,
+            authenticated: false,
+            capabilities: ["file-edit"],
+          }],
+        },
+      },
+    });
+
+    expect(prompt).toContain("Available responder context:");
+    expect(prompt).toContain("claude-code (Claude Code) | not authenticated | capabilities=file-edit");
+    expect(prompt).toContain("agent.responderType: \"agent\"");
+    expect(prompt).toContain("Agent responder task shape:");
+  });
+
   test("PhasePlanProcess prompt includes bounded session planning context", async () => {
     const prompt = await buildProcessDefinitionSystemPrompt("/tmp/out.js", {
       ...context,
