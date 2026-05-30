@@ -44,6 +44,15 @@ export async function resolveExternalAgentEffectsForStopHook(args: {
   model?: string;
   log?: HookLogger;
 }): Promise<ExternalAgentEffectsResult> {
+  return resolveExternalAgentEffectsForRun(args);
+}
+
+export async function resolveExternalAgentEffectsForRun(args: {
+  runDir: string;
+  workspace?: string;
+  model?: string;
+  log?: HookLogger;
+}): Promise<ExternalAgentEffectsResult> {
   const events = await loadJournal(args.runDir);
   const index = await buildEffectIndex({ runDir: args.runDir, events });
   const pending = index

@@ -27,6 +27,7 @@ import {
   deriveHookStatus,
   parseHookDecision,
 } from "./runIterateHelpers";
+import { resolveExternalAgentEffectsForRun } from "../../harness/hooks/externalAgentEffect";
 
 export interface RunIterateOptions {
   runDir: string;
@@ -108,6 +109,38 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
     runDir,
     ...(subprocessSupport ? { subprocessSupport } : {}),
   });
+
+  if (iterationResult.status === "waiting") {
+    const externalResolution = await resolveExternalAgentEffectsForRun({
+      runDir,
+      workspace: projectRoot,
+    });
+    if (externalResolution.resolved.some((resolution) => resolution.status === "ok" || resolution.status === "error")) {
+      await callRuntimeHook(
+        "on-iteration-end",
+        {
+          runId,
+          iteration,
+          action: "executed-tasks",
+          status: "executed",
+          reason: "external-agent-effects-resolved",
+          count: externalResolution.resolved.length,
+          timestamp: new Date().toISOString(),
+        },
+        { cwd: projectRoot, logger: verbose ? ((msg: string) => console.error(msg)) : undefined }
+      );
+      return {
+        iteration,
+        iterationCount,
+        status: "executed",
+        action: "executed-tasks",
+        reason: "external-agent-effects-resolved",
+        count: externalResolution.resolved.length,
+        warnings: warnings.length ? warnings : undefined,
+        metadata: { runId, processId: metadata.processId, hookStatus: "executed" },
+      };
+    }
+  }
 
   if (iterationResult.status === "completed") {
     const completionProof = resolveCompletionProof(metadata);

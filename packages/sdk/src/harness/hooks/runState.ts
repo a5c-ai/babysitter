@@ -7,6 +7,10 @@ import { deriveObservedRunState } from "../../runtime/runLifecycleState";
 import { resolveCompletionProof } from "../../cli/completionProof";
 import { resolveExistingRunDir } from "../../config";
 import { countPendingByKind, isOnlyBreakpoints } from "./utils";
+import {
+  hostDelegablePendingRecords,
+  onlyExternallyRoutedEffectsPending,
+} from "./stopHookContinuation";
 
 export interface HookRunStateSummary {
   runState: "" | "completed" | "halted" | "failed" | "waiting" | "created";
@@ -38,10 +42,13 @@ export async function resolveHookRunState(args: {
     const runState = deriveObservedRunState(journal, pendingRecords.length);
     const pendingByKind = countPendingByKind(pendingRecords);
     const pendingKinds = Object.keys(pendingByKind).join(", ");
-    const onlyBreakpointsPending =
-      pendingRecords.length > 0 && isOnlyBreakpoints(pendingByKind);
-    const currentPendingEffectId = pendingRecords
-      .filter((record) => record.kind !== "breakpoint")
+    const onlyBreakpointsPending = pendingRecords.length > 0 && (
+      isOnlyBreakpoints(pendingByKind) ||
+      await onlyExternallyRoutedEffectsPending(runDir, pendingRecords)
+    );
+    const currentPendingEffectId = (
+      await hostDelegablePendingRecords(runDir, pendingRecords)
+    )
       .sort((left, right) =>
         (left.requestedAt ?? "").localeCompare(right.requestedAt ?? "")
         || left.effectId.localeCompare(right.effectId),
