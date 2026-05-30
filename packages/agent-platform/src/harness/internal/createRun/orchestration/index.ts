@@ -166,8 +166,8 @@ async function runCliOrchestration(args: RunOrchestrationPhaseArgs): Promise<num
   return 1;
 }
 
-async function resolveAndPostEffect(
-  action: { effectId: string; kind: string; taskDef?: { agent?: { prompt?: string | { instructions?: string[] } }; shell?: { command?: string }; title?: string } },
+export async function resolveAndPostEffect(
+  action: { effectId: string; kind: string; taskDef?: { agent?: { prompt?: string | { instructions?: string[] } } & Record<string, unknown>; shell?: { command?: string }; title?: string } & Record<string, unknown> },
   runDir: string,
   workspace: string,
   model?: string,
@@ -181,7 +181,10 @@ async function resolveAndPostEffect(
 
   let value: string;
 
-  if (action.kind === "agent" || action.kind === "skill") {
+  const tasksMuxValue = await resolveViaTasksMuxForCli(action, workspace, model);
+  if (tasksMuxValue !== undefined) {
+    value = tasksMuxValue;
+  } else if (action.kind === "agent" || action.kind === "skill") {
     const agentPrompt = action.taskDef?.agent?.prompt;
     const prompt = typeof agentPrompt === "string"
       ? agentPrompt
@@ -228,4 +231,92 @@ async function resolveAndPostEffect(
   } catch {
     // Best effort
   }
+}
+
+async function resolveViaTasksMuxForCli(
+  action: { kind: string; taskDef?: { agent?: { prompt?: string | { instructions?: string[] } } & Record<string, unknown>; title?: string } & Record<string, unknown>; taskId?: string; effectId: string; labels?: string[] },
+  workspace: string,
+  model?: string,
+): Promise<string | undefined> {
+  if (action.kind !== "agent" && action.kind !== "breakpoint") {
+    return undefined;
+  }
+
+  let mux: {
+    routeTask?: (task: unknown, context?: unknown) => {
+      responderType: string;
+      responder?: { adapter?: string; model?: string; id?: string };
+      unavailable?: boolean;
+      reason?: string;
+    };
+    AgentMuxResponderBackend?: new (config?: Record<string, unknown>) => {
+      submitBreakpoint(params: unknown): Promise<{
+        answers: Array<{ text: string; responderId: string; responderName: string }>;
+      }>;
+    };
+  };
+  try {
+    mux = await import("@a5c-ai/tasks-mux") as unknown as typeof mux;
+  } catch {
+    return undefined;
+  }
+
+  if (typeof mux.routeTask !== "function") {
+    return undefined;
+  }
+
+  const decision = mux.routeTask(action.taskDef);
+  if (decision.responderType === "internal" || decision.responderType === "human") {
+    return undefined;
+  }
+  if (decision.responderType === "tracker") {
+    if (!decision.unavailable) return undefined;
+    return JSON.stringify({
+      success: false,
+      routedThrough: "tasks-mux",
+      responderType: "tracker",
+      error: decision.reason ?? "ExternalTrackerBackend unavailable",
+    });
+  }
+  if (decision.responderType !== "agent") {
+    return undefined;
+  }
+  if (typeof mux.AgentMuxResponderBackend !== "function") {
+    throw new Error("tasks-mux AgentMuxResponderBackend is unavailable");
+  }
+
+  const prompt = buildCliAgentPrompt(action.taskDef);
+  const backend = new mux.AgentMuxResponderBackend({
+    adapter: decision.responder?.adapter ?? decision.responder?.id,
+    model: decision.responder?.model ?? model,
+    cwd: workspace,
+  });
+  const breakpoint = await backend.submitBreakpoint({
+    text: prompt,
+    context: {
+      description: action.taskDef?.title ?? action.taskId ?? action.effectId,
+      codeSnippets: [],
+      fileReferences: [],
+      tags: action.labels ?? [],
+    },
+    routing: {
+      strategy: "single",
+      targetResponders: decision.responder?.id ? [decision.responder.id] : [],
+      timeoutMs: 300_000,
+      presentToUser: false,
+      responderType: "agent",
+      adapter: decision.responder?.adapter ?? decision.responder?.id,
+      model: decision.responder?.model ?? model,
+    },
+  });
+  return JSON.stringify(breakpoint.answers[0]?.text ?? "");
+}
+
+function buildCliAgentPrompt(taskDef: { agent?: { prompt?: string | { instructions?: string[] } }; title?: string } | undefined): string {
+  const agentPrompt = taskDef?.agent?.prompt;
+  return typeof agentPrompt === "string"
+    ? agentPrompt
+    : agentPrompt?.instructions?.join("\n")
+      ?? taskDef?.title
+      ?? "Execute this task";
 }

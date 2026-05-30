@@ -1,11 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdtemp, readFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
 import type { AgentCoreSessionEvent } from "../../../types";
-import { subscribeVerbosePiEvents } from "../orchestration";
+import { resolveAndPostEffect, subscribeVerbosePiEvents } from "../orchestration";
 import { resolveEffect } from "../orchestration/effects";
 
 const taskMuxMock = vi.hoisted(() => ({
   submitBreakpoint: vi.fn(),
   routeTask: vi.fn(),
+}));
+const childProcessMock = vi.hoisted(() => ({
+  execFileSync: vi.fn(),
+  execSync: vi.fn(),
 }));
 
 vi.mock("@a5c-ai/tasks-mux", () => ({
@@ -14,6 +21,15 @@ vi.mock("@a5c-ai/tasks-mux", () => ({
     submitBreakpoint = taskMuxMock.submitBreakpoint;
   },
 }));
+
+vi.mock("node:child_process", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:child_process")>();
+  return {
+    ...actual,
+    execFileSync: childProcessMock.execFileSync,
+    execSync: childProcessMock.execSync,
+  };
+});
 
 describe("subscribeVerbosePiEvents", () => {
   let stderrSpy: ReturnType<typeof vi.spyOn>;
@@ -106,6 +122,8 @@ describe("resolveEffect tasks-mux routing", () => {
   beforeEach(() => {
     taskMuxMock.routeTask.mockReset();
     taskMuxMock.submitBreakpoint.mockReset();
+    childProcessMock.execFileSync.mockReset();
+    childProcessMock.execSync.mockReset();
   });
 
   it("delegates routable agent effects through tasks-mux AgentMuxResponderBackend", async () => {
@@ -149,5 +167,56 @@ describe("resolveEffect tasks-mux routing", () => {
     }));
     expect(result.status).toBe("ok");
     expect(result.value).toBe("{\"ok\":true}");
+  });
+
+  it("delegates legacy CLI resolveAndPostEffect agent routing through tasks-mux", async () => {
+    taskMuxMock.routeTask.mockReturnValue({
+      responderType: "agent",
+      route: "agent-mux",
+      responder: { id: "codex", adapter: "codex", model: "gpt-5.4" },
+    });
+    taskMuxMock.submitBreakpoint.mockResolvedValue({
+      answers: [{ text: "routed answer", responderId: "codex", responderName: "Codex" }],
+    });
+    childProcessMock.execFileSync.mockReturnValue("{}");
+
+    const runDir = await mkdtemp(path.join(tmpdir(), "issue-633-cli-"));
+    await resolveAndPostEffect(
+      {
+        effectId: "effect-2",
+        invocationKey: "invocation",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          title: "Routed CLI agent",
+          agent: {
+            responderType: "agent",
+            adapter: "codex",
+            prompt: { instructions: ["return routed answer"] },
+          },
+        },
+      },
+      runDir,
+      "/tmp/workspace",
+      "gpt-5.4",
+    );
+
+    expect(taskMuxMock.routeTask).toHaveBeenCalledWith(expect.objectContaining({
+      kind: "agent",
+    }));
+    expect(taskMuxMock.submitBreakpoint).toHaveBeenCalledWith(expect.objectContaining({
+      routing: expect.objectContaining({
+        responderType: "agent",
+        adapter: "codex",
+      }),
+      text: "return routed answer",
+    }));
+    await expect(readFile(path.join(runDir, "tasks/effect-2/output.json"), "utf8"))
+      .resolves.toBe(JSON.stringify("routed answer"));
+    expect(childProcessMock.execFileSync).toHaveBeenCalledWith(
+      "babysitter",
+      expect.arrayContaining(["task:post", runDir, "effect-2", "--status", "ok"]),
+      expect.objectContaining({ cwd: "/tmp/workspace" }),
+    );
   });
 });
