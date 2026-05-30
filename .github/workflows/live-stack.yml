@@ -129,6 +129,7 @@ jobs:
           npm run build --workspace=@a5c-ai/agent-mux-adapters & leaf_pids+=("$!")
           npm run build --workspace=@a5c-ai/agent-mux-harness-mock & leaf_pids+=("$!")
           npm run build --workspace=@a5c-ai/transport-mux & leaf_pids+=("$!")
+          npm run build --workspace=@a5c-ai/tasks-mux & leaf_pids+=("$!")
           leaf_fail=0
           for pid in "${leaf_pids[@]}"; do wait "$pid" || leaf_fail=1; done
           [ "$leaf_fail" -eq 0 ] || exit 1
