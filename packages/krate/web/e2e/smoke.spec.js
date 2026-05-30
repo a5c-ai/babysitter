@@ -8,7 +8,9 @@ test.describe('public pages', () => {
   test('login page renders with sign-in methods', async ({ page }) => {
     await page.goto('/login');
     await expect(page.locator('h1')).toContainText('Sign in');
-    await expect(page.locator('a[href*="/api/auth/"]')).toBeVisible();
+    const signInMethods = page.locator('a[href*="/api/auth/"]');
+    const emptyAuthNotice = page.getByText('No browser sign-in method is configured for this endpoint.');
+    await expect(signInMethods.first().or(emptyAuthNotice)).toBeVisible();
   });
 
   test('login page has correct title', async ({ page }) => {

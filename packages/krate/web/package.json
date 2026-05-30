@@ -26,5 +26,8 @@
     "type": "git",
     "url": "git+https://github.com/a5c-ai/babysitter.git",
     "directory": "packages/krate/web"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
   }
 }
