@@ -29,6 +29,12 @@ export { ToolExecutionError, serializeToolError } from './types.js';
 /* ------------------------------------------------------------------ */
 
 export { ToolRegistry } from './registry.js';
+export type {
+  DeferredToolEntry,
+  ResolvedToolEntry,
+  SchemaLoader,
+  ToolSchema,
+} from './registry.js';
 
 /* ------------------------------------------------------------------ */
 /*  Dispatch                                                           */

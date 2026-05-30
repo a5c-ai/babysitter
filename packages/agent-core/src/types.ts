@@ -161,6 +161,58 @@ export interface ToolExecutionContext {
   };
 }
 
+export type UnifiedToolSource = "builtin" | "mcp" | "plugin" | "custom";
+
+export interface UnifiedToolEntry {
+  name: string;
+  description: string;
+  source: UnifiedToolSource;
+  sourceQualifier?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UnifiedToolSchema {
+  inputSchema: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
+}
+
+export interface ResolvedUnifiedToolEntry extends UnifiedToolEntry {
+  schema: UnifiedToolSchema;
+}
+
+export interface UnifiedToolRegistryLike {
+  registerAll?(tools: Array<{
+    name: string;
+    description?: string;
+    parameters?: Record<string, unknown>;
+    source: UnifiedToolSource;
+    sourceQualifier?: string;
+    metadata?: Record<string, unknown>;
+  }>): void;
+  searchTools(query: string, maxResults?: number): UnifiedToolEntry[];
+  fetchSchema(
+    toolName: string,
+    source?: UnifiedToolSource,
+    sourceQualifier?: string,
+  ): Promise<ResolvedUnifiedToolEntry | undefined>;
+}
+
+export interface UnifiedToolDispatcherLike {
+  dispatch(
+    context: {
+      toolName: string;
+      input: unknown;
+      caller?: string;
+      signal?: AbortSignal;
+      onUpdate?: (event: ToolUpdateEvent) => void | Promise<void>;
+    },
+    executor: (
+      tool: { name: string },
+      context: { input: unknown },
+    ) => Promise<unknown>,
+  ): Promise<{ output: unknown; durationMs: number; error?: string | { message?: string } }>;
+}
+
 export interface ToolMetadata {
   category: string;
   tags?: string[];
@@ -214,6 +266,11 @@ export interface AgentCoreToolOptions {
   cache?: ToolExecutionContext["cache"];
   /** Optional externally managed registry. When provided, the caller owns disposal. */
   backgroundRegistry?: BackgroundProcessRegistry;
+  /** Canonical unified registry from tool-mux. */
+  toolRegistry?: UnifiedToolRegistryLike;
+  /** Canonical dispatcher from tool-mux used by code_executor nested tool calls. */
+  toolDispatcher?: UnifiedToolDispatcherLike;
+  /** @deprecated Use toolRegistry from @a5c-ai/tool-mux. */
   deferredToolRegistry?: DeferredToolRegistry;
   /**
    * Opt-in Programmatic Tool Calling / Code Mode surface. When enabled,

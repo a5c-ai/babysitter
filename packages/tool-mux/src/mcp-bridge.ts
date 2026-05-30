@@ -112,6 +112,7 @@ export class McpBridge {
       description: tool.description,
       parameters: tool.inputSchema,
       source: 'mcp',
+      sourceQualifier: serverId,
       server: serverId,
     };
   }

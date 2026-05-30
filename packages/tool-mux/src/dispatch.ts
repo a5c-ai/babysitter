@@ -158,13 +158,13 @@ export class ToolDispatcher {
     // --- execute ---
     const start = Date.now();
     let output: unknown;
-    let error: string | undefined;
+    let error: ToolCallResult['error'];
 
     try {
       output = await executor(descriptor, context);
     } catch (err: unknown) {
       error = err instanceof ToolExecutionError
-        ? serializeToolError(err).message
+        ? serializeToolError(err)
         : err instanceof Error ? err.message : String(err);
     }
 

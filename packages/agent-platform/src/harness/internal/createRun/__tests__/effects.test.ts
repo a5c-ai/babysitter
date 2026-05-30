@@ -102,6 +102,48 @@ describe("issue #580 orchestration effect routing", () => {
     expect(onLine).toHaveBeenCalledWith("line two", "stdout");
   });
 
+  it("routes MCP execution through a unified dispatcher when configured", async () => {
+    const execute = vi.fn(async () => ({
+      success: true,
+      content: [{ type: "text", text: "dispatched output" }],
+      durationMs: 11,
+    }));
+    const dispatch = vi.fn(async (_context, executor) => ({
+      output: await executor(),
+      durationMs: 12,
+    }));
+    const action = {
+      effectId: "eff-mcp-dispatch",
+      taskId: "task-mcp-dispatch",
+      kind: "mcp",
+      taskDef: {
+        mcp: {
+          serverName: "filesystem",
+          toolName: "read_file",
+          args: { path: "README.md" },
+        },
+      },
+    } as unknown as EffectAction;
+
+    const result = await resolveEffect(action, "codex", {
+      runId: "run-1",
+      sessionId: "session-1",
+      mcp: { executor: { execute }, dispatcher: { dispatch } },
+    } as never);
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        toolName: "read_file",
+        caller: "agent-platform:mcp",
+        runId: "run-1",
+        sessionId: "session-1",
+      }),
+      expect.any(Function),
+    );
+    expect(execute).toHaveBeenCalledOnce();
+    expect(result.stdout).toBe("dispatched output");
+  });
+
   it("evaluates configured approval chains before non-interactive breakpoint auto-approval", async () => {
     const action = {
       effectId: "eff-breakpoint",

@@ -31,6 +31,14 @@ export function createAgentCoreToolDefinitions(options: AgenticToolOptions): Cus
     ...createWebTools(),
   ].map((tool) => wrapToolDefinition(tool, options.onToolUse));
 
+  options.toolRegistry?.registerAll?.(baseTools.map((tool) => ({
+    name: tool.name,
+    description: tool.description,
+    parameters: tool.parameters as unknown as Record<string, unknown>,
+    source: "builtin",
+    metadata: tool.metadata as Record<string, unknown> | undefined,
+  })));
+
   const tools = shouldEnableProgrammaticToolCalling(options)
     ? [
       ...baseTools,
