@@ -1,4 +1,4 @@
-import { CONFIG_ENV_VARS, DEFAULTS, getConfig, type BabysitterConfig } from "@a5c-ai/babysitter-sdk";
+import { DEFAULTS, getConfig, type BabysitterConfig } from "@a5c-ai/babysitter-sdk";
 
 const EXTENDED_CONFIG_KEYS: ReadonlySet<string> = new Set([
   "model",
@@ -41,21 +41,15 @@ const CONFIG_KEY_TYPES: Record<string, string> = {
 
 const VALID_LOG_LEVELS = new Set(["debug", "info", "warn", "error", "silent"]);
 
-const CONFIG_KEY_TO_ENV: Record<string, string> = {
-  runsDir: CONFIG_ENV_VARS.RUNS_DIR,
-  maxIterations: CONFIG_ENV_VARS.MAX_ITERATIONS,
-  qualityThreshold: CONFIG_ENV_VARS.QUALITY_THRESHOLD,
-  timeout: CONFIG_ENV_VARS.TIMEOUT,
-  logLevel: CONFIG_ENV_VARS.LOG_LEVEL,
-  allowSecretLogs: CONFIG_ENV_VARS.ALLOW_SECRET_LOGS,
-  hookTimeout: CONFIG_ENV_VARS.HOOK_TIMEOUT,
-  nodeTaskTimeout: CONFIG_ENV_VARS.NODE_TASK_TIMEOUT,
-};
-
+const globalConfigOverrides = new Map<string, unknown>();
 const runScopedConfig = new Map<string, unknown>();
 
 export function resetRunScopedConfig(): void {
   runScopedConfig.clear();
+}
+
+export function resetGlobalConfigOverrides(): void {
+  globalConfigOverrides.clear();
 }
 
 export function isValidConfigKey(key: string): boolean {
@@ -83,6 +77,9 @@ export function getConfigValue(key: string): unknown {
   if (runScopedConfig.has(key)) {
     return runScopedConfig.get(key);
   }
+  if (globalConfigOverrides.has(key)) {
+    return globalConfigOverrides.get(key);
+  }
   if (BABYSITTER_CONFIG_KEYS.has(key)) {
     const config = getConfig();
     return config[key as keyof BabysitterConfig];
@@ -101,6 +98,7 @@ export function listConfigKeys(): string[] {
   return [...new Set<string>([
     ...BABYSITTER_CONFIG_KEYS,
     ...EXTENDED_CONFIG_KEYS,
+    ...globalConfigOverrides.keys(),
     ...runScopedConfig.keys(),
   ])];
 }
@@ -109,14 +107,14 @@ export function getRunScopedConfigEntries(): IterableIterator<[string, unknown]>
   return runScopedConfig.entries();
 }
 
+export function getGlobalConfigOverrideEntries(): IterableIterator<[string, unknown]> {
+  return globalConfigOverrides.entries();
+}
+
 export function setConfigValue(key: string, value: unknown, scope: string): void {
   if (scope === "global") {
-    const envKey = CONFIG_KEY_TO_ENV[key];
-    if (envKey) {
-      process.env[envKey] = String(value);
-    } else {
-      process.env[`BABYSITTER_${key.replace(/\./g, "_").toUpperCase()}`] = String(value);
-    }
+    globalConfigOverrides.set(key, value);
+    return;
   }
   runScopedConfig.set(key, value);
 }
@@ -124,7 +122,9 @@ export function setConfigValue(key: string, value: unknown, scope: string): void
 export function resetConfigValue(key?: string): void {
   if (key) {
     runScopedConfig.delete(key);
+    globalConfigOverrides.delete(key);
     return;
   }
   runScopedConfig.clear();
+  globalConfigOverrides.clear();
 }

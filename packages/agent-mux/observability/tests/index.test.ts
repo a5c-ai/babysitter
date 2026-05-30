@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 describe('Observability Integration', () => {
   beforeEach(() => {
     vi.resetModules();
+    delete process.env.AMUX_OBSERVABILITY_MODE;
   });
 
   it('should switch between modes based on env var', async () => {
@@ -40,5 +41,38 @@ describe('Observability Integration', () => {
     const { logger: loggerFull, telemetry: telemetryFull } = await import('../src/index.js');
     expect((loggerFull as any).name).toBe('real-logger');
     expect((telemetryFull as any).name).toBe('real-telemetry');
+  });
+
+  it('supports explicit in-process mode without mutating env', async () => {
+    vi.doMock('../src/logger.js', () => ({
+      logger: { name: 'real-logger' },
+      createLogger: () => ({ name: 'real-logger' }),
+      createComponentLogger: () => ({ name: 'real-logger' }),
+      reconfigureLogger: vi.fn(),
+    }));
+    vi.doMock('../src/logger-simple.js', () => ({
+      logger: { name: 'simple-logger' },
+      createSimpleLogger: () => ({ name: 'simple-logger' }),
+      createComponentLogger: () => ({ name: 'simple-logger' }),
+    }));
+    vi.doMock('../src/telemetry.js', () => ({
+      telemetry: { name: 'real-telemetry' },
+      initializeTelemetry: vi.fn(),
+      shutdownTelemetry: vi.fn(),
+    }));
+    vi.doMock('../src/telemetry-simple.js', () => ({
+      telemetry: { name: 'simple-telemetry' },
+      initializeTelemetry: vi.fn(),
+      shutdownTelemetry: vi.fn(),
+    }));
+
+    const { logger, setObservabilityMode } = await import('../src/index.js');
+
+    expect((logger as any).name).toBe('simple-logger');
+
+    setObservabilityMode('full');
+
+    expect((logger as any).name).toBe('real-logger');
+    expect(process.env.AMUX_OBSERVABILITY_MODE).toBeUndefined();
   });
 });

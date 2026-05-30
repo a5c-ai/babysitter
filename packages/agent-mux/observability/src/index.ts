@@ -35,8 +35,17 @@ export * from './types.js';
  */
 export type ObservabilityMode = 'full' | 'simple';
 
+let configuredMode: ObservabilityMode | undefined;
+
 function getMode(): ObservabilityMode {
-  return (process.env.AMUX_OBSERVABILITY_MODE as ObservabilityMode) || 'simple';
+  return configuredMode ?? ((process.env.AMUX_OBSERVABILITY_MODE as ObservabilityMode) || 'simple');
+}
+
+/**
+ * Override observability mode for the current process without mutating env.
+ */
+export function setObservabilityMode(mode: ObservabilityMode | undefined): void {
+  configuredMode = mode;
 }
 
 // Exported Logger

@@ -31,7 +31,7 @@ export function createConfigTool(): CustomToolDefinition {
       value: Type.Optional(Type.Unknown({ description: "New value for set action" })),
       scope: Type.Optional(
         Type.Union([Type.Literal("run"), Type.Literal("global")], {
-          description: "Scope: 'run' (default, in-memory) or 'global' (env vars)",
+          description: "Scope: 'run' (default, in-memory) or 'global' (process-local override)",
         }),
       ),
     }),

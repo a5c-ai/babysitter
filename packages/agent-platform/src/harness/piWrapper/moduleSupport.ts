@@ -30,6 +30,12 @@ interface PiAuthStorage {
   create(path?: string): PiAuthStorage;
 }
 
+export interface AzureOpenAiEnvDefaults {
+  AZURE_OPENAI_RESOURCE_NAME?: string;
+  AZURE_OPENAI_BASE_URL?: string;
+  AZURE_OPENAI_DEPLOYMENT_NAME_MAP?: string;
+}
+
 export interface PiCodingAgentModule {
   createAgentSession: (options?: Record<string, unknown>) => Promise<{
     session: PiAgentSession;
@@ -124,15 +130,16 @@ function normalizeAzureOpenAiBaseUrl(value: string): string {
   return trimmed;
 }
 
-export function configureAzureOpenAiEnvDefaults(requestedModel?: string): void {
+export function configureAzureOpenAiEnvDefaults(requestedModel?: string): AzureOpenAiEnvDefaults {
+  const defaults: AzureOpenAiEnvDefaults = {};
   const resourceName = process.env.AZURE_OPENAI_RESOURCE_NAME || process.env.AZURE_OPENAI_PROJECT_NAME;
   if (!process.env.AZURE_OPENAI_RESOURCE_NAME && process.env.AZURE_OPENAI_PROJECT_NAME) {
-    process.env.AZURE_OPENAI_RESOURCE_NAME = process.env.AZURE_OPENAI_PROJECT_NAME;
+    defaults.AZURE_OPENAI_RESOURCE_NAME = process.env.AZURE_OPENAI_PROJECT_NAME;
   }
   if (process.env.AZURE_OPENAI_BASE_URL) {
-    process.env.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(process.env.AZURE_OPENAI_BASE_URL);
+    defaults.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(process.env.AZURE_OPENAI_BASE_URL);
   } else if (resourceName) {
-    process.env.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(`https://${resourceName}.openai.azure.com`);
+    defaults.AZURE_OPENAI_BASE_URL = normalizeAzureOpenAiBaseUrl(`https://${resourceName}.openai.azure.com`);
   }
   if (
     requestedModel &&
@@ -140,18 +147,25 @@ export function configureAzureOpenAiEnvDefaults(requestedModel?: string): void {
     process.env.AZURE_OPENAI_DEPLOYMENT &&
     !process.env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP
   ) {
-    process.env.AZURE_OPENAI_DEPLOYMENT_NAME_MAP = `${requestedModel}=${process.env.AZURE_OPENAI_DEPLOYMENT}`;
+    defaults.AZURE_OPENAI_DEPLOYMENT_NAME_MAP = `${requestedModel}=${process.env.AZURE_OPENAI_DEPLOYMENT}`;
   }
+  return defaults;
 }
 
-function synthesizeAzureModelEntry(modelId: string): PiModelEntry | undefined {
+function synthesizeAzureModelEntry(
+  modelId: string,
+  azureDefaults: AzureOpenAiEnvDefaults = {},
+): PiModelEntry | undefined {
   if (!process.env.AZURE_OPENAI_API_KEY) {
     return undefined;
   }
-  const resourceName = process.env.AZURE_OPENAI_RESOURCE_NAME || process.env.AZURE_OPENAI_PROJECT_NAME;
-  const baseUrl = process.env.AZURE_OPENAI_BASE_URL
-    ? normalizeAzureOpenAiBaseUrl(process.env.AZURE_OPENAI_BASE_URL)
-    : (resourceName ? normalizeAzureOpenAiBaseUrl(`https://${resourceName}.openai.azure.com`) : undefined);
+  const resourceName = process.env.AZURE_OPENAI_RESOURCE_NAME
+    || azureDefaults.AZURE_OPENAI_RESOURCE_NAME
+    || process.env.AZURE_OPENAI_PROJECT_NAME;
+  const baseUrl = azureDefaults.AZURE_OPENAI_BASE_URL
+    ?? (process.env.AZURE_OPENAI_BASE_URL
+      ? normalizeAzureOpenAiBaseUrl(process.env.AZURE_OPENAI_BASE_URL)
+      : (resourceName ? normalizeAzureOpenAiBaseUrl(`https://${resourceName}.openai.azure.com`) : undefined));
   if (!baseUrl) {
     return undefined;
   }
@@ -234,6 +248,7 @@ async function modelHasUsableAuth(
 export async function resolvePiModel(
   mod: PiCodingAgentModule,
   modelStr: string,
+  azureDefaults: AzureOpenAiEnvDefaults = {},
 ): Promise<PiModelEntry | undefined> {
   const auth = mod.AuthStorage.create();
   const registry = new mod.ModelRegistry(auth);
@@ -254,7 +269,7 @@ export async function resolvePiModel(
     }
   }
 
-  return resolved ?? synthesizeAzureModelEntry(modelStr);
+  return resolved ?? synthesizeAzureModelEntry(modelStr, azureDefaults);
 }
 
 export function describePiModelResolutionFailure(modelStr: string): string {
