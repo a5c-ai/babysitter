@@ -2,6 +2,13 @@
 
 import { useState } from 'react';
 
+let kvPairCounter = 0;
+
+function createKvPair() {
+  kvPairCounter += 1;
+  return { id: `kv-${kvPairCounter}`, key: '', value: '' };
+}
+
 /**
  * SecretManager — manage Kubernetes Secrets and ConfigMaps with grants.
  *
@@ -18,11 +25,11 @@ export function SecretManager({ org = 'default', secrets = [], configMaps = [], 
 
   // Create form state
   const [newName, setNewName] = useState('');
-  const [kvPairs, setKvPairs] = useState([{ key: '', value: '' }]);
+  const [kvPairs, setKvPairs] = useState(() => [createKvPair()]);
   const [grantedTo, setGrantedTo] = useState('');
 
   function addKvPair() {
-    setKvPairs((prev) => [...prev, { key: '', value: '' }]);
+    setKvPairs((prev) => [...prev, createKvPair()]);
   }
 
   function removeKvPair(index) {
@@ -35,7 +42,7 @@ export function SecretManager({ org = 'default', secrets = [], configMaps = [], 
 
   function resetForm() {
     setNewName('');
-    setKvPairs([{ key: '', value: '' }]);
+    setKvPairs([createKvPair()]);
     setGrantedTo('');
     setShowCreateForm(false);
   }
@@ -246,7 +253,7 @@ export function SecretManager({ org = 'default', secrets = [], configMaps = [], 
           <fieldset>
             <legend>Key-value pairs</legend>
             {kvPairs.map((pair, i) => (
-              <div className="kvRow" key={i}>
+              <div className="kvRow" key={pair.id}>
                 <input
                   type="text"
                   placeholder="KEY"
