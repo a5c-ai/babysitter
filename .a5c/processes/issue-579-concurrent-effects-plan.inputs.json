@@ -1,0 +1,30 @@
+{
+  "issueNumber": 579,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-579-concurrent-effects",
+  "relatedIssues": [593, 595, 598, 604],
+  "scope": {
+    "include": [
+      "parallel within-harness dispatch for eligible pending effects",
+      "dependency-aware effect ordering",
+      "maxConcurrency and scheduler hint enforcement",
+      "all-settled result aggregation with serialized journal commits",
+      "CLI capability propagation for concurrent-effects",
+      "deterministic SDK and agent-platform regression tests"
+    ],
+    "exclude": [
+      "BackgroundEffects non-blocking dispatch",
+      "MultiHarnessDispatch",
+      "new effect kinds unrelated to ConcurrentEffects"
+    ]
+  },
+  "qualityGates": [
+    "Sequential behavior remains default unless concurrent-effects is supported.",
+    "Sequential ctx.task chains stay ordered.",
+    "Explicit ctx.parallel groups can dispatch concurrently within maxConcurrency.",
+    "Every settled sibling result is committed before replay continues.",
+    "Mixed success/failure does not drop successes.",
+    "Journal commits are serialized per run.",
+    "No live harness credentials are required for regression tests."
+  ]
+}
