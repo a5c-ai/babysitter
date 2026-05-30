@@ -48,7 +48,7 @@ function parseToolResult(resp) {
 }
 
 test('MCP_TOOLS includes the four Jitsi meeting tools with required schemas', () => {
-  assert.equal(MCP_TOOLS.length, 23);
+  assert.equal(MCP_TOOLS.length, 26);
   const byName = new Map(MCP_TOOLS.map((tool) => [tool.name, tool]));
   for (const name of ['krate_create_meeting', 'krate_join_meeting', 'krate_list_meetings', 'krate_invite_to_meeting']) {
     assert.ok(byName.has(name), `${name} must be registered`);

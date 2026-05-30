@@ -1,11 +1,12 @@
 import crypto from 'node:crypto';
-import {
+import { invalidateApiCache } from './api-errors.js';
+
+const {
   clearSnapshotCache,
   createKrateApiController,
   globalEventBus,
   orgNamespaceName,
-} from '@a5c-ai/krate-sdk';
-import { invalidateApiCache } from './api-errors.js';
+} = await import('@a5c-ai/krate-sdk').catch(() => import('../../../sdk/src/index.js'));
 
 export const JITSI_KINDS = {
   providers: 'JitsiMeetProvider',
@@ -135,6 +136,8 @@ export function createRecordingResource(org, body = {}) {
   }, {
     phase: body.phase || 'Recording',
     startedAt: body.startedAt || new Date().toISOString(),
+    endedAt: body.endedAt,
+    duration: body.duration,
     transcript: body.transcript || { available: false },
   });
 }
@@ -206,4 +209,137 @@ export function verifyJitsiWebhookSignature(rawBody, signatureHeader, secret = p
   const expectedBuffer = Buffer.from(expected, 'hex');
   if (actualBuffer.length !== expectedBuffer.length) return { valid: false, reason: 'invalid_signature' };
   return { valid: crypto.timingSafeEqual(actualBuffer, expectedBuffer), reason: 'invalid_signature' };
+}
+
+export function createJitsiWebhookDeliveryCache({ ttlMs = 5 * 60 * 1000, replayWindowMs = 5 * 60 * 1000, now = () => Date.now() } = {}) {
+  const deliveries = new Map();
+  return {
+    checkAndRemember(deliveryId, timestamp = new Date(now()).toISOString()) {
+      const currentTime = now();
+      for (const [id, record] of deliveries) {
+        if (currentTime - record.seenAt > ttlMs) deliveries.delete(id);
+      }
+      const eventTime = new Date(timestamp).getTime();
+      if (Number.isFinite(eventTime) && currentTime - eventTime > replayWindowMs) {
+        return { duplicate: false, replay: true, deliveryId };
+      }
+      if (deliveryId && deliveries.has(deliveryId)) {
+        return { duplicate: true, replay: false, deliveryId };
+      }
+      if (deliveryId) deliveries.set(deliveryId, { seenAt: currentTime, timestamp });
+      return { duplicate: false, replay: false, deliveryId };
+    },
+  };
+}
+
+function participantList(meeting, payload, joined) {
+  const existing = meeting.status?.participants?.current || [];
+  const participant = {
+    id: payload.participant?.id || payload.participantId || payload.userId || payload.participant?.name,
+    name: payload.participant?.name || payload.participantName,
+    type: payload.participant?.type || payload.participantType || 'user',
+    joinedAt: payload.timestamp || new Date().toISOString(),
+    ...(payload.participant || {}),
+  };
+  const current = joined
+    ? [...existing.filter((item) => item.id !== participant.id), participant]
+    : existing.filter((item) => item.id !== participant.id);
+  const previousTotal = Number(meeting.status?.participants?.total || 0);
+  const total = joined && !existing.some((item) => item.id === participant.id) ? previousTotal + 1 : previousTotal;
+  return {
+    current,
+    total,
+    peak: Math.max(Number(meeting.status?.participants?.peak || 0), current.length, total),
+  };
+}
+
+export function handleJitsiWebhookPayload(org, rawBody, { deliveryId } = {}) {
+  let payload;
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    throw new Error('invalid_json');
+  }
+
+  const rawEventType = payload.eventType || payload.type || payload.event;
+  const eventType = String(rawEventType || '').replaceAll('_', '-');
+  const roomId = payload.roomId || payload.roomName || payload.room;
+  const meetingRef = payload.meetingRef || roomId;
+  const providerRef = payload.providerRef || 'default';
+  const timestamp = payload.timestamp || new Date().toISOString();
+  const effectiveDeliveryId = deliveryId || payload.deliveryId || payload.id || `${eventType}:${roomId || payload.recordingId}:${timestamp}`;
+
+  if (eventType === 'room-created') {
+    return {
+      deliveryId: effectiveDeliveryId,
+      eventType: 'meeting-created',
+      resource: createMeetingResource(org, {
+        name: meetingRef,
+        displayName: payload.displayName || payload.roomName || roomId,
+        providerRef,
+        roomId,
+        roomUrl: payload.roomUrl,
+        phase: 'Active',
+      }),
+    };
+  }
+
+  if (eventType === 'room-destroyed') {
+    const resource = createMeetingResource(org, {
+      name: meetingRef,
+      displayName: payload.displayName || payload.roomName || roomId,
+      providerRef,
+      roomId,
+      roomUrl: payload.roomUrl,
+      phase: 'Ended',
+    });
+    resource.status.endedAt = timestamp;
+    return { deliveryId: effectiveDeliveryId, eventType: 'meeting-ended', resource };
+  }
+
+  if (eventType === 'participant-joined' || eventType === 'participant-left') {
+    const resource = createMeetingResource(org, {
+      name: meetingRef,
+      displayName: payload.displayName || payload.roomName || roomId,
+      providerRef,
+      roomId,
+      roomUrl: payload.roomUrl,
+      phase: 'Active',
+    });
+    resource.status.participants = participantList(resource, payload, eventType === 'participant-joined');
+    return { deliveryId: effectiveDeliveryId, eventType, resource };
+  }
+
+  if (eventType === 'recording-started') {
+    return {
+      deliveryId: effectiveDeliveryId,
+      eventType: 'recording-started',
+      resource: createRecordingResource(org, {
+        name: payload.recordingId,
+        recordingId: payload.recordingId,
+        meetingRef,
+        providerRef,
+        phase: 'Recording',
+        startedAt: timestamp,
+      }),
+    };
+  }
+
+  if (eventType === 'recording-stopped') {
+    return {
+      deliveryId: effectiveDeliveryId,
+      eventType: 'recording-stopped',
+      resource: createRecordingResource(org, {
+        name: payload.recordingId,
+        recordingId: payload.recordingId,
+        meetingRef,
+        providerRef,
+        phase: 'Completed',
+        endedAt: timestamp,
+        duration: payload.duration,
+      }),
+    };
+  }
+
+  return { deliveryId: effectiveDeliveryId, eventType, resource: null, ignored: true };
 }

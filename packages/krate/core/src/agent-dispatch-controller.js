@@ -48,6 +48,7 @@ export function createAgentDispatchController(options = {}) {
   const eventBus = options.eventBus || null;
   const lifecycleEmitter = options.lifecycleEmitter || (eventBus ? createHooksLifecycleEmitter(eventBus) : null);
   const hookBridge = options.hookBridge || null;
+  const jitsiAgentBridge = options.jitsiAgentBridge || null;
 
   return {
     role: 'agent-dispatch-controller',
@@ -262,7 +263,7 @@ export function createAgentDispatchController(options = {}) {
       return { run, attempt, transcript, notification };
     },
 
-    async createManualDispatch({ repository, ref, sourceRefs = [], agentDefinition, agentStack, taskKind, actor, namespace = 'default', organizationRef = 'default', resources = {}, callbackUrl } = {}, options = {}) {
+    async createManualDispatch({ repository, ref, sourceRefs = [], agentDefinition, agentStack, meetingRef, taskKind, actor, namespace = 'default', organizationRef = 'default', resources = {}, callbackUrl } = {}, options = {}) {
       let identity = null;
       if (agentDefinition) {
         const resolved = personaController.resolveAgentDefinition(agentDefinition, { resources, organizationRef });
@@ -434,6 +435,9 @@ export function createAgentDispatchController(options = {}) {
       if (mountSpec) {
         run.spec.mountSpec = mountSpec;
       }
+      if (meetingRef && jitsiAgentBridge?.hasMeetingCapability?.(stack)) {
+        await jitsiAgentBridge.prepareMeetingContext(run, meetingRef, stack, { resources, organizationRef, namespace });
+      }
 
       if (lifecycleEmitter) {
         lifecycleEmitter.emitRunCreated(run);
@@ -493,6 +497,7 @@ export function createAgentDispatchController(options = {}) {
           env: jobEnv,
           workspace: pvcName ? { pvcName } : undefined,
           resources: stack.spec?.resources,
+          meetingContext: run.spec.meetingContext,
         });
 
         attempt.status.jobName = jobName;

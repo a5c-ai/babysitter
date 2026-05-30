@@ -339,7 +339,7 @@ export function createAgentMuxClient(options = {}) {
      * Generate a Kubernetes Job manifest to run an agent as an isolated Job
      * instead of a subprocess of the API server.
      *
-     * @param {{ adapter: string, provider?: string, model?: string, workspace?: { pvcName?: string }, prompt?: { system?: string, task?: string }, env?: Record<string,string>, org: string, runId?: string, stackName?: string, budget?: { maxDurationSeconds?: number }, resources?: object, image?: string, serviceAccount?: string, callbackUrl?: string, jitsi?: object }} config
+     * @param {{ adapter: string, provider?: string, model?: string, workspace?: { pvcName?: string }, prompt?: { system?: string, task?: string }, env?: Record<string,string>, org: string, runId?: string, stackName?: string, budget?: { maxDurationSeconds?: number }, resources?: object, image?: string, serviceAccount?: string, callbackUrl?: string, jitsi?: object, meetingContext?: object }} config
      * @returns {{ jobManifest: object, jobName: string }}
      */
     createAgentJob(config = {}) {
@@ -360,6 +360,7 @@ export function createAgentMuxClient(options = {}) {
         resources: resourceLimits,
         transportBindings = [],
         jitsi,
+        meetingContext = null,
       } = config;
 
       // Validate adapter
@@ -380,6 +381,7 @@ export function createAgentMuxClient(options = {}) {
         { spec: { adapter, provider } },
         transportBindings
       );
+      const jitsiContext = meetingContext || jitsi || null;
 
       const containerEnv = [
         { name: 'KRATE_ORG', value: org },
@@ -391,10 +393,18 @@ export function createAgentMuxClient(options = {}) {
         ...(callbackUrl ? [{ name: 'KRATE_CALLBACK_URL', value: callbackUrl }] : []),
         ...(prompt?.system ? [{ name: 'AGENT_SYSTEM_PROMPT', value: prompt.system }] : []),
         ...(prompt?.task ? [{ name: 'AGENT_TASK', value: prompt.task }] : []),
+        ...(jitsiContext ? [
+          { name: 'JITSI_AGENT_SOCKET', value: JITSI_SOCKET_PATH },
+          { name: 'JITSI_MEETING_ACTIVE', value: 'true' },
+        ] : []),
         ...Object.entries(env).map(([name, value]) => ({ name, value: String(value) })),
       ];
       const volumes = pvcName ? [{ name: 'workspace', persistentVolumeClaim: { claimName: pvcName } }] : [];
       const agentVolumeMounts = pvcName ? [{ name: 'workspace', mountPath: '/workspace' }] : [];
+      if (jitsiContext) {
+        agentVolumeMounts.push({ name: 'agent-socket', mountPath: '/tmp' });
+        volumes.push({ name: 'agent-socket', emptyDir: {} });
+      }
       const containers = [{
         name: 'agent',
         image: image || 'ghcr.io/a5c-ai/agent-mux:latest',
@@ -408,14 +418,8 @@ export function createAgentMuxClient(options = {}) {
         volumeMounts: agentVolumeMounts,
       }];
 
-      if (jitsi) {
-        containerEnv.push(
-          { name: 'JITSI_AGENT_SOCKET', value: JITSI_SOCKET_PATH },
-          { name: 'JITSI_MEETING_ACTIVE', value: 'true' },
-        );
-        agentVolumeMounts.push({ name: 'agent-socket', mountPath: '/tmp' });
-        volumes.push({ name: 'agent-socket', emptyDir: {} });
-        containers.push(createJitsiSidecarContainer({ ...jitsi, stackName }));
+      if (jitsiContext) {
+        containers.push(createJitsiSidecarContainer({ ...jitsiContext, stackName }));
       }
 
       const jobManifest = {

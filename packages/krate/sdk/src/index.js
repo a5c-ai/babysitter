@@ -57,6 +57,10 @@ export {
 
 /** External sync controller for reconciling resources from external backends into Krate. */
 export { createSyncController } from '../../core/src/external/sync-controller.js';
+/** Jitsi meeting controllers for room lifecycle, webhook sync, and agent sidecars. */
+export { createJitsiMeetingController } from '../../core/src/jitsi-meeting-controller.js';
+export { createJitsiSyncController } from '../../core/src/jitsi-sync-controller.js';
+export { createJitsiAgentBridge } from '../../core/src/jitsi-agent-bridge.js';
 /** External webhook controller for processing inbound webhook deliveries from providers. */
 export { createWebhookController } from '../../core/src/external/webhook-controller.js';
 /** External write controller for pushing Krate resource changes back to external backends. */

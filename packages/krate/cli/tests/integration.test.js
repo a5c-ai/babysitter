@@ -2,7 +2,7 @@
  * CLI Integration Tests — Verify MCP server commands work together
  *
  * Tests the full MCP server protocol flow: initialize, tools/list, tools/call
- * with an apply+list round-trip and verification that all 23 tools are present.
+ * with an apply+list round-trip and verification that all 26 tools are present.
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -105,7 +105,7 @@ test('CLI integration: initialize → tools/list → krate_snapshot all succeed'
   const listResp = await server.handleMessage(rpc('tools/list'));
   assert.ok(listResp.result, 'tools/list must return a result');
   assert.ok(Array.isArray(listResp.result.tools), 'result.tools must be an array');
-  assert.equal(listResp.result.tools.length, 23, 'must list exactly 23 tools');
+  assert.equal(listResp.result.tools.length, 26, 'must list exactly 26 tools');
 
   // krate_snapshot
   const snapResp = await server.handleMessage(rpc('tools/call', {
@@ -160,15 +160,18 @@ test('CLI integration: krate_apply_resource → krate_list_resources round-trip'
 // Test 3: All tools listed in tools/list
 // ---------------------------------------------------------------------------
 
-test('CLI integration: all 23 tools listed in MCP_TOOLS and tools/list', async () => {
+test('CLI integration: all 26 tools listed in MCP_TOOLS and tools/list', async () => {
   // MCP_TOOLS static array
-  assert.equal(MCP_TOOLS.length, 23, 'MCP_TOOLS must have exactly 23 entries');
+  assert.equal(MCP_TOOLS.length, 26, 'MCP_TOOLS must have exactly 26 entries');
 
   const expectedTools = [
     'krate_snapshot',
     'krate_list_resources',
     'krate_apply_resource',
     'krate_dispatch_agent',
+    'krate_list_agents',
+    'krate_get_agent_profile',
+    'krate_create_agent',
     'krate_get_resource',
     'krate_delete_resource',
     'krate_list_stacks',
@@ -198,7 +201,7 @@ test('CLI integration: all 23 tools listed in MCP_TOOLS and tools/list', async (
   // Also verify via tools/list response
   const server = createMcpServer({ controller: createMockController() });
   const resp = await server.handleMessage(rpc('tools/list'));
-  assert.equal(resp.result.tools.length, 23, 'tools/list must return exactly 23 tools');
+  assert.equal(resp.result.tools.length, 26, 'tools/list must return exactly 26 tools');
 
   const responsedNames = resp.result.tools.map((t) => t.name);
   assert.ok(responsedNames.includes('krate_snapshot'));

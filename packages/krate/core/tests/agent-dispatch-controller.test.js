@@ -124,6 +124,80 @@ test('Successful dispatch with Agent Mux available', async () => {
   assert.equal(gw.applied[0].kind, 'Job', 'Applied resource should be a Job');
 });
 
+test('Meeting-aware dispatch injects meeting context only for Jitsi-capable stacks', async () => {
+  const gw = createMockResourceGateway();
+  const muxClient = createAgentMuxClient({ resourceGateway: gw });
+  const resources = buildValidResources('meeting-stack');
+  resources.AgentStack[0].spec.jitsiCapability = true;
+  resources.AgentStack[0].spec.jitsiConfig = { participantName: 'Standup Bot', role: 'observer', capabilities: { chat: 'readwrite' } };
+  resources.JitsiMeeting = [
+    createResource('JitsiMeeting', { name: 'daily', namespace: 'krate-org-default' }, {
+      organizationRef: 'default',
+      providerRef: 'jitsi-prod',
+      roomId: 'daily-default',
+      ttlMinutes: 30,
+    }, {
+      phase: 'Active',
+      roomUrl: 'https://meet.example/daily-default',
+    })
+  ];
+  const controller = createAgentDispatchController({
+    agentMuxClient: muxClient,
+    jitsiAgentBridge: {
+      hasMeetingCapability(stack) { return stack.spec?.jitsiCapability === true; },
+      async prepareMeetingContext(run, meetingRef, stack) {
+        run.spec.meetingRef = meetingRef;
+        run.spec.meetingContext = {
+          roomUrl: 'https://meet.example/daily-default',
+          roomId: 'daily-default',
+          jwt: 'krate-jitsi.jwt.sig',
+          role: stack.spec.jitsiConfig.role,
+          capabilities: stack.spec.jitsiConfig.capabilities,
+        };
+        return run.spec.meetingContext;
+      },
+    },
+  });
+
+  const result = await controller.createManualDispatch({
+    repository: 'test-repo',
+    ref: 'main',
+    agentStack: 'meeting-stack',
+    meetingRef: 'daily',
+    actor: 'test-user',
+    namespace: 'krate-org-default',
+    organizationRef: 'default',
+    resources
+  });
+
+  assert.equal(result.error, false);
+  assert.equal(result.run.spec.meetingRef, 'daily');
+  assert.equal(result.run.spec.meetingContext.roomId, 'daily-default');
+  assert.ok(gw.applied[0].spec.template.spec.containers.some((container) => container.name === 'jitsi-agent-sidecar'));
+});
+
+test('Non-Jitsi stack with meetingRef dispatches without sidecar regression', async () => {
+  const gw = createMockResourceGateway();
+  const muxClient = createAgentMuxClient({ resourceGateway: gw });
+  const resources = buildValidResources('plain-stack');
+  const controller = createAgentDispatchController({ agentMuxClient: muxClient });
+
+  const result = await controller.createManualDispatch({
+    repository: 'test-repo',
+    ref: 'main',
+    agentStack: 'plain-stack',
+    meetingRef: 'daily',
+    actor: 'test-user',
+    namespace: 'krate-org-default',
+    organizationRef: 'default',
+    resources
+  });
+
+  assert.equal(result.error, false);
+  assert.equal(result.run.spec.meetingRef, undefined);
+  assert.equal(gw.applied[0].spec.template.spec.containers.length, 1);
+});
+
 test('Dispatch with Agent Mux unavailable (no resource gateway)', async () => {
   // When no resourceGateway is provided, job submission throws
   const muxClient = createAgentMuxClient({});

@@ -1,6 +1,8 @@
-import { applyJitsiResource, createMeetingResource, createRecordingResource, verifyJitsiWebhookSignature } from '../../../../../../lib/jitsi-service.js';
+import { applyJitsiResource, createJitsiWebhookDeliveryCache, handleJitsiWebhookPayload, verifyJitsiWebhookSignature } from '../../../../../../lib/jitsi-service.js';
 
 export const dynamic = 'force-dynamic';
+
+const deliveries = createJitsiWebhookDeliveryCache();
 
 export const POST = async (request, { params }) => {
   const { org } = await params;
@@ -11,32 +13,30 @@ export const POST = async (request, { params }) => {
     return Response.json({ error: verification.reason || 'invalid_signature' }, { status: 400 });
   }
 
-  let payload;
+  let normalized;
   try {
-    payload = JSON.parse(rawBody);
-  } catch {
-    return Response.json({ error: 'invalid_json' }, { status: 400 });
+    normalized = handleJitsiWebhookPayload(org, rawBody, {
+      deliveryId: request.headers.get('x-jitsi-delivery') || undefined,
+    });
+  } catch (err) {
+    if (err.message === 'invalid_json') {
+      return Response.json({ error: 'invalid_json' }, { status: 400 });
+    }
+    throw err;
   }
 
-  const eventType = payload.eventType || payload.type;
-  let result = { accepted: true, eventType };
-  if (eventType === 'room-created') {
-    result = await applyJitsiResource(org, createMeetingResource(org, {
-      name: payload.roomId || payload.roomName,
-      displayName: payload.displayName || payload.roomName || payload.roomId,
-      providerRef: payload.providerRef,
-      roomId: payload.roomId || payload.roomName,
-      roomUrl: payload.roomUrl,
-      phase: 'Active',
-    }), { eventType: 'meeting-created' });
-  } else if (eventType === 'recording-started') {
-    result = await applyJitsiResource(org, createRecordingResource(org, {
-      name: payload.recordingId,
-      meetingRef: payload.meetingRef || payload.roomId,
-      providerRef: payload.providerRef,
-      phase: 'Recording',
-    }), { eventType: 'recording-started' });
+  const replay = deliveries.checkAndRemember(normalized.deliveryId, JSON.parse(rawBody).timestamp);
+  if (replay.replay) {
+    return Response.json({ error: 'stale_delivery' }, { status: 409 });
+  }
+  if (replay.duplicate) {
+    return Response.json({ ok: true, duplicate: true, deliveryId: normalized.deliveryId }, { headers: { 'Cache-Control': 'no-store' } });
   }
 
-  return Response.json({ ok: true, eventType, result }, { headers: { 'Cache-Control': 'no-store' } });
+  if (!normalized.resource) {
+    return Response.json({ ok: true, ignored: true, eventType: normalized.eventType }, { headers: { 'Cache-Control': 'no-store' } });
+  }
+
+  const result = await applyJitsiResource(org, normalized.resource, { eventType: normalized.eventType });
+  return Response.json({ ok: true, eventType: normalized.eventType, result }, { headers: { 'Cache-Control': 'no-store' } });
 };

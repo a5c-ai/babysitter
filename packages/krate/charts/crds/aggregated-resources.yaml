@@ -215,6 +215,126 @@ spec:
           status:
             type: object
             x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: jitsimeetings.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: jitsimeetings
+    singular: jitsimeeting
+    kind: JitsiMeeting
+    shortNames:
+    - jm
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Room
+      type: string
+      jsonPath: .spec.roomId
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - providerRef
+            - roomId
+            properties:
+              organizationRef:
+                type: string
+              providerRef:
+                type: string
+              templateRef:
+                type: string
+              roomId:
+                type: string
+              displayName:
+                type: string
+              dispatchRunRef:
+                type: string
+              ttlMinutes:
+                type: integer
+              participants:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              roomConfig:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: jitsirecordings.krate.a5c.ai
+spec:
+  group: krate.a5c.ai
+  scope: Namespaced
+  names:
+    plural: jitsirecordings
+    singular: jitsirecording
+    kind: JitsiRecording
+    shortNames:
+    - jr
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+    - name: Meeting
+      type: string
+      jsonPath: .spec.meetingRef
+    - name: Phase
+      type: string
+      jsonPath: .status.phase
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+            required:
+            - organizationRef
+            - meetingRef
+            - providerRef
+            properties:
+              organizationRef:
+                type: string
+              meetingRef:
+                type: string
+              providerRef:
+                type: string
+              format:
+                type: string
+              storageRef:
+                type: string
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
     subresources:
       status: {}
 ---
