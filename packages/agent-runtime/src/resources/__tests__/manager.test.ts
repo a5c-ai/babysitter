@@ -195,4 +195,24 @@ describe("ResourceManagerImpl", () => {
     expect(snap.concurrency).toBeDefined();
     expect(snap.timestamp).toBeDefined();
   });
+
+  it("admits execution resource policies through an OS-limit seam", () => {
+    const rm = new ResourceManagerImpl({ tokenLimit: 1000, costLimit: 50 });
+
+    const admission = rm.admitExecutionPolicy({
+      resources: {
+        cpuCount: 2,
+        memoryBytes: 536_870_912,
+        pidsLimit: 64,
+      },
+    });
+
+    expect(admission.accepted).toBe(true);
+    expect(admission.osLimits).toEqual({
+      cpuCount: 2,
+      memoryBytes: 536_870_912,
+      pidsLimit: 64,
+    });
+    expect(admission.unsupported).toEqual([]);
+  });
 });

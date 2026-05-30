@@ -59,12 +59,46 @@ describe("DockerExecutor", () => {
 
     expect(args).toContain("run");
     expect(args).toContain("--rm");
+    expect(args).toContain("--read-only");
+    expect(args).toContain("--cap-drop");
+    expect(args).toContain("ALL");
+    expect(args).toContain("--security-opt");
+    expect(args).toContain("no-new-privileges");
+    expect(args).toContain("--user");
+    expect(args).toContain("65532:65532");
+    expect(args).toContain("--network");
+    expect(args).toContain("none");
     expect(args).not.toContain("-v");
-    expect(args).not.toContain("--network");
     expect(args).not.toContain("-e");
     expect(args).toContain("alpine:latest");
     expect(args).toContain("echo");
     expect(args).toContain("hello");
+  });
+
+  it("maps resource and DNS policy into docker run args", () => {
+    const executor = new DockerExecutor();
+
+    const config: DockerExecutionConfig = {
+      mode: "docker",
+      image: "node:20-slim",
+      policy: {
+        network: { mode: "bridge", dns: ["1.1.1.1"] },
+        resources: { cpuCount: 1.5, memoryBytes: 268_435_456, pidsLimit: 128 },
+      },
+    };
+
+    const args = executor._buildDockerArgs("abc12345-uuid", "node", ["index.js"], config);
+
+    expect(args).toContain("--cpus");
+    expect(args).toContain("1.5");
+    expect(args).toContain("--memory");
+    expect(args).toContain("268435456");
+    expect(args).toContain("--pids-limit");
+    expect(args).toContain("128");
+    expect(args).toContain("--dns");
+    expect(args).toContain("1.1.1.1");
+    expect(args).toContain("--network");
+    expect(args).toContain("bridge");
   });
 });
 
@@ -93,9 +127,10 @@ describe("SshExecutor", () => {
     // Port
     expect(args).toContain("-p");
     expect(args).toContain("2222");
-    // Strict host key checking disabled
+    // Strict host key checking is secure by default.
     expect(args).toContain("-o");
-    expect(args).toContain("StrictHostKeyChecking=no");
+    expect(args).toContain("StrictHostKeyChecking=yes");
+    expect(args).not.toContain("StrictHostKeyChecking=no");
     expect(args).toContain("BatchMode=yes");
     // Target
     expect(args).toContain("deploy@remote.example.com");
@@ -123,6 +158,23 @@ describe("SshExecutor", () => {
     expect(args).not.toContain("-i");
     expect(args).not.toContain("-p");
     expect(args).toContain("root@10.0.0.1");
+  });
+
+  it("emits StrictHostKeyChecking=no only with explicit insecure opt-in", () => {
+    const executor = new SshExecutor();
+
+    const config: SshExecutionConfig = {
+      mode: "ssh",
+      host: "10.0.0.1",
+      user: "root",
+      policy: {
+        ssh: { insecureSkipHostKeyChecking: true },
+      },
+    };
+
+    const args = executor._buildSshArgs("whoami", [], config);
+
+    expect(args).toContain("StrictHostKeyChecking=no");
   });
 });
 
@@ -173,6 +225,30 @@ describe("KubernetesExecutor", () => {
     expect(handle.manifest).not.toContain("serviceAccountName");
     expect(handle.manifest).toContain("namespace: default");
     expect(handle.manifest).toContain("image: alpine:latest");
+  });
+
+  it("maps execution policy to security context and resources", async () => {
+    const executor = new KubernetesExecutor();
+
+    const config: KubernetesExecutionConfig = {
+      mode: "kubernetes",
+      namespace: "ci-jobs",
+      image: "node:20-slim",
+      policy: {
+        environment: { values: { NODE_ENV: "test" } },
+        resources: { cpuCount: 1, memoryBytes: 134_217_728 },
+      },
+    };
+
+    const handle = await executor.spawn("node", ["script.js"], config);
+
+    expect(handle.manifest).toContain("runAsNonRoot: true");
+    expect(handle.manifest).toContain("readOnlyRootFilesystem: true");
+    expect(handle.manifest).toContain("allowPrivilegeEscalation: false");
+    expect(handle.manifest).toContain("name: NODE_ENV");
+    expect(handle.manifest).toContain("value: \"test\"");
+    expect(handle.manifest).toContain("cpu: \"1\"");
+    expect(handle.manifest).toContain("memory: \"134217728\"");
   });
 });
 
