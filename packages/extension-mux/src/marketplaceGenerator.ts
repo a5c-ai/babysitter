@@ -30,6 +30,7 @@ export function generateMarketplaceJson(
           source: 'local',
           path: pluginSourcePath,
         },
+        version: manifest.version,
         policy: {
           installation: 'AVAILABLE',
           authentication: 'ON_INSTALL',

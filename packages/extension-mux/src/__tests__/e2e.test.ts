@@ -318,6 +318,35 @@ describe('e2e: sample plugin compilation', () => {
       expect(binFiles).toHaveLength(0);
     });
 
+    it('marketplace manifests should expose the plugin version used for update checks', () => {
+      const outputBaseDir = path.join(tmpDir, 'marketplace-version-test');
+      const claudeResult = compile({
+        source: SAMPLE_PLUGIN_DIR,
+        target: 'claude-code',
+        output: path.join(outputBaseDir, 'claude-code'),
+        outputBaseDir,
+      });
+      const codexResult = compile({
+        source: SAMPLE_PLUGIN_DIR,
+        target: 'codex',
+        output: path.join(outputBaseDir, 'codex'),
+        outputBaseDir,
+      });
+
+      expect(claudeResult.status).not.toBe('error');
+      expect(codexResult.status).not.toBe('error');
+
+      const claudeMarketplace = JSON.parse(
+        fs.readFileSync(path.join(outputBaseDir, '.claude-plugin/marketplace.json'), 'utf-8')
+      );
+      const codexMarketplace = JSON.parse(
+        fs.readFileSync(path.join(outputBaseDir, '.agents/plugins/marketplace.json'), 'utf-8')
+      );
+
+      expect(claudeMarketplace.plugins.find((plugin: { name: string }) => plugin.name === 'sample-plugin')?.version).toBe('1.0.0');
+      expect(codexMarketplace.plugins.find((plugin: { name: string }) => plugin.name === 'sample-plugin')?.version).toBe('1.0.0');
+    });
+
     it('opencode: should emit accomplish-skills', () => {
       const result = compile({
         source: SAMPLE_PLUGIN_DIR,
