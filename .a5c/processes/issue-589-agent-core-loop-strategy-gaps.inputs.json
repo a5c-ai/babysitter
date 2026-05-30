@@ -1,0 +1,162 @@
+{
+  "issueNumber": 589,
+  "baseBranch": "staging",
+  "targetBranch": "agent/issue-589-agent-core-loop-strategy-gaps",
+  "projectRoot": "/home/runner/work/babysitter/babysitter",
+  "title": "agent-core: loop strategy gaps - concurrent, group-chat, handoff",
+  "labels": [
+    "enhancement",
+    "priority:high",
+    "ready-for-dev",
+    "effort:large",
+    "agent-core",
+    "P2",
+    "risk:high"
+  ],
+  "summary": "Issue #589 tracks agent-core strategy hardening gaps: concurrent timeout and partial results, group-chat moderator validation, handoff context and target validation, external loop cancellation, retryable oversight, enforced delegation timeoutMs, and strategy composition.",
+  "issueFindings": [
+    "ConcurrentLoopRunner currently batches agents and awaits Promise.allSettled without per-agent timeout controls.",
+    "GroupChatLoopRunner currently asks a moderator for output and selects the first configured id found by string inclusion.",
+    "HandoffLoopRunner currently accepts a handoffTarget from output without validating it against configured agent ids.",
+    "HandoffLoopRunner switches active agent ids but does not build or transfer structured handoff context.",
+    "AgentLoop.run() exposes no external cancellation token or signal.",
+    "SubagentInvokerImpl.delegate() uses OversightRunner.review(output, 0), making oversight single-pass.",
+    "OversightConfig declares timeoutMs, but SubagentInvokerImpl does not enforce it directly.",
+    "AgentLoopStrategy is a flat discriminator union, so composition/mixing needs an explicit additive contract."
+  ],
+  "targetFiles": [
+    "packages/agent-core/src/loop/types.ts",
+    "packages/agent-core/src/loop/agent-loop.ts",
+    "packages/agent-core/src/loop/strategies/concurrent.ts",
+    "packages/agent-core/src/loop/strategies/group-chat.ts",
+    "packages/agent-core/src/loop/strategies/handoff.ts",
+    "packages/agent-core/src/loop/strategies/index.ts",
+    "packages/agent-core/src/loop/__tests__/agent-loop.test.ts",
+    "packages/agent-core/src/subagent/types.ts",
+    "packages/agent-core/src/subagent/invoker.ts",
+    "packages/agent-core/src/subagent/oversight.ts",
+    "packages/agent-core/src/subagent/__tests__/invoker.test.ts",
+    "packages/agent-core/src/index.ts",
+    "packages/agent-core/README.md",
+    "docs/agent-layer-gaps.md"
+  ],
+  "processLibraryResearch": {
+    "activeRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "referencesUsed": [
+      "methodologies/cc10x/cc10x-build.js",
+      "methodologies/cc10x/cc10x-plan.js",
+      "methodologies/atdd-tdd/atdd-tdd.js",
+      "tdd-quality-convergence.js",
+      "processes/shared/tdd-triplet.js",
+      "reference/sdk.md",
+      "reference/ADVANCED_PATTERNS.md",
+      "processes/shared/ci/idempotency-and-safe-abort.js",
+      "specializations/collaboration/github/issue-linking.js"
+    ],
+    "methodologyChoices": [
+      "Runtime-read the GitHub issue and current code evidence to prevent spec drift.",
+      "Trace brownfield runtime call paths before editing implementation files.",
+      "Author failing Vitest contract tests before implementation.",
+      "Use shell tasks with expectedExitCode for deterministic red, targeted, and full verification gates.",
+      "Use agent review only for semantic/API compatibility evaluation."
+    ]
+  },
+  "acceptanceFocus": [
+    "Concurrent strategy exposes and enforces per-agent timeout semantics without discarding completed agents' partial results.",
+    "Concurrent strategy reports timed-out and rejected agents predictably while preserving deterministic agent id ordering.",
+    "AgentLoop can be cancelled from outside run()/iteration execution and transitions to a clear terminal state without orphaning callbacks or in-flight timeout state.",
+    "Group-chat moderator selection uses a structured or otherwise unambiguous contract and validates selected speakers against configured agent ids.",
+    "Invalid or ambiguous group-chat moderator selections fail clearly instead of silently falling back to an arbitrary speaker.",
+    "Handoff strategy validates handoff targets against configured agent ids before switching control.",
+    "Handoff strategy transfers structured context to the next agent according to a typed contract.",
+    "Subagent delegation enforces oversight.timeoutMs or a renamed equivalent timeout contract in SubagentInvokerImpl.",
+    "Delegation oversight supports configurable retry behavior that can produce revised output, not only repeat review of the same output.",
+    "Strategy composition/mixing has an explicit typed contract and tests, or the final review documents a maintainer-approved narrower contract.",
+    "Public exports and README documentation match the implemented contract.",
+    "docs/agent-layer-gaps.md is updated so fixed issue #589 gaps are not still listed as current gaps."
+  ],
+  "nonGoals": [
+    "Do not implement broader agent-platform concurrent effect scheduling from #579 unless an agent-core public contract requires a small integration note.",
+    "Do not replace the external subagent/task routing architecture from #581.",
+    "Do not redesign all AgentLoop strategies beyond additive hardening needed for the issue.",
+    "Do not change unrelated agent-core session, tool, synthesis, or context-manager behavior."
+  ],
+  "plannedPhases": [
+    {
+      "name": "Runtime issue/spec read",
+      "purpose": "Read issue #589 title, body, labels, and comments at execution time."
+    },
+    {
+      "name": "Runtime code evidence read",
+      "purpose": "Capture current loop, strategy, subagent, docs, and test evidence before authoring prompts that depend on the spec."
+    },
+    {
+      "name": "Reuse audit",
+      "purpose": "Find existing timeout, cancellation, parallel dispatch, handoff, oversight, and process patterns to reuse."
+    },
+    {
+      "name": "Architecture trace",
+      "purpose": "Record runtimeCallPaths and a compatible typed contract for all issue gaps."
+    },
+    {
+      "name": "Contract tests and red gate",
+      "purpose": "Write failing Vitest tests from the runtime-read spec before implementation and require a red exit code."
+    },
+    {
+      "name": "Implementation loop",
+      "purpose": "Iterate up to three times on the smallest compatible TypeScript implementation."
+    },
+    {
+      "name": "Targeted verification",
+      "purpose": "Run agent-core loop/subagent tests, agent-core build, and git diff hygiene after each implementation attempt."
+    },
+    {
+      "name": "Semantic contract review",
+      "purpose": "Compare the spec and diff directly for missing tests, unsafe fallbacks, timeout/cancellation leaks, and compatibility regressions."
+    },
+    {
+      "name": "Full verification",
+      "purpose": "Run the agent-core package test suite, build, metadata verification, and diff hygiene."
+    },
+    {
+      "name": "Final acceptance",
+      "purpose": "Confirm all issue criteria, docs, changed files, residual risks, and PR readiness."
+    }
+  ],
+  "qualityGates": [
+    "Red gate: new targeted Vitest tests must fail before implementation with expectedExitCode 1.",
+    "Targeted loop/subagent tests pass after implementation.",
+    "npm run build --workspace=@a5c-ai/agent-core passes.",
+    "npm run test --workspace=@a5c-ai/agent-core passes.",
+    "npm run verify:metadata passes.",
+    "git diff --check passes.",
+    "Agent semantic review approves the diff against the runtime-read spec.",
+    "Final acceptance review confirms docs and docs/agent-layer-gaps.md match the implemented contract."
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config packages/agent-core/vitest.config.ts packages/agent-core/src/loop/__tests__/agent-loop.test.ts packages/agent-core/src/subagent/__tests__/invoker.test.ts",
+    "npm run test --workspace=@a5c-ai/agent-core",
+    "npm run build --workspace=@a5c-ai/agent-core",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "breakpoints": [
+    {
+      "when": "Only if strategy composition or cancellation requires a non-additive public API contract.",
+      "owner": "maintainer",
+      "options": [
+        "Proceed with recommended additive contract",
+        "Pause for maintainer guidance"
+      ]
+    },
+    {
+      "when": "Only if final acceptance identifies an unresolved public API decision or accepted residual risk.",
+      "owner": "maintainer",
+      "options": [
+        "Accept residual risk and proceed",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "expectedProcessEntrypoint": ".a5c/processes/issue-589-agent-core-loop-strategy-gaps.mjs#process"
+}
