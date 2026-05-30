@@ -1,0 +1,88 @@
+{
+  "issueNumber": 585,
+  "baseBranch": "staging",
+  "branchName": "agent/issue-585",
+  "maxImplementationAttempts": 2,
+  "issueContext": {
+    "title": "agent-runtime: crash recovery, persistent queue, K8s executor",
+    "body": "## Summary\nThree critical gaps:\n\n### Crash Recovery\nNo auto-restart. No watchdog. Pending work lost on death.\n\n### Persistent Queue\nIn-memory only. Lost on restart. Need disk-backed queue with replay.\n\n### K8s Executor\nkubernetes.ts is a manifest builder stub. No kubectl apply, no log streaming.\n\n### Also\n- onTrigger errors crash daemon (no try/catch)\n- Resource budgets not enforced\n- Telemetry never exported\n\nRef: `docs/agent-layer-gaps.md`",
+    "labels": [
+      "priority:high",
+      "ready-for-dev",
+      "feature",
+      "automated-triage",
+      "effort:large",
+      "agent-runtime",
+      "P1",
+      "risk:high"
+    ],
+    "comments": [
+      {
+        "author": "tmuskal",
+        "createdAt": "2026-05-30T06:53:13Z",
+        "body": "**Related:** #604 - external agent dispatches are journaled, so crash recovery can replay them. Persistent queue (#585) ensures pending external dispatches survive daemon restart."
+      },
+      {
+        "author": "tmuskal",
+        "createdAt": "2026-05-30T06:54:49Z",
+        "body": "**Related:** #590 (process isolation - sandboxing needed for K8s pods)\n**Related:** #592 (scheduling - crash recovery affects trigger replay)\n**Related:** #593 (background processes - crash recovery must handle orphaned bg processes)"
+      },
+      {
+        "author": "a5c-ai",
+        "createdAt": "2026-05-30T10:09:52Z",
+        "body": "## Triage Summary\n- **One-line**: agent-runtime needs production-grade durability and execution hardening across daemon recovery, persistent trigger queueing, Kubernetes execution, resource enforcement, and telemetry export.\n\n## Critical Evaluation\n- Reporter analysis is accurate: the referenced gaps exist in `packages/agent-runtime` and are not already fixed on `staging`.\n- This should be treated as a decomposable production-readiness epic, not a single narrow bug fix.\n\n## Root Cause Analysis\n- `packages/agent-runtime/src/daemon/loop.ts`: `activeRuns` and `queue` are process-local memory. Pending trigger events are lost on daemon death/restart, and there is no durable ack/replay/dead-letter model.\n- `packages/agent-runtime/src/daemon/lifecycle.ts`: lifecycle manages pid/metadata files and signal shutdown, but does not provide a watchdog, auto-restart, or replay of pending daemon work.\n- `packages/agent-runtime/src/execution/modes/kubernetes.ts`: the file documents itself as a structural stub; `spawn()` builds a Job manifest and marks the handle `running`, while `attach()` is a no-op and no `kubectl apply`, polling Job completion, log streaming, or cleanup path exists.\n- `packages/agent-runtime/src/resources/manager.ts`: budgets can be inspected/consumed and warnings fired, but there is no admission/enforcement boundary that blocks over-budget work.\n- `packages/agent-runtime/src/telemetry/provider.ts`: telemetry is in-memory only; `flush()` clears buffered spans and there is no OTLP/file/export sink.\n\n## Affected Components\n- Packages: `packages/agent-runtime`\n- Effort: `effort:large`\n\n## Recommended Approach\nTreat this as phased work:\n1. Add a durable trigger queue with event IDs, ack states, replay, retry/backoff, and dead-letter handling.\n2. Add crash recovery/watchdog semantics around daemon lifecycle while preserving foreground/dev mode behavior.\n3. Replace the Kubernetes stub with real Job execution: apply, poll, log stream, timeout, and cleanup.\n4. Wire resource budgets into admission/enforcement paths with explicit failure results.\n5. Add telemetry exporters with redaction and opt-in sink configuration.\n\nAdd integration tests before implementation for daemon crash/restart replay and K8s command behavior. Existing tests cover manifest/provider/resource/telemetry units, but not the production behavior requested here.\n\n## Reproduction\n- Queue/crash recovery: start `runDaemonLoop` with `maxConcurrentRuns=1`, trigger more than one event, kill/restart the daemon, and observe queued events are gone because they lived only in the local queue array/status count.\n- K8s execution: instantiate `KubernetesExecutor.spawn()` and observe it returns `status: \"running\"` and a manifest without invoking `kubectl`, polling Job completion, or streaming logs.\n- Telemetry export: start/end spans with `InMemoryTelemetryProvider` and observe `flush()` only clears memory with no external sink.\n\n## Related Issues/PRs\n- Related: #604, #590, #592, #593\n- Historical related implementation: #217, #210\n- Search found related-but-distinct open issues, not a duplicate of this combined runtime durability/execution issue.\n\n## Priority: high\nThis affects core agent-runtime production viability and can lose pending work or falsely report Kubernetes execution as running. It is not marked critical because the current code appears to be an incomplete/stub production-readiness area rather than a regression in an already-supported production path, and the implementation should be phased.\n\n## Risk Analysis\n- **Risk Level**: `risk:high`\n- **Duplicate or lost trigger execution during durable queue replay**\n  - Mitigation: define event IDs, ack states, idempotency keys, and dead-letter behavior before implementation; add crash/restart integration tests that kill between enqueue, dispatch, ack, and failure states.\n- **Watchdog/restart logic can conflict with pid-file and foreground/dev lifecycle**\n  - Mitigation: separate supervisor responsibilities from daemon responsibilities; preserve foreground semantics; test stale PID, restart, graceful drain, and SIGKILL paths.\n- **Real Kubernetes execution can orphan Jobs or expose logs/secrets**\n  - Mitigation: use explicit job names/labels, timeout and cleanup hooks, RBAC-minimal examples, redacted log streaming, mocked `kubectl` integration tests, and optional cluster smoke tests.\n- **Budget enforcement can break currently permissive workflows**\n  - Mitigation: introduce clear failure results and test over-budget admission before wiring into dispatch paths.\n- **Telemetry export can leak sensitive run content**\n  - Mitigation: add opt-in sinks, redaction hooks, and tests that verify secret-like fields are filtered before OTLP/file export."
+      }
+    ],
+    "relatedIssues": [
+      604,
+      590,
+      592,
+      593,
+      217,
+      210
+    ]
+  },
+  "targetFiles": [
+    "docs/agent-layer-gaps.md",
+    "packages/agent-runtime/src/daemon/loop.ts",
+    "packages/agent-runtime/src/daemon/lifecycle.ts",
+    "packages/agent-runtime/src/daemon/types.ts",
+    "packages/agent-runtime/src/daemon/config.ts",
+    "packages/agent-runtime/src/daemon/daemonLog.ts",
+    "packages/agent-runtime/src/execution/modes/kubernetes.ts",
+    "packages/agent-runtime/src/execution/types.ts",
+    "packages/agent-runtime/src/execution/provider.ts",
+    "packages/agent-runtime/src/resources/manager.ts",
+    "packages/agent-runtime/src/resources/types.ts",
+    "packages/agent-runtime/src/resources/budget-tracker.ts",
+    "packages/agent-runtime/src/telemetry/provider.ts",
+    "packages/agent-runtime/src/telemetry/types.ts",
+    "packages/agent-runtime/src/execution/__tests__/provider.test.ts",
+    "packages/agent-runtime/src/resources/__tests__/manager.test.ts",
+    "packages/agent-runtime/src/telemetry/__tests__/provider.test.ts"
+  ],
+  "qualityCommands": [
+    "npm run test --workspace=@a5c-ai/agent-runtime",
+    "npm run build --workspace=@a5c-ai/agent-runtime",
+    "npm run build:runtime:agent-core-deps",
+    "npm run verify:metadata"
+  ],
+  "planSummary": {
+    "phases": [
+      "Phase 0 reuse audit against existing daemon queue, lifecycle, K8s, resource, telemetry, tests, and docs surfaces.",
+      "Trace live runtime call paths and define boundaries before edits.",
+      "Author failing regression/integration tests before production implementation.",
+      "Implement durable trigger queue, replay, retry/backoff, dead-letter, onTrigger containment, and watchdog/recovery semantics.",
+      "Replace Kubernetes manifest-only stub with kubectl-backed Job apply, poll, log streaming, timeout, and cleanup through a mockable seam.",
+      "Wire budget admission/enforcement and opt-in telemetry exporters with redaction.",
+      "Run full agent-runtime quality gates, review against issue context, then deliver PR and issue comment."
+    ],
+    "qualityGates": [
+      "Regression tests prove queued pending work survives daemon restart and failed triggers are not lost silently.",
+      "Kubernetes executor tests mock kubectl and prove apply, polling, logs, timeout/failure, and delete cleanup.",
+      "Resource tests prove over-budget work fails before dispatch.",
+      "Telemetry tests prove file/OTLP-compatible export and redaction before flush clears spans.",
+      "Package tests/build and metadata verification pass."
+    ]
+  }
+}
