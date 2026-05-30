@@ -9,7 +9,14 @@ export const POST = withAuth(async (request, { params }) => {
   try {
     const controller = createKrateApiController({ namespace: orgNamespaceName(org) });
     const body = await request.json();
-    const result = await controller.syncExternalBinding(body.bindingName);
+    const result = await controller.syncExternalBinding(body.bindingName, {
+      kind: body.kind,
+      localName: body.localName,
+      namespace: orgNamespaceName(org),
+      spec: body.spec || {},
+      externalEnvelope: body.externalEnvelope || { nativeId: '', url: '', etag: '', providerRef: '' },
+      watermark: body.watermark
+    });
     return Response.json(result);
   } catch (error) {
     return errorResponse(error.message, 500);
