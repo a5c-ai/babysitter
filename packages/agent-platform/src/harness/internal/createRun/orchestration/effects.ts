@@ -695,7 +695,11 @@ async function resolveViaTasksMuxIfRoutable(
   if (decision.responderType !== "agent") {
     return undefined;
   }
+  const fallbackToInternal = shouldFallbackExternalAgentToInternal(action.taskDef);
   if (typeof mux.AgentMuxResponderBackend !== "function") {
+    if (fallbackToInternal) {
+      return undefined;
+    }
     return {
       status: "error",
       error: new Error("tasks-mux AgentMuxResponderBackend is unavailable"),
@@ -703,29 +707,40 @@ async function resolveViaTasksMuxIfRoutable(
   }
 
   const prompt = buildAgentPrompt(action.taskDef as Record<string, unknown>);
-  const backend = new mux.AgentMuxResponderBackend({
-    adapter: decision.responder?.adapter ?? decision.responder?.id,
-    model: decision.responder?.model ?? options.model,
-    cwd: options.workspace,
-  });
-  const breakpoint = await backend.submitBreakpoint({
-    text: prompt,
-    context: {
-      description: action.taskDef?.title ?? action.taskId ?? action.effectId,
-      codeSnippets: [],
-      fileReferences: [],
-      tags: action.labels ?? [],
-    },
-    routing: {
-      strategy: "single",
-      targetResponders: decision.responder?.id ? [decision.responder.id] : [],
-      timeoutMs: 300_000,
-      presentToUser: false,
-      responderType: "agent",
+  let breakpoint: { answers: Array<{ text: string; responderId: string; responderName: string }> };
+  try {
+    const backend = new mux.AgentMuxResponderBackend({
       adapter: decision.responder?.adapter ?? decision.responder?.id,
       model: decision.responder?.model ?? options.model,
-    },
-  });
+      cwd: options.workspace,
+    });
+    breakpoint = await backend.submitBreakpoint({
+      text: prompt,
+      context: {
+        description: action.taskDef?.title ?? action.taskId ?? action.effectId,
+        codeSnippets: [],
+        fileReferences: [],
+        tags: action.labels ?? [],
+      },
+      routing: {
+        strategy: "single",
+        targetResponders: decision.responder?.id ? [decision.responder.id] : [],
+        timeoutMs: readExternalAgentTimeoutMs(action.taskDef) ?? 300_000,
+        presentToUser: false,
+        responderType: "agent",
+        adapter: decision.responder?.adapter ?? decision.responder?.id,
+        model: decision.responder?.model ?? options.model,
+      },
+    });
+  } catch (err) {
+    if (fallbackToInternal) {
+      return undefined;
+    }
+    return {
+      status: "error",
+      error: err instanceof Error ? err : new Error(String(err)),
+    };
+  }
   const answer = breakpoint.answers[0];
   return {
     status: "ok",
@@ -762,6 +777,20 @@ async function resolveBreakpointLikeEffect(
     createAskUserQuestionResponse(approvalPrompt, { [approvalKey]: "Approve" }),
     approvalKey,
   );
+}
+
+function shouldFallbackExternalAgentToInternal(taskDef: EffectAction["taskDef"] | undefined): boolean {
+  const agent = isPlainRecord(taskDef?.agent) ? taskDef.agent : {};
+  const metadata = isPlainRecord(taskDef?.metadata) ? taskDef.metadata : {};
+  return agent.fallbackToInternal === true
+    || metadata.fallbackToInternal === true
+    || agent.fallbackType === "internal"
+    || metadata.fallbackType === "internal";
+}
+
+function readExternalAgentTimeoutMs(taskDef: EffectAction["taskDef"] | undefined): number | undefined {
+  const agent = isPlainRecord(taskDef?.agent) ? taskDef.agent : {};
+  return typeof agent.timeoutMs === "number" ? agent.timeoutMs : undefined;
 }
 
 function parseSubprocessSpec(

@@ -92,7 +92,7 @@ describe("task kind helpers", () => {
       const helper = externalAgentTask(externalAgentKindFixtures.id, {
         adapter: externalAgentKindFixtures.adapter,
         prompt: () => externalAgentKindFixtures.prompt,
-        fallbackType: () => "internal",
+        fallbackToInternal: () => externalAgentKindFixtures.fallbackToInternal,
         metadata: () => externalAgentKindFixtures.metadata,
       });
       const ctx = createTestBuildContext({ labels: ["ctx-agent"] });
@@ -107,6 +107,7 @@ describe("task kind helpers", () => {
         adapter: externalAgentKindFixtures.adapter,
         prompt: externalAgentKindFixtures.prompt,
         fallbackType: externalAgentKindFixtures.fallbackType,
+        fallbackToInternal: true,
       });
     });
 

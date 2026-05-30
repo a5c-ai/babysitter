@@ -205,6 +205,80 @@ describe("resolveEffect tasks-mux routing", () => {
     });
   });
 
+  it("falls back to internal agent resolution when external agent dispatch fails with fallback enabled", async () => {
+    taskMuxMock.routeTask.mockReturnValue({
+      responderType: "agent",
+      route: "agent-mux",
+      responder: { id: "codex", adapter: "codex", model: "gpt-5.4" },
+    });
+    taskMuxMock.submitBreakpoint.mockRejectedValue(new Error("agent-mux unavailable"));
+    const piSession = {
+      prompt: vi.fn(async () => ({
+        success: true,
+        output: "internal answer",
+        exitCode: 0,
+        duration: 1,
+      })),
+    };
+
+    const result = await resolveEffect(
+      {
+        effectId: "effect-fallback",
+        invocationKey: "invocation",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          title: "Fallback agent",
+          agent: {
+            responderType: "agent",
+            adapter: "codex",
+            fallbackToInternal: true,
+            prompt: { task: "return text" },
+          },
+        },
+      },
+      "pi",
+      { workspace: "/tmp/workspace", model: "gpt-5.4" },
+      piSession as never,
+    );
+
+    expect(taskMuxMock.submitBreakpoint).toHaveBeenCalled();
+    expect(piSession.prompt).toHaveBeenCalledWith(expect.stringContaining("return text"), expect.any(Number));
+    expect(result.status).toBe("ok");
+    expect(result.value).toBe("internal answer");
+  });
+
+  it("returns an error when external agent dispatch fails without fallback enabled", async () => {
+    taskMuxMock.routeTask.mockReturnValue({
+      responderType: "agent",
+      route: "agent-mux",
+      responder: { id: "codex", adapter: "codex" },
+    });
+    taskMuxMock.submitBreakpoint.mockRejectedValue(new Error("auth failed"));
+
+    const result = await resolveEffect(
+      {
+        effectId: "effect-no-fallback",
+        invocationKey: "invocation",
+        kind: "agent",
+        taskDef: {
+          kind: "agent",
+          title: "No fallback agent",
+          agent: {
+            responderType: "agent",
+            adapter: "codex",
+            prompt: { task: "return text" },
+          },
+        },
+      },
+      "pi",
+      { workspace: "/tmp/workspace", model: "gpt-5.4" },
+    );
+
+    expect(result.status).toBe("error");
+    expect(result.error?.message).toBe("auth failed");
+  });
+
   it("delegates legacy CLI resolveAndPostEffect agent routing through tasks-mux", async () => {
     taskMuxMock.routeTask.mockReturnValue({
       responderType: "agent",
