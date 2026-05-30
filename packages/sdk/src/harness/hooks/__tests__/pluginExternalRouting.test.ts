@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isHostDelegableRoute, routeTask } from "@a5c-ai/tasks-mux";
 
 describe("plugin tasks-mux external routing classification", () => {
-  it("keeps agent responder effects host-delegable so plugin mode can continue resolving them", () => {
+  it("keeps agent responder effects inside tasks-mux so plugin mode can resolve them internally", () => {
     const decision = routeTask(
       {
         kind: "agent",
@@ -31,7 +31,7 @@ describe("plugin tasks-mux external routing classification", () => {
       responderType: "agent",
       route: "agent-mux",
     });
-    expect(isHostDelegableRoute(decision)).toBe(true);
+    expect(isHostDelegableRoute(decision)).toBe(false);
   });
 
   it("classifies tracker responder effects as externally waiting when no tracker backend is available", () => {

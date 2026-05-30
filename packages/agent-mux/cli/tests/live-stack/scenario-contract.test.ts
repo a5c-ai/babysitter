@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   assertEvidenceBundleComplete,
   createEvidenceBundle,
+  externalAgentDispatchLiveStackScenario,
   getScenarioCapabilityStatus,
   liveStackScenarioFromEnv,
   primaryLiveStackScenario,
@@ -135,6 +136,19 @@ describe('live stack scenario contract primitives', () => {
     expect(scenario.model.amuxProvider).toBe('google');
     expect(scenario.model.model).toBe('gemini-3.1-pro-preview');
     expect(scenario.model.requiredEnv).toEqual(['GOOGLE_API_KEY']);
+  });
+
+  it('declares the gated omni to claude-code external agent dispatch scenario', () => {
+    const scenario = externalAgentDispatchLiveStackScenario();
+
+    expect(scenario.scenarioId).toBe('live.omni.claude-code-external-agent.foundry-openai.gpt-5.5');
+    expect(scenario.agent.agentPath).toBe('omni');
+    expect(scenario.agent.babysitterHarness).toBe('omni');
+    expect(scenario.agent.setupCommands).toEqual(['omni call']);
+    expect(scenario.model.requiredEnv).toEqual(['LIVE_STACK_EXTERNAL_AGENT', 'AZURE_API_KEY', 'AMUX_API_BASE']);
+    expect(scenario.layers).toContain('tasks-mux responder routing');
+    expect(scenario.layers).toContain('agent-mux claude-code adapter');
+    expect(scenario.expectedArtifacts).toContain('external-agent-cost-event');
   });
 
   it('separates live model capability gates from deterministic no-credential execution', () => {

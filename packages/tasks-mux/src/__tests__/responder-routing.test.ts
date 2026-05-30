@@ -105,5 +105,16 @@ describe("issue #606 responder routing matrix", () => {
       route: "agent-mux",
       backend,
     });
+    expect(isHostDelegableRoute(routeTask(
+      {
+        kind: "agent",
+        agent: {
+          responderType: "agent",
+          adapter: "codex",
+          fallbackType: "internal",
+        },
+      },
+      { agentBackend: backend },
+    ))).toBe(false);
   });
 });
