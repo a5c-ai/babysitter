@@ -15,6 +15,7 @@ attributes:
 edges:
   has_version:
     - agentVersion:gemini:ge-0-43-0
+    - agentVersion:gemini:0-44-1
   composed_of:
     - target: language:typescript
       role: core

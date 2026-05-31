@@ -18,6 +18,7 @@ attributes:
 edges:
   has_version:
     - agentVersion:claude:ge-0-0-0
+    - agentVersion:claude:2-1-159
   accepts_plugin: []
   composed_of:
     - target: language:typescript

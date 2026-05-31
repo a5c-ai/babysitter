@@ -20,6 +20,7 @@ attributes:
 edges:
   has_version:
     - agentVersion:openclaw:ge-2026-5-27
+    - agentVersion:openclaw:2026-5-28
   composed_of:
     - target: language:typescript
       role: core
