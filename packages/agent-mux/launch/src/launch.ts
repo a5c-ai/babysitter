@@ -1968,7 +1968,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     console.error(`[amux launch] stdin: promptInArgs=${promptInArgs} stdinOverride=${!!stdinPromptOverride} keepStdinOpen=${keepStdinOpen}`);
   }
 
-  if (effectivePrompt && child.stdin && !ptyProcess && needsStdinDelivery) {
+  if (effectivePrompt && ptyProcess && !isInteractive && needsStdinDelivery) {
+    // ConPTY path: write prompt to PTY stdin after a short delay for initialization
+    setTimeout(() => { ptyProcess.write(prompt + '\n'); }, 2000);
+  } else if (effectivePrompt && child.stdin && !ptyProcess && needsStdinDelivery) {
     child.stdin.write(prompt + '\n');
     if (!isInteractive && !keepStdinOpen) {
       child.stdin.end();
