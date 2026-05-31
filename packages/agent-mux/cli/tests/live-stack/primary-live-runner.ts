@@ -1006,7 +1006,7 @@ async function validateAgentBehavior(
     if (!runCompleted && processMode === 'create') {
       const fileCreated = entries.some(e => e.name === 'file-creation' && e.status === 'passed');
       const processCreated = entries.some(e => e.name === 'process-creation' && e.status === 'passed');
-      const hooksActive = entries.some(e => e.name === 'hooks-mux-session' && e.status === 'passed');
+      const hooksActive = deferredHooksEntries.some(e => e.name === 'hooks-mux-session' && e.status === 'passed');
       if (fileCreated && processCreated && hooksActive) {
         runCompleted = true;
         runCompletionDetail = 'no SDK run created, but process+artifact+hooks all succeeded (create mode)';
