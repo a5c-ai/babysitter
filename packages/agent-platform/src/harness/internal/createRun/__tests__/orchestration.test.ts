@@ -17,8 +17,8 @@ const childProcessMock = vi.hoisted(() => ({
 
 vi.mock("@a5c-ai/tasks-mux", () => ({
   routeTask: taskMuxMock.routeTask,
-  isHostDelegableRoute: (decision: { responderType: string; backend?: string }) =>
-    decision.responderType === "internal" || (decision.responderType === "agent" && !decision.backend),
+  isHostDelegableRoute: (decision: { route: string }) =>
+    decision.route === "agent-core",
   AgentMuxResponderBackend: class {
     submitBreakpoint = taskMuxMock.submitBreakpoint;
   },
