@@ -65,7 +65,7 @@ Start Pi, then use the thin Babysitter entrypoints exposed by the package:
 - `/babysit` or `/babysitter`
 - `/call`
 - `/plan`
-- `/resume`
+- `/babysitter:resume`
 - `/doctor`
 - `/yolo`
 

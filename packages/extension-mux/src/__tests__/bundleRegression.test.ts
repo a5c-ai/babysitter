@@ -10,6 +10,7 @@ const SAMPLE_PLUGIN_DIR = path.resolve(__dirname, '../../examples/sample-plugin'
 const UNIFIED_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified');
 const CLAUDE_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/claude-code');
 const CODEX_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/codex');
+const PI_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/pi');
 const OMP_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/omp');
 
 function createTempDir(prefix: string): string {
@@ -134,6 +135,11 @@ describe('bundle regression coverage', () => {
     const tempDir = createTempDir('mux-surface-regression-');
     tempDirs.push(tempDir);
 
+    const piResult = compile({
+      source: UNIFIED_PLUGIN_DIR,
+      target: 'pi',
+      output: path.join(tempDir, 'pi'),
+    });
     const codexResult = compile({
       source: UNIFIED_PLUGIN_DIR,
       target: 'codex',
@@ -146,8 +152,19 @@ describe('bundle regression coverage', () => {
       output: path.join(tempDir, 'oh-my-pi'),
     });
 
+    expect(piResult.status).not.toBe('error');
     expect(codexResult.status).not.toBe('error');
     expect(ompResult.status).not.toBe('error');
+
+    const piExtension = readFile(path.join(piResult.outputDir, 'extensions', 'index.ts'));
+    expect(readFile(path.join(piResult.outputDir, 'README.md'))).toBe(
+      readFile(path.join(PI_HARNESS_DIR, 'README.md')),
+    );
+    expect(piExtension).toBe(readFile(path.join(PI_HARNESS_DIR, 'extensions-index.ts')));
+    expect(piExtension).toContain('const RESERVED_PI_COMMANDS = new Set<string>(["resume"]);');
+    expect(piExtension).toContain('if (!RESERVED_PI_COMMANDS.has(name))');
+    expect(piExtension).toContain('pi.registerCommand(`babysitter:${name}`,');
+    expect(piExtension).not.toContain('pi.registerCommand("resume",');
 
     expect(readFile(path.join(codexResult.outputDir, 'README.md'))).toBe(
       readFile(path.join(CODEX_HARNESS_DIR, 'README.md')),
