@@ -218,7 +218,10 @@ export class BridgeHookEmulator {
     if (this.ctx.runsDir) {
       babysitterCmd.push('--runs-dir', this.ctx.runsDir);
     }
-    const handlerCommand = babysitterCmd.join(' ');
+    // Prepend AGENT_SESSION_ID to handler command so it reaches babysitter
+    // through the hooks-mux subprocess chain (env may not propagate).
+    const envPrefix = this.ctx.sessionId ? `AGENT_SESSION_ID=${this.ctx.sessionId} ` : '';
+    const handlerCommand = envPrefix + babysitterCmd.join(' ');
 
     if (this.ctx.verbose) {
       console.error(`[bridge-hooks] invokeHookEvent(${nativeEvent}): hooksMuxBin=${this.hooksMuxBin}, adapter=${this.adapter}`);
