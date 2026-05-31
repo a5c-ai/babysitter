@@ -113,6 +113,11 @@ export const KRATE_RESOURCES = [
   // Inference resources (etcd-stored, krate.a5c.ai group)
   { kind: 'KrateInferenceService', plural: 'krateinferenceservices', namespaced: true, storage: 'etcd' },
   { kind: 'KrateServingRuntime', plural: 'krateservingruntimes', namespaced: true, storage: 'etcd' },
+  // Jitsi resources
+  { kind: 'JitsiMeetProvider', plural: 'jitsimeetproviders', namespaced: true, storage: 'etcd' },
+  { kind: 'JitsiMeetingTemplate', plural: 'jitsimeetingtemplates', namespaced: true, storage: 'etcd' },
+  { kind: 'JitsiMeeting', plural: 'jitsimeetings', namespaced: true, storage: 'postgres' },
+  { kind: 'JitsiRecording', plural: 'jitsirecordings', namespaced: true, storage: 'postgres' },
   // Core Kubernetes resources (group: '' — no API group prefix for kubectl).
   // These are excluded from snapshot discovery (storage: 'core') but are
   // available for list/get/delete via findResourceDefinition.
