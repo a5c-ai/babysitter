@@ -1,0 +1,53 @@
+{
+  "issueNumber": 792,
+  "baseBranch": "staging",
+  "implementationBranch": "fix/issue-792-pi-resume-command-conflict",
+  "maxAttempts": 3,
+  "reservedCommands": [
+    "resume"
+  ],
+  "targetFiles": [
+    "plugins/babysitter-unified/per-harness/pi/extensions-index.ts",
+    "plugins/babysitter-unified/per-harness/pi/README.md",
+    "packages/extension-mux/src/__tests__/bundleRegression.test.ts"
+  ],
+  "verificationCommands": [
+    "npm run test:extension-mux",
+    "npm run build:extension-mux",
+    "npm run generate:plugins",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "acceptanceCriteria": [
+    "The Pi plugin no longer registers a top-level Babysitter /resume command that conflicts with Pi's built-in session resume command.",
+    "The Pi plugin still registers /babysitter:resume and forwards it to the Babysitter resume skill.",
+    "Other top-level Babysitter Pi aliases remain registered as before unless they are explicitly listed in reservedCommands.",
+    "The Pi README documents /babysitter:resume instead of advertising /resume as a Babysitter quick command.",
+    "A focused regression test or generated bundle check proves the Pi extension output skips top-level resume while retaining babysitter:resume.",
+    "Plugin generation, extension-mux tests/build, metadata verification, and diff hygiene checks pass or report exact environmental blockers."
+  ],
+  "knownIssueContext": {
+    "title": "Pi plugin: /resume conflicts with Pi's built-in session resume command",
+    "labels": [
+      "bug",
+      "ready-for-dev",
+      "effort:small",
+      "plugins",
+      "priority:low",
+      "risk:low"
+    ],
+    "reportedFailure": "After installing @a5c-ai/babysitter-pi, Pi startup warns that extension command '/resume' conflicts with a built-in interactive command and skips the Babysitter alias in autocomplete.",
+    "recommendedSourcePaths": [
+      "plugins/babysitter-unified/per-harness/pi/extensions-index.ts",
+      "plugins/babysitter-unified/per-harness/pi/README.md"
+    ],
+    "legacyPathNote": "The issue body references plugins/babysitter-pi/extensions/index.ts, but triage says the live source in this checkout is the unified per-harness Pi overlay.",
+    "workaround": "Use /babysitter:resume.",
+    "nonGoals": [
+      "Do not remove the resume skill.",
+      "Do not remove /babysitter:resume.",
+      "Do not change Pi's built-in /resume behavior.",
+      "Do not broadly redesign command registration across other harnesses."
+    ]
+  }
+}
