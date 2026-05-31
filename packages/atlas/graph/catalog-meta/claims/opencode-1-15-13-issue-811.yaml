@@ -1,0 +1,26 @@
+nodeKind: Claim
+id: claim:opencode-1-15-13-issue-811-release-assimilation
+attributes:
+  claimId: opencode-1-15-13-issue-811-release-assimilation
+  subjectKind: AgentVersion
+  subjectId: agentVersion:opencode:ge-0-0-0
+  attribute: releaseAssimilation
+  value: "1.15.13:issue-811-upstream-release-tracked"
+  statement: "OpenCode v1.15.13 is assimilated for issue #811 with release metadata covering Anthropic Opus 4.7+ adaptive reasoning summarized-thinking preservation, custom session metadata through the API and SDK, opened-location-upward config loading, TUI inline tool row wrapping/error expansion fixes, and unchanged opencode-ai install metadata."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:opencode-1-15-13-issue-811-release
+  claimedAt: "2026-05-31T20:20:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "The generic OpenCode current graph record now points at 1.15.13; this issue/version-scoped claim preserves release provenance for #811 without using a collision-prone generic filename."
+edges:
+  about_subject:
+    - agentVersion:opencode:ge-0-0-0
+  backed_by_evidence:
+    - evidence:opencode-1-15-13-issue-811-release
+  sourced_from:
+    - evidence:opencode-1-15-13-issue-811-release

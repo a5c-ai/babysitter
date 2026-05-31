@@ -13,11 +13,15 @@ attributes:
     - "macos"
     - "windows"
   agentProductId: agent:opencode
-  versionRange: ">=1.15.12"
-  currentVersion: "1.15.12"
-  releasedAt: "2026-05-28"
-  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.15.12"
+  versionRange: ">=1.15.13"
+  currentVersion: "1.15.13"
+  releasedAt: "2026-05-30"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.15.13"
   assimilationNotes:
+    - "Gateway Anthropic Opus 4.7+ adaptive reasoning keeps summarized thinking instead of returning empty thinking blocks; thinking-stream handling should preserve summarized thinking."
+    - "Sessions can store custom metadata through the API and SDK; transport/session model mappings should preserve custom metadata fields."
+    - "Config loads from the opened location upward, so directory-specific settings and provider policies apply more predictably."
+    - "TUI wrapped inline tool rows stay aligned, and failed inline tools can expand error details in place."
     - "ACP integrations can send prompts, slash commands, and usage updates through acp-next."
     - "OpenAI Responses gained an experimental WebSocket transport behind OPENCODE_EXPERIMENTAL_WEBSOCKETS=true, with custom base URL support, active timeouts, and retry-before-fallback behavior."
     - "TUI adds a workspace management dialog, preserves session navigation while prompt modes are open, restores the thinking spinner, surfaces subagent retry status, and opens editors from non-Git project paths."
@@ -139,39 +143,40 @@ edges:
     - target: knowledge-fabric-impl:opencode.knowledge@current
       role: knowledge-fabric
   sourced_from:
+    - evidence:opencode-1-15-13-issue-811-release
     - evidence:opencode-1-15-12-release
   supports:
     - target: capability:skills
-      versionRange: ">=1.15.12"
+      versionRange: ">=1.15.13"
       level: full
       notes: OpenCode documents reusable command surfaces — first-party basis for the local skills abstraction.
     - target: capability:supports-thinking
-      versionRange: ">=1.15.12"
+      versionRange: ">=1.15.13"
       level: full
-      notes: OpenCode documented as an interactive terminal coding surface backed by configurable providers.
+      notes: OpenCode documented as an interactive terminal coding surface backed by configurable providers; 1.15.13 fixes Anthropic Opus 4.7+ adaptive reasoning to preserve summarized thinking blocks.
     - target: capability:interactive-mode
-      versionRange: ">=1.15.12"
+      versionRange: ">=1.15.13"
       level: full
       notes: Interactive terminal use documented directly in OpenCode TUI docs.
     - target: capability:stdin-injection
-      versionRange: ">=1.15.12"
+      versionRange: ">=1.15.13"
       level: full
       notes: Public docs thinner for non-interactive prompt injection; local fallback metadata remains primary.
     - target: capability:vision-input
-      versionRange: ">=1.15.12"
+      versionRange: ">=1.15.13"
       level: full
       notes: Public OpenCode docs lack strong technical detail for image input.
     - target: capability:runtime-hooks
-      versionRange: ">=1.15.12"
+      versionRange: ">=1.15.13"
       level: full
       notes: OpenCode plugins expose hook-based extensibility — first-party basis for runtime hooks.
     - target: capability:stop-hook
-      versionRange: ">=1.15.12"
+      versionRange: ">=1.15.13"
       level: full
       notes: Local ontology normalizes stop-hook separately; first-party support is the broader plugin hook system.
     - target: capability:can-resume
-      versionRange: ">=1.15.12"
+      versionRange: ">=1.15.13"
       level: full
-      notes: Public OpenCode docs describe where sessions are stored.
+      notes: Public OpenCode docs describe where sessions are stored; 1.15.13 adds custom session metadata through the API and SDK.
   uses_memory_system:
     - target: memory-system:file-based-markdown-pattern
