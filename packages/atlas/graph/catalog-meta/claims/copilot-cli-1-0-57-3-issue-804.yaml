@@ -1,0 +1,89 @@
+nodeKind: Claim
+id: claim:copilot-cli-1-0-57-3-issue-804-current-version
+attributes:
+  claimId: copilot-cli-1-0-57-3-issue-804-current-version
+  subjectKind: AgentVersion
+  subjectId: agentVersion:copilot:ge-1-0-55-3
+  attribute: currentVersion
+  value: "1.0.57-3"
+  statement: "Issue #804 tracks GitHub Copilot CLI 1.0.57-3 as the current Copilot graph release while preserving the existing AgentVersion identity and gh extension install path."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:copilot-cli-1-0-57-3-issue-804-release
+  evidenceIds:
+    - copilot-cli-1-0-57-3-issue-804-release
+  claimedAt: "2026-05-31T20:15:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agentVersion:copilot:ge-1-0-55-3
+  backed_by_evidence:
+    - evidence:copilot-cli-1-0-57-3-issue-804-release
+  sourced_from:
+    - evidence:copilot-cli-1-0-57-3-issue-804-release
+---
+nodeKind: Claim
+id: claim:copilot-cli-1-0-57-3-issue-804-high-contrast-diff-backgrounds
+attributes:
+  claimId: copilot-cli-1-0-57-3-issue-804-high-contrast-diff-backgrounds
+  subjectKind: AgentVersion
+  subjectId: agentVersion:copilot:ge-1-0-55-3
+  attribute: adapterMetadata.terminalDiff.highContrastBackgrounds
+  value:
+    versionIntroduced: "1.0.57-3"
+    behavior: darker-high-contrast-diff-backgrounds
+    likelyAffectedArea: terminal-visual-snapshots
+  statement: "Copilot CLI 1.0.57-3 darkens high-contrast diff backgrounds to improve text readability, which may affect terminal visual snapshot baselines."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:copilot-cli-1-0-57-3-issue-804-release
+  evidenceIds:
+    - copilot-cli-1-0-57-3-issue-804-release
+  claimedAt: "2026-05-31T20:15:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agentVersion:copilot:ge-1-0-55-3
+  backed_by_evidence:
+    - evidence:copilot-cli-1-0-57-3-issue-804-release
+  sourced_from:
+    - evidence:copilot-cli-1-0-57-3-issue-804-release
+---
+nodeKind: Claim
+id: claim:copilot-cli-1-0-57-3-issue-804-partial-session-log-resume
+attributes:
+  claimId: copilot-cli-1-0-57-3-issue-804-partial-session-log-resume
+  subjectKind: AgentVersion
+  subjectId: agentVersion:copilot:ge-1-0-55-3
+  attribute: adapterMetadata.sessionResume.partialLogRecovery
+  value:
+    versionIntroduced: "1.0.57-3"
+    behavior: resumes-after-crash-with-partial-session-log-data
+    likelyAffectedArea: session-recovery-fixtures
+  statement: "Copilot CLI 1.0.57-3 fixes session resume after a crash leaves partial data in the session log, so recovery fixtures should tolerate partial session-log data."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:copilot-cli-1-0-57-3-issue-804-release
+  evidenceIds:
+    - copilot-cli-1-0-57-3-issue-804-release
+  claimedAt: "2026-05-31T20:15:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agentVersion:copilot:ge-1-0-55-3
+  backed_by_evidence:
+    - evidence:copilot-cli-1-0-57-3-issue-804-release
+  sourced_from:
+    - evidence:copilot-cli-1-0-57-3-issue-804-release

@@ -16,10 +16,10 @@ attributes:
     - "windows"
   agentProductId: agent:copilot-cli
   versionRange: ">=1.0.55-3"
-  currentVersion: "1.0.55-7"
-  releasedAt: "2026-05-27"
-  upstreamReleaseTag: "v1.0.55-7"
-  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.55-7"
+  currentVersion: "1.0.57-3"
+  releasedAt: "2026-05-30"
+  upstreamReleaseTag: "v1.0.57-3"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.57-3"
   cliCommand: "gh copilot"
   installMethods:
     - install:gh-extension
@@ -34,7 +34,9 @@ attributes:
     surfaces per-extension logs, discovers project extensions in non-git
     folder-backed workspaces, and allows `/statusline` and `/theme` while the
     agent is executing. 1.0.55-7 restricts exit_plan_mode to plan mode and
-    falls back to JavaScript when the native binary crashes.
+    falls back to JavaScript when the native binary crashes. 1.0.57-3 darkens
+    high-contrast diff backgrounds for readability and fixes session resume
+    after a crash leaves partial data in the session log.
   adapterMetadata:
     installCommands:
       - type: gh-extension
@@ -137,6 +139,7 @@ edges:
     - evidence:copilot-cli-1-0-55-5-release
     - evidence:copilot-cli-1-0-55-6-release
     - evidence:copilot-cli-1-0-55-7-release
+    - evidence:copilot-cli-1-0-57-3-issue-804-release
   supports:
     - target: capability:skills
       versionRange: ">=1.0.55-3"
