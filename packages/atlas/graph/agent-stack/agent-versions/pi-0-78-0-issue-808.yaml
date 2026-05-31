@@ -1,0 +1,73 @@
+# Additive issue #808 record. The filename includes the upstream version to
+# avoid conflicts with concurrent Pi graph updates.
+nodeKind: AgentVersion
+id: agentVersion:pi:0-78-0
+attributes:
+  agentId: "pi"
+  agentProductId: agent:pi
+  displayName: "Pi CLI 0.78.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.78.0"
+  currentVersion: "0.78.0"
+  releasedAt: "2026-05-29"
+  sourcePackage: "@earendil-works/pi-coding-agent"
+  upstreamReleaseTag: "v0.78.0"
+  releaseNotesUrl: "https://github.com/earendil-works/pi/releases/tag/v0.78.0"
+  cliCommand: "pi"
+  summary: "Pi CLI 0.78.0 adds startup session naming via --name / -n and OSC 8 file:// hyperlinks in built-in file tool titles."
+  assimilationNotes:
+    - "Issue #808 tracks Pi 0.78.0 --name / -n startup session naming across interactive, print, JSON, and RPC modes."
+    - "Issue #808 tracks Pi 0.78.0 built-in file tool titles rendering OSC 8 file:// hyperlinks when the terminal supports them, including supported tmux clients."
+    - "Issue #808 records no install method or package-name change; @earendil-works/pi-coding-agent remains installed through npm."
+  releaseHighlights:
+    - "Named startup sessions via --name / -n."
+    - "Clickable file tool paths using OSC 8 file:// hyperlinks."
+  installMethods:
+    - install:npm
+  adapterMetadata:
+    issue808ReleaseAdditions:
+      releaseVersion: "0.78.0"
+      launchBehavior:
+        promptExtraFlags:
+          - "--name"
+          - "-n"
+        sessionNamingFlags:
+          longFlag: "--name"
+          shortFlag: "-n"
+          valuePlaceholder: "<display-name>"
+          appliesBeforeStartup: true
+          modes:
+            - interactive
+            - print
+            - json
+            - rpc
+          notes: "Sets the session display name before Pi startup so downstream session metadata can expose the chosen startup name."
+      terminalParser:
+        builtInFileToolTitleHyperlinks:
+          encoding: "OSC 8"
+          uriScheme: "file://"
+          introducedIn: "0.78.0"
+          terminalSupportDetection: true
+          tmuxClientSupport: "supported clients pass OSC 8 hyperlinks through"
+          parserExpectation: "Terminal parsers and snapshots should tolerate OSC 8 hyperlink wrappers around file paths in built-in file tool titles."
+          fixtureCoverage: "Include an OSC 8 file:// hyperlink title fixture when parser fixtures are generated from this graph fact."
+      sessionMetadata:
+        startupDisplayName:
+          field: "sessionName"
+          aliases:
+            - "displayName"
+            - "startupDisplayName"
+          argvFlags:
+            - "--name"
+            - "-n"
+          introducedIn: "0.78.0"
+          captureTiming: "before startup"
+          notes: "Session metadata can expose the startup display name configured by --name / -n."
+edges:
+  version_of:
+    - agent:pi
+  sourced_from:
+    - evidence:pi-0-78-0-release-issue-808
+  evidenced_by:
+    - evidence:pi-0-78-0-release-issue-808

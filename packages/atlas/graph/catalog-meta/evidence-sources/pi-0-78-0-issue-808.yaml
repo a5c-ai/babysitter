@@ -1,0 +1,29 @@
+# Dedicated issue #808 evidence record for Pi 0.78.0. Kept separate from
+# date-bucket evidence files to avoid conflicts with concurrent graph updates.
+nodeKind: EvidenceSource
+id: evidence:pi-0-78-0-release-issue-808
+attributes:
+  displayName: "Pi v0.78.0 release notes for issue #808"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/earendil-works/pi/releases/tag/v0.78.0
+  sourcePathOrUrl: https://github.com/earendil-works/pi/releases/tag/v0.78.0
+  locator: "earendil-works/pi release v0.78.0 tracked by issue #808"
+  capturedAt: "2026-05-31T20:11:30Z"
+  observedAt: "2026-05-29T23:49:12Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:11:30Z"
+  notes: |
+    Issue #808 tracks Pi v0.78.0 release notes. The release adds named
+    startup sessions through --name / -n across interactive, print, JSON, and
+    RPC modes. It also renders built-in file tool titles with OSC 8 file://
+    hyperlinks when terminal support is detected, including supported tmux
+    clients. The npm package and install command are unchanged.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:pi:0-78-0
+    - agent:pi
