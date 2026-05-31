@@ -1,5 +1,43 @@
 # Changelog
 
+## [Unreleased] - 2026-05-31
+
+### Bug Fixes
+- restore proper BP verification thresholds (350afabb2, Tal Muskal, 14 minutes ago)
+- set LIVE_STACK_OUTPUT_DIR as absolute path in agent env (c6b436d3e, Tal Muskal, 21 minutes ago)
+- resolve output path to absolute using LIVE_STACK_CWD (c846561a6, Tal Muskal, 39 minutes ago)
+- also pass LIVE_STACK_TRACE_ID and BABYSITTER_RUNS_DIR in handler env (d96d15d86, Tal Muskal, 52 minutes ago)
+- update bridge-hooks test for session ID prefix + unified harness (19033314d, Tal Muskal, 63 minutes ago)
+- embed AGENT_SESSION_ID in handler command string (fe8be095e, Tal Muskal, 68 minutes ago)
+- align isHostDelegableRoute mocks with route-based check (9adc0bdda, Tal Muskal, 2 hours ago)
+- RBAC permissions + readiness probe timeout for controller (8a1102f4c, Tal Muskal, 3 hours ago)
+- set AGENT_SESSION_ID env for session-start hook (574fe6bb0, Tal Muskal, 3 hours ago)
+- isHostDelegableRoute should check route, not backend (5dd82f650, Tal Muskal, 3 hours ago)
+- update broken process library links to point to library/ root (#793) (045a22651, Safet A, 3 hours ago)
+- use 'unified' harness for session-start/end hooks (1334fbd6b, Tal Muskal, 3 hours ago)
+- map amux agent name to babysitter SDK harness name (018d055c7, Tal Muskal, 4 hours ago)
+- add SessionStart/Stop mappings to gemini and pi adapters (e195a4980, Tal Muskal, 5 hours ago)
+- add Jitsi resource kinds to KRATE_RESOURCES array (c9a80314d, Tal Muskal, 5 hours ago)
+- deliver stdin prompt through ConPTY for hermes Windows (4b92bc7a3, Tal Muskal, 6 hours ago)
+- handle Windows Node 22 PATH resolution in live-stack (850950b7f, Tal Muskal, 7 hours ago)
+- ensure Node 22 is active in live-stack test step (741489564, Tal Muskal, 7 hours ago)
+- use ConPTY for hermes on Windows NI mode (a2865ee1a, Tal Muskal, 7 hours ago)
+- add a5c GitHub App token for copilot-cli live-stack tests (40aef9d16, Tal Muskal, 13 hours ago)
+- add full SDK build chain to ALL downstream publish jobs (4946105f5, Tal Muskal, 20 hours ago)
+- add tasks-mux build to Publish Agent Core + Babysitter Agent jobs (458d565d7, Tal Muskal, 21 hours ago)
+- add tasks-mux build to Publish SDK job (1036122b5, Tal Muskal, 22 hours ago)
+- merge fallback mappings with catalog for hermes adapter (4e9b4ed23, Tal Muskal, 22 hours ago)
+- read traceId from LIVE_STACK_TRACE_ID env in BP process (d72ab98c0, Tal Muskal, 23 hours ago)
+- replace all new Function import tricks + align tasks-mux mocks (940c497b1, Tal Muskal, 23 hours ago)
+- align routing tests with updated isHostDelegableRoute (972c6aec5, Tal Muskal, 23 hours ago)
+- add SessionStart and Stop mappings to hermes adapter (0b2c75705, Tal Muskal, 23 hours ago)
+- use native gemini babysitter prompts (#791) (69c094717, a5c-ai[bot], 24 hours ago)
+- use child process for pluginExternalRouting test isolation (8ff240ee6, Tal Muskal, 24 hours ago)
+- isolate pluginExternalRouting from vi.mock thread leaks (bdc57daf1, Tal Muskal, 24 hours ago)
+
+### Maintenance
+- Fix Pi resume command conflict (#794) (a5cc6edec, a5c-ai[bot], 3 hours ago)
+
 ## [Unreleased] - 2026-05-29
 
 ### New Features
