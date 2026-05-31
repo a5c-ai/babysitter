@@ -1,0 +1,53 @@
+nodeKind: Claim
+id: claim:amp-0-0-1780244579-g6b52f9-issue-813-current-version
+attributes:
+  claimId: amp-0-0-1780244579-g6b52f9-issue-813-current-version
+  subjectKind: AgentVersion
+  subjectId: agentVersion:amp:0-0-1780244579-g6b52f9
+  attribute: currentVersion
+  value: "0.0.1780244579-g6b52f9"
+  statement: "Issue #813 tracks Sourcegraph Amp CLI 0.0.1780244579-g6b52f9 as the exact npm-backed Amp version baseline."
+  confidence: high
+  provenanceKind: package-metadata
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amp-0-0-1780244579-g6b52f9-issue-813-release
+  claimedAt: "2026-05-31T20:15:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "The shared dated AgentVersion graph already includes this concrete Amp version; this issue-scoped claim records the #813 tracking decision without modifying shared version files."
+edges:
+  about_subject:
+    - agentVersion:amp:0-0-1780244579-g6b52f9
+  backed_by_evidence:
+    - evidence:amp-0-0-1780244579-g6b52f9-issue-813-release
+  sourced_from:
+    - evidence:amp-0-0-1780244579-g6b52f9-issue-813-release
+---
+nodeKind: Claim
+id: claim:amp-0-0-1780244579-g6b52f9-issue-813-release-assimilation
+attributes:
+  claimId: amp-0-0-1780244579-g6b52f9-issue-813-release-assimilation
+  subjectKind: AgentVersion
+  subjectId: agentVersion:amp:0-0-1780244579-g6b52f9
+  attribute: releaseAssimilation
+  value: "0.0.1780244579-g6b52f9:issue-813-upstream-release-tracked"
+  statement: "Sourcegraph Amp CLI 0.0.1780244579-g6b52f9 is assimilated for issue #813 with unchanged @ampcode/cli install metadata via npm install -g @ampcode/cli and no public build-specific changelog confirming new CLI flags, transport changes, model support changes, launch behavior changes, auth changes, MCP changes, subagent changes, or migration steps."
+  confidence: high
+  provenanceKind: package-metadata
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amp-0-0-1780244579-g6b52f9-issue-813-release
+  claimedAt: "2026-05-31T20:15:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "Keep existing Amp launch/auth/MCP/subagent assumptions until Sourcegraph publishes build-specific notes."
+edges:
+  about_subject:
+    - agentVersion:amp:0-0-1780244579-g6b52f9
+  backed_by_evidence:
+    - evidence:amp-0-0-1780244579-g6b52f9-issue-813-release
+  sourced_from:
+    - evidence:amp-0-0-1780244579-g6b52f9-issue-813-release

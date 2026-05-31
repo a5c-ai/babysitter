@@ -1,0 +1,26 @@
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1780244579-g6b52f9-issue-813-release
+attributes:
+  displayName: "Amp CLI 0.0.1780244579-g6b52f9 npm package"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780244579-g6b52f9
+  sourcePathOrUrl: https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780244579-g6b52f9
+  locator: "npm @ampcode/cli v0.0.1780244579-g6b52f9"
+  capturedAt: "2026-05-31T20:15:00Z"
+  observedAt: "2026-05-31T20:15:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:15:00Z"
+  notes: |
+    npm latest reports @ampcode/cli 0.0.1780244579-g6b52f9. The Amp public
+    site did not expose build-specific changelog details during issue #813
+    assimilation, so launch, auth, MCP, subagent, model-support, transport,
+    CLI-flag, and migration behavior remain on existing graph assumptions.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1780244579-g6b52f9
+    - agent-version:amp@current
