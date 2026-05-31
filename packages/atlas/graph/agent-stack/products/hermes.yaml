@@ -15,3 +15,4 @@ attributes:
 edges:
   has_version:
     - agent-version:hermes@current
+    - agentVersion:hermes:0-15-2
