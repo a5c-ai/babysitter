@@ -26,39 +26,6 @@ edges:
     - agent:claude-agent-sdk
 ---
 nodeKind: AgentVersion
-id: agentVersion:codex:0-135-0
-attributes:
-  agentId: "codex"
-  agentProductId: agent:codex
-  displayName: "Codex CLI 0.135.0"
-  runtimeFamily: "cli-harness"
-  releaseChannel: "stable"
-  versionRange: "0.135.0"
-  currentVersion: "0.135.0"
-  releasedAt: "2026-05-28"
-  sourcePackage: "@openai/codex"
-  upstreamReleaseTag: "rust-v0.135.0"
-  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.135.0"
-  cliCommand: "codex"
-  summary: "Codex CLI release adding richer doctor diagnostics, remote status details, Vim mode improvements, named permission profiles, bundled zsh helper discovery, SDK sandbox presets, and non-interactive installers."
-  assimilationNotes:
-    - "`codex doctor` reports richer environment, Git, terminal, app-server, and thread inventory diagnostics; support/debug surfaces can expose more structured diagnostics."
-    - "`/status` shows remote connection details and server version for remote transport sessions, affecting transport-mux status parsing."
-    - "`/permissions` now understands named permission profiles and displays custom profiles; permission profile projection should be checked."
-    - "Vim mode gained text-object editing, improved word/line-end behavior, and configurable interrupt-turn binding; TUI control translation may need new keybinding expectations."
-    - "install.sh/install.ps1 support CODEX_NON_INTERACTIVE=1 for non-interactive installation."
-  releaseHighlights:
-    - "Richer doctor diagnostics."
-    - "Remote transport status details."
-    - "Named permission profiles."
-    - "Non-interactive installer mode."
-  installMethods:
-    - install:npm
-edges:
-  version_of:
-    - agent:codex
----
-nodeKind: AgentVersion
 id: agentVersion:codex-sdk:6-39-1
 attributes:
   agentId: "codex-sdk"
