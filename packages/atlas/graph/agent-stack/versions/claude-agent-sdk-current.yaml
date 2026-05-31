@@ -3,15 +3,15 @@ id: agent-version:claude-agent-sdk@current
 attributes:
   agentProductId: agent:claude-agent-sdk
   sourcePackage: "@anthropic-ai/claude-agent-sdk"
-  versionRange: ">=0.3.156"
-  currentVersion: "0.3.156"
-  releasedAt: "2026-05-29"
-  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.156"
+  versionRange: ">=0.3.159"
+  currentVersion: "0.3.159"
+  releasedAt: "2026-05-31"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.159"
   assimilationNotes:
-    - "Updated to parity with Claude Code v2.1.156."
-    - "Claude Code parity includes the Opus 4.8 thinking-block fix from Claude Code v2.1.156."
-    - "Claude Code parity includes plugin source skipLfs, status-line COLUMNS/LINES, subagent MCP policy fixes, and /model default-selection behavior."
-    - "Install method remains npm install @anthropic-ai/claude-agent-sdk@0.3.156; package name unchanged."
+    - "Updated to parity with Claude Code v2.1.159."
+    - "Claude Agent SDK 0.3.159 does not publish SDK-only migration notes beyond Claude Code v2.1.159 parity."
+    - "Recent Claude Agent SDK v0.3.154 fixed stdio MCP servers being incorrectly restarted on every reconcile pass due to config-equality false positives."
+    - "Install method remains npm install -g @anthropic-ai/claude-agent-sdk or npm install @anthropic-ai/claude-agent-sdk@0.3.159; package name unchanged."
   cliCommand: "<sdk:@anthropic-ai/claude-agent-sdk>"
   installMethods:
     - install:npm
@@ -26,22 +26,23 @@ edges:
     - target: agent-runtime-impl:claude-agent-sdk.runtime@current
       role: runtime
   sourced_from:
-    - evidence:claude-agent-sdk-0-3-156-release
+    - evidence:claude-agent-sdk-0-3-159-release
+    - evidence:claude-agent-sdk-0-3-159-issue-801-tracker
   supports:
     - target: capability:can-multi-turn
-      versionRange: '>=0.3.156'
+      versionRange: '>=0.3.159'
       level: full
       notes: Claude Agent SDK provides a multi-turn agent loop.
     - target: capability:supports-text-streaming
-      versionRange: '>=0.3.156'
+      versionRange: '>=0.3.159'
       level: full
       notes: Claude Agent SDK streams model output.
     - target: capability:supports-tool-use
-      versionRange: '>=0.3.156'
+      versionRange: '>=0.3.159'
       level: full
       notes: Claude Agent SDK dispatches tool calls per turn.
     - target: capability:supports-subagent-dispatch
-      versionRange: '>=0.3.156'
+      versionRange: '>=0.3.159'
       level: full
       notes: Claude Agent SDK supports spawning subagent threads.
   uses_memory_system:

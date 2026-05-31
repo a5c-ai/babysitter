@@ -1,0 +1,84 @@
+nodeKind: Claim
+id: claim:claude-agent-sdk-0-3-159-current-version
+attributes:
+  claimId: claude-agent-sdk-0-3-159-current-version
+  subjectKind: AgentVersion
+  subjectId: agent-version:claude-agent-sdk@current
+  attribute: currentVersion
+  value: "0.3.159"
+  statement: "Issue #801 assimilates Claude Agent SDK v0.3.159 as the tracked current Claude Agent SDK release."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-agent-sdk-0-3-159-release
+    - evidence:claude-agent-sdk-0-3-159-issue-801-tracker
+  claimedAt: "2026-05-31T20:10:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "The stable AgentVersion id remains agent-version:claude-agent-sdk@current; the exact upstream version is recorded in currentVersion and release metadata."
+edges:
+  about_subject:
+    - agent-version:claude-agent-sdk@current
+  backed_by_evidence:
+    - evidence:claude-agent-sdk-0-3-159-release
+    - evidence:claude-agent-sdk-0-3-159-issue-801-tracker
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-159-release
+---
+nodeKind: Claim
+id: claim:claude-agent-sdk-0-3-159-release-assimilation
+attributes:
+  claimId: claude-agent-sdk-0-3-159-release-assimilation
+  subjectKind: AgentVersion
+  subjectId: agent-version:claude-agent-sdk@current
+  attribute: releaseAssimilation
+  value: "0.3.159:claude-code-2.1.159-parity"
+  statement: "Claude Agent SDK v0.3.159 is assimilated as a TypeScript SDK parity release for Claude Code v2.1.159 with no package rename, install method change, or SDK-only migration step recorded."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-agent-sdk-0-3-159-release
+  claimedAt: "2026-05-31T20:10:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "Install continuity remains @anthropic-ai/claude-agent-sdk via npm."
+edges:
+  about_subject:
+    - agent-version:claude-agent-sdk@current
+  backed_by_evidence:
+    - evidence:claude-agent-sdk-0-3-159-release
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-159-release
+---
+nodeKind: Claim
+id: claim:claude-agent-sdk-0-3-154-stdio-mcp-reconcile-fix
+attributes:
+  claimId: claude-agent-sdk-0-3-154-stdio-mcp-reconcile-fix
+  subjectKind: AgentVersion
+  subjectId: agent-version:claude-agent-sdk@current
+  attribute: mcpReconcileBehavior
+  value: "0.3.154:stdio-mcp-config-equality-restart-fix"
+  statement: "The recent Claude Agent SDK v0.3.154 line fixed stdio MCP servers being incorrectly restarted on every reconcile pass due to config-equality false positives, and issue #801 carries that note forward while tracking v0.3.159."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-agent-sdk-0-3-154-stdio-mcp-reconcile
+    - evidence:claude-agent-sdk-0-3-159-issue-801-tracker
+  claimedAt: "2026-05-31T20:10:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "This claim documents the issue-requested MCP reconciliation concern without adding local adapter code changes."
+edges:
+  about_subject:
+    - agent-version:claude-agent-sdk@current
+  backed_by_evidence:
+    - evidence:claude-agent-sdk-0-3-154-stdio-mcp-reconcile
+    - evidence:claude-agent-sdk-0-3-159-issue-801-tracker
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-154-stdio-mcp-reconcile
