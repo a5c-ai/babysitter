@@ -35,16 +35,19 @@ function hookMappingToPhaseMapping(mapping: HookMappingDescriptor): PhaseMapping
   };
 }
 
+const BRIDGE_LIFECYCLE_MAPPINGS: PhaseMapping[] = [
+  { canonicalPhase: 'session.start', nativeHook: 'SessionStart', supportLevel: 'emulated', blockCapability: false, mutationCapability: false, scope: 'session' },
+  { canonicalPhase: 'turn.stop', nativeHook: 'Stop', supportLevel: 'emulated', blockCapability: true, mutationCapability: false, scope: 'turn' },
+];
+
 function buildFromCatalog(): PhaseMapping[] {
   const mappings = listHookMappingsByAdapterFamily('gemini');
-  if (mappings.length === 0) {
-    throw new Error('hooks-mux adapter-gemini: catalog unavailable or returned no mappings for family "gemini"');
-  }
   const phaseMappings = mappings
     .map(hookMappingToPhaseMapping)
     .filter((m): m is PhaseMapping => m !== null);
+  const merged = [...phaseMappings, ...BRIDGE_LIFECYCLE_MAPPINGS];
   const seen = new Set<string>();
-  return phaseMappings.filter((m) => {
+  return merged.filter((m) => {
     if (seen.has(m.nativeHook)) return false;
     seen.add(m.nativeHook);
     return true;
