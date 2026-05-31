@@ -1,0 +1,29 @@
+nodeKind: EvidenceSource
+id: evidence:openai-node-6-39-1-issue-803-release
+attributes:
+  displayName: "OpenAI Node SDK v6.39.1 release notes for issue #803"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/openai/openai-node/releases/tag/v6.39.1
+  sourcePathOrUrl: https://github.com/openai/openai-node/releases/tag/v6.39.1
+  locator: "openai/openai-node release v6.39.1"
+  capturedAt: "2026-05-31T20:12:00Z"
+  observedAt: "2026-05-31T20:12:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:12:00Z"
+  notes: |
+    Issue #803 tracks OpenAI Node SDK 6.39.1 as the upstream package used by
+    the Codex SDK adapter. The official release notes list improved undici
+    dispatcher mismatch guidance and treating text/plan with format: binary as
+    a raw upload. No install method, package-name, or launch behavior migration
+    is required for this SDK-only update.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:codex-sdk@current
+    - agentVersion:codex-sdk:6-39-1
+    - source-ref:openai-node-npm
+    - source-ref:openai-node-github

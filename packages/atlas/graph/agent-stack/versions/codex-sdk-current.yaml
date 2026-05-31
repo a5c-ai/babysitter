@@ -3,11 +3,19 @@ id: agent-version:codex-sdk@current
 attributes:
   agentProductId: agent:codex-sdk
   versionRange: ">=6.39.0"
-  releasedAt: "2026-05-21"
+  currentVersion: "6.39.1"
+  releasedAt: "2026-05-28"
+  upstreamReleaseTag: "v6.39.1"
+  releaseNotesUrl: "https://github.com/openai/openai-node/releases/tag/v6.39.1"
   cliCommand: "<sdk:openai>"
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
+  summary: "OpenAI Node SDK 6.39.1 is the tracked Codex SDK adapter upstream version."
+  assimilationNotes:
+    - "Improved undici dispatcher mismatch guidance can surface clearer SDK adapter error reporting."
+    - "text/plan parts with format: binary are treated as raw uploads for SDK-backed upload handling."
+    - "No package name, npm install method, or launch behavior change is modeled for this SDK-only patch."
 edges:
   version_of:
     - agent:codex-sdk
@@ -19,6 +27,7 @@ edges:
   sourced_from:
     - source-ref:openai-node-npm
     - source-ref:openai-node-github
+    - evidence:openai-node-6-39-1-issue-803-release
   supports:
     - target: capability:can-multi-turn
       versionRange: '>=6.39.0'

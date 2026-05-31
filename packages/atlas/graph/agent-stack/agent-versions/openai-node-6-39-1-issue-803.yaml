@@ -1,0 +1,32 @@
+# Additive issue #803 record. This file intentionally uses the OpenAI Node SDK
+# version in the filename to avoid concurrent graph-update conflicts.
+nodeKind: AgentVersion
+id: agentVersion:codex-sdk:6-39-1
+attributes:
+  agentId: "codex-sdk"
+  agentProductId: agent:codex-sdk
+  displayName: "OpenAI Node SDK 6.39.1"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "6.39.1"
+  currentVersion: "6.39.1"
+  releasedAt: "2026-05-28"
+  sourcePackage: "openai"
+  upstreamReleaseTag: "v6.39.1"
+  releaseNotesUrl: "https://github.com/openai/openai-node/releases/tag/v6.39.1"
+  summary: "Issue #803 tracks OpenAI Node SDK 6.39.1 for the Codex SDK adapter graph surface."
+  assimilationNotes:
+    - "Improved undici dispatcher mismatch guidance affects SDK adapter error messages and diagnostics."
+    - "text/plan with format: binary is treated as a raw upload, preserving binary file upload handling in SDK-backed Codex integrations."
+    - "No install method, package name, or launch behavior change is required because this is an SDK-only patch."
+  releaseHighlights:
+    - "Improved undici dispatcher mismatch guidance."
+    - "Raw upload handling for binary text/plan parts."
+    - "No install or package-name migration."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:codex-sdk
+  sourced_from:
+    - evidence:openai-node-6-39-1-issue-803-release

@@ -1,0 +1,103 @@
+nodeKind: Claim
+id: claim:openai-node-6-39-1-issue-803-current-version
+attributes:
+  claimId: openai-node-6-39-1-issue-803-current-version
+  subjectKind: AgentVersion
+  subjectId: agent-version:codex-sdk@current
+  attribute: currentVersion
+  value: "6.39.1"
+  statement: "Issue #803 records OpenAI Node SDK 6.39.1 as the tracked current upstream package version for the Codex SDK adapter."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-39-1-issue-803-release
+  claimedAt: "2026-05-31T20:12:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agent-version:codex-sdk@current
+  backed_by_evidence:
+    - evidence:openai-node-6-39-1-issue-803-release
+  sourced_from:
+    - evidence:openai-node-6-39-1-issue-803-release
+---
+nodeKind: Claim
+id: claim:openai-node-6-39-1-issue-803-undici-guidance
+attributes:
+  claimId: openai-node-6-39-1-issue-803-undici-guidance
+  subjectKind: AgentVersion
+  subjectId: agent-version:codex-sdk@current
+  attribute: adapterMetadata.errorReporting.undiciDispatcherMismatchGuidance
+  value: "improved"
+  statement: "OpenAI Node SDK 6.39.1 improves undici dispatcher mismatch guidance, so Codex SDK adapter error reporting can surface clearer diagnostics for that mismatch."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-39-1-issue-803-release
+  claimedAt: "2026-05-31T20:12:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agent-version:codex-sdk@current
+  backed_by_evidence:
+    - evidence:openai-node-6-39-1-issue-803-release
+  sourced_from:
+    - evidence:openai-node-6-39-1-issue-803-release
+---
+nodeKind: Claim
+id: claim:openai-node-6-39-1-issue-803-binary-plan-raw-upload
+attributes:
+  claimId: openai-node-6-39-1-issue-803-binary-plan-raw-upload
+  subjectKind: AgentVersion
+  subjectId: agent-version:codex-sdk@current
+  attribute: adapterMetadata.uploadHandling.textPlanFormatBinary
+  value: "raw-upload"
+  statement: "OpenAI Node SDK 6.39.1 treats text/plan with format: binary as a raw upload, so SDK-backed file upload handling should preserve binary text/plan parts as raw uploads."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-39-1-issue-803-release
+  claimedAt: "2026-05-31T20:12:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agent-version:codex-sdk@current
+  backed_by_evidence:
+    - evidence:openai-node-6-39-1-issue-803-release
+  sourced_from:
+    - evidence:openai-node-6-39-1-issue-803-release
+---
+nodeKind: Claim
+id: claim:openai-node-6-39-1-issue-803-install-continuity
+attributes:
+  claimId: openai-node-6-39-1-issue-803-install-continuity
+  subjectKind: AgentVersion
+  subjectId: agent-version:codex-sdk@current
+  attribute: releaseAssimilation
+  value: "6.39.1:no-install-package-or-launch-behavior-change"
+  statement: "No install method, package name, or launch behavior change is modeled for OpenAI Node SDK 6.39.1; the Codex SDK adapter source hint remains the openai npm package."
+  confidence: medium
+  provenanceKind: release-notes
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:openai-node-6-39-1-issue-803-release
+  claimedAt: "2026-05-31T20:12:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+edges:
+  about_subject:
+    - agent-version:codex-sdk@current
+  backed_by_evidence:
+    - evidence:openai-node-6-39-1-issue-803-release
+  sourced_from:
+    - evidence:openai-node-6-39-1-issue-803-release
