@@ -1,0 +1,72 @@
+# Additive issue #810 record. This file intentionally avoids editing shared
+# OpenClaw current/version YAML files so concurrent graph-update PRs do not
+# conflict.
+nodeKind: AgentVersion
+id: agentVersion:openclaw:2026-5-28
+attributes:
+  agentId: "openclaw"
+  agentProductId: agent:openclaw
+  displayName: "OpenClaw 2026.5.28"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2026.5.28"
+  currentVersion: "2026.5.28"
+  releasedAt: "2026-05-30"
+  sourcePackage: "openclaw"
+  upstreamReleaseTag: "v2026.5.28"
+  releaseNotesUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.5.28"
+  cliCommand: "openclaw"
+  summary: "OpenClaw 2026.5.28 improves runtime recovery, channel identity handling, provider/media/model coverage, and CLI/auth/doctor failure behavior."
+  assimilationNotes:
+    - "Issue #810 tracks OpenClaw 2026.5.28 agent and Codex runtime recovery improvements: subagents keep cwd/workspace separation, hook context stays prompt-local, timeout-aborted session locks release, stale restart continuations are avoided, and Codex app-server/helper failures preserve shared runtime state."
+    - "Issue #810 tracks safer channel delivery and session identity across outbound plugin hooks, Matrix, iMessage, Slack, Discord, WhatsApp, Telegram, and Microsoft Teams."
+    - "Issue #810 tracks provider, media, model, and document catalog expansion for Claude Opus 4.8, Fal Krea image schemas, NVIDIA featured models, MiniMax streaming music responses, encrypted PDF extraction, voice model catalogs, GitHub Copilot agent runtime support, and Codex Supervisor plugin path metadata."
+    - "Issue #810 tracks clearer CLI, auth, doctor, and provider failures, including malformed option rejection, bounded startup/auth probes, agent auth health labels, canonical auth-profile migration, and actionable restart guidance."
+  releaseHighlights:
+    - "Agent and Codex runtime recovery improvements."
+    - "Safer outbound plugin hook and channel session identity handling."
+    - "Expanded provider/media/model catalogs and GitHub Copilot agent runtime support."
+    - "Clearer CLI/auth/doctor/provider failure labels and recovery guidance."
+  installMethods:
+    - install:npm
+  adapterMetadata:
+    issue810ReleaseAdditions:
+      releaseVersion: "2026.5.28"
+      runtimeRecovery:
+        subagentWorkspaceSeparation: true
+        promptLocalHookContext: true
+        releaseTimeoutAbortedSessionLocks: true
+        avoidStaleRestartContinuations: true
+        preserveCodexSharedRuntimeStateOnHelperFailure: true
+        notes: "Adapter health and recovery tests should account for timeout-aborted session locks and stale restart continuation behavior."
+      channelIdentity:
+        saferOutboundPluginHooks: true
+        affectedChannels:
+          - Matrix
+          - iMessage
+          - Slack
+          - Discord
+          - WhatsApp
+          - Telegram
+          - Microsoft Teams
+        notes: "Transport-mux and channel mappings should preserve canonical session keys and delivery context across outbound plugin hooks."
+      providerCatalog:
+        claudeOpus48: true
+        falKreaImageSchemas: true
+        nvidiaFeaturedModels: true
+        minimaxStreamingMusicResponses: true
+        encryptedPdfExtraction: true
+        voiceModelCatalogs: true
+        githubCopilotAgentRuntime: true
+        codexSupervisorPluginPath: true
+      healthAndRecovery:
+        malformedOptionRejection: true
+        boundedStartupAndAuthProbes: true
+        clearerAgentAuthHealthLabels: true
+        canonicalAuthProfileMigration: true
+        actionableDoctorRestartGuidance: true
+edges:
+  version_of:
+    - agent:openclaw
+  sourced_from:
+    - evidence:openclaw-2026-5-28-release-issue-810
