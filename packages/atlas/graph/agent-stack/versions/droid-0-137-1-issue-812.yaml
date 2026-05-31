@@ -1,0 +1,28 @@
+# Additive issue #812 record. This file intentionally avoids editing the shared
+# Droid current-version YAML file so concurrent graph-update PRs do not conflict.
+nodeKind: AgentVersion
+id: agent-version:droid@current
+attributes:
+  patch: true
+  versionRange: ">=0.137.1"
+  currentVersion: "0.137.1"
+  releasedAt: "2026-05-30"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.137.1"
+  assimilationNotes:
+    - "Issue #812 tracks npm latest moving @factory/cli from 0.136.1 to 0.137.1; package metadata shows 0.137.1 was published on 2026-05-30."
+    - "Install method and package name remain npm install -g @factory/cli."
+    - "No public Factory GitHub release or changelog entry was found for 0.137.1, so no CLI flag, transport, model, MCP, auth, or install-method change is confirmed."
+    - "Keep existing Droid adapter launch/auth/MCP assumptions until Factory publishes version-specific notes or package testing confirms a behavioral change."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.137.1."
+edges:
+  sourced_from:
+    - evidence:droid-cli-0-137-1-issue-812
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-137-1
+attributes:
+  patch: true
+edges:
+  sourced_from:
+    - evidence:droid-cli-0-137-1-issue-812
