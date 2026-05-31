@@ -180,8 +180,9 @@ spec:
             httpGet:
               path: /healthz
               port: http
-            initialDelaySeconds: 3
-            periodSeconds: 5
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -25,9 +25,9 @@ rules:
 
   - apiGroups: [""]
 
-    resources: ["namespaces"]
+    resources: ["namespaces", "services", "secrets", "configmaps", "pods", "events", "persistentvolumeclaims"]
 
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
   - apiGroups: ["apiextensions.k8s.io"]
 
@@ -76,6 +76,12 @@ rules:
     resources: ["deployments"]
 
     verbs: ["get", "list", "watch"]
+
+  - apiGroups: ["batch"]
+
+    resources: ["jobs"]
+
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 ---
 
