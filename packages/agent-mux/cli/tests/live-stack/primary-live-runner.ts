@@ -960,7 +960,7 @@ async function validateAgentBehavior(
       if (runEntries.length === 0) {
         runCompletionDetail = 'no runs created in .a5c/runs/';
       } else {
-        const MIN_JOURNAL_EVENTS = 3;
+        const MIN_JOURNAL_EVENTS = 7;
         for (const entry of runEntries.slice(-5)) {
           const journalDir = path.join(runsDir, entry, 'journal');
           try {
@@ -1023,9 +1023,12 @@ async function validateAgentBehavior(
             bareRunDetail ??= `run ${entry} is still a bare run — babysitter skill should have assigned a process via run:assign-process`;
             continue;
           }
-          completionProofFound = true;
-          completionProofDetail = `run ${entry} completed with processId=${processId} and completionProof${hasRunCompleted ? '' : ' (no RUN_COMPLETED journal event)'}`;
-          break;
+          if (hasRunCompleted) {
+            completionProofFound = true;
+            completionProofDetail = `run ${entry} completed with processId=${processId} and completionProof`;
+            break;
+          }
+          completionProofDetail = `run ${entry} has completionProof and processId=${processId} but no RUN_COMPLETED event in journal`;
         } catch { continue; }
       }
       if (!completionProofFound && bareRunDetail) completionProofDetail = bareRunDetail;
