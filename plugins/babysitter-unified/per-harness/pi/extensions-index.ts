@@ -23,6 +23,8 @@ const COMMANDS = [
   "yolo",
 ] as const;
 
+const RESERVED_PI_COMMANDS = new Set<string>(["resume"]);
+
 function toSkillPrompt(name: string, args: string): string {
   return `/skill:${name}${args ? ` ${args}` : ""}`;
 }
@@ -110,17 +112,21 @@ export default function activate(pi: ExtensionAPI): void {
       pi.sendUserMessage(toSkillPrompt(name, String(args ?? "").trim()));
     };
 
-    pi.registerCommand(name, {
-      description: name === "doctor"
-        ? t("command.doctor.description", "Open the Babysitter doctor skill")
-        : `Open the Babysitter ${name} skill`,
-      handler: forward,
-    });
+    if (!RESERVED_PI_COMMANDS.has(name)) {
+      pi.registerCommand(name, {
+        description: name === "doctor"
+          ? t("command.doctor.description", "Open the Babysitter doctor skill")
+          : `Open the Babysitter ${name} skill`,
+        handler: forward,
+      });
+    }
 
     pi.registerCommand(`babysitter:${name}`, {
       description: name === "doctor"
         ? t("command.doctor.aliasDescription", "Alias for /doctor")
-        : `Alias for /${name}`,
+        : RESERVED_PI_COMMANDS.has(name)
+          ? `Open the Babysitter ${name} skill`
+          : `Alias for /${name}`,
       handler: forward,
     });
   }
