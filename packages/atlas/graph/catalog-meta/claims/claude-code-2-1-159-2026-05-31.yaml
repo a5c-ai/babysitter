@@ -1,0 +1,162 @@
+---
+nodeKind: Claim
+id: claim:claude-code-2-1-159-current-version
+attributes:
+  claimId: claude-code-2-1-159-current-version
+  subjectKind: AgentVersion
+  subjectId: agentVersion:claude:2-1-159
+  attribute: currentVersion
+  value: "2.1.159"
+  statement: "Claude Code v2.1.159 is represented as an exact Atlas AgentVersion record."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-code-2-1-159-release-2026-05-31
+  claimedAt: "2026-05-31T20:10:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "The exact-version record avoids relying only on the broad compatibility record agentVersion:claude:ge-0-0-0."
+edges:
+  about_subject:
+    - agentVersion:claude:2-1-159
+  backed_by_evidence:
+    - evidence:claude-code-2-1-159-release-2026-05-31
+  sourced_from:
+    - evidence:claude-code-2-1-159-release-2026-05-31
+---
+nodeKind: Claim
+id: claim:claude-code-2-1-159-no-user-facing-change
+attributes:
+  claimId: claude-code-2-1-159-no-user-facing-change
+  subjectKind: AgentVersion
+  subjectId: agentVersion:claude:2-1-159
+  attribute: releaseAssimilation
+  value: "2.1.159:no-user-facing-changes"
+  statement: "Claude Code v2.1.159 contains internal infrastructure improvements and no user-facing changes."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-code-2-1-159-release-2026-05-31
+  claimedAt: "2026-05-31T20:10:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "No adapter change is required for v2.1.159 itself because upstream states no user-facing changes."
+edges:
+  about_subject:
+    - agentVersion:claude:2-1-159
+  backed_by_evidence:
+    - evidence:claude-code-2-1-159-release-2026-05-31
+  sourced_from:
+    - evidence:claude-code-2-1-159-release-2026-05-31
+---
+nodeKind: Claim
+id: claim:claude-code-2-1-159-agent-dispatch-flag
+attributes:
+  claimId: claude-code-2-1-159-agent-dispatch-flag
+  subjectKind: AgentVersion
+  subjectId: agentVersion:claude:2-1-159
+  attribute: adapterMetadata.launchBehavior.promptExtraFlags
+  value: "--agent <name>"
+  statement: "Claude agents honors the agent field in settings.json for dispatched sessions and supports --agent <name> as an override."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-code-2-1-157-release-2026-05-29
+  claimedAt: "2026-05-31T20:10:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "This satisfies the launchBehavior checklist item for named Claude agent dispatch."
+edges:
+  about_subject:
+    - agentVersion:claude:2-1-159
+  backed_by_evidence:
+    - evidence:claude-code-2-1-157-release-2026-05-29
+  sourced_from:
+    - evidence:claude-code-2-1-157-release-2026-05-29
+---
+nodeKind: Claim
+id: claim:claude-code-2-1-159-plugin-discovery
+attributes:
+  claimId: claude-code-2-1-159-plugin-discovery
+  subjectKind: AgentVersion
+  subjectId: agentVersion:claude:2-1-159
+  attribute: adapterMetadata.pluginDiscovery
+  value: ".claude/skills:auto-loaded; claude plugin init <name>"
+  statement: "Claude Code can auto-load plugins from .claude/skills and scaffold local plugins with claude plugin init <name>."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-code-2-1-157-release-2026-05-29
+  claimedAt: "2026-05-31T20:10:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "Plugin discovery should not assume marketplace installation is required."
+edges:
+  about_subject:
+    - agentVersion:claude:2-1-159
+  backed_by_evidence:
+    - evidence:claude-code-2-1-157-release-2026-05-29
+  sourced_from:
+    - evidence:claude-code-2-1-157-release-2026-05-29
+---
+nodeKind: Claim
+id: claim:claude-code-2-1-159-workflows-surface
+attributes:
+  claimId: claude-code-2-1-159-workflows-surface
+  subjectKind: AgentVersion
+  subjectId: agentVersion:claude:2-1-159
+  attribute: adapterMetadata.workflowSurface
+  value: "/workflows"
+  statement: "Claude Code's recent 2.1.x line includes dynamic workflows surfaced through /workflows for background orchestration."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-code-2-1-154-release-2026-05-28
+  claimedAt: "2026-05-31T20:10:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "Workflow/session modeling should treat /workflows as a native Claude workflow surface."
+edges:
+  about_subject:
+    - agentVersion:claude:2-1-159
+  backed_by_evidence:
+    - evidence:claude-code-2-1-154-release-2026-05-28
+  sourced_from:
+    - evidence:claude-code-2-1-154-release-2026-05-28
+---
+nodeKind: Claim
+id: claim:claude-code-2-1-159-tool-decision-parameters
+attributes:
+  claimId: claude-code-2-1-159-tool-decision-parameters
+  subjectKind: AgentVersion
+  subjectId: agentVersion:claude:2-1-159
+  attribute: adapterMetadata.telemetry.toolDecisionParameters
+  value: "tool_decision.tool_parameters when OTEL_LOG_TOOL_DETAILS=1"
+  statement: "Claude Code tool_decision telemetry includes tool_parameters, including bash commands and MCP or skill names, when OTEL_LOG_TOOL_DETAILS=1."
+  confidence: high
+  provenanceKind: release-notes
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:claude-code-2-1-157-release-2026-05-29
+  claimedAt: "2026-05-31T20:10:00Z"
+  claimedBy: codex-babysitter-yolo
+  claimKind: assertion
+  note: "Telemetry mapping should expose the field only where detailed tool logging is intentionally enabled."
+edges:
+  about_subject:
+    - agentVersion:claude:2-1-159
+  backed_by_evidence:
+    - evidence:claude-code-2-1-157-release-2026-05-29
+  sourced_from:
+    - evidence:claude-code-2-1-157-release-2026-05-29

@@ -1,0 +1,78 @@
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-159-release-2026-05-31
+attributes:
+  displayName: "Claude Code v2.1.159 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.159
+  sourcePathOrUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.159
+  locator: "anthropics/claude-code release v2.1.159"
+  capturedAt: "2026-05-31T20:10:00Z"
+  observedAt: "2026-05-31T20:10:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:10:00Z"
+  notes: |
+    Release notes state that v2.1.159 contains internal infrastructure
+    improvements with no user-facing changes. No package rename, install
+    method change, migration step, or CLI behavior change is published for
+    this release.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-159
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-157-release-2026-05-29
+attributes:
+  displayName: "Claude Code v2.1.157 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.157
+  sourcePathOrUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.157
+  locator: "anthropics/claude-code release v2.1.157"
+  capturedAt: "2026-05-31T20:10:00Z"
+  observedAt: "2026-05-31T20:10:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:10:00Z"
+  notes: |
+    Related recent release notes for the 2.1.x line. The release documents
+    .claude/skills plugin auto-loading, `claude plugin init <name>`,
+    /plugin autocomplete, settings.json `agent` dispatch behavior with
+    --agent override, EnterWorktree switching, and tool_decision
+    tool_parameters telemetry when OTEL_LOG_TOOL_DETAILS=1.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-159
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-154-release-2026-05-28
+attributes:
+  displayName: "Claude Code v2.1.154 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+  sourcePathOrUrl: https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+  locator: "anthropics/claude-code release v2.1.154"
+  capturedAt: "2026-05-31T20:10:00Z"
+  observedAt: "2026-05-31T20:10:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-05-31T20:10:00Z"
+  notes: |
+    Related recent release notes for the 2.1.x line. The release documents
+    Opus 4.8 support, dynamic workflows with /workflows, and auto-mode
+    provider coverage for Bedrock, Vertex, and Foundry.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-159

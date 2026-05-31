@@ -1,35 +1,3 @@
----
-nodeKind: AgentVersion
-id: agentVersion:claude:2-1-159
-attributes:
-  agentId: "claude"
-  agentProductId: agent:claude-code
-  displayName: "Claude Code 2.1.159"
-  runtimeFamily: "cli-harness"
-  releaseChannel: "stable"
-  versionRange: "2.1.159"
-  currentVersion: "2.1.159"
-  releasedAt: "2026-05-31"
-  sourcePackage: "@anthropic-ai/claude-code"
-  upstreamReleaseTag: "v2.1.159"
-  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.159"
-  cliCommand: "claude"
-  summary: "Claude Code stable release with no user-facing changes in 2.1.159; recent 2.1.x line added Opus 4.8 workflows, local skills plugins, agent dispatch metadata, and auto mode provider coverage."
-  assimilationNotes:
-    - "2.1.159 itself is documented as internal infrastructure improvements with no user-facing changes."
-    - "Recent 2.1.x releases added dynamic workflows surfaced by /workflows; workflow/session orchestration metadata should be watched by launch and session mappers."
-    - "Plugins in .claude/skills are automatically loaded and `claude plugin init <name>` scaffolds a local plugin, affecting plugin discovery assumptions."
-    - "`claude agents` now honors the `agent` field in settings.json and adds `--agent <name>` override behavior for dispatched sessions."
-    - "Auto mode is available on Bedrock, Vertex, and Foundry for Opus 4.7 and Opus 4.8 behind CLAUDE_CODE_ENABLE_AUTO_MODE=1."
-  releaseHighlights:
-    - "Internal infrastructure improvements in v2.1.159."
-    - "Recent v2.1.x: Opus 4.8, dynamic workflows, .claude/skills plugin loading, plugin init, settings.json agent dispatch, and auto mode provider support."
-  installMethods:
-    - install:npm
-edges:
-  version_of:
-    - agent:claude-code
----
 nodeKind: AgentVersion
 id: agentVersion:claude-agent-sdk:0-3-159
 attributes:
