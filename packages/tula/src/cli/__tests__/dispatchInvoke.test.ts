@@ -67,7 +67,7 @@ const baseParsed = {
   positional: [],
 };
 
-describe("omni invoke dispatch", () => {
+describe("tula invoke dispatch", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

@@ -1,7 +1,7 @@
 {
-  "name": "@a5c-ai/omni",
+  "name": "@a5c-ai/tula",
   "version": "5.0.0",
-  "description": "Omni — unified agent product integrating core, runtime, platform, and TUI",
+  "description": "Tula — unified agent product integrating core, runtime, platform, and TUI",
   "license": "MIT",
   "type": "commonjs",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "omni": "./dist/cli/main.js"
+    "tula": "./dist/cli/main.js"
   },
   "files": [
     "dist/",
@@ -52,15 +52,15 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/a5c-ai/babysitter.git",
-    "directory": "packages/omni"
+    "directory": "packages/tula"
   },
-  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/omni#readme",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/tula#readme",
   "bugs": {
     "url": "https://github.com/a5c-ai/babysitter/issues"
   },
   "keywords": [
     "babysitter",
-    "omni",
+    "tula",
     "agent",
     "orchestration",
     "unified"

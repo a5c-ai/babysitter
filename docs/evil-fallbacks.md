@@ -239,8 +239,8 @@ Malformed artifacts silently produce empty strings. Report shows "—" with no e
 **Native package install — continue on failure** — `.github/workflows/live-stack.yml:81-83`
 `npm install --no-save $NATIVE_PKGS || echo "some native deps failed to install"`. Build continues with missing deps.
 
-**Omni startup check — non-fatal** — `.github/workflows/live-stack.yml:454-456`
-Omni binary can't start → test proceeds anyway. Later failures attributed to test logic.
+**Tula startup check — non-fatal** — `.github/workflows/live-stack.yml:454-456`
+Tula binary can't start → test proceeds anyway. Later failures attributed to test logic.
 
 **Run evidence files — silent skip** — `packages/agent-mux/cli/tests/live-stack/primary-live-runner.ts:630-635`
 Missing run metadata files silently skipped. Incomplete trace ID evidence.

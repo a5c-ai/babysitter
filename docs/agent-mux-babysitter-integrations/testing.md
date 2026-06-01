@@ -57,8 +57,8 @@ unit tests only validate task definition shape, validation, and serialization.
 - Cost tracking flows through journal
 
 **Live-stack addition** (`.github/workflows/live-stack.yml`):
-- Add omni scenario with external agent dispatch (omni calls claude-code for a subtask)
-- Requires both omni and claude-code to be available in CI
+- Add tula scenario with external agent dispatch (tula calls claude-code for a subtask)
+- Requires both tula and claude-code to be available in CI
 - Validates journal has COST event from external dispatch
 
 ### 4. Process Library Tests
@@ -97,7 +97,7 @@ const mockAmuxClient = {
 
 - Unit tests: run on every PR (no external dependencies needed)
 - Integration tests: run with `LIVE_STACK_EXTERNAL_AGENT=1` env var
-- Live-stack: add external agent scenario to dispatch matrix when both omni and claude-code are available
+- Live-stack: add external agent scenario to dispatch matrix when both tula and claude-code are available
 
 ## Coverage Targets
 

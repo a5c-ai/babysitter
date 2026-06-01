@@ -33,11 +33,11 @@ The `babysitter` binary is shipped by [`@a5c-ai/babysitter`](../../packages/baby
 - `breakpoint:*`
 - `health`, `configure`, `version`
 
-## Product CLI: `omni`
+## Product CLI: `tula`
 
-The product CLI implementation lives in [`@a5c-ai/omni`](../../packages/omni/package.json) and is exposed as `omni`.
+The product CLI implementation lives in [`@a5c-ai/tula`](../../packages/tula/package.json) and is exposed as `tula`.
 
-Use `omni call` for new runtime orchestration examples. The legacy `babysitter harness:call` alias has been removed and must not appear in new tests or docs.
+Use `tula call` for new runtime orchestration examples. The legacy `babysitter harness:call` alias has been removed and must not appear in new tests or docs.
 
 Setup remains on the core CLI through `babysitter harness:install` and `babysitter harness:install-plugin`.
 
@@ -66,7 +66,7 @@ The command surfaces involved are split by responsibility:
 | --- | --- |
 | `babysitter run:create`, `run:iterate`, `task:list`, `task:post` | Create and replay the run, inspect pending effects, and post resolved task results. |
 | `babysitter process-library:active`, `skill:discover`, `profile:*` | Gather process-authoring context, available skills, and user/project preferences before deciding whether an external responder is appropriate. |
-| `omni discover`, `omni list`, `omni invoke` | Human-facing discovery and invocation surface for available runtime agents and services. |
+| `tula discover`, `tula list`, `tula invoke` | Human-facing discovery and invocation surface for available runtime agents and services. |
 | `amux doctor`, `amux launch`, `amux auth`, `amux install` | agent-mux checks and adapter operations. See the agent-mux reference for the exact CLI flags. |
 
 Troubleshooting common external agent failures:

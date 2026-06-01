@@ -120,7 +120,7 @@ export const PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS = process.platform === 'win32' ?
 const CLI_COMMAND_MAP: Record<string, string> = {
   'copilot': 'gh copilot',
   'cursor': 'cursor-agent',
-  'omni': 'omni yolo',
+  'tula': 'tula yolo',
 };
 
 function resolveCliCommand(harness: string): { command: string; prefixArgs: string[] } {
@@ -1025,10 +1025,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         console.error(`[amux launch] Gemini proxy: GOOGLE_API_KEY=${(plan.env['GOOGLE_API_KEY'] ?? '').slice(0, 8)}..., endpoint=${proxyOrigin}`);
       }
 
-      // Omni (agent-core): set AMUX_* env vars to route through the proxy.
+      // Tula (agent-core): set AMUX_* env vars to route through the proxy.
       // Use AMUX_API_BASE (non-Azure mode) so agent-core sends Authorization: Bearer
       // instead of api-key header. The proxy validates Bearer tokens.
-      if (plan.harness === 'omni') {
+      if (plan.harness === 'tula') {
         plan.env['AMUX_API_BASE'] = `${proxyRuntime.url}/v1`;
         plan.env['AMUX_API_KEY'] = proxyRuntime.authToken ?? 'proxy-token';
         plan.env['AMUX_MODEL'] = plan.proxy?.targetModel ?? plan.model ?? '';
@@ -1036,7 +1036,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         delete plan.env['AZURE_API_KEY'];
         delete plan.env['AZURE_OPENAI_API_KEY'];
         delete plan.env['AZURE_OPENAI_PROJECT_NAME'];
-        console.error(`[amux launch] Omni proxy: AMUX_API_BASE=${plan.env['AMUX_API_BASE']}, AMUX_MODEL=${plan.env['AMUX_MODEL']}`);
+        console.error(`[amux launch] Tula proxy: AMUX_API_BASE=${plan.env['AMUX_API_BASE']}, AMUX_MODEL=${plan.env['AMUX_MODEL']}`);
       }
 
       // Generic OpenAI-compatible harnesses: set OPENAI_API_KEY + OPENAI_BASE_URL
@@ -1104,9 +1104,9 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     }
   }
 
-  // Omni: ensure $HOME/.a5c/ exists — omni's SDK writes package.json there
+  // Tula: ensure $HOME/.a5c/ exists — tula's SDK writes package.json there
   // on first run, and the atomic write fails on Windows if the dir is missing.
-  if (plan.harness === 'omni') {
+  if (plan.harness === 'tula') {
     const { mkdirSync } = await import('node:fs');
     const { join } = await import('node:path');
     const homeA5c = join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.a5c');

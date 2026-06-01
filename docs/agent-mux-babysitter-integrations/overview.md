@@ -23,7 +23,7 @@ Process Definition (defineTask)
 ```
 
 This works identically in both modes:
-- **Standalone** (omni, agent-platform CLI): tasks-mux resolves directly
+- **Standalone** (tula, agent-platform CLI): tasks-mux resolves directly
 - **Plugin** (inside claude-code, codex): tasks-mux resolves agent/tracker tasks internally; host-resolvable tasks delegated via stop-hook
 
 ## Capability Layers

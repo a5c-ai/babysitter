@@ -30,7 +30,7 @@ SDK journals resolution → next iteration
 
 **Current:** When babysitter runs as a plugin inside claude-code, it can only delegate effects to claude-code itself. It cannot ask codex or gemini-cli to do something.
 
-**Needed:** Process definitions running in plugin mode should be able to create `external: true` agent tasks that dispatch through agent-mux, just like the standalone omni path.
+**Needed:** Process definitions running in plugin mode should be able to create `external: true` agent tasks that dispatch through agent-mux, just like the standalone tula path.
 
 **Implementation:**
 - The stop-hook handler must distinguish between "host-resolvable" effects and "external agent" effects

@@ -23,7 +23,7 @@
     "@a5c-ai/agent-core": "5.0.0",
     "@a5c-ai/agent-runtime": "5.0.0",
     "@a5c-ai/agent-platform": "5.0.0",
-    "@a5c-ai/omni": "5.0.0"
+    "@a5c-ai/tula": "5.0.0"
   },
   "repository": {
     "type": "git",

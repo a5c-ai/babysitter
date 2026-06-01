@@ -75,7 +75,7 @@ Files/modules that concentrate the most danger across multiple categories.
 
 | Importer | Imports From (internal path) | Risk |
 |----------|----------------------------|------|
-| `omni` tests | `sdk/src/storage` (createRunDir, appendEvent) | SDK refactor breaks omni |
+| `tula` tests | `sdk/src/storage` (createRunDir, appendEvent) | SDK refactor breaks tula |
 | `hooks-mux/core` tests | `adapter-claude/src/mappings`, `adapter-codex/src/mappings` | Adapter restructure breaks core |
 | `hooks-mux/adapter-codex` tests | `cli/src/cli/stdin`, `cli/src/cli/adapter-loader` | CLI module changes break adapter tests |
 

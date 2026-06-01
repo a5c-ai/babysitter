@@ -138,13 +138,13 @@ describe('live stack scenario contract primitives', () => {
     expect(scenario.model.requiredEnv).toEqual(['GOOGLE_API_KEY']);
   });
 
-  it('declares the gated omni to claude-code external agent dispatch scenario', () => {
+  it('declares the gated tula to claude-code external agent dispatch scenario', () => {
     const scenario = externalAgentDispatchLiveStackScenario();
 
-    expect(scenario.scenarioId).toBe('live.omni.claude-code-external-agent.foundry-openai.gpt-5.5');
-    expect(scenario.agent.agentPath).toBe('omni');
-    expect(scenario.agent.babysitterHarness).toBe('omni');
-    expect(scenario.agent.setupCommands).toEqual(['omni call']);
+    expect(scenario.scenarioId).toBe('live.tula.claude-code-external-agent.foundry-openai.gpt-5.5');
+    expect(scenario.agent.agentPath).toBe('tula');
+    expect(scenario.agent.babysitterHarness).toBe('tula');
+    expect(scenario.agent.setupCommands).toEqual(['tula call']);
     expect(scenario.model.requiredEnv).toEqual(['LIVE_STACK_EXTERNAL_AGENT', 'AZURE_API_KEY', 'AMUX_API_BASE']);
     expect(scenario.layers).toContain('tasks-mux responder routing');
     expect(scenario.layers).toContain('agent-mux claude-code adapter');

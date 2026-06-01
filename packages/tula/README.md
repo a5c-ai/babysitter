@@ -1,6 +1,6 @@
-# @a5c-ai/omni
+# @a5c-ai/tula
 
-Omni is the unified agent product that composes every layer of the babysitter agent stack into a single distributable binary.
+Tula is the unified agent product that composes every layer of the babysitter agent stack into a single distributable binary.
 
 ## Architecture
 
@@ -12,17 +12,17 @@ Omni is the unified agent product that composes every layer of the babysitter ag
 | Mux | `@a5c-ai/agent-mux` | Agent multiplexer |
 | TUI | `@a5c-ai/babysitter-tui-plugins` | TUI plugins for cost, governance, status |
 
-Omni re-exports the full public API from all layers and owns the single `omni` CLI binary implementation.
+Tula re-exports the full public API from all layers and owns the single `tula` CLI binary implementation.
 
 ## Usage
 
 ```bash
 # As a CLI
-npx @a5c-ai/omni <command> [options]
+npx @a5c-ai/tula <command> [options]
 
 # As a library
-import { createBabysitterAgentCli } from "@a5c-ai/omni/cli";
-import { createAgentCoreSession } from "@a5c-ai/omni";
+import { createBabysitterAgentCli } from "@a5c-ai/tula/cli";
+import { createAgentCoreSession } from "@a5c-ai/tula";
 ```
 
 ## Development

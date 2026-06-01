@@ -1,11 +1,11 @@
 export interface AgentCliProgram {
   readonly variant: "agent";
-  readonly commandName: "omni";
-  readonly packageName: "@a5c-ai/omni";
+  readonly commandName: "tula";
+  readonly packageName: "@a5c-ai/tula";
 }
 
 export const AGENT_PROGRAM: AgentCliProgram = {
   variant: "agent",
-  commandName: "omni",
-  packageName: "@a5c-ai/omni",
+  commandName: "tula",
+  packageName: "@a5c-ai/tula",
 };

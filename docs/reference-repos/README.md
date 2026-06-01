@@ -184,7 +184,7 @@ License filter: MIT / BSD / Apache-2.0 only
 
 | Plugin | Author | Stars | License | Extraction Priority |
 |--------|--------|-------|---------|---------------------|
-| [omni](clawhub/fajarhide/omni/research.md) | @fajarhide | 49 | MIT | High |
+| [tula](clawhub/fajarhide/tula/research.md) | @fajarhide | 49 | MIT | High |
 | [openviking-plugins](clawhub/Castor6/openviking-plugins/research.md) | @Castor6 | 7 | Apache-2.0 | Low |
 | [Apple-PIM-Agent-Plugin](clawhub/omarshahine/Apple-PIM-Agent-Plugin/research.md) | @omarshahine | 3 | MIT | Medium |
 | [caveman-claw](clawhub/mCo0L/caveman-claw/research.md) | @mCo0L | 3 | MIT | Low |

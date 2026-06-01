@@ -1,5 +1,5 @@
 /**
- * @a5c-ai/omni — Unified agent product
+ * @a5c-ai/tula — Unified agent product
  *
  * Re-exports the full public API surface from every layer:
  *   L4  agent-core     — loop, subagent, context, synthesis

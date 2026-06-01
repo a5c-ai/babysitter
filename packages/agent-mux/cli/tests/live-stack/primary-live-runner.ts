@@ -73,17 +73,17 @@ export function buildPrimaryLiveStackCommands(
   const traceId = commandEnv['LIVE_STACK_TRACE_ID'];
   const prompt = buildPrompt(scenario, traceId, options.env);
 
-  if (scenario.agent.agent === 'omni') {
+  if (scenario.agent.agent === 'tula') {
     commandEnv['BABYSITTER_RUNS_DIR'] = commandEnv['BABYSITTER_RUNS_DIR'] ?? path.join(options.cwd, '.a5c', 'runs');
     commandEnv['BABYSITTER_RUNS_SCOPE'] = commandEnv['BABYSITTER_RUNS_SCOPE'] ?? 'repo';
     const fixturesDir = path.join(options.cwd, 'packages', 'agent-mux', 'cli', 'tests', 'live-stack', 'fixtures');
     const processesDir = path.join(options.cwd, '.a5c', 'processes');
-    const copyFixture = { command: process.execPath, args: ['-e', `const fs=require("fs"),p=require("path");fs.mkdirSync(${JSON.stringify(processesDir)},{recursive:true});fs.copyFileSync(${JSON.stringify(path.join(fixturesDir, 'omni-simple-test.mjs'))},${JSON.stringify(path.join(processesDir, 'omni-simple-test.mjs'))})`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS };
-    const omniArgs = ['call', '--model', scenario.model.model, '--workspace', options.cwd, '--process', '.a5c/processes/omni-simple-test.mjs', '--prompt', prompt, '--json'];
+    const copyFixture = { command: process.execPath, args: ['-e', `const fs=require("fs"),p=require("path");fs.mkdirSync(${JSON.stringify(processesDir)},{recursive:true});fs.copyFileSync(${JSON.stringify(path.join(fixturesDir, 'tula-simple-test.mjs'))},${JSON.stringify(path.join(processesDir, 'tula-simple-test.mjs'))})`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS };
+    const omniArgs = ['call', '--model', scenario.model.model, '--workspace', options.cwd, '--process', '.a5c/processes/tula-simple-test.mjs', '--prompt', prompt, '--json'];
     return [
       ensureLiveArtifactDirCommand(commandEnv, options.cwd),
       copyFixture,
-      commandExecution(commandEnv, 'LIVE_STACK_OMNI_BIN', 'omni', omniArgs, options.cwd, timeoutMs),
+      commandExecution(commandEnv, 'LIVE_STACK_TULA_BIN', 'tula', omniArgs, options.cwd, timeoutMs),
     ];
   }
 
@@ -179,9 +179,9 @@ export function buildPrimaryLiveStackCommands(
   );
 
   if (scenario.agent.installMode === 'vanilla') {
-    // Omni is a monorepo agent — already linked to PATH by the CI workflow.
+    // Tula is a monorepo agent — already linked to PATH by the CI workflow.
     // Other agents need amux install to fetch their CLI from npm.
-    const installCommands = installTarget === 'omni'
+    const installCommands = installTarget === 'tula'
       ? []
       : [commandExecution(commandEnv, 'LIVE_STACK_AMUX_BIN', 'amux', ['install', installTarget, '--json'], options.cwd, SETUP_TIMEOUT_MS)];
     return [
@@ -529,8 +529,8 @@ function buildPrompt(scenario: LiveStackScenario, traceId: string, env: Record<s
     return `Write a 12-paragraph summary of Homer's Odyssey, then translate each paragraph to Greek.`;
   }
 
-  if (scenario.agent.agent === 'omni') {
-    return `Write a 6-section summary of Homer's Odyssey with Greek translations and save to .a5c-live-test/${traceId}-odyssey.md. The process at .a5c/processes/omni-simple-test.mjs handles the orchestration.`;
+  if (scenario.agent.agent === 'tula') {
+    return `Write a 6-section summary of Homer's Odyssey with Greek translations and save to .a5c-live-test/${traceId}-odyssey.md. The process at .a5c/processes/tula-simple-test.mjs handles the orchestration.`;
   }
 
   if (scenario.agent.installMode === 'babysitter-plugin') {
@@ -778,7 +778,7 @@ async function validateAgentBehavior(
   env: Record<string, string | undefined>,
 ): Promise<VerificationEntry[]> {
   const entries: VerificationEntry[] = [];
-  const isBabysitterAgent = scenario.agent.agent === 'agent-platform' || scenario.agent.agent === 'omni';
+  const isBabysitterAgent = scenario.agent.agent === 'agent-platform' || scenario.agent.agent === 'tula';
   const isBabysitterPlugin = scenario.agent.installMode === 'babysitter-plugin';
 
   // --- agent-platform: verify model responded with content ---
@@ -874,12 +874,12 @@ async function validateAgentBehavior(
     }
   }
 
-  // --- babysitter-plugin/omni: stop hooks, hooks-mux session, run completion, completion proof ---
+  // --- babysitter-plugin/tula: stop hooks, hooks-mux session, run completion, completion proof ---
   // All checks run in both TTY-backed and non-TTY modes.
   // stop-hooks is a warning (not failure) only when no TTY-backed invocation is used.
   const isInteractiveInvocation = env['LIVE_STACK_INTERACTIVE'] === 'true' || env['LIVE_STACK_BRIDGE_INTERACTIVE'] === 'true';
   const isBridgeHooksMode = env['LIVE_STACK_BRIDGE_HOOKS'] === 'true';
-  if (isBabysitterPlugin || scenario.agent.agent === 'omni') {
+  if (isBabysitterPlugin || scenario.agent.agent === 'tula') {
     // stop-hooks: check for hooks-mux log files in all possible locations
     const homeDir = process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp';
     const hooksLogCandidates = [

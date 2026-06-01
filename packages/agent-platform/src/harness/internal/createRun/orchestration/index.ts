@@ -66,7 +66,7 @@ async function runCliOrchestration(args: RunOrchestrationPhaseArgs): Promise<num
 
   // Create run via CLI — pass prompt both as metadata and as process inputs
   const fsPromises = await import("node:fs/promises");
-  const inputsFile = path.join(workspace, `.a5c-omni-inputs-${Date.now()}.json`);
+  const inputsFile = path.join(workspace, `.a5c-tula-inputs-${Date.now()}.json`);
   await fsPromises.writeFile(inputsFile, JSON.stringify({ prompt, request: prompt }));
   const createArgs = [
     "run:create",
@@ -109,10 +109,10 @@ async function runCliOrchestration(args: RunOrchestrationPhaseArgs): Promise<num
   const maxIterations = Math.min(args.maxIterations ?? 20, 20);
   let consecutiveNoEffects = 0;
   for (let i = 1; i <= maxIterations; i++) {
-    process.stderr.write(`[omni-orchestration] iteration ${i}/${maxIterations} starting\n`);
+    process.stderr.write(`[tula-orchestration] iteration ${i}/${maxIterations} starting\n`);
     try {
       const iterArgs = [...babysitterPrefix, "run:iterate", runDir, "--json", "--iteration", String(i)];
-      process.stderr.write(`[omni-orchestration] exec: ${babysitterCmd} ${iterArgs.join(" ")}\n`);
+      process.stderr.write(`[tula-orchestration] exec: ${babysitterCmd} ${iterArgs.join(" ")}\n`);
       const iterResult = execFileSync(babysitterCmd, iterArgs, {
         cwd: workspace,
         encoding: "utf8",
@@ -120,7 +120,7 @@ async function runCliOrchestration(args: RunOrchestrationPhaseArgs): Promise<num
         env: { ...process.env },
       });
       const parsed = JSON.parse(iterResult);
-      process.stderr.write(`[omni-orchestration] iterate result: status=${parsed.status} actions=${parsed.nextActions?.length ?? 0} reason=${parsed.reason ?? 'n/a'}\n`);
+      process.stderr.write(`[tula-orchestration] iterate result: status=${parsed.status} actions=${parsed.nextActions?.length ?? 0} reason=${parsed.reason ?? 'n/a'}\n`);
 
       if (parsed.status === "completed") {
         if (!args.json) {
@@ -138,11 +138,11 @@ async function runCliOrchestration(args: RunOrchestrationPhaseArgs): Promise<num
       // Handle pending effects
       if (parsed.nextActions?.length) {
         consecutiveNoEffects = 0;
-        process.stderr.write(`[omni-orchestration] iteration ${i}: ${parsed.nextActions.length} pending effects to resolve\n`);
+        process.stderr.write(`[tula-orchestration] iteration ${i}: ${parsed.nextActions.length} pending effects to resolve\n`);
         for (const action of parsed.nextActions) {
-          process.stderr.write(`[omni-orchestration] resolving effect ${action.effectId} (${action.kind})\n`);
+          process.stderr.write(`[tula-orchestration] resolving effect ${action.effectId} (${action.kind})\n`);
           await resolveAndPostEffect(action, runDir, workspace, model, babysitterBin);
-          process.stderr.write(`[omni-orchestration] effect ${action.effectId} resolved\n`);
+          process.stderr.write(`[tula-orchestration] effect ${action.effectId} resolved\n`);
         }
       } else if (parsed.status === "none") {
         consecutiveNoEffects++;

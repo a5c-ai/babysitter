@@ -49,7 +49,7 @@ if (externalAgents.available && externalAgents.agents.some(a => a.installed)) {
 }
 ```
 
-### Raw Text Session Template (omni path)
+### Raw Text Session Template (tula path)
 
 In the `isRawTextSession` branch, append external agent info to the system prompt when available:
 

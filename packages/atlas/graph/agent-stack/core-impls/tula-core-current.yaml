@@ -1,12 +1,12 @@
 nodeKind: AgentCoreImpl
-id: agent-core-impl:omni.core@current
+id: agent-core-impl:tula.core@current
 attributes:
-  displayName: "omni Core (current) — composed agent-core + babysitter-sdk loop"
-  agentVersionId: agent-version:omni@current
-  packageRef: source-ref:packages-omni
+  displayName: "tula Core (current) — composed agent-core + babysitter-sdk loop"
+  agentVersionId: agent-version:tula@current
+  packageRef: source-ref:packages-tula
   loopIteratorPolicy: process-function-driven
   loopIteratorNotes: |
-    omni composes @a5c-ai/agent-core and @a5c-ai/babysitter-sdk; the loop
+    tula composes @a5c-ai/agent-core and @a5c-ai/babysitter-sdk; the loop
     semantics are inherited from babysitter-sdk (user-authored async
     `process(inputs, ctx)` with journaled effects) exposed through the
     agent-core contract.
@@ -27,17 +27,17 @@ attributes:
   streamingFidelity: full
   thinkingChannelHandling: delegated-to-remote
   notes: |
-    omni's core layer composes agent-core and babysitter-sdk to provide the
+    tula's core layer composes agent-core and babysitter-sdk to provide the
     loop, context, and transport primitives. The binary adds CLI entrypoints,
     barrel exports, and agent-mux bridging on top.
 edges:
   realizes:
     - target: layer:4-agent-core
   composes:
-    - target: agent:omni
+    - target: agent:tula
       role: core
   depends_on:
-    - target: source-ref:packages-omni
+    - target: source-ref:packages-tula
     - target: source-ref:babysitter-sdk
   speaks: []
   supports_orchestration_primitive:

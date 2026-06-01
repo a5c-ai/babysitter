@@ -1,12 +1,12 @@
 nodeKind: PluginTarget
-id: plugin-target:omni
+id: plugin-target:tula
 attributes:
-  displayName: "Omni"
-  hostAgent: agent:omni
+  displayName: "Tula"
+  hostAgent: agent:tula
   adapterFamily: internal
   manifestFormat: "none"
   commandFormat: "none"
-  adapterName: omni
+  adapterName: tula
   skillHandling: none
   hookRegistrationFormat: none
   hookRegistrationOutputPath: null
@@ -32,19 +32,19 @@ attributes:
   componentSupport:
     agents: unsupported
     context: unsupported
-  cliCommand: "omni"
+  cliCommand: "tula"
   callerEnvVars:
     - "AGENT_SESSION_ID"
   configPaths: []
   processNames:
-    - "omni"
+    - "tula"
     - "agent-platform"
   capabilities:
     - SessionBinding
     - HeadlessPrompt
   adapterModule: null
   externalRepo: null
-  externalPackageName: "@a5c-ai/omni"
+  externalPackageName: "@a5c-ai/tula"
   generatedSourceDir: null
   marketplaceSpecs: []
   requiredSurfaceFile: null
@@ -89,4 +89,4 @@ attributes:
 
 edges:
   hosted_by:
-    - target: agent:omni
+    - target: agent:tula

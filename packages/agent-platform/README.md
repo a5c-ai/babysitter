@@ -5,7 +5,7 @@ Agent Platform layer — harness integration, governance, interaction, storage.
 <!-- docs-status:start -->
 > Status: Public advanced/runtime package.
 > Canonical docs home: [Package and Plugin Docs Map](../../docs/package-and-plugin-map.md).
-> This README is the canonical runtime/platform API contract. The product CLI implementation lives in `@a5c-ai/omni`.
+> This README is the canonical runtime/platform API contract. The product CLI implementation lives in `@a5c-ai/tula`.
 <!-- docs-status:end -->
 
 ## Installation
@@ -16,14 +16,14 @@ npm install @a5c-ai/agent-platform
 
 ## Usage
 
-Use this package as the reusable platform API layer. Install `@a5c-ai/omni` for the product CLI.
+Use this package as the reusable platform API layer. Install `@a5c-ai/tula` for the product CLI.
 
 ```ts
 import { discoverHarnesses, invokeHarness } from "@a5c-ai/agent-platform/harness";
 import { apiRunStatus } from "@a5c-ai/agent-platform/api";
 ```
 
-Use `@a5c-ai/omni` for the product CLI and the main `babysitter` CLI for harness installation and session-state commands:
+Use `@a5c-ai/tula` for the product CLI and the main `babysitter` CLI for harness installation and session-state commands:
 
 ```bash
 babysitter harness:install claude-code

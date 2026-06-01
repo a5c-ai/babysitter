@@ -8,7 +8,7 @@ Design documents for integrating agent-mux capabilities into the babysitter SDK,
 1. [**overview.md**](./overview.md) — Architecture overview and capability summary
 2. [**tasks-mux-routing.md**](./tasks-mux-routing.md) — **Core design:** tasks-mux as unified routing hub for all task types (human, agent, tracker, internal) — covers both standalone and plugin modes
 
-### Standalone Mode (omni, agent-platform CLI)
+### Standalone Mode (tula, agent-platform CLI)
 3. [**sdk-discovery.md**](./sdk-discovery.md) — SDK-level agent-mux discovery (harnesses, models, capabilities)
 4. [**external-agent-tasks.md**](./external-agent-tasks.md) — New `agent` task kind with `external` flag for agent-mux dispatch
 5. [**effect-resolution.md**](./effect-resolution.md) — Effect resolution pipeline changes (SDK → tasks-mux → agent-mux)

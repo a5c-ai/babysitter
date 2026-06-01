@@ -1,9 +1,9 @@
 /**
  * Live integration test: verifies the REAL round-trip by spawning the
- * actual omni CLI with `--output-format amux-events` and parsing
+ * actual tula CLI with `--output-format amux-events` and parsing
  * its JSONL output.
  *
- * These tests are skipped when the omni CLI is not available on
+ * These tests are skipped when the tula CLI is not available on
  * PATH, so they are safe to run in any environment (CI or local).
  *
  * @module harness/amux/__tests__/live-integration
@@ -18,7 +18,7 @@ import { execSync, spawn } from "child_process";
 
 const CLI_AVAILABLE = (() => {
   try {
-    execSync("omni version", { stdio: "pipe", timeout: 10000 });
+    execSync("tula version", { stdio: "pipe", timeout: 10000 });
     return true;
   } catch {
     return false;
@@ -30,7 +30,7 @@ const CLI_AVAILABLE = (() => {
 // ---------------------------------------------------------------------------
 
 /**
- * Spawn omni with the given args and collect stdout lines.
+ * Spawn tula with the given args and collect stdout lines.
  * Returns { lines, exitCode, stderr }.
  */
 function spawnBabysitter(
@@ -38,7 +38,7 @@ function spawnBabysitter(
   timeoutMs = 15000,
 ): Promise<{ lines: string[]; exitCode: number | null; stderr: string }> {
   return new Promise((resolve, reject) => {
-    const child = spawn("omni", args, {
+    const child = spawn("tula", args, {
       stdio: ["pipe", "pipe", "pipe"],
       shell: true,
       timeout: timeoutMs,
@@ -91,15 +91,15 @@ function tryParseJson(line: string): Record<string, unknown> | null {
 // ---------------------------------------------------------------------------
 
 describe(
-  "Live integration: omni CLI amux-events output",
+  "Live integration: tula CLI amux-events output",
   { timeout: 30000 },
   () => {
-    describe.skipIf(!CLI_AVAILABLE)("with omni CLI", () => {
+    describe.skipIf(!CLI_AVAILABLE)("with tula CLI", () => {
       it("invoke with --output-format amux-events produces valid JSONL", async () => {
         // Use invoke with a fast-failing prompt so no real harness is required for availability.
         // We invoke it with --output-format amux-events to test that the CLI
         // accepts the flag. If the command doesn't support --output-format,
-        // omni should still emit session_start/session_end.
+        // tula should still emit session_start/session_end.
         //
         // NOTE: invoke requires a harness name and prompt, so we use
         // a command that will fail fast but still exercise the amux-events

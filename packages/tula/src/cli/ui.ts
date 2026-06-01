@@ -56,7 +56,7 @@ export function outputError(error: Error, options: { json: boolean; verbose?: bo
 export async function readCliVersion(): Promise<string> {
   const candidatePaths = [
     path.join(process.cwd(), "package.json"),
-    path.join(process.cwd(), "packages", "omni", "package.json"),
+    path.join(process.cwd(), "packages", "tula", "package.json"),
     path.join(__dirname, "..", "..", "package.json"),
     path.join(__dirname, "..", "..", "..", "package.json"),
   ];

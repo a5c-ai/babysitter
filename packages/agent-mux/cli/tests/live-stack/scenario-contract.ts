@@ -1,10 +1,10 @@
 export type LiveStackProvider = 'foundry-openai' | 'anthropic-direct' | 'google-vertex' | 'google';
 export type AgentMuxProviderId = 'foundry' | 'anthropic' | 'vertex' | 'google';
-export type LiveStackAgentPath = 'agent-mux' | 'agent-platform' | 'omni';
+export type LiveStackAgentPath = 'agent-mux' | 'agent-platform' | 'tula';
 export type LiveStackIntegrationType = 'third-party-plugin' | 'runtime-cli';
 export type LiveStackInstallMode = 'babysitter-plugin' | 'vanilla';
-export type LiveStackAgentId = 'claude-code' | 'codex' | 'gemini-cli' | 'pi' | 'agent-platform' | 'omni' | 'internal';
-export type LiveStackAgentMuxAgentId = 'claude' | 'codex' | 'gemini' | 'pi' | 'babysitter' | 'omni';
+export type LiveStackAgentId = 'claude-code' | 'codex' | 'gemini-cli' | 'pi' | 'agent-platform' | 'tula' | 'internal';
+export type LiveStackAgentMuxAgentId = 'claude' | 'codex' | 'gemini' | 'pi' | 'babysitter' | 'tula';
 
 export interface LiveStackModelEntry {
   readonly provider: LiveStackProvider;
@@ -95,12 +95,12 @@ export function primaryLiveStackScenario(): LiveStackScenario {
 
 export function externalAgentDispatchLiveStackScenario(): LiveStackScenario {
   return createLiveStackScenario({
-    scenarioId: 'live.omni.claude-code-external-agent.foundry-openai.gpt-5.5',
-    agentPath: 'omni',
-    agent: 'omni',
-    agentMuxAgent: 'omni',
+    scenarioId: 'live.tula.claude-code-external-agent.foundry-openai.gpt-5.5',
+    agentPath: 'tula',
+    agent: 'tula',
+    agentMuxAgent: 'tula',
     integrationType: 'runtime-cli',
-    babysitterHarness: 'omni',
+    babysitterHarness: 'tula',
     installMode: 'vanilla',
     provider: 'foundry-openai',
     amuxProvider: 'foundry',
@@ -108,7 +108,7 @@ export function externalAgentDispatchLiveStackScenario(): LiveStackScenario {
     credentialMode: 'github-org-secrets-and-vars',
     requiredEnv: ['LIVE_STACK_EXTERNAL_AGENT', 'AZURE_API_KEY', 'AMUX_API_BASE'],
     layers: [
-      'omni runtime-cli',
+      'tula runtime-cli',
       'tasks-mux responder routing',
       'agent-mux claude-code adapter',
       'external agent cost event',
@@ -229,7 +229,7 @@ export function assertEvidenceBundleComplete(scenario: LiveStackScenario, bundle
 
 function setupCommandsFor(agentPath: LiveStackAgentPath, agent: LiveStackAgentId, agentMuxAgent: LiveStackAgentMuxAgentId, installMode: LiveStackInstallMode): readonly string[] {
   if (agentPath === 'agent-platform') return ['agent-platform create-run --harness internal'];
-  if (agentPath === 'omni') return ['omni call'];
+  if (agentPath === 'tula') return ['tula call'];
   if (installMode === 'vanilla') return [`amux install ${agentMuxAgent}`, agent === 'agent-platform' ? 'amux run babysitter' : `amux launch ${agentMuxAgent}`];
   return [
     'npm run generate:plugins',
@@ -254,8 +254,8 @@ function agentMuxAgentFor(agent: LiveStackAgentId): LiveStackAgentMuxAgentId {
       return agent;
     case 'agent-platform':
       return 'babysitter';
-    case 'omni':
-      return 'omni';
+    case 'tula':
+      return 'tula';
     case 'internal':
       return 'babysitter';
   }

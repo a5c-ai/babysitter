@@ -142,7 +142,7 @@ jobs:
           npm run build --workspace=@a5c-ai/babysitter-sdk
           (cd packages/agent-core && npx tsc --build --force tsconfig.json)
           (cd packages/agent-platform && npx tsc --build --force tsconfig.json)
-          (cd packages/omni && npx tsc --build tsconfig.json)
+          (cd packages/tula && npx tsc --build tsconfig.json)
 
           wait_all
 
@@ -202,7 +202,7 @@ jobs:
                 'omp': {agent:'omp', amux_agent:'omp'},
                 'droid': {agent:'droid', amux_agent:'droid'},
                 'amp': {agent:'amp', amux_agent:'amp'},
-                'omni': {agent:'omni', amux_agent:'omni', agent_path:'omni'},
+                'tula': {agent:'tula', amux_agent:'tula', agent_path:'tula'},
               };
               const models = {
                 'foundry-gpt55': {provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AMUX_API_BASE'},
@@ -234,7 +234,7 @@ jobs:
                 return {
                   id: 'live.agent-mux.' + a.agent + '.' + m.provider + '.' + m.model,
                   agent_path: a.agent_path || 'agent-mux', agent: a.agent, amux_agent: a.amux_agent,
-                  integration_type: a.agent_path === 'omni' ? 'runtime-cli' : 'third-party-plugin',
+                  integration_type: a.agent_path === 'tula' ? 'runtime-cli' : 'third-party-plugin',
                   provider: m.provider, amux_provider: m.amux_provider, model: m.model,
                   required_env: m.required_env, live: entry.live !== false,
                   process_mode: entry.process_mode || 'predefined',
@@ -396,8 +396,8 @@ jobs:
           mkdir -p "$HOME/.local/bin"
           for pair in \
             "amux:packages/agent-mux/cli/dist/index.js" \
-            "agent-platform:packages/omni/dist/cli/main.js" \
-            "omni:packages/omni/dist/cli/main.js" \
+            "agent-platform:packages/tula/dist/cli/main.js" \
+            "tula:packages/tula/dist/cli/main.js" \
             "babysitter:packages/sdk/dist/cli/main.js" \
             "a5c-hooks-mux:packages/hooks-mux/cli/dist/cli/main.js"
           do
@@ -451,8 +451,8 @@ jobs:
           LIVE_STACK_COMMAND_TIMEOUT_MS: '900000'
           LIVE_STACK_BABYSITTER_BIN: ${{ github.workspace }}/packages/sdk/dist/cli/main.js
           LIVE_STACK_AMUX_BIN: ${{ github.workspace }}/packages/agent-mux/cli/dist/index.js
-          LIVE_STACK_AGENT_PLATFORM_BIN: ${{ github.workspace }}/packages/omni/dist/cli/main.js
-          LIVE_STACK_OMNI_BIN: ${{ github.workspace }}/packages/omni/dist/cli/main.js
+          LIVE_STACK_AGENT_PLATFORM_BIN: ${{ github.workspace }}/packages/tula/dist/cli/main.js
+          LIVE_STACK_TULA_BIN: ${{ github.workspace }}/packages/tula/dist/cli/main.js
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AMUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
           AMUX_PROVIDER: foundry
@@ -494,11 +494,11 @@ jobs:
           fi
           # Ensure pip user-bin is on PATH for hermes and other pip agents (Linux + macOS paths)
           export PATH="$HOME/.local/bin:$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$PATH"
-          # Pre-create .a5c directory — omni atomic write needs it on Windows
+          # Pre-create .a5c directory — tula atomic write needs it on Windows
           mkdir -p "$HOME/.a5c" .a5c 2>/dev/null || true
-          # Verify omni can start — capture and echo output for debugging
-          echo "::group::Omni startup check"
-          OMNI_CHECK=$(node packages/omni/dist/cli/main.js version 2>&1) && echo "omni ok: $OMNI_CHECK" || echo "OMNI STARTUP FAILED: $OMNI_CHECK"
+          # Verify tula can start — capture and echo output for debugging
+          echo "::group::Tula startup check"
+          OMNI_CHECK=$(node packages/tula/dist/cli/main.js version 2>&1) && echo "tula ok: $OMNI_CHECK" || echo "OMNI STARTUP FAILED: $OMNI_CHECK"
           echo "::endgroup::"
           START_TS=$(date +%s)
           npm run test:e2e:live-stack:pipeline

@@ -22,7 +22,7 @@ npm run lint:hooks-mux
 | `packages/sdk` | `@a5c-ai/babysitter-sdk` | Core runtime, storage, tasks, CLI, hooks, profiles, plugins, compression |
 | `packages/babysitter` | `@a5c-ai/babysitter` | Metapackage and `babysitter` binary |
 | `packages/agent-platform` | `@a5c-ai/agent-platform` | Platform API for harness integration, governance, interaction, and storage |
-| `packages/omni` | `@a5c-ai/omni` | Unified product package and owner of the `omni` CLI implementation |
+| `packages/tula` | `@a5c-ai/tula` | Unified product package and owner of the `tula` CLI implementation |
 | `packages/babysitter-tui-plugins` | `@a5c-ai/babysitter-tui-plugins` | TUI panels for status, cost, and governance |
 | `packages/atlas` | `@a5c-ai/atlas` | Atlas catalog graph SDK, CLI, and data |
 | `packages/atlas/webui` | `@a5c-ai/atlas-webui` | Atlas graph explorer (Next.js) |
@@ -33,7 +33,7 @@ npm run lint:hooks-mux
 - SDK CLI: [`packages/sdk/src/cli/main.ts`](../../packages/sdk/src/cli/main.ts)
 - SDK command registry: [`packages/sdk/src/cli/main/program.ts`](../../packages/sdk/src/cli/main/program.ts)
 - SDK config and runs resolution: [`packages/sdk/src/config/`](../../packages/sdk/src/config)
-- Omni product CLI: [`packages/omni/src/cli/main.ts`](../../packages/omni/src/cli/main.ts)
+- Tula product CLI: [`packages/tula/src/cli/main.ts`](../../packages/tula/src/cli/main.ts)
 - Metapackage shim: `packages/babysitter/bin/babysitter.js`
 - Atlas graph explorer: [`packages/atlas/webui/app/page.tsx`](../../packages/atlas/webui/app/page.tsx)
 

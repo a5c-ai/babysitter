@@ -261,18 +261,18 @@ SDK effect execution → unified executor → tool-mux dispatch (MISSING)
 
 ---
 
-## Omni → Agent-Mux Cross-Agent Dispatch (NOT IMPLEMENTED)
+## Tula → Agent-Mux Cross-Agent Dispatch (NOT IMPLEMENTED)
 
-Omni should be able to dispatch subtasks to external agents supported by agent-mux (claude-code, codex, gemini-cli, copilot, etc.) through the runtime. This enables an omni orchestration to delegate specialist work to the best available agent.
+Tula should be able to dispatch subtasks to external agents supported by agent-mux (claude-code, codex, gemini-cli, copilot, etc.) through the runtime. This enables an tula orchestration to delegate specialist work to the best available agent.
 
 ### Missing Architecture
 
 ```
 Current:
-  omni → agent-core session (direct API) → single model, no tool agents
+  tula → agent-core session (direct API) → single model, no tool agents
 
 Needed:
-  omni → agent-platform effect dispatch
+  tula → agent-platform effect dispatch
     → SDK "subagent" effect type (journaled)
     → tasks-mux routes to responder (agent-mux adapter)
     → agent-mux adapter launches target agent (claude-code, codex, etc.)
@@ -285,7 +285,7 @@ Needed:
 | Gap | Description |
 |-----|-------------|
 | No subagent effect type in SDK | Need `kind: "subagent"` with `{ targetAgent, prompt, model, timeout }` |
-| No agent-mux adapter selection in omni | omni doesn't know about agent-mux's adapter registry |
+| No agent-mux adapter selection in tula | tula doesn't know about agent-mux's adapter registry |
 | No tasks-mux routing for subagent dispatch | tasks-mux routes to human responders, not to agent-mux adapters |
 | No result collection from external agents | agent-mux launch returns stdout/stderr but no structured task result |
 | No cross-agent session context | Dispatched agent doesn't see parent's context, files, or journal |
@@ -347,7 +347,7 @@ Only `GitHubIssuesBackend` exists. Basic mapping of breakpoints to GitHub issues
 | SDK tasks ≠ tasks-mux | SDK↔tasks-mux | SDK has its own task system (defineTask, ctx.task). tasks-mux has BreakpointBackend. Neither knows about the other. |
 | transport-mux cost feedback missing | transport-mux↔SDK | Proxy extracts cost records but never feeds them back to SDK journal or L6 cost tracking |
 | transport-mux session-unaware | transport-mux↔L5 | Proxy is stateless. No runId/sessionId tracking for distributed observability. |
-| No cross-agent task dispatch | tasks-mux↔agent-mux | omni can't dispatch subtasks to external agents (claude-code, codex, etc.) via agent-mux adapters |
+| No cross-agent task dispatch | tasks-mux↔agent-mux | tula can't dispatch subtasks to external agents (claude-code, codex, etc.) via agent-mux adapters |
 | No external issue tracker sync | tasks-mux↔external | Only GitHub Issues backend. No Jira, Linear, or generic REST backend for pluggable subtask tracking. |
 
 ---
@@ -364,7 +364,7 @@ Only `GitHubIssuesBackend` exists. Basic mapping of breakpoints to GitHub issues
 7. Token usage tracking end-to-end (L4 → transport-mux → SDK journal → L6 cost)
 
 **P1 — Unblock platform features:**
-1. Subagent effect type in SDK journal + omni → agent-mux adapter dispatch
+1. Subagent effect type in SDK journal + tula → agent-mux adapter dispatch
 2. Structured output / JSON mode hardening in agent-core (full schema validator coverage and streaming coordination)
 3. Vision/multimodal input follow-through (#575 streaming responses, #588 image-bearing `ToolResult`)
 4. Wire breakpoint delegation → tasks-mux backends
@@ -375,7 +375,7 @@ Only `GitHubIssuesBackend` exists. Basic mapping of breakpoints to GitHub issues
 
 **P2 — Integration & hardening:**
 1. External issue tracker backends (Jira, Linear, generic REST) with bidirectional sync
-2. Omni cross-agent dispatch: tasks-mux routes subtasks to agent-mux adapters
+2. Tula cross-agent dispatch: tasks-mux routes subtasks to agent-mux adapters
 3. K8s executor implementation
 4. Crash recovery + persistent queue in daemon
 5. Process isolation/sandboxing

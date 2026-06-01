@@ -1,48 +1,48 @@
 nodeKind: AgentVersion
-id: agent-version:omni@current
+id: agent-version:tula@current
 attributes:
-  agentProductId: agent:omni
+  agentProductId: agent:tula
   versionRange: ">=5.0.0"
   releasedAt: "2026-05-01"
-  cliCommand: "omni"
-  sourcePackage: "@a5c-ai/omni"
+  cliCommand: "tula"
+  sourcePackage: "@a5c-ai/tula"
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
 edges:
   version_of:
-    - agent:omni
+    - agent:tula
   composed_of:
-    - target: agent-core-impl:omni.core@current
+    - target: agent-core-impl:tula.core@current
       role: core
-    - target: agent-runtime-impl:omni.runtime@current
+    - target: agent-runtime-impl:tula.runtime@current
       role: runtime
-    - target: agent-platform-impl:omni.platform@current
+    - target: agent-platform-impl:tula.platform@current
       role: platform
-    - target: agent-ui-impl:omni.ui@current
+    - target: agent-ui-impl:tula.ui@current
       role: ui
   sourced_from: []
   supports:
     - target: capability:can-multi-turn
       versionRange: '>=5.0.0'
       level: full
-      notes: omni orchestrates multi-turn agent sessions via the composed agent-platform and babysitter-sdk.
+      notes: tula orchestrates multi-turn agent sessions via the composed agent-platform and babysitter-sdk.
     - target: capability:supports-text-streaming
       versionRange: '>=5.0.0'
       level: full
-      notes: omni streams agent output in real time through the composed runtime.
+      notes: tula streams agent output in real time through the composed runtime.
     - target: capability:supports-mcp
       versionRange: '>=5.0.0'
       level: full
-      notes: omni integrates with MCP servers via agent-platform and agent-mux.
+      notes: tula integrates with MCP servers via agent-platform and agent-mux.
     - target: capability:supports-subagent-dispatch
       versionRange: '>=5.0.0'
       level: full
-      notes: omni dispatches tasks to subagent processes via the composed agent-platform runtime.
+      notes: tula dispatches tasks to subagent processes via the composed agent-platform runtime.
     - target: capability:can-resume
       versionRange: '>=5.0.0'
       level: full
-      notes: omni supports run resume and session recovery through babysitter-sdk journaling.
+      notes: tula supports run resume and session recovery through babysitter-sdk journaling.
   uses_memory_system:
     - target: memory-system:instruction-file-hierarchy
     - target: memory-system:claude-code-auto-memory

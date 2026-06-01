@@ -175,7 +175,7 @@ function buildKnownAdapters(): string[] {
     const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog') as {
       listPluginTargetDescriptors: () => Array<{ adapterName: string }>;
     };
-    const excludes = new Set(['omni', 'babysitter', 'agent-mux', 'agent-mux-remote', 'agent-platform']);
+    const excludes = new Set(['tula', 'babysitter', 'agent-mux', 'agent-mux-remote', 'agent-platform']);
     const adapters = new Set(
       listPluginTargetDescriptors()
         .map(t => normalizeAdapterName(t.adapterName))

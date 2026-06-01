@@ -9,6 +9,6 @@ export interface HarnessParsedArgs extends CoreParsedArgs {
   anycliMcp?: boolean;
   anycliAuthFile?: string;
   anycliTransport?: string;
-  /** Output format for omni invoke results. */
+  /** Output format for tula invoke results. */
   outputFormat?: HarnessOutputFormat;
 }

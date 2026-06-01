@@ -1,5 +1,5 @@
 /**
- * Formats omni invocation results as agent-mux compatible
+ * Formats tula invocation results as agent-mux compatible
  * JSONL events.
  *
  * When `--output-format amux-events` is used, the `invoke` command

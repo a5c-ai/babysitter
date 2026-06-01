@@ -1,7 +1,7 @@
 /**
  * tui command -- stub redirecting to agent-mux TUI with babysitter plugins.
  *
- * The omni dashboard uses the agent-mux TUI
+ * The tula dashboard uses the agent-mux TUI
  * with babysitter-tui-plugins instead (packages/babysitter-tui-plugins/).
  *
  * `babysitter tui --json` still works as a non-interactive JSON fallback
@@ -179,11 +179,11 @@ export async function handleTui(args: TuiArgs): Promise<number> {
 
   // Interactive TUI: redirect to agent-mux TUI
   console.error(
-    "The omni TUI delegates to agent-mux.\n" +
+    "The tula TUI delegates to agent-mux.\n" +
     "Use agent-mux TUI with babysitter plugins instead:\n" +
     "  npx agent-mux tui --workspace .\n" +
     "\n" +
-    "For non-interactive run listing, use: omni tui --json"
+    "For non-interactive run listing, use: tula tui --json"
   );
   return 1;
 }

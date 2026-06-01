@@ -135,11 +135,11 @@ nodes:
     edges:
       source_of:
         - target: agent:agent-platform
-  - id: source-ref:packages-omni
+  - id: source-ref:packages-tula
     kind: SourceRef
     edges:
       source_of:
-        - target: agent:omni
+        - target: agent:tula
   - id: source-ref:context7-mcp
     kind: SourceRef
     edges:

@@ -1,9 +1,9 @@
 nodeKind: AgentRuntimeImpl
-id: agent-runtime-impl:omni.runtime@current
+id: agent-runtime-impl:tula.runtime@current
 attributes:
-  displayName: "omni Runtime (current) — composed agent-runtime + SDK runtime"
-  agentVersionId: agent-version:omni@current
-  packageRef: source-ref:packages-omni
+  displayName: "tula Runtime (current) — composed agent-runtime + SDK runtime"
+  agentVersionId: agent-version:tula@current
+  packageRef: source-ref:packages-tula
   subagentDispatchMechanism: agent-as-tool
   subagentChildSessionPolicy: persistent-child-session
   subagentToolScopePolicy: explicit-allowlist
@@ -28,14 +28,14 @@ attributes:
     - mcp-transport:http-sse
   supportsStreaming: true
   notes: |
-    omni runtime composes agent-runtime and babysitter-sdk runtime (journal-
+    tula runtime composes agent-runtime and babysitter-sdk runtime (journal-
     replay, breakpoint policy engine, harness adapters) into a unified
     runtime surface. Adds agent-mux bridging for multi-harness dispatch.
 edges:
   realizes:
     - target: layer:5-agent-runtime
   composes:
-    - target: agent:omni
+    - target: agent:tula
       role: runtime
   bundles:
     - target: tool-descriptor:bash

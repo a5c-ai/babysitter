@@ -1,9 +1,9 @@
 nodeKind: PackageSurface
-id: package:a5c-ai-omni
+id: package:a5c-ai-tula
 attributes:
-  packageId: "@a5c-ai/omni"
-  packageName: "@a5c-ai/omni"
-  workspacePath: packages/omni
+  packageId: "@a5c-ai/tula"
+  packageName: "@a5c-ai/tula"
+  workspacePath: packages/tula
   moduleType: typescript
   surfaceKinds:
     - agent-runtime
@@ -14,8 +14,8 @@ attributes:
   sourceOfTruthRole: application
   publishedTo: npm
   versionPolicy: semver
-  # Source: packages/omni/package.json (exports ./cli barrel + root barrel).
-  # Bin: omni. Composes agent-core, agent-runtime, agent-platform, agent-mux,
+  # Source: packages/tula/package.json (exports ./cli barrel + root barrel).
+  # Bin: tula. Composes agent-core, agent-runtime, agent-platform, agent-mux,
   # and babysitter-sdk into a single installable product.
 edges:
   references_path:

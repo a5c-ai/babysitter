@@ -1,9 +1,9 @@
 nodeKind: AgentPlatformImpl
-id: agent-platform-impl:omni.platform@current
+id: agent-platform-impl:tula.platform@current
 attributes:
-  displayName: "omni Platform (current) — composed agent-platform + plugin/skill registry"
-  agentVersionId: agent-version:omni@current
-  packageRef: source-ref:packages-omni
+  displayName: "tula Platform (current) — composed agent-platform + plugin/skill registry"
+  agentVersionId: agent-version:tula@current
+  packageRef: source-ref:packages-tula
   subagentDefinitionFormat: js-module-export
   nativeExtensionFormat: babysitter-plugin
   nativeExtensionManifestPath: plugin.json
@@ -37,7 +37,7 @@ attributes:
   supportedChannelKinds:
     - mcp-channel
   notes: |
-    omni platform layer composes agent-platform's defineTask registry,
+    tula platform layer composes agent-platform's defineTask registry,
     plugin/skill/agent loader, and breakpoint policy engine. Inherits all
     agent-platform platform surfaces and adds barrel-export convenience for
     downstream consumers.
@@ -45,6 +45,6 @@ edges:
   realizes:
     - target: layer:6-agent-platform
   composes:
-    - target: agent:omni
+    - target: agent:tula
       role: platform
   bundles: []

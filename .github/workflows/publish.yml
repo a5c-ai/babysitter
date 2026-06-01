@@ -1573,7 +1573,7 @@ jobs:
         run: npm publish --workspace=@a5c-ai/agent-runtime --access public --tag "$NPM_TAG"
 
   publish_staging_omni:
-    name: Publish Omni
+    name: Publish Tula
     needs: [publish_staging_babysitter_agent, publish_staging_agent_runtime]
     runs-on: ubuntu-latest-l
     permissions:
@@ -1604,7 +1604,7 @@ jobs:
           npm ci
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Build omni
+      - name: Build tula
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
@@ -1615,12 +1615,12 @@ jobs:
           npm run build --workspace=@a5c-ai/agent-core
           npm run build --workspace=@a5c-ai/agent-runtime
           npm run build --workspace=@a5c-ai/agent-platform
-          npm run build --workspace=@a5c-ai/omni
+          npm run build --workspace=@a5c-ai/tula
 
-      - name: Publish omni
+      - name: Publish tula
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/omni --skip-build
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tula --skip-build
 
   deploy_docs_site:
     if: ${{ github.ref_name != 'develop' }}

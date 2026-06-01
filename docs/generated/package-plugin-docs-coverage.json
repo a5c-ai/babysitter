@@ -341,12 +341,12 @@
       "note": "Public npm package, platform layer for agent orchestration."
     },
     {
-      "surface": "packages/omni",
-      "packageName": "@a5c-ai/omni",
-      "description": "Omni — unified agent product integrating core, runtime, platform, and TUI.",
+      "surface": "packages/tula",
+      "packageName": "@a5c-ai/tula",
+      "description": "Tula — unified agent product integrating core, runtime, platform, and TUI.",
       "hasReadme": true,
       "status": "Public package",
-      "canonicalHome": "../packages/omni/README.md",
+      "canonicalHome": "../packages/tula/README.md",
       "supporting": [],
       "note": "Top-level integrated agent product."
     },

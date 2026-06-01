@@ -109,11 +109,11 @@ attributes:
   kind: git-path
 ---
 nodeKind: SourceRef
-id: source-ref:packages-omni
+id: source-ref:packages-tula
 attributes:
-  description: '@a5c-ai/omni — top-level integrated agent product (CLI binary + barrel exports)'
-  displayName: a5c-ai/babysitter — packages/omni
+  description: '@a5c-ai/tula — top-level integrated agent product (CLI binary + barrel exports)'
+  displayName: a5c-ai/babysitter — packages/tula
   repoUrl: https://github.com/a5c-ai/babysitter
   ref: main
-  path: packages/omni
+  path: packages/tula
   kind: git-path

@@ -316,7 +316,7 @@ async function runHarnessCreateRun(
   overrides: { interactive?: boolean; planOnly?: boolean; prompt?: string } = {},
 ): Promise<number> {
   if (parsed.harness && normalizeBuiltInHarnessName(parsed.harness) !== "agent-core") {
-    process.stderr.write(`[omni] --harness ${parsed.harness} ignored — omni always uses agent-core\n`);
+    process.stderr.write(`[tula] --harness ${parsed.harness} ignored — tula always uses agent-core\n`);
   }
   return await handleHarnessCreateRun({
     invocationCommand: parsed.command,

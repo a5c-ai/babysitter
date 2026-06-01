@@ -1,41 +1,41 @@
 nodeKind: AgentUIImpl
-id: agent-ui-impl:omni.ui@current
+id: agent-ui-impl:tula.ui@current
 attributes:
-  displayName: "omni UI (current) — CLI binary"
-  agentVersionId: agent-version:omni@current
-  packageRef: source-ref:packages-omni
+  displayName: "tula UI (current) — CLI binary"
+  agentVersionId: agent-version:tula@current
+  packageRef: source-ref:packages-tula
   uiKind: cli-only
   presentationsBundled:
-    - presentation:omni-cli
+    - presentation:tula-cli
   themeSupport: none
   accessibilitySupport: basic
   notes: |
-    omni's user-facing surface is its CLI binary (`omni`). The CLI wraps
+    tula's user-facing surface is its CLI binary (`tula`). The CLI wraps
     agent-platform and agent-mux surfaces. Operator UIs (TUI, web, mobile)
     are delivered via the agent-mux package family.
 edges:
   realizes:
     - target: layer:11-presentation
   bundled_with:
-    - target: presentation:omni-cli
+    - target: presentation:tula-cli
   supports_interaction_primitive:
     - target: interaction-primitive:babysitter-run-create
       attributes:
         mechanism: native-api
-        invocationToken: "omni run:create"
+        invocationToken: "tula run:create"
     - target: interaction-primitive:babysitter-run-iterate
       attributes:
         mechanism: native-api
-        invocationToken: "omni run:iterate"
+        invocationToken: "tula run:iterate"
     - target: interaction-primitive:babysitter-task-post
       attributes:
         mechanism: native-api
-        invocationToken: "omni task:post"
+        invocationToken: "tula task:post"
     - target: interaction-primitive:babysitter-doctor
       attributes:
         mechanism: native-api
-        invocationToken: "omni doctor"
+        invocationToken: "tula doctor"
     - target: interaction-primitive:babysitter-mcp-server
       attributes:
         mechanism: native-api
-        invocationToken: "omni mcp"
+        invocationToken: "tula mcp"
