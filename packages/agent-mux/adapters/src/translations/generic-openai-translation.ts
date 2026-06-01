@@ -1,6 +1,6 @@
 import type { ProviderConfig, TransportId } from '@a5c-ai/agent-comm-mux';
-import { getProviderTranslation } from '@a5c-ai/agent-catalog';
-import type { ProviderTranslationRecord, ProviderTranslationEnvMapping } from '@a5c-ai/agent-catalog';
+import { getProviderTranslation } from '@a5c-ai/atlas/catalog';
+import type { ProviderTranslationRecord, ProviderTranslationEnvMapping } from '@a5c-ai/atlas/catalog';
 import type { HarnessProviderTranslation } from '../provider-translation.js';
 
 function resolveEnvSource(mapping: ProviderTranslationEnvMapping, config: ProviderConfig): string | undefined {

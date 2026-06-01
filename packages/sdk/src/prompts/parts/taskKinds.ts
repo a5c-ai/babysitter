@@ -1,6 +1,6 @@
 import { renderTemplate, resolveTemplatePath } from '../templateRenderer';
 import type { PromptContext } from '../types';
-import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
+import { listPluginTargetDescriptors } from '@a5c-ai/atlas/catalog';
 
 /**
  * Resolve the skill system label from catalog metadata.

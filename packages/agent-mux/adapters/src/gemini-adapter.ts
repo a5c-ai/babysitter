@@ -5,7 +5,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { getAdapterMetadata, getAdapterModels, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
+import { getAdapterMetadata, getAdapterModels, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/atlas/catalog';
 
 import type {
   AgentCapabilities,
@@ -322,7 +322,7 @@ export class GeminiAdapter extends BaseAgentAdapter {
 
 // Self-register in the global adapter registry
 import { registerAdapterFactory } from './base-adapter.js';
-import { getPluginTargetDescriptor } from '@a5c-ai/agent-catalog';
+import { getPluginTargetDescriptor } from '@a5c-ai/atlas/catalog';
 
 const _name = 'gemini';
 registerAdapterFactory(_name, () => new GeminiAdapter(_name, getPluginTargetDescriptor(_name)?.cliCommand ?? _name));

@@ -7,7 +7,7 @@
  * plugins, and executes them through the proper chain.
  */
 
-import { getHookSupport, type HookSupportLevel } from '@a5c-ai/agent-catalog';
+import { getHookSupport, type HookSupportLevel } from '@a5c-ai/atlas/catalog';
 
 // ---------------------------------------------------------------------------
 // Public types

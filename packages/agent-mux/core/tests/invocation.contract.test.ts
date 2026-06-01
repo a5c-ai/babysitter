@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getHarnessImages,
   lookupHarnessImage as lookupCatalogHarnessImage,
-} from "@a5c-ai/agent-catalog";
+} from "@a5c-ai/atlas/catalog";
 import {
   HARNESS_IMAGE_CATALOG,
   lookupHarnessImage,

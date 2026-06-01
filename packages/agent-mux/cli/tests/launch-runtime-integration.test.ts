@@ -33,7 +33,7 @@ vi.mock('@a5c-ai/agent-mux-adapters', () => ({
   })),
 }));
 
-vi.mock('@a5c-ai/agent-catalog', () => ({
+vi.mock('@a5c-ai/atlas/catalog', () => ({
   getLaunchBehavior: vi.fn((harness: string) => {
     const behaviors: Record<string, unknown> = {
       claude: { promptDelivery: 'cli-flag', promptFlag: '-p', stdinBehavior: 'close-after-prompt', selfExits: true, needsIdleKill: false, sessionIdFlag: '--session-id', maxTurnsFlag: '--max-turns', resumeDelivery: 'flag', resumeFlag: '--resume' },

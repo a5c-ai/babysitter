@@ -1,7 +1,7 @@
 import { CANONICAL_PHASES, LIFECYCLE_SCOPES } from '@a5c-ai/hooks-mux-core';
 import type { PhaseMapping } from '@a5c-ai/hooks-mux-core';
-import { listHookMappingsByAdapterFamily } from '@a5c-ai/agent-catalog';
-import type { HookMappingDescriptor } from '@a5c-ai/agent-catalog';
+import { listHookMappingsByAdapterFamily } from '@a5c-ai/atlas/catalog';
+import type { HookMappingDescriptor } from '@a5c-ai/atlas/catalog';
 
 /**
  * Claude Code native event name to canonical phase mappings.

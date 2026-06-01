@@ -11,7 +11,7 @@
 import { readPluginRegistry } from '../blueprints/registry';
 import { resolveActiveProcessLibrary } from '../processLibrary/active';
 import type { PluginScope } from '../blueprints/types';
-import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
+import { listPluginTargetDescriptors } from '@a5c-ai/atlas/catalog';
 
 /**
  * Collected capabilities from all runtime signal sources.

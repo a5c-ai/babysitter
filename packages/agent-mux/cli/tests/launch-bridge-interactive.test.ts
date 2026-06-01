@@ -100,7 +100,7 @@ vi.mock('@a5c-ai/agent-comm-mux', () => ({
   })),
 }));
 
-vi.mock('@a5c-ai/agent-catalog', () => ({
+vi.mock('@a5c-ai/atlas/catalog', () => ({
   getBridgeCapabilities: vi.fn(() => ({ interactiveBridge: true })),
   getYoloLaunchArgs: vi.fn(() => []),
   getAutomationEnv: vi.fn(() => ({})),

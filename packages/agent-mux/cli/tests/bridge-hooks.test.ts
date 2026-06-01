@@ -106,7 +106,7 @@ const getHookSupportMock = vi.fn();
 const getBridgeCapabilitiesMock = vi.fn();
 const getYoloLaunchArgsMock = vi.fn(() => []);
 
-vi.mock('@a5c-ai/agent-catalog', () => ({
+vi.mock('@a5c-ai/atlas/catalog', () => ({
   getHookSupport: getHookSupportMock,
   getBridgeCapabilities: getBridgeCapabilitiesMock,
   getYoloLaunchArgs: getYoloLaunchArgsMock,

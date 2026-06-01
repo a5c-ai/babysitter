@@ -29,7 +29,7 @@ import { createCustomAdapter } from "./customAdapter";
 // Discovery specs — derived from agent-catalog (which reads Atlas graph)
 // ---------------------------------------------------------------------------
 
-import { listPluginTargetDescriptors } from "@a5c-ai/agent-catalog";
+import { listPluginTargetDescriptors } from "@a5c-ai/atlas/catalog";
 
 const CAPABILITY_MAP: Record<string, Cap> = {
   SessionBinding: Cap.SessionBinding,

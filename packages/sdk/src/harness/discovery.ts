@@ -21,7 +21,7 @@ import * as os from "node:os";
 import {
   getHooksMuxDetectionRules,
   type HooksMuxDetectionRule,
-} from "@a5c-ai/agent-catalog";
+} from "@a5c-ai/atlas/catalog";
 import type {
   CallerHarnessResult,
   HarnessDiscoveryResult,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getHooksMuxDetectionRules } from '@a5c-ai/agent-catalog';
+import { getHooksMuxDetectionRules } from '@a5c-ai/atlas/catalog';
 import { detectHarness } from '../detector';
 
 function envForSignals(signals: readonly string[]): Record<string, string> {

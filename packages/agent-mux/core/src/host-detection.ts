@@ -16,7 +16,7 @@
  * catalog is embedded here for when the adapters package is not loaded.
  */
 
-import { getHostDetectionRules, getHostMetadataFields, getHostSignalMap } from '@a5c-ai/agent-catalog';
+import { getHostDetectionRules, getHostMetadataFields, getHostSignalMap } from '@a5c-ai/atlas/catalog';
 import type { AgentName } from './types.js';
 
 /** Information about a detected host harness. */

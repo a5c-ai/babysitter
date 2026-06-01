@@ -91,7 +91,7 @@
     "prepublishOnly": "npm run build && npm run test && npm run verify:release"
   },
   "dependencies": {
-    "@a5c-ai/agent-catalog": "5.0.0",
+    "@a5c-ai/atlas": "5.0.0",
     "@a5c-ai/agent-mux-observability": "5.0.0",
     "@sinclair/typebox": "^0.34.48"
   },

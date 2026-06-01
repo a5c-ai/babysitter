@@ -40,7 +40,7 @@
     "verify:package-health": "node scripts/verify-package-health.cjs"
   },
   "dependencies": {
-    "@a5c-ai/agent-catalog": "5.0.0",
+    "@a5c-ai/atlas": "5.0.0",
     "@a5c-ai/agent-mux": "^5.0.0",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@sinclair/typebox": "^0.34.48",

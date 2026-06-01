@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
-      "@a5c-ai/agent-catalog": path.resolve(__dirname, "../agent-catalog/dist/index.js"),
+      "@a5c-ai/atlas/catalog": path.resolve(__dirname, "../atlas/dist/catalog/index.js"),
     },
   },
   test: {

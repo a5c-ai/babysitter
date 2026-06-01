@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import type { A5cPluginManifest } from './types.js';
-import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
+import { listPluginTargetDescriptors } from '@a5c-ai/atlas/catalog';
 
 /**
  * Build the contextFiles map from catalog data.

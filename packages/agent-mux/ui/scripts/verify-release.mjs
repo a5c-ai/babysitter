@@ -46,7 +46,7 @@ export function verifyAgentMuxUiRelease({ packageRoot, manifest, packEntries }) 
     'packages/agent-mux/ui/package.json publishConfig.access must stay public'
   );
   expect(
-    scripts['build:realtime'] === 'npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build',
+    scripts['build:realtime'] === 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build',
     'packages/agent-mux/ui/package.json build:realtime must remain a package-local realtime build entrypoint'
   );
   expect(

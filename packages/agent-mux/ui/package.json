@@ -66,7 +66,7 @@
   },
   "scripts": {
     "build": "npm run clean && npm run codegen && tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
-    "build:realtime": "npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build",
+    "build:realtime": "npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "codegen": "tsx src/codegen/swift-types.ts && tsx src/codegen/kotlin-types.ts",
     "test": "vitest run --root ../../.. --config vitest.config.ts packages/agent-mux/ui",

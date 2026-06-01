@@ -14,12 +14,12 @@ import {
 } from '@a5c-ai/agent-comm-mux';
 import type { ProviderId, TransportId } from '@a5c-ai/agent-comm-mux';
 import { translateForHarness } from '@a5c-ai/agent-mux-adapters';
-import { getLaunchBehavior } from '@a5c-ai/agent-catalog';
+import { getLaunchBehavior } from '@a5c-ai/atlas/catalog';
 import {
   getAutomationEnv,
   getBridgeCapabilities,
   getYoloLaunchArgs,
-} from '@a5c-ai/agent-catalog';
+} from '@a5c-ai/atlas/catalog';
 import { startTransportMuxRuntime } from '@a5c-ai/transport-mux';
 import type { TransportMuxRuntime } from '@a5c-ai/transport-mux';
 import type { ParsedArgs, FlagDef } from './cli-helpers.js';

@@ -257,7 +257,7 @@ export function getSessionMarkerPath(harness: string, ancestorPid: number): stri
 function deriveProcessNames(harness: string): string[] {
   const slug = sanitizeHarnessSlug(harness);
   try {
-    const { getPluginTargetDescriptor } = require("@a5c-ai/agent-catalog") as { getPluginTargetDescriptor: (id: string) => { processNames?: string[]; cliCommand?: string } | undefined };
+    const { getPluginTargetDescriptor } = require("@a5c-ai/atlas/catalog") as { getPluginTargetDescriptor: (id: string) => { processNames?: string[]; cliCommand?: string } | undefined };
     // Try exact match first, then common aliases
     const target = getPluginTargetDescriptor(slug)
       ?? getPluginTargetDescriptor(slug === "claude" ? "claude-code" : slug)

@@ -8,7 +8,7 @@
 import {
   getHarnessImages,
   lookupHarnessImage as lookupCatalogHarnessImage,
-} from '@a5c-ai/agent-catalog';
+} from '@a5c-ai/atlas/catalog';
 
 // ---------------------------------------------------------------------------
 // Invocation Mode Discriminated Union

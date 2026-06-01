@@ -16,7 +16,7 @@ function buildFromCatalog(): {
   harnessDefaultTransport: Record<string, TransportId>;
 } {
   try {
-    const { listPluginTargetDescriptors, getAgentCatalog } = require('@a5c-ai/agent-catalog') as {
+    const { listPluginTargetDescriptors, getAgentCatalog } = require('@a5c-ai/atlas/catalog') as {
       listPluginTargetDescriptors: () => Array<{
         targetId: string;
         adapterName: string;

@@ -13,7 +13,7 @@ import {
   createDefaultCliSetupSnippet,
   createPromptContext,
 } from "../../prompts/contextShared";
-import { listPluginTargetDescriptors, type PluginTargetDescriptor } from "@a5c-ai/agent-catalog";
+import { listPluginTargetDescriptors, type PluginTargetDescriptor } from "@a5c-ai/atlas/catalog";
 
 function getTargetDescriptors(): PluginTargetDescriptor[] {
   return listPluginTargetDescriptors();

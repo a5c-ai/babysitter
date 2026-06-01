@@ -5,7 +5,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { getAdapterMetadata, getAdapterModels, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/agent-catalog';
+import { getAdapterMetadata, getAdapterModels, getAgentVersion, getInstallMethods, getHostEnvSignals, getSessionConfig, getCapabilityFlags, getRuntimeHooks, getConfigSchema, getDisplayName, getDefaultModelId } from '@a5c-ai/atlas/catalog';
 
 import type {
   AgentCapabilities,
@@ -387,7 +387,7 @@ export class CodexAdapter extends BaseAgentAdapter {
 
 // Self-register in the global adapter registry
 import { registerAdapterFactory } from './base-adapter.js';
-import { getPluginTargetDescriptor } from '@a5c-ai/agent-catalog';
+import { getPluginTargetDescriptor } from '@a5c-ai/atlas/catalog';
 
 const _name = 'codex';
 registerAdapterFactory(_name, () => new CodexAdapter(_name, getPluginTargetDescriptor(_name)?.cliCommand ?? _name));

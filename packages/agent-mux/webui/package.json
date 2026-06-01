@@ -42,7 +42,7 @@
   },
   "scripts": {
     "build": "npm run clean && npm run build --workspace=@a5c-ai/agent-mux-ui && vite build && tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
-    "build:realtime": "npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build --workspace=@a5c-ai/agent-mux-ui && npm run build",
+    "build:realtime": "npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build --workspace=@a5c-ai/agent-mux-ui && npm run build",
     "clean": "rimraf dist dist-types tsconfig.tsbuildinfo",
     "dev": "vite",
     "test": "vitest run --config vitest.config.ts",

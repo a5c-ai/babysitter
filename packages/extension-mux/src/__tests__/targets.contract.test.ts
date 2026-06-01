@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   getHookNameMap,
   listPluginTargetDescriptors,
-} from '@a5c-ai/agent-catalog';
+} from '@a5c-ai/atlas/catalog';
 import {
   getAllTargets,
   getTargetProfile,

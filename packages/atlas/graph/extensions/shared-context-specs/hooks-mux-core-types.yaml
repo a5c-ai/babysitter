@@ -96,7 +96,7 @@ attributes:
   displayName: "PhaseMapping (canonical↔native)"
   contextKind: "interface-contract"
   typescriptInterface: "PhaseMapping"
-  producerIface: "@a5c-ai/agent-catalog adapter capability tables"
+  producerIface: "@a5c-ai/atlas/catalog adapter capability tables"
   consumerIfaces:
     - "@a5c-ai/hooks-mux-core merge-engine (capability gating)"
     - "@a5c-ai/hooks-mux-core propagation/adapt-output (degradation tracking)"

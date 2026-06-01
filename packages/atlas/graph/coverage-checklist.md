@@ -461,7 +461,7 @@ A `Mux` is treated as `ExtensionInterface` (a5c-flavored contract) plus implemen
 
 | Concept | Source | Schema mapping | Status | Notes |
 |---|---|---|---|---|
-| `@a5c-ai/agent-catalog` | a5c/01-component-map.md | `PackageSurface` + `CiSurface` (both populated; example: graph/catalog-meta/package-surfaces/agent-catalog.yaml) | ✅ | promoted from stub |
+| `@a5c-ai/atlas/catalog` | a5c/01-component-map.md | `PackageSurface` + `CiSurface` (both populated; example: graph/catalog-meta/package-surfaces/agent-catalog.yaml) | ✅ | promoted from stub |
 | `@a5c-ai/catalog` (UI) | a5c/01-component-map.md | `PackageSurface` + `CiSurface` | ✅ | |
 | `@a5c-ai/tula-core` | a5c/01-component-map.md | `PackageSurface` | ✅ | |
 | `@a5c-ai/agent-comm-mux/adapters/cli/sdk/gateway/harness-mock/observability/tui/webui` | a5c/01-component-map.md | one `PackageSurface` each | ✅ | |

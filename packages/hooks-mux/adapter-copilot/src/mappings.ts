@@ -1,6 +1,6 @@
 import type { PhaseMapping } from '@a5c-ai/hooks-mux-core';
-import { listHookMappingsByAdapterFamily } from '@a5c-ai/agent-catalog';
-import type { HookMappingDescriptor } from '@a5c-ai/agent-catalog';
+import { listHookMappingsByAdapterFamily } from '@a5c-ai/atlas/catalog';
+import type { HookMappingDescriptor } from '@a5c-ai/atlas/catalog';
 
 /**
  * Copilot native hook names mapped to canonical lifecycle phases.

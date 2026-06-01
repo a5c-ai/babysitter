@@ -1,6 +1,6 @@
 import { renderTemplate, resolveTemplatePath } from '../templateRenderer';
 import type { PromptContext } from '../types';
-import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
+import { listPluginTargetDescriptors } from '@a5c-ai/atlas/catalog';
 
 /**
  * Resolve whether the current harness uses codex-style ambient env var

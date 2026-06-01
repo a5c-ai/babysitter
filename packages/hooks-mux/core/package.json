@@ -30,7 +30,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@a5c-ai/agent-catalog": "5.0.0"
+    "@a5c-ai/atlas": "5.0.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

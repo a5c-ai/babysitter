@@ -265,7 +265,7 @@ they're published.
 
 | Attribute | Type | Required | Notes |
 |---|---|---|---|
-| `id` | id | yes | `package:<name>`, e.g. `package:@a5c-ai/agent-catalog`. |
+| `id` | id | yes | `package:<name>`, e.g. `package:@a5c-ai/atlas/catalog`. |
 | `packageId` | string | yes | Stable id (typically equals the npm/PyPI package name). |
 | `packageName` | string | yes | Human-readable / publishable name. |
 | `workspacePath` | string | yes | Repo-relative path to the package root (e.g. `packages/agent-catalog`). |
@@ -303,13 +303,13 @@ events for a package's CI pipeline.
 
 | Attribute | Type | Required | Notes |
 |---|---|---|---|
-| `id` | id | yes | `ci:<package>`, e.g. `ci:@a5c-ai/agent-catalog`. |
+| `id` | id | yes | `ci:<package>`, e.g. `ci:@a5c-ai/atlas/catalog`. |
 | `ciId` | string | yes | Stable id (typically the package name). |
 | `packageId` | ref<`PackageSurface`> | yes | The package this CI surface validates. |
 | `scripts` | list<string> | yes | Top-level npm/pnpm scripts (e.g. `build`, `test`, `validate:evidence:freshness`, `ci:evidence`, `policy:check`, `ci:test`, `version:check`). |
 | `publishStrategy` | enum<internal-workspace,npm-public,application,container-image,none> | yes | How the package's outputs are released. |
 | `releaseChannels` | list<string> | yes | Channels (e.g. `ci`, `prod`, `staging`). |
-| `validationCommands` | list<string> | yes | Concrete validation commands (e.g. `npm run ci:test --workspace=@a5c-ai/agent-catalog`). |
+| `validationCommands` | list<string> | yes | Concrete validation commands (e.g. `npm run ci:test --workspace=@a5c-ai/atlas`). |
 | `artifactExpectations` | list<string> | no | Glob patterns for expected build artifacts (e.g. `dist/**`, `graph/**`, `evidence/**`, `.next/**`). |
 | `triggerEvents` | list<enum<push,pr,tag,schedule>> | no | Events that trigger this pipeline. |
 | `requiredApprovals` | int | no | Number of human approvals required before publish. |

@@ -110,7 +110,7 @@ multiple boundaries (e.g., one per dimension).
   ref: "ef128993"
   path: "packages/agent-catalog/v1"
   packageManager: npm
-  packageName: "@a5c-ai/agent-catalog"
+  packageName: "@a5c-ai/atlas/catalog"
   version: "1.4.2"
   description: |
     The v1 agent catalog package, pinned to commit ef128993. Used as the upstream

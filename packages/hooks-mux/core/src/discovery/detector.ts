@@ -7,8 +7,8 @@
  * particular flavour of AI assistant has summoned us.
  */
 
-import { getHooksMuxDetectionRules } from '@a5c-ai/agent-catalog';
-import type { HooksMuxDetectionRule } from '@a5c-ai/agent-catalog';
+import { getHooksMuxDetectionRules } from '@a5c-ai/atlas/catalog';
+import type { HooksMuxDetectionRule } from '@a5c-ai/atlas/catalog';
 
 export interface DetectedHarness {
   /** Adapter name (e.g. 'claude', 'codex', 'gemini'). */

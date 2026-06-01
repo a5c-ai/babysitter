@@ -3,7 +3,7 @@ import {
   getHostDetectionRules,
   getHostMetadataFields,
   getHostSignalMap,
-} from '@a5c-ai/agent-catalog';
+} from '@a5c-ai/atlas/catalog';
 import { detectHostHarness } from '../src/host-detection.js';
 
 function envForSignals(signals: readonly string[]): NodeJS.ProcessEnv {

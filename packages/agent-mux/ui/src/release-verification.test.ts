@@ -19,7 +19,7 @@ const baseManifest = {
     },
   },
   scripts: {
-    'build:realtime': 'npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build',
+    'build:realtime': 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build',
     test: 'vitest run --root ../../.. --config vitest.config.ts packages/agent-mux/ui',
     'test:realtime':
       'vitest run --root ../../.. --config vitest.config.ts "packages/agent-mux/ui/src/session-flow*.test.ts" "packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx" "packages/agent-mux/ui/src/release-verification.test.ts"',

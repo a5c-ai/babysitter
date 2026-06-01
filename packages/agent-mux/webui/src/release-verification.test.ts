@@ -11,7 +11,7 @@ const baseManifest = {
     access: 'public',
   },
   scripts: {
-    'build:realtime': 'npm run build --workspace=@a5c-ai/agent-catalog && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build --workspace=@a5c-ai/agent-mux-ui && npm run build',
+    'build:realtime': 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-comm-mux && npm run build --workspace=@a5c-ai/agent-mux-ui && npm run build',
     test: 'vitest run --config vitest.config.ts',
     'test:realtime':
       'vitest run --root ../../.. --config vitest.config.ts "packages/agent-mux/webui/src/pages/SessionDetailPage.test.ts" "packages/agent-mux/webui/src/pages/SessionDetailPage.route.test.tsx" "packages/agent-mux/webui/src/release-verification.test.ts"',

@@ -172,7 +172,7 @@ function normalizeAdapterName(adapterName: string): string {
 
 function buildKnownAdapters(): string[] {
   try {
-    const { listPluginTargetDescriptors } = require('@a5c-ai/agent-catalog') as {
+    const { listPluginTargetDescriptors } = require('@a5c-ai/atlas/catalog') as {
       listPluginTargetDescriptors: () => Array<{ adapterName: string }>;
     };
     const excludes = new Set(['tula', 'babysitter', 'agent-mux', 'agent-mux-remote', 'agent-platform']);

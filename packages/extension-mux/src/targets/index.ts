@@ -4,8 +4,8 @@ import {
   getHookNameMap,
   getPluginTargetDescriptor,
   listPluginTargetDescriptors,
-} from '@a5c-ai/agent-catalog';
-import type { PluginTargetDescriptor } from '@a5c-ai/agent-catalog';
+} from '@a5c-ai/atlas/catalog';
+import type { PluginTargetDescriptor } from '@a5c-ai/atlas/catalog';
 import type { TargetProfile } from '../types.js';
 
 function toManifestFormat(format: string): TargetProfile['manifestFormat'] {

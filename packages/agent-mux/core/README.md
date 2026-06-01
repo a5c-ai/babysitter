@@ -30,7 +30,7 @@ instead of expecting a separate CJS bundle.
 
 Runtime dependencies are part of the package contract:
 
-- `@a5c-ai/agent-catalog` provides the harness image catalog plus host-detection
+- `@a5c-ai/atlas/catalog` provides the harness image catalog plus host-detection
   rules and metadata used by invocation and host helpers
 - `@a5c-ai/agent-mux-observability` provides the structured logging and telemetry
   primitives used by the client, auth/session flows, and run-handle implementation

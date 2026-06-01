@@ -3,7 +3,7 @@
 export type { HarnessOutputAdapter } from './interface.js';
 export { BaseHarnessOutputAdapter } from './base.js';
 
-import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
+import { listPluginTargetDescriptors } from '@a5c-ai/atlas/catalog';
 import type { HarnessOutputAdapter } from './interface.js';
 import { ClaudeCodeAdapter } from './claude-code.js';
 import { CodexAdapter } from './codex.js';

@@ -47,7 +47,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@a5c-ai/agent-catalog": "5.0.0"
+    "@a5c-ai/atlas": "5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

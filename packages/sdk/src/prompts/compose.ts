@@ -6,7 +6,7 @@
 
 import { PromptContext } from './types';
 import * as parts from './parts';
-import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
+import { listPluginTargetDescriptors } from '@a5c-ai/atlas/catalog';
 
 /**
  * Resolve the orchestration step count from catalog metadata.

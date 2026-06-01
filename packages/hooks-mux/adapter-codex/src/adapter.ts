@@ -1,5 +1,5 @@
 import type { AdapterCapabilities } from '@a5c-ai/hooks-mux-core';
-import { getPluginTargetDescriptor } from '@a5c-ai/agent-catalog';
+import { getPluginTargetDescriptor } from '@a5c-ai/atlas/catalog';
 
 /**
  * Creates the Codex adapter with its capability metadata.

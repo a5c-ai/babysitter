@@ -239,7 +239,7 @@ aliases:
   # ─────────────────────────────────────────────────────────────────
   # NodeKind: PackageSurface
   # ─────────────────────────────────────────────────────────────────
-  - { legacyId: "package:@a5c-ai/agent-catalog",     v6Id: "package-surface:a5c-ai-agent-catalog",     nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/atlas/catalog",     v6Id: "package-surface:a5c-ai-agent-catalog",     nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/agent-comm-mux",    v6Id: "package-surface:a5c-ai-agent-comm-mux",    nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/extension-mux", v6Id: "package-surface:a5c-ai-extension-mux", nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/babysitter-sdk",    v6Id: "package-surface:a5c-ai-babysitter-sdk",    nodeKind: PackageSurface }
@@ -256,7 +256,7 @@ aliases:
   # ─────────────────────────────────────────────────────────────────
   # NodeKind: CiSurface
   # ─────────────────────────────────────────────────────────────────
-  - { legacyId: "ci:@a5c-ai/agent-catalog", v6Id: "ci-surface:a5c-ai-agent-catalog", nodeKind: CiSurface }
+  - { legacyId: "ci:@a5c-ai/atlas/catalog", v6Id: "ci-surface:a5c-ai-agent-catalog", nodeKind: CiSurface }
   - { legacyId: "ci:@a5c-ai/catalog",       v6Id: "ci-surface:a5c-ai-catalog",       nodeKind: CiSurface }
 
   # ─────────────────────────────────────────────────────────────────

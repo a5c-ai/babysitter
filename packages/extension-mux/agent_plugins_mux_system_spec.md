@@ -46,7 +46,7 @@ npx @a5c-ai/extension-mux compile --target all --output dist/
 3. **Deterministic output**: Same input always produces identical output.
 4. **Lossless where possible, explicit degradation where not**: When a target does not support a component, the compiler emits a diagnostic rather than silently dropping it.
 5. **hooks-mux is a dependency, not internalized**: Hook execution routing goes through the hooks-mux subsystem. The compiler generates the shell/Node.js/PowerShell wrapper scripts that call into hooks-mux.
-6. **agent-catalog is authoritative for target metadata**: Target capabilities, hook mappings, install paths, argv detection hints, and package/bin generation metadata are read from `@a5c-ai/agent-catalog`; compiler code only adapts that declarative graph into emitted files.
+6. **agent-catalog is authoritative for target metadata**: Target capabilities, hook mappings, install paths, argv detection hints, and package/bin generation metadata are read from `@a5c-ai/atlas/catalog`; compiler code only adapts that declarative graph into emitted files.
 
 ---
 

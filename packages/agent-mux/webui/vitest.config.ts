@@ -46,7 +46,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@a5c-ai/agent-catalog': path.resolve(rootDir, '..', '..', 'agent-catalog', 'src', 'index.ts'),
+      '@a5c-ai/atlas/catalog': path.resolve(rootDir, '..', '..', 'atlas', 'src', 'catalog', 'index.ts'),
       '@a5c-ai/agent-comm-mux/automation': path.resolve(rootDir, '..', 'core', 'src', 'automation.ts'),
       '@a5c-ai/agent-comm-mux/kanban': path.resolve(rootDir, '..', 'core', 'src', 'kanban.ts'),
       '@a5c-ai/agent-comm-mux/browser': path.resolve(rootDir, '..', 'core', 'src', 'browser.ts'),

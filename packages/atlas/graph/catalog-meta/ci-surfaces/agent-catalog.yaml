@@ -1,7 +1,7 @@
 nodeKind: CiSurface
 id: ci:a5c-ai-agent-catalog
 attributes:
-  ciId: "@a5c-ai/agent-catalog"
+  ciId: "@a5c-ai/atlas/catalog"
   packageId: package:a5c-ai-agent-catalog
   scripts:
     - build
@@ -15,8 +15,8 @@ attributes:
   releaseChannels:
     - ci
   validationCommands:
-    - "npm run ci:test --workspace=@a5c-ai/agent-catalog"
-    - "npm run version:check --workspace=@a5c-ai/agent-catalog"
+    - "npm run ci:test --workspace=@a5c-ai/atlas"
+    - "npm run version:check --workspace=@a5c-ai/atlas"
   artifactExpectations:
     - "dist/**"
     - "graph/**"

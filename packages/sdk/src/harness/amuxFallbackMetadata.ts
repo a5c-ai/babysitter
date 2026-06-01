@@ -1,4 +1,4 @@
-import { listFallbackHarnessMetadata as listCatalogFallbackHarnessMetadata, getHostSignalMap } from "@a5c-ai/agent-catalog";
+import { listFallbackHarnessMetadata as listCatalogFallbackHarnessMetadata, getHostSignalMap } from "@a5c-ai/atlas/catalog";
 import { resolveRunsDir } from "../config";
 import type { AmuxAdapterMetadata } from "./amuxMetadata";
 
