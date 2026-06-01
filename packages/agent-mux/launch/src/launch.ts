@@ -1815,9 +1815,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       });
       (child as any).__bridgeExitPromise = exitPromise;
     }
-  } else if (process.platform === 'win32' && plan.harness === 'hermes') {
-    // Hermes on Windows NI: use ConPTY so prompt_toolkit gets a console.
-    // Without ConPTY, Win32Input can't read stdin from a pipe.
+  } else if (process.platform === 'win32' && plan.harness === 'hermes' && !bridgeHooks) {
+    // Hermes on Windows NI (non-bridge): use ConPTY so prompt_toolkit gets a console.
+    // With bridge-hooks, skip ConPTY — sitecustomize.py patches prompt_toolkit to use
+    // PosixPipeInput, and stdio pipe is 5-10x faster than ConPTY.
     try {
       const nodePty: any = await import('node-pty');
       const resolved = await resolveSpawnCommand(plan.command, plan.args);
