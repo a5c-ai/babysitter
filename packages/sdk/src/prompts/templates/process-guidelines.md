@@ -88,6 +88,12 @@ specified:
   - Integration phases for each new functionality in every milestone
   - Where relevant -- beautiful and polished UX with pixel-perfect verification
   - Accurate and complete implementation of the user request
+  - For implementation phases that author planned new files under `scripts/`,
+    `supabase/migrations/`, `src/server/`, or `src/lib/`, require an exact path
+    preflight with `ls` or `rg`/`grep` before writing. If a planned new path
+    already exists, read the existing file, report findings to the orchestrator,
+    and wait for scope direction such as use-existing, replace, append, or
+    renumber. Do not auto-resolve existing-file collisions.
   - Closing quality feedback loops as comprehensively as practical
   - Search for processes, skills, agents, methodologies during the interactive
     process building phase to compose a comprehensive process:

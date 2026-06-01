@@ -76,6 +76,14 @@ If the audit finds no matches, still include the heading with a brief "No
 matching existing infrastructure found" note so reviewers know the pre-flight
 ran. Draft the plan with the reuse-audit findings in context.
 
+**Implementation-time orphan-file preflight**: In implementation tasks, before
+an agent authors planned new files under `scripts/`, `supabase/migrations/`,
+`src/server/`, or `src/lib/`, instruct it to check each exact path with `ls`
+or `rg`/`grep`. If an exact planned new path already exists, the agent must
+read the existing file, report findings to the orchestrator, and wait for
+scope direction such as use-existing, replace, append, or renumber. Do not auto-resolve
+existing-file collisions.
+
 After the process is created and before creating the run:
 
 - **Interactive mode**: describe the process at high level (not the code or
