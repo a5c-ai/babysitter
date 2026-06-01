@@ -1,9 +1,13 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { AtlasRecord, Edge, IndexShape, NeighborResult, SearchHit } from "./types";
 
-// Use require() so bundlers (Turbopack/webpack) can resolve the JSON
-// at build time instead of relying on fs.readFileSync + __dirname.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const indexJson: IndexShape = require("./index.json");
+// Load the pre-built graph index with readFileSync instead of require()
+// so Vite's CJS-to-ESM interop doesn't try to process the 37 MB JSON
+// through its transform pipeline (which silently drops it in CI).
+const indexJson: IndexShape = JSON.parse(
+  readFileSync(join(__dirname, "index.json"), "utf8"),
+);
 
 export type { AtlasRecord, ClusterDef, Edge, EdgeKindDef, IndexShape, NeighborResult, NodeKindDef, Record_, SearchHit } from "./types";
 
