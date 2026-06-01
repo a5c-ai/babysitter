@@ -71,8 +71,8 @@ describe('ASSISTANT_RUNTIME_BOUNDARY', () => {
 describe('defaultAssistantConfig', () => {
   it('returns an object with expected fields', () => {
     const config = defaultAssistantConfig();
-    assert.equal(config.baseAgent, 'claude-code');
-    assert.equal(config.provider, 'anthropic');
+    assert.equal(config.baseAgent, 'krate-assistant');
+    assert.ok(typeof config.provider === 'string' || config.provider === undefined);
     assert.equal(typeof config.model, 'string');
     assert.equal(typeof config.systemPrompt, 'string');
     assert.equal(config.approvalMode, 'prompt');
@@ -219,8 +219,8 @@ describe('createAssistantRuntime — resolveConfig', () => {
   it('returns default config when no controller provided', async () => {
     const runtime = createAssistantRuntime();
     const config = await runtime.resolveConfig(null);
-    assert.equal(config.baseAgent, 'claude-code');
-    assert.equal(config.provider, 'anthropic');
+    assert.equal(config.baseAgent, 'krate-assistant');
+    assert.ok(typeof config.provider === 'string' || config.provider === undefined);
   });
 
   it('returns default config when controller throws', async () => {

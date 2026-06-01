@@ -989,17 +989,19 @@ describe("handleHarnessCreateRun", () => {
           runDir,
           metadata: {},
         });
-        (orchestrateIteration as Mock).mockResolvedValueOnce({
-          status: "waiting",
-          nextActions: [
-            {
-              effectId: "eff-agent",
-              invocationKey: "key-agent",
-              kind: "agent",
-              taskDef: { kind: "agent", title: "Do work" },
-            },
-          ],
-        });
+        (orchestrateIteration as Mock)
+          .mockResolvedValueOnce({
+            status: "waiting",
+            nextActions: [
+              {
+                effectId: "eff-agent",
+                invocationKey: "key-agent",
+                kind: "agent",
+                taskDef: { kind: "agent", title: "Do work" },
+              },
+            ],
+          })
+          .mockResolvedValue({ status: "failed", error: { message: "effect failed" } });
 
         const makeWaitingAssessment = () => ({
           run: {

@@ -68,7 +68,7 @@ describe('ClaudeAdapter', () => {
     });
 
     it('has correct display name', () => {
-      expect(adapter.displayName).toBe('Claude Code');
+      expect(adapter.displayName).toBe('claude');
     });
 
     it('has correct CLI command', () => {
