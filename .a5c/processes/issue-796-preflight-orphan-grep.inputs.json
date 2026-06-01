@@ -1,0 +1,106 @@
+{
+  "issueNumber": 796,
+  "baseBranch": "staging",
+  "implementationBranch": "fix/issue-796-preflight-orphan-grep-prompts",
+  "maxAttemptsPerPhase": 3,
+  "qualityThreshold": 90,
+  "collisionPronePaths": [
+    "scripts/",
+    "supabase/migrations/",
+    "src/server/",
+    "src/lib/"
+  ],
+  "targetFiles": [
+    "library/cradle/feature-implementation-contribute.js",
+    "library/cradle/feature-harness-integration-contribute.js",
+    "library/methodologies/cc10x/cc10x-build.js",
+    "packages/sdk/src/prompts/templates/process-creation.md",
+    "packages/sdk/src/prompts/templates/process-guidelines.md",
+    "packages/sdk/src/prompts/templates/coding-philosophy.md"
+  ],
+  "candidateTestFiles": [
+    "library/vitest.config.mjs",
+    "packages/sdk/src/prompts/**/*.test.*",
+    "library/**/*.test.*",
+    "tests/**/*.test.*"
+  ],
+  "verificationCommands": [
+    "npm run test:library",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "phases": [
+    {
+      "id": "cradle-feature-implementation",
+      "title": "Cradle feature implementation prompt hardening",
+      "targetFiles": [
+        "library/cradle/feature-implementation-contribute.js"
+      ],
+      "intent": "Add exact-path pre-author orphan-file detection to applyImplementationTask without changing unrelated contribution workflow behavior.",
+      "acceptanceFocus": [
+        "Implementation task instructions require checking planned new files before writing.",
+        "Existing files under collision-prone paths must be read and reported to the orchestrator.",
+        "The agent must wait for scope direction instead of auto-resolving the collision."
+      ]
+    },
+    {
+      "id": "cradle-harness-integration",
+      "title": "Cradle harness integration prompt hardening",
+      "targetFiles": [
+        "library/cradle/feature-harness-integration-contribute.js"
+      ],
+      "intent": "Add the same detection behavior before harness integration creates planned new harness files.",
+      "acceptanceFocus": [
+        "Harness integration creation guidance checks exact planned paths before authoring.",
+        "The check remains limited to planned new files and common collision-prone paths."
+      ]
+    },
+    {
+      "id": "cc10x-tdd-green-guidance",
+      "title": "CC10X TDD GREEN guidance hardening",
+      "targetFiles": [
+        "library/methodologies/cc10x/cc10x-build.js"
+      ],
+      "intent": "Ensure implementation-oriented TDD guidance checks planned new paths before writing implementation code.",
+      "acceptanceFocus": [
+        "GREEN phase guidance still enforces minimal implementation and exit-code evidence.",
+        "Pre-author orphan-file checks are performed before Write/Edit creates planned new files."
+      ]
+    },
+    {
+      "id": "sdk-babysit-template-guidance",
+      "title": "SDK babysit/process template guidance hardening",
+      "targetFiles": [
+        "packages/sdk/src/prompts/templates/process-creation.md",
+        "packages/sdk/src/prompts/templates/process-guidelines.md",
+        "packages/sdk/src/prompts/templates/coding-philosophy.md"
+      ],
+      "intent": "Extend SDK instruction templates so future generated implementation-style processes inherit the pre-author orphan-file check without weakening existing REUSE-AUDIT guidance.",
+      "acceptanceFocus": [
+        "Plan-scoped REUSE-AUDIT remains intact and distinct from implementation-time orphan checks.",
+        "Generated implementation process guidance preserves exact-path collision detection.",
+        "Coding philosophy continues to prefer existing files over unnecessary new files."
+      ]
+    }
+  ],
+  "knownIssueContext": {
+    "title": "feature: Pre-flight orphan-file grep in impl-task prompts",
+    "labels": [
+      "sdk",
+      "ready-for-dev",
+      "effort:small",
+      "feature",
+      "priority:medium",
+      "risk:medium"
+    ],
+    "problem": "Recent cookbook work discovered multiple already-existing proposed artifacts only after authoring started, wasting time and forcing scope pivots.",
+    "requestedBehavior": "Before an implementation agent writes a new file under common-author paths, it should check the exact proposed path, read existing content if present, report findings, and wait for orchestrator direction.",
+    "explicitNonGoals": [
+      "Do not auto-resolve collisions.",
+      "Do not broaden the preflight into a mandatory check for every ordinary edit.",
+      "Do not create implementation source changes as part of this planning artifact."
+    ]
+  }
+}
