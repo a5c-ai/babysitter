@@ -1649,8 +1649,8 @@ export function getConfigSchema(harness: string): import('./models.js').AdapterC
 export function getDisplayName(harness: string): string {
   const metadata = getAdapterMetadata(harness);
   if (metadata?.displayName) return metadata.displayName;
-  const agent = getAgentVersion(harness);
-  if (agent?.displayName) return agent.displayName;
+  const topology = getAgentVersionTopology(harness);
+  if (topology?.product?.displayName) return topology.product.displayName;
   return harness;
 }
 

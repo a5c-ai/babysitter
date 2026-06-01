@@ -11,34 +11,33 @@ attributes:
     - "No public npm-style package version was identified; existing Cursor installer / cursor-agent auth assumptions remain unchanged."
   releaseHighlights:
     - "Cursor 2026-05-20 changelog adds Automations in the Agents Window, multi-repo and no-repo automation contexts, shared canvases, and /loop repeated prompt runs."
-  adapterMetadata:
-    issue805Changelog:
-      releaseMarker: "2026-05-20"
-      sourceKind: official-changelog
-      releaseNotesUrl: "https://cursor.com/changelog"
-      publicCliSemverIdentified: false
-      installerChangeIdentified: false
-      automation:
-        surface: agents-window
-        repositoryAttachmentModes:
-          - multi-repo
-          - no-repo
-        workspaceAssumptionNotes: "Adapters should not assume every Cursor Automation has exactly one attached repository."
-      artifacts:
-        sharedCanvases:
-          availability: live-read-only-browser-snapshot
-          artifactKinds:
-            - report
-            - dashboard
-            - custom-interface
-          notes: "Artifact/session metadata should be able to reference shared canvas snapshots when surfaced by Cursor."
-      slashCommands:
-        loop:
-          invocationToken: "/loop"
-          cadenceModes:
-            - local-schedule
-            - agent-decided-cadence
-          notes: "Slash-command metadata should model repeated or background prompt runs."
+  issue805Changelog:
+    releaseMarker: "2026-05-20"
+    sourceKind: official-changelog
+    releaseNotesUrl: "https://cursor.com/changelog"
+    publicCliSemverIdentified: false
+    installerChangeIdentified: false
+    automation:
+      surface: agents-window
+      repositoryAttachmentModes:
+        - multi-repo
+        - no-repo
+      workspaceAssumptionNotes: "Adapters should not assume every Cursor Automation has exactly one attached repository."
+    artifacts:
+      sharedCanvases:
+        availability: live-read-only-browser-snapshot
+        artifactKinds:
+          - report
+          - dashboard
+          - custom-interface
+        notes: "Artifact/session metadata should be able to reference shared canvas snapshots when surfaced by Cursor."
+    slashCommands:
+      loop:
+        invocationToken: "/loop"
+        cadenceModes:
+          - local-schedule
+          - agent-decided-cadence
+        notes: "Slash-command metadata should model repeated or background prompt runs."
 edges:
   sourced_from:
     - evidence:cursor-2026-05-20-changelog-issue-805
