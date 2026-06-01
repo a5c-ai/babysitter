@@ -146,6 +146,17 @@ export interface CreateRunResult {
   metadata: RunMetadata;
 }
 
+export interface ForwardFixAttemptMetadata extends JsonRecord {
+  bugClass?: string;
+  attemptStatus?: "failed" | "succeeded" | "cancelled";
+  instrumentation_only?: boolean;
+}
+
+export interface ForwardFixDiagnostic extends JsonRecord {
+  code: "missing_bugClass";
+  message: string;
+}
+
 export interface SubprocessInvocation {
   processPath: string;
   exportName?: string;

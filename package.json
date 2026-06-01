@@ -29,6 +29,7 @@
     "check:library-syntax": "node ./scripts/validate-library-js-syntax.cjs",
     "verify:metadata": "node ./scripts/check-package-metadata.cjs",
     "validate:processes": "node ./scripts/validate-process.mjs",
+    "check:processes": "npm run validate:processes && node ./scripts/check-fix-strikes.mjs",
     "verify:library-metadata": "node packages/atlas/scripts/verify-library-metadata.mjs",
     "test:agent-catalog-contracts": "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts \"packages/agent-catalog/src/catalog.test.ts\" \"packages/agent-catalog/src/discovery.contract.test.ts\" \"packages/agent-catalog/src/sdk.contract.test.ts\" \"packages/agent-catalog/src/discovery.packaged.test.ts\" \"packages/sdk/src/harness/amuxFallbackMetadata.contract.test.ts\" \"packages/hooks-mux/core/src/discovery/__tests__/detector.contract.test.ts\" \"packages/agent-mux/core/tests/host-detection.contract.test.ts\" \"packages/agent-mux/core/tests/invocation.contract.test.ts\" \"packages/extension-mux/src/__tests__/targets.contract.test.ts\"",
     "verify:v6:seams": "npm run test:seams --workspace=@a5c-ai/agent-platform",

@@ -30,6 +30,8 @@ export interface RunMetadata extends JsonRecord {
   prompt?: string;
   inputSchema?: Record<string, unknown>;
   outputSchema?: Record<string, unknown>;
+  bugClass?: string;
+  instrumentation_only?: boolean;
 }
 
 export interface CreateRunDirOptions {

@@ -137,6 +137,14 @@ routes, credentials, SDK installs, or equivalent infrastructure.
 - Do not rely on auto-hooks to continue a run in environments where hooks are unavailable; drive the loop explicitly when required.
 - Keep completion criteria explicit and tied to run status, not to optimistic summaries.
 
+## Strike-3 Forward-Fix Gate
+
+Forward-fix processes that participate in strike tracking must use explicit metadata. Set `bugClass` to the author-supplied bug class and set `instrumentation_only: true` when the current iteration is limited to instrumentation, log emission, environment flags, no-op guards, or revert-only changes. The framework does not semantically infer `bugClass`.
+
+After two failed forward-fix attempts for the same `bugClass`, the third attempt is treated as an instrumentation-only deploy preview. The `check:processes` validation surface runs `scripts/check-fix-strikes.mjs`, which emits `[gate]` diagnostics and blocks configured algorithm-change paths during `instrumentation_only` iterations.
+
+Use `--strike3-override` only for an explicit audited exception. The override must include a non-empty reason, an actor, and a timestamp; the audit record includes `actor`, `reason`, `bugClass`, `strikeCount`, `matchedFiles`, and `timestamp`. Override output is visibly distinct from a clean pass in the `[gate]` stream.
+
 ## Where To Look Next
 
 - [Runtime And Layout](./runtime-and-layout.md) for replay and run-state behavior
