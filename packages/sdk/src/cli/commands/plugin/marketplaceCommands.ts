@@ -2,8 +2,8 @@ import {
   cloneMarketplace,
   listMarketplacePlugins,
   updateMarketplace,
-} from '../../../plugins/marketplace';
-import type { MarketplacePluginEntry } from '../../../plugins/types';
+} from '../../../blueprints/marketplace';
+import type { MarketplacePluginEntry } from '../../../blueprints/types';
 import {
   autoResolveMarketplace,
   getProjectDir,

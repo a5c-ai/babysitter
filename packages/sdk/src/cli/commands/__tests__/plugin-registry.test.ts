@@ -6,14 +6,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { PluginRegistry, PluginRegistryEntry } from "../../../plugins/types";
-import { PLUGIN_REGISTRY_SCHEMA_VERSION } from "../../../plugins/types";
+import type { PluginRegistry, PluginRegistryEntry } from "../../../blueprints/types";
+import { PLUGIN_REGISTRY_SCHEMA_VERSION } from "../../../blueprints/types";
 
 // ---------------------------------------------------------------------------
 // Mocks
 // ---------------------------------------------------------------------------
 
-vi.mock("../../../plugins/registry", () => ({
+vi.mock("../../../blueprints/registry", () => ({
   readPluginRegistry: vi.fn(),
   getPluginEntry: vi.fn(),
   listPluginEntries: vi.fn(),
@@ -22,7 +22,7 @@ vi.mock("../../../plugins/registry", () => ({
   writePluginRegistry: vi.fn(),
 }));
 
-vi.mock("../../../plugins/marketplace", () => ({
+vi.mock("../../../blueprints/marketplace", () => ({
   resolvePluginPackagePath: vi.fn(),
 }));
 
@@ -33,9 +33,9 @@ import {
   upsertPluginEntry,
   removePluginEntry,
   writePluginRegistry,
-} from "../../../plugins/registry";
+} from "../../../blueprints/registry";
 
-import { resolvePluginPackagePath } from "../../../plugins/marketplace";
+import { resolvePluginPackagePath } from "../../../blueprints/marketplace";
 
 import {
   handlePluginListInstalled,

@@ -9,7 +9,7 @@ export * from "./hooks";
 export * from "./harness";
 export * from "./config";
 export * from "./profiles";
-export * from "./plugins";
+export * from "./blueprints";
 export * from "./prompts";
 export * from "./logging";
 export * from "./cost/index";

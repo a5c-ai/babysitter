@@ -1,4 +1,4 @@
-import { resolvePluginPackagePath } from '../../../plugins/marketplace';
+import { resolvePluginPackagePath } from '../../../blueprints/marketplace';
 import {
   getPluginEntry,
   listPluginEntries,
@@ -6,8 +6,8 @@ import {
   removePluginEntry,
   upsertPluginEntry,
   writePluginRegistry,
-} from '../../../plugins/registry';
-import type { PluginRegistryEntry } from '../../../plugins/types';
+} from '../../../blueprints/registry';
+import type { PluginRegistryEntry } from '../../../blueprints/types';
 import {
   getProjectDir,
   requireArg,

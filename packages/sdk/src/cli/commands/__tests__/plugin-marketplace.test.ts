@@ -6,10 +6,10 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-import type { MarketplacePluginEntry } from "../../../plugins/types";
+import type { MarketplacePluginEntry } from "../../../blueprints/types";
 
 // Mock the marketplace module before importing handlers
-vi.mock("../../../plugins/marketplace", () => ({
+vi.mock("../../../blueprints/marketplace", () => ({
   cloneMarketplace: vi.fn(),
   updateMarketplace: vi.fn(),
   listMarketplacePlugins: vi.fn(),
@@ -28,7 +28,7 @@ import {
   cloneMarketplace,
   updateMarketplace,
   listMarketplacePlugins,
-} from "../../../plugins/marketplace";
+} from "../../../blueprints/marketplace";
 
 const mockedClone = vi.mocked(cloneMarketplace);
 const mockedUpdate = vi.mocked(updateMarketplace);

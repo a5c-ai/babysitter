@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("../../../plugins/marketplace", () => ({
+vi.mock("../../../blueprints/marketplace", () => ({
   updateMarketplace: vi.fn(),
   resolvePluginPackagePath: vi.fn(),
   readMarketplaceManifest: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock("../../../plugins/marketplace", () => ({
   listMarketplaces: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock("../../../plugins/registry", () => ({
+vi.mock("../../../blueprints/registry", () => ({
   readPluginRegistry: vi.fn(),
   getPluginEntry: vi.fn(),
   listPluginEntries: vi.fn(),
@@ -23,13 +23,13 @@ vi.mock("../../../plugins/registry", () => ({
   writePluginRegistry: vi.fn(),
 }));
 
-vi.mock("../../../plugins/packageReader", () => ({
+vi.mock("../../../blueprints/packageReader", () => ({
   readInstallInstructions: vi.fn(),
   readUninstallInstructions: vi.fn(),
   readConfigureInstructions: vi.fn(),
 }));
 
-vi.mock("../../../plugins/migrations", () => ({
+vi.mock("../../../blueprints/migrations", () => ({
   resolveMigrationChain: vi.fn(),
 }));
 
@@ -51,20 +51,20 @@ import {
   updateMarketplace,
   resolvePluginPackagePath,
   readMarketplaceManifest,
-} from "../../../plugins/marketplace";
+} from "../../../blueprints/marketplace";
 
 import {
   readPluginRegistry,
   getPluginEntry,
-} from "../../../plugins/registry";
+} from "../../../blueprints/registry";
 
 import {
   readInstallInstructions,
   readUninstallInstructions,
   readConfigureInstructions,
-} from "../../../plugins/packageReader";
+} from "../../../blueprints/packageReader";
 
-import { resolveMigrationChain } from "../../../plugins/migrations";
+import { resolveMigrationChain } from "../../../blueprints/migrations";
 
 describe("plugin lifecycle commands", () => {
   beforeEach(() => {

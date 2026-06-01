@@ -220,7 +220,7 @@ describe("readMarketplaceManifest", () => {
       plugins: [
         {
           name: "my-plugin",
-          source: "./plugins/my-plugin",
+          source: "./blueprints/my-plugin",
           description: "A plugin",
           version: "2.0.0",
           author: { name: "org" },
@@ -233,7 +233,7 @@ describe("readMarketplaceManifest", () => {
     expect(manifest.name).toBe("legacy-mp");
     expect(manifest.owner).toBe("org");
     expect(manifest.plugins["my-plugin"]).toBeDefined();
-    expect(manifest.plugins["my-plugin"].packagePath).toBe("plugins/my-plugin");
+    expect(manifest.plugins["my-plugin"].packagePath).toBe("blueprints/my-plugin");
     expect(manifest.plugins["my-plugin"].latestVersion).toBe("2.0.0");
     expect(manifest.plugins["my-plugin"].author).toBe("org");
   });

@@ -16,14 +16,14 @@ describe("getRegistryPath", () => {
   it("returns global registry path under homedir", () => {
     const result = getRegistryPath("global");
     expect(result).toBe(
-      path.join("/mock/home", ".a5c", "plugin-registry.json")
+      path.join("/mock/home", ".a5c", "blueprint-registry.json")
     );
   });
 
   it("returns project registry path under projectDir", () => {
     const result = getRegistryPath("project", "/my/project");
     expect(result).toBe(
-      path.join("/my/project", ".a5c", "plugin-registry.json")
+      path.join("/my/project", ".a5c", "blueprint-registry.json")
     );
   });
 

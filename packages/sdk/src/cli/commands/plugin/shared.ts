@@ -1,5 +1,5 @@
-import { listMarketplaces } from '../../../plugins/marketplace';
-import type { PluginScope } from '../../../plugins/types';
+import { listMarketplaces } from '../../../blueprints/marketplace';
+import type { PluginScope } from '../../../blueprints/types';
 
 export interface PluginCommandArgs {
   pluginName?: string;

@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-vi.mock("../../../plugins/marketplace", () => ({
+vi.mock("../../../blueprints/marketplace", () => ({
   cloneMarketplace: vi.fn(),
   updateMarketplace: vi.fn(),
   listMarketplacePlugins: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock("../../../plugins/marketplace", () => ({
   readMarketplaceManifest: vi.fn(),
 }));
 
-vi.mock("../../../plugins/registry", () => ({
+vi.mock("../../../blueprints/registry", () => ({
   readPluginRegistry: vi.fn(),
   getPluginEntry: vi.fn(),
   listPluginEntries: vi.fn(),
@@ -25,20 +25,20 @@ vi.mock("../../../plugins/registry", () => ({
   writePluginRegistry: vi.fn(),
 }));
 
-vi.mock("../../../plugins/packageReader", () => ({
+vi.mock("../../../blueprints/packageReader", () => ({
   readInstallInstructions: vi.fn(),
   readUninstallInstructions: vi.fn(),
   readConfigureInstructions: vi.fn(),
 }));
 
-vi.mock("../../../plugins/migrations", () => ({
+vi.mock("../../../blueprints/migrations", () => ({
   resolveMigrationChain: vi.fn(),
 }));
 
 import {
   cloneMarketplace,
   updateMarketplace,
-} from "../../../plugins/marketplace";
+} from "../../../blueprints/marketplace";
 
 import {
   validateScope,

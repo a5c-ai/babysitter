@@ -8,9 +8,9 @@
  * @module prompts/capabilityCollector
  */
 
-import { readPluginRegistry } from '../plugins/registry';
+import { readPluginRegistry } from '../blueprints/registry';
 import { resolveActiveProcessLibrary } from '../processLibrary/active';
-import type { PluginScope } from '../plugins/types';
+import type { PluginScope } from '../blueprints/types';
 import { listPluginTargetDescriptors } from '@a5c-ai/agent-catalog';
 
 /**

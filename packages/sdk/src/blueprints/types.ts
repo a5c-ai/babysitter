@@ -1,21 +1,22 @@
 /**
- * Plugin Types for Babysitter SDK
+ * Blueprint types for Babysitter SDK marketplace installables.
  *
- * This module defines the TypeScript interfaces for plugin management,
- * including registry entries, marketplace manifests, migrations, and
- * package metadata.
+ * The deprecated Plugin* aliases remain for one-version compatibility with
+ * existing SDK callers while the CLI and docs migrate to blueprint naming.
  */
 
 /**
  * Schema version for plugin registry serialization.
  * Used to detect and migrate older registry formats.
  */
-export const PLUGIN_REGISTRY_SCHEMA_VERSION = "2026.01.plugin-registry-v1";
+export const BLUEPRINT_REGISTRY_SCHEMA_VERSION = "2026.01.blueprint-registry-v1";
+export const PLUGIN_REGISTRY_SCHEMA_VERSION = BLUEPRINT_REGISTRY_SCHEMA_VERSION;
 
 /**
  * Filename for the JSON-serialized plugin registry.
  */
-export const PLUGIN_REGISTRY_FILENAME = "plugin-registry.json";
+export const BLUEPRINT_REGISTRY_FILENAME = "blueprint-registry.json";
+export const PLUGIN_REGISTRY_FILENAME = BLUEPRINT_REGISTRY_FILENAME;
 
 /**
  * Filename for the marketplace manifest within a cloned marketplace directory.
@@ -34,7 +35,8 @@ export const MANIFEST_PATH_FILENAME = ".babysitter-manifest-path";
  * - `global` — User-wide configuration in the home directory
  * - `project` — Project-specific configuration in the project root
  */
-export type PluginScope = "global" | "project";
+export type BlueprintScope = "global" | "project";
+export type PluginScope = BlueprintScope;
 
 /**
  * Type guard for Node.js system errors with an error code property.
@@ -46,7 +48,7 @@ export function isNodeError(error: unknown): error is NodeJS.ErrnoException {
 /**
  * A single plugin entry within the registry.
  */
-export interface PluginRegistryEntry {
+export interface BlueprintRegistryEntry {
   /** Plugin identifier (e.g. "babysitter@a5c.ai") */
   name: string;
   /** Currently installed semantic version */
@@ -54,7 +56,7 @@ export interface PluginRegistryEntry {
   /** Name of the marketplace this plugin was sourced from */
   marketplace: string;
   /** Whether this plugin is installed globally or per-project */
-  scope: PluginScope;
+  scope: BlueprintScope;
   /** ISO 8601 timestamp of initial installation */
   installedAt: string;
   /** ISO 8601 timestamp of most recent update */
@@ -68,19 +70,23 @@ export interface PluginRegistryEntry {
 /**
  * The full plugin registry, persisted as JSON.
  */
-export interface PluginRegistry {
+export type PluginRegistryEntry = BlueprintRegistryEntry;
+
+export interface BlueprintRegistry {
   /** Schema version for forward compatibility */
   schemaVersion: typeof PLUGIN_REGISTRY_SCHEMA_VERSION;
   /** ISO 8601 timestamp of last registry modification */
   updatedAt: string;
   /** Map of plugin name to registry entry */
-  plugins: Record<string, PluginRegistryEntry>;
+  plugins: Record<string, BlueprintRegistryEntry>;
 }
+
+export type PluginRegistry = BlueprintRegistry;
 
 /**
  * A single plugin entry within a marketplace manifest.
  */
-export interface MarketplacePluginEntry {
+export interface MarketplaceBlueprintEntry {
   /** Human-readable plugin name */
   name: string;
   /** Short description of the plugin */
@@ -100,6 +106,8 @@ export interface MarketplacePluginEntry {
 /**
  * The marketplace manifest, read from a cloned marketplace repository.
  */
+export type MarketplacePluginEntry = MarketplaceBlueprintEntry;
+
 export interface MarketplaceManifest {
   /** Human-readable marketplace name */
   name: string;
@@ -110,7 +118,7 @@ export interface MarketplaceManifest {
   /** Marketplace owner name or organization */
   owner: string;
   /** Map of plugin name to marketplace plugin entry */
-  plugins: Record<string, MarketplacePluginEntry>;
+  plugins: Record<string, MarketplaceBlueprintEntry>;
 }
 
 /**
@@ -130,7 +138,7 @@ export interface MigrationDescriptor {
 /**
  * Aggregated information read from a plugin package directory.
  */
-export interface PluginPackageInfo {
+export interface BlueprintPackageInfo {
   /** Plugin identifier */
   name: string;
   /** Markdown install instructions, or undefined if not present */
@@ -144,3 +152,5 @@ export interface PluginPackageInfo {
   /** List of process definition file paths relative to the package */
   processFiles: string[];
 }
+
+export type PluginPackageInfo = BlueprintPackageInfo;

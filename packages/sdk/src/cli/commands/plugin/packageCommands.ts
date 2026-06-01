@@ -1,17 +1,17 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { resolveMigrationChain } from '../../../plugins/migrations';
+import { resolveMigrationChain } from '../../../blueprints/migrations';
 import {
   readConfigureInstructions,
   readInstallInstructions,
   readUninstallInstructions,
-} from '../../../plugins/packageReader';
+} from '../../../blueprints/packageReader';
 import {
   readMarketplaceManifest,
   resolvePluginPackagePath,
   updateMarketplace,
-} from '../../../plugins/marketplace';
-import { getPluginEntry, readPluginRegistry } from '../../../plugins/registry';
+} from '../../../blueprints/marketplace';
+import { getPluginEntry, readPluginRegistry } from '../../../blueprints/registry';
 import {
   autoResolveMarketplace,
   getProjectDir,
