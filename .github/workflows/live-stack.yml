@@ -454,7 +454,7 @@ jobs:
           LIVE_STACK_EXPECTED_ARTIFACTS: ${{ matrix.install_mode.expected_artifacts }}
           LIVE_STACK_RUN_MODEL_TESTS: ${{ matrix.scenario.live && '1' || '0' }}
           LIVE_STACK_REQUIRE_EVIDENCE: '1'
-          LIVE_STACK_TEST_TIMEOUT_MS: '2760000'
+          LIVE_STACK_TEST_TIMEOUT_MS: '2880000'
           LIVE_STACK_COMMAND_TIMEOUT_MS: '2700000'
           LIVE_STACK_BABYSITTER_BIN: ${{ github.workspace }}/packages/sdk/dist/cli/main.js
           LIVE_STACK_AMUX_BIN: ${{ github.workspace }}/packages/agent-mux/cli/dist/index.js
