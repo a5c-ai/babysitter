@@ -227,7 +227,7 @@ describe('createAssistantRuntime — resolveConfig', () => {
     const runtime = createAssistantRuntime();
     const controller = mockController({}); // empty — will throw
     const config = await runtime.resolveConfig(controller);
-    assert.equal(config.baseAgent, 'claude-code');
+    assert.equal(config.baseAgent, 'krate-assistant');
   });
 
   it('reads spec from controller when stack exists', async () => {
@@ -256,7 +256,7 @@ describe('createAssistantRuntime — resolveConfig', () => {
       'AgentStack/assistant': { spec: null },
     });
     const config = await runtime.resolveConfig(controller);
-    assert.equal(config.baseAgent, 'claude-code');
+    assert.equal(config.baseAgent, 'krate-assistant');
   });
 });
 
