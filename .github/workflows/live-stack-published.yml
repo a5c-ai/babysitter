@@ -203,7 +203,7 @@ jobs:
           set -euo pipefail
           echo "Installing published packages with tag: @${NPM_TAG}"
 
-          # Install the agent-mux CLI (includes transport-mux, agent-catalog, etc.)
+          # Install the agent-mux CLI (includes transport-mux, atlas catalog, etc.)
           npm install -g @a5c-ai/agent-mux@${NPM_TAG}
 
           # Install the babysitter SDK CLI

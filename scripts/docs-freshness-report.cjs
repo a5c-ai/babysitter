@@ -198,7 +198,7 @@ function main() {
   // External plugin packages — derived from Atlas PluginTarget records
   const externalPluginPackages = [];
   try {
-    const { listPluginTargetDescriptors } = require(path.join(repoRoot, "packages", "agent-catalog", "dist", "sdk.js"));
+    const { listPluginTargetDescriptors } = require(path.join(repoRoot, "packages", "atlas", "dist", "catalog", "sdk.js"));
     for (const target of listPluginTargetDescriptors()) {
       externalPluginPackages.push(`@a5c-ai/babysitter-${target.adapterName === "omp" ? "omp" : target.targetId}`);
     }

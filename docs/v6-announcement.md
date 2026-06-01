@@ -73,7 +73,7 @@ The SDK (453 files, 58K lines) remains the foundation of every babysitter proces
 
 The CLI is now split: core commands stay in the `babysitter` binary, while orchestration commands move to `agent-platform`, with `babysitter-harness` retained as a compatibility binary. A new `babysitter-mcp-server` binary provides native MCP integration. Session resolution has been overhauled: PID-scoped session markers now take precedence over environment variables, with `BABYSITTER_TRUST_ENV_SESSION=1` available as an escape hatch for CI environments.
 
-- New dependencies: `@a5c-ai/agent-catalog`, `@a5c-ai/agent-mux`, `@modelcontextprotocol/sdk`, `zod@4`, `ws`.
+- New dependencies: `@a5c-ai/atlas`, `@a5c-ai/agent-mux`, `@modelcontextprotocol/sdk`, `zod@4`, `ws`.
 - `defineTask` remains backward-compatible with object-form specs.
 - SDK version markers are now written to run artifacts for auditability.
 - PID-scoped session markers replace env-var-first resolution.

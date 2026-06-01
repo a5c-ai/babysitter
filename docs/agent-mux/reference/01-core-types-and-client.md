@@ -29,7 +29,7 @@ dependency story must match the published package graph.
 
 | Package | Purpose | Runtime dependencies |
 |---|---|---|
-| `@a5c-ai/agent-comm-mux` | `AgentMuxClient`, normalized events, type definitions, provider/hook/workspace helpers, and stream/runtime primitives | `@a5c-ai/agent-catalog`, `@a5c-ai/agent-mux-observability` |
+| `@a5c-ai/agent-comm-mux` | `AgentMuxClient`, normalized events, type definitions, provider/hook/workspace helpers, and stream/runtime primitives | `@a5c-ai/atlas`, `@a5c-ai/agent-mux-observability` |
 | `@a5c-ai/agent-mux-adapters` | All built-in adapter implementations (claude, codex, gemini, copilot, cursor, opencode, pi, omp, openclaw, hermes) | `@a5c-ai/agent-comm-mux` |
 | `@a5c-ai/agent-mux-cli` | CLI binary (`amux`) | `@a5c-ai/agent-comm-mux`, `@a5c-ai/agent-mux-adapters` |
 | `@a5c-ai/agent-mux` | Convenience meta-package: re-exports core + adapters + cli | All three above |
@@ -65,7 +65,7 @@ There is no separate CommonJS build. CommonJS callers should use dynamic import
 The core package's two runtime dependencies are intentional parts of the current
 architecture:
 
-- `@a5c-ai/agent-catalog` supplies the harness image catalog plus host-detection
+- `@a5c-ai/atlas/catalog` supplies the harness image catalog plus host-detection
   rules and metadata used by invocation and host helpers.
 - `@a5c-ai/agent-mux-observability` supplies the structured logging and telemetry
   primitives used by the client, auth/session flows, and run-handle implementation.

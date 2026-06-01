@@ -1384,7 +1384,7 @@ jobs:
       - name: Build SDK workspace
         run: |
           set -euo pipefail
-          # atlas must be built first — agent-catalog (in agent-mux chain) imports from it
+          # atlas must be built first because the agent-mux chain imports atlas/catalog
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/tasks-mux
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk

@@ -136,12 +136,12 @@ attributes:
 edges: {}
 ---
 nodeKind: EvidenceSource
-id: evidence:repo-agent-catalog-package
+id: evidence:repo-atlas-catalog-package
 attributes:
-  displayName: "agent-catalog package root"
+  displayName: "atlas catalog package root"
   kindLabel: file
-  sourceUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-catalog"
-  filePath: "packages/agent-catalog"
+  sourceUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/atlas"
+  filePath: "packages/atlas"
   trustLevel: trust-level:repo
   observedAt: "2026-04-23T00:00:00Z"
   observedBy: a5c-ai-team

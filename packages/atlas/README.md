@@ -20,6 +20,34 @@ atlas search codex --limit 10
 atlas neighbors <node-id> --depth 2
 ```
 
+## Catalog Runtime
+
+Atlas also ships the catalog runtime API as `@a5c-ai/atlas/catalog`. Use this
+subpath for graph-backed agent metadata, discovery snapshots, UI projections,
+fallback harness metadata, host detection rules, plugin targets, and
+package/process topology.
+
+```ts
+import {
+  getCatalogDiscoverySnapshot,
+  getFallbackHarnessMetadata,
+  listPluginTargetDescriptors,
+  resolveCatalogAssetPath,
+} from "@a5c-ai/atlas/catalog";
+
+const discovery = getCatalogDiscoverySnapshot();
+const claude = getFallbackHarnessMetadata("claude-code");
+const pluginTargets = listPluginTargetDescriptors();
+const assetPath = resolveCatalogAssetPath("discovery-snapshot.json");
+```
+
+Build and validate the catalog surface with atlas:
+
+```sh
+npm run build --workspace=@a5c-ai/atlas
+npm run test:atlas-catalog-contracts
+```
+
 ## MCP
 
 The Atlas MCP surface is exposed by the Atlas WebUI as a Streamable HTTP endpoint:

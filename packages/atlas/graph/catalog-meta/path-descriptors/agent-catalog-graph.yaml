@@ -2,8 +2,8 @@ nodeKind: PathDescriptor
 id: path:agent-catalog-graph
 attributes:
   pathId: path:agent-catalog-graph
-  displayName: "Agent catalog graph source-of-truth"
-  path: "packages/agent-catalog/graph"
+  displayName: "Atlas catalog graph source-of-truth"
+  path: "packages/atlas/graph"
   pathKind: source-of-truth-dir
   ownerKind: PackageSurface
   ownerId: package:a5c-ai-agent-catalog

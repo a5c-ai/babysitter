@@ -28,13 +28,8 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 
 | Package or surface | Script | Lane | Scope | Owner | Artifact name | Pipeline placement |
 | --- | --- | --- | --- | --- | --- | --- |
-| `@a5c-ai/agent-catalog` | `build` | No-model | static-check | Catalog/Atlas maintainers | `test-logs/agent-catalog-build.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/agent-catalog` | `check:src-artifacts` | No-model | static-check | Catalog/Atlas maintainers | `test-logs/agent-catalog-check-src-artifacts.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/agent-catalog` | `ci:test` | No-model | static-check | Catalog/Atlas maintainers | `test-logs/agent-catalog-ci-test.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/agent-catalog` | `policy:check` | No-model | static-check | Catalog/Atlas maintainers | `test-logs/agent-catalog-policy-check.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/agent-catalog` | `test` | No-model | static-check | Catalog/Atlas maintainers | `test-logs/agent-catalog-test.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/agent-catalog` | `version:check` | No-model | static-check | Catalog/Atlas maintainers | `test-logs/agent-catalog-version-check.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/tula-core` | `test` | No-model | unit-or-integration | Runtime maintainers | `test-logs/tula-core-test.log` | ci.yml packages-sdk/test; publish.yml validate_core |
+| `@a5c-ai/atlas/catalog` | `test:atlas-catalog-contracts` | No-model | contract | Catalog/Atlas maintainers | `test-logs/atlas-catalog-contracts.log` | ci.yml test or package-local validation when catalog surface is touched |
+| `@a5c-ai/agent-core` | `test` | No-model | unit-or-integration | Runtime maintainers | `test-logs/agent-core-test.log` | ci.yml packages-sdk/test; publish.yml validate_core |
 | `@a5c-ai/agent-mux` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-adapters` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-adapters-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-cli` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-cli-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
@@ -135,7 +130,7 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | `babysitter` | `docs:serve` | No-model | docs-qa | CI maintainers | `docs-qa/babysitter-docs-serve.log` | ci.yml docs-quality; publish.yml deploy_docs_site; docs-only PRs |
 | `babysitter` | `docs:snippets` | No-model | static-check | CI maintainers | `test-logs/babysitter-docs-snippets.log` | ci.yml docs-quality; publish.yml deploy_docs_site; docs-only PRs |
 | `babysitter` | `lint:hooks-mux` | No-model | static-check | CI maintainers | `test-logs/babysitter-lint-hooks-mux.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
-| `babysitter` | `test:agent-catalog-contracts` | No-model | contract | CI maintainers | `test-logs/babysitter-test-agent-catalog-contracts.log` | ci.yml test or package-local validation when package is touched |
+| `babysitter` | `test:atlas-catalog-contracts` | No-model | contract | CI maintainers | `test-logs/babysitter-test-atlas-catalog-contracts.log` | ci.yml test or package-local validation when catalog surface is touched |
 | `babysitter` | `test:agent-mux` | No-model | unit-or-integration | CI maintainers | `test-logs/babysitter-test-agent-mux.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `babysitter` | `test:e2e:agent-mux-hooks-mux` | No-model | integration | CI maintainers | `e2e/agent-mux-hooks-mux/*.jsonl` | publish.yml agent_mux_hooks_mux_e2e matrix for claude-code, codex, pi |
 | `babysitter` | `test:e2e:agent-mux-no-model-stack` | No-model | e2e | CI maintainers | `e2e/no-model-stack/*.jsonl`, `summary.json` | publish.yml no_model_mock_matrix across runtime, agent, and hook-mode dimensions |

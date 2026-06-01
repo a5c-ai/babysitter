@@ -124,7 +124,7 @@ graph TB
 | Package | Role |
 |---------|------|
 | `packages/atlas` | Knowledge graph: YAML definitions → JSON index |
-| `packages/agent-catalog` | Query API over the atlas graph |
+| `@a5c-ai/atlas/catalog` | Query API over the atlas graph |
 | `packages/agent-mux/cli` | `amux` CLI: launch, install, run |
 | `packages/agent-mux/adapters` | Per-harness thin wrappers (data from graph) |
 | `packages/agent-mux/core` | Provider resolver, workspace service |

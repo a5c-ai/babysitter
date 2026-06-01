@@ -65,9 +65,10 @@ adapterMetadata:
   defaultModelId: "claude-sonnet-4-20250514"
 ```
 
-## Agent Catalog
+## Atlas Catalog
 
-`packages/agent-catalog` provides a typed query API over the atlas graph:
+`packages/atlas/src/catalog` provides a typed query API over the atlas graph
+through the `@a5c-ai/atlas/catalog` export:
 
 ### Core Queries
 
@@ -88,7 +89,7 @@ import {
   getHookSupport,
   getYoloLaunchArgs,
   getTransportCodecCapabilities,
-} from '@a5c-ai/agent-catalog';
+} from '@a5c-ai/atlas/catalog';
 ```
 
 ### How Adapters Use It

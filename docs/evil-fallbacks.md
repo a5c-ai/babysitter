@@ -364,10 +364,10 @@ Invalid K8s response → `[]`. "No resources" indistinguishable from "API return
 
 ### Medium
 
-**Agent catalog readdir/stat → empty/undefined** — `packages/agent-catalog/src/discovery.ts:190-202`
+**Atlas catalog readdir/stat → empty/undefined** — `packages/atlas/src/catalog/discovery.ts:190-202`
 `readdirSync` catch returns `[]`, `statSync` catch returns `undefined`. Permission errors = "nothing here."
 
-**Agent catalog frontmatter parse → empty** — `packages/agent-catalog/src/discovery.ts:267-275`
+**Atlas catalog frontmatter parse → empty** — `packages/atlas/src/catalog/discovery.ts:267-275`
 YAML parse errors → `{ frontmatter: {}, content }`. Missing metadata without indication.
 
 **Tasks-mux config → undefined** — `packages/tasks-mux/src/config.ts:115-124`

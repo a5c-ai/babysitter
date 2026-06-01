@@ -64,7 +64,7 @@ jobs:
             STEP 1 — ANALYZE RECENT CHANGES:
             Run `git log --since="24 hours ago" --oneline --stat` to see what changed.
             Categorize changes by component: sdk, agent-mux, transport-mux, hooks-mux,
-            tasks-mux, atlas, agent-catalog, triggers, plugins, ci, docs.
+            tasks-mux, atlas catalog, triggers, plugins, ci, docs.
             Count the volume of changes per component.
 
             STEP 2 — SELECT TEST MATRIX:
