@@ -2278,8 +2278,8 @@ jobs:
             --set "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname=${APP_HOST}" \
             --set-string "ingress.annotations.nginx\\.ingress\\.kubernetes\\.io/ssl-redirect=true" \
             --set demo.enabled=false \
-            --set gitea.enabled=false \
-            --set argocd.enabled=false \
+            --set gitea.enabled=true \
+            --set argocd.enabled=true \
             --set kubevela.enabled=true \
             --set "externalDependencies.kyverno.enabled=true" \
             --set "externalDependencies.kyverno.discoverExisting=true" \

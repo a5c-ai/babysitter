@@ -67,6 +67,11 @@ export const KRATE_RESOURCES = [
   { kind: 'View', plural: 'views', namespaced: true, storage: 'etcd' },
   { kind: 'Selector', plural: 'selectors', namespaced: true, storage: 'etcd' },
   // Agent orchestration CRDs (etcd-stored, krate.a5c.ai group)
+  { kind: 'AgentPersona', plural: 'agentpersonas', namespaced: true, storage: 'etcd' },
+  { kind: 'AgentSoul', plural: 'agentsouls', namespaced: true, storage: 'etcd' },
+  { kind: 'AgentAppearance', plural: 'agentappearances', namespaced: true, storage: 'etcd' },
+  { kind: 'AgentVoiceProfile', plural: 'agentvoiceprofiles', namespaced: true, storage: 'etcd' },
+  { kind: 'AgentDefinition', plural: 'agentdefinitions', namespaced: true, storage: 'etcd' },
   { kind: 'AgentStack', plural: 'agentstacks', namespaced: true, storage: 'etcd' },
   { kind: 'AgentSubagent', plural: 'agentsubagents', namespaced: true, storage: 'etcd' },
   { kind: 'AgentToolProfile', plural: 'agenttoolprofiles', namespaced: true, storage: 'etcd' },
