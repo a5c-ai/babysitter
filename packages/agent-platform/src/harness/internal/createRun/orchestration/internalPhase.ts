@@ -31,6 +31,7 @@ import {
 import { readProcessFileFingerprint } from "./effects";
 import { createOrchestrationTools } from "./internalTools";
 import { ensureRunAndMaybeBindFromProcessDefinition } from "../planProcess/runState";
+import { runDelegatedHarnessTask } from "../planProcess";
 import { assessRun } from "../resumeState";
 import type { OrchestrationProgressSnapshot, RunOrchestrationPhaseArgs } from "./types";
 import { subscribeVerbosePiEvents } from "./verbose";
@@ -417,41 +418,71 @@ export async function runInternalOrchestrationPhase(
         consecutiveProcessErrorStalls = 0;
         continue;
       }
-      // Auto-execute shell effects in the host — models struggle with these.
+      // Auto-execute effects in the host — models struggle with the babysitter tool protocol.
       if (state.pendingActions.size > 0) {
-        let shellEffectsResolved = 0;
+        let effectsResolved = 0;
         for (const [effectId, action] of state.pendingActions) {
-          if (action.kind !== 'shell') continue;
-          const shell = (action as any).shell;
-          if (!shell?.command) continue;
-          writeVerbose(`[phaseOrchestration host] auto-executing shell effect ${effectId}: ${shell.command} ${(shell.args || []).slice(0, 2).join(' ')}`);
-          try {
-            const { execFileSync } = await import('node:child_process');
-            const stdout = execFileSync(shell.command, shell.args || [], {
-              cwd: args.workspace,
-              timeout: shell.timeout || 30_000,
-              encoding: 'utf8',
-              stdio: ['pipe', 'pipe', 'pipe'],
-            });
-            await invokeTool(taskPostTool, 'babysitter_task_post_result', {
-              effectId,
-              status: 'ok',
-              valueText: stdout,
-            });
-            shellEffectsResolved++;
-          } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : String(err);
-            writeVerbose(`[phaseOrchestration host] shell effect ${effectId} failed: ${msg}`);
-            await invokeTool(taskPostTool, 'babysitter_task_post_result', {
-              effectId,
-              status: 'error',
-              valueText: msg,
-            });
-            shellEffectsResolved++;
+          if (action.kind === 'shell') {
+            const shell = (action as any).shell;
+            if (!shell?.command) continue;
+            writeVerbose(`[phaseOrchestration host] auto-executing shell effect ${effectId}: ${shell.command} ${(shell.args || []).slice(0, 2).join(' ')}`);
+            try {
+              const { execFileSync } = await import('node:child_process');
+              const stdout = execFileSync(shell.command, shell.args || [], {
+                cwd: args.workspace,
+                timeout: shell.timeout || 30_000,
+                encoding: 'utf8',
+                stdio: ['pipe', 'pipe', 'pipe'],
+              });
+              await invokeTool(taskPostTool, 'babysitter_task_post_result', {
+                effectId,
+                status: 'ok',
+                valueText: stdout,
+              });
+              effectsResolved++;
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : String(err);
+              writeVerbose(`[phaseOrchestration host] shell effect ${effectId} failed: ${msg}`);
+              await invokeTool(taskPostTool, 'babysitter_task_post_result', {
+                effectId,
+                status: 'error',
+                valueText: msg,
+              });
+              effectsResolved++;
+            }
+          } else if (action.kind === 'agent') {
+            const agentSpec = (action as any).agent;
+            const prompt = typeof agentSpec?.prompt === 'string'
+              ? agentSpec.prompt
+              : JSON.stringify(agentSpec?.prompt ?? (action as any).title ?? 'Execute this task');
+            writeVerbose(`[phaseOrchestration host] auto-delegating agent effect ${effectId}: ${((action as any).title ?? '').slice(0, 80)}`);
+            try {
+              const delegated = await runDelegatedHarnessTask({
+                task: prompt,
+                workspace: args.workspace,
+                model: args.model,
+                timeout: 120_000,
+              });
+              await invokeTool(taskPostTool, 'babysitter_task_post_result', {
+                effectId,
+                status: 'ok',
+                valueJson: typeof delegated === 'string' ? delegated : JSON.stringify(delegated),
+              });
+              effectsResolved++;
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : String(err);
+              writeVerbose(`[phaseOrchestration host] agent effect ${effectId} failed: ${msg}`);
+              await invokeTool(taskPostTool, 'babysitter_task_post_result', {
+                effectId,
+                status: 'error',
+                valueText: msg,
+              });
+              effectsResolved++;
+            }
           }
         }
-        if (shellEffectsResolved > 0) {
-          writeVerbose(`[phaseOrchestration host] auto-resolved ${shellEffectsResolved} shell effects`);
+        if (effectsResolved > 0) {
+          writeVerbose(`[phaseOrchestration host] auto-resolved ${effectsResolved} effects`);
           consecutiveStalls = 0;
           continue;
         }
