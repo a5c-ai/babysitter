@@ -12,7 +12,15 @@ export default {
       'react-native$': path.resolve(__dirname, 'test-shims/react-native.ts'),
     },
   },
+  ssr: {
+    external: ['@a5c-ai/atlas'],
+  },
   test: {
+    server: {
+      deps: {
+        external: ['@a5c-ai/atlas'],
+      },
+    },
     include: [
       'packages/*/src/**/*.test.{ts,tsx}',
       'packages/*/src/**/*.contract.test.{ts,tsx}',
