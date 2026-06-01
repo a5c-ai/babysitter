@@ -300,6 +300,12 @@ jobs:
           set -euo pipefail
           npm run test:hooks-mux 2>&1 | tee artifacts/mux-logs/hooks-mux-tests.log
 
+      - name: Verify atlas graph data
+        run: |
+          set -euo pipefail
+          echo "Atlas dist/index.json: $(wc -c < packages/atlas/dist/index.json) bytes"
+          node -e "const i=require('./packages/atlas/dist/index.json'); console.log('Atlas records:', Object.keys(i.records).length, 'edges:', i.edges.length)"
+
       - name: agent-mux package tests
         run: |
           set -euo pipefail

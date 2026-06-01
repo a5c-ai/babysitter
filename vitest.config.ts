@@ -7,20 +7,13 @@ export default {
   resolve: {
     alias: {
       '@a5c-ai/agent-catalog': path.resolve(__dirname, 'packages/agent-catalog/src/index.ts'),
+      '@a5c-ai/atlas': path.resolve(__dirname, 'packages/atlas/dist/index.js'),
       'next/server': path.resolve(__dirname, 'test-shims/next-server.ts'),
       'react-native': path.resolve(__dirname, 'test-shims/react-native.ts'),
       'react-native$': path.resolve(__dirname, 'test-shims/react-native.ts'),
     },
   },
-  ssr: {
-    external: ['@a5c-ai/atlas'],
-  },
   test: {
-    server: {
-      deps: {
-        external: ['@a5c-ai/atlas'],
-      },
-    },
     include: [
       'packages/*/src/**/*.test.{ts,tsx}',
       'packages/*/src/**/*.contract.test.{ts,tsx}',
