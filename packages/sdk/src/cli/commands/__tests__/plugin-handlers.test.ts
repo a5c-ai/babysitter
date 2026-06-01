@@ -47,6 +47,7 @@ import {
   handlePluginUpdateMarketplace,
   handlePluginListPlugins,
 } from "../plugin";
+import { getValidCommands } from "../../main/program";
 
 const mockedCloneMarketplace = vi.mocked(cloneMarketplace);
 const mockedUpdateMarketplace = vi.mocked(updateMarketplace);
@@ -66,6 +67,18 @@ describe("validateScope", () => {
 
   it("returns false for invalid string", () => {
     expect(validateScope("local")).toBe(false);
+  });
+});
+
+describe("blueprint command surface", () => {
+  it("exposes blueprint commands while retaining deprecated plugin aliases", () => {
+    const commands = getValidCommands("core");
+
+    expect(commands).toContain("blueprints:install");
+    expect(commands).toContain("blueprints:list");
+    expect(commands).toContain("blueprints:marketplace");
+    expect(commands).toContain("plugin:install");
+    expect(commands).toContain("plugin:list-plugins");
   });
 });
 
