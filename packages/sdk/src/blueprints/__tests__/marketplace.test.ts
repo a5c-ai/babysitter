@@ -219,7 +219,7 @@ describe("readMarketplaceManifest", () => {
 
   it("uses custom manifest path from .babysitter-manifest-path", async () => {
     // .babysitter-manifest-path found with custom path
-    mockedReadFile.mockResolvedValueOnce("plugins/a5c/marketplace/marketplace.json");
+    mockedReadFile.mockResolvedValueOnce("blueprints/a5c/marketplace/marketplace.json");
     // access check for the custom path succeeds
     mockedAccess.mockResolvedValueOnce(undefined);
     // read the manifest at the custom path

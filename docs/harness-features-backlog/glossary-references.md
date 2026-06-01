@@ -161,7 +161,7 @@ Terms, abbreviations, file paths, and cross-codebase references used throughout 
 | Pi plugin | `plugins/babysitter-pi/` |
 | oh-my-pi plugin | `plugins/babysitter-omp/` |
 | Paperclip plugin | `plugins/babysitter-paperclip/` |
-| Marketplace | `plugins/a5c/marketplace/` |
+| Marketplace | `blueprints/a5c/marketplace/` |
 
 ## CC Feature Reference (from inventory)
 
