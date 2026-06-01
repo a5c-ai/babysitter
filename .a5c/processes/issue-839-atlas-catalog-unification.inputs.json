@@ -1,0 +1,150 @@
+{
+  "issueNumber": 839,
+  "baseBranch": "staging",
+  "implementationBranch": "agent/issue-839-atlas-catalog-unification",
+  "targetQuality": 90,
+  "maxAttemptsPerPhase": 4,
+  "feature": "Merge packages/agent-catalog source into packages/atlas/src/catalog and migrate all active consumers to @a5c-ai/atlas/catalog.",
+  "referencedDocs": [
+    "docs/atlas-catalog-unification/README.md",
+    "docs/agent-reference/process-authoring.md",
+    "library/methodologies/atdd-tdd/README.md",
+    "library/methodologies/gsd/iterative-convergence.js",
+    "library/methodologies/adversarial-spec-debates.js"
+  ],
+  "acceptanceCriteria": [
+    "The catalog runtime source from packages/agent-catalog/src is available under packages/atlas/src/catalog with equivalent public behavior.",
+    "packages/atlas/package.json exposes @a5c-ai/atlas/catalog with working CommonJS/default runtime and TypeScript declarations.",
+    "All active runtime consumers import catalog APIs from @a5c-ai/atlas/catalog or @a5c-ai/atlas, not @a5c-ai/agent-catalog.",
+    "Root workspace metadata, TypeScript references, package-lock.json, build scripts, test scripts, CI, and release/package docs no longer treat @a5c-ai/agent-catalog as a standalone package.",
+    "packages/agent-catalog is removed after source/tests/docs that remain relevant are migrated.",
+    "The implementation is driven by failing tests first in each phase, then minimum implementation, refactor, verification, and adversarial review scoring until each phase scores at least 90/100."
+  ],
+  "targetMoveMap": {
+    "packages/agent-catalog/src/discovery.ts": "packages/atlas/src/catalog/discovery.ts",
+    "packages/agent-catalog/src/models.ts": "packages/atlas/src/catalog/models.ts",
+    "packages/agent-catalog/src/sdk.ts": "packages/atlas/src/catalog/sdk.ts",
+    "packages/agent-catalog/src/data.ts": "packages/atlas/src/catalog/data.ts",
+    "packages/agent-catalog/src/index.ts": "packages/atlas/src/catalog/index.ts",
+    "packages/agent-catalog/src/atlas-bridge.ts": "packages/atlas/src/catalog/atlas-bridge.ts",
+    "packages/agent-catalog/src/cli.ts": "packages/atlas/src/catalog/cli.ts",
+    "packages/agent-catalog/src/ui.ts": "packages/atlas/src/catalog/ui.ts",
+    "packages/agent-catalog/src/*.test.ts": "packages/atlas/src/catalog/*.test.ts"
+  },
+  "consumerSurfaces": [
+    "packages/sdk/src/harness",
+    "packages/sdk/src/prompts",
+    "packages/agent-mux/adapters/src",
+    "packages/hooks-mux/adapter-*",
+    "packages/hooks-mux/cli/src",
+    "packages/agent-platform/vitest.config.ts",
+    "packages/agent-mux/webui/vite.config.ts",
+    "packages/agent-mux/webui/vitest.config.ts",
+    "packages/agent-mux/webui/tests/vite-config.test.ts",
+    "consumer mocks and package.json dependencies that mention @a5c-ai/agent-catalog"
+  ],
+  "metadataSurfaces": [
+    "package.json",
+    "package-lock.json",
+    "tsconfig.json",
+    ".github/workflows",
+    "docs/workspace-validation.md",
+    "docs/package-and-plugin-map.md",
+    "docs/release-pipeline.md",
+    "packages/atlas/graph/catalog-meta/package-surfaces",
+    "packages/atlas/graph/catalog-meta/ci-surfaces"
+  ],
+  "verificationCommands": [
+    "npm run build --workspace=@a5c-ai/atlas",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts \"packages/atlas/src/catalog/*.test.ts\" \"packages/sdk/src/harness/amuxFallbackMetadata.contract.test.ts\" \"packages/hooks-mux/core/src/discovery/__tests__/detector.contract.test.ts\" \"packages/agent-mux/core/tests/host-detection.contract.test.ts\" \"packages/agent-mux/core/tests/invocation.contract.test.ts\" \"packages/extension-mux/src/__tests__/targets.contract.test.ts\"",
+    "rg -n \"@a5c-ai/agent-catalog|packages/agent-catalog\" package.json package-lock.json tsconfig.json .github packages --glob '!**/node_modules/**' --glob '!**/dist/**'",
+    "test ! -d packages/agent-catalog",
+    "git diff --check"
+  ],
+  "phases": [
+    {
+      "id": "phase-1-catalog-source-and-export-contract",
+      "title": "Move catalog source into Atlas and expose @a5c-ai/atlas/catalog",
+      "objective": "Relocate agent-catalog runtime source and contract tests under packages/atlas/src/catalog while preserving the public API surface.",
+      "redTests": [
+        "A package export contract test imports/requires @a5c-ai/atlas/catalog and fails before the export exists.",
+        "Moved catalog contract tests target packages/atlas/src/catalog and fail until source is present and relative imports resolve."
+      ],
+      "greenWork": [
+        "Move catalog runtime source, index, bridge, cli/ui helpers, and catalog tests into packages/atlas/src/catalog.",
+        "Add packages/atlas/package.json ./catalog export with runtime and type declaration targets.",
+        "Update local catalog imports to avoid a package dependency cycle."
+      ],
+      "verification": [
+        "Targeted atlas catalog contract tests pass.",
+        "npm run build --workspace=@a5c-ai/atlas passes."
+      ]
+    },
+    {
+      "id": "phase-2-consumer-import-migration",
+      "title": "Migrate runtime consumers to @a5c-ai/atlas/catalog",
+      "objective": "Replace downstream @a5c-ai/agent-catalog imports and package dependencies with @a5c-ai/atlas/catalog or @a5c-ai/atlas.",
+      "redTests": [
+        "Consumer contract tests fail if any runtime package still imports @a5c-ai/agent-catalog.",
+        "Vitest alias/config tests fail until aliases point to the atlas catalog surface."
+      ],
+      "greenWork": [
+        "Update sdk, agent-mux adapters, hooks-mux adapters, webui/agent-platform aliases, mocks, and package dependencies.",
+        "Use @a5c-ai/atlas/catalog for catalog APIs and @a5c-ai/atlas only for root graph APIs."
+      ],
+      "verification": [
+        "Updated consumer contract matrix passes.",
+        "No non-historical runtime imports of @a5c-ai/agent-catalog remain under packages."
+      ]
+    },
+    {
+      "id": "phase-3-workspace-build-ci-and-lockfile-cleanup",
+      "title": "Remove standalone agent-catalog workspace metadata",
+      "objective": "Make atlas the only package and update build order, workspace metadata, project references, CI/release docs, and package-lock entries.",
+      "redTests": [
+        "A metadata guard fails while workspace/package/lockfile/CI surfaces still treat packages/agent-catalog as a package.",
+        "Build-order tests fail until build:sdk and related scripts no longer build @a5c-ai/agent-catalog."
+      ],
+      "greenWork": [
+        "Remove agent-catalog from root scripts, lockfile workspace package entries, TypeScript references, release/CI surfaces, and package docs.",
+        "Rename or update catalog contract test scripts to validate atlas/catalog.",
+        "Regenerate package-lock.json."
+      ],
+      "verification": [
+        "Lockfile regeneration completes cleanly.",
+        "npm run build:sdk, npm run test:sdk, and npm run verify:metadata pass."
+      ]
+    },
+    {
+      "id": "phase-4-final-package-removal-and-documentation",
+      "title": "Remove packages/agent-catalog and update docs",
+      "objective": "Delete the standalone package after all source, tests, consumers, and metadata have moved, while keeping intentional historical references clear.",
+      "redTests": [
+        "A final guard fails while packages/agent-catalog exists or active docs direct users to import @a5c-ai/agent-catalog.",
+        "A documentation/package-map check fails until public package docs describe atlas/catalog as the catalog surface."
+      ],
+      "greenWork": [
+        "Remove packages/agent-catalog after preserving relevant README/policy information in atlas docs.",
+        "Update unification docs, package maps, workspace validation, release pipeline references, and atlas graph package/CI surfaces as needed."
+      ],
+      "verification": [
+        "Full stale-reference guard passes for active package/runtime references.",
+        "Final acceptance commands pass and adversarial review score is at least 90."
+      ]
+    }
+  ],
+  "qualityRubric": {
+    "minimumScore": 90,
+    "dimensions": [
+      "Spec coverage and traceability to issue #839 and docs/atlas-catalog-unification/README.md",
+      "Red/green/refactor discipline with failing tests proven before implementation",
+      "Compatibility of @a5c-ai/atlas/catalog runtime and type exports",
+      "Completeness of consumer import and package dependency migration",
+      "Workspace, lockfile, CI, docs, and atlas graph metadata cleanup",
+      "Verification command evidence and stale-reference guard coverage"
+    ]
+  }
+}
