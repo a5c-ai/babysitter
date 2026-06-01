@@ -238,7 +238,7 @@ const traceId=${JSON.stringify(traceId)};
 function cpDir(s,d){fs.mkdirSync(d,{recursive:true});for(const e of fs.readdirSync(s,{withFileTypes:true})){const sp=p.join(s,e.name),dp=p.join(d,e.name);if(e.isDirectory())cpDir(sp,dp);else fs.copyFileSync(sp,dp)}}
 cpDir(src,dest);
 for(const f of fs.readdirSync(dest)){if(f.endsWith(".json")){const fp=p.join(dest,f);let c=fs.readFileSync(fp,"utf8");c=c.replace(/RESUME_FIXTURE_RUN/g,runId);fs.writeFileSync(fp,c)}}
-fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:".a5c-live-test"}));
+fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.join(${JSON.stringify(options.cwd)},".a5c-live-test")}));
 `.replace(/\n/g, '')], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS },
     );
     commandEnv['LIVE_STACK_RESUME_RUN_ID'] = resumeRunId;
