@@ -16,3 +16,4 @@ edges:
   has_version:
     - agent-version:amp@current
     - agentVersion:amp:0-0-1780244579-g6b52f9
+    - agentVersion:amp:0-0-1780336675-gf27daa

@@ -29,7 +29,7 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | Package or surface | Script | Lane | Scope | Owner | Artifact name | Pipeline placement |
 | --- | --- | --- | --- | --- | --- | --- |
 | `@a5c-ai/atlas/catalog` | `test:atlas-catalog-contracts` | No-model | contract | Catalog/Atlas maintainers | `test-logs/atlas-catalog-contracts.log` | ci.yml test or package-local validation when catalog surface is touched |
-| `@a5c-ai/agent-core` | `test` | No-model | unit-or-integration | Runtime maintainers | `test-logs/agent-core-test.log` | ci.yml packages-sdk/test; publish.yml validate_core |
+| `@a5c-ai/tula-core` | `test` | No-model | unit-or-integration | Runtime maintainers | `test-logs/tula-core-test.log` | ci.yml packages-sdk/test; publish.yml validate_core |
 | `@a5c-ai/agent-mux` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-adapters` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-adapters-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-cli` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-cli-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |

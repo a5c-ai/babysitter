@@ -16,6 +16,7 @@ edges:
   has_version:
     - agentVersion:cursor:ge-0-0-0
     - agentVersion:cursor:changelog-2026-05-20
+    - agentVersion:cursor:changelog-2026-05-29
   composed_of:
     - target: language:typescript
       role: core

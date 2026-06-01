@@ -16,3 +16,4 @@ edges:
   has_version:
     - agentVersion:copilot:ge-1-0-55-3
     - agentVersion:copilot:1-0-57-3
+    - agentVersion:copilot:1-0-57

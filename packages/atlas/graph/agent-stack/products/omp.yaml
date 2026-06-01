@@ -16,3 +16,4 @@ edges:
   has_version:
     - agentVersion:omp:ge-15-5-9
     - agentVersion:omp:15-7-3
+    - agentVersion:omp:15-7-6
