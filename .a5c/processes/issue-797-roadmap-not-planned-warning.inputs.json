@@ -1,0 +1,83 @@
+{
+  "issueNumber": 797,
+  "baseBranch": "staging",
+  "targetBranch": "work/issue-797-roadmap-not-planned-warning",
+  "targetQualityScore": 90,
+  "maxAttemptsPerPhase": 3,
+  "issueContext": {
+    "title": "feature: Auto-flag roadmap items linked to upstream NOT_PLANNED issues",
+    "labels": [
+      "documentation",
+      "effort:medium",
+      "ready-for-dev",
+      "feature",
+      "priority:medium",
+      "ci",
+      "risk:medium"
+    ],
+    "body": "The cookbook roadmap held 3 items in in-progress status for 3+ days while their linked upstream library issues had already been closed as NOT_PLANNED by the babysitter maintainers. Extend the roadmap render / sync step to inspect roadmap items with issue_link fields or similar, query gh issue view <link> --json state,stateReason with a fallback to state,closedAt for older gh versions, and if state is CLOSED and stateReason is NOT_PLANNED surface a consider dropping warning in rendered HTML or emit a non-blocking lint message in CI. Auto-dropping items is out of scope; keep a human in the loop.",
+    "comments": [
+      {
+        "author": "a5c-ai",
+        "body": "Triage confirms there is no scripts/render-roadmap.mjs, no issue_link, no stateReason, and no NOT_PLANNED handling in current roadmap/docs tooling. Closest warning/reporting surface is scripts/docs-freshness-report.cjs with central scope in scripts/docs-qa-config.cjs, wired through docs:freshness, docs:qa, docs:ci, and .github/workflows/ci.yml. Recommended approach: reusable roadmap/upstream-issue stale-link check callable from docs:freshness/docs:qa; define authoritative roadmap sources and issue_link metadata format; parse linked GitHub issue references; dedupe issue lookups; query gh issue view <link> --json state,stateReason,closedAt,url,title with bounded timeouts; emit warning-only output for state CLOSED and stateReason NOT_PLANNED; do not infer NOT_PLANNED from closedAt alone when stateReason is missing; add parser and state evaluation tests without live network calls."
+      }
+    ]
+  },
+  "targetFiles": [
+    "scripts/docs-freshness-report.cjs",
+    "scripts/docs-qa-config.cjs",
+    "package.json",
+    ".github/workflows/ci.yml",
+    "docs/harness-features-backlog/roadmap.md"
+  ],
+  "testFiles": [
+    "scripts/__tests__/docs-freshness-roadmap-issues.test.cjs",
+    "scripts/__tests__/roadmap-upstream-issue-state.test.cjs",
+    "scripts/__tests__/roadmap-issue-link-parser.test.cjs"
+  ],
+  "verificationCommands": [
+    "npm run docs:freshness",
+    "npm run docs:qa",
+    "npm run validate:processes"
+  ],
+  "acceptanceCriteria": [
+    "Roadmap-style docs or configured roadmap sources can expose GitHub issue links through issue_link metadata or an explicitly documented equivalent format.",
+    "Linked issue lookup is deduped and bounded, and can be tested with mocked gh/process execution.",
+    "Only CLOSED issues with stateReason NOT_PLANNED generate stale-roadmap warnings.",
+    "OPEN issues, CLOSED completed issues, gh failures, timeouts, auth/network absence, and missing stateReason do not generate false NOT_PLANNED warnings.",
+    "Warnings are included in artifacts/docs-qa/freshness-report.json and surfaced in docs:freshness output.",
+    "The warning is informational and does not fail docs:freshness, docs:qa, or CI.",
+    "No implementation automatically drops, rewrites, or changes roadmap item status."
+  ],
+  "processLibraryResearch": {
+    "requestedPath": ".a5c/process-library/",
+    "requestedPathPresent": false,
+    "usedLibraryRoot": "library/",
+    "matchingMethodologies": [
+      "library/tdd-quality-convergence.js",
+      "library/processes/shared/tdd-triplet.js",
+      "library/processes/shared/deterministic-quality-gate.js",
+      "library/methodologies/spec-driven-development.js",
+      "library/methodologies/superpowers/test-driven-development.js",
+      "library/methodologies/superpowers/verification-before-completion.js",
+      "library/specializations/technical-documentation/docs-testing.js"
+    ],
+    "repoProcessReferences": [
+      ".a5c/processes/issue-572-shell-output-schema-plan.mjs",
+      ".a5c/processes/issue-586-kanban-exhaustiveness-checks.mjs"
+    ],
+    "selectedShape": "flat phase list with per-phase TDD convergence loops",
+    "reasoning": "The bug class and integration point are known from triage. The requested methodology is TDD and spec-driven with adversarial scoring, so each phase runs red, green, refactor, verification, and adversarial review until score >= 90."
+  },
+  "implementationNotes": [
+    "Prefer scripts/docs-freshness-report.cjs as the warning/reporting surface because no roadmap renderer exists in this repo.",
+    "Prefer pure helpers for parsing and state classification so tests do not require live GitHub calls.",
+    "If child_process spawning is needed, isolate it behind an injectable adapter and use short timeouts.",
+    "Treat older gh versions that cannot return stateReason as uncertain; do not infer NOT_PLANNED from closedAt alone.",
+    "Keep breakpoints sparse; only pause when the roadmap source contract or metadata format is genuinely ambiguous."
+  ],
+  "pr": {
+    "title": "Plan: roadmap NOT_PLANNED warning workflow",
+    "linkedIssue": 797
+  }
+}
