@@ -1,5 +1,95 @@
 # Changelog
 
+## [Unreleased] - 2026-06-01
+
+### Features
+
+- feat: Atlas catalog unification (#850) (6c9c72239, a5c-ai[bot], 5 minutes ago)
+- feat: TDD blueprints rename convergence (#853) (c1c743c3a, a5c-ai[bot], 45 minutes ago)
+- feat: agent-core to tula-core TDD rename (#852) (2dc9dcfb2, a5c-ai[bot], 2 hours ago)
+- feat: preflight orphan-file grep prompts (#849) (ba6e2d8f5, a5c-ai[bot], 7 hours ago)
+- feat(live-stack): add tula to vanilla and BP matrix sections (0e867fd48, Tal Muskal, 11 hours ago)
+- feat(krate): add OpenAI-compatible provider support for assistant (0fd0f82ba, Tal Muskal, 23 hours ago)
+- feat(graph): add OpenClaw 2026.5.28 issue 810 records (#829) (80c787ffe, a5c-ai[bot], 23 hours ago)
+- feat(graph): track Copilot CLI 1.0.57-3 (#826) (6bf2b63b2, a5c-ai[bot], 23 hours ago)
+- feat(graph): track Amp 0.0.1780244579-g6b52f9 (#825) (ad9d3d027, a5c-ai[bot], 23 hours ago)
+- feat(graph): add Pi 0.78.0 issue 808 records (#824) (cfbaf82fb, a5c-ai[bot], 23 hours ago)
+- feat(atlas): track OpenAI Node SDK 6.39.1 (#823) (da7481317, a5c-ai[bot], 23 hours ago)
+- feat(graph): add Qwen Code 0.17.0 issue 807 records (#822) (ba4cfd04d, a5c-ai[bot], 23 hours ago)
+- feat(atlas): track Droid CLI 0.137.1 (#830) (313ff1440, a5c-ai[bot], 23 hours ago)
+- Add Cursor 2026-05-20 graph update (#821) (f31cf1daf, a5c-ai[bot], 23 hours ago)
+- feat(atlas): track Claude Agent SDK 0.3.159 (#819) (d1aa94640, a5c-ai[bot], 23 hours ago)
+- feat(graph): track OpenCode 1.15.13 for issue 811 (#818) (02ff17a6f, a5c-ai[bot], 23 hours ago)
+- feat(graph): track Claude Code 2.1.159 (#816) (db73f79fe, a5c-ai[bot], 23 hours ago)
+
+### Fixes
+
+- fix(atlas): use readFileSync instead of require for graph index JSON (ce0247dbd, Tal Muskal, 7 minutes ago)
+- fix(ci): alias atlas to dist in vitest + add graph data verification (54aee7f7b, Tal Muskal, 21 minutes ago)
+- fix(ci): externalize atlas in vitest to fix 67 adapter test failures (ffc5a5088, Tal Muskal, 41 minutes ago)
+- fix: krate default provider to anthropic, relax gemini version pin test (b660ceccd, Tal Muskal, 56 minutes ago)
+- fix: additional CI test fixes (fa888cc2a, Tal Muskal, 77 minutes ago)
+- fix(live-stack): accept missing file in resume mode (e512ef37c, Tal Muskal, 2 hours ago)
+- fix(live-stack): use absolute outputDir in resume fixture inputs (9acbf924e, Tal Muskal, 2 hours ago)
+- fix: resolve 4 pre-existing CI test failures (3b77d2e51, Tal Muskal, 2 hours ago)
+- fix(live-stack): increase command timeout to 60 min for hermes Windows ConPTY (0abe419f4, Tal Muskal, 5 hours ago)
+- fix(launch): increase NI idle timeout to 5 min in bridge-hooks mode (9d48bd7c8, Tal Muskal, 5 hours ago)
+- fix(launch): skip ConPTY for hermes Windows in bridge-hooks mode (4c0d11358, Tal Muskal, 6 hours ago)
+- fix(live-stack): resume completion-proof doesn't require file-creation (7289b3999, Tal Muskal, 7 hours ago)
+- fix(live-stack): add resume-mode rescue for non-zero exit (dd276d92a, Tal Muskal, 7 hours ago)
+- fix(ci): update architecture boundary check for omni→tula rename (8d5266cc3, Tal Muskal, 7 hours ago)
+- fix(ci): plan agent creates draft PRs with feat: title, not Plan: (0c43046a1, Tal Muskal, 7 hours ago)
+- fix(live-stack): increase test timeout to 48 min (> 45 min command + setup) (6e5a99476, Tal Muskal, 8 hours ago)
+- fix(live-stack): increase all timeouts to 45 min for hermes Windows (28021fc45, Tal Muskal, 9 hours ago)
+- fix(live-stack): relax tula validation thresholds (97e67a911, Tal Muskal, 9 hours ago)
+- fix(agent-platform): auto-execute ALL effect kinds, check taskDef paths (e19b732b7, Tal Muskal, 10 hours ago)
+- fix(agent-platform,live-stack): autonomous host loop + 35 min timeout (923c44d4e, Tal Muskal, 10 hours ago)
+- fix(live-stack): increase command timeout from 15 to 25 min (6820e2c2d, Tal Muskal, 11 hours ago)
+- fix(live-stack): increase interactive timeout to 25 min unconditionally (e4cbae9fb, Tal Muskal, 12 hours ago)
+- fix(launch): increase PROMPT_ARTIFACT_MONITOR_TIMEOUT to 25 min on Windows (7eec88d3b, Tal Muskal, 12 hours ago)
+- fix(live-stack): increase Windows interactive timeout to 25 min (ad9689487, Tal Muskal, 13 hours ago)
+- fix(agent-platform): auto-execute agent effects via delegation (ebcd4399b, Tal Muskal, 13 hours ago)
+- fix(agent-platform): auto-execute shell effects in orchestration host (3a9b84b95, Tal Muskal, 14 hours ago)
+- fix(live-stack): accept resume-mode completion when run+artifact exist (9b4b8c859, Tal Muskal, 14 hours ago)
+- fix(krate): add identity CRDs to KRATE_RESOURCES, enable ArgoCD+Gitea (68ef09e90, Tal Muskal, 14 hours ago)
+- fix(live-stack): use simpler 2-task process for omni tests (61640bc10, Tal Muskal, 14 hours ago)
+- fix(live-stack): omni uses simple call without --process (06fa83e22, Tal Muskal, 19 hours ago)
+- fix(agent-platform): increase MAX_CONSECUTIVE_STALLS from 2 to 5 (83934170a, Tal Muskal, 20 hours ago)
+- fix(live-stack): check deferredHooksEntries for hooks-mux-session (518906e65, Tal Muskal, 21 hours ago)
+- fix(live-stack): move create-mode upgrade before entries are pushed (2cb757841, Tal Muskal, 21 hours ago)
+- fix(live-stack): rescue non-zero exit in create mode when process file exists (e7da1f61d, Tal Muskal, 21 hours ago)
+- fix(live-stack): accept create-mode success without formal SDK run (0126a124a, Tal Muskal, 21 hours ago)
+- fix(launch): add --skip-trust for gemini-cli in addition to env var (f7c7fb29c, Tal Muskal, 22 hours ago)
+- fix(live-stack): root-cause fixes for gemini-cli, macOS, pi, omni (4443e9297, Tal Muskal, 22 hours ago)
+- fix(krate): lightweight readiness probe to prevent pod flip-flopping (581c9db58, Tal Muskal, 22 hours ago)
+- fix(krate): remove production-only JWT secret requirement for Jitsi (ad267f4cb, Tal Muskal, 23 hours ago)
+- fix(live-stack): use /resume for non-claude/codex agents in BP/Resume mode (d17e01611, Tal Muskal, 23 hours ago)
+- fix(extension-mux): templatize harness name in generated plugins (6f188c842, Tal Muskal, 23 hours ago)
+- fix(atlas): track Oh-My-Pi 15.7.3 graph updates (#827) (da5b4b314, a5c-ai[bot], 23 hours ago)
+- fix(live-stack): use /yolo for pi/gemini/hermes BP (not /babysitter:yolo) (7817987a5, Tal Muskal, 23 hours ago)
+- fix(live-stack): explicit babysitter call instruction for BP/Create non-native agents (529e6660b, Tal Muskal, 24 hours ago)
+- fix(live-stack): restore proper BP verification thresholds (350afabb2, Tal Muskal, 24 hours ago)
+
+### Refactors
+
+- rename: omni → tula across entire repo (da7723a66, Tal Muskal, 12 hours ago)
+- refactor(unified-plugin): remove per-harness babysit-SKILL overrides (b19518bc5, Tal Muskal, 22 hours ago)
+
+### Documentation
+
+- docs: add 4 rename/restructure gap analyses (56f57a01d, Tal Muskal, 11 hours ago)
+- docs: daily changelog update (#799) (a7fe568df, a5c-ai[bot], 24 hours ago)
+
+### Maintenance
+
+- revert(launch): re-enable ConPTY for hermes Windows (stdin needs it) (6c4ed3a27, Tal Muskal, 5 hours ago)
+- chore: regenerate package-lock.json after omni→tula rename (adf0d61aa, Tal Muskal, 12 hours ago)
+- debug(live-stack): add logging to create-mode upgrade path (4406ef6be, Tal Muskal, 21 hours ago)
+- chore(graph): track Hermes Agent 0.15.2 (#828) (534cd171f, a5c-ai[bot], 23 hours ago)
+- chore(atlas): track Codex CLI 0.135.0 (#820) (fc2a667fa, a5c-ai[bot], 23 hours ago)
+- chore(atlas): track gemini cli 0.44.1 for issue 806 (#817) (607e09858, a5c-ai[bot], 23 hours ago)
+- Track upstream agent CLI versions (#815) (b347fb538, a5c-ai[bot], 24 hours ago)
+
 ## [Unreleased] - 2026-05-31
 
 ### Bug Fixes
