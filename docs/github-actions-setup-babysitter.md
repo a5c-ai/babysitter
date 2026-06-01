@@ -545,7 +545,7 @@ Enable verbose mode for debugging:
 - [Gemini CLI Action](https://github.com/google-github-actions/run-gemini-cli) — [Setup Guide](github-actions-setup-gemini-cli.md)
 
 ### Marketplace Plugins
-- [github-actions-cicd-babysitter](https://github.com/a5c-ai/babysitter/blob/main/plugins/a5c/marketplace/plugins/github-actions-cicd-babysitter/configure.md) — Marketplace plugin for this action
-- [github-actions-cicd-claude-code](https://github.com/a5c-ai/babysitter/blob/main/plugins/a5c/marketplace/plugins/github-actions-cicd-claude-code/configure.md) — Claude Code specific
-- [github-actions-cicd-codex](https://github.com/a5c-ai/babysitter/blob/main/plugins/a5c/marketplace/plugins/github-actions-cicd-codex/configure.md) — Codex specific
-- [github-actions-cicd-gemini-cli](https://github.com/a5c-ai/babysitter/blob/main/plugins/a5c/marketplace/plugins/github-actions-cicd-gemini-cli/configure.md) — Gemini CLI specific
+- [github-actions-cicd-babysitter](https://github.com/a5c-ai/babysitter/blob/main/blueprints/a5c/marketplace/plugins/github-actions-cicd-babysitter/configure.md) — Marketplace blueprint for this action
+- [github-actions-cicd-claude-code](https://github.com/a5c-ai/babysitter/blob/main/blueprints/a5c/marketplace/plugins/github-actions-cicd-claude-code/configure.md) — Claude Code specific
+- [github-actions-cicd-codex](https://github.com/a5c-ai/babysitter/blob/main/blueprints/a5c/marketplace/plugins/github-actions-cicd-codex/configure.md) — Codex specific
+- [github-actions-cicd-gemini-cli](https://github.com/a5c-ai/babysitter/blob/main/blueprints/a5c/marketplace/plugins/github-actions-cicd-gemini-cli/configure.md) — Gemini CLI specific

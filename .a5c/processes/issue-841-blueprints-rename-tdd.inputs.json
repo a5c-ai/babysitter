@@ -1,0 +1,99 @@
+{
+  "issueNumber": 841,
+  "baseBranch": "staging",
+  "implementationBranch": "issue-841-blueprints-rename",
+  "targetQuality": 90,
+  "maxIterationsPerPhase": 4,
+  "finalVerificationTimeout": 900000,
+  "phases": [
+    {
+      "id": "sdk-blueprints-module",
+      "name": "SDK source/module rename",
+      "goal": "Move the babysitter plugin SDK module to blueprints, update exported types/interfaces/constants, and preserve compatibility only where the spec requires it.",
+      "targetTestFiles": [
+        "packages/sdk/src/blueprints/__tests__/registry.test.ts",
+        "packages/sdk/src/blueprints/__tests__/paths.test.ts",
+        "packages/sdk/src/blueprints/__tests__/marketplace.test.ts",
+        "packages/sdk/src/blueprints/__tests__/migrations.test.ts",
+        "packages/sdk/src/blueprints/__tests__/packageReader.test.ts",
+        "packages/sdk/src/index.ts"
+      ],
+      "testCommand": "npm run test --workspace=@a5c-ai/babysitter-sdk -- src/blueprints src/index.ts",
+      "verificationCommand": "npm run build:sdk && npm run test --workspace=@a5c-ai/babysitter-sdk -- src/blueprints src/index.ts",
+      "redExpectedExitCode": 1,
+      "testTimeout": 240000,
+      "verificationTimeout": 600000
+    },
+    {
+      "id": "cli-blueprint-commands",
+      "name": "CLI blueprints commands and deprecated aliases",
+      "goal": "Add the blueprints CLI command surface, keep old plugin command aliases with deprecation warnings, update argument parsing/usage, and reconcile the issue's plural examples with the current singular plugin:* command family.",
+      "targetTestFiles": [
+        "packages/sdk/src/cli/commands/__tests__/plugin-registry.test.ts",
+        "packages/sdk/src/cli/commands/__tests__/plugin-lifecycle.test.ts",
+        "packages/sdk/src/cli/commands/__tests__/plugin-marketplace.test.ts",
+        "packages/sdk/src/cli/commands/__tests__/plugin-handlers.test.ts",
+        "packages/sdk/src/cli/__tests__/cliRuns.test.ts"
+      ],
+      "testCommand": "npm run test --workspace=@a5c-ai/babysitter-sdk -- src/cli/commands/__tests__/plugin-registry.test.ts src/cli/commands/__tests__/plugin-lifecycle.test.ts src/cli/commands/__tests__/plugin-marketplace.test.ts src/cli/commands/__tests__/plugin-handlers.test.ts src/cli/__tests__/cliRuns.test.ts",
+      "verificationCommand": "npm run build:sdk && npm run test --workspace=@a5c-ai/babysitter-sdk -- src/cli/commands/__tests__/plugin-registry.test.ts src/cli/commands/__tests__/plugin-lifecycle.test.ts src/cli/commands/__tests__/plugin-marketplace.test.ts src/cli/commands/__tests__/plugin-handlers.test.ts src/cli/__tests__/cliRuns.test.ts && npm run check:plugin-commands",
+      "redExpectedExitCode": 1,
+      "testTimeout": 300000,
+      "verificationTimeout": 700000
+    },
+    {
+      "id": "marketplace-config-paths",
+      "name": "Marketplace and config path migration",
+      "goal": "Move babysitter marketplace installables from plugins to blueprints, read both old and new config paths for compatibility, add BABYSITTER_BLUEPRINT_* support, and keep agent plugin env vars unchanged.",
+      "targetTestFiles": [
+        "packages/sdk/src/blueprints/__tests__/marketplace.test.ts",
+        "packages/sdk/src/blueprints/__tests__/integration/plugin-flows.test.ts",
+        "packages/sdk/src/cli/commands/__tests__/plugin-lifecycle.test.ts",
+        "scripts/check-package-metadata.cjs"
+      ],
+      "testCommand": "npm run test --workspace=@a5c-ai/babysitter-sdk -- src/blueprints/__tests__/marketplace.test.ts src/blueprints/__tests__/integration/plugin-flows.test.ts src/cli/commands/__tests__/plugin-lifecycle.test.ts",
+      "verificationCommand": "npm run build:sdk && npm run test --workspace=@a5c-ai/babysitter-sdk -- src/blueprints/__tests__/marketplace.test.ts src/blueprints/__tests__/integration/plugin-flows.test.ts src/cli/commands/__tests__/plugin-lifecycle.test.ts && npm run verify:metadata",
+      "redExpectedExitCode": 1,
+      "testTimeout": 300000,
+      "verificationTimeout": 700000
+    },
+    {
+      "id": "docs-skills-process-library",
+      "name": "Docs, skills, and process-library terminology",
+      "goal": "Split/update docs for babysitter blueprints while preserving agent plugin docs, rename the babysitter plugins skill/command surface to blueprints, and update process-library references without touching agent plugin internals.",
+      "targetTestFiles": [
+        "docs/blueprints.md",
+        "docs/plugins.md",
+        "plugins/babysitter-unified/commands/blueprints.md",
+        "plugins/babysitter/skills/blueprints/SKILL.md"
+      ],
+      "testCommand": "npm run docs:snippets && npm run docs:links && npm run check:sdk-command-templates",
+      "verificationCommand": "npm run docs:snippets && npm run docs:links && npm run check:sdk-command-templates && npm run check:plugin-commands",
+      "redExpectedExitCode": 1,
+      "testTimeout": 300000,
+      "verificationTimeout": 700000
+    }
+  ],
+  "finalVerificationCommands": [
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run check:plugin-commands",
+    "npm run check:sdk-command-templates",
+    "npm run verify:metadata",
+    "test -d packages/sdk/src/blueprints && test ! -d packages/sdk/src/plugins",
+    "changed=\"$(git diff --name-only origin/staging...HEAD 2>/dev/null || git diff --name-only)\"; echo \"$changed\" | rg '^(packages/(extension-mux|hooks-mux)/|\\.claude/plugins/)' && exit 1 || true"
+  ],
+  "qualityRubric": {
+    "specCoverage": 30,
+    "tddDiscipline": 20,
+    "backwardCompatibility": 20,
+    "noTouchBoundary": 15,
+    "maintainability": 10,
+    "verificationStrength": 5
+  },
+  "explicitNonGoals": [
+    "Do not rename or alter hooks-mux or extension-mux agent plugin concepts.",
+    "Do not rename CLAUDE_PLUGIN_ROOT, PI_PLUGIN_ROOT, or .claude/plugins.",
+    "Do not remove deprecated plugin CLI aliases in this change."
+  ]
+}

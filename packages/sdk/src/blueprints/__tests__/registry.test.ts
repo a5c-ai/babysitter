@@ -105,7 +105,7 @@ describe("writePluginRegistry", () => {
 
     expect(mockedWriteFileAtomic).toHaveBeenCalledTimes(1);
     const [writtenPath, writtenData] = mockedWriteFileAtomic.mock.calls[0];
-    expect(writtenPath).toContain("plugin-registry.json");
+    expect(writtenPath).toContain("blueprint-registry.json");
     const parsed = JSON.parse(writtenData as string);
     expect(parsed.schemaVersion).toBe(PLUGIN_REGISTRY_SCHEMA_VERSION);
   });

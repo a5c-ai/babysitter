@@ -3,7 +3,7 @@ import { collectCapabilities, mergeCapabilities } from '../capabilityCollector';
 import { createRuntimePromptContext } from '../runtimeContext';
 
 // Mock the plugin registry module
-vi.mock('../../plugins/registry', () => ({
+vi.mock('../../blueprints/registry', () => ({
   readPluginRegistry: vi.fn(),
 }));
 
@@ -12,7 +12,7 @@ vi.mock('../../processLibrary/active', () => ({
   resolveActiveProcessLibrary: vi.fn(),
 }));
 
-import { readPluginRegistry } from '../../plugins/registry';
+import { readPluginRegistry } from '../../blueprints/registry';
 import { resolveActiveProcessLibrary } from '../../processLibrary/active';
 
 const mockReadPluginRegistry = vi.mocked(readPluginRegistry);

@@ -14,8 +14,10 @@ import { PluginScope, PLUGIN_REGISTRY_FILENAME } from "./types";
  */
 const BABYSITTER_DIR = ".a5c";
 
+const BLUEPRINTS_SUBDIR = "blueprints";
+
 /**
- * Subdirectory within the babysitter config dir for marketplace clones.
+ * Subdirectory within the blueprint config dir for marketplace clones.
  */
 const MARKETPLACES_SUBDIR = "marketplaces";
 
@@ -57,6 +59,13 @@ export function getRegistryPath(
  * @param projectDir - Required when scope is 'project'
  */
 export function getMarketplacesDir(
+  scope: PluginScope,
+  projectDir?: string
+): string {
+  return path.join(getBaseDir(scope, projectDir), BLUEPRINTS_SUBDIR, MARKETPLACES_SUBDIR);
+}
+
+export function getLegacyMarketplacesDir(
   scope: PluginScope,
   projectDir?: string
 ): string {

@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-vi.mock("../../../plugins/marketplace", () => ({
+vi.mock("../../../blueprints/marketplace", () => ({
   cloneMarketplace: vi.fn(),
   updateMarketplace: vi.fn(),
   listMarketplacePlugins: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock("../../../plugins/marketplace", () => ({
   readMarketplaceManifest: vi.fn(),
 }));
 
-vi.mock("../../../plugins/registry", () => ({
+vi.mock("../../../blueprints/registry", () => ({
   readPluginRegistry: vi.fn(),
   getPluginEntry: vi.fn(),
   listPluginEntries: vi.fn(),
@@ -25,20 +25,20 @@ vi.mock("../../../plugins/registry", () => ({
   writePluginRegistry: vi.fn(),
 }));
 
-vi.mock("../../../plugins/packageReader", () => ({
+vi.mock("../../../blueprints/packageReader", () => ({
   readInstallInstructions: vi.fn(),
   readUninstallInstructions: vi.fn(),
   readConfigureInstructions: vi.fn(),
 }));
 
-vi.mock("../../../plugins/migrations", () => ({
+vi.mock("../../../blueprints/migrations", () => ({
   resolveMigrationChain: vi.fn(),
 }));
 
 import {
   cloneMarketplace,
   updateMarketplace,
-} from "../../../plugins/marketplace";
+} from "../../../blueprints/marketplace";
 
 import {
   validateScope,
@@ -47,6 +47,7 @@ import {
   handlePluginUpdateMarketplace,
   handlePluginListPlugins,
 } from "../plugin";
+import { getValidCommands } from "../../main/program";
 
 const mockedCloneMarketplace = vi.mocked(cloneMarketplace);
 const mockedUpdateMarketplace = vi.mocked(updateMarketplace);
@@ -66,6 +67,18 @@ describe("validateScope", () => {
 
   it("returns false for invalid string", () => {
     expect(validateScope("local")).toBe(false);
+  });
+});
+
+describe("blueprint command surface", () => {
+  it("exposes blueprint commands while retaining deprecated plugin aliases", () => {
+    const commands = getValidCommands("core");
+
+    expect(commands).toContain("blueprints:install");
+    expect(commands).toContain("blueprints:list");
+    expect(commands).toContain("blueprints:marketplace");
+    expect(commands).toContain("plugin:install");
+    expect(commands).toContain("plugin:list-plugins");
   });
 });
 

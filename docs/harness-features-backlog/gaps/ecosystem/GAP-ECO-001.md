@@ -17,7 +17,7 @@ CC plugin ecosystem.
 
 **This is NOT about babysitter's existing plugin system** (`packages/sdk/src/plugins/`).
 Babysitter already has harness-integration plugins (`plugins/babysitter/`,
-`plugins/babysitter-codex/`, etc.) and a marketplace (`plugins/a5c/marketplace/`).
+`plugins/babysitter-codex/`, etc.) and a marketplace (`blueprints/a5c/marketplace/`).
 This gap is about a NEW compatibility layer that bridges CC's plugin format into
 babysitter's runtime.
 

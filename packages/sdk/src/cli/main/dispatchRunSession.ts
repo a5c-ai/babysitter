@@ -274,7 +274,16 @@ async function executeSupportCommand(parsed: ParsedArgs): Promise<number | undef
     };
     return await handleProfileCommand(parsed.command.split(":")[1], args);
   }
-  if (parsed.command?.startsWith("plugin:")) {
+  if (
+    parsed.command?.startsWith("plugin:") ||
+    parsed.command?.startsWith("blueprints:")
+  ) {
+    const command = normalizeBlueprintCommand(parsed.command);
+    if (parsed.command.startsWith("plugin:") && !parsed.json) {
+      console.warn(
+        `${parsed.command} is deprecated; use ${toBlueprintCommand(parsed.command)} instead.`
+      );
+    }
     const args: PluginCommandArgs = {
       pluginName: parsed.pluginName,
       marketplaceName: parsed.marketplaceName,
@@ -288,7 +297,7 @@ async function executeSupportCommand(parsed: ParsedArgs): Promise<number | undef
       verbose: parsed.verbose,
       runsDir: parsed.runsDir,
     };
-    switch (parsed.command) {
+    switch (command) {
       case "plugin:add-marketplace":
         return await handlePluginAddMarketplace(args);
       case "plugin:update-marketplace":
@@ -312,4 +321,46 @@ async function executeSupportCommand(parsed: ParsedArgs): Promise<number | undef
     }
   }
   return undefined;
+}
+
+function normalizeBlueprintCommand(command: string): string {
+  switch (command) {
+    case "blueprints:list":
+    case "blueprints:marketplace":
+      return "plugin:list-plugins";
+    case "blueprints:add-marketplace":
+      return "plugin:add-marketplace";
+    case "blueprints:update-marketplace":
+      return "plugin:update-marketplace";
+    case "blueprints:list-installed":
+      return "plugin:list-installed";
+    case "blueprints:update-registry":
+      return "plugin:update-registry";
+    case "blueprints:remove-from-registry":
+      return "plugin:remove-from-registry";
+    default:
+      if (command.startsWith("blueprints:")) {
+        return `plugin:${command.slice("blueprints:".length)}`;
+      }
+      return command;
+  }
+}
+
+function toBlueprintCommand(command: string): string {
+  switch (command) {
+    case "plugin:list-plugins":
+      return "blueprints:list";
+    case "plugin:add-marketplace":
+      return "blueprints:add-marketplace";
+    case "plugin:update-marketplace":
+      return "blueprints:update-marketplace";
+    case "plugin:list-installed":
+      return "blueprints:list-installed";
+    case "plugin:update-registry":
+      return "blueprints:update-registry";
+    case "plugin:remove-from-registry":
+      return "blueprints:remove-from-registry";
+    default:
+      return command.replace(/^plugin:/, "blueprints:");
+  }
 }

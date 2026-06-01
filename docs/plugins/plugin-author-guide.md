@@ -1,17 +1,17 @@
-# Plugin Author Guide
+# Blueprint Author Guide
 
-This guide explains how to create plugin packages for the babysitter SDK. A babysitter plugin is not a conventional software plugin. Instead, it is a version-managed package of contextual instructions that an AI agent reads and executes to install, uninstall, configure, or migrate between versions of a tool or integration.
+This guide explains how to create blueprint packages for the babysitter SDK. A Babysitter blueprint is not a conventional software plugin. Instead, it is a version-managed package of contextual instructions that an AI agent reads and executes to install, uninstall, configure, or migrate between versions of a tool or integration.
 
 ## Concepts
 
 - **Plugin package** -- A directory within a marketplace repository containing instruction files and optional babysitter process files.
-- **Marketplace** -- A Git repository with a `marketplace.json` manifest that indexes available plugins.
-- **Registry** -- A local JSON file (`plugin-registry.json`) that tracks which plugins are installed and at what version.
-- **Scope** -- Plugins can be installed at `global` scope (`~/.babysitter/`) or `project` scope (`<projectDir>/.babysitter/`).
+- **Marketplace** -- A Git repository with a `marketplace.json` manifest that indexes available blueprints.
+- **Registry** -- A local JSON file (`plugin-registry.json`) that tracks which blueprints are installed and at what version.
+- **Scope** -- Plugins can be installed at `global` scope (`~/.a5c/blueprints/`) or `project` scope (`<projectDir>/.a5c/blueprints/`).
 
-## Plugin Package Directory Structure
+## Blueprint Package Directory Structure
 
-A plugin package is a directory with the following layout:
+A blueprint package is a directory with the following layout:
 
 ```
 my-plugin/
@@ -52,7 +52,7 @@ Guidelines:
 
 ## Steps
 
-1. Add the plugin entry to `.claude/settings.json` under the `permissions.allow` array:
+1. Add the blueprint entry to `.claude/settings.json` under the `permissions.allow` array:
    ```json
    {
      "permissions": {
@@ -85,7 +85,7 @@ The `uninstall.md` file contains instructions for removing the plugin. It should
 ```markdown
 # Uninstall my-plugin
 
-1. Remove the plugin entry from `.claude/settings.json` under `permissions.allow`.
+1. Remove the blueprint entry from `.claude/settings.json` under `permissions.allow`.
 2. Delete the plugin configuration directory:
    ```
    rm -rf .a5c/plugins/my-plugin
@@ -131,11 +131,11 @@ These process files enable automated, multi-step operations that go beyond what 
 - Generating configuration files from templates
 - Performing health checks after installation
 
-The SDK detects process files by checking for their existence at conventional paths within the plugin package directory. When present, the `processFile` field in the command output contains the absolute path to the file.
+The SDK detects process files by checking for their existence at conventional paths within the blueprint package directory. When present, the `processFile` field in the command output contains the absolute path to the file.
 
 ## Creating Migration Files
 
-Migration files live in the `migrations/` subdirectory of the plugin package. They describe how to move from one version to another.
+Migration files live in the `migrations/` subdirectory of the blueprint package. They describe how to move from one version to another.
 
 ### Naming Convention
 
@@ -181,7 +181,7 @@ Contain agent-readable instructions for performing the migration:
 
 Standard babysitter process files that automate the migration. The SDK returns the absolute path to the file in the `processFile` field so the agent can execute it.
 
-## Example Complete Plugin Package
+## Example Complete Blueprint Package
 
 ```
 example-plugin/
@@ -200,7 +200,7 @@ With a corresponding marketplace.json entry:
 ```json
 {
   "name": "example-plugin",
-  "description": "An example babysitter plugin",
+  "description": "An example Babysitter blueprint",
   "latestVersion": "2.1.0",
   "versions": ["2.1.0", "2.0.0", "1.1.0", "1.0.0"],
   "packagePath": "plugins/example-plugin",
@@ -213,8 +213,8 @@ With a corresponding marketplace.json entry:
 
 The complete lifecycle for a plugin from the agent's perspective:
 
-1. **Discovery** -- `plugin:list-plugins` to browse available plugins in a marketplace.
-2. **Install** -- `plugin:install` returns instructions from `install.md`. Agent executes them. Then `plugin:update-registry` records the version.
-3. **Configure** -- `plugin:configure` returns instructions from `configure.md`. Agent executes them.
-4. **Update** -- `plugin:update` resolves the migration chain and returns ordered migration instructions. Agent executes each migration step. Then `plugin:update-registry` records the new version.
-5. **Uninstall** -- `plugin:uninstall` returns instructions from `uninstall.md`. Agent executes them. Then `plugin:remove-from-registry` cleans up the registry.
+1. **Discovery** -- `blueprint:list-plugins` to browse available blueprints in a marketplace.
+2. **Install** -- `blueprint:install` returns instructions from `install.md`. Agent executes them. Then `blueprint:update-registry` records the version.
+3. **Configure** -- `blueprint:configure` returns instructions from `configure.md`. Agent executes them.
+4. **Update** -- `blueprint:update` resolves the migration chain and returns ordered migration instructions. Agent executes each migration step. Then `blueprint:update-registry` records the new version.
+5. **Uninstall** -- `blueprint:uninstall` returns instructions from `uninstall.md`. Agent executes them. Then `blueprint:remove-from-registry` cleans up the registry.

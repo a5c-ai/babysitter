@@ -27,9 +27,9 @@ CC's marketplace system (`src/utils/plugins/marketplaceManager.ts`, `marketplace
 - Plugin startup check (`pluginStartupCheck.ts`) -- validates on boot
 
 ## Current State
-Babysitter has its own marketplace system (`plugins/a5c/marketplace/`) with
+Babysitter has its own marketplace system (`blueprints/a5c/marketplace/`) with
 `marketplace.json` and plugin entries. The protocol is similar (git-based) but
-NOT compatible with CC's marketplace format. Cannot install CC marketplace plugins.
+NOT compatible with CC's marketplace format. Cannot install CC marketplace blueprints.
 
 ## Target State
 Babysitter can add CC marketplaces as sources and install CC plugins from them.

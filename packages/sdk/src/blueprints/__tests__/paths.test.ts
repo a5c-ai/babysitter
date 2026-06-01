@@ -16,14 +16,14 @@ describe("getRegistryPath", () => {
   it("returns global registry path under homedir", () => {
     const result = getRegistryPath("global");
     expect(result).toBe(
-      path.join("/mock/home", ".a5c", "plugin-registry.json")
+      path.join("/mock/home", ".a5c", "blueprint-registry.json")
     );
   });
 
   it("returns project registry path under projectDir", () => {
     const result = getRegistryPath("project", "/my/project");
     expect(result).toBe(
-      path.join("/my/project", ".a5c", "plugin-registry.json")
+      path.join("/my/project", ".a5c", "blueprint-registry.json")
     );
   });
 
@@ -38,14 +38,14 @@ describe("getMarketplacesDir", () => {
   it("returns global marketplaces dir under homedir", () => {
     const result = getMarketplacesDir("global");
     expect(result).toBe(
-      path.join("/mock/home", ".a5c", "marketplaces")
+      path.join("/mock/home", ".a5c", "blueprints", "marketplaces")
     );
   });
 
   it("returns project marketplaces dir under projectDir", () => {
     const result = getMarketplacesDir("project", "/my/project");
     expect(result).toBe(
-      path.join("/my/project", ".a5c", "marketplaces")
+      path.join("/my/project", ".a5c", "blueprints", "marketplaces")
     );
   });
 
@@ -60,7 +60,7 @@ describe("getMarketplaceDir", () => {
   it("returns marketplace-specific directory under global scope", () => {
     const result = getMarketplaceDir("my-marketplace", "global");
     expect(result).toBe(
-      path.join("/mock/home", ".a5c", "marketplaces", "my-marketplace")
+      path.join("/mock/home", ".a5c", "blueprints", "marketplaces", "my-marketplace")
     );
   });
 
@@ -74,6 +74,7 @@ describe("getMarketplaceDir", () => {
       path.join(
         "/my/project",
         ".a5c",
+        "blueprints",
         "marketplaces",
         "my-marketplace"
       )

@@ -292,7 +292,7 @@ function shouldCheckExplicitFile(entry) {
 
 function listManagedPackageJsons() {
   const managed = [];
-  for (const topLevel of ['packages', 'plugins']) {
+  for (const topLevel of ['packages', 'plugins', 'blueprints']) {
     walkPackageJsons(path.join(repoRoot, topLevel), managed);
   }
   return managed;
