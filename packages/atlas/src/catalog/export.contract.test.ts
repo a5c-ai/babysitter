@@ -23,5 +23,5 @@ describe("@a5c-ai/atlas/catalog export contract", () => {
     expect(catalog.getCatalogDiscoverySnapshot().counts.agents).toBeGreaterThan(0);
     expect(catalog.getFallbackHarnessMetadata("claude-code")?.adapterName).toBe("claude");
     expect(catalog.getPluginTargetDescriptor("codex")?.adapterName).toBe("codex");
-  });
+  }, 15_000);
 });

@@ -24,10 +24,10 @@ function generatedPluginSourceDir(sourceDir) {
   return GENERATED_SOURCE_DIR_ALIASES.get(sourceDir) || sourceDir;
 }
 
-// Build targets from agent-catalog (which reads Atlas graph)
+// Build targets from the atlas catalog surface.
 async function buildTargetsFromCatalog() {
   try {
-    const { listPluginTargetDescriptors } = await import(pathToFileURL(join(ROOT, 'packages', 'agent-catalog', 'dist', 'sdk.js')).href);
+    const { listPluginTargetDescriptors } = await import(pathToFileURL(join(ROOT, 'packages', 'atlas', 'dist', 'catalog', 'sdk.js')).href);
     return listPluginTargetDescriptors()
       .filter((t) => t.externalRepo)
       .map((t) => ({
@@ -44,7 +44,7 @@ async function buildTargetsFromCatalog() {
 
 const targets = await buildTargetsFromCatalog();
 if (!targets || targets.length === 0) {
-  console.error('ERROR: catalog is required for sync-external-plugin-repos. Build agent-catalog first (npm run build -w packages/agent-catalog).');
+  console.error('ERROR: catalog is required for sync-external-plugin-repos. Build atlas first (npm run build --workspace=@a5c-ai/atlas).');
   process.exit(1);
 }
 

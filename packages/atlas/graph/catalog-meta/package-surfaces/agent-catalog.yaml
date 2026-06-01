@@ -3,7 +3,7 @@ id: package:a5c-ai-agent-catalog
 attributes:
   packageId: "@a5c-ai/atlas/catalog"
   packageName: "@a5c-ai/atlas/catalog"
-  workspacePath: packages/agent-catalog
+  workspacePath: packages/atlas
   moduleType: commonjs
   surfaceKinds:
     - graph-source

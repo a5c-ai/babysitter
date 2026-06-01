@@ -98,7 +98,6 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/agent-catalog
 
       - name: "Build phase 2: parallel independents and agent-mux critical path"
         run: |

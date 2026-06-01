@@ -71,8 +71,8 @@ describe('scripts/agent-mux-build.cjs', () => {
 
     expect(exitCode).toBe(0);
     expect(packages[0]).toBe('packages/atlas');
-    expect(packages.indexOf('packages/atlas')).toBeLessThan(packages.indexOf('packages/agent-catalog'));
-    expect(packages.indexOf('packages/agent-catalog')).toBeLessThan(packages.indexOf('packages/agent-mux/core'));
+    expect(packages.indexOf('packages/atlas')).toBeLessThan(packages.indexOf('packages/agent-mux/core'));
+    expect(packages).not.toContain(['packages', 'agent-catalog'].join('/'));
     expect(packages.indexOf('packages/agent-mux/sdk')).toBeLessThan(packages.indexOf('packages/agent-mux/tui'));
     expect(packages.indexOf('packages/agent-mux/webui')).toBeGreaterThan(packages.indexOf('packages/agent-mux/tui'));
     expect(commands).toHaveLength(expectedPackages.length);

@@ -58,10 +58,9 @@ jobs:
             upstream agent CLI products — NOT our babysitter plugin packages.
             ${{ inputs.dry_run == 'true' && 'DRY RUN MODE: report findings but do NOT create PRs or issues.' || '' }}
 
-            STEP 1: Build atlas and agent-catalog.
+            STEP 1: Build atlas.
             ```
             npm run build --workspace=@a5c-ai/atlas
-            npm run build --workspace=@a5c-ai/agent-catalog
             ```
 
             STEP 2: Get the target list using the SAME logic as
@@ -69,7 +68,7 @@ jobs:
             Read that file to understand the pattern, then run:
             ```
             node -e "
-              import(new URL('file://' + process.cwd() + '/packages/agent-catalog/dist/sdk.js').href)
+              import(new URL('file://' + process.cwd() + '/packages/atlas/dist/catalog/sdk.js').href)
                 .then(m => {
                   const targets = m.listPluginTargetDescriptors()
                     .filter(t => t.externalRepo)

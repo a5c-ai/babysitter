@@ -93,11 +93,10 @@ jobs:
             npx --no-install tsc --build packages/agent-platform/tsconfig.json
           }
 
-          echo "Building @a5c-ai/atlas before agent-catalog"
+          echo "Building @a5c-ai/atlas catalog foundation"
           npm run build --workspace=@a5c-ai/atlas
 
           run_many "Build foundation packages" \
-            @a5c-ai/agent-catalog \
             @a5c-ai/tasks-mux \
             @a5c-ai/cloud \
             @a5c-ai/agent-mux-observability \
@@ -195,7 +194,6 @@ jobs:
 
           publish_many "Publish foundation packages" \
             @a5c-ai/atlas \
-            @a5c-ai/agent-catalog \
             @a5c-ai/tasks-mux \
             @a5c-ai/cloud \
             @a5c-ai/agent-mux-observability \

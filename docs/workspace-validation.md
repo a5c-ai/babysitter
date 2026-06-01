@@ -41,8 +41,8 @@ These packages are publicly installable, but their canonical docs live primarily
 | Workspace | Role | Validation path |
 | --- | --- | --- |
 | `packages/agent-platform` | Public runtime CLI for headless/orchestrated/operator workflows; not the default first-stop end-user entrypoint | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` runtime build/test validation |
-| `packages/tula-core` | Public advanced/runtime dependency package consumed by `@a5c-ai/agent-platform` and runtime orchestration flows | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |
-| `packages/agent-catalog` | Public graph/evidence catalog package consumed by SDK, agent-mux, hooks-mux, plugin compiler, and catalog-adjacent tooling | `.github/workflows/ci.yml` job `workspace-coverage` (`npm run ci:test --workspace=@a5c-ai/agent-catalog`), plus `publish.yml` and `publish-packages-from-tag.yml` |
+| `packages/agent-core` | Public advanced/runtime dependency package consumed by `@a5c-ai/agent-platform` and runtime orchestration flows | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |
+| `packages/atlas` (`./catalog` export) | Public graph/evidence catalog surface consumed by SDK, agent-mux, hooks-mux, plugin compiler, and catalog-adjacent tooling | `.github/workflows/ci.yml` job `test` (`npm run build --workspace=@a5c-ai/atlas` and `npm run test:atlas-catalog-contracts`), plus `publish.yml` and `publish-packages-from-tag.yml` |
 
 ## Internal-only active workspaces
 

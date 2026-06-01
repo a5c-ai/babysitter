@@ -40,7 +40,6 @@ const packageFamilies = {
     "@a5c-ai/agent-mux-watch-wearos-app",
   ],
   "support-systems": [
-    "@a5c-ai/agent-catalog",
     "@a5c-ai/extension-mux",
     "@a5c-ai/atlas",
     "@a5c-ai/tasks-mux",

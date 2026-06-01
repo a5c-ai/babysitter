@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/atlas",
-  "version": "0.1.0",
+  "version": "5.0.0",
   "description": "Atlas catalog graph data, SDK, and CLI.",
   "license": "MIT",
   "repository": {
@@ -15,6 +15,19 @@
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "catalog": [
+        "dist/catalog/index.d.ts"
+      ],
+      "catalog/*": [
+        "dist/catalog/*"
+      ],
+      "indexer": [
+        "dist/indexer.d.ts"
+      ]
+    }
+  },
   "bin": {
     "atlas": "dist/cli.js",
     "a5c-atlas": "dist/cli.js"

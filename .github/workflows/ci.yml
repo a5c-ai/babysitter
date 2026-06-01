@@ -286,17 +286,11 @@ jobs:
           - @a5c-ai/babysitter + unified plugin compiler/bundles -> test + release/staging publish paths
 
           Additional active workspaces validated in this job:
-          - @a5c-ai/agent-catalog -> ci:test + public package lifecycle policy
           - @a5c-ai/babysitter-tui-plugins
           - @a5c-ai/transport-mux (build + lint + typecheck + test + migration scorecard)
 
-      - name: Build atlas (agent-catalog prerequisite)
+      - name: Build atlas catalog foundation
         run: npm run build --workspace=@a5c-ai/atlas
-
-      - name: Validate agent-catalog public package policy
-        run: |
-          set -euo pipefail
-          npm run ci:test --workspace=@a5c-ai/agent-catalog 2>&1 | tee artifacts/workspace-coverage-logs/agent-catalog-ci.log
 
       - name: Validate transport-mux workspace QA surface
         run: |

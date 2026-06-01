@@ -6,7 +6,6 @@ const path = require('node:path');
 const repoRoot = path.resolve(__dirname, '..');
 const packages = [
   'packages/atlas',
-  'packages/agent-catalog',
   'packages/agent-mux/observability',
   'packages/agent-mux/core',
   'packages/agent-mux/adapters',

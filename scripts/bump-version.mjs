@@ -251,7 +251,6 @@ const updateLockVersion = (path, version) => {
 
 const workspaceManifestPaths = [
   "package.json",
-  "packages/agent-catalog/package.json",
   "packages/atlas/package.json",
   "packages/tula-core/package.json",
   "packages/agent-runtime/package.json",

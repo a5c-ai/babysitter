@@ -525,15 +525,15 @@ describe("agent-catalog graph-backed ontology", () => {
 
   it("exposes package, process, and path discovery helpers", () => {
     expect(listPackageSurfaces().map((pkg) => pkg.packageId)).toContain("@a5c-ai/catalog");
-    expect(listPackageSurfaces().map((pkg) => pkg.packageId)).toContain("@a5c-ai/agent-catalog");
+    expect(listPackageSurfaces().map((pkg) => pkg.packageId)).toContain("@a5c-ai/atlas/catalog");
 
-    const agentCatalogTopology = getPackageTopology("@a5c-ai/agent-catalog");
+    const agentCatalogTopology = getPackageTopology("@a5c-ai/atlas/catalog");
     expect(agentCatalogTopology).toBeDefined();
     expect(agentCatalogTopology!.ciSurfaces).toHaveLength(1);
     expect(agentCatalogTopology!.ciSurfaces[0].publishStrategy).toBe("internal-workspace");
     expect(agentCatalogTopology!.ciSurfaces[0].releaseChannels).toEqual(["ci"]);
     expect(agentCatalogTopology!.ciSurfaces[0].validationCommands).toContain(
-      "npm run ci:test --workspace=@a5c-ai/agent-catalog",
+      "npm run ci:test --workspace=@a5c-ai/atlas",
     );
 
     const topology = getPackageTopology("@a5c-ai/catalog");
