@@ -73,21 +73,28 @@ export function buildPrimaryLiveStackCommands(
   const traceId = commandEnv['LIVE_STACK_TRACE_ID'];
   const prompt = buildPrompt(scenario, traceId, options.env);
 
-  if (scenario.agent.agent === 'tula') {
+  // Tula in BP mode: uses native babysitter support (tula call --process).
+  // Tula in vanilla mode: falls through to the standard amux launch path below.
+  if (scenario.agent.agent === 'tula' && scenario.agent.installMode === 'babysitter-plugin') {
     commandEnv['BABYSITTER_RUNS_DIR'] = commandEnv['BABYSITTER_RUNS_DIR'] ?? path.join(options.cwd, '.a5c', 'runs');
     commandEnv['BABYSITTER_RUNS_SCOPE'] = commandEnv['BABYSITTER_RUNS_SCOPE'] ?? 'repo';
     const fixturesDir = path.join(options.cwd, 'packages', 'agent-mux', 'cli', 'tests', 'live-stack', 'fixtures');
     const processesDir = path.join(options.cwd, '.a5c', 'processes');
-    const copyFixture = { command: process.execPath, args: ['-e', `const fs=require("fs"),p=require("path");fs.mkdirSync(${JSON.stringify(processesDir)},{recursive:true});fs.copyFileSync(${JSON.stringify(path.join(fixturesDir, 'tula-simple-test.mjs'))},${JSON.stringify(path.join(processesDir, 'tula-simple-test.mjs'))})`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS };
-    const omniArgs = ['call', '--model', scenario.model.model, '--workspace', options.cwd, '--process', '.a5c/processes/tula-simple-test.mjs', '--prompt', prompt, '--json'];
+    const processMode = options.env['LIVE_STACK_PROCESS_MODE'] ?? 'predefined';
+    const setupCommands: CommandExecution[] = [ensureLiveArtifactDirCommand(commandEnv, options.cwd)];
+    const tulaArgs = ['call', '--model', scenario.model.model, '--workspace', options.cwd, '--prompt', prompt, '--json'];
+    if (processMode === 'predefined') {
+      const copyFixture = { command: process.execPath, args: ['-e', `const fs=require("fs"),p=require("path");fs.mkdirSync(${JSON.stringify(processesDir)},{recursive:true});fs.copyFileSync(${JSON.stringify(path.join(fixturesDir, 'tula-simple-test.mjs'))},${JSON.stringify(path.join(processesDir, 'tula-simple-test.mjs'))})`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS };
+      setupCommands.push(copyFixture);
+      tulaArgs.push('--process', '.a5c/processes/tula-simple-test.mjs');
+    }
     return [
-      ensureLiveArtifactDirCommand(commandEnv, options.cwd),
-      copyFixture,
-      commandExecution(commandEnv, 'LIVE_STACK_TULA_BIN', 'tula', omniArgs, options.cwd, timeoutMs),
+      ...setupCommands,
+      commandExecution(commandEnv, 'LIVE_STACK_TULA_BIN', 'tula', tulaArgs, options.cwd, timeoutMs),
     ];
   }
 
-  if (scenario.agent.integrationType === 'runtime-cli') {
+  if (scenario.agent.integrationType === 'runtime-cli' && scenario.agent.agent !== 'tula') {
     return [
       commandExecution(commandEnv, 'LIVE_STACK_AGENT_PLATFORM_BIN', 'agent-platform', ['create-run', '--harness', 'internal', '--workspace', options.cwd, '--model', scenario.model.model, '--prompt', prompt, '--json'], options.cwd, timeoutMs),
     ];
@@ -530,7 +537,7 @@ function buildPrompt(scenario: LiveStackScenario, traceId: string, env: Record<s
   }
 
   if (scenario.agent.agent === 'tula') {
-    return `Write a 6-section summary of Homer's Odyssey with Greek translations and save to .a5c-live-test/${traceId}-odyssey.md. The process at .a5c/processes/tula-simple-test.mjs handles the orchestration.`;
+    return coreTask;
   }
 
   if (scenario.agent.installMode === 'babysitter-plugin') {

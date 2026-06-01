@@ -285,37 +285,44 @@ jobs:
               const claude = scenario('claude-code','claude',foundry);
               const codex = scenario('codex','codex',google);
               const pi = scenario('pi','pi',deepseek);
+              // Tula is a runtime-cli agent with native babysitter support
+              const tulaScenario = {id:'live.agent-mux.tula.foundry-openai.gpt-5.5', agent_path:'tula', agent:'tula', amux_agent:'tula', integration_type:'runtime-cli', provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AMUX_API_BASE', live:true, process_mode:'predefined'};
 
-              // Vanilla NI: claude+codex+pi NI
+              // Vanilla NI: claude+codex+pi+tula NI
               const vanillaNi = [
                 {scenario: claude, interaction_mode: ni, install_mode: vanillaInstall},
                 {scenario: codex, interaction_mode: ni, install_mode: vanillaInstall},
                 {scenario: pi, interaction_mode: ni, install_mode: vanillaInstall},
+                {scenario: tulaScenario, interaction_mode: ni, install_mode: vanillaInstall},
               ];
 
-              // Vanilla Interactive: empty — defaults use NI + bridged-interactive only
+              // Vanilla Interactive: bridged-interactive
               const vanillaInt = [
                   {scenario: claude, interaction_mode: bridgedInt, install_mode: vanillaInstall},
                   {scenario: codex, interaction_mode: bridgedInt, install_mode: vanillaInstall},
                   {scenario: pi, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+                  {scenario: tulaScenario, interaction_mode: bridgedInt, install_mode: vanillaInstall},
               ];
 
               const claudeCreate = scenario('claude-code','claude',foundry,'create');
               const codexCreate = scenario('codex','codex',google,'create');
               const piCreate = scenario('pi','pi',deepseek,'create');
+              const tulaBp = {...tulaScenario};
 
-              // BP Interactive: claude+codex+pi (create only)
+              // BP Interactive: claude+codex+pi (create) + tula (predefined, native babysitter)
               const bpInt = [
                 {scenario: claudeCreate, interaction_mode: interactive, install_mode: bpInstall},
                 {scenario: codexCreate, interaction_mode: interactive, install_mode: bpInstall},
                 {scenario: piCreate, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: tulaBp, interaction_mode: interactive, install_mode: bpInstall},
               ];
 
-              // BP Bridged-hooks: claude+codex+pi (create only)
+              // BP Bridged-hooks: claude+codex+pi (create) + tula (predefined, native babysitter)
               const bpBridged = [
                 {scenario: claudeCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
                 {scenario: codexCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
                 {scenario: piCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
+                {scenario: tulaBp, interaction_mode: bridgedHooks, install_mode: bpInstall},
               ];
 
               const wrap = (arr) => JSON.stringify({include: arr});
