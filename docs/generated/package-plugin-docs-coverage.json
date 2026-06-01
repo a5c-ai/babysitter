@@ -43,12 +43,12 @@
       "note": "Public npm package for the Atlas catalog graph index and query SDK."
     },
     {
-      "surface": "packages/agent-core",
-      "packageName": "@a5c-ai/agent-core",
-      "description": "Built-in agent-core runtime and tool surface for Babysitter.",
+      "surface": "packages/tula-core",
+      "packageName": "@a5c-ai/tula-core",
+      "description": "Built-in tula-core runtime and tool surface for Babysitter.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/agent-core/README.md",
+      "canonicalHome": "../packages/tula-core/README.md",
       "supporting": [],
       "note": "Public runtime dependency package for advanced orchestration surfaces."
     },
@@ -137,7 +137,7 @@
     {
       "surface": "packages/agent-mux/harness-mock",
       "packageName": "@a5c-ai/agent-mux-harness-mock",
-      "description": "Mock harness simulator for testing agent-mux adapters \u2014 simulates claude-code, codex, and other CLI harnesses",
+      "description": "Mock harness simulator for testing agent-mux adapters — simulates claude-code, codex, and other CLI harnesses",
       "hasReadme": true,
       "status": "Public family package",
       "canonicalHome": "../packages/agent-mux/harness-mock/README.md",
@@ -281,7 +281,7 @@
     {
       "surface": "packages/extension-mux",
       "packageName": "@a5c-ai/extension-mux",
-      "description": "Cross-harness plugin compiler \u2014 compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
+      "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
       "hasReadme": true,
       "status": "Public package",
       "canonicalHome": "../packages/extension-mux/README.md",
@@ -631,7 +631,7 @@
     {
       "surface": "plugins/babysitter-omp",
       "packageName": "@a5c-ai/babysitter-omp",
-      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval \u2014 oh-my-pi",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval — oh-my-pi",
       "hasReadme": true,
       "status": "Public harness plugin",
       "canonicalHome": "../plugins/babysitter-omp/README.md",
@@ -667,7 +667,7 @@
     {
       "surface": "plugins/babysitter-pi",
       "packageName": "@a5c-ai/babysitter-pi",
-      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval \u2014 Pi Coding Agent",
+      "description": "Orchestrate complex, multi-step workflows with event-sourced state management, hook-based extensibility, and human-in-the-loop approval — Pi Coding Agent",
       "hasReadme": true,
       "status": "Public harness plugin",
       "canonicalHome": "../plugins/babysitter-pi/README.md",

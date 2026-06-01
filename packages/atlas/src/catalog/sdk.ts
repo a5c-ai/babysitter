@@ -1566,8 +1566,14 @@ export function getTransportCodecCapabilities(transportId: string): CodecCapabil
 }
 
 export function getAdapterMetadata(harness: string): import('./models.js').AdapterMetadata | undefined {
-  const agent = getAgentVersion(harness);
-  return agent?.adapterMetadata;
+  // Walk versions from most-specific to catch-all and return the first
+  // with a non-empty adapterMetadata object.
+  for (const v of getAgentVersions(harness)) {
+    if (v.adapterMetadata && Object.keys(v.adapterMetadata).length > 0) {
+      return v.adapterMetadata;
+    }
+  }
+  return undefined;
 }
 
 export interface ResolvedInstallMethod {
@@ -1642,7 +1648,10 @@ export function getConfigSchema(harness: string): import('./models.js').AdapterC
 
 export function getDisplayName(harness: string): string {
   const metadata = getAdapterMetadata(harness);
-  return metadata?.displayName ?? harness;
+  if (metadata?.displayName) return metadata.displayName;
+  const agent = getAgentVersion(harness);
+  if (agent?.displayName) return agent.displayName;
+  return harness;
 }
 
 export function getDefaultModelId(harness: string): string | undefined {
