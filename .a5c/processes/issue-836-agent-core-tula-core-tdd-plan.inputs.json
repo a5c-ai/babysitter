@@ -1,0 +1,70 @@
+{
+  "issueNumber": 836,
+  "baseBranch": "staging",
+  "targetBranch": "issue/836-agent-core-to-tula-core",
+  "targetScore": 90,
+  "maxIterationsPerPhase": 4,
+  "referencedDocs": [
+    "docs/tula-stack-renames/README.md"
+  ],
+  "scope": {
+    "rename": {
+      "fromPackage": "@a5c-ai/agent-core",
+      "toPackage": "@a5c-ai/tula-core",
+      "fromDirectory": "packages/agent-core",
+      "toDirectory": "packages/tula-core"
+    },
+    "nonGoals": [
+      "Do not rename @a5c-ai/agent-runtime or packages/agent-runtime in issue #836.",
+      "Do not rename @a5c-ai/agent-platform or packages/agent-platform in issue #836.",
+      "Do not rename the agent-core runtime harness terminology unless it is specifically package/workspace identity.",
+      "Do not change behavior of the agent runtime or harness invocation paths beyond references needed for the package rename."
+    ]
+  },
+  "phasePlan": [
+    {
+      "id": "workspace-identity",
+      "objective": "Rename workspace package identity and directory with tests proving package metadata and exports are correct."
+    },
+    {
+      "id": "dependents-and-imports",
+      "objective": "Update workspace dependencies, imports, re-exports, mocks, and TypeScript project references in dependent packages."
+    },
+    {
+      "id": "ci-docs-lockfile",
+      "objective": "Update CI, release workflows, docs, atlas graph references, and regenerated package-lock entries."
+    }
+  ],
+  "verificationCommands": [
+    "npm run build --workspace=@a5c-ai/tula-core",
+    "npm run test --workspace=@a5c-ai/tula-core",
+    "npm run build --workspace=@a5c-ai/agent-platform",
+    "npm run build --workspace=@a5c-ai/tula",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "staleReferencePolicy": {
+    "blockingPackageIdentityPatterns": [
+      "@a5c-ai/agent-core",
+      "packages/agent-core",
+      "../agent-core"
+    ],
+    "intentionalTerminologyExamples": [
+      "agent-core harness",
+      "selectedHarnessName === \"agent-core\"",
+      "logs or errors that identify the built-in agent-core worker"
+    ]
+  },
+  "processLibraryResearch": {
+    "activeRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "references": [
+      "babysitter/tdd-quality-convergence",
+      "methodologies/atdd-tdd/atdd-tdd.js",
+      "methodologies/spec-kit/spec-kit-implementation.js",
+      "specializations/code-migration-modernization/code-refactoring.js",
+      "methodologies/superpowers/test-driven-development.js",
+      "methodologies/superpowers/verification-before-completion.js",
+      "specializations/collaboration/github/pr-policies.js"
+    ]
+  }
+}
