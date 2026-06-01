@@ -49,6 +49,7 @@ export function createOrchestrationTools(args: {
 }): {
   mergedTools: unknown[];
   iterateTool: OrchestrationNamedTool | undefined;
+  taskPostTool: OrchestrationNamedTool | undefined;
   finishTool: OrchestrationNamedTool | undefined;
   invokeTool: (
     tool: OrchestrationNamedTool | undefined,
@@ -113,10 +114,12 @@ export function createOrchestrationTools(args: {
   );
   const tools = mergedTools as OrchestrationNamedTool[];
   const iterateTool = tools.find((tool) => tool.name === "babysitter_run_iterate");
+  const taskPostTool = tools.find((tool) => tool.name === "babysitter_task_post_result");
   const finishTool = tools.find((tool) => tool.name === "babysitter_finish_orchestration");
   return {
     mergedTools,
     iterateTool,
+    taskPostTool,
     finishTool,
     invokeTool: async (
       tool: OrchestrationNamedTool | undefined,

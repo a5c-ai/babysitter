@@ -237,7 +237,7 @@ export async function runInternalOrchestrationPhase(
     return { runStatus: assessed.run.status, synchronized };
   };
 
-  const { mergedTools, iterateTool, finishTool, invokeTool } = createOrchestrationTools({
+  const { mergedTools, iterateTool, taskPostTool, finishTool, invokeTool } = createOrchestrationTools({
     phaseArgs: args,
     state,
     describePendingActions,
@@ -417,6 +417,46 @@ export async function runInternalOrchestrationPhase(
         consecutiveProcessErrorStalls = 0;
         continue;
       }
+      // Auto-execute shell effects in the host — models struggle with these.
+      if (state.pendingActions.size > 0) {
+        let shellEffectsResolved = 0;
+        for (const [effectId, action] of state.pendingActions) {
+          if (action.kind !== 'shell') continue;
+          const shell = (action as any).shell;
+          if (!shell?.command) continue;
+          writeVerbose(`[phaseOrchestration host] auto-executing shell effect ${effectId}: ${shell.command} ${(shell.args || []).slice(0, 2).join(' ')}`);
+          try {
+            const { execFileSync } = await import('node:child_process');
+            const stdout = execFileSync(shell.command, shell.args || [], {
+              cwd: args.workspace,
+              timeout: shell.timeout || 30_000,
+              encoding: 'utf8',
+              stdio: ['pipe', 'pipe', 'pipe'],
+            });
+            await invokeTool(taskPostTool, 'babysitter_task_post_result', {
+              effectId,
+              status: 'ok',
+              valueText: stdout,
+            });
+            shellEffectsResolved++;
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err);
+            writeVerbose(`[phaseOrchestration host] shell effect ${effectId} failed: ${msg}`);
+            await invokeTool(taskPostTool, 'babysitter_task_post_result', {
+              effectId,
+              status: 'error',
+              valueText: msg,
+            });
+            shellEffectsResolved++;
+          }
+        }
+        if (shellEffectsResolved > 0) {
+          writeVerbose(`[phaseOrchestration host] auto-resolved ${shellEffectsResolved} shell effects`);
+          consecutiveStalls = 0;
+          continue;
+        }
+      }
+
       const progressBeforeTurn = captureProgressSnapshot();
       try {
         await promptOrchestrationAgent(

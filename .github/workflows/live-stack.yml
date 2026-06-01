@@ -475,7 +475,10 @@ jobs:
           if ! node --version | grep -q "^v22"; then
             echo "::warning::Node version is not 22, fixing PATH"
             if [[ "$RUNNER_OS" == "Windows" ]]; then
-              NODE22=$(find /c/hostedtoolcache/windows/node/22.*/x64 -maxdepth 0 2>/dev/null | head -1 || true)
+              NODE22=$(ls -d /c/hostedtoolcache/windows/node/22.*/x64 2>/dev/null | head -1 || true)
+              if [[ -z "$NODE22" ]]; then
+                NODE22=$(ls -d "$RUNNER_TOOL_CACHE/node/22."*/x64 2>/dev/null | head -1 || true)
+              fi
               if [[ -n "$NODE22" ]]; then export PATH="$NODE22:$PATH"; fi
             elif [[ "$RUNNER_OS" == "macOS" ]]; then
               NODE22=$(find /Users/runner/hostedtoolcache/node/22.*/arm64/bin -maxdepth 0 2>/dev/null | head -1 || true)
