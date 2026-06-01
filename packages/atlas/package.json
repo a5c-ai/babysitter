@@ -28,6 +28,10 @@
       "types": "./dist/indexer.d.ts",
       "default": "./dist/indexer.js"
     },
+    "./catalog": {
+      "types": "./dist/catalog/index.d.ts",
+      "default": "./dist/catalog/index.js"
+    },
     "./graph-index": "./dist/index.json"
   },
   "files": [
@@ -37,7 +41,8 @@
   "scripts": {
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "build:index": "tsx src/indexer.ts --catalog-dir ./graph --out dist/index.json",
-    "build": "node scripts/generate-library-nodes.mjs && node scripts/generate-wiki-pages.mjs && node -e \"require('fs').mkdirSync('dist',{recursive:true})\" && npm run build:index && node scripts/validate-library-bridge.mjs && tsc -p tsconfig.json && node scripts/copy-assets.cjs",
+    "generate:discovery-snapshot": "node ./scripts/generate-discovery-snapshot.cjs",
+    "build": "node scripts/generate-library-nodes.mjs && node scripts/generate-wiki-pages.mjs && node -e \"require('fs').mkdirSync('dist',{recursive:true})\" && npm run build:index && node scripts/validate-library-bridge.mjs && tsc -p tsconfig.json && node scripts/copy-assets.cjs && npm run generate:discovery-snapshot",
     "validate:library": "node scripts/validate-library-bridge.mjs",
     "validate:library:strict": "node scripts/validate-library-bridge.mjs --strict",
     "prepack": "npm run build",
@@ -53,7 +58,8 @@
     "validate:krate-graph:committed": "node scripts/validate-krate-graph.mjs --mode=committed-baseline"
   },
   "dependencies": {
-    "js-yaml": "^4.1.1"
+    "js-yaml": "^4.1.1",
+    "yaml": "^2.8.3"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

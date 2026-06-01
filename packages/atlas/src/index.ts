@@ -3,7 +3,15 @@ import type { AtlasRecord, Edge, IndexShape, NeighborResult, SearchHit } from ".
 // Use require() so bundlers (Turbopack/webpack) can resolve the JSON
 // at build time instead of relying on fs.readFileSync + __dirname.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const indexJson: IndexShape = require("./index.json");
+const indexJson: IndexShape = (() => {
+  try {
+    return require("./index.json");
+  } catch (error) {
+    const missingSourceIndex = error instanceof Error && "code" in error && error.code === "MODULE_NOT_FOUND";
+    if (!missingSourceIndex) throw error;
+    return require("../dist/index.json");
+  }
+})();
 
 export type { AtlasRecord, ClusterDef, Edge, EdgeKindDef, IndexShape, NeighborResult, NodeKindDef, Record_, SearchHit } from "./types";
 
@@ -187,5 +195,4 @@ export const getIncoming = (id: string): Edge[] => atlas.getIncoming(id);
 export const getNeighbors = (id: string, depth = 1): NeighborResult => atlas.getNeighbors(id, depth);
 export const getDisplayName = (record: AtlasRecord | undefined): string => atlas.getDisplayName(record);
 export const searchRecords = (query: string, options?: { limit?: number; kind?: string; cluster?: string }): SearchHit[] => atlas.searchRecords(query, options);
-
 
