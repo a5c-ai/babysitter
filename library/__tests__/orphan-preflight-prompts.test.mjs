@@ -30,4 +30,16 @@ describe('implementation prompt orphan preflight guidance', () => {
 
     expectOrphanPreflightGuidance(source);
   });
+
+  it('requires exact-path pre-author checks in the cradle harness integration prompt', () => {
+    const source = readRepoFile('library/cradle/feature-harness-integration-contribute.js');
+
+    expectOrphanPreflightGuidance(source);
+  });
+
+  it('requires exact-path pre-author checks in the CC10X TDD GREEN prompt', () => {
+    const source = readRepoFile('library/methodologies/cc10x/cc10x-build.js');
+
+    expectOrphanPreflightGuidance(source);
+  });
 });

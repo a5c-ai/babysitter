@@ -478,6 +478,9 @@ export const implementHarnessIntegrationTask = defineTask('implement-harness-int
       },
       instructions: [
         'Follow the patterns identified from existing harness implementations',
+        'Before authoring planned new files under scripts/, supabase/migrations/, src/server/, or src/lib/, check each exact path with ls or rg/grep.',
+        'If an exact planned new path already exists, read the existing file, report findings to the orchestrator, and wait for scope direction such as use-existing, replace, append, or renumber.',
+        'Do not auto-resolve existing-file collisions.',
         'Create necessary files for the harness integration:',
         '  - Session binding module (how the harness connects to babysitter)',
         '  - Hook handlers (how the harness responds to orchestration events)',
