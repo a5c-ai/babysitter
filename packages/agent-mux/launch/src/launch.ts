@@ -1894,7 +1894,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     const niUseIdleKill = _lb ? _lb.needsIdleKill : true;
     let niIdleTimer: ReturnType<typeof setTimeout> | null = null;
     let niHasOutput = false;
-    const NI_IDLE_TIMEOUT_MS = 30_000;
+    const NI_IDLE_TIMEOUT_MS = bridgeHooks ? 300_000 : 30_000;
     let niFatalBuf = '';
     child.stdout?.on('data', (chunk: Buffer) => {
       const text = chunk.toString('utf8');
