@@ -1,0 +1,186 @@
+{
+  "issueNumber": 798,
+  "baseBranch": "staging",
+  "targetBranch": "feat/issue-798-strike3-deploy-block",
+  "title": "feature: Strike-3 deploy-block enforcement (instrumentation-only iterations)",
+  "summary": "Add SDK/runtime enforcement so a third forward-fix attempt for the same explicit bugClass is forced into instrumentation_only=true and deploy-blocked from algorithm-changing diffs unless an explicit audited --strike3-override is present.",
+  "qualityThreshold": 90,
+  "maxIterationsPerPhase": 4,
+  "bugClass": "strike-3-deploy-block-enforcement",
+  "labels": [
+    "sdk",
+    "ci",
+    "feature",
+    "ready-for-dev",
+    "effort:medium",
+    "priority:medium",
+    "risk:medium"
+  ],
+  "acceptanceCriteria": [
+    "Forward-fix attempt metadata has a typed, documented bugClass field and instrumentation_only state while preserving existing arbitrary metadata compatibility.",
+    "Two prior failed forward-fix attempts for the same bugClass cause the next attempt to be auto-flagged instrumentation_only=true.",
+    "Strike counts are derived only from journaled run/effect/result metadata and replay deterministically across repeated run:iterate calls.",
+    "instrumentation_only=true blocks configured algorithm-change file diffs during the gate unless an explicit --strike3-override flag with an auditable reason is provided.",
+    "Log-emission, env-flag, no-op-guard, and revert-only changes remain allowed during instrumentation-only iterations.",
+    "Algorithm-change patterns are configurable and defaults are narrow enough to avoid over-blocking docs, tests, and logging-only changes.",
+    "Override usage records actor, reason, bugClass, strike count, matched files, and timestamp in structured output or journal metadata.",
+    "Gate output uses the existing [gate] log stream style and includes actionable diagnostics for missing bugClass, matched algorithm files, and override requirements.",
+    "The current process validation surface is wired correctly: add a documented check:processes alias or integrate the check into validate:processes/CI without breaking existing validation.",
+    "Docs and CLI references describe bugClass, instrumentation_only, strike-3 deploy-block behavior, configurable patterns, and --strike3-override audit semantics.",
+    "Targeted runtime, replay, gate, CLI/script, docs, build, test, metadata, and diff hygiene verification passes or any unrelated failures are documented with exact evidence."
+  ],
+  "nonGoals": [
+    "Do not semantically auto-detect bugClass.",
+    "Do not re-open the broad #478 FORWARD_FIX_STRIKE_BUDGET design.",
+    "Do not add a database, external service, daemon, or mutable working-tree-derived strike store.",
+    "Do not block documentation, tests, log-only instrumentation, env flags, no-op guards, or revert-only changes merely because instrumentation_only=true.",
+    "Do not silently apply strike-3 override through undocumented environment variables.",
+    "Do not redesign unrelated runtime governance policy features beyond the narrow strike-3 deploy-block enforcement needed for #798."
+  ],
+  "processLibraryResearch": {
+    "requestedRoot": ".a5c/process-library/",
+    "requestedRootStatus": "absent in this checkout during planning",
+    "activeLibraryRoot": "/home/runner/.a5c/process-library/babysitter-repo/library",
+    "selectedReferences": [
+      "library/processes/shared/tdd-triplet.js",
+      "library/processes/shared/deterministic-quality-gate.js",
+      "library/processes/shared/n-strikes-escalation.js",
+      "library/processes/shared/prior-attempts-scanner.js",
+      "library/methodologies/spec-driven-development.js",
+      "library/methodologies/superpowers/test-driven-development.js",
+      "library/methodologies/adversarial-spec-debates.js",
+      "/home/runner/.a5c/process-library/babysitter-repo/library/tdd-quality-convergence.js"
+    ]
+  },
+  "targetFiles": [
+    "packages/sdk/src/runtime/types.ts",
+    "packages/sdk/src/storage/types.ts",
+    "packages/sdk/src/runtime/createRun.ts",
+    "packages/sdk/src/runtime/orchestrateIteration.ts",
+    "packages/sdk/src/runtime/orchestrateHelpers.ts",
+    "packages/sdk/src/runtime/replay/createReplayEngine.ts",
+    "packages/sdk/src/runtime/intrinsics/task.ts",
+    "packages/sdk/src/runtime/commitEffectResult.ts",
+    "packages/sdk/src/runtime/policy/types.ts",
+    "packages/sdk/src/tasks/types.ts",
+    "packages/sdk/src/testing/runHarness.ts",
+    "packages/sdk/src/cli/main/program.ts",
+    "packages/sdk/src/cli/main/usage.ts",
+    "scripts/check-fix-strikes.mjs",
+    "scripts/validate-process.mjs",
+    "package.json",
+    "docs/agent-reference/process-authoring.md",
+    "docs/agent-reference/command-surfaces.md",
+    "docs/reference/babysitter_cli_surface_spec.md",
+    "docs/user-guide/reference/cli-reference.md",
+    "packages/sdk/src/prompts/templates/task-examples.md",
+    "packages/sdk/src/prompts/templates/task-kinds.md"
+  ],
+  "expectedTestFiles": [
+    "packages/sdk/src/runtime/__tests__/forwardFixMetadata.test.ts",
+    "packages/sdk/src/runtime/__tests__/forwardFixStrikes.test.ts",
+    "packages/sdk/src/runtime/__tests__/forwardFixGate.test.ts",
+    "packages/sdk/src/runtime/__tests__/forwardFixOverride.test.ts",
+    "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "packages/sdk/src/runtime/__tests__/deterministicHarness.test.ts",
+    "packages/sdk/src/cli/__tests__/cliMain.test.ts",
+    "scripts/__tests__/check-fix-strikes.test.mjs"
+  ],
+  "defaultAlgorithmChangePatterns": [
+    "src/lib/scheduler/**",
+    "src/server/scheduler*",
+    "packages/**/src/**/scheduler/**",
+    "packages/**/src/**/*scheduler*",
+    "packages/sdk/src/runtime/**",
+    "packages/sdk/src/storage/**"
+  ],
+  "allowedInstrumentationChangeTypes": [
+    "log-emission",
+    "env-flag",
+    "no-op-guard",
+    "revert-only"
+  ],
+  "plannedPhases": [
+    {
+      "name": "Forward-fix metadata contract",
+      "loop": "RED tests for bugClass/instrumentation_only metadata, GREEN typed/persisted compatibility implementation, REFACTOR shared normalization, adversarial score until >=90."
+    },
+    {
+      "name": "Deterministic strike-state derivation",
+      "loop": "RED tests for two failed fixes then strike-3 instrumentation_only, GREEN journal-derived strike helper, REFACTOR pure deterministic state, adversarial score until >=90."
+    },
+    {
+      "name": "Instrumentation-only deploy-block gate",
+      "loop": "RED gate allow/deny tests, GREEN configurable file-pattern checker and process validation wiring, REFACTOR matching/config boundaries, adversarial score until >=90."
+    },
+    {
+      "name": "Strike-3 override audit trail",
+      "loop": "RED override reason/audit tests, GREEN --strike3-override handling and structured audit output, REFACTOR audit payload normalization, adversarial score until >=90."
+    },
+    {
+      "name": "Documentation and CI integration",
+      "loop": "RED docs/spec checks where available, GREEN docs/CLI/package script integration, REFACTOR wording/field-name consistency, adversarial score until >=90."
+    }
+  ],
+  "verificationCommands": [
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/runtime/__tests__/forwardFixMetadata.test.ts packages/sdk/src/runtime/__tests__/forwardFixStrikes.test.ts packages/sdk/src/runtime/__tests__/forwardFixGate.test.ts packages/sdk/src/runtime/__tests__/forwardFixOverride.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts packages/sdk/src/runtime/__tests__/deterministicHarness.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/sdk/src/cli/__tests__/cliMain.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts scripts/__tests__/check-fix-strikes.test.mjs",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run validate:processes",
+    "npm run check:processes",
+    "npm run verify:metadata",
+    "npm run docs:snippets",
+    "git diff --check"
+  ],
+  "qualityGates": [
+    "Every implementation phase starts by adding tests that fail for the intended missing behavior.",
+    "No production implementation task may proceed unless the red verification confirms failedForRightReason=true.",
+    "Green implementation is the minimum code needed to pass the phase tests.",
+    "Refactor occurs only after green tests and must re-run verification.",
+    "Adversarial review produces a 0-100 score with scoreBreakdown and blocking findings.",
+    "Each phase iterates until review.approved=true, verification.passed=true, and qualityScore >= 90.",
+    "Inter-phase checkpoints verify scope control, handoff readiness, exact command evidence, and no phase acceptance drift.",
+    "Final gate verifies all issue acceptance criteria, all non-goals, replay/idempotency behavior, override auditability, docs, build, tests, metadata, process validation, and diff hygiene."
+  ],
+  "breakpoints": [
+    {
+      "when": "The metadata placement or override CLI boundary is genuinely ambiguous after architecture mapping.",
+      "owner": "maintainer",
+      "options": [
+        "Approve recommended contract",
+        "Pause for maintainer guidance"
+      ]
+    },
+    {
+      "when": "A phase cannot reach qualityScore >= 90 and verification.passed=true within maxIterationsPerPhase.",
+      "owner": "maintainer",
+      "options": [
+        "Continue with targeted remediation",
+        "Pause for maintainer guidance"
+      ]
+    },
+    {
+      "when": "Final acceptance finds unresolved compatibility, replay, gate, or CI risk.",
+      "owner": "maintainer",
+      "options": [
+        "Continue with documented remediation",
+        "Pause for maintainer guidance"
+      ]
+    }
+  ],
+  "publishPlan": {
+    "implementationBranchName": "feat/issue-798-strike3-deploy-block",
+    "implementationPrTitle": "Enforce strike-3 instrumentation-only deploy blocks",
+    "implementationPrBodyMustMention": [
+      "Closes #798",
+      "Explicit bugClass and instrumentation_only metadata contract",
+      "Journal-derived deterministic strike-state",
+      "Configurable algorithm-change gate",
+      "--strike3-override audit trail",
+      "TDD red/green/refactor verification and adversarial quality scores"
+    ]
+  }
+}
