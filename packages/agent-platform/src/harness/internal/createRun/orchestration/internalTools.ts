@@ -1,5 +1,5 @@
 import { Type } from "@sinclair/typebox";
-import { createAgentCoreToolDefinitions } from "@a5c-ai/agent-core";
+import { createAgentCoreToolDefinitions } from "@a5c-ai/tula-core";
 import { buildBreakpointEffectResult } from "./internalToolsHelpers";
 import {
   commitEffectResult,

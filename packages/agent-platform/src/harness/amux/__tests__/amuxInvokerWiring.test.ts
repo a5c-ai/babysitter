@@ -60,7 +60,7 @@ vi.mock("node:child_process", () => ({
 }));
 
 // Mock agent-core
-vi.mock("@a5c-ai/agent-core", () => ({
+vi.mock("@a5c-ai/tula-core", () => ({
   createAgentCoreSession: vi.fn().mockReturnValue({
     prompt: vi.fn().mockResolvedValue({
       output: "pi-output",
@@ -92,7 +92,7 @@ import { invokeHarness } from "../../invoker";
 import { getAmuxClient } from "../amuxClientFactory";
 import { invokeViaAgentMux } from "../amuxBridge";
 import { handleHarnessCreateRun } from "../../internal/createRun";
-import { createAgentCoreSession } from "@a5c-ai/agent-core";
+import { createAgentCoreSession } from "@a5c-ai/tula-core";
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -20,7 +20,7 @@ const MIN_SIZE = 10000;
 
 const packageDirs = [
   'packages/sdk', 'packages/babysitter', 'packages/agent-platform',
-  'packages/agent-core', 'packages/agent-catalog', 'packages/atlas',
+  'packages/tula-core', 'packages/agent-catalog', 'packages/atlas',
   'packages/transport-mux', 'packages/extension-mux', 'packages/tasks-mux',
   'packages/triggers-mux', 'packages/cloud', 'packages/observer-dashboard',
   'packages/babysitter-tui-plugins',

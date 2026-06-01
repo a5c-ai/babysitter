@@ -140,7 +140,7 @@ jobs:
           npm run build:local --workspace=@a5c-ai/agent-mux-tui
           npm run build --workspace=@a5c-ai/agent-mux-webui
           npm run build --workspace=@a5c-ai/babysitter-sdk
-          (cd packages/agent-core && npx tsc --build --force tsconfig.json)
+          (cd packages/tula-core && npx tsc --build --force tsconfig.json)
           (cd packages/agent-platform && npx tsc --build --force tsconfig.json)
           (cd packages/tula && npx tsc --build tsconfig.json)
 

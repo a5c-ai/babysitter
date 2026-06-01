@@ -38,12 +38,12 @@ The graph has `agent:agent-mux` and `agent:agent-mux-remote`:
 | Package | npm name | What it actually does |
 |---------|----------|----------------------|
 | `packages/sdk/` | `@a5c-ai/babysitter-sdk` | Orchestration engine: runs, replay, storage, tasks, hooks, plugins, profiles, session, compression, MCP, CLI commands |
-| `packages/agent-core/` | `@a5c-ai/agent-core` | Thin: agentic tools, background process registry, session binding, deferred tool registry |
+| `packages/tula-core/` | `@a5c-ai/tula-core` | Thin: agentic tools, background process registry, session binding, deferred tool registry |
 | `packages/agent-platform/` | `@a5c-ai/agent-platform` | Fat CLI: wraps SDK + agent-core, adds daemon, observer, governance, harness bridge, cost, interaction |
 
 ### The confusion:
 
-1. **`agent-core` is tiny** — 6 source files. It's NOT the "core" of anything in the graph sense. The graph's `AgentCoreImpl` (SDK-backed CLI loop) lives in `babysitter-sdk`, not `agent-core`.
+1. **`tula-core` is tiny** — 6 source files. It's NOT the "core" of anything in the graph sense. The graph's `AgentCoreImpl` (SDK-backed CLI loop) lives in `babysitter-sdk`, not `tula-core`.
 
 2. **`babysitter-sdk` is the real core** — runtime, replay, storage, tasks, hooks, process context, effect model. This is what the graph calls `agent-core-impl:agent-platform.core`.
 
@@ -66,7 +66,7 @@ The graph says agent-platform has Core, Runtime, Platform, and UI. The code shou
 
 ### agent-core package fate
 
-`@a5c-ai/agent-core` is confusingly named — it's not the agent core, it's a small utility package. Options:
+`@a5c-ai/tula-core` is confusingly named — it's not the agent core, it's a small utility package. Options:
 
 **Option A: Fold into agent-platform** (recommended)
 - Move agentic tools, background process registry, session binding into agent-platform
@@ -108,8 +108,8 @@ The tasks-mux scope is broader than breakpoints — it's the trust chain for ALL
 | Move `deferredToolRegistry.ts` from agent-core to tool-mux | Small |
 | Move `backgroundProcessRegistry.ts` to agent-platform (runtime concern) | Small |
 | Move `session.ts` to agent-platform (runtime concern) | Small |
-| Update all imports from `@a5c-ai/agent-core` across monorepo | Medium |
-| Deprecate `@a5c-ai/agent-core` on npm | Small |
+| Update all imports from `@a5c-ai/tula-core` across monorepo | Medium |
+| Deprecate `@a5c-ai/tula-core` on npm | Small |
 | Update graph: remove agent-core SourceRef, add tool-mux SourceRef | Small |
 
 ### T2: Slim agent-platform to match graph Runtime+UI scope
@@ -227,7 +227,7 @@ As described in graph-alignment-tasks.md Phase 1.3, split into graph-aligned sub
 | `@a5c-ai/krate-*` | Project management | L6 |
 
 **Dissolved:**
-- `@a5c-ai/agent-core` → absorbed into `@a5c-ai/tool-mux` (tools) + `@a5c-ai/agent-platform` (session/registry)
+- `@a5c-ai/tula-core` → absorbed into `@a5c-ai/tool-mux` (tools) + `@a5c-ai/agent-platform` (session/registry)
 - `@a5c-ai/agent-mux-adapters` → absorbed into `@a5c-ai/agent-config-mux`
 - `@a5c-ai/extension-mux` → renamed to `@a5c-ai/extension-mux`
 - `@a5c-ai/tasks-mux` → renamed to `@a5c-ai/tasks-mux`

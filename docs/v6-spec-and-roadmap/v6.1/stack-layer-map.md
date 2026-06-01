@@ -56,13 +56,13 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/agent-core`, `@a5c-ai/agent-comm-mux` |
+| Packages | `@a5c-ai/tula-core`, `@a5c-ai/agent-comm-mux` |
 | Node Kinds | AgentCoreImpl (agent-stack) |
 | Graph Cluster | agent-stack |
 | Maturity | **Mature** — Dual implementation path (unified + harness-neutral) |
 | Spec Coverage | v6.0 unified-stack-architecture.md, v6-architecture-specification.md |
 
-**Note:** Two packages implement this layer for different concerns: `agent-core` (unified babysitter loop) and `agent-comm-mux` (harness-neutral dispatch). This is intentional per v6.0 spec.
+**Note:** Two packages implement this layer for different concerns: `tula-core` (unified babysitter loop) and `agent-comm-mux` (harness-neutral dispatch). This is intentional per v6.0 spec.
 
 ---
 

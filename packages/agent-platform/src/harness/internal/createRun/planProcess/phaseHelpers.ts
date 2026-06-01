@@ -2,7 +2,7 @@ import * as path from "node:path";
 import * as readline from "node:readline";
 import { promises as fs } from "node:fs";
 import { Type } from "@sinclair/typebox";
-import { createAgentCoreToolDefinitions } from "@a5c-ai/agent-core";
+import { createAgentCoreToolDefinitions } from "@a5c-ai/tula-core";
 import {
   askUserQuestionViaTool,
   emitProgress,

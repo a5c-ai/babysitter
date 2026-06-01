@@ -209,19 +209,19 @@ During process execution, the internal harness can **delegate tasks to any disco
 
 ## Runtime Package Builds
 
-For the core runtime chain (`@a5c-ai/babysitter-sdk`, `@a5c-ai/agent-mux`, `@a5c-ai/agent-core`, `@a5c-ai/agent-platform`), use the shared workspace entrypoint from a fresh checkout:
+For the core runtime chain (`@a5c-ai/babysitter-sdk`, `@a5c-ai/agent-mux`, `@a5c-ai/tula-core`, `@a5c-ai/agent-platform`), use the shared workspace entrypoint from a fresh checkout:
 
 ```bash
 npm ci
 npm run build:runtime
 ```
 
-`build:runtime` is the supported root entrypoint for release and CI validation. It builds the runtime graph in workspace order: SDK -> agent-mux SDK surface -> agent-core -> agent-platform.
+`build:runtime` is the supported root entrypoint for release and CI validation. It builds the runtime graph in workspace order: SDK -> agent-mux SDK surface -> tula-core -> agent-platform.
 
 Package-local validation is also supported:
 
 ```bash
-npm run build --workspace=@a5c-ai/agent-core
+npm run build --workspace=@a5c-ai/tula-core
 npm run build --workspace=@a5c-ai/agent-platform
 ```
 

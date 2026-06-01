@@ -34,7 +34,7 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | `@a5c-ai/agent-catalog` | `policy:check` | No-model | static-check | Catalog/Atlas maintainers | `test-logs/agent-catalog-policy-check.log` | ci.yml test or package-local validation when package is touched |
 | `@a5c-ai/agent-catalog` | `test` | No-model | static-check | Catalog/Atlas maintainers | `test-logs/agent-catalog-test.log` | ci.yml test or package-local validation when package is touched |
 | `@a5c-ai/agent-catalog` | `version:check` | No-model | static-check | Catalog/Atlas maintainers | `test-logs/agent-catalog-version-check.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/agent-core` | `test` | No-model | unit-or-integration | Runtime maintainers | `test-logs/agent-core-test.log` | ci.yml packages-sdk/test; publish.yml validate_core |
+| `@a5c-ai/tula-core` | `test` | No-model | unit-or-integration | Runtime maintainers | `test-logs/tula-core-test.log` | ci.yml packages-sdk/test; publish.yml validate_core |
 | `@a5c-ai/agent-mux` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-adapters` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-adapters-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/agent-mux-cli` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/agent-mux-cli-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |

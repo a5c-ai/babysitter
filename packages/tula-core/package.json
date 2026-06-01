@@ -1,7 +1,7 @@
 {
-  "name": "@a5c-ai/agent-core",
+  "name": "@a5c-ai/tula-core",
   "version": "5.0.0",
-  "description": "Built-in agent-core runtime and tool surface for Babysitter.",
+  "description": "Tula core runtime and tool surface for Babysitter.",
   "license": "MIT",
   "type": "commonjs",
   "main": "dist/index.js",
@@ -22,7 +22,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "npm run build:runtime:agent-core-deps --prefix ../.. && tsc --build --force tsconfig.json",
+    "build": "npm run build:runtime:tula-core-deps --prefix ../.. && tsc --build --force tsconfig.json",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "test": "vitest run --config vitest.config.ts"
   },
@@ -42,9 +42,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/a5c-ai/babysitter.git",
-    "directory": "packages/agent-core"
+    "directory": "packages/tula-core"
   },
-  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-core#readme",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/tula-core#readme",
   "bugs": {
     "url": "https://github.com/a5c-ai/babysitter/issues"
   },

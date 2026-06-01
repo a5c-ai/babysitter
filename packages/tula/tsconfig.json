@@ -54,7 +54,7 @@
       "path": "../sdk"
     },
     {
-      "path": "../agent-core"
+      "path": "../tula-core"
     },
     {
       "path": "../agent-runtime"

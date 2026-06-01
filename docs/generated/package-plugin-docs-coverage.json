@@ -53,12 +53,12 @@
       "note": "Public npm package for shared ontology, discovery, and evidence assets used by other published runtimes."
     },
     {
-      "surface": "packages/agent-core",
-      "packageName": "@a5c-ai/agent-core",
-      "description": "Built-in agent-core runtime and tool surface for Babysitter.",
+      "surface": "packages/tula-core",
+      "packageName": "@a5c-ai/tula-core",
+      "description": "Tula core runtime and tool surface for Babysitter.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/agent-core/README.md",
+      "canonicalHome": "../packages/tula-core/README.md",
       "supporting": [],
       "note": "Public runtime dependency package for advanced orchestration surfaces."
     },

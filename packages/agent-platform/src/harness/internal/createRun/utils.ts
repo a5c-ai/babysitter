@@ -411,8 +411,8 @@ export {
   createApprovalAskUserQuestion,
   createAskUserQuestionResponse,
 } from "../../../interaction";
-export { createAgentCoreSession } from "@a5c-ai/agent-core";
-export type { AgentCoreSessionHandle } from "@a5c-ai/agent-core";
+export { createAgentCoreSession } from "@a5c-ai/tula-core";
+export type { AgentCoreSessionHandle } from "@a5c-ai/tula-core";
 export { discoverHarnesses } from "@a5c-ai/babysitter-sdk";
 export { BabysitterRuntimeError, ErrorCategory } from "@a5c-ai/babysitter-sdk";
 export { Type } from "@sinclair/typebox";

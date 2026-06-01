@@ -12,12 +12,12 @@ Files/modules that concentrate the most danger across multiple categories.
 
 | File | Categories | Top Risk |
 |------|-----------|----------|
-| `packages/agent-core/src/session.ts` | coupling, caveat | 8 env vars read with complex fallback chain, 900s timeout unexplained *(model default + anthropic conversion now logged)* |
+| `packages/tula-core/src/session.ts` | coupling, caveat | 8 env vars read with complex fallback chain, 900s timeout unexplained *(model default + anthropic conversion now logged)* |
 | `packages/agent-mux/core/src/provider-resolver.ts` | coupling | 6-level region chain, 5-level model chain *(model source + Google→Vertex now logged)* |
 | `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts` | hazard, coupling, caveat | Double-cast type assertions, process.env mutations *(retry loop now logged)* |
 | `packages/agent-platform/src/harness/piWrapper/moduleSupport.ts` | coupling, caveat | Azure env mutations *(URL parse + import error now logged)* |
 | `packages/agent-mux/core/src/spawn-runner.ts` | hazard | 8+ PTY kill/write failures *(4 now logged in spawn-runner)* |
-| `packages/agent-core/src/agenticTools/shared/process.ts` | caveat, hazard | Ripgrep path cached at module load |
+| `packages/tula-core/src/agenticTools/shared/process.ts` | caveat, hazard | Ripgrep path cached at module load |
 | `packages/agent-mux/webui/src/lib/global-registry.ts` | coupling | globalThis shared mutable state, duplicated in observer-dashboard |
 | `packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts` | hazard | 3-layer recovery chain invisible without verbose *(code block extraction now rejects non-process blocks)* |
 | ~~`packages/sdk/src/storage/journal.ts`~~ | ~~fallback~~ | ~~Atomicity abandoned~~ → now throws on ENOENT. Queue errors logged. |
@@ -42,7 +42,7 @@ Files/modules that concentrate the most danger across multiple categories.
 **FIXED:** Extracted `createGlobalRegistry<TMap>` factory. All three copies (webui, gateway, observer-dashboard) now use the same factory with domain-specific type maps. Factory is canonical source, copies marked.
 
 ### ~~Double-cast type assertions bypass all safety~~
-**Files:** `packages/agent-core/src/loop/agent-loop.ts:209`, `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts:128-129`, `packages/agent-platform/src/cost/journal.ts`
+**Files:** `packages/tula-core/src/loop/agent-loop.ts:209`, `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts:128-129`, `packages/agent-platform/src/cost/journal.ts`
 
 **FIXED:** agent-loop.ts now validates shape at runtime before cast. effects.ts removed 3 double-casts (TaskDef has index sig, session has public abort). cost/journal.ts replaced blind cast with field-by-field validation.
 
@@ -52,7 +52,7 @@ Files/modules that concentrate the most danger across multiple categories.
 **FIXED:** Added `registryId` string key alongside WeakMap. Same logical owner with `registryId` reuses existing registry instead of creating a new one.
 
 ### ~~Silent stdout truncation at 50MB~~
-**File:** `packages/agent-core/src/agenticTools/shared/process.ts:55-84`
+**File:** `packages/tula-core/src/agenticTools/shared/process.ts:55-84`
 
 **FIXED:** Now emits a visible `[babysitter] WARNING: stdout truncated at ... bytes` message in the output when truncation triggers. Caller can see that data was lost.
 
@@ -81,7 +81,7 @@ Files/modules that concentrate the most danger across multiple categories.
 
 ### Circular dependency (via re-export shim)
 
-`agent-core` → re-exports from `agent-runtime` (BackgroundProcessRegistry) → `agent-runtime` may import from `agent-core`. Documented with backward-compat shim comment but fragile.
+`tula-core` → re-exports from `agent-runtime` (BackgroundProcessRegistry) → `agent-runtime` may import from `tula-core`. Documented with backward-compat shim comment but fragile.
 
 ### ~~Stringly-typed event contracts (no compile-time safety)~~
 
@@ -93,7 +93,7 @@ Files/modules that concentrate the most danger across multiple categories.
 
 ### ~~Shell invocation — 5 locations, subtly different~~
 
-**FIXED:** Shell argv construction is centralized in `@a5c-ai/agent-runtime` through `buildShellInvocation()`. Runtime background spawning, agent-core session execution, and core/platform bash tools all use the shared contract.
+**FIXED:** Shell argv construction is centralized in `@a5c-ai/agent-runtime` through `buildShellInvocation()`. Runtime background spawning, tula-core session execution, and core/platform bash tools all use the shared contract.
 
 ### ~~Kanban status — 6+ sealed switch statements~~
 **File:** `packages/agent-mux/core/src/kanban.ts` (2518 lines)
@@ -123,22 +123,22 @@ Three quote styles checked separately with hardcoded strings. Adding a new kind 
 ## Missing Caveats
 
 ### ~~File read silently capped at 10,000 lines~~
-**File:** `packages/agent-core/src/agenticTools/tools/fileSystem.ts:42-45`
+**File:** `packages/tula-core/src/agenticTools/tools/fileSystem.ts:42-45`
 
 **FIXED:** Now appends `(capped at 10000 lines — requested N)` when limit is reduced.
 
 ### HTTP fetch response truncated at 50,000 chars
-**File:** `packages/agent-core/src/agenticTools/tools/execution.ts:136-140`
+**File:** `packages/tula-core/src/agenticTools/tools/execution.ts:136-140`
 
 Unless `raw: true`, response bodies are truncated. The `... (truncated)` suffix is appended but the agent may not notice. Truncated JSON/HTML is unparseable.
 
 ### Ripgrep path cached at module load — never invalidated
-**File:** `packages/agent-core/src/agenticTools/shared/process.ts:11-26`
+**File:** `packages/tula-core/src/agenticTools/shared/process.ts:11-26`
 
 `getRgPath()` checks `@vscode/ripgrep` on first call, caches result forever. If ripgrep is installed after first use, the stale `"rg"` fallback is used permanently.
 
 ### AbortController timeout is advisory, not enforced
-**File:** `packages/agent-core/src/session.ts:96-100`
+**File:** `packages/tula-core/src/session.ts:96-100`
 
 The timeout sets an abort signal but doesn't guarantee the request stops. Fetch implementations check the signal asynchronously — requests can exceed the timeout window.
 
@@ -149,7 +149,7 @@ The timeout sets an abort signal but doesn't guarantee the request stops. Fetch 
 **FIXED:** Comment added: accommodates long-running model responses and Azure cold-start latency.
 
 ### ~~Tool dispose requires exact array reference~~
-**File:** `packages/agent-core/src/agenticTools/index.ts:40-50`
+**File:** `packages/tula-core/src/agenticTools/index.ts:40-50`
 
 **FIXED:** Tool definitions are now tracked by both returned array and individual tool object ownership. Passing a shallow-copied definitions array to `disposeAgentCoreToolDefinitions()` still resolves the owning options and clears retained background task state.
 
@@ -159,7 +159,7 @@ The timeout sets an abort signal but doesn't guarantee the request stops. Fetch 
 **FIXED:** Initialization failures now record the failure and retry-after timestamp. Immediate retries rethrow the recorded failure instead of hammering session creation, while retries after the backoff window can recover from transient failures.
 
 ### ~~Platform-specific shell path assumption~~
-**File:** `packages/agent-core/src/agenticTools/tools/execution.ts:53-56`
+**File:** `packages/tula-core/src/agenticTools/tools/execution.ts:53-56`
 
 **FIXED:** Shell invocation now uses the shared runtime helper in `@a5c-ai/agent-runtime`, so agentic shell execution paths share one argv construction contract instead of hardcoding `/bin/bash` in each caller.
 

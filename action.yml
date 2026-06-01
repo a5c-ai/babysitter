@@ -114,7 +114,7 @@ runs:
         npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
         npm run build:sdk
         npm run build:agent-mux
-        npm run build --workspace=@a5c-ai/agent-core
+        npm run build --workspace=@a5c-ai/tula-core
         npm run build --workspace=@a5c-ai/agent-platform
 
     - name: Run Babysitter

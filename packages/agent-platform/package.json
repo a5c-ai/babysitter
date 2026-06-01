@@ -114,7 +114,7 @@
     "test:seams": "vitest run --config vitest.config.ts src/seams/contract.test.ts"
   },
   "dependencies": {
-    "@a5c-ai/agent-core": "5.0.0",
+    "@a5c-ai/tula-core": "5.0.0",
     "@a5c-ai/agent-mux": "^5.0.0",
     "@a5c-ai/agent-comm-mux": "5.0.0",
     "@a5c-ai/agent-runtime": "5.0.0",

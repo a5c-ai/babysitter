@@ -6,8 +6,8 @@
 
 import * as path from "node:path";
 import { Type } from "@sinclair/typebox";
-import { createAgentCoreSession, AgentCoreSessionHandle } from "@a5c-ai/agent-core";
-import { createAgentCoreToolDefinitions } from "@a5c-ai/agent-core";
+import { createAgentCoreSession, AgentCoreSessionHandle } from "@a5c-ai/tula-core";
+import { createAgentCoreToolDefinitions } from "@a5c-ai/tula-core";
 import { resolveExistingRunDir, resolveRunsDir } from "@a5c-ai/babysitter-sdk";
 import type { AgentCoreSessionEvent } from "@a5c-ai/agent-platform/harness";
 import { handleHarnessCreateRun } from "./createRun";

@@ -35,7 +35,7 @@
     "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
-    "@a5c-ai/agent-core": "5.0.0",
+    "@a5c-ai/tula-core": "5.0.0",
     "@a5c-ai/agent-runtime": "5.0.0",
     "@a5c-ai/agent-platform": "5.0.0",
     "@a5c-ai/agent-mux": "^5.0.0",

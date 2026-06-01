@@ -22,7 +22,7 @@ import {
   ErrorCategory,
   detectCallerHarness,
 } from "@a5c-ai/babysitter-sdk";
-import type { AgentCoreSessionHandle } from "@a5c-ai/agent-core";
+import type { AgentCoreSessionHandle } from "@a5c-ai/tula-core";
 
 describe("harnessUtils", () => {
   beforeEach(() => {

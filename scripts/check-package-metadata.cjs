@@ -7,6 +7,10 @@ const repoRoot = path.resolve(__dirname, '..');
 const DOCS_SURFACE_PATH = 'docs/generated/package-plugin-docs-coverage.json';
 const BUGS_URL = 'https://github.com/a5c-ai/babysitter/issues';
 const REPOSITORY_URL = 'git+https://github.com/a5c-ai/babysitter.git';
+const TULA_CORE_SURFACE = 'packages/tula-core';
+const TULA_CORE_PACKAGE = '@a5c-ai/tula-core';
+const OLD_AGENT_CORE_SURFACE = 'packages/agent-core';
+const OLD_AGENT_CORE_PACKAGE = '@a5c-ai/agent-core';
 
 function fail(message) {
   console.error(`Metadata verification failed: ${message}`);
@@ -107,6 +111,111 @@ function createCanonicalMetadata(surfacePath) {
       url: BUGS_URL,
     },
   };
+}
+
+function verifyTulaCoreRename() {
+  if (fs.existsSync(path.join(repoRoot, OLD_AGENT_CORE_SURFACE))) {
+    fail(`${OLD_AGENT_CORE_SURFACE} must be renamed to ${TULA_CORE_SURFACE}`);
+  }
+
+  if (!fs.existsSync(path.join(repoRoot, TULA_CORE_SURFACE, 'package.json'))) {
+    fail(`${TULA_CORE_SURFACE}/package.json must exist`);
+  }
+
+  const manifest = readJson(path.join(TULA_CORE_SURFACE, 'package.json'));
+  expectEqual(manifest.name, TULA_CORE_PACKAGE, `${TULA_CORE_SURFACE}/package.json name`);
+  expectDeepEqual(manifest.repository, createCanonicalMetadata(TULA_CORE_SURFACE).repository, `${TULA_CORE_SURFACE}/package.json repository`);
+  expectEqual(manifest.homepage, createCanonicalMetadata(TULA_CORE_SURFACE).homepage, `${TULA_CORE_SURFACE}/package.json homepage`);
+
+  const docsCoverage = readJson(DOCS_SURFACE_PATH);
+  const tulaCoreSurface = docsCoverage.surfaces.find((entry) => entry.surface === TULA_CORE_SURFACE);
+  if (!tulaCoreSurface) {
+    fail(`${DOCS_SURFACE_PATH} must list ${TULA_CORE_SURFACE}`);
+  }
+  expectEqual(tulaCoreSurface.packageName, TULA_CORE_PACKAGE, `${DOCS_SURFACE_PATH} ${TULA_CORE_SURFACE} packageName`);
+
+  const oldSurface = docsCoverage.surfaces.find((entry) => entry.surface === OLD_AGENT_CORE_SURFACE);
+  if (oldSurface) {
+    fail(`${DOCS_SURFACE_PATH} must not list ${OLD_AGENT_CORE_SURFACE}`);
+  }
+}
+
+function verifyTulaCoreDependents() {
+  const packageJsonPaths = [
+    'packages/agent-platform/package.json',
+    'packages/tula/package.json',
+  ];
+  for (const packageJsonPath of packageJsonPaths) {
+    const manifest = readJson(packageJsonPath);
+    if (manifest.dependencies && Object.prototype.hasOwnProperty.call(manifest.dependencies, OLD_AGENT_CORE_PACKAGE)) {
+      fail(`${packageJsonPath} must depend on ${TULA_CORE_PACKAGE}, not ${OLD_AGENT_CORE_PACKAGE}`);
+    }
+  }
+
+  const tsconfigPaths = [
+    'packages/agent-platform/tsconfig.json',
+    'packages/tula/tsconfig.json',
+  ];
+  for (const tsconfigPath of tsconfigPaths) {
+    const config = readJson(tsconfigPath);
+    const staleReference = (config.references || []).find((reference) => reference && reference.path === '../agent-core');
+    if (staleReference) {
+      fail(`${tsconfigPath} must reference ../tula-core, not ../agent-core`);
+    }
+  }
+
+  const staleImportFiles = [
+    'packages/agent-platform/src/harness/index.ts',
+    'packages/agent-platform/src/harness/internal/createRun/utils.ts',
+    'packages/agent-platform/src/harness/internal/createRun/planProcess/phaseHelpers.ts',
+    'packages/agent-platform/src/harness/internal/createRun/orchestration/internalTools.ts',
+    'packages/agent-platform/src/harness/internal/createRun/__tests__/createRun.test.ts',
+    'packages/agent-platform/src/harness/internal/createRun/__tests__/utils.test.ts',
+    'packages/agent-platform/src/harness/amux/__tests__/amuxInvokerWiring.test.ts',
+    'packages/tula/src/index.ts',
+    'packages/tula/src/cli/commands/harness/resumeRun.ts',
+  ];
+  for (const filePath of staleImportFiles) {
+    const fullPath = path.join(repoRoot, filePath);
+    if (!fs.existsSync(fullPath)) {
+      continue;
+    }
+    const contents = fs.readFileSync(fullPath, 'utf8');
+    if (contents.includes(OLD_AGENT_CORE_PACKAGE)) {
+      fail(`${filePath} must import ${TULA_CORE_PACKAGE}, not ${OLD_AGENT_CORE_PACKAGE}`);
+    }
+  }
+}
+
+function verifyTulaCoreExternalSurfaces() {
+  const stalePatterns = [OLD_AGENT_CORE_PACKAGE, OLD_AGENT_CORE_SURFACE, 'packages/agent-core/', '../agent-core'];
+  const files = [
+    'package-lock.json',
+    '.github/workflows/ci.yml',
+    '.github/workflows/publish.yml',
+    '.github/workflows/publish-packages-from-tag.yml',
+    '.github/workflows/live-stack.yml',
+    'docs/workspace-validation.md',
+    'docs/package-and-plugin-map.md',
+    'docs/testing/agent-mux-and-runtime-e2e.md',
+    'docs/testing/current-test-command-inventory.md',
+    'docs/testing/stack-permutations.md',
+    'packages/tula/README.md',
+    'packages/atlas/graph/coverage-checklist.md',
+    'packages/atlas/graph/agent-stack/core-impls/tula-core-current.yaml',
+  ];
+
+  for (const filePath of files) {
+    const fullPath = path.join(repoRoot, filePath);
+    if (!fs.existsSync(fullPath)) {
+      continue;
+    }
+    const contents = fs.readFileSync(fullPath, 'utf8');
+    const stalePattern = stalePatterns.find((pattern) => contents.includes(pattern));
+    if (stalePattern) {
+      fail(`${filePath} must not contain stale tula-core package identity ${JSON.stringify(stalePattern)}`);
+    }
+  }
 }
 
 function coversFileEntry(files, relativePath) {
@@ -218,6 +327,9 @@ function walkPackageJsons(dirPath, output) {
 const rootManifest = readJson('package.json');
 expectEqual(rootManifest.private, true, 'package.json private');
 expectEqual(rootManifest.license, 'MIT', 'package.json license');
+verifyTulaCoreRename();
+verifyTulaCoreDependents();
+verifyTulaCoreExternalSurfaces();
 verifyBabysitterPluginVersionSync();
 
 const docsCoverage = readJson(DOCS_SURFACE_PATH);

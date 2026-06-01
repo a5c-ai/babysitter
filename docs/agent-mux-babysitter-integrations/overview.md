@@ -2,7 +2,7 @@
 
 ## Goal
 
-Allow babysitter processes to discover what agents and models are available in the environment and dispatch work to them. When agent-mux is installed, processes gain access to external agents (claude-code, codex, gemini-cli, copilot, etc.) as first-class task targets alongside the internal agent-core session.
+Allow babysitter processes to discover what agents and models are available in the environment and dispatch work to them. When agent-mux is installed, processes gain access to external agents (claude-code, codex, gemini-cli, copilot, etc.) as first-class task targets alongside the internal tula-core session.
 
 ## Architecture
 
@@ -15,7 +15,7 @@ Process Definition (defineTask)
   │
   ↓ tasks-mux routes by responderType:
   │
-  ├─ responderType: "internal"  → agent-core session (direct API)
+  ├─ responderType: "internal"  → tula-core session (direct API)
   ├─ responderType: "human"     → breakpoint → human responder (existing)
   ├─ responderType: "agent"     → agent-mux adapter (claude-code, codex, etc.)
   ├─ responderType: "tracker"   → external issue tracker (Jira, Linear)
@@ -54,7 +54,7 @@ Agent-mux is **optional**. The SDK must work without it. Discovery returns empty
 | `packages/tasks-mux` | Agent responder backend, task router, responder types, agent-mux integration |
 | `packages/sdk` | Discovery API, responderType on tasks, route through tasks-mux |
 | `packages/agent-platform` | Effect resolution delegates to tasks-mux, process prompt updates |
-| `packages/agent-core` | None (internal agent tasks unchanged) |
+| `packages/tula-core` | None (internal agent tasks unchanged) |
 | `packages/agent-mux` | None (existing run/launch API consumed by tasks-mux) |
 | `packages/hooks-mux` | Host tool discovery, capability extensions |
 

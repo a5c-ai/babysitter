@@ -11,7 +11,7 @@ last_updated: 2026-05-01
 - `.github/workflows/staging-publish.yml` owns prerelease npm publishing from `staging`, guarded by the `staging-publish` concurrency group.
 - `@a5c-ai/babysitter-observer-dashboard` is part of those central workflows. The former standalone `.github/workflows/observer-dashboard-publish.yml` path is retired, so observer-dashboard no longer has a separate `main` release workflow.
 - `@a5c-ai/agent-catalog` is part of those central publish workflows. It ships as a public dependency surface for SDK, hooks-mux, agent-mux, and extension-mux consumers.
-- `@a5c-ai/agent-core` and `@a5c-ai/agent-platform` are part of those central publish workflows. `agent-core` publishes before `agent-platform` so the runtime CLI can be installed from npm without workspace-only dependencies.
+- `@a5c-ai/tula-core` and `@a5c-ai/agent-platform` are part of those central publish workflows. `tula-core` publishes before `agent-platform` so the runtime CLI can be installed from npm without workspace-only dependencies.
 - `@a5c-ai/transport-mux` is part of the public agent-mux runtime chain. It must publish before the downstream agent-mux CLI/root packages so `@a5c-ai/agent-platform` remains globally installable through its agent-mux dependency chain.
 - Both central workflows validate, build, and publish observer-dashboard alongside the other public workspaces they own.
 

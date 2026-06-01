@@ -38,7 +38,7 @@ Use it to answer three questions quickly:
 | Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
 | --- | --- | --- | --- | --- |
 | `packages/extension-mux` | Public package | [packages/extension-mux/README.md](../packages/extension-mux/README.md) | — | README is the canonical package-level contract. |
-| `packages/agent-core` | Public advanced/runtime package | [packages/agent-core/README.md](../packages/agent-core/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public runtime dependency package for advanced orchestration surfaces; README is the canonical package contract. |
+| `packages/tula-core` | Public advanced/runtime package | [packages/tula-core/README.md](../packages/tula-core/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public runtime dependency package for advanced orchestration surfaces; README is the canonical package contract. |
 | `packages/babysitter` | Public package | [packages/babysitter/README.md](../packages/babysitter/README.md) | — | README is the canonical package-level contract. |
 | `packages/agent-platform` | Public advanced/runtime package | [packages/agent-platform/README.md](../packages/agent-platform/README.md) | [README.md](../README.md) | Public npm package, but it is an advanced/operator-facing runtime CLI rather than the default entrypoint for new users. |
 | `packages/agent-catalog` | Public advanced/runtime package | [packages/agent-catalog/README.md](../packages/agent-catalog/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public npm package for shared ontology/discovery/evidence assets used by other published runtimes; README is the canonical package contract. |

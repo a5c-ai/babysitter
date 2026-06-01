@@ -1,15 +1,15 @@
 nodeKind: AgentCoreImpl
 id: agent-core-impl:tula.core@current
 attributes:
-  displayName: "tula Core (current) — composed agent-core + babysitter-sdk loop"
+  displayName: "tula Core (current) — composed tula-core + babysitter-sdk loop"
   agentVersionId: agent-version:tula@current
   packageRef: source-ref:packages-tula
   loopIteratorPolicy: process-function-driven
   loopIteratorNotes: |
-    tula composes @a5c-ai/agent-core and @a5c-ai/babysitter-sdk; the loop
+    tula composes @a5c-ai/tula-core and @a5c-ai/babysitter-sdk; the loop
     semantics are inherited from babysitter-sdk (user-authored async
     `process(inputs, ctx)` with journaled effects) exposed through the
-    agent-core contract.
+    tula-core contract.
   contextManagementStrategy: user-managed
   compactionTriggerNotes: |
     Inherited from the SDK; the wrapped process function owns context.
@@ -27,7 +27,7 @@ attributes:
   streamingFidelity: full
   thinkingChannelHandling: delegated-to-remote
   notes: |
-    tula's core layer composes agent-core and babysitter-sdk to provide the
+    tula's core layer composes tula-core and babysitter-sdk to provide the
     loop, context, and transport primitives. The binary adds CLI entrypoints,
     barrel exports, and agent-mux bridging on top.
 edges:

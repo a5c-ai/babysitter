@@ -16,6 +16,6 @@
 export * from "@a5c-ai/agent-platform";
 
 // L4 and L5 — namespaced for unambiguous access
-import * as core from "@a5c-ai/agent-core";
+import * as core from "@a5c-ai/tula-core";
 import * as runtime from "@a5c-ai/agent-runtime";
 export { core, runtime };

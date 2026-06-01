@@ -205,13 +205,13 @@ jobs:
       - name: Build babysitter-harness
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/agent-core 2>&1 | tee artifacts/test-logs/agent-core-build.log
+          npm run build --workspace=@a5c-ai/tula-core 2>&1 | tee artifacts/test-logs/tula-core-build.log
           npm run build --workspace=@a5c-ai/agent-platform 2>&1 | tee artifacts/test-logs/babysitter-harness-build.log
 
-      - name: agent-core tests
+      - name: tula-core tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/agent-core 2>&1 | tee artifacts/test-logs/agent-core-tests.log
+          npm run test --workspace=@a5c-ai/tula-core 2>&1 | tee artifacts/test-logs/tula-core-tests.log
 
       - name: babysitter-harness tests
         run: |

@@ -1,6 +1,6 @@
-# @a5c-ai/agent-core
+# @a5c-ai/tula-core
 
-Built-in programmatic session wrapper and agentic tool surface for Babysitter runtime consumers.
+Tula core programmatic session wrapper and agentic tool surface for Babysitter runtime consumers.
 
 <!-- docs-status:start -->
 > Status: Public advanced/runtime package.
@@ -10,12 +10,12 @@ Built-in programmatic session wrapper and agentic tool surface for Babysitter ru
 
 ## Package role
 
-`@a5c-ai/agent-core` sits between `@a5c-ai/agent-platform`, `@a5c-ai/agent-mux`, and `@a5c-ai/babysitter-sdk`:
+`@a5c-ai/tula-core` sits between `@a5c-ai/agent-platform`, `@a5c-ai/agent-mux`, and `@a5c-ai/babysitter-sdk`:
 
 - `createAgentCoreSession()` wraps an `@a5c-ai/agent-mux` client for in-process prompt execution.
 - `createAgentCoreToolDefinitions()` assembles the built-in Babysitter-flavored tool surface that host runtimes can inject into planning, resume, or delegated-task flows.
-- `@a5c-ai/agent-platform` re-exports these APIs from `src/harness/index.ts`, uses `createAgentCoreSession()` for direct `agent-core` harness invocation in `src/harness/invoker.ts`, and injects tool definitions into plan-process and resume-run flows.
-- `@a5c-ai/babysitter-sdk` still owns run directories, journals, task/effect lifecycle, and config defaults. `agent-core` does not replace the SDK orchestration layer.
+- `@a5c-ai/agent-platform` re-exports these APIs from `src/harness/index.ts`, uses `createAgentCoreSession()` for direct `tula-core` harness invocation in `src/harness/invoker.ts`, and injects tool definitions into plan-process and resume-run flows.
+- `@a5c-ai/babysitter-sdk` still owns run directories, journals, task/effect lifecycle, and config defaults. `tula-core` does not replace the SDK orchestration layer.
 
 This package is published as a runtime dependency surface for higher-level Babysitter runtimes. It is still an advanced/operator-facing building block rather than the primary entrypoint for new users.
 
@@ -52,7 +52,7 @@ import {
   type AgentCoreToolOptions,
   type CustomToolDefinition,
   type ToolResult,
-} from "@a5c-ai/agent-core";
+} from "@a5c-ai/tula-core";
 ```
 
 Key exports:
@@ -91,7 +91,7 @@ Session behavior that matters to host integrations:
 - Failed prompts, timed-out requests, aborted requests, and malformed streams do not append partial assistant output to history.
 - Concurrent `prompt()` calls on the same handle are rejected.
 - Event payloads are normalized before subscribers see them. Non-object payloads become `{ type: "unknown", value }`.
-- Approval mode is `prompt` only when `uiContext` is present; otherwise agent-core uses `yolo`.
+- Approval mode is `prompt` only when `uiContext` is present; otherwise tula-core uses `yolo`.
 
 ### Supported runtime options
 
@@ -105,7 +105,7 @@ Session behavior that matters to host integrations:
 | `thinkingLevel` | Translated to agent-mux `thinkingEffort` (`minimal`/`low` -> `low`, `medium` -> `medium`, `high` -> `high`, `xhigh` -> `max`). |
 | `systemPrompt` | Used as the base `systemPrompt`. |
 | `appendSystemPrompt` | Appended to the final `systemPrompt` before dispatch. |
-| `uiContext` | Switches run approval mode to `prompt`; when omitted, agent-core uses `yolo`. |
+| `uiContext` | Switches run approval mode to `prompt`; when omitted, tula-core uses `yolo`. |
 | `backend` | Selects the agent-mux adapter/backend forwarded as `agent`. |
 | `outputFormat` | Optional structured-output mode: `text`, `json_object`, or `json_schema`. |
 | `outputSchema` | JSON Schema used when `outputFormat` is `json_schema`. |
@@ -138,7 +138,7 @@ if (result.success) {
 }
 ```
 
-OpenAI-compatible and Azure endpoints receive `response_format` with either `{ type: "json_object" }` or a `json_schema` payload. Anthropic does not expose the same response-format field through this direct Messages API path, so agent-core injects a system instruction that requires JSON-only output and still parses/validates the returned text locally.
+OpenAI-compatible and Azure endpoints receive `response_format` with either `{ type: "json_object" }` or a `json_schema` payload. Anthropic does not expose the same response-format field through this direct Messages API path, so tula-core injects a system instruction that requires JSON-only output and still parses/validates the returned text locally.
 
 `json_object` requires the model to return a JSON object. `json_schema` requires `outputSchema` and validates the parsed object for common JSON Schema constraints used by this package contract (`type`, `required`, `properties`, `items`, and `enum`). Parse or schema failures return `success: false`, `exitCode: 1`, the raw `output`, and `validationError`.
 
@@ -172,15 +172,15 @@ These fields remain on `AgentCoreSessionOptions` for compatibility, but the curr
 
 | Option | Status | Migration note |
 | --- | --- | --- |
-| `toolsMode` | Deprecated, ignored by agent-core | Use backend-native configuration, or the PI wrapper in `@a5c-ai/agent-platform`, if you still need tool-surface control. |
-| `customTools` | Deprecated, ignored by agent-core | Register host-side tools with `createAgentCoreToolDefinitions()` or use the PI wrapper for runtime custom-tool injection. |
-| `isolated` | Deprecated, ignored by agent-core | Use the PI wrapper if you still need extension/skills isolation controls. |
-| `ephemeral` | Deprecated, ignored by agent-core | Session persistence is determined by the selected agent-mux backend. |
-| `bashSandbox` | Deprecated, ignored by agent-core | Sandbox behavior belongs to the selected backend. |
-| `enableCompaction` | Deprecated, ignored by agent-core | Compaction behavior belongs to the selected backend/runtime. |
-| `agentDir` | Deprecated, ignored by agent-core | Configure agent directories through the target backend instead. |
+| `toolsMode` | Deprecated, ignored by tula-core | Use backend-native configuration, or the PI wrapper in `@a5c-ai/agent-platform`, if you still need tool-surface control. |
+| `customTools` | Deprecated, ignored by tula-core | Register host-side tools with `createAgentCoreToolDefinitions()` or use the PI wrapper for runtime custom-tool injection. |
+| `isolated` | Deprecated, ignored by tula-core | Use the PI wrapper if you still need extension/skills isolation controls. |
+| `ephemeral` | Deprecated, ignored by tula-core | Session persistence is determined by the selected agent-mux backend. |
+| `bashSandbox` | Deprecated, ignored by tula-core | Sandbox behavior belongs to the selected backend. |
+| `enableCompaction` | Deprecated, ignored by tula-core | Compaction behavior belongs to the selected backend/runtime. |
+| `agentDir` | Deprecated, ignored by tula-core | Configure agent directories through the target backend instead. |
 
-If you still need the PI-era controls above, use the PI wrapper exposed from `@a5c-ai/agent-platform` rather than `@a5c-ai/agent-core`.
+If you still need the PI-era controls above, use the PI wrapper exposed from `@a5c-ai/agent-platform` rather than `@a5c-ai/tula-core`.
 
 ## Tool-definition API
 
@@ -204,7 +204,7 @@ The `calc` tool evaluates a constrained arithmetic language only: numeric litera
 - `onToolUse`: observer callback fired after tool wrapping.
 - `onBackgroundComplete`, `maxBackgroundProcesses`, `backgroundRegistry`: background-process lifecycle hooks and limits.
 - `deferredToolRegistry`: enables `tool_search` and `tool_fetch`.
-- `programmaticToolCalling`: opt-in Code Mode / Programmatic Tool Calling surface. When enabled, `code_executor` runs a bounded JavaScript async body with `tools.<name>(params)` and `callTool(name, params)` helpers for batching existing agent-core tools behind one model-level tool call.
+- `programmaticToolCalling`: opt-in Code Mode / Programmatic Tool Calling surface. When enabled, `code_executor` runs a bounded JavaScript async body with `tools.<name>(params)` and `callTool(name, params)` helpers for batching existing tula-core tools behind one model-level tool call.
 
 Example:
 
@@ -237,7 +237,7 @@ Background tasks are scoped to the returned tool-definition array, not to a modu
 
 The `config` tool reads Babysitter defaults from `@a5c-ai/babysitter-sdk` and also supports run-scoped in-memory overrides plus selected global env-var writes.
 
-Call `resetRunScopedConfig()` between independent runs if your host process reuses the same agent-core module instance and you do not want config overrides to leak across runs.
+Call `resetRunScopedConfig()` between independent runs if your host process reuses the same tula-core module instance and you do not want config overrides to leak across runs.
 
 ## DeferredToolRegistry API
 
@@ -270,26 +270,26 @@ Current downstream integration boundaries in this repo:
 
 - `@a5c-ai/agent-platform`
   - re-exports the session/tool APIs from `src/harness/index.ts`
-  - uses `createAgentCoreSession()` for the direct `agent-core` harness path in `src/harness/invoker.ts`
+  - uses `createAgentCoreSession()` for the direct `tula-core` harness path in `src/harness/invoker.ts`
   - injects `createAgentCoreToolDefinitions()` into plan-process and delegated-task flows in `src/harness/internal/createRun/planProcess/*`
   - uses both session and tool-definition APIs in `src/cli/commands/harness/resumeRun.ts` to inspect and resume existing runs
 - `@a5c-ai/agent-mux`
-  - provides the actual client, built-in adapters, session continuation, approval mode, and backend selection that agent-core forwards into
+  - provides the actual client, built-in adapters, session continuation, approval mode, and backend selection that tula-core forwards into
 - `@a5c-ai/babysitter-sdk`
   - provides config defaults/env wiring used by the `config` tool and remains the owner of orchestration/run-state semantics outside this package
 
-In practice, use `agent-core` when you need an in-process runtime wrapper or bundled tool surface. Use `agent-platform` when you need the higher-level harness CLI/runtime entrypoints.
+In practice, use `tula-core` when you need an in-process runtime wrapper or bundled tool surface. Use `agent-platform` when you need the higher-level harness CLI/runtime entrypoints.
 
 ## Build, test, and CI
 
 From the repo root:
 
 ```bash
-npm run build --workspace=@a5c-ai/agent-core
-npm run test --workspace=@a5c-ai/agent-core
+npm run build --workspace=@a5c-ai/tula-core
+npm run test --workspace=@a5c-ai/tula-core
 ```
 
-The package `build` script invokes the root `build:runtime:agent-core-deps` entrypoint before `tsc --build`, so fresh-checkout builds do not depend on prebuilt upstream `dist/` output.
+The package `build` script invokes the root `build:runtime:tula-core-deps` entrypoint before `tsc --build`, so fresh-checkout builds do not depend on prebuilt upstream `dist/` output.
 
 Package-local `test` runs `vitest` against:
 
@@ -303,4 +303,4 @@ For the shared runtime chain used by release-oriented workflows, run:
 npm run build:runtime
 ```
 
-Per [Workspace Validation Map](../../docs/workspace-validation.md), `packages/agent-core` is a public advanced/runtime package validated by `.github/workflows/ci.yml` job `test` and by the release/staging workflows. Keep README claims aligned with those validation paths rather than inventing package-specific CI jobs that do not exist.
+Per [Workspace Validation Map](../../docs/workspace-validation.md), `packages/tula-core` is a public advanced/runtime package validated by `.github/workflows/ci.yml` job `test` and by the release/staging workflows. Keep README claims aligned with those validation paths rather than inventing package-specific CI jobs that do not exist.

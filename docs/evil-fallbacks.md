@@ -61,45 +61,45 @@ Subscriber errors silently discarded.
 
 ---
 
-## Agent Core (packages/agent-core)
+## Tula Core (packages/tula-core)
 
 ### Critical
 
-**Endpoint resolution fallback chain** — `packages/agent-core/src/session.ts:38-89` **(logged)**
+**Endpoint resolution fallback chain** — `packages/tula-core/src/session.ts:38-89` **(logged)**
 9 env vars checked in priority order. Model defaults to "gpt-4o" now warns when no model specified. Anthropic path now logs model conversion.
 
 ### High
 
-**Tool error wrapping loses everything** — `packages/agent-core/src/agenticTools/shared/results.ts:37-58` **(logged)**
+**Tool error wrapping loses everything** — `packages/tula-core/src/agenticTools/shared/results.ts:37-58` **(logged)**
 Now logs full error including stack trace to stderr before converting to errorResult.
 
-**Subagent invocation — message only** — `packages/agent-core/src/subagent/invoker.ts:65-76,116-118` **(logged)**
+**Subagent invocation — message only** — `packages/tula-core/src/subagent/invoker.ts:65-76,116-118` **(logged)**
 Now logs full stack trace in `buildErrorResult` before returning message-only result.
 
 ### Medium
 
-**AST-grep → ripgrep silent fallback** — `packages/agent-core/src/agenticTools/tools/code.ts:100-130` **(logged)**
+**AST-grep → ripgrep silent fallback** — `packages/tula-core/src/agenticTools/tools/code.ts:100-130` **(logged)**
 Now logs exit code when falling back from `sg` to `rg`.
 
-**Mermaid rendering — "mmdc not available"** — `packages/agent-core/src/agenticTools/tools/code.ts:216-239` **(logged)**
+**Mermaid rendering — "mmdc not available"** — `packages/tula-core/src/agenticTools/tools/code.ts:216-239` **(logged)**
 Now logs the error reason. Temp file cleanup failures also logged.
 
-**Puppeteer import — misleading message** — `packages/agent-core/src/agenticTools/browser/tool.ts:42-49` **(hardened)**
+**Puppeteer import — misleading message** — `packages/tula-core/src/agenticTools/browser/tool.ts:42-49` **(hardened)**
 Error message now includes actual import error, not just "not installed."
 
-**JSON parse fallback changes types** — `packages/agent-core/src/agenticTools/tools/programmaticToolCalling.ts:137-142`
+**JSON parse fallback changes types** — `packages/tula-core/src/agenticTools/tools/programmaticToolCalling.ts:137-142`
 `JSON.parse()` fails → returns raw string instead. Callers expecting object get string. Type mismatch propagates.
 
-**Web search URL decode fallback** — `packages/agent-core/src/agenticTools/web/searchHelpers.ts:18-23`
+**Web search URL decode fallback** — `packages/tula-core/src/agenticTools/web/searchHelpers.ts:18-23`
 `decodeURIComponent` fails → uses raw DuckDuckGo-encoded URL. Broken URLs passed downstream.
 
-~~**Session abort is a no-op**~~ — `packages/agent-core/src/session.ts` **(hardened)**
+~~**Session abort is a no-op**~~ — `packages/tula-core/src/session.ts` **(hardened)**
 `abort()` now cancels the active provider request through the request `AbortController`; abort after completion is harmless and aborted prompts do not append partial history.
 
-**Directory walk silent failure** — `packages/agent-core/src/agenticTools/shared/paths.ts:61-65` **(logged)**
+**Directory walk silent failure** — `packages/tula-core/src/agenticTools/shared/paths.ts:61-65` **(logged)**
 Now logs the directory path and error before returning.
 
-**Spawn error — message only** — `packages/agent-core/src/agenticTools/shared/process.ts:94-99` **(hardened)**
+**Spawn error — message only** — `packages/tula-core/src/agenticTools/shared/process.ts:94-99` **(hardened)**
 Now includes `ErrnoException.code` (ENOENT, EACCES, etc.) in error message.
 
 ---

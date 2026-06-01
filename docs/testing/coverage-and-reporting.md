@@ -24,7 +24,7 @@ The long-term target is one repository coverage artifact with package-level sect
 
 - `@a5c-ai/babysitter-sdk`,
 - `@a5c-ai/agent-platform`,
-- `@a5c-ai/agent-core`,
+- `@a5c-ai/tula-core`,
 - `@a5c-ai/transport-mux`,
 - the `@a5c-ai/agent-mux` package family,
 - the hooks-mux package family,
@@ -93,7 +93,7 @@ Transport-mux scenario coverage should be reported as separate checklist rows, n
 - agent-mux launch proxy decision matrix,
 - fixture stream cancellation/timeout/reconnect behavior,
 - passthrough path/query/upstream failure behavior,
-- live agent-core stream bridge,
+- live tula-core stream bridge,
 - live external harness bridge through `amux launch --with-proxy*`.
 
 A coverage summary should show scenario coverage as a checklist, not as a percentage that hides missing live evidence.

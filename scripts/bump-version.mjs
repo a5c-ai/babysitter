@@ -183,7 +183,7 @@ const updateLockVersion = (path, version) => {
     "packages/triggers-mux": {
       version
     },
-    "packages/agent-core": {
+    "packages/tula-core": {
       version,
       dependencies: {
         "@a5c-ai/agent-mux": version,
@@ -201,7 +201,7 @@ const updateLockVersion = (path, version) => {
     "packages/omni": {
       version,
       dependencies: {
-        "@a5c-ai/agent-core": version,
+        "@a5c-ai/tula-core": version,
         "@a5c-ai/agent-runtime": version,
         "@a5c-ai/agent-platform": version,
         "@a5c-ai/agent-mux": version,
@@ -253,7 +253,7 @@ const workspaceManifestPaths = [
   "package.json",
   "packages/agent-catalog/package.json",
   "packages/atlas/package.json",
-  "packages/agent-core/package.json",
+  "packages/tula-core/package.json",
   "packages/agent-runtime/package.json",
   "packages/omni/package.json",
   "packages/tool-mux/package.json",
@@ -369,7 +369,7 @@ for (const path of [
 
 for (const path of [
   "package.json",
-  "packages/agent-core/package.json",
+  "packages/tula-core/package.json",
   "packages/sdk/package.json",
   "packages/agent-platform/package.json",
   "packages/agent-mux/adapters/package.json",
@@ -392,7 +392,7 @@ for (const path of [
   "packages/agent-mux/config/package.json",
   "packages/babysitter-tui-plugins/package.json",
 ]) {
-  syncDependencyVersion(path, "@a5c-ai/agent-core", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/tula-core", newVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-runtime", newVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-platform", newVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux", newAgentMuxVersion);

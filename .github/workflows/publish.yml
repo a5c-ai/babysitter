@@ -160,11 +160,11 @@ jobs:
           # webui depends on core + ui — must be after agent-mux chain
           npm run build --workspace=@a5c-ai/agent-mux-webui
 
-          # SDK, agent-core, agent-platform: prerequisites (atlas, agent-catalog,
+          # SDK, tula-core, agent-platform: prerequisites (atlas, agent-catalog,
           # agent-mux chain) are already built above — call tsc directly to avoid
           # redundant rebuilds through chained npm scripts.
           npm run build --workspace=@a5c-ai/babysitter-sdk
-          (cd packages/agent-core && npx tsc --build --force tsconfig.json)
+          (cd packages/tula-core && npx tsc --build --force tsconfig.json)
           (cd packages/agent-platform && npx tsc --build tsconfig.json)
 
           wait_all
@@ -234,10 +234,10 @@ jobs:
           set -euo pipefail
           npm run test:sdk 2>&1 | tee artifacts/core-logs/sdk-tests.log
 
-      - name: agent-core tests
+      - name: tula-core tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/agent-core 2>&1 | tee artifacts/core-logs/agent-core-tests.log
+          npm run test --workspace=@a5c-ai/tula-core 2>&1 | tee artifacts/core-logs/tula-core-tests.log
 
       - name: babysitter-harness tests
         run: |
@@ -1454,7 +1454,7 @@ jobs:
           npm ci
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Build agent-core workspace
+      - name: Build tula-core workspace
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
@@ -1462,12 +1462,12 @@ jobs:
           npm run build --workspace=@a5c-ai/tasks-mux
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
-          npm run build --workspace=@a5c-ai/agent-core
+          npm run build --workspace=@a5c-ai/tula-core
 
-      - name: Publish agent-core
+      - name: Publish tula-core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/agent-core --access public --tag "$NPM_TAG"
+        run: npm publish --workspace=@a5c-ai/tula-core --access public --tag "$NPM_TAG"
 
   publish_staging_babysitter_agent:
     name: Publish Babysitter Agent
@@ -1516,7 +1516,7 @@ jobs:
           npm run build --workspace=@a5c-ai/tasks-mux
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
-          npm run build --workspace=@a5c-ai/agent-core
+          npm run build --workspace=@a5c-ai/tula-core
           npm run build --workspace=@a5c-ai/agent-platform
 
       - name: Publish agent-platform
@@ -1564,7 +1564,7 @@ jobs:
           npm run build --workspace=@a5c-ai/tasks-mux
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
-          npm run build --workspace=@a5c-ai/agent-core
+          npm run build --workspace=@a5c-ai/tula-core
           npm run build --workspace=@a5c-ai/agent-runtime
 
       - name: Publish agent-runtime
@@ -1612,7 +1612,7 @@ jobs:
           npm run build --workspace=@a5c-ai/tasks-mux
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
-          npm run build --workspace=@a5c-ai/agent-core
+          npm run build --workspace=@a5c-ai/tula-core
           npm run build --workspace=@a5c-ai/agent-runtime
           npm run build --workspace=@a5c-ai/agent-platform
           npm run build --workspace=@a5c-ai/tula
