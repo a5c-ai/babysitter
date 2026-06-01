@@ -45,6 +45,7 @@ import type { MarketplaceManifest } from "../types";
 const mockedReadFile = vi.mocked(fs.readFile);
 const mockedAccess = vi.mocked(fs.access);
 const mockedReaddir = vi.mocked(fs.readdir);
+const mockedMkdir = vi.mocked(fs.mkdir);
 
 const enoent = () => {
   const err = new Error("ENOENT") as NodeJS.ErrnoException;
@@ -114,6 +115,17 @@ describe("deriveMarketplaceName", () => {
 });
 
 describe("cloneMarketplace", () => {
+  it("clones new marketplaces under the blueprints config directory", async () => {
+    mockedAccess.mockRejectedValueOnce(enoent());
+
+    await cloneMarketplace("https://github.com/a5c-ai/marketplace.git", "global");
+
+    expect(mockedMkdir).toHaveBeenCalledWith(
+      path.join("/mock/home", ".a5c", "blueprints", "marketplaces"),
+      { recursive: true },
+    );
+  });
+
   it("rejects branch names that would be parsed as git options", async () => {
     mockedAccess.mockRejectedValueOnce(enoent());
 
@@ -166,6 +178,8 @@ describe("readMarketplaceManifest", () => {
     mockedAccess.mockRejectedValueOnce(enoent());
     // .claude-plugin/marketplace.json not found
     mockedAccess.mockRejectedValueOnce(enoent());
+    // legacy .a5c/marketplaces fallback not found
+    mockedAccess.mockRejectedValueOnce(enoent());
 
     await expect(
       readMarketplaceManifest("missing-marketplace", "global")
@@ -180,6 +194,8 @@ describe("readMarketplaceManifest", () => {
     // Should fall through to root check
     mockedAccess.mockRejectedValueOnce(enoent());
     // .claude-plugin check
+    mockedAccess.mockRejectedValueOnce(enoent());
+    // legacy .a5c/marketplaces fallback not found
     mockedAccess.mockRejectedValueOnce(enoent());
 
     await expect(
@@ -306,6 +322,7 @@ describe("resolvePluginPackagePath", () => {
       path.join(
         "/mock/home",
         ".a5c",
+        "blueprints",
         "marketplaces",
         "mp",
         "plugins",
@@ -349,6 +366,7 @@ describe("resolvePluginPackagePath", () => {
       path.join(
         "/mock/home",
         ".a5c",
+        "blueprints",
         "marketplaces",
         "mp",
         "sub",
@@ -382,12 +400,14 @@ describe("listMarketplaces", () => {
       { name: "alpha-mp", isDirectory: () => true, isFile: () => false },
       { name: "readme.txt", isDirectory: () => false, isFile: () => true },
     ] as unknown as Awaited<ReturnType<typeof fs.readdir>>);
+    mockedReaddir.mockRejectedValueOnce(enoent());
 
     const result = await listMarketplaces("global");
     expect(result).toEqual(["alpha-mp", "beta-mp"]);
   });
 
   it("returns empty array when marketplaces dir does not exist", async () => {
+    mockedReaddir.mockRejectedValueOnce(enoent());
     mockedReaddir.mockRejectedValueOnce(enoent());
 
     const result = await listMarketplaces("global");

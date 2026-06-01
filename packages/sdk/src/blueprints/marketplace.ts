@@ -9,7 +9,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { execFile as execFileCb } from "node:child_process";
 import { promisify } from "node:util";
-import { getMarketplacesDir, getMarketplaceDir } from "./paths";
+import { getLegacyMarketplacesDir, getMarketplacesDir, getMarketplaceDir } from "./paths";
 import {
   MarketplaceManifest,
   MarketplacePluginEntry,
@@ -121,7 +121,7 @@ export async function updateMarketplace(
   projectDir?: string,
   branch?: string
 ): Promise<void> {
-  const dir = getMarketplaceDir(marketplaceName, scope, projectDir);
+  const dir = await resolveMarketplaceDir(marketplaceName, scope, projectDir);
 
   try { await fs.access(dir); } catch {
     throw new Error(`Marketplace "${marketplaceName}" not found at ${dir}. Clone it first.`);
@@ -154,8 +154,7 @@ async function readManifestWithPath(
   scope: PluginScope,
   projectDir?: string
 ): Promise<{ manifest: MarketplaceManifest; manifestPath: string }> {
-  const dir = getMarketplaceDir(marketplaceName, scope, projectDir);
-  const manifestPath = await resolveManifestPath(dir);
+  const manifestPath = await resolveMarketplaceManifestPath(marketplaceName, scope, projectDir);
   const raw = await fs.readFile(manifestPath, "utf8");
   const manifest = normalizeManifest(JSON.parse(raw) as Record<string, unknown>);
   return { manifest, manifestPath };
@@ -211,11 +210,69 @@ export async function listMarketplaces(
   projectDir?: string
 ): Promise<string[]> {
   const dir = getMarketplacesDir(scope, projectDir);
+  const legacyDir = getLegacyMarketplacesDir(scope, projectDir);
+  const names = new Set<string>();
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true });
-    return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
+    for (const entry of entries) {
+      if (entry.isDirectory()) names.add(entry.name);
+    }
   } catch (error: unknown) {
-    if (isNodeError(error) && error.code === "ENOENT") { return []; }
-    throw error;
+    if (!isNodeError(error) || error.code !== "ENOENT") { throw error; }
   }
+  try {
+    const entries = await fs.readdir(legacyDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) names.add(entry.name);
+    }
+  } catch (error: unknown) {
+    if (!isNodeError(error) || error.code !== "ENOENT") { throw error; }
+  }
+  return [...names].sort();
+}
+
+async function resolveMarketplaceDir(
+  marketplaceName: string,
+  scope: PluginScope,
+  projectDir?: string
+): Promise<string> {
+  const dir = getMarketplaceDir(marketplaceName, scope, projectDir);
+  try {
+    await fs.access(dir);
+    return dir;
+  } catch (error: unknown) {
+    if (!isNodeError(error) || error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+  const legacyDir = path.join(getLegacyMarketplacesDir(scope, projectDir), marketplaceName);
+  try {
+    await fs.access(legacyDir);
+    return legacyDir;
+  } catch {
+    return dir;
+  }
+}
+
+async function resolveMarketplaceManifestPath(
+  marketplaceName: string,
+  scope: PluginScope,
+  projectDir?: string
+): Promise<string> {
+  const dir = getMarketplaceDir(marketplaceName, scope, projectDir);
+  try {
+    return await resolveManifestPath(dir);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes("Marketplace manifest not found")) {
+      throw error;
+    }
+  }
+  const legacyDir = path.join(getLegacyMarketplacesDir(scope, projectDir), marketplaceName);
+  try {
+    await fs.access(legacyDir);
+  } catch {
+    throw new Error(`Marketplace manifest not found in ${dir}`);
+  }
+  return await resolveManifestPath(legacyDir);
 }
