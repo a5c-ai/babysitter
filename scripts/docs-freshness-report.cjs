@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { execFile } = require("child_process");
 
 const {
   docsRoot,
@@ -12,6 +13,8 @@ const {
   publishedLandingPages,
   requiredPublishedFrontmatterDocs,
   futurePackageReferencePrefixes,
+  roadmapIssueSourcePaths,
+  roadmapIssueLookupTimeoutMs,
 } = require("./docs-qa-config.cjs");
 
 const LAST_REFRESHED_RE = /Last refreshed:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i;
@@ -23,6 +26,8 @@ const PACKAGE_REFERENCE_RE = /\B(@[a-z0-9-]+\/[a-z0-9-]+(?:\/[a-z0-9._-]+)*)/gi;
 const VERSION_LABEL_RE = /(?:^\*\*Version:\*\*\s*(.+)$|^\*\*Specification\s+(v[0-9][^\n*]*)\*\*|^###\s+Version\s+([0-9][0-9A-Za-z.\-]*))/gim;
 const HISTORICAL_CONTEXT_RE = /\b(removed|legacy|historical|archived|deprecated|superseded|old)\b/i;
 const REQUIRED_FRONTMATTER_FIELDS = ["title", "description", "last_updated"];
+const GITHUB_ISSUE_URL_RE = /https:\/\/github\.com\/([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)\/issues\/([0-9]+)/g;
+const ISSUE_SHORTHAND_RE = /^([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)#([0-9]+)$/;
 
 function listMarkdownFiles(targetPath) {
   const stat = fs.statSync(targetPath);
@@ -186,7 +191,180 @@ function getCliCandidatesFromLine(line) {
   return candidates;
 }
 
-function main() {
+function normalizeIssueReference(value) {
+  const trimmed = String(value ?? "").trim().replace(/^[\s"'`(<]+|[\s"'`),.>]+$/g, "");
+  const shorthand = trimmed.match(ISSUE_SHORTHAND_RE);
+  if (shorthand) {
+    return `${shorthand[1]}#${shorthand[2]}`;
+  }
+
+  const url = trimmed.match(/^https:\/\/github\.com\/([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)\/issues\/([0-9]+)(?:[#?].*)?$/);
+  if (url) {
+    return `${url[1]}#${url[2]}`;
+  }
+
+  return null;
+}
+
+function getMarkdownTableItem(line) {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) {
+    return null;
+  }
+  const cells = trimmed
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim());
+  const firstCell = cells[0];
+  if (!firstCell || /^-+$/.test(firstCell)) {
+    return null;
+  }
+  return firstCell.replace(/^\[([^\]]+)\]\([^)]+\)$/, "$1");
+}
+
+function parseRoadmapIssueLinks({ file, text }) {
+  const links = [];
+  const seen = new Set();
+  const lines = String(text ?? "").split(/\r?\n/);
+  let currentItem = null;
+
+  function addLink(issue, line, item) {
+    const key = `${file}:${issue}`;
+    if (seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    links.push({
+      file,
+      line,
+      issue,
+      item: item || issue,
+    });
+  }
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const lineNumber = index + 1;
+    const idMatch = line.match(/^\s*-\s*id:\s*([A-Za-z0-9_.-]+)/) || line.match(/\bid:\s*([A-Za-z0-9_.-]+)/);
+    if (idMatch) {
+      currentItem = idMatch[1];
+    }
+
+    const issueLinkMatch = line.match(/\bissue_link:\s*(\S+)/);
+    if (issueLinkMatch) {
+      const issue = normalizeIssueReference(issueLinkMatch[1]);
+      if (issue) {
+        addLink(issue, lineNumber, currentItem);
+      }
+    }
+
+    for (const match of line.matchAll(GITHUB_ISSUE_URL_RE)) {
+      const issue = `${match[1]}#${match[2]}`;
+      const markdownText = line.slice(0, match.index).match(/\[([^\]]+)\]\([^\)]*$/);
+      addLink(issue, lineNumber, markdownText?.[1] || getMarkdownTableItem(line) || currentItem);
+    }
+  }
+
+  return links;
+}
+
+function classifyRoadmapIssueState(issueState) {
+  const state = String(issueState?.state ?? "").toUpperCase();
+  const stateReason = issueState?.stateReason == null ? null : String(issueState.stateReason).toUpperCase();
+
+  if (state === "CLOSED" && stateReason === "NOT_PLANNED") {
+    return "not_planned";
+  }
+  if (state === "CLOSED" && stateReason == null) {
+    return "unknown";
+  }
+  return "not_stale";
+}
+
+async function lookupIssueWithGh(issue, { timeoutMs = roadmapIssueLookupTimeoutMs, execFileImpl = execFile } = {}) {
+  return new Promise((resolve, reject) => {
+    execFileImpl(
+      "gh",
+      ["issue", "view", issue, "--json", "state,stateReason,closedAt,url,title"],
+      { timeout: timeoutMs },
+      (error, stdout) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        try {
+          resolve(JSON.parse(stdout));
+        } catch (parseError) {
+          reject(parseError);
+        }
+      },
+    );
+  });
+}
+
+async function collectRoadmapIssueWarnings({ roadmapSources, lookupIssue = lookupIssueWithGh } = {}) {
+  const linksByIssue = new Map();
+
+  for (const source of roadmapSources ?? []) {
+    for (const link of parseRoadmapIssueLinks(source)) {
+      if (!linksByIssue.has(link.issue)) {
+        linksByIssue.set(link.issue, link);
+      }
+    }
+  }
+
+  const warnings = [];
+  for (const [issue, link] of linksByIssue) {
+    let issueState;
+    try {
+      issueState = await lookupIssue(issue);
+    } catch (error) {
+      continue;
+    }
+
+    if (classifyRoadmapIssueState(issueState) !== "not_planned") {
+      continue;
+    }
+
+    warnings.push({
+      severity: "warning",
+      file: link.file,
+      line: link.line,
+      item: link.item,
+      issue,
+      title: issueState.title ?? null,
+      url: issueState.url ?? null,
+      message: `${link.item} links to ${issue}, which GitHub reports as CLOSED/NOT_PLANNED; consider dropping or revising the roadmap item.`,
+    });
+  }
+
+  return warnings;
+}
+
+async function collectRoadmapIssueReport(options = {}) {
+  const roadmapIssueWarnings = await collectRoadmapIssueWarnings(options);
+  return {
+    exitCode: 0,
+    roadmapIssueWarnings,
+  };
+}
+
+function readRoadmapSources() {
+  return roadmapIssueSourcePaths
+    .map((relativePath) => {
+      const absolutePath = path.join(repoRoot, relativePath);
+      if (!fs.existsSync(absolutePath)) {
+        return null;
+      }
+      return {
+        file: relativePath,
+        text: fs.readFileSync(absolutePath, "utf8"),
+      };
+    })
+    .filter(Boolean);
+}
+
+async function main() {
   const artifactDir = path.join(repoRoot, "artifacts", "docs-qa");
   fs.mkdirSync(artifactDir, { recursive: true });
 
@@ -220,6 +398,10 @@ function main() {
   const invalidCliReferences = [];
   const invalidPackageReferences = [];
   const plannedPackageReferences = [];
+  const roadmapIssueReport = await collectRoadmapIssueReport({
+    roadmapSources: readRoadmapSources(),
+  });
+  const { roadmapIssueWarnings } = roadmapIssueReport;
   const versionClaims = [];
   const publishedDocInventory = [];
   const historicalDocInventory = [];
@@ -419,6 +601,7 @@ function main() {
     invalidCliReferences,
     invalidPackageReferences,
     plannedPackageReferences,
+    roadmapIssueWarnings,
     versionClaims,
   };
 
@@ -483,7 +666,27 @@ function main() {
     }
   }
 
+  if (roadmapIssueWarnings.length > 0) {
+    console.warn("[docs:freshness] roadmap items linked to NOT_PLANNED GitHub issues:");
+    for (const warning of roadmapIssueWarnings) {
+      console.warn(`- ${warning.file}:${warning.line} ${warning.message}`);
+    }
+  }
+
   console.log(JSON.stringify(report, null, 2));
 }
 
-main();
+module.exports = {
+  parseRoadmapIssueLinks,
+  classifyRoadmapIssueState,
+  collectRoadmapIssueWarnings,
+  collectRoadmapIssueReport,
+  lookupIssueWithGh,
+};
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

@@ -4,6 +4,18 @@
 capabilities, and respects dependency ordering. Gaps within a milestone can be
 worked in parallel unless noted.
 
+## Upstream issue freshness warnings
+
+`npm run docs:freshness` scans this configured roadmap source for `issue_link`
+metadata and equivalent GitHub issue links. If a linked issue is `CLOSED` with
+GitHub `stateReason: NOT_PLANNED`, the docs freshness report emits a
+warning-only "consider dropping or revising" finding in
+`artifacts/docs-qa/freshness-report.json`.
+
+This check does not auto-drop roadmap items, rewrite statuses, or fail CI when
+`gh`, GitHub auth, or the network is unavailable. Operators still decide whether
+to drop, revise, or keep the roadmap item.
+
 ---
 
 ## M0: Quick Wins and Foundations

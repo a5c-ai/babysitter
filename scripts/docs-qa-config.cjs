@@ -47,6 +47,9 @@ const publishedDocsExcludePatterns = [
 ];
 
 const historicalDocPrefixes = [
+  "docs/blueprints-rename/",
+  "docs/agent-mux/terminology-and-structure-gaps/",
+  "docs/tula-stack-renames/",
   "docs/reference-repos/",
   "docs/retrospectives/",
   "docs/harness-features-backlog/",
@@ -101,6 +104,10 @@ const futurePackageReferencePrefixes = [
   "docs/v6-spec-and-roadmap/",
 ];
 
+const roadmapIssueSourcePaths = [
+  "docs/harness-features-backlog/roadmap.md",
+];
+
 function normalizeSlashes(value) {
   return value.split(path.sep).join("/");
 }
@@ -146,4 +153,6 @@ module.exports = {
   publishedLandingPages,
   requiredPublishedFrontmatterDocs,
   futurePackageReferencePrefixes,
+  roadmapIssueSourcePaths,
+  roadmapIssueLookupTimeoutMs: 5000,
 };
