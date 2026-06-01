@@ -76,13 +76,9 @@ export function buildPrimaryLiveStackCommands(
   if (scenario.agent.agent === 'omni') {
     commandEnv['BABYSITTER_RUNS_DIR'] = commandEnv['BABYSITTER_RUNS_DIR'] ?? path.join(options.cwd, '.a5c', 'runs');
     commandEnv['BABYSITTER_RUNS_SCOPE'] = commandEnv['BABYSITTER_RUNS_SCOPE'] ?? 'repo';
-    const fixturesDir = path.join(options.cwd, 'packages', 'agent-mux', 'cli', 'tests', 'live-stack', 'fixtures');
-    const processesDir = path.join(options.cwd, '.a5c', 'processes');
-    const copyFixture = { command: process.execPath, args: ['-e', `const fs=require("fs"),p=require("path");fs.mkdirSync(p.dirname(${JSON.stringify(path.join(processesDir, 'summarize-translate-test.mjs'))}),{recursive:true});fs.copyFileSync(${JSON.stringify(path.join(fixturesDir, 'summarize-translate-test.mjs'))},${JSON.stringify(path.join(processesDir, 'summarize-translate-test.mjs'))})`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS };
-    const omniArgs = ['call', '--model', scenario.model.model, '--workspace', options.cwd, '--process', '.a5c/processes/summarize-translate-test.mjs', '--prompt', prompt, '--json'];
+    const omniArgs = ['call', '--model', scenario.model.model, '--workspace', options.cwd, '--prompt', prompt, '--json'];
     return [
       ensureLiveArtifactDirCommand(commandEnv, options.cwd),
-      copyFixture,
       commandExecution(commandEnv, 'LIVE_STACK_OMNI_BIN', 'omni', omniArgs, options.cwd, timeoutMs),
     ];
   }
@@ -530,7 +526,7 @@ function buildPrompt(scenario: LiveStackScenario, traceId: string, env: Record<s
   }
 
   if (scenario.agent.agent === 'omni') {
-    return `Execute the summarize-translate-test process. Write a 12-paragraph summary of Homer's Odyssey, translate each paragraph to Greek, combine into a markdown document. The process handles orchestration — just provide high-quality content when prompted. Output goes to .a5c-live-test/${traceId}-odyssey.md.`;
+    return `Write a concise 6-section markdown summary of Homer's Odyssey with markdown headers (## for each section). After each section, add one sentence in Greek (using Greek alphabet characters). Save the entire result to .a5c-live-test/${traceId}-odyssey.md. The .a5c-live-test directory already exists.`;
   }
 
   if (scenario.agent.installMode === 'babysitter-plugin') {
