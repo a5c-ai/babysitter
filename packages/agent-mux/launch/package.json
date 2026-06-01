@@ -52,7 +52,7 @@
     "@a5c-ai/agent-comm-mux": "5.0.0",
     "@a5c-ai/agent-mux-adapters": "5.0.0",
     "@a5c-ai/atlas": "5.0.0",
-    "@a5c-ai/transport-mux": "5.0.0"
+    "@a5c-ai/agent-mux-transport": "5.0.0"
   },
   "optionalDependencies": {
     "node-pty": "^1.0.0"

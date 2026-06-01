@@ -25,8 +25,8 @@ const packageFamilies = {
     "@a5c-ai/agent-mux-harness-mock",
     "@a5c-ai/agent-config-mux",
     "@a5c-ai/agent-launch-mux",
-    "@a5c-ai/tool-mux",
-    "@a5c-ai/transport-mux",
+    "@a5c-ai/agent-mux-tools",
+    "@a5c-ai/agent-mux-transport",
   ],
   "dispatch-surfaces": [
     "@a5c-ai/agent-mux-ui",
@@ -40,9 +40,9 @@ const packageFamilies = {
     "@a5c-ai/agent-mux-watch-wearos-app",
   ],
   "support-systems": [
-    "@a5c-ai/extension-mux",
+    "@a5c-ai/agent-mux-extensions",
     "@a5c-ai/atlas",
-    "@a5c-ai/tasks-mux",
+    "@a5c-ai/agent-mux-tasks",
     "@a5c-ai/hooks-mux-core",
     "@a5c-ai/hooks-mux-cli",
     "@a5c-ai/hooks-mux-adapter-claude",
@@ -55,7 +55,7 @@ const packageFamilies = {
     "@a5c-ai/hooks-mux-adapter-openclaw",
     "@a5c-ai/hooks-mux-adapter-opencode",
     "@a5c-ai/hooks-mux-adapter-pi",
-    "@a5c-ai/triggers-mux",
+    "@a5c-ai/agent-mux-triggers",
   ],
   "downstream-consumers": [
     "@a5c-ai/babysitter-observer-dashboard",

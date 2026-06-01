@@ -11,6 +11,38 @@ const TULA_CORE_SURFACE = 'packages/tula-core';
 const TULA_CORE_PACKAGE = '@a5c-ai/tula-core';
 const OLD_AGENT_CORE_SURFACE = 'packages/agent-core';
 const OLD_AGENT_CORE_PACKAGE = '@a5c-ai/agent-core';
+const TOP_LEVEL_AGENT_MUX_PACKAGE_MOVES = [
+  {
+    oldPath: 'packages/transport-mux',
+    newPath: 'packages/agent-mux/transport',
+    oldName: '@a5c-ai/transport-mux',
+    newName: '@a5c-ai/agent-mux-transport',
+  },
+  {
+    oldPath: 'packages/extension-mux',
+    newPath: 'packages/agent-mux/extensions',
+    oldName: '@a5c-ai/extension-mux',
+    newName: '@a5c-ai/agent-mux-extensions',
+  },
+  {
+    oldPath: 'packages/triggers-mux',
+    newPath: 'packages/agent-mux/triggers',
+    oldName: '@a5c-ai/triggers-mux',
+    newName: '@a5c-ai/agent-mux-triggers',
+  },
+  {
+    oldPath: 'packages/tasks-mux',
+    newPath: 'packages/agent-mux/tasks',
+    oldName: '@a5c-ai/tasks-mux',
+    newName: '@a5c-ai/agent-mux-tasks',
+  },
+  {
+    oldPath: 'packages/tool-mux',
+    newPath: 'packages/agent-mux/tools',
+    oldName: '@a5c-ai/tool-mux',
+    newName: '@a5c-ai/agent-mux-tools',
+  },
+];
 
 function fail(message) {
   console.error(`Metadata verification failed: ${message}`);
@@ -24,6 +56,10 @@ function readJson(relativePath) {
   } catch (error) {
     fail(`Unable to read ${relativePath}: ${error.message}`);
   }
+}
+
+function pathExists(relativePath) {
+  return fs.existsSync(path.join(repoRoot, relativePath));
 }
 
 function expectEqual(actual, expected, label) {
@@ -96,7 +132,7 @@ function isInternalStatus(status) {
 }
 
 function packageExists(surfacePath) {
-  return fs.existsSync(path.join(repoRoot, surfacePath, 'package.json'));
+  return pathExists(path.join(surfacePath, 'package.json'));
 }
 
 function createCanonicalMetadata(surfacePath) {
@@ -324,12 +360,47 @@ function walkPackageJsons(dirPath, output) {
   }
 }
 
+function verifyTopLevelAgentMuxPackageMoves() {
+  const workspaceEntries = new Set((rootManifest.workspaces || []).map(normalizePath));
+  const rootReferences = new Set((readJson('tsconfig.json').references || []).map((entry) => normalizePath(entry.path || '')));
+
+  for (const move of TOP_LEVEL_AGENT_MUX_PACKAGE_MOVES) {
+    if (pathExists(move.oldPath)) {
+      fail(`${move.oldPath} must be moved under packages/agent-mux`);
+    }
+
+    if (!packageExists(move.newPath)) {
+      fail(`${move.newPath}/package.json is required for ${move.newName}`);
+    }
+
+    const manifest = readJson(path.join(move.newPath, 'package.json'));
+    expectEqual(manifest.name, move.newName, `${move.newPath}/package.json name`);
+
+    if (workspaceEntries.has(move.oldPath)) {
+      fail(`package.json workspaces must not include stale ${move.oldPath}`);
+    }
+
+    if (!workspaceEntries.has('packages/agent-mux/*') && !workspaceEntries.has(move.newPath)) {
+      fail(`package.json workspaces must include ${move.newPath} or packages/agent-mux/*`);
+    }
+
+    if (rootReferences.has(move.oldPath)) {
+      fail(`tsconfig.json references must not include stale ${move.oldPath}`);
+    }
+
+    if (!rootReferences.has(move.newPath)) {
+      fail(`tsconfig.json references must include ${move.newPath}`);
+    }
+  }
+}
+
 const rootManifest = readJson('package.json');
 expectEqual(rootManifest.private, true, 'package.json private');
 expectEqual(rootManifest.license, 'MIT', 'package.json license');
 verifyTulaCoreRename();
 verifyTulaCoreDependents();
 verifyTulaCoreExternalSurfaces();
+verifyTopLevelAgentMuxPackageMoves();
 verifyBabysitterPluginVersionSync();
 
 const docsCoverage = readJson(DOCS_SURFACE_PATH);

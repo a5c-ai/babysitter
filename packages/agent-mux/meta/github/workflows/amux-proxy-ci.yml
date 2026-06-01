@@ -10,5 +10,5 @@ jobs:
       - name: Historical archive only
         run: |
           echo "Historical archive only."
-          echo "Active transport/proxy runtime owner: @a5c-ai/transport-mux."
+          echo "Active transport/proxy runtime owner: @a5c-ai/agent-mux-transport."
           echo "Use the repo root ci.yml, release.yml, and staging-publish.yml workflows instead."

@@ -64,7 +64,7 @@
     "@a5c-ai/agent-comm-mux": "5.0.0",
     "@a5c-ai/agent-mux-adapters": "5.0.0",
     "@a5c-ai/agent-mux-observability": "5.0.0",
-    "@a5c-ai/transport-mux": "5.0.0",
+    "@a5c-ai/agent-mux-transport": "5.0.0",
     "qrcode-terminal": "^0.12.0",
     "yaml": "^2.8.3"
   },

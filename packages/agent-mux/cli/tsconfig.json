@@ -11,8 +11,8 @@
       "@a5c-ai/agent-launch-mux": [
         "../launch/src/index.ts"
       ],
-      "@a5c-ai/transport-mux": [
-        "../../transport-mux/src/index.ts"
+      "@a5c-ai/agent-mux-transport": [
+        "../transport/src/index.ts"
       ]
     }
   },
@@ -23,6 +23,6 @@
     { "path": "../config" },
     { "path": "../gateway" },
     { "path": "../launch" },
-    { "path": "../../transport-mux" }
+    { "path": "../transport" }
   ]
 }

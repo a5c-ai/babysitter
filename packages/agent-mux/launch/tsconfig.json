@@ -5,8 +5,8 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@a5c-ai/transport-mux": [
-        "../../transport-mux/src/index.ts"
+      "@a5c-ai/agent-mux-transport": [
+        "../transport/src/index.ts"
       ]
     }
   },
@@ -14,6 +14,6 @@
   "references": [
     { "path": "../core" },
     { "path": "../adapters" },
-    { "path": "../../transport-mux" }
+    { "path": "../transport" }
   ]
 }

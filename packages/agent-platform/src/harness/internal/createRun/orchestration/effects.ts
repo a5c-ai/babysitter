@@ -660,7 +660,7 @@ async function resolveViaTasksMuxIfRoutable(
     };
   };
   try {
-    mux = await importOptionalModule("@a5c-ai/tasks-mux") as typeof mux;
+    mux = await importOptionalModule("@a5c-ai/agent-mux-tasks") as typeof mux;
   } catch {
     return undefined;
   }

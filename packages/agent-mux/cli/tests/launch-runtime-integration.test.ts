@@ -20,7 +20,7 @@ vi.mock('node-pty', () => {
   throw new Error('node-pty mocked out for tests');
 });
 
-vi.mock('@a5c-ai/transport-mux', () => ({
+vi.mock('@a5c-ai/agent-mux-transport', () => ({
   startTransportMuxRuntime: startTransportMuxRuntimeMock,
 }));
 

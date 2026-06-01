@@ -3,7 +3,7 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { main } from '../../src/index.js';
-import { startTransportMuxRuntime, type CompletionEngine, type CompletionRequest, type CompletionResult, type CompletionStreamEvent, type TransportMuxRuntime } from '@a5c-ai/transport-mux';
+import { startTransportMuxRuntime, type CompletionEngine, type CompletionRequest, type CompletionResult, type CompletionStreamEvent, type TransportMuxRuntime } from '@a5c-ai/agent-mux-transport';
 
 interface MatrixLane {
   agent: string;

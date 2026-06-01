@@ -6,7 +6,7 @@ import { createRun } from "../../../runtime/createRun";
 import { runIterate } from "../runIterate";
 import { loadJournal } from "../../../storage/journal";
 
-vi.mock("@a5c-ai/tasks-mux", () => {
+vi.mock("@a5c-ai/agent-mux-tasks", () => {
   class AgentMuxResponderBackend {
     constructor(readonly config: Record<string, unknown> = {}) {}
 

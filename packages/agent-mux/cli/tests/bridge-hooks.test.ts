@@ -64,7 +64,7 @@ vi.mock('node-pty', () => ({
   spawn: ptySpawnMock,
 }));
 
-vi.mock('@a5c-ai/transport-mux', () => ({
+vi.mock('@a5c-ai/agent-mux-transport', () => ({
   startTransportMuxRuntime: vi.fn(),
 }));
 

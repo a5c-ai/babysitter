@@ -1,0 +1,68 @@
+{
+  "name": "@a5c-ai/agent-mux-extensions",
+  "version": "5.0.0",
+  "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "extension-mux": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "a5c",
+    "plugin",
+    "compiler",
+    "unified",
+    "claude-code",
+    "codex",
+    "cursor",
+    "gemini",
+    "copilot",
+    "pi"
+  ],
+  "author": "a5c.ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-mux/extensions"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/extensions#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@a5c-ai/atlas": "5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "atlas": {
+    "layers": [
+      "L6"
+    ],
+    "muxes": [
+      "extension-mux"
+    ]
+  }
+}

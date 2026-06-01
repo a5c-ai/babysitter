@@ -176,11 +176,11 @@ const updateLockVersion = (path, version) => {
       version,
       dependencies: { "@a5c-ai/agent-mux-ui": version }
     },
-    "packages/transport-mux": {
+    "packages/agent-mux/transport": {
       version,
       dependencies: { "@a5c-ai/agent-comm-mux": version }
     },
-    "packages/triggers-mux": {
+    "packages/agent-mux/triggers": {
       version
     },
     "packages/tula-core": {
@@ -208,13 +208,13 @@ const updateLockVersion = (path, version) => {
         "@a5c-ai/babysitter-sdk": version
       }
     },
-    "packages/tool-mux": {
+    "packages/agent-mux/tools": {
       version,
       dependencies: {
-        "@a5c-ai/transport-mux": version
+        "@a5c-ai/agent-mux-transport": version
       }
     },
-    "packages/tasks-mux": {
+    "packages/agent-mux/tasks": {
       version
     },
     "packages/babysitter-tui-plugins": {
@@ -255,12 +255,12 @@ const workspaceManifestPaths = [
   "packages/tula-core/package.json",
   "packages/agent-runtime/package.json",
   "packages/omni/package.json",
-  "packages/tool-mux/package.json",
+  "packages/agent-mux/tools/package.json",
   "packages/sdk/package.json",
   "packages/babysitter/package.json",
   "packages/agent-platform/package.json",
-  "packages/extension-mux/package.json",
-  "packages/tasks-mux/package.json",
+  "packages/agent-mux/extensions/package.json",
+  "packages/agent-mux/tasks/package.json",
   "packages/babysitter-tui-plugins/package.json",
   "packages/cloud/package.json",
   "packages/observer-dashboard/package.json",
@@ -298,9 +298,9 @@ const agentMuxManifestPaths = [
   "packages/agent-mux/webui/package.json",
   "packages/agent-mux/config/package.json",
   "packages/agent-mux/launch/package.json",
-  "packages/transport-mux/package.json",
-  "packages/tool-mux/package.json",
-  "packages/triggers-mux/package.json",
+  "packages/agent-mux/transport/package.json",
+  "packages/agent-mux/tools/package.json",
+  "packages/agent-mux/triggers/package.json",
 ];
 
 const pluginPackageManifestPaths = [
@@ -383,10 +383,10 @@ for (const path of [
   "packages/agent-mux/webui/package.json",
   "packages/agent-mux/ui/package.json",
   "packages/agent-mux/webui/package.json",
-  "packages/transport-mux/package.json",
+  "packages/agent-mux/transport/package.json",
   "packages/agent-runtime/package.json",
   "packages/omni/package.json",
-  "packages/tool-mux/package.json",
+  "packages/agent-mux/tools/package.json",
   "packages/agent-mux/launch/package.json",
   "packages/agent-mux/config/package.json",
   "packages/babysitter-tui-plugins/package.json",
@@ -403,7 +403,7 @@ for (const path of [
   syncDependencyVersion(path, "@a5c-ai/agent-mux-tui", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-ui", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-webui", newAgentMuxVersion);
-  syncDependencyVersion(path, "@a5c-ai/transport-mux", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-transport", newAgentMuxVersion);
 }
 
 for (const path of [
