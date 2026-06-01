@@ -88,7 +88,8 @@ jobs:
             BRANCH AND PR:
             - Create a new branch `plan/issue-${{ inputs.issue_number || github.event.issue.number }}`.
             - Commit the process file and inputs file.
-            - Push and create a PR with title "Plan: <brief description>" linking to #${{ inputs.issue_number || github.event.issue.number }}.
+            - Push and create a DRAFT PR using `gh pr create --draft` with title "feat: <brief description>" linking to #${{ inputs.issue_number || github.event.issue.number }}.
+            - Do NOT put "Plan:" in the PR title. Use "feat:" prefix.
             - The PR body should summarize the planned phases, expected tasks, and quality gates.
             - Post a comment on #${{ inputs.issue_number || github.event.issue.number }} with the plan summary and a link to the PR.
 
