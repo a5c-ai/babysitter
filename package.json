@@ -43,6 +43,7 @@
     "verify:v6:seams": "npm run test:seams --workspace=@a5c-ai/agent-platform",
     "test:architecture": "npm run verify:v6:seams && node ./scripts/check-architecture-boundaries.cjs",
     "test:package-renames": "node ./scripts/check-package-renames.cjs",
+    "test:binary-renames": "node ./scripts/check-binary-renames.cjs",
     "sync:sdk-command-templates": "node ./scripts/sync-sdk-command-templates.cjs",
     "check:sdk-command-templates": "node ./scripts/sync-sdk-command-templates.cjs --check",
     "sync:plugin-commands": "node ./scripts/sync-plugin-commands.cjs",
