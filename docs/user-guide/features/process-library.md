@@ -138,7 +138,7 @@ Click any link to view the current source location:
 | **library/methodologies/gsd/** | Get Shit Done workflows | [Browse →](../../../library/methodologies/gsd/README.md) |
 | **library/specializations/** | Domain-specific processes across the specialization tree | [Browse →](../../../library/specializations/) |
 | **library/processes/shared/** | Shared reusable process components | [Browse →](../../../library/processes/shared/README.md) |
-| **library/tdd-quality-convergence.js** | Featured TDD workflow at the library root | `library/tdd-quality-convergence.js` |
+| **library/tdd-quality-convergence.js** | Featured TDD workflow at the library root | [View](../../../library/tdd-quality-convergence.js) |
 
 ### Specializations Sub-Structure
 
@@ -395,65 +395,65 @@ Snapshot refreshed from the live `library/` tree on 2026-05-07.
 
 | Process | Description | Source |
 |---------|-------------|--------|
-| nextjs-fullstack-app | Complete Next.js application | `library/specializations/web-development/nextjs-fullstack-app.js` |
-| graphql-api-apollo | GraphQL API with Apollo | `library/specializations/web-development/graphql-api-apollo.js` |
-| jwt-authentication | JWT auth implementation | `library/specializations/web-development/jwt-authentication.js` |
-| e2e-testing-playwright | Playwright E2E testing | `library/specializations/web-development/e2e-testing-playwright.js` |
-| micro-frontend-module-federation | Micro-frontend architecture | `library/specializations/web-development/micro-frontend-module-federation.js` |
-| accessibility-audit-remediation | WCAG compliance | `library/specializations/web-development/accessibility-audit-remediation.js` |
-| docker-containerization | Docker deployment | `library/specializations/web-development/docker-containerization.js` |
+| nextjs-fullstack-app | Complete Next.js application | [View](../../../library/specializations/web-development/nextjs-fullstack-app.js) |
+| graphql-api-apollo | GraphQL API with Apollo | [View](../../../library/specializations/web-development/graphql-api-apollo.js) |
+| jwt-authentication | JWT auth implementation | [View](../../../library/specializations/web-development/jwt-authentication.js) |
+| e2e-testing-playwright | Playwright E2E testing | [View](../../../library/specializations/web-development/e2e-testing-playwright.js) |
+| micro-frontend-module-federation | Micro-frontend architecture | [View](../../../library/specializations/web-development/micro-frontend-module-federation.js) |
+| accessibility-audit-remediation | WCAG compliance | [View](../../../library/specializations/web-development/accessibility-audit-remediation.js) |
+| docker-containerization | Docker deployment | [View](../../../library/specializations/web-development/docker-containerization.js) |
 
 ### AI Agents and Conversational
 [Browse all ai-agents-conversational processes →](../../../library/specializations/ai-agents-conversational/)
 
 | Process | Description | Source |
 |---------|-------------|--------|
-| multi-agent-system | Multi-agent orchestration | `library/specializations/ai-agents-conversational/multi-agent-system.js` |
-| advanced-rag-patterns | Advanced RAG implementation | `library/specializations/ai-agents-conversational/advanced-rag-patterns.js` |
-| langgraph-workflow-design | LangGraph workflows | `library/specializations/ai-agents-conversational/langgraph-workflow-design.js` |
-| conversational-memory-system | Long-term memory for agents | `library/specializations/ai-agents-conversational/conversational-memory-system.js` |
-| function-calling-agent | Tool-using agents | `library/specializations/ai-agents-conversational/function-calling-agent.js` |
-| agent-evaluation-framework | Agent testing and eval | `library/specializations/ai-agents-conversational/agent-evaluation-framework.js` |
-| llm-observability-monitoring | LLM monitoring setup | `library/specializations/ai-agents-conversational/llm-observability-monitoring.js` |
+| multi-agent-system | Multi-agent orchestration | [View](../../../library/specializations/ai-agents-conversational/multi-agent-system.js) |
+| advanced-rag-patterns | Advanced RAG implementation | [View](../../../library/specializations/ai-agents-conversational/advanced-rag-patterns.js) |
+| langgraph-workflow-design | LangGraph workflows | [View](../../../library/specializations/ai-agents-conversational/langgraph-workflow-design.js) |
+| conversational-memory-system | Long-term memory for agents | [View](../../../library/specializations/ai-agents-conversational/conversational-memory-system.js) |
+| function-calling-agent | Tool-using agents | [View](../../../library/specializations/ai-agents-conversational/function-calling-agent.js) |
+| agent-evaluation-framework | Agent testing and eval | [View](../../../library/specializations/ai-agents-conversational/agent-evaluation-framework.js) |
+| llm-observability-monitoring | LLM monitoring setup | [View](../../../library/specializations/ai-agents-conversational/llm-observability-monitoring.js) |
 
 ### Security Research
 [Browse all security-research processes →](../../../library/specializations/security-research/)
 
 | Process | Description | Source |
 |---------|-------------|--------|
-| binary-reverse-engineering | Binary analysis | `library/specializations/security-research/binary-reverse-engineering.js` |
-| exploit-development | Exploit writing workflow | `library/specializations/security-research/exploit-development.js` |
-| fuzzing-campaign | Fuzzing setup and execution | `library/specializations/security-research/fuzzing-campaign.js` |
-| malware-analysis | Malware analysis workflow | `library/specializations/security-research/malware-analysis.js` |
-| network-penetration-testing | Network pentesting | `library/specializations/security-research/network-penetration-testing.js` |
-| capture-the-flag-challenges | CTF solving workflow | `library/specializations/security-research/capture-the-flag-challenges.js` |
-| bug-bounty-workflow | Bug bounty methodology | `library/specializations/security-research/bug-bounty-workflow.js` |
+| binary-reverse-engineering | Binary analysis | [View](../../../library/specializations/security-research/binary-reverse-engineering.js) |
+| exploit-development | Exploit writing workflow | [View](../../../library/specializations/security-research/exploit-development.js) |
+| fuzzing-campaign | Fuzzing setup and execution | [View](../../../library/specializations/security-research/fuzzing-campaign.js) |
+| malware-analysis | Malware analysis workflow | [View](../../../library/specializations/security-research/malware-analysis.js) |
+| network-penetration-testing | Network pentesting | [View](../../../library/specializations/security-research/network-penetration-testing.js) |
+| capture-the-flag-challenges | CTF solving workflow | [View](../../../library/specializations/security-research/capture-the-flag-challenges.js) |
+| bug-bounty-workflow | Bug bounty methodology | [View](../../../library/specializations/security-research/bug-bounty-workflow.js) |
 
 ### DevOps and SRE
 [Browse all devops-sre-platform processes →](../../../library/specializations/devops-sre-platform/)
 
 | Process | Description | Source |
 |---------|-------------|--------|
-| kubernetes-setup | Kubernetes cluster setup | `library/specializations/devops-sre-platform/kubernetes-setup.js` |
-| cicd-pipeline-setup | CI/CD pipeline creation | `library/specializations/devops-sre-platform/cicd-pipeline-setup.js` |
-| monitoring-setup | Observability stack | `library/specializations/devops-sre-platform/monitoring-setup.js` |
-| incident-response | Incident management | `library/specializations/devops-sre-platform/incident-response.js` |
-| disaster-recovery-plan | DR planning and testing | `library/specializations/devops-sre-platform/disaster-recovery-plan.js` |
-| slo-sli-tracking | SLO/SLI implementation | `library/specializations/devops-sre-platform/slo-sli-tracking.js` |
-| secrets-management | Secrets management setup | `library/specializations/devops-sre-platform/secrets-management.js` |
+| kubernetes-setup | Kubernetes cluster setup | [View](../../../library/specializations/devops-sre-platform/kubernetes-setup.js) |
+| cicd-pipeline-setup | CI/CD pipeline creation | [View](../../../library/specializations/devops-sre-platform/cicd-pipeline-setup.js) |
+| monitoring-setup | Observability stack | [View](../../../library/specializations/devops-sre-platform/monitoring-setup.js) |
+| incident-response | Incident management | [View](../../../library/specializations/devops-sre-platform/incident-response.js) |
+| disaster-recovery-plan | DR planning and testing | [View](../../../library/specializations/devops-sre-platform/disaster-recovery-plan.js) |
+| slo-sli-tracking | SLO/SLI implementation | [View](../../../library/specializations/devops-sre-platform/slo-sli-tracking.js) |
+| secrets-management | Secrets management setup | [View](../../../library/specializations/devops-sre-platform/secrets-management.js) |
 
 ### Scientific Discovery
 [Browse all scientific-discovery processes →](../../../library/specializations/domains/science/scientific-discovery/)
 
 | Process | Description | Source |
 |---------|-------------|--------|
-| hypothesis-formulation-testing | Scientific method | `library/specializations/domains/science/scientific-discovery/hypothesis-formulation-testing.js` |
-| causal-inference | Causal analysis | `library/specializations/domains/science/scientific-discovery/causal-inference.js` |
-| bayesian-probabilistic-reasoning | Bayesian reasoning | `library/specializations/domains/science/scientific-discovery/bayesian-probabilistic-reasoning.js` |
-| experimental-design-reasoning | Experiment planning | `library/specializations/domains/science/scientific-discovery/experimental-design-reasoning.js` |
-| literature-review-synthesis | Literature review | `library/specializations/domains/science/scientific-discovery/literature-review-synthesis.js` |
-| reproducible-research-pipeline | Reproducibility | `library/specializations/domains/science/scientific-discovery/reproducible-research-pipeline.js` |
-| systems-thinking | Systems analysis | `library/specializations/domains/science/scientific-discovery/systems-thinking.js` |
+| hypothesis-formulation-testing | Scientific method | [View](../../../library/specializations/domains/science/scientific-discovery/hypothesis-formulation-testing.js) |
+| causal-inference | Causal analysis | [View](../../../library/specializations/domains/science/scientific-discovery/causal-inference.js) |
+| bayesian-probabilistic-reasoning | Bayesian reasoning | [View](../../../library/specializations/domains/science/scientific-discovery/bayesian-probabilistic-reasoning.js) |
+| experimental-design-reasoning | Experiment planning | [View](../../../library/specializations/domains/science/scientific-discovery/experimental-design-reasoning.js) |
+| literature-review-synthesis | Literature review | [View](../../../library/specializations/domains/science/scientific-discovery/literature-review-synthesis.js) |
+| reproducible-research-pipeline | Reproducibility | [View](../../../library/specializations/domains/science/scientific-discovery/reproducible-research-pipeline.js) |
+| systems-thinking | Systems analysis | [View](../../../library/specializations/domains/science/scientific-discovery/systems-thinking.js) |
 
 ## Using a Pre-Built Process
 
