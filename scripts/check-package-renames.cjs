@@ -65,6 +65,7 @@ function listTrackedFiles() {
       "--",
       "package.json",
       "package-lock.json",
+      "pnpm-workspace.yaml",
       ".github",
       "packages",
       "scripts",
@@ -86,6 +87,7 @@ function isScannedFile(relativePath) {
   return [
     "package.json",
     "package-lock.json",
+    "pnpm-workspace.yaml",
     ".github/",
     "packages/",
     "scripts/",
