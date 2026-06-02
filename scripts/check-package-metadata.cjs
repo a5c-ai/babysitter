@@ -11,6 +11,10 @@ const TULA_CORE_SURFACE = 'packages/tula-core';
 const TULA_CORE_PACKAGE = '@a5c-ai/tula-core';
 const OLD_AGENT_CORE_SURFACE = 'packages/agent-core';
 const OLD_AGENT_CORE_PACKAGE = '@a5c-ai/agent-core';
+const TULA_RUNTIME_SURFACE = 'packages/tula-runtime';
+const TULA_RUNTIME_PACKAGE = '@a5c-ai/tula-runtime';
+const OLD_AGENT_RUNTIME_SURFACE = ['packages', 'agent-runtime'].join('/');
+const OLD_AGENT_RUNTIME_PACKAGE = ['@a5c-ai', 'agent-runtime'].join('/');
 const TOP_LEVEL_AGENT_MUX_PACKAGE_MOVES = [
   {
     oldPath: 'packages/transport-mux',
@@ -254,6 +258,60 @@ function verifyTulaCoreExternalSurfaces() {
   }
 }
 
+function verifyTulaRuntimeRename() {
+  if (fs.existsSync(path.join(repoRoot, OLD_AGENT_RUNTIME_SURFACE))) {
+    fail(`${OLD_AGENT_RUNTIME_SURFACE} must be renamed to ${TULA_RUNTIME_SURFACE}`);
+  }
+
+  if (!fs.existsSync(path.join(repoRoot, TULA_RUNTIME_SURFACE, 'package.json'))) {
+    fail(`${TULA_RUNTIME_SURFACE}/package.json must exist`);
+  }
+
+  const manifest = readJson(path.join(TULA_RUNTIME_SURFACE, 'package.json'));
+  expectEqual(manifest.name, TULA_RUNTIME_PACKAGE, `${TULA_RUNTIME_SURFACE}/package.json name`);
+  expectDeepEqual(manifest.repository, createCanonicalMetadata(TULA_RUNTIME_SURFACE).repository, `${TULA_RUNTIME_SURFACE}/package.json repository`);
+  expectEqual(manifest.homepage, createCanonicalMetadata(TULA_RUNTIME_SURFACE).homepage, `${TULA_RUNTIME_SURFACE}/package.json homepage`);
+
+  const docsCoverage = readJson(DOCS_SURFACE_PATH);
+  const tulaRuntimeSurface = docsCoverage.surfaces.find((entry) => entry.surface === TULA_RUNTIME_SURFACE);
+  if (!tulaRuntimeSurface) {
+    fail(`${DOCS_SURFACE_PATH} must list ${TULA_RUNTIME_SURFACE}`);
+  }
+  expectEqual(tulaRuntimeSurface.packageName, TULA_RUNTIME_PACKAGE, `${DOCS_SURFACE_PATH} ${TULA_RUNTIME_SURFACE} packageName`);
+
+  const oldSurface = docsCoverage.surfaces.find((entry) => entry.surface === OLD_AGENT_RUNTIME_SURFACE);
+  if (oldSurface) {
+    fail(`${DOCS_SURFACE_PATH} must not list ${OLD_AGENT_RUNTIME_SURFACE}`);
+  }
+}
+
+function verifyTulaRuntimeDependents() {
+  const packageJsonPaths = [
+    'packages/agent-platform/package.json',
+    'packages/tula-core/package.json',
+    'packages/tula/package.json',
+  ];
+  for (const packageJsonPath of packageJsonPaths) {
+    const manifest = readJson(packageJsonPath);
+    if (manifest.dependencies && Object.prototype.hasOwnProperty.call(manifest.dependencies, OLD_AGENT_RUNTIME_PACKAGE)) {
+      fail(`${packageJsonPath} must depend on ${TULA_RUNTIME_PACKAGE}, not ${OLD_AGENT_RUNTIME_PACKAGE}`);
+    }
+  }
+
+  const tsconfigPaths = [
+    'packages/agent-platform/tsconfig.json',
+    'packages/tula/tsconfig.json',
+  ];
+  for (const tsconfigPath of tsconfigPaths) {
+    const config = readJson(tsconfigPath);
+    const staleRuntimeReference = `../${'agent-runtime'}`;
+    const staleReference = (config.references || []).find((reference) => reference && reference.path === staleRuntimeReference);
+    if (staleReference) {
+      fail(`${tsconfigPath} must reference ../tula-runtime, not ../agent-runtime`);
+    }
+  }
+}
+
 function coversFileEntry(files, relativePath) {
   const target = normalizePath(relativePath);
   const targetRoot = target.split('/')[0];
@@ -400,6 +458,8 @@ expectEqual(rootManifest.license, 'MIT', 'package.json license');
 verifyTulaCoreRename();
 verifyTulaCoreDependents();
 verifyTulaCoreExternalSurfaces();
+verifyTulaRuntimeRename();
+verifyTulaRuntimeDependents();
 verifyTopLevelAgentMuxPackageMoves();
 verifyBabysitterPluginVersionSync();
 

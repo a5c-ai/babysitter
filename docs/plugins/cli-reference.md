@@ -1,6 +1,6 @@
 # Blueprint CLI Reference
 
-Complete reference for all `babysitter blueprint:*` commands. Every command supports the `--json` flag for machine-readable output and `--verbose` for additional diagnostic information.
+Complete reference for all `babysitter plugin:*` commands. Every command supports the `--json` flag for machine-readable output and `--verbose` for additional diagnostic information.
 
 ## Global Flags
 
@@ -21,14 +21,14 @@ When `--project` is used, the current working directory is treated as the projec
 
 ---
 
-## blueprint:add-marketplace
+## plugin:add-marketplace
 
 Clones a marketplace repository into the local marketplaces directory.
 
 ### Usage
 
 ```
-babysitter blueprint:add-marketplace --marketplace-url <url> --global|--project [--json] [--verbose]
+babysitter plugin:add-marketplace --marketplace-url <url> --global|--project [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -41,7 +41,7 @@ babysitter blueprint:add-marketplace --marketplace-url <url> --global|--project 
 ### Example
 
 ```bash
-babysitter blueprint:add-marketplace --marketplace-url https://github.com/a5c-ai/babysitter-marketplace.git --global --json
+babysitter plugin:add-marketplace --marketplace-url https://github.com/a5c-ai/babysitter-marketplace.git --global --json
 ```
 
 ### JSON Output
@@ -64,14 +64,14 @@ babysitter blueprint:add-marketplace --marketplace-url https://github.com/a5c-ai
 
 ---
 
-## blueprint:update-marketplace
+## plugin:update-marketplace
 
 Pulls the latest changes for a previously cloned marketplace.
 
 ### Usage
 
 ```
-babysitter blueprint:update-marketplace --marketplace-name <name> --global|--project [--json] [--verbose]
+babysitter plugin:update-marketplace --marketplace-name <name> --global|--project [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -84,7 +84,7 @@ babysitter blueprint:update-marketplace --marketplace-name <name> --global|--pro
 ### Example
 
 ```bash
-babysitter blueprint:update-marketplace --marketplace-name babysitter-marketplace --global --json
+babysitter plugin:update-marketplace --marketplace-name babysitter-marketplace --global --json
 ```
 
 ### JSON Output
@@ -106,14 +106,14 @@ babysitter blueprint:update-marketplace --marketplace-name babysitter-marketplac
 
 ---
 
-## blueprint:list-plugins
+## plugin:list-plugins
 
 Lists all blueprints available in a marketplace manifest.
 
 ### Usage
 
 ```
-babysitter blueprint:list-plugins --marketplace-name <name> --global|--project [--json] [--verbose]
+babysitter plugin:list-plugins --marketplace-name <name> --global|--project [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -126,7 +126,7 @@ babysitter blueprint:list-plugins --marketplace-name <name> --global|--project [
 ### Example
 
 ```bash
-babysitter blueprint:list-plugins --marketplace-name babysitter-marketplace --global --json
+babysitter plugin:list-plugins --marketplace-name babysitter-marketplace --global --json
 ```
 
 ### JSON Output
@@ -171,14 +171,14 @@ Blueprints in marketplace "babysitter-marketplace" (scope: global):
 
 ---
 
-## blueprint:install
+## plugin:install
 
 Installs a blueprint from a marketplace. Updates the marketplace first, resolves the blueprint version, reads install instructions from the blueprint package, and returns them for the agent to execute.
 
 ### Usage
 
 ```
-babysitter blueprint:install <plugin-name> [--marketplace-name <name>] --global|--project [--plugin-version <ver>] [--json] [--verbose]
+babysitter plugin:install <plugin-name> [--marketplace-name <name>] --global|--project [--plugin-version <ver>] [--json] [--verbose]
 ```
 
 The blueprint name can be provided as a positional argument or via `--plugin-name`.
@@ -200,7 +200,7 @@ The blueprint name can be provided as a positional argument or via `--plugin-nam
 ### Example
 
 ```bash
-babysitter blueprint:install babysitter@a5c.ai --marketplace-name babysitter-marketplace --global --json
+babysitter plugin:install babysitter@a5c.ai --marketplace-name babysitter-marketplace --global --json
 ```
 
 ### JSON Output
@@ -227,14 +227,14 @@ The `instructions` field contains the markdown content from `install.md` in the 
 
 ---
 
-## blueprint:uninstall
+## plugin:uninstall
 
 Reads uninstall instructions for a previously installed blueprint. Looks up the plugin in the registry to find its marketplace and version, then reads the uninstall instructions from the blueprint package.
 
 ### Usage
 
 ```
-babysitter blueprint:uninstall <plugin-name> --global|--project [--json] [--verbose]
+babysitter plugin:uninstall <plugin-name> --global|--project [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -247,7 +247,7 @@ babysitter blueprint:uninstall <plugin-name> --global|--project [--json] [--verb
 ### Example
 
 ```bash
-babysitter blueprint:uninstall babysitter@a5c.ai --global --json
+babysitter plugin:uninstall babysitter@a5c.ai --global --json
 ```
 
 ### JSON Output
@@ -272,14 +272,14 @@ babysitter blueprint:uninstall babysitter@a5c.ai --global --json
 
 ---
 
-## blueprint:update
+## plugin:update
 
 Updates an installed blueprint to a newer version. Resolves the migration chain from the currently installed version to the target version using BFS shortest-path on available migration files, and returns all migration instructions in order.
 
 ### Usage
 
 ```
-babysitter blueprint:update <plugin-name> [--marketplace-name <name>] --global|--project [--plugin-version <ver>] [--json] [--verbose]
+babysitter plugin:update <plugin-name> [--marketplace-name <name>] --global|--project [--plugin-version <ver>] [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -299,7 +299,7 @@ babysitter blueprint:update <plugin-name> [--marketplace-name <name>] --global|-
 ### Example
 
 ```bash
-babysitter blueprint:update babysitter@a5c.ai --marketplace-name babysitter-marketplace --global --json
+babysitter plugin:update babysitter@a5c.ai --marketplace-name babysitter-marketplace --global --json
 ```
 
 ### JSON Output
@@ -353,14 +353,14 @@ When the installed version already matches the target version, migrations is an 
 
 ---
 
-## blueprint:configure
+## plugin:configure
 
 Reads configuration instructions for an installed blueprint from its blueprint package.
 
 ### Usage
 
 ```
-babysitter blueprint:configure <plugin-name> [--marketplace-name <name>] --global|--project [--json] [--verbose]
+babysitter plugin:configure <plugin-name> [--marketplace-name <name>] --global|--project [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -373,7 +373,7 @@ babysitter blueprint:configure <plugin-name> [--marketplace-name <name>] --globa
 ### Example
 
 ```bash
-babysitter blueprint:configure babysitter@a5c.ai --project --json
+babysitter plugin:configure babysitter@a5c.ai --project --json
 ```
 
 ### JSON Output
@@ -397,14 +397,14 @@ babysitter blueprint:configure babysitter@a5c.ai --project --json
 
 ---
 
-## blueprint:list-installed
+## plugin:list-installed
 
 Lists all blueprints recorded in the plugin registry for the given scope.
 
 ### Usage
 
 ```
-babysitter blueprint:list-installed --global|--project [--json] [--verbose]
+babysitter plugin:list-installed --global|--project [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -416,7 +416,7 @@ babysitter blueprint:list-installed --global|--project [--json] [--verbose]
 ### Example
 
 ```bash
-babysitter blueprint:list-installed --global --json
+babysitter plugin:list-installed --global --json
 ```
 
 ### JSON Output
@@ -454,14 +454,14 @@ Installed blueprints (scope: global):
 
 ---
 
-## blueprint:update-registry
+## plugin:update-registry
 
 Creates or updates a blueprint entry in the registry. Used after the agent has completed the install or update steps to record the installed version.
 
 ### Usage
 
 ```
-babysitter blueprint:update-registry <plugin-name> --plugin-version <ver> --marketplace-name <name> --global|--project [--json] [--verbose]
+babysitter plugin:update-registry <plugin-name> --plugin-version <ver> --marketplace-name <name> --global|--project [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -476,7 +476,7 @@ babysitter blueprint:update-registry <plugin-name> --plugin-version <ver> --mark
 ### Example
 
 ```bash
-babysitter blueprint:update-registry babysitter@a5c.ai --plugin-version 0.0.176 --marketplace-name babysitter-marketplace --global --json
+babysitter plugin:update-registry babysitter@a5c.ai --plugin-version 0.0.176 --marketplace-name babysitter-marketplace --global --json
 ```
 
 ### JSON Output
@@ -503,14 +503,14 @@ babysitter blueprint:update-registry babysitter@a5c.ai --plugin-version 0.0.176 
 
 ---
 
-## blueprint:remove-from-registry
+## plugin:remove-from-registry
 
 Removes a blueprint entry from the registry. Used after the agent has completed the uninstall steps.
 
 ### Usage
 
 ```
-babysitter blueprint:remove-from-registry <plugin-name> --global|--project [--json] [--verbose]
+babysitter plugin:remove-from-registry <plugin-name> --global|--project [--json] [--verbose]
 ```
 
 ### Required Flags
@@ -523,7 +523,7 @@ babysitter blueprint:remove-from-registry <plugin-name> --global|--project [--js
 ### Example
 
 ```bash
-babysitter blueprint:remove-from-registry babysitter@a5c.ai --global --json
+babysitter plugin:remove-from-registry babysitter@a5c.ai --global --json
 ```
 
 ### JSON Output

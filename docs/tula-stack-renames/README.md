@@ -7,7 +7,7 @@ The agent stack packages should be renamed to use the "tula" brand consistently.
 | Package | Target Package | Directory | Target Dir |
 |---------|---------------|-----------|-----------|
 | tula core | `@a5c-ai/tula-core` | `packages/tula-core/` | `packages/tula-core/` |
-| `@a5c-ai/agent-runtime` | `@a5c-ai/tula-runtime` | `packages/agent-runtime/` | `packages/tula-runtime/` |
+| tula runtime | `@a5c-ai/tula-runtime` | `packages/tula-runtime/` | `packages/tula-runtime/` |
 | `@a5c-ai/agent-platform` | `@a5c-ai/tula-platform` | `packages/agent-platform/` | `packages/tula-platform/` |
 | `@a5c-ai/tula` | `@a5c-ai/tula` (keep) | `packages/tula/` | `packages/tula/` (keep) |
 
@@ -17,7 +17,7 @@ The agent stack packages should be renamed to use the "tula" brand consistently.
 ```bash
 # Count references
 grep -rl "@a5c-ai/tula-core" packages/ docs/ .github/ --include="*.ts" --include="*.json" --include="*.yml" --include="*.md" | grep -v node_modules | grep -v dist | wc -l
-grep -rl "@a5c-ai/agent-runtime" packages/ docs/ .github/ --include="*.ts" --include="*.json" --include="*.yml" --include="*.md" | grep -v node_modules | grep -v dist | wc -l
+grep -rl "@a5c-ai/tula-runtime" packages/ docs/ .github/ --include="*.ts" --include="*.json" --include="*.yml" --include="*.md" | grep -v node_modules | grep -v dist | wc -l
 grep -rl "@a5c-ai/agent-platform" packages/ docs/ .github/ --include="*.ts" --include="*.json" --include="*.yml" --include="*.md" | grep -v node_modules | grep -v dist | wc -l
 ```
 
@@ -33,17 +33,17 @@ Every import that targets a renamed package needs updating across the monorepo.
 - `packages/atlas/graph/agent-stack/` — core-impls, runtime-impls, platform-impls reference these packages
 
 ### Documentation
-- `docs/agent-layer-gaps.md` — references tula-core, agent-runtime, agent-platform throughout
+- `docs/agent-layer-gaps.md` — references tula-core, tula-runtime, agent-platform throughout
 - `docs/agent-reference/*.md` — architecture docs
 - `docs/agent-stack/hooks/*.md` — hook coverage matrix
 
 ## Execution Plan
 
 1. tula core package rename is complete.
-2. `git mv packages/agent-runtime packages/tula-runtime`
+2. tula runtime package rename is complete.
 3. `git mv packages/agent-platform packages/tula-platform`
 4. tula core package references are updated across all files.
-5. Find-replace `@a5c-ai/agent-runtime` → `@a5c-ai/tula-runtime`
+5. tula runtime package references are updated across all files.
 6. Find-replace `@a5c-ai/agent-platform` → `@a5c-ai/tula-platform`
 7. tula core package paths are updated across all files.
 8. Update tsconfig references

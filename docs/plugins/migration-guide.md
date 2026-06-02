@@ -30,7 +30,7 @@ Migration files are stored in the `migrations/` subdirectory of a blueprint pack
 
 ## Migration Chain Resolution
 
-When `blueprint:update` is called, the SDK resolves the shortest migration path from the installed version to the target version.
+When `plugin:update` is called, the SDK resolves the shortest migration path from the installed version to the target version.
 
 ### Algorithm
 
@@ -124,7 +124,7 @@ Blueprint `my-plugin` is installed at version `1.0.0`. A new version `1.2.0` is 
 
 1. Agent runs:
    ```bash
-   babysitter blueprint:update my-plugin --marketplace-name my-marketplace --global --json
+   babysitter plugin:update my-plugin --marketplace-name my-marketplace --global --json
    ```
 
 2. SDK updates the marketplace (git pull), reads the registry to find installed version `1.0.0`, determines target version `1.2.0`, and resolves the migration chain.
@@ -164,7 +164,7 @@ Blueprint `my-plugin` is installed at version `1.0.0`. A new version `1.2.0` is 
 
 5. Agent updates the registry:
    ```bash
-   babysitter blueprint:update-registry my-plugin --plugin-version 1.2.0 --marketplace-name my-marketplace --global
+   babysitter plugin:update-registry my-plugin --plugin-version 1.2.0 --marketplace-name my-marketplace --global
    ```
 
 ## MigrationDescriptor Type

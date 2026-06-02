@@ -47,7 +47,7 @@ Files/modules that concentrate the most danger across multiple categories.
 **FIXED:** agent-loop.ts now validates shape at runtime before cast. effects.ts removed 3 double-casts (TaskDef has index sig, session has public abort). cost/journal.ts replaced blind cast with field-by-field validation.
 
 ### ~~Background process registry orphans on options object recreation~~
-**File:** `packages/agent-runtime/src/background/state.ts:13-35`
+**File:** `packages/tula-runtime/src/background/state.ts:13-35`
 
 **FIXED:** Added `registryId` string key alongside WeakMap. Same logical owner with `registryId` reuses existing registry instead of creating a new one.
 
@@ -93,7 +93,7 @@ Files/modules that concentrate the most danger across multiple categories.
 
 ### ~~Shell invocation — 5 locations, subtly different~~
 
-**FIXED:** Shell argv construction is centralized in `@a5c-ai/agent-runtime` through `buildShellInvocation()`. Runtime background spawning, tula-core session execution, and core/platform bash tools all use the shared contract.
+**FIXED:** Shell argv construction is centralized in `@a5c-ai/tula-runtime` through `buildShellInvocation()`. Runtime background spawning, tula-core session execution, and core/platform bash tools all use the shared contract.
 
 ### ~~Kanban status — 6+ sealed switch statements~~
 **File:** `packages/agent-mux/core/src/kanban.ts` (2518 lines)
@@ -161,7 +161,7 @@ The timeout sets an abort signal but doesn't guarantee the request stops. Fetch 
 ### ~~Platform-specific shell path assumption~~
 **File:** `packages/tula-core/src/agenticTools/tools/execution.ts:53-56`
 
-**FIXED:** Shell invocation now uses the shared runtime helper in `@a5c-ai/agent-runtime`, so agentic shell execution paths share one argv construction contract instead of hardcoding `/bin/bash` in each caller.
+**FIXED:** Shell invocation now uses the shared runtime helper in `@a5c-ai/tula-runtime`, so agentic shell execution paths share one argv construction contract instead of hardcoding `/bin/bash` in each caller.
 
 ---
 

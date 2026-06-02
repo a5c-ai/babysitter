@@ -99,13 +99,13 @@ attributes:
   kind: git-path
 ---
 nodeKind: SourceRef
-id: source-ref:packages-agent-runtime
+id: source-ref:packages-tula-runtime
 attributes:
-  description: '@a5c-ai/agent-runtime — shared agent runtime types + host adapters'
-  displayName: a5c-ai/babysitter — packages/agent-runtime
+  description: '@a5c-ai/tula-runtime — shared agent runtime types + host adapters'
+  displayName: a5c-ai/babysitter — packages/tula-runtime
   repoUrl: https://github.com/a5c-ai/babysitter
   ref: main
-  path: packages/agent-runtime
+  path: packages/tula-runtime
   kind: git-path
 ---
 nodeKind: SourceRef

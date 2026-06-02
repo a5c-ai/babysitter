@@ -53,12 +53,12 @@
       "note": "Public runtime dependency package for advanced orchestration surfaces."
     },
     {
-      "surface": "packages/agent-runtime",
-      "packageName": "@a5c-ai/agent-runtime",
+      "surface": "packages/tula-runtime",
+      "packageName": "@a5c-ai/tula-runtime",
       "description": "Agent runtime layer (L5) — daemon, session, resource management, telemetry.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/agent-runtime/README.md",
+      "canonicalHome": "../packages/tula-runtime/README.md",
       "supporting": [],
       "note": "Public runtime dependency for L5 agent runtime concerns."
     },

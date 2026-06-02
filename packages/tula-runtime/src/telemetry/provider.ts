@@ -233,7 +233,7 @@ function toOtlpPayload(spans: readonly TelemetrySpan[]): unknown {
         resource: { attributes: [] },
         scopeSpans: [
           {
-            scope: { name: "@a5c-ai/agent-runtime" },
+            scope: { name: "@a5c-ai/tula-runtime" },
             spans: spans.map((span) => ({
               traceId: span.traceId,
               spanId: span.spanId,

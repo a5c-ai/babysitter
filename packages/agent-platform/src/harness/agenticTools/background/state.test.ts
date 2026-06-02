@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BackgroundProcessRegistry as RuntimeBackgroundProcessRegistry,
-} from "@a5c-ai/agent-runtime";
+} from "@a5c-ai/tula-runtime";
 import { BackgroundProcessRegistry as PlatformBackgroundProcessRegistry } from "../../backgroundProcessRegistry";
 import {
   disposeBackgroundRegistry,

@@ -1,5 +1,5 @@
 import type { TObject } from "@sinclair/typebox";
-import type { BackgroundProcessRegistry } from "@a5c-ai/agent-runtime";
+import type { BackgroundProcessRegistry } from "@a5c-ai/tula-runtime";
 import type { DeferredToolRegistry } from "./deferredToolRegistry";
 
 export type AgentCoreOutputFormat = "text" | "json_object" | "json_schema";

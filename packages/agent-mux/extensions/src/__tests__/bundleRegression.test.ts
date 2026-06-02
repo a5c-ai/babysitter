@@ -7,11 +7,11 @@ import { compile } from '../compiler.js';
 import { verify } from '../verify.js';
 
 const SAMPLE_PLUGIN_DIR = path.resolve(__dirname, '../../examples/sample-plugin');
-const UNIFIED_PLUGIN_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified');
-const CLAUDE_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/claude-code');
-const CODEX_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/codex');
-const PI_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/pi');
-const OMP_HARNESS_DIR = path.resolve(__dirname, '../../../../plugins/babysitter-unified/per-harness/omp');
+const UNIFIED_PLUGIN_DIR = path.resolve(__dirname, '../../../../../plugins/babysitter-unified');
+const CLAUDE_HARNESS_DIR = path.resolve(__dirname, '../../../../../plugins/babysitter-unified/per-harness/claude-code');
+const CODEX_HARNESS_DIR = path.resolve(__dirname, '../../../../../plugins/babysitter-unified/per-harness/codex');
+const PI_HARNESS_DIR = path.resolve(__dirname, '../../../../../plugins/babysitter-unified/per-harness/pi');
+const OMP_HARNESS_DIR = path.resolve(__dirname, '../../../../../plugins/babysitter-unified/per-harness/omp');
 
 function createTempDir(prefix: string): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));

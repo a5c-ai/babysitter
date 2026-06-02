@@ -90,7 +90,7 @@ The `packagePath` field in each blueprint entry points to the relative path with
 
 ## Local Clone Structure
 
-When a marketplace is cloned via `blueprint:add-marketplace`, it is stored under the babysitter configuration directory:
+When a marketplace is cloned via `plugin:add-marketplace`, it is stored under the babysitter configuration directory:
 
 - **Global scope**: `~/.a5c/blueprints/marketplaces/<marketplace-name>/`
 - **Project scope**: `<projectDir>/.a5c/blueprints/marketplaces/<marketplace-name>/`
@@ -99,7 +99,7 @@ The marketplace name is derived from the Git URL (the repository name without th
 
 ## Version Tracking
 
-The `latestVersion` field in each blueprint entry determines the default version used during `blueprint:install` when no `--plugin-version` flag is provided. The `versions` array provides a complete history for reference, listed newest first.
+The `latestVersion` field in each blueprint entry determines the default version used during `plugin:install` when no `--plugin-version` flag is provided. The `versions` array provides a complete history for reference, listed newest first.
 
 Version strings follow semantic versioning conventions (e.g., `1.0.0`, `2.0.0-beta.1`). Pre-release identifiers with dashes and dots are supported.
 
@@ -117,7 +117,7 @@ Version strings follow semantic versioning conventions (e.g., `1.0.0`, `2.0.0-be
 
 6. Users can then add the marketplace:
    ```bash
-   babysitter blueprint:add-marketplace --marketplace-url <your-repo-url> --global
+   babysitter plugin:add-marketplace --marketplace-url <your-repo-url> --global
    ```
 
 ## Updating the Marketplace
@@ -131,7 +131,7 @@ When you release a new blueprint version:
 
 Users update their local clone with:
 ```bash
-babysitter blueprint:update-marketplace --marketplace-name <name> --global
+babysitter plugin:update-marketplace --marketplace-name <name> --global
 ```
 
 ## TypeScript Interfaces

@@ -28,6 +28,6 @@
   "references": [
     { "path": "../sdk" },
     { "path": "../tula-core" },
-    { "path": "../agent-runtime" }
+    { "path": "../tula-runtime" }
   ]
 }

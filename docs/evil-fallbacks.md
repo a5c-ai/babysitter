@@ -6,7 +6,7 @@ Silent fallback mechanisms that hide real problems, introduce unexpected degrade
 
 ---
 
-## SDK & Runtime (packages/sdk, packages/agent-runtime)
+## SDK & Runtime (packages/sdk, packages/tula-runtime)
 
 ### Critical
 
@@ -50,13 +50,13 @@ Stash errors now logged before force-checkout.
 **Session marker cleanup — ignore errors** — `packages/sdk/src/utils/sessionMarker.ts:79,101`
 Stale markers accumulate on disk over time.
 
-**Daemon lifecycle cleanup — `.catch(() => {})`** — `packages/agent-runtime/src/daemon/lifecycle.ts:68-70,174-178,243`
+**Daemon lifecycle cleanup — `.catch(() => {})`** — `packages/tula-runtime/src/daemon/lifecycle.ts:68-70,174-178,243`
 PID file deletion and log writes are best-effort. Stale PID files cause "daemon already running" false positives.
 
-**Webhook trigger setup — silent skip** — `packages/agent-runtime/src/daemon/loop.ts:132-142`
+**Webhook trigger setup — silent skip** — `packages/tula-runtime/src/daemon/loop.ts:132-142`
 Port in use or permission denied → trigger silently never fires. No indication to user.
 
-**Resource warning callbacks swallowed** — `packages/agent-runtime/src/resources/manager.ts:141-155`
+**Resource warning callbacks swallowed** — `packages/tula-runtime/src/resources/manager.ts:141-155`
 Subscriber errors silently discarded.
 
 ---

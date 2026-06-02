@@ -1,5 +1,5 @@
 /**
- * Re-export shim — canonical implementation lives in @a5c-ai/agent-runtime.
+ * Re-export shim — canonical implementation lives in @a5c-ai/tula-runtime.
  * Internal agent-platform consumers continue to import via relative paths
  * through this barrel file.
  */
@@ -113,4 +113,4 @@ export {
   setSessionBudget,
   checkBudget,
   markThresholdsTriggered,
-} from "@a5c-ai/agent-runtime/session";
+} from "@a5c-ai/tula-runtime/session";

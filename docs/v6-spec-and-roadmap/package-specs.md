@@ -99,7 +99,7 @@ These are plausible extraction or rename candidates, but not yet committed deliv
 
 The following names may be useful as future concepts, but they are not current package commitments:
 
-- `@a5c-ai/agent-runtime`
+- `@a5c-ai/tula-runtime`
 - `@a5c-ai/agent-platform`
 - `@a5c-ai/agent-platform-meta-plugins`
 - `@a5c-ai/agent-platform-orchestration-plugin`

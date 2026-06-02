@@ -1,5 +1,5 @@
 import { Type } from "@sinclair/typebox";
-import { buildShellInvocation } from "@a5c-ai/agent-runtime";
+import { buildShellInvocation } from "@a5c-ai/tula-runtime";
 import type { AgenticToolOptions, CustomToolDefinition } from "../types";
 import { DEFAULT_BASH_TIMEOUT, DEFAULT_SEARCH_TIMEOUT, spawnAsync } from "../shared/process";
 import { jsonResult } from "../shared/results";

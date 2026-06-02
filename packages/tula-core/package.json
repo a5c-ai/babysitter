@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@a5c-ai/agent-mux": "^5.0.0",
-    "@a5c-ai/agent-runtime": "^5.0.0",
+    "@a5c-ai/tula-runtime": "^5.0.0",
     "@a5c-ai/babysitter-sdk": "5.0.0",
     "@a5c-ai/agent-mux-tools": "5.0.0",
     "@sinclair/typebox": "^0.34.48"

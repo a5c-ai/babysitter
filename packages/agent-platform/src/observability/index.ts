@@ -1,5 +1,5 @@
 /**
- * Re-export shim — canonical implementation lives in @a5c-ai/agent-runtime.
+ * Re-export shim — canonical implementation lives in @a5c-ai/tula-runtime.
  * Internal agent-platform consumers continue to import via relative paths
  * through this barrel file.
  */
@@ -36,4 +36,4 @@ export {
   type WebhookRegistry,
   type WebhookRegistrationInput,
   WEBHOOK_SCHEMA_VERSION,
-} from "@a5c-ai/agent-runtime/observability";
+} from "@a5c-ai/tula-runtime/observability";
