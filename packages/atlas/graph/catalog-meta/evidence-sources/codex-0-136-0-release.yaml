@@ -1,0 +1,29 @@
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-136-0-issue-859-additive-release
+attributes:
+  displayName: "Codex CLI rust-v0.136.0 release notes for issue #859"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/codex/releases/tag/rust-v0.136.0"
+  sourcePathOrUrl: "https://github.com/openai/codex/releases/tag/rust-v0.136.0"
+  locator: "openai/codex release rust-v0.136.0"
+  capturedAt: "2026-06-02T06:15:00Z"
+  observedAt: "2026-06-01T17:49:22Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-02T06:15:00Z"
+  notes: |
+    Official Codex CLI 0.136.0 release notes document OSC 8 web links and
+    key/value fallback table rendering, /archive plus codex archive/unarchive
+    session lifecycle commands, app-server thread resume/status updates and
+    app-server --stdio, CODEX_API_KEY remote registration, short-lived
+    server-token remote-control websockets, alpha Windows sandbox setup,
+    image generation extension artifact routing, command-safety hardening,
+    sandbox cleanup and deny-read fixes, and Python SDK CodexConfig docs.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:codex@0.136.0
+    - agent:codex
