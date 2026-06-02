@@ -29,8 +29,8 @@ id: evidence:repo-hooks-detector
 attributes:
   displayName: "hooks-mux discovery detector"
   kindLabel: file
-  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/hooks-mux/core/src/discovery/detector.ts"
-  filePath: "packages/hooks-mux/core/src/discovery/detector.ts"
+  sourceUrl: "https://github.com/a5c-ai/babysitter/blob/main/packages/agent-mux/hooks/core/src/discovery/detector.ts"
+  filePath: "packages/agent-mux/hooks/core/src/discovery/detector.ts"
   trustLevel: trust-level:repo
   observedAt: "2026-04-23T00:00:00Z"
   observedBy: a5c-ai-team

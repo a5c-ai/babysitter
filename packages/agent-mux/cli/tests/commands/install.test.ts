@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { createClient, type AgentAdapter, type Spawner } from '@a5c-ai/agent-comm-mux';
+import { createClient, type AgentAdapter, type Spawner } from '@a5c-ai/agent-mux-comm';
 import { ClaudeAdapter, CodexAdapter, CursorAdapter } from '@a5c-ai/agent-mux-adapters';
 
 import {

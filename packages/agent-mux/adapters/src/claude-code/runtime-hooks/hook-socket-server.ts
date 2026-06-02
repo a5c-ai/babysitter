@@ -1,7 +1,7 @@
 import * as net from 'node:net';
 
-import { formatHookResult } from '@a5c-ai/agent-comm-mux';
-import type { RuntimeHookDispatcher } from '@a5c-ai/agent-comm-mux';
+import { formatHookResult } from '@a5c-ai/agent-mux-comm';
+import type { RuntimeHookDispatcher } from '@a5c-ai/agent-mux-comm';
 
 const HOOK_EVENT_MAP = {
   PreToolUse: { kind: 'preToolUse', mode: 'blocking' },

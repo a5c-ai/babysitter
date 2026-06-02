@@ -1,19 +1,19 @@
 # Public zod-validated wire schemas exposed by
-# @a5c-ai/tasks-mux/src/types.ts. Modeled types are the ones that
+# @a5c-ai/agent-mux-tasks/src/types.ts. Modeled types are the ones that
 # cross the package boundary (CLI ↔ backend ↔ MCP tool boundary). Internal
 # helpers (Code Snippet helpers, lock-file shapes) are not modeled.
-# Wired via @a5c-ai/tasks-mux PackageSurface `has_payload_schema` edge.
+# Wired via @a5c-ai/agent-mux-tasks PackageSurface `has_payload_schema` edge.
 nodeKind: SharedContextSpec
 id: shared-context-spec:tasks-mux-breakpoint-context
 attributes:
   displayName: "BreakpointContext (zod)"
   contextKind: "wire-payload"
   typescriptInterface: "BreakpointContext"
-  producerIface: "@a5c-ai/tasks-mux CLI / SDK callers (createBreakpoint)"
+  producerIface: "@a5c-ai/agent-mux-tasks CLI / SDK callers (createBreakpoint)"
   consumerIfaces:
-    - "@a5c-ai/tasks-mux backends/server.ts ServerBreakpointBackend"
-    - "@a5c-ai/tasks-mux backends/git-native.ts"
-    - "@a5c-ai/tasks-mux mcp/tools/ask-breakpoint.ts"
+    - "@a5c-ai/agent-mux-tasks backends/server.ts ServerBreakpointBackend"
+    - "@a5c-ai/agent-mux-tasks backends/git-native.ts"
+    - "@a5c-ai/agent-mux-tasks mcp/tools/ask-breakpoint.ts"
   fieldSchema:
     - "description:string:required:Plain-text breakpoint context"
     - "codeSnippets:list<string|{filename,code,language?}>:required:Code snippets bundle"
@@ -34,9 +34,9 @@ attributes:
   displayName: "BreakpointRouting (zod)"
   contextKind: "wire-payload"
   typescriptInterface: "BreakpointRouting"
-  producerIface: "@a5c-ai/tasks-mux CLI ask command"
+  producerIface: "@a5c-ai/agent-mux-tasks CLI ask command"
   consumerIfaces:
-    - "@a5c-ai/tasks-mux backends/* SubmitBreakpointParams.routing"
+    - "@a5c-ai/agent-mux-tasks backends/* SubmitBreakpointParams.routing"
   fieldSchema:
     - "strategy:enum<single|first-response-wins|collect-all|quorum>:required"
     - "targetResponders:list<string>:required:Responder ids"
@@ -55,7 +55,7 @@ attributes:
   typescriptInterface: "BreakpointAnswer"
   producerIface: "responders (CLI answer / MCP answer-breakpoint tool)"
   consumerIfaces:
-    - "@a5c-ai/tasks-mux backends/server.ts (POST /questions/:id/answers body)"
+    - "@a5c-ai/agent-mux-tasks backends/server.ts (POST /questions/:id/answers body)"
     - "callers awaiting BreakpointWaitResult.answer"
   fieldSchema:
     - "id|breakpointId|responderId|responderName:string:required"
@@ -78,8 +78,8 @@ attributes:
   typescriptInterface: "ProvenBreakpointAnswer"
   producerIface: "responders signing answers via Ed25519 key (auth key generate / push)"
   consumerIfaces:
-    - "@a5c-ai/tasks-mux proven verifier"
-    - "@a5c-ai/tasks-mux mcp/tools/verify-answer.ts"
+    - "@a5c-ai/agent-mux-tasks proven verifier"
+    - "@a5c-ai/agent-mux-tasks mcp/tools/verify-answer.ts"
   fieldSchema:
     - "<extends BreakpointAnswer>:embed:required"
     - "signature:string:required:Detached Ed25519 signature over signedFields"
@@ -95,10 +95,10 @@ attributes:
   displayName: "ResponderProfile (zod)"
   contextKind: "wire-payload"
   typescriptInterface: "ResponderProfile"
-  producerIface: "@a5c-ai/tasks-mux backends/* listResponders"
+  producerIface: "@a5c-ai/agent-mux-tasks backends/* listResponders"
   consumerIfaces:
-    - "@a5c-ai/tasks-mux CLI responders {list,show}"
-    - "@a5c-ai/tasks-mux mcp/tools/list-responders.ts"
+    - "@a5c-ai/agent-mux-tasks CLI responders {list,show}"
+    - "@a5c-ai/agent-mux-tasks mcp/tools/list-responders.ts"
   fieldSchema:
     - "id|name|title:string:required"
     - "domains|tags:list<string>:required"
@@ -114,10 +114,10 @@ attributes:
   displayName: "BreakpointBackend (interface)"
   contextKind: "interface-contract"
   typescriptInterface: "BreakpointBackend"
-  producerIface: "@a5c-ai/tasks-mux backends/server.ts ServerBreakpointBackend / backends/git-native.ts"
+  producerIface: "@a5c-ai/agent-mux-tasks backends/server.ts ServerBreakpointBackend / backends/git-native.ts"
   consumerIfaces:
-    - "@a5c-ai/tasks-mux CLI commands (ask, breakpoints, responders, responder-loop)"
-    - "@a5c-ai/tasks-mux mcp/backend-resolver.ts"
+    - "@a5c-ai/agent-mux-tasks CLI commands (ask, breakpoints, responders, responder-loop)"
+    - "@a5c-ai/agent-mux-tasks mcp/backend-resolver.ts"
   fieldSchema:
     - "submitBreakpoint:fn(SubmitBreakpointParams)->Promise<Breakpoint>:required"
     - "waitForAnswer:fn(id,WaitForAnswerOptions)->Promise<BreakpointWaitResult>:required"

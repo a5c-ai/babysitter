@@ -18,7 +18,7 @@ The test strategy must treat the stack as modular. A valid E2E does not need eve
 | Agent-mux core | `packages/agent-mux/core`, `@a5c-ai/agent-mux` | Adapter registry, `createClient().run`, sessions, workspaces, plugin manager, runtime hooks, provider/model config | Babysitter run journal ownership |
 | Agent-mux adapters | `packages/agent-mux/adapters` | Per-agent spawn/programmatic adapters, capabilities, session parsing, adapter plugin APIs when supported | Generic Babysitter process orchestration |
 | Transport-mux | `packages/transport-mux` | Harness-facing provider protocol routes, local proxy runtime lifecycle, proxy auth, runtime env injection, passthrough forwarding, streaming/non-streaming response shape, cancellation, timeout, and metrics/cache visibility | Installing harnesses/plugins, normalizing hooks, owning Babysitter journals, or proving agent-mux adapter/session semantics without a consumer |
-| Hooks-mux | `packages/hooks-mux/*` | Normalizing raw hook payloads and merge/policy behavior across harnesses | Agent-mux runtime hook dispatch and SDK stop-hook iteration policy |
+| Hooks-mux | `packages/agent-mux/hooks/*` | Normalizing raw hook payloads and merge/policy behavior across harnesses | Agent-mux runtime hook dispatch and SDK stop-hook iteration policy |
 | Agent-core | `packages/tula-core` | Programmatic model session backend and tool-call loop used by internal/runtime paths | External harness plugin installation |
 | Agent-plugins-mux | `packages/extension-mux` | Plugin target discovery and plugin target contracts | Runtime session execution |
 

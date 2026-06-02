@@ -95,7 +95,7 @@ jobs:
       - name: Build tasks-mux
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/tasks-mux 2>&1 | tee artifacts/test-logs/tasks-mux-build.log
+          npm run build --workspace=@a5c-ai/agent-mux-tasks 2>&1 | tee artifacts/test-logs/tasks-mux-build.log
 
       - name: Build runtime graph
         run: |
@@ -110,12 +110,12 @@ jobs:
       - name: Typecheck tasks-mux
         run: |
           set -euo pipefail
-          npm run typecheck --workspace=@a5c-ai/tasks-mux 2>&1 | tee artifacts/test-logs/tasks-mux-typecheck.log
+          npm run typecheck --workspace=@a5c-ai/agent-mux-tasks 2>&1 | tee artifacts/test-logs/tasks-mux-typecheck.log
 
       - name: tasks-mux tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/tasks-mux 2>&1 | tee artifacts/test-logs/tasks-mux-tests.log
+          npm run test --workspace=@a5c-ai/agent-mux-tasks 2>&1 | tee artifacts/test-logs/tasks-mux-tests.log
 
       - name: Build hooks-mux
         run: |
@@ -140,22 +140,22 @@ jobs:
       - name: Build triggers package
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/test-logs/triggers-build.log
+          npm run build --workspace=@a5c-ai/agent-mux-triggers 2>&1 | tee artifacts/test-logs/triggers-build.log
 
       - name: Triggers unit tests
         run: |
           set -euo pipefail
-          npm run test:unit --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/test-logs/triggers-unit-tests.log
+          npm run test:unit --workspace=@a5c-ai/agent-mux-triggers 2>&1 | tee artifacts/test-logs/triggers-unit-tests.log
 
       - name: Triggers e2e tests
         run: |
           set -euo pipefail
-          npm run test:e2e --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/test-logs/triggers-e2e-tests.log
+          npm run test:e2e --workspace=@a5c-ai/agent-mux-triggers 2>&1 | tee artifacts/test-logs/triggers-e2e-tests.log
 
       - name: Triggers coverage tests
         run: |
           set -euo pipefail
-          npm run test:coverage --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/test-logs/triggers-coverage.log
+          npm run test:coverage --workspace=@a5c-ai/agent-mux-triggers 2>&1 | tee artifacts/test-logs/triggers-coverage.log
 
       - name: agent-mux-tui release verification
         run: |
@@ -165,7 +165,7 @@ jobs:
       - name: agent-comm-mux release verification
         run: |
           set -euo pipefail
-          npm run verify:release --workspace=@a5c-ai/agent-comm-mux 2>&1 | tee artifacts/test-logs/agent-comm-mux-release.log
+          npm run verify:release --workspace=@a5c-ai/agent-mux-comm 2>&1 | tee artifacts/test-logs/agent-comm-mux-release.log
 
       - name: Build realtime flow surfaces
         run: |
@@ -195,12 +195,12 @@ jobs:
       - name: Build extension-mux
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/extension-mux 2>&1 | tee artifacts/test-logs/extension-mux-build.log
+          npm run build --workspace=@a5c-ai/agent-mux-extensions 2>&1 | tee artifacts/test-logs/extension-mux-build.log
 
       - name: extension-mux tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/extension-mux 2>&1 | tee artifacts/test-logs/extension-mux-tests.log
+          npm run test --workspace=@a5c-ai/agent-mux-extensions 2>&1 | tee artifacts/test-logs/extension-mux-tests.log
 
       - name: Build babysitter-harness
         run: |
@@ -277,17 +277,17 @@ jobs:
 
           Release-critical workspaces validated in other CI/release jobs:
           - @a5c-ai/babysitter-sdk -> test + packages-sdk + release/staging publish
-          - @a5c-ai/tasks-mux -> test + release/staging publish
-          - @a5c-ai/extension-mux -> test + release/staging publish
+          - @a5c-ai/agent-mux-tasks -> test + release/staging publish
+          - @a5c-ai/agent-mux-extensions -> test + release/staging publish
           - @a5c-ai/babysitter-observer-dashboard -> observer-dashboard + release/staging publish
           - @a5c-ai/cloud -> workspace-coverage + release/staging publish + deploy-hook paths
-          - @a5c-ai/hooks-mux-* -> test + release/staging publish
+          - @a5c-ai/agent-mux-hooks-* -> test + release/staging publish
           - @a5c-ai/agent-mux-* -> test + release/staging publish
           - @a5c-ai/babysitter + unified plugin compiler/bundles -> test + release/staging publish paths
 
           Additional active workspaces validated in this job:
           - @a5c-ai/babysitter-tui-plugins
-          - @a5c-ai/transport-mux (build + lint + typecheck + test + migration scorecard)
+          - @a5c-ai/agent-mux-transport (build + lint + typecheck + test + migration scorecard)
 
       - name: Build atlas catalog foundation
         run: npm run build --workspace=@a5c-ai/atlas
@@ -295,11 +295,11 @@ jobs:
       - name: Validate transport-mux workspace QA surface
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-build.log
-          npm run lint --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-lint.log
-          npm run typecheck --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-typecheck.log
-          npm run test --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-test.log
-          npm run scorecard:migration --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-scorecard.log
+          npm run build --workspace=@a5c-ai/agent-mux-transport 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-build.log
+          npm run lint --workspace=@a5c-ai/agent-mux-transport 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-lint.log
+          npm run typecheck --workspace=@a5c-ai/agent-mux-transport 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-typecheck.log
+          npm run test --workspace=@a5c-ai/agent-mux-transport 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-test.log
+          npm run scorecard:migration --workspace=@a5c-ai/agent-mux-transport 2>&1 | tee artifacts/workspace-coverage-logs/transport-mux-scorecard.log
 
       - name: Validate cloud deployment workspace QA surface
         run: |

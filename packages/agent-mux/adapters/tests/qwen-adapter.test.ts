@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { StreamAssembler } from '@a5c-ai/agent-comm-mux';
-import type { ParseContext } from '@a5c-ai/agent-comm-mux';
+import { StreamAssembler } from '@a5c-ai/agent-mux-comm';
+import type { ParseContext } from '@a5c-ai/agent-mux-comm';
 import { QwenAdapter } from '../src/qwen-adapter.js';
 
 function makeContext(overrides?: Partial<ParseContext>): ParseContext {

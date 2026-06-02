@@ -1,5 +1,5 @@
-import type { AgentMuxClient, WorkspaceSessionBinding } from '@a5c-ai/agent-comm-mux';
-import { WorkspaceService } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient, WorkspaceSessionBinding } from '@a5c-ai/agent-mux-comm';
+import { WorkspaceService } from '@a5c-ai/agent-mux-comm';
 
 import type { ParsedArgs, FlagDef } from '../parse-args.js';
 import { flagArr, flagBool, flagStr } from '../parse-args.js';

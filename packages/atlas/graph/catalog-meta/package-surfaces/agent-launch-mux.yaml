@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-agent-launch-mux
 attributes:
-  packageId: "@a5c-ai/agent-launch-mux"
-  packageName: "@a5c-ai/agent-launch-mux"
+  packageId: "@a5c-ai/agent-mux-launch"
+  packageName: "@a5c-ai/agent-mux-launch"
   workspacePath: packages/agent-mux/launch
   moduleType: typescript
   surfaceKinds:

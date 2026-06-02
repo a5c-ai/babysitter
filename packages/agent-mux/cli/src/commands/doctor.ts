@@ -7,7 +7,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import type { AgentMuxClient, DetectInstallationResult, AuthState } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient, DetectInstallationResult, AuthState } from '@a5c-ai/agent-mux-comm';
 import type { ParsedArgs } from '../parse-args.js';
 import { flagBool } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';

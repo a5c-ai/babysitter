@@ -7,9 +7,9 @@ attributes:
   displayName: "NormalizedTriggerEvent payload schema"
   contextKind: "trigger-event-envelope"
   typescriptInterface: "NormalizedTriggerEvent"
-  producerIface: "@a5c-ai/triggers-mux backend normalizers (github|gitlab|bitbucket|generic-webhook)"
+  producerIface: "@a5c-ai/agent-mux-triggers backend normalizers (github|gitlab|bitbucket|generic-webhook)"
   consumerIfaces:
-    - "@a5c-ai/triggers-mux evaluateTrigger (packages/triggers-mux/src/query.ts:102)"
+    - "@a5c-ai/agent-mux-triggers evaluateTrigger (packages/triggers-mux/src/query.ts:102)"
     - "amux run pipeline (downstream pre-run, agent-mux, post-run via AMUX_TRIGGER_EVENT_PATH)"
   fieldSchema:
     - "backend:enum<github|gitlab|bitbucket|generic-webhook>:required:Trigger backend the payload was normalized from"
@@ -37,7 +37,7 @@ attributes:
   displayName: "TriggerChange payload field schema"
   contextKind: "trigger-event-change-entry"
   typescriptInterface: "TriggerChange"
-  producerIface: "@a5c-ai/triggers-mux backend normalizers + enrichGithubFromApi + enrichWithLocalGit + enrichDiffsWithLocalGit"
+  producerIface: "@a5c-ai/agent-mux-triggers backend normalizers + enrichGithubFromApi + enrichWithLocalGit + enrichDiffsWithLocalGit"
   consumerIfaces:
     - "evaluateTrigger path/files/diff query keys"
   fieldSchema:

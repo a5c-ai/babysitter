@@ -15,31 +15,31 @@ const TOP_LEVEL_AGENT_MUX_PACKAGE_MOVES = [
   {
     oldPath: 'packages/transport-mux',
     newPath: 'packages/agent-mux/transport',
-    oldName: '@a5c-ai/transport-mux',
+    oldName: '@a5c-ai/agent-mux-transport',
     newName: '@a5c-ai/agent-mux-transport',
   },
   {
     oldPath: 'packages/extension-mux',
     newPath: 'packages/agent-mux/extensions',
-    oldName: '@a5c-ai/extension-mux',
+    oldName: '@a5c-ai/agent-mux-extensions',
     newName: '@a5c-ai/agent-mux-extensions',
   },
   {
     oldPath: 'packages/triggers-mux',
     newPath: 'packages/agent-mux/triggers',
-    oldName: '@a5c-ai/triggers-mux',
+    oldName: '@a5c-ai/agent-mux-triggers',
     newName: '@a5c-ai/agent-mux-triggers',
   },
   {
     oldPath: 'packages/tasks-mux',
     newPath: 'packages/agent-mux/tasks',
-    oldName: '@a5c-ai/tasks-mux',
+    oldName: '@a5c-ai/agent-mux-tasks',
     newName: '@a5c-ai/agent-mux-tasks',
   },
   {
     oldPath: 'packages/tool-mux',
     newPath: 'packages/agent-mux/tools',
-    oldName: '@a5c-ai/tool-mux',
+    oldName: '@a5c-ai/agent-mux-tools',
     newName: '@a5c-ai/agent-mux-tools',
   },
 ];

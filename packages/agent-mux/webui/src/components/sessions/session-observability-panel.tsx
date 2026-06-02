@@ -4,7 +4,7 @@ import { Link } from "react-router-dom-v6";
 import { useMemo, useState } from "react";
 import { Tabs, type TabItem } from "@a5c-ai/compendium";
 import { buildSessionFlowModel, type SessionFlowModel } from "@a5c-ai/agent-mux-ui/session-flow";
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-comm-mux";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-comm";
 import { AlertTriangle, ArrowUpRight, CheckCircle2, Hand, TerminalSquare } from "lucide-react";
 
 import { buildRunArtifactShortcuts } from "@/lib/babysitter-overlays";

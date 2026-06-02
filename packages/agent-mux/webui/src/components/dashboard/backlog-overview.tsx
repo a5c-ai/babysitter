@@ -14,7 +14,7 @@ import type {
   KanbanTaskTag,
   KanbanReviewArtifact,
   KanbanWorkflowState,
-} from "@a5c-ai/agent-comm-mux/kanban";
+} from "@a5c-ai/agent-mux-comm/kanban";
 import {
   Activity,
   AlertCircle,

@@ -5,7 +5,7 @@ import path from 'node:path';
 import type {
   AutomationExecutionRecord,
   AutomationRule,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 import type {
   KanbanActivityEntry,
@@ -18,7 +18,7 @@ import type {
   KanbanProjectSettings,
   KanbanTaskTag,
   KanbanTeam,
-} from '@a5c-ai/agent-comm-mux/kanban';
+} from '@a5c-ai/agent-mux-comm/kanban';
 
 export const KANBAN_BACKLOG_FILE_PATH =
   process.env.KANBAN_BACKLOG_FILE ?? path.join(os.homedir(), '.a5c', 'kanban-backlog.json');

@@ -1,4 +1,4 @@
-import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanCollaboratorRole, KanbanDispatchContextLabelDefinition, KanbanPermissionGrant, KanbanProjectSettings, KanbanTaskTag, KanbanWorkflowState } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanCollaboratorRole, KanbanDispatchContextLabelDefinition, KanbanPermissionGrant, KanbanProjectSettings, KanbanTaskTag, KanbanWorkflowState } from "@a5c-ai/agent-mux-comm/kanban";
 export interface BacklogOverviewSummary {
     projectCount: number;
     issueCount: number;

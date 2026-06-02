@@ -5,10 +5,10 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@a5c-ai/agent-config-mux": [
+      "@a5c-ai/agent-mux-config": [
         "../config/src/index.ts"
       ],
-      "@a5c-ai/agent-launch-mux": [
+      "@a5c-ai/agent-mux-launch": [
         "../launch/src/index.ts"
       ],
       "@a5c-ai/agent-mux-transport": [

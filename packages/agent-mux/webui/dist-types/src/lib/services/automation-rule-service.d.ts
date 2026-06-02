@@ -1,5 +1,5 @@
-import type { AutomationExecutionRecord, AutomationRule, AutomationRuleLifecycleState } from '@a5c-ai/agent-comm-mux';
-import type { KanbanIssue } from '@a5c-ai/agent-comm-mux/kanban';
+import type { AutomationExecutionRecord, AutomationRule, AutomationRuleLifecycleState } from '@a5c-ai/agent-mux-comm';
+import type { KanbanIssue } from '@a5c-ai/agent-mux-comm/kanban';
 import { BacklogQueryService } from './backlog-query-service';
 import { type KanbanStorageDeps } from './kanban-storage';
 export declare const AUTOMATION_RULE_STATES: readonly ["draft", "active", "paused", "disabled", "archived"];

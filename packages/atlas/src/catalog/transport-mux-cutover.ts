@@ -118,7 +118,7 @@ function evaluateTransportMuxCutover(): boolean {
       Array.isArray(packageJson.files) &&
       packageJson.publishConfig?.access === "public",
     Boolean(packageJson.scripts?.["scorecard:migration"]) && jsContractTests > 0,
-    launchCommand.includes("@a5c-ai/transport-mux") && packageEntrypoint.includes("export * from './runtime.js';"),
+    launchCommand.includes("@a5c-ai/agent-mux-transport") && packageEntrypoint.includes("export * from './runtime.js';"),
     docsHonestyChecks.every(Boolean),
   ];
 

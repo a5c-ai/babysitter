@@ -1,5 +1,5 @@
 import * as fs from 'node:fs';
-import type { ProviderConfig, ProviderId } from '@a5c-ai/agent-comm-mux';
+import type { ProviderConfig, ProviderId } from '@a5c-ai/agent-mux-comm';
 import type { HarnessProviderTranslation } from '../provider-translation.js';
 
 function mergeWithExistingConfig(generatedConfig: string): string {

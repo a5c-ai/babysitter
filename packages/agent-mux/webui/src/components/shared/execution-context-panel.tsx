@@ -1,6 +1,6 @@
 "use client";
 
-import type { KanbanExecutionContextEnvelope } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanExecutionContextEnvelope } from "@a5c-ai/agent-mux-comm/kanban";
 
 import { cx } from "@a5c-ai/compendium";
 

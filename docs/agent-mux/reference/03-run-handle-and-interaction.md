@@ -981,7 +981,7 @@ Key differences from pipe-mode spawn:
 
 ### 7.3 node-pty Dependency
 
-`node-pty` is a native module with platform-specific compilation requirements. It is an optional peer dependency of `@a5c-ai/agent-comm-mux`:
+`node-pty` is a native module with platform-specific compilation requirements. It is an optional peer dependency of `@a5c-ai/agent-mux-comm`:
 
 ```json
 {

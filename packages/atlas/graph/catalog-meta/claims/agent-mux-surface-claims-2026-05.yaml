@@ -96,7 +96,7 @@ attributes:
   subjectId: package:a5c-ai-hooks-mux-core
   subjectKind: PackageSurface
   attribute: surfaceKinds
-  value: '@a5c-ai/hooks-mux-core is modeled as the package surface exposing normalized hook payload schemas.'
+  value: '@a5c-ai/agent-mux-hooks-core is modeled as the package surface exposing normalized hook payload schemas.'
   statement: The hooks-mux core package surface is grounded in package metadata and core package source files.
   evidenceSourceIds:
     - evidence:hooks-mux-core-package-source
@@ -188,7 +188,7 @@ attributes:
   subjectId: package:a5c-ai-tasks-mux
   subjectKind: PackageSurface
   attribute: surfaceKinds
-  value: '@a5c-ai/tasks-mux is modeled as a breakpoint-runtime package surface.'
+  value: '@a5c-ai/agent-mux-tasks is modeled as a breakpoint-runtime package surface.'
   statement: The tasks-mux package surface is grounded in package metadata and runtime source files.
   evidenceSourceIds:
     - evidence:tasks-mux-package-source

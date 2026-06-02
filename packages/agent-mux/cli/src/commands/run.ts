@@ -6,8 +6,8 @@
 
 import * as path from 'node:path';
 
-import type { AgentMuxClient } from '@a5c-ai/agent-comm-mux';
-import { AgentMuxError } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient } from '@a5c-ai/agent-mux-comm';
+import { AgentMuxError } from '@a5c-ai/agent-mux-comm';
 import type { ParsedArgs } from '../parse-args.js';
 import type { FlagDef } from '../parse-args.js';
 import { flagStr, flagNum, flagBool, flagArr } from '../parse-args.js';

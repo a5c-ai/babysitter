@@ -56,7 +56,7 @@ Agent-mux is **optional**. The SDK must work without it. Discovery returns empty
 | `packages/agent-platform` | Effect resolution delegates to tasks-mux, process prompt updates |
 | `packages/tula-core` | None (internal agent tasks unchanged) |
 | `packages/agent-mux` | None (existing run/launch API consumed by tasks-mux) |
-| `packages/hooks-mux` | Host tool discovery, capability extensions |
+| `packages/agent-mux/hooks` | Host tool discovery, capability extensions |
 
 ## Non-Goals (This Phase)
 

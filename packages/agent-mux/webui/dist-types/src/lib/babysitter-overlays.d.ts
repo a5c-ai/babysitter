@@ -1,4 +1,4 @@
-import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanReviewDecision, KanbanReviewArtifact, KanbanWorkflowState } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanReviewDecision, KanbanReviewArtifact, KanbanWorkflowState } from "@a5c-ai/agent-mux-comm/kanban";
 import type { Run } from "@/types";
 export type BabysitterOverlayStage = "dispatch" | "executing" | "review" | "recovery" | "done";
 export interface BoardExecutionOverlay {

@@ -1,6 +1,6 @@
 # Core Types, Client, and Package Identity
 
-**Specification v1.0** | `@a5c-ai/agent-comm-mux`
+**Specification v1.0** | `@a5c-ai/agent-mux-comm`
 
 ---
 
@@ -11,7 +11,7 @@
 | Field | Value |
 |---|---|
 | npm scope | `@a5c-ai` |
-| Core runtime package | `@a5c-ai/agent-comm-mux` |
+| Core runtime package | `@a5c-ai/agent-mux-comm` |
 | Convenience meta-package | `@a5c-ai/agent-mux` |
 | CLI binary | `amux` |
 | Language | TypeScript, strict mode |
@@ -29,19 +29,19 @@ dependency story must match the published package graph.
 
 | Package | Purpose | Runtime dependencies |
 |---|---|---|
-| `@a5c-ai/agent-comm-mux` | `AgentMuxClient`, normalized events, type definitions, provider/hook/workspace helpers, and stream/runtime primitives | `@a5c-ai/atlas`, `@a5c-ai/agent-mux-observability` |
-| `@a5c-ai/agent-mux-adapters` | All built-in adapter implementations (claude, codex, gemini, copilot, cursor, opencode, pi, omp, openclaw, hermes) | `@a5c-ai/agent-comm-mux` |
-| `@a5c-ai/agent-mux-cli` | CLI binary (`amux`) | `@a5c-ai/agent-comm-mux`, `@a5c-ai/agent-mux-adapters` |
+| `@a5c-ai/agent-mux-comm` | `AgentMuxClient`, normalized events, type definitions, provider/hook/workspace helpers, and stream/runtime primitives | `@a5c-ai/atlas`, `@a5c-ai/agent-mux-observability` |
+| `@a5c-ai/agent-mux-adapters` | All built-in adapter implementations (claude, codex, gemini, copilot, cursor, opencode, pi, omp, openclaw, hermes) | `@a5c-ai/agent-mux-comm` |
+| `@a5c-ai/agent-mux-cli` | CLI binary (`amux`) | `@a5c-ai/agent-mux-comm`, `@a5c-ai/agent-mux-adapters` |
 | `@a5c-ai/agent-mux` | Convenience meta-package: re-exports core + adapters + cli | All three above |
 
 ### 1.3 Installation
 
 ```bash
 # Core runtime only
-npm install @a5c-ai/agent-comm-mux
+npm install @a5c-ai/agent-mux-comm
 
 # SDK/runtime with built-in adapters
-npm install @a5c-ai/agent-comm-mux @a5c-ai/agent-mux-adapters
+npm install @a5c-ai/agent-mux-comm @a5c-ai/agent-mux-adapters
 
 # SDK + CLI (everything)
 npm install @a5c-ai/agent-mux
@@ -53,14 +53,14 @@ npx @a5c-ai/agent-mux
 Import the package as ESM:
 
 ```typescript
-import { createClient } from '@a5c-ai/agent-comm-mux';
-import { classifyTool } from '@a5c-ai/agent-comm-mux/browser';
-import { buildKanbanProjectBoard } from '@a5c-ai/agent-comm-mux/kanban';
-import type { AutomationRule } from '@a5c-ai/agent-comm-mux/automation';
+import { createClient } from '@a5c-ai/agent-mux-comm';
+import { classifyTool } from '@a5c-ai/agent-mux-comm/browser';
+import { buildKanbanProjectBoard } from '@a5c-ai/agent-mux-comm/kanban';
+import type { AutomationRule } from '@a5c-ai/agent-mux-comm/automation';
 ```
 
 There is no separate CommonJS build. CommonJS callers should use dynamic import
-(`await import('@a5c-ai/agent-comm-mux')`) rather than assuming a CJS shim.
+(`await import('@a5c-ai/agent-mux-comm')`) rather than assuming a CJS shim.
 
 The core package's two runtime dependencies are intentional parts of the current
 architecture:
@@ -72,10 +72,10 @@ architecture:
 
 The documented public subpath surface is:
 
-- `@a5c-ai/agent-comm-mux`
-- `@a5c-ai/agent-comm-mux/browser`
-- `@a5c-ai/agent-comm-mux/kanban`
-- `@a5c-ai/agent-comm-mux/automation`
+- `@a5c-ai/agent-mux-comm`
+- `@a5c-ai/agent-mux-comm/browser`
+- `@a5c-ai/agent-mux-comm/kanban`
+- `@a5c-ai/agent-mux-comm/automation`
 
 Package release verification should keep these subpaths aligned with the
 published `dist/index.*`, `dist/browser.*`, `dist/kanban.*`, and

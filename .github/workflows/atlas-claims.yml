@@ -16,7 +16,7 @@ jobs:
           cache: npm
       - run: npm ci --prefer-offline --legacy-peer-deps
       - run: npm run build -w packages/atlas
-      - run: npm run build -w packages/hooks-mux/core -w packages/hooks-mux/cli
+      - run: npm run build -w packages/agent-mux/hooks/core -w packages/agent-mux/hooks/cli
         continue-on-error: true
       - name: Stop-hook control claims (vitest)
         run: npx vitest run packages/atlas/tests/claims/stop-hook-control.test.ts --reporter=verbose

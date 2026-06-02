@@ -6,7 +6,7 @@ import {
   normalizeKanbanDispatchContextLabelKey,
   normalizeKanbanDispatchContextLabels,
   type KanbanDispatchContextLabelDefinition,
-} from "@a5c-ai/agent-comm-mux/kanban";
+} from "@a5c-ai/agent-mux-comm/kanban";
 
 import { AppError } from "../error-handler";
 import {

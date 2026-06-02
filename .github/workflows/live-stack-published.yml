@@ -210,7 +210,7 @@ jobs:
           npm install -g @a5c-ai/babysitter-sdk@${NPM_TAG}
 
           # Install hooks-mux CLI
-          npm install -g @a5c-ai/hooks-mux-cli@${NPM_TAG}
+          npm install -g @a5c-ai/agent-mux-hooks-cli@${NPM_TAG}
 
           # Install node-pty for interactive modes
           npm install -g node-pty || echo "node-pty install failed (optional)"

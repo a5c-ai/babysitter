@@ -9,7 +9,7 @@
  * command handler. Exports core functionality for programmatic use.
  */
 
-export { createClient } from '@a5c-ai/agent-comm-mux';
+export { createClient } from '@a5c-ai/agent-mux-comm';
 export { ExitCode, errorCodeToExitCode } from './exit-codes.js';
 export { parseArgs } from './parse-args.js';
 export { registerBuiltInAdapters } from './bootstrap.js';
@@ -18,7 +18,7 @@ export type { ParsedArgs, FlagDef } from './parse-args.js';
 // Re-exported so the meta-package shim (`@a5c-ai/agent-mux`) can drive the CLI.
 export { main as runCli };
 
-import { createClient, AgentMuxError } from '@a5c-ai/agent-comm-mux';
+import { createClient, AgentMuxError } from '@a5c-ai/agent-mux-comm';
 import { parseArgs } from './parse-args.js';
 import { flagBool, flagStr } from './parse-args.js';
 import { RUN_FLAGS } from './commands/run.js';

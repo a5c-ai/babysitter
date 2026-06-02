@@ -7,7 +7,7 @@ configuration drive hook dispatch across all 11 supported harnesses.
 
 - **Hook type** — a harness-specific event name (e.g. `PreToolUse`,
   `StopHook`, `OnToolCall`). See `HOOK_CATALOG` in
-  `@a5c-ai/agent-comm-mux` for the per-harness list.
+  `@a5c-ai/agent-mux-comm` for the per-harness list.
 - **Registration** — a record in `.amux/hooks.json` (project) or
   `~/.amux/hooks.json` (global) that maps
   `(agent, hookType) → handler(target)`. Project overrides global by `id`.
@@ -27,7 +27,7 @@ configuration drive hook dispatch across all 11 supported harnesses.
 import {
   HookConfigManager, HookDispatcher, builtInHooks,
   parseHookPayload, formatHookResult,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 const mgr = new HookConfigManager();
 await mgr.add({

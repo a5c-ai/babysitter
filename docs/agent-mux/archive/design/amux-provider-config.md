@@ -365,7 +365,7 @@ function buildOpenCodeConfig(resolved: ProviderConfig, proxyUrl?: string): strin
 ### 5.1 SDK Surface
 
 ```typescript
-import { resolveProvider, translateForHarness } from '@a5c-ai/agent-comm-mux';
+import { resolveProvider, translateForHarness } from '@a5c-ai/agent-mux-comm';
 
 // Resolve from mixed sources
 const config: ProviderConfig = resolveProvider({

@@ -240,12 +240,12 @@ aliases:
   # NodeKind: PackageSurface
   # ─────────────────────────────────────────────────────────────────
   - { legacyId: "package:@a5c-ai/atlas/catalog",     v6Id: "package-surface:a5c-ai-agent-catalog",     nodeKind: PackageSurface }
-  - { legacyId: "package:@a5c-ai/agent-comm-mux",    v6Id: "package-surface:a5c-ai-agent-comm-mux",    nodeKind: PackageSurface }
-  - { legacyId: "package:@a5c-ai/extension-mux", v6Id: "package-surface:a5c-ai-extension-mux", nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/agent-mux-comm",    v6Id: "package-surface:a5c-ai-agent-comm-mux",    nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/agent-mux-extensions", v6Id: "package-surface:a5c-ai-extension-mux", nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/babysitter-sdk",    v6Id: "package-surface:a5c-ai-babysitter-sdk",    nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/catalog",           v6Id: "package-surface:a5c-ai-catalog",           nodeKind: PackageSurface }
-  - { legacyId: "package:@a5c-ai/hooks-mux-core",    v6Id: "package-surface:a5c-ai-hooks-mux-core",    nodeKind: PackageSurface }
-  - { legacyId: "package:@a5c-ai/transport-mux",     v6Id: "package-surface:a5c-ai-transport-mux",     nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/agent-mux-hooks-core",    v6Id: "package-surface:a5c-ai-hooks-mux-core",    nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/agent-mux-transport",     v6Id: "package-surface:a5c-ai-transport-mux",     nodeKind: PackageSurface }
 
   # ─────────────────────────────────────────────────────────────────
   # NodeKind: ProcessDescriptor

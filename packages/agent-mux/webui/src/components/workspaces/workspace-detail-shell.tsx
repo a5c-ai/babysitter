@@ -2,7 +2,7 @@
 
 import { Link, useNavigate } from "react-router-dom-v6";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Attachment } from "@a5c-ai/agent-comm-mux";
+import type { Attachment } from "@a5c-ai/agent-mux-comm";
 import { ChevronLeft, ExternalLink, GripVertical, LayoutDashboard, MessagesSquare, PanelLeft, PanelRight, Workflow } from "lucide-react";
 
 import { SessionConversationSurface } from "@/components/sessions/session-conversation-surface";
@@ -11,7 +11,7 @@ import { Button, CommandPalette, Select } from "@a5c-ai/compendium";
 import type { CommandItem } from "@a5c-ai/compendium";
 import { useKeyboard } from "@/hooks/use-keyboard";
 import { usePersistedState } from "@/hooks/use-persisted-state";
-import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/agent-mux-comm/kanban";
 import {
   DESKTOP_LAYOUT_BREAKPOINT,
   ensureVisiblePanels,

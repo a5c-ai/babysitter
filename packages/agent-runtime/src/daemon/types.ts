@@ -6,7 +6,7 @@ import type {
   AutomationRule,
   TimerAutomationRule,
   WebhookAutomationRule,
-} from "@a5c-ai/agent-comm-mux";
+} from "@a5c-ai/agent-mux-comm";
 
 // ── Config types ────────────────────────────────────────────────────────────
 

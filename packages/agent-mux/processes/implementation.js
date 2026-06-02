@@ -393,7 +393,7 @@ export async function process(inputs, ctx) {
           `Read spec 01 at "${args.projectRoot}/docs/01-core-types-and-client.md" sections 1.1-1.3 for package structure.`,
           `Project root is "${args.projectRoot}".`,
           'Set up a TypeScript monorepo with these packages:',
-          '  - packages/agent-mux/core/ — @a5c-ai/agent-comm-mux (types, client, stream engine)',
+          '  - packages/agent-mux/core/ — @a5c-ai/agent-mux-comm (types, client, stream engine)',
           '  - packages/agent-mux/adapters/ — @a5c-ai/agent-mux-adapters (built-in adapters)',
           '  - packages/agent-mux/cli/ — @a5c-ai/agent-mux-cli (amux binary)',
           '  - packages/agent-mux/sdk/ — @a5c-ai/agent-mux (meta-package)',

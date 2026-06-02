@@ -2,15 +2,15 @@
 
 import { Link } from "react-router-dom-v6";
 import { useNavigate, useSearchParams } from "react-router-dom-v6";
-import type { Attachment } from "@a5c-ai/agent-comm-mux";
+import type { Attachment } from "@a5c-ai/agent-mux-comm";
 import type {
   KanbanLinkedPullRequestSummary,
   KanbanRepositoryIntegrationState,
   KanbanReviewArtifact,
   KanbanReviewComment,
   KanbanReviewSummary,
-} from "@a5c-ai/agent-comm-mux/kanban";
-import { findKanbanExecutionContextEnvelopesForSession } from "@a5c-ai/agent-comm-mux/kanban";
+} from "@a5c-ai/agent-mux-comm/kanban";
+import { findKanbanExecutionContextEnvelopesForSession } from "@a5c-ai/agent-mux-comm/kanban";
 import { AlertTriangle, Archive, FolderGit2, Pin, PinOff, RefreshCw, RotateCcw, Search, Trash2, Wrench } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 

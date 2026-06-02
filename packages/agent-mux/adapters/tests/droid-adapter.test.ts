@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { DroidAdapter } from '../src/droid-adapter.js';
-import type { RunOptions } from '@a5c-ai/agent-comm-mux';
+import type { RunOptions } from '@a5c-ai/agent-mux-comm';
 
 describe('DroidAdapter', () => {
   let adapter: DroidAdapter;

@@ -4,8 +4,8 @@ import { useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom-v6';
 import { LogoWordmark } from '@a5c-ai/compendium';
-import type { Attachment, WorkspaceRuntimeSurface } from '@a5c-ai/agent-comm-mux';
-import type { KanbanWorkspaceSessionSummary } from '@a5c-ai/agent-comm-mux/kanban';
+import type { Attachment, WorkspaceRuntimeSurface } from '@a5c-ai/agent-mux-comm';
+import type { KanbanWorkspaceSessionSummary } from '@a5c-ai/agent-mux-comm/kanban';
 import { useGateway, useStopRun } from '@a5c-ai/agent-mux-ui';
 import type { Run } from '../types/index.js';
 

@@ -1081,7 +1081,7 @@ nodeKinds:
   - name: absentSignals
     type: list<string>
     required: false
-    notes: Env-var names whose ABSENCE is required for the rule to match. Used by hooks-mux ordered-rule detector (e.g. codex-without-claude-env disambiguates from claude when OPENAI_API_KEY is set but CLAUDE_PLUGIN_ROOT/CLAUDE_ENV_FILE are not). Consumed by `HooksMuxDetectionRule.absentSignals` in packages/agent-catalog/src/models.ts and packages/hooks-mux/core/src/discovery/detector.ts.
+    notes: Env-var names whose ABSENCE is required for the rule to match. Used by hooks-mux ordered-rule detector (e.g. codex-without-claude-env disambiguates from claude when OPENAI_API_KEY is set but CLAUDE_PLUGIN_ROOT/CLAUDE_ENV_FILE are not). Consumed by `HooksMuxDetectionRule.absentSignals` in packages/agent-catalog/src/models.ts and packages/agent-mux/hooks/core/src/discovery/detector.ts.
   - name: argvMatches
     type: list<string>
     required: false

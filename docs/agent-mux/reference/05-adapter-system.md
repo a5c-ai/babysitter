@@ -1074,11 +1074,11 @@ Plugin adapters distributed as npm packages should follow this convention:
 
 - Package name: `agent-mux-adapter-<agent-name>` (e.g., `agent-mux-adapter-aider`).
 - Default export: an `AgentAdapter` instance or a factory function `() => AgentAdapter`.
-- Peer dependency: `@a5c-ai/agent-comm-mux` (to get type definitions).
+- Peer dependency: `@a5c-ai/agent-mux-comm` (to get type definitions).
 
 ```typescript
 // agent-mux-adapter-aider/src/index.ts
-import { BaseAgentAdapter } from '@a5c-ai/agent-comm-mux';
+import { BaseAgentAdapter } from '@a5c-ai/agent-mux-comm';
 
 class AiderAdapter extends BaseAgentAdapter {
   // ... implementation

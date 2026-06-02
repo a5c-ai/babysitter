@@ -1,7 +1,7 @@
 import { nextBackoffDelay } from './backoff.js';
 import { GatewayClientDisconnectedError, GatewayClientTimeoutError } from './errors.js';
 import { createWebSocket as createBrowserWebSocket, type GatewaySocket } from './transports/ws-browser.js';
-import type { Attachment } from '@a5c-ai/agent-comm-mux';
+import type { Attachment } from '@a5c-ai/agent-mux-comm';
 import type { GatewayFrame, HookRequestFrame, RunEventFrame, SubscribeFrame } from '../protocol/v1.js';
 
 type GatewayClientEventMap = {

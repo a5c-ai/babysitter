@@ -484,7 +484,7 @@ The `launch` command is implemented in `packages/cli/src/commands/launch.ts` as 
 - `AdapterRegistry` for harness lookup and capability checking
 - `BaseAgentAdapter.detectInstallation()` for binary discovery
 - `BaseAgentAdapter.detectAuth()` for auth validation
-- Provider resolution from `@a5c-ai/agent-comm-mux` (new module: `provider-config.ts`)
+- Provider resolution from `@a5c-ai/agent-mux-comm` (new module: `provider-config.ts`)
 
 ### 9.2 Proxy Process Management
 

@@ -1,4 +1,4 @@
-import type { TransportId } from '@a5c-ai/agent-comm-mux';
+import type { TransportId } from '@a5c-ai/agent-mux-comm';
 
 export interface HarnessProviderTranslation {
   env: Record<string, string>;

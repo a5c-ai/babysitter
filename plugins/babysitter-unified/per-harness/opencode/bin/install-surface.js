@@ -173,7 +173,7 @@ function mergeHooksConfig(packageRoot, openCodeHome) {
         const normalizedScript = relativeScript.replace(/\\/g, '/').replace(/^\.\//, '');
         return {
           ...entry,
-          script: `npx -y -p @a5c-ai/hooks-mux-cli -c "a5c-hooks-mux invoke --adapter opencode --handler 'node ./plugins/${PLUGIN_NAME}/${normalizedScript}' --json"`,
+          script: `npx -y -p @a5c-ai/agent-mux-hooks-cli -c "a5c-hooks-mux invoke --adapter opencode --handler 'node ./plugins/${PLUGIN_NAME}/${normalizedScript}' --json"`,
         };
       }
       if (entry.command) {

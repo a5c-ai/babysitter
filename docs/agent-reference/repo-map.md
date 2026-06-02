@@ -26,7 +26,7 @@ npm run lint:hooks-mux
 | `packages/babysitter-tui-plugins` | `@a5c-ai/babysitter-tui-plugins` | TUI panels for status, cost, and governance |
 | `packages/atlas` | `@a5c-ai/atlas` | Atlas catalog graph SDK, CLI, and data |
 | `packages/atlas/webui` | `@a5c-ai/atlas-webui` | Atlas graph explorer (Next.js) |
-| `packages/hooks-mux/*` | `hooks-mux workspace packages` | Hook normalization, CLI, and harness adapters |
+| `packages/agent-mux/hooks/*` | `hooks-mux workspace packages` | Hook normalization, CLI, and harness adapters |
 
 ## Key Entry Points
 

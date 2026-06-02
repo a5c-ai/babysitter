@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { AgentMuxClient } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient } from '@a5c-ai/agent-mux-comm';
 import type { ParsedArgs } from '../../src/parse-args.js';
 import { mcpCommand } from '../../src/commands/mcp.js';
 import { ExitCode } from '../../src/exit-codes.js';

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { HookDecision } from '@a5c-ai/agent-comm-mux';
+import type { HookDecision } from '@a5c-ai/agent-mux-comm';
 
 import type { HookDecisionFrame, HookRequestFrame, HookResolvedFrame } from '../protocol/v1.js';
 import type { ClientConn } from '../fanout/client-conn.js';

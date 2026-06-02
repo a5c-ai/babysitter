@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import { Box, Text, useInput } from 'ink';
-import { HookConfigManager } from '@a5c-ai/agent-comm-mux';
+import { HookConfigManager } from '@a5c-ai/agent-mux-comm';
 import { definePlugin, type TuiViewProps } from '../plugin.js';
 
 interface Row {

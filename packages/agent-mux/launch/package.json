@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/agent-launch-mux",
+  "name": "@a5c-ai/agent-mux-launch",
   "version": "5.0.0",
   "type": "module",
   "license": "MIT",
@@ -49,7 +49,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/agent-comm-mux": "5.0.0",
+    "@a5c-ai/agent-mux-comm": "5.0.0",
     "@a5c-ai/agent-mux-adapters": "5.0.0",
     "@a5c-ai/atlas": "5.0.0",
     "@a5c-ai/agent-mux-transport": "5.0.0"

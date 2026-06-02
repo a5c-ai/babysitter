@@ -52,7 +52,7 @@ vi.mock('@a5c-ai/atlas/catalog', () => ({
   getSessionConfig: vi.fn(() => ({})),
 }));
 
-vi.mock('@a5c-ai/agent-comm-mux', () => ({
+vi.mock('@a5c-ai/agent-mux-comm', () => ({
   PROVIDER_DEFAULTS: {
     bedrock: { envKey: undefined },
   },

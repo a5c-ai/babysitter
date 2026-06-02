@@ -1,5 +1,5 @@
 import type { ReactNode, TextareaHTMLAttributes } from "react";
-import type { KanbanTaskTag } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanTaskTag } from "@a5c-ai/agent-mux-comm/kanban";
 interface TaskTagAutocompleteTextareaProps {
     value: string;
     onValueChange: (value: string) => void;

@@ -24,7 +24,7 @@ import type {
   CostRecord,
   SpawnArgs,
   ParseContext,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 /**
  * Abstract base class for programmatic adapters. Provides shared utilities

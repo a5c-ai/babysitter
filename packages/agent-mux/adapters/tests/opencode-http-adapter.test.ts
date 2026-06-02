@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import type { ServerInfo } from '@a5c-ai/agent-comm-mux';
+import type { ServerInfo } from '@a5c-ai/agent-mux-comm';
 import { OpenCodeHttpAdapter } from '../src/opencode-http-adapter.js';
 
 describe('OpenCodeHttpAdapter', () => {

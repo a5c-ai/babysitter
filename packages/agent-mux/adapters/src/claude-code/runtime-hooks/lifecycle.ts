@@ -1,4 +1,4 @@
-import type { RunOptions, RuntimeHookDispatcher, RuntimeHookSetup } from '@a5c-ai/agent-comm-mux';
+import type { RunOptions, RuntimeHookDispatcher, RuntimeHookSetup } from '@a5c-ai/agent-mux-comm';
 
 import {
   createClaudeRuntimeHookConfig,

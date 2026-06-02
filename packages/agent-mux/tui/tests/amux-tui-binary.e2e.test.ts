@@ -8,7 +8,7 @@ import * as pty from 'node-pty';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const binaryPath = path.resolve(__dirname, '../dist/bin/amux-tui.js');
 const fixturePluginPath = path.resolve(__dirname, 'fixtures/amux-tui-e2e-plugin.mjs');
-const agentMuxCoreDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/agent-comm-mux/dist/index.js');
+const agentMuxCoreDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/agent-mux-comm/dist/index.js');
 const agentMuxCliBootstrapDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/agent-mux-cli/dist/bootstrap.js');
 const observabilityDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/agent-mux-observability/dist/index.js');
 const describeBuiltBinary =

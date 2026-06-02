@@ -1,5 +1,5 @@
 import { type SessionFlowModel } from "@a5c-ai/agent-mux-ui/session-flow";
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-comm-mux";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-comm";
 interface EventBuffer {
     events: Array<Record<string, unknown>>;
 }

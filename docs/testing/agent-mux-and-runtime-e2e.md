@@ -16,7 +16,7 @@ This strategy covers runtime paths after setup is already satisfied. It separate
 | Adapter translation | `packages/agent-mux/adapters` | Prompt normalization, tool-call mapping, stop reasons, model selection, fallback behavior with mock adapters | Live Codex and Claude Code adapters translate real provider output into mux events |
 | Transport runtime | `packages/transport-mux` | Route matrix, proxy auth, protocol codecs, runtime env injection, passthrough forwarding, subprocess lifecycle, stream cancellation, timeout/error paths, metrics/cache snapshots | Transport-mux carries traffic for a real external harness through agent-mux launch and for an tula-core-backed stream |
 | Agent-core bridge | `packages/tula-core` | Programmatic session creation, mock provider responses, cancellation, usage accounting | Agent-core invokes a real provider and returns events compatible with agent-mux and agent-platform |
-| Hooks muxes | `packages/hooks-mux/*` | Adapter normalization, hook payload fixtures, CLI execution, approval/deny/error events | Real harness hook payloads from Codex and Claude Code normalize to the same hook contract |
+| Hooks muxes | `packages/agent-mux/hooks/*` | Adapter normalization, hook payload fixtures, CLI execution, approval/deny/error events | Real harness hook payloads from Codex and Claude Code normalize to the same hook contract |
 | Babysitter-agent runtime | `packages/agent-platform` | Seam contract, phase orchestration, planner/executor mocks, run journal state, task posting, selected backend | `agent-platform call/create-run/invoke` uses preinstalled or mocked backends; no harness install or plugin install steps are part of this E2E |
 | User surfaces | `packages/agent-mux/webui`, `packages/agent-mux/ui`, `packages/agent-mux/tui` | Playwright/Vitest against mock gateway and fixture sessions | Optional manual/live smoke against a model-backed gateway session |
 
@@ -36,8 +36,8 @@ The no-model runtime suite should be built first. It should include:
 Candidate command grouping:
 
 ```bash
-npm run test --workspace=@a5c-ai/transport-mux
-npm run test --workspace=@a5c-ai/agent-comm-mux
+npm run test --workspace=@a5c-ai/agent-mux-transport
+npm run test --workspace=@a5c-ai/agent-mux-comm
 npm run test --workspace=@a5c-ai/agent-mux-adapters
 npm run test --workspace=@a5c-ai/agent-mux-gateway
 npm run test --workspace=@a5c-ai/tula-core

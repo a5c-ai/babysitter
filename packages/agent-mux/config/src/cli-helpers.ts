@@ -6,7 +6,7 @@
  * dependency back to the CLI package.
  */
 
-import type { ErrorCode } from '@a5c-ai/agent-comm-mux';
+import type { ErrorCode } from '@a5c-ai/agent-mux-comm';
 
 // ---------------------------------------------------------------------------
 // Types

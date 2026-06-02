@@ -1,4 +1,4 @@
-import type { KanbanBacklogSnapshot, KanbanDispatchContextExecutionEnvelope } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanBacklogSnapshot, KanbanDispatchContextExecutionEnvelope } from "@a5c-ai/agent-mux-comm/kanban";
 export interface DispatchContextAuditRecord {
     readonly issueId: string;
     readonly issueKey: string;

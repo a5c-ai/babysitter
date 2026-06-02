@@ -8,7 +8,7 @@ import type {
   KanbanProject,
   KanbanWorkspaceInventory,
   KanbanWorkspaceSummary,
-} from '@a5c-ai/agent-comm-mux/kanban';
+} from '@a5c-ai/agent-mux-comm/kanban';
 import { definePlugin, type TuiViewProps } from '../plugin.js';
 import { truncateEnd, truncateMiddle, visibleWindow } from '../layout.js';
 

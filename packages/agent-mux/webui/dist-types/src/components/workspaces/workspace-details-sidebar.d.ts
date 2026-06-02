@@ -1,5 +1,5 @@
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-comm-mux";
-import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/agent-comm-mux/kanban";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-comm";
+import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/agent-mux-comm/kanban";
 import type { WorkspaceInventoryItem } from "@/lib/workspace-lifecycle";
 type WorkspaceSidebarAction = "rebase-start" | "rebase-auto-resolve" | "rebase-open-in-editor" | "rebase-mark-resolved" | "rebase-abort";
 export interface WorkspaceSidebarFeedback {

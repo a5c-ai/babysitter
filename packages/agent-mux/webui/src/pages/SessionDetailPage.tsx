@@ -14,7 +14,7 @@ import {
   type SessionCost,
   type SessionFlowModel,
 } from '@a5c-ai/agent-mux-ui/session-flow';
-import type { Attachment, WorkspaceRuntimeSurface } from '@a5c-ai/agent-comm-mux';
+import type { Attachment, WorkspaceRuntimeSurface } from '@a5c-ai/agent-mux-comm';
 import { Button } from '@a5c-ai/compendium';
 
 import { SessionWorkspaceShell } from '../components/sessions/session-workspace-shell.js';

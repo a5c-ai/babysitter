@@ -4523,7 +4523,7 @@ migration verdict from GREEN → **COMPLETE**.
   ordered-rule modeller for "signals present AND absentSignals absent").
 - New optional attribute `absentSignals: list<string>` — drives the
   legacy `HooksMuxDetectionRule.absentSignals` consumer in
-  `packages/hooks-mux/core/src/discovery/detector.ts:46` and
+  `packages/agent-mux/hooks/core/src/discovery/detector.ts:46` and
   `packages/agent-catalog/src/models.ts:438`.
 
 **Data authored** — 10 `DiscoverySignal[scope=hooks-mux]` rows under
@@ -4766,9 +4766,9 @@ NodeKind. **Result: 0 new anti-patterns.**
 
 
 
-## Catalog pass 94 — @a5c-ai/triggers-mux package surface modeled (2026-05-04)
+## Catalog pass 94 — @a5c-ai/agent-mux-triggers package surface modeled (2026-05-04)
 
-Catalog pass 94 catalogs `packages/triggers-mux/` (`@a5c-ai/triggers-mux` v0.4.9) into atlas
+Catalog pass 94 catalogs `packages/triggers-mux/` (`@a5c-ai/agent-mux-triggers` v0.4.9) into atlas
 as `OperationalTrigger` records, capturing all four `TriggerBackend`
 variants plus the reusable composite GitHub Action.
 
@@ -4852,9 +4852,9 @@ dangling / parse 0 / 0 / 0.
 - Dead-EdgeKinds 11 (≤ 13 cap honored).
 
 
-## Catalog pass 95 - @a5c-ai/triggers-mux package deep-decomposition (catalog pass 95, 2026-05-04)
+## Catalog pass 95 - @a5c-ai/agent-mux-triggers package deep-decomposition (catalog pass 95, 2026-05-04)
 
-catalog pass 95 deepens catalog pass 94 trigger modeling so the @a5c-ai/triggers-mux package
+catalog pass 95 deepens catalog pass 94 trigger modeling so the @a5c-ai/agent-mux-triggers package
 can be regenerated from the atlas graph alone. catalog pass 94 had compressed seven
 decomposable surfaces into string attributes on five OperationalTrigger
 records; catalog pass 95 promotes each surface to first-class records with edges.
@@ -4944,7 +4944,7 @@ this expectation here. No allowlist change needed.
 
 ### Codegen-readiness verdict for the triggers package
 
-GREEN -- given atlas alone, the @a5c-ai/triggers-mux package can be
+GREEN -- given atlas alone, the @a5c-ai/agent-mux-triggers package can be
 regenerated: package.json from PackageSurface + exposes_subcommand,
 action.yml from the 5 OperationalTriggers + 19 FrontmatterFields + 9
 GithubActionSteps, src/types.ts from the 2 SharedContextSpec field
@@ -5188,7 +5188,7 @@ tasks-mux, hooks-mux/core) into 40 graph records.
   `tasks-mux` top-level CLI groups + 2 APIEndpoint for the MCP
   HTTP transport (`/mcp`, `/healthz`) + 6 SharedContextSpec for the
   zod-validated wire schemas / BreakpointBackend interface
-- 8 SharedContextSpec for @a5c-ai/hooks-mux-core (UnifiedHookEvent,
+- 8 SharedContextSpec for @a5c-ai/agent-mux-hooks-core (UnifiedHookEvent,
   UnifiedExecutionContext, UnifiedHookResult, MergedExecutionResult,
   PhaseMapping, SessionState, DetectedHarness, PropagationOptions)
 

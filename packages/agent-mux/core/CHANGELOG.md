@@ -1,4 +1,4 @@
-# @a5c-ai/agent-comm-mux
+# @a5c-ai/agent-mux-comm
 
 ## 0.4.9
 

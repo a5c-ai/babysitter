@@ -71,7 +71,7 @@ attributes:
 nodeKind: SourceRef
 id: source-ref:packages-tool-mux
 attributes:
-  description: '@a5c-ai/tool-mux — unified tool-descriptor registry + MCP tool routing'
+  description: '@a5c-ai/agent-mux-tools — unified tool-descriptor registry + MCP tool routing'
   displayName: a5c-ai/babysitter — packages/tool-mux
   repoUrl: https://github.com/a5c-ai/babysitter
   ref: main
@@ -81,7 +81,7 @@ attributes:
 nodeKind: SourceRef
 id: source-ref:packages-agent-launch-mux
 attributes:
-  description: '@a5c-ai/agent-launch-mux — agent session launcher (spawn / attach / reconnect)'
+  description: '@a5c-ai/agent-mux-launch — agent session launcher (spawn / attach / reconnect)'
   displayName: a5c-ai/babysitter — packages/agent-mux/launch
   repoUrl: https://github.com/a5c-ai/babysitter
   ref: main
@@ -91,7 +91,7 @@ attributes:
 nodeKind: SourceRef
 id: source-ref:packages-agent-config-mux
 attributes:
-  description: '@a5c-ai/agent-config-mux — agent configuration discovery + merging'
+  description: '@a5c-ai/agent-mux-config — agent configuration discovery + merging'
   displayName: a5c-ai/babysitter — packages/agent-mux/config
   repoUrl: https://github.com/a5c-ai/babysitter
   ref: main

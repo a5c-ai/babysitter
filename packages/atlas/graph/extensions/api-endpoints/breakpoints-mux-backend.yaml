@@ -4,7 +4,7 @@
 # external breakpoints-pro server and is therefore NOT modeled as an
 # ApiEndpoint here (the upstream server's surface lives outside the
 # monorepo). Only the in-process MCP HTTP server is exposed.
-# Wired via @a5c-ai/tasks-mux PackageSurface `exposes_endpoint` edge.
+# Wired via @a5c-ai/agent-mux-tasks PackageSurface `exposes_endpoint` edge.
 nodeKind: APIEndpoint
 id: api-endpoint:tasks-mux-mcp-streamable
 attributes:

@@ -64,7 +64,7 @@ Agent orchestration implications:
   - Important files:
     - `packages/agent-mux/core/src/types.ts`
     - `packages/agent-mux/core/src/session-manager.ts`
-    - `packages/agent-mux/core/src/workspace-service.ts` if present in this branch; otherwise follow imports from `@a5c-ai/agent-comm-mux`.
+    - `packages/agent-mux/core/src/workspace-service.ts` if present in this branch; otherwise follow imports from `@a5c-ai/agent-mux-comm`.
 - `packages/agent-mux/gateway/`
   - HTTP/WebSocket gateway and server-side run/session orchestration.
   - Important files:

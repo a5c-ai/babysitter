@@ -2,8 +2,8 @@ import * as http from 'node:http';
 
 import { Hono, type Context } from 'hono';
 import { WebSocketServer } from 'ws';
-import type { Attachment } from '@a5c-ai/agent-comm-mux';
-import { resolveWorkspaceDefaultCwd, WorkspaceService } from '@a5c-ai/agent-comm-mux';
+import type { Attachment } from '@a5c-ai/agent-mux-comm';
+import { resolveWorkspaceDefaultCwd, WorkspaceService } from '@a5c-ai/agent-mux-comm';
 
 import {
   BootstrapAuthService,

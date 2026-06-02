@@ -1,5 +1,5 @@
-import type { Attachment } from "@a5c-ai/agent-comm-mux";
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-comm-mux";
+import type { Attachment } from "@a5c-ai/agent-mux-comm";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-comm";
 import type { SessionCost, SessionFlowModel } from "@a5c-ai/agent-mux-ui/session-flow";
 import { type WorkspacePanelSizes } from "@/lib/workspace-layout-state";
 type EventBuffer = {

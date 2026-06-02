@@ -15,7 +15,7 @@ git mv packages/tool-mux packages/agent-mux/tools
 ## Phase 2: Move Hooks-Mux Under Agent-Mux
 
 ```bash
-git mv packages/hooks-mux packages/agent-mux/hooks
+git mv packages/agent-mux/hooks packages/agent-mux/hooks
 ```
 
 This moves all 12 hooks-mux subpackages at once since they're already structured under a parent directory.

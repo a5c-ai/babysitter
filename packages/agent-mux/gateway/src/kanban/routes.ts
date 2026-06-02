@@ -8,13 +8,13 @@ import {
   type AgentName,
   type McpServerConfig,
   type WorkspaceRuntimeSurface,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 import type {
   KanbanReviewArtifact,
   KanbanReviewComment,
   KanbanReviewSummary,
-} from '@a5c-ai/agent-comm-mux';
-import type { AutomationRuleLifecycleState } from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
+import type { AutomationRuleLifecycleState } from '@a5c-ai/agent-mux-comm';
 import type { Hono } from 'hono';
 import { randomUUID } from 'node:crypto';
 

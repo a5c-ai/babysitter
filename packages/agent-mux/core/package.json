@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/agent-comm-mux",
+  "name": "@a5c-ai/agent-mux-comm",
   "version": "5.0.0",
   "type": "module",
   "license": "MIT",

@@ -4,7 +4,7 @@
 # at the group level; deep enumeration is deferred — leaf subcommand
 # expansion would not change the grammar shape and is callable through the
 # parent group records here.
-# Wired via @a5c-ai/tasks-mux PackageSurface `exposes_subcommand` edge.
+# Wired via @a5c-ai/agent-mux-tasks PackageSurface `exposes_subcommand` edge.
 nodeKind: InteractionPrimitive
 id: interaction-primitive:tasks-mux-cli-ask
 attributes:

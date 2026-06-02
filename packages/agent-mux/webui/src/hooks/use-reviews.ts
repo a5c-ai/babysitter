@@ -17,7 +17,7 @@ import type {
   KanbanReviewStatus,
   KanbanReviewSnapshot,
   KanbanReviewTargetType,
-} from "@a5c-ai/agent-comm-mux/kanban";
+} from "@a5c-ai/agent-mux-comm/kanban";
 
 import { useSmartPolling } from "./use-smart-polling";
 

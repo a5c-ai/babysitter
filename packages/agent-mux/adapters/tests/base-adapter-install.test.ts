@@ -3,7 +3,7 @@
  * and per-adapter overrides (claude, gemini, cursor, agent-mux-remote).
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import type { Spawner } from '@a5c-ai/agent-comm-mux';
+import type { Spawner } from '@a5c-ai/agent-mux-comm';
 
 import {
   ClaudeAdapter,

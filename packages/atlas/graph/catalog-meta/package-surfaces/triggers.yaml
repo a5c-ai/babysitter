@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-triggers
 attributes:
-  packageId: "@a5c-ai/triggers-mux"
-  packageName: "@a5c-ai/triggers-mux"
+  packageId: "@a5c-ai/agent-mux-triggers"
+  packageName: "@a5c-ai/agent-mux-triggers"
   workspacePath: packages/triggers-mux
   moduleType: typescript
   surfaceKinds:

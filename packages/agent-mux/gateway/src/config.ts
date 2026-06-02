@@ -1,7 +1,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import type { RunHandle, RunOptions } from '@a5c-ai/agent-comm-mux';
+import type { RunHandle, RunOptions } from '@a5c-ai/agent-mux-comm';
 
 import type { BootstrapAuthMode } from './auth/bootstrap.js';
 import type { TokenStore } from './auth/tokens.js';

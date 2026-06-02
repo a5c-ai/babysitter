@@ -46,7 +46,7 @@ attributes:
     cd "$REPO_ROOT"
     npm ci
     npm run build:agent-mux
-    npm run build --workspace=@a5c-ai/triggers-mux
+    npm run build --workspace=@a5c-ai/agent-mux-triggers
   sourceCitation: "packages/triggers-mux/action.yml:91-101"
 edges:
   executed_by_trigger:

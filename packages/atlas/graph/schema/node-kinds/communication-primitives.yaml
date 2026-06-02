@@ -111,7 +111,7 @@ nodeKinds:
 
     prefix or namespace conflicts. Sourced from
 
-    packages/hooks-mux/core/src/merge-engine/merge.ts (MergeOptions,
+    packages/agent-mux/hooks/core/src/merge-engine/merge.ts (MergeOptions,
 
     MergedExecutionResult).
 

@@ -376,7 +376,7 @@ jobs:
             "agent-platform:packages/tula/dist/cli/main.js" \
             "tula:packages/tula/dist/cli/main.js" \
             "babysitter:packages/sdk/dist/cli/main.js" \
-            "a5c-hooks-mux:packages/hooks-mux/cli/dist/cli/main.js"
+            "a5c-hooks-mux:packages/agent-mux/hooks/cli/dist/cli/main.js"
           do
             name="${pair%%:*}"
             script="${pair#*:}"

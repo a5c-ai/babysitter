@@ -1,6 +1,6 @@
 import type { GatewayRunClient } from './config.js';
 
-import { createClient } from '@a5c-ai/agent-comm-mux';
+import { createClient } from '@a5c-ai/agent-mux-comm';
 import {
   AgentMuxRemoteAdapter,
   AmpAdapter,

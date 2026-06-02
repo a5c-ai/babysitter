@@ -101,7 +101,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/tasks-mux
+          npm run build --workspace=@a5c-ai/agent-mux-tasks
 
 
       - name: "Build phase 2: parallel independents and agent-mux critical path"
@@ -123,28 +123,28 @@ jobs:
 
           run_bg bash -lc '
             set -euo pipefail
-            npm run build --workspace=@a5c-ai/hooks-mux-core
+            npm run build --workspace=@a5c-ai/agent-mux-hooks-core
             # Adapters are independent (only depend on core) — build in parallel
             for adapter in claude codex gemini copilot cursor pi oh-my-pi opencode openclaw hermes; do
-              npm run build --workspace=@a5c-ai/hooks-mux-adapter-$adapter &
+              npm run build --workspace=@a5c-ai/agent-mux-hooks-adapter-$adapter &
             done
             wait
-            npm run build --workspace=@a5c-ai/hooks-mux-cli
+            npm run build --workspace=@a5c-ai/agent-mux-hooks-cli
           '
-          run_bg npm run build --workspace=@a5c-ai/extension-mux
-          run_bg npm run build --workspace=@a5c-ai/triggers-mux
+          run_bg npm run build --workspace=@a5c-ai/agent-mux-extensions
+          run_bg npm run build --workspace=@a5c-ai/agent-mux-triggers
           run_bg npm run build:observer
           run_bg npm run build:cloud
           run_bg bash -lc 'cd packages/krate/core && npm run build && cd ../web && npm run build'
 
           # agent-mux critical path (sequential — each depends on previous)
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-comm-mux
+          npm run build --workspace=@a5c-ai/agent-mux-comm
 
           leaf_pids=()
           npm run build --workspace=@a5c-ai/agent-mux-adapters & leaf_pids+=("$!")
           npm run build --workspace=@a5c-ai/agent-mux-harness-mock & leaf_pids+=("$!")
-          npm run build --workspace=@a5c-ai/transport-mux & leaf_pids+=("$!")
+          npm run build --workspace=@a5c-ai/agent-mux-transport & leaf_pids+=("$!")
           leaf_fail=0
           for pid in "${leaf_pids[@]}"; do
             wait "$pid" || leaf_fail=1
@@ -316,19 +316,19 @@ jobs:
           node scripts/agent-mux-build.cjs test packages/agent-mux/gateway 2>&1 | tee artifacts/mux-logs/agent-mux-gateway-tests.log
           node scripts/agent-mux-build.cjs test packages/agent-mux/cli 2>&1 | tee artifacts/mux-logs/agent-mux-cli-tests.log
           node scripts/agent-mux-build.cjs test packages/agent-mux/sdk 2>&1 | tee artifacts/mux-logs/agent-mux-sdk-tests.log
-          npm run test:unit --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/mux-logs/triggers-tests.log
+          npm run test:unit --workspace=@a5c-ai/agent-mux-triggers 2>&1 | tee artifacts/mux-logs/triggers-tests.log
 
       - name: Verify non-realtime agent-mux release artifacts
         run: |
           set -euo pipefail
-          npm run verify:release --workspace=@a5c-ai/agent-comm-mux 2>&1 | tee artifacts/mux-logs/agent-comm-mux-release.log
+          npm run verify:release --workspace=@a5c-ai/agent-mux-comm 2>&1 | tee artifacts/mux-logs/agent-comm-mux-release.log
           npm run verify:release --workspace=@a5c-ai/agent-mux-tui 2>&1 | tee artifacts/mux-logs/agent-mux-tui-release.log
 
       - name: Validate transport-mux runtime owner
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/mux-logs/transport-mux-tests.log
-          npm run scorecard:migration --workspace=@a5c-ai/transport-mux 2>&1 | tee artifacts/mux-logs/transport-mux-scorecard.log
+          npm run test --workspace=@a5c-ai/agent-mux-transport 2>&1 | tee artifacts/mux-logs/transport-mux-tests.log
+          npm run scorecard:migration --workspace=@a5c-ai/agent-mux-transport 2>&1 | tee artifacts/mux-logs/transport-mux-scorecard.log
 
       - name: Upload mux validation logs
         if: always()
@@ -389,8 +389,8 @@ jobs:
       - name: Triggers e2e + coverage
         run: |
           set -euo pipefail
-          npm run test:e2e --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/e2e-logs/triggers-e2e.log
-          npm run test:coverage --workspace=@a5c-ai/triggers-mux 2>&1 | tee artifacts/e2e-logs/triggers-coverage.log
+          npm run test:e2e --workspace=@a5c-ai/agent-mux-triggers 2>&1 | tee artifacts/e2e-logs/triggers-e2e.log
+          npm run test:coverage --workspace=@a5c-ai/agent-mux-triggers 2>&1 | tee artifacts/e2e-logs/triggers-coverage.log
 
       - name: Krate e2e + smoke
         run: |
@@ -599,7 +599,7 @@ jobs:
       - name: Test extension-mux
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/extension-mux 2>&1 | tee artifacts/observer-compiler-logs/extension-mux-tests.log
+          npm run test --workspace=@a5c-ai/agent-mux-extensions 2>&1 | tee artifacts/observer-compiler-logs/extension-mux-tests.log
 
       - name: Generate unified plugin bundles
         run: |
@@ -790,19 +790,19 @@ jobs:
       matrix:
         include:
           - name: tasks-mux
-            build: npm run build --workspace=@a5c-ai/tasks-mux
-            publish: npm publish --workspace=@a5c-ai/tasks-mux --access public --tag "$NPM_TAG"
+            build: npm run build --workspace=@a5c-ai/agent-mux-tasks
+            publish: npm publish --workspace=@a5c-ai/agent-mux-tasks --access public --tag "$NPM_TAG"
           - name: agent-mux-observability
             build: npm run build --workspace=@a5c-ai/agent-mux-observability
             publish: npm publish --workspace=@a5c-ai/agent-mux-observability --access public --tag "$NPM_TAG"
           - name: triggers
             build: |
               set -euo pipefail
-              npm run build --workspace=@a5c-ai/triggers-mux
-              npm run test:unit --workspace=@a5c-ai/triggers-mux
-              npm run test:e2e --workspace=@a5c-ai/triggers-mux
-              npm run test:coverage --workspace=@a5c-ai/triggers-mux
-            publish: npm publish --workspace=@a5c-ai/triggers-mux --access public --tag "$NPM_TAG"
+              npm run build --workspace=@a5c-ai/agent-mux-triggers
+              npm run test:unit --workspace=@a5c-ai/agent-mux-triggers
+              npm run test:e2e --workspace=@a5c-ai/agent-mux-triggers
+              npm run test:coverage --workspace=@a5c-ai/agent-mux-triggers
+            publish: npm publish --workspace=@a5c-ai/agent-mux-triggers --access public --tag "$NPM_TAG"
           - name: observer-dashboard
             build: npm run build:observer
             publish: npm publish --workspace=@a5c-ai/babysitter-observer-dashboard --access public --tag "$NPM_TAG"
@@ -864,14 +864,14 @@ jobs:
       matrix:
         include:
           - name: hooks-mux-core
-            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/hooks-mux-core
-            publish: npm publish --workspace=@a5c-ai/hooks-mux-core --access public --tag "$NPM_TAG"
+            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-mux-hooks-core
+            publish: npm publish --workspace=@a5c-ai/agent-mux-hooks-core --access public --tag "$NPM_TAG"
           - name: agent-comm-mux
-            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-mux-observability && npm run build --workspace=@a5c-ai/agent-comm-mux
-            publish: npm publish --workspace=@a5c-ai/agent-comm-mux --access public --tag "$NPM_TAG"
+            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-mux-observability && npm run build --workspace=@a5c-ai/agent-mux-comm
+            publish: npm publish --workspace=@a5c-ai/agent-mux-comm --access public --tag "$NPM_TAG"
           - name: extension-mux
-            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/extension-mux
-            publish: npm publish --workspace=@a5c-ai/extension-mux --access public --tag "$NPM_TAG"
+            build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-mux-extensions
+            publish: npm publish --workspace=@a5c-ai/agent-mux-extensions --access public --tag "$NPM_TAG"
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v8
@@ -924,25 +924,25 @@ jobs:
       matrix:
         include:
           - name: hooks-mux-adapter-claude
-            workspace: '@a5c-ai/hooks-mux-adapter-claude'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-claude'
           - name: hooks-mux-adapter-codex
-            workspace: '@a5c-ai/hooks-mux-adapter-codex'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-codex'
           - name: hooks-mux-adapter-gemini
-            workspace: '@a5c-ai/hooks-mux-adapter-gemini'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-gemini'
           - name: hooks-mux-adapter-copilot
-            workspace: '@a5c-ai/hooks-mux-adapter-copilot'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-copilot'
           - name: hooks-mux-adapter-cursor
-            workspace: '@a5c-ai/hooks-mux-adapter-cursor'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-cursor'
           - name: hooks-mux-adapter-pi
-            workspace: '@a5c-ai/hooks-mux-adapter-pi'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-pi'
           - name: hooks-mux-adapter-oh-my-pi
-            workspace: '@a5c-ai/hooks-mux-adapter-oh-my-pi'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-oh-my-pi'
           - name: hooks-mux-adapter-opencode
-            workspace: '@a5c-ai/hooks-mux-adapter-opencode'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-opencode'
           - name: hooks-mux-adapter-openclaw
-            workspace: '@a5c-ai/hooks-mux-adapter-openclaw'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-openclaw'
           - name: hooks-mux-adapter-hermes
-            workspace: '@a5c-ai/hooks-mux-adapter-hermes'
+            workspace: '@a5c-ai/agent-mux-hooks-adapter-hermes'
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v8
@@ -980,7 +980,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/hooks-mux-core
+          npm run build --workspace=@a5c-ai/agent-mux-hooks-core
           npm run build --workspace=${{ matrix.workspace }}
 
       - name: Publish hooks adapter
@@ -1033,7 +1033,7 @@ jobs:
       - name: Publish hooks-mux CLI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/hooks-mux-cli --access public --tag "$NPM_TAG"
+        run: npm publish --workspace=@a5c-ai/agent-mux-hooks-cli --access public --tag "$NPM_TAG"
 
   publish_staging_agent_mux_leaf:
     name: Publish Agent Mux Leaf - ${{ matrix.name }}
@@ -1051,7 +1051,7 @@ jobs:
               set -euo pipefail
               npm run build --workspace=@a5c-ai/atlas
               npm run build --workspace=@a5c-ai/agent-mux-observability
-              npm run build --workspace=@a5c-ai/agent-comm-mux
+              npm run build --workspace=@a5c-ai/agent-mux-comm
               npm run build --workspace=@a5c-ai/agent-mux-adapters
           - name: agent-mux-harness-mock
             workspace: '@a5c-ai/agent-mux-harness-mock'
@@ -1059,42 +1059,42 @@ jobs:
               set -euo pipefail
               npm run build --workspace=@a5c-ai/atlas
               npm run build --workspace=@a5c-ai/agent-mux-observability
-              npm run build --workspace=@a5c-ai/agent-comm-mux
+              npm run build --workspace=@a5c-ai/agent-mux-comm
               npm run build --workspace=@a5c-ai/agent-mux-harness-mock
           - name: transport-mux
-            workspace: '@a5c-ai/transport-mux'
+            workspace: '@a5c-ai/agent-mux-transport'
             build: |
               set -euo pipefail
               npm run build --workspace=@a5c-ai/atlas
               npm run build --workspace=@a5c-ai/agent-mux-observability
-              npm run build --workspace=@a5c-ai/agent-comm-mux
-              npm run build --workspace=@a5c-ai/transport-mux
+              npm run build --workspace=@a5c-ai/agent-mux-comm
+              npm run build --workspace=@a5c-ai/agent-mux-transport
           - name: agent-config-mux
-            workspace: '@a5c-ai/agent-config-mux'
+            workspace: '@a5c-ai/agent-mux-config'
             build: |
               set -euo pipefail
               npm run build --workspace=@a5c-ai/atlas
               npm run build --workspace=@a5c-ai/agent-mux-observability
-              npm run build --workspace=@a5c-ai/agent-comm-mux
+              npm run build --workspace=@a5c-ai/agent-mux-comm
               npx tsc --build packages/agent-mux/config/tsconfig.json
           - name: agent-launch-mux
-            workspace: '@a5c-ai/agent-launch-mux'
+            workspace: '@a5c-ai/agent-mux-launch'
             build: |
               set -euo pipefail
               npm run build --workspace=@a5c-ai/atlas
               npm run build --workspace=@a5c-ai/agent-mux-observability
-              npm run build --workspace=@a5c-ai/agent-comm-mux
+              npm run build --workspace=@a5c-ai/agent-mux-comm
               npm run build --workspace=@a5c-ai/agent-mux-adapters
-              npm run build --workspace=@a5c-ai/transport-mux
+              npm run build --workspace=@a5c-ai/agent-mux-transport
               npx tsc --build packages/agent-mux/launch/tsconfig.json
           - name: tool-mux
-            workspace: '@a5c-ai/tool-mux'
+            workspace: '@a5c-ai/agent-mux-tools'
             build: |
               set -euo pipefail
               npm run build --workspace=@a5c-ai/atlas
               npm run build --workspace=@a5c-ai/agent-mux-observability
-              npm run build --workspace=@a5c-ai/agent-comm-mux
-              npm run build --workspace=@a5c-ai/transport-mux
+              npm run build --workspace=@a5c-ai/agent-mux-comm
+              npm run build --workspace=@a5c-ai/agent-mux-transport
               npx tsc --build packages/tool-mux/tsconfig.json
     steps:
       - name: Download publish workspace
@@ -1181,7 +1181,7 @@ jobs:
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-comm-mux
+          npm run build --workspace=@a5c-ai/agent-mux-comm
           npm run build --workspace=@a5c-ai/agent-mux-adapters
           npm run build --workspace=@a5c-ai/agent-mux-gateway
 
@@ -1224,10 +1224,10 @@ jobs:
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-comm-mux
+          npm run build --workspace=@a5c-ai/agent-mux-comm
           npm run build --workspace=@a5c-ai/agent-mux-adapters
           npm run build --workspace=@a5c-ai/agent-mux-gateway
-          npm run build --workspace=@a5c-ai/transport-mux
+          npm run build --workspace=@a5c-ai/agent-mux-transport
           npm run build --workspace=@a5c-ai/agent-mux-cli
 
       - name: Publish agent-mux CLI
@@ -1279,10 +1279,10 @@ jobs:
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-comm-mux
+          npm run build --workspace=@a5c-ai/agent-mux-comm
           npm run build --workspace=@a5c-ai/agent-mux-adapters
           npm run build --workspace=@a5c-ai/agent-mux-gateway
-          npm run build --workspace=@a5c-ai/transport-mux
+          npm run build --workspace=@a5c-ai/agent-mux-transport
           npm run build --workspace=@a5c-ai/agent-mux-cli
           npm run build --workspace=@a5c-ai/agent-mux
 
@@ -1335,10 +1335,10 @@ jobs:
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/agent-mux-observability
-          npm run build --workspace=@a5c-ai/agent-comm-mux
+          npm run build --workspace=@a5c-ai/agent-mux-comm
           npm run build --workspace=@a5c-ai/agent-mux-adapters
           npm run build --workspace=@a5c-ai/agent-mux-gateway
-          npm run build --workspace=@a5c-ai/transport-mux
+          npm run build --workspace=@a5c-ai/agent-mux-transport
           npm run build --workspace=@a5c-ai/agent-mux-cli
           npm run build --workspace=@a5c-ai/agent-mux
           npm run build:local --workspace=@a5c-ai/agent-mux-tui
@@ -1392,7 +1392,7 @@ jobs:
           set -euo pipefail
           # atlas must be built first because the agent-mux chain imports atlas/catalog
           npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/tasks-mux
+          npm run build --workspace=@a5c-ai/agent-mux-tasks
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
 
@@ -1447,7 +1447,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/tasks-mux
+          npm run build --workspace=@a5c-ai/agent-mux-tasks
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
           npm run build --workspace=@a5c-ai/tula-core
@@ -1500,7 +1500,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/tasks-mux
+          npm run build --workspace=@a5c-ai/agent-mux-tasks
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
           npm run build --workspace=@a5c-ai/tula-core
@@ -1547,7 +1547,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/tasks-mux
+          npm run build --workspace=@a5c-ai/agent-mux-tasks
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
           npm run build --workspace=@a5c-ai/tula-core
@@ -1594,7 +1594,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/tasks-mux
+          npm run build --workspace=@a5c-ai/agent-mux-tasks
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
           npm run build --workspace=@a5c-ai/tula-core

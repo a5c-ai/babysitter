@@ -19,7 +19,7 @@ type TargetPackageProfile = Pick<TargetProfile, 'name' | 'npmPackageName'>;
 export const BABYSITTER_DEFAULT_SDK_CONFIG: Readonly<SdkConfig> = {
   package: '@a5c-ai/babysitter-sdk',
   cli: 'babysitter',
-  proxyPackage: '@a5c-ai/hooks-mux-cli',
+  proxyPackage: '@a5c-ai/agent-mux-hooks-cli',
   proxyBinary: 'a5c-hooks-mux',
   scope: '@a5c-ai',
   envPrefix: 'BABYSITTER',

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import type { AgentMuxClient } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient } from '@a5c-ai/agent-mux-comm';
 import type { ParsedArgs } from '../../src/parse-args.js';
 import { skillCommand } from '../../src/commands/skill.js';
 import { ExitCode } from '../../src/exit-codes.js';

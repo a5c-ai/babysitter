@@ -80,7 +80,7 @@
     "test": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
-    "@a5c-ai/agent-comm-mux": "5.0.0",
+    "@a5c-ai/agent-mux-comm": "5.0.0",
     "hono": "^4.12.14",
     "ws": "^8.20.0"
   },

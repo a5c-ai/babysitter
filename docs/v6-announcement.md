@@ -50,7 +50,7 @@ The WebUI received a full Compendium redesign with first-class dark mode and tab
 
 ### Hooks Mux
 
-Hooks Mux (248 files, 30K lines) provides a unified hook system with adapters for all 9 supported harnesses. The core package (`@a5c-ai/hooks-mux-core`) defines canonical schemas, types, a session store, and a merge engine that reconciles hook state across concurrent agent invocations.
+Hooks Mux (248 files, 30K lines) provides a unified hook system with adapters for all 9 supported harnesses. The core package (`@a5c-ai/agent-mux-hooks-core`) defines canonical schemas, types, a session store, and a merge engine that reconciles hook state across concurrent agent invocations.
 
 Three documentation guides are referenced across the adapter READMEs: `adapter-integration-guide.md`, `portable-hook-authoring.md`, and `session-context-propagation.md`.
 

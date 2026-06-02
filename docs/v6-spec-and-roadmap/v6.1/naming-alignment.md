@@ -41,8 +41,8 @@ The graph defines `HookSurface`, `HookMapping`, `Channel` (channels-hooks cluste
 
 | Graph Concept | Package | Mismatch |
 |---------------|---------|----------|
-| HookSurface | `@a5c-ai/hooks-mux-core` | "mux" implies multiplexing; graph says "surface" |
-| HookMapping | `@a5c-ai/hooks-mux-adapter-*` | Graph uses "mapping" not "adapter" |
+| HookSurface | `@a5c-ai/agent-mux-hooks-core` | "mux" implies multiplexing; graph says "surface" |
+| HookMapping | `@a5c-ai/agent-mux-hooks-adapter-*` | Graph uses "mapping" not "adapter" |
 | Channel | (no dedicated package) | Graph concept has no implementation |
 
 **Recommendation:** The hooks-mux naming is stable and understood. "Channel" from the graph maps to the event routing in hooks-mux-core but isn't surfaced as a first-class concept in the API.

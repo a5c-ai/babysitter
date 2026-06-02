@@ -1,4 +1,4 @@
-import type { KanbanExecutionContextEnvelope } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanExecutionContextEnvelope } from "@a5c-ai/agent-mux-comm/kanban";
 export declare function ExecutionContextPanel(props: {
     contexts: readonly KanbanExecutionContextEnvelope[];
     title?: string;

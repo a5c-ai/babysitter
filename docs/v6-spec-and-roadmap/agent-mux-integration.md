@@ -12,7 +12,7 @@ The integrated `agent-mux` package family includes:
 
 ### Core Infrastructure
 
-- **`@a5c-ai/agent-comm-mux`** - Core types, client, and stream engine
+- **`@a5c-ai/agent-mux-comm`** - Core types, client, and stream engine
 - **`@a5c-ai/agent-mux-adapters`** - Built-in harness adapters
 - **`@a5c-ai/agent-mux-cli`** - `amux` command-line interface
 - **`@a5c-ai/agent-mux`** - Main SDK package and dispatch surface
@@ -70,7 +70,7 @@ The monorepo root includes:
 
 - `packages/*`
 - `packages/agent-mux/*`
-- `packages/hooks-mux/*`
+- `packages/agent-mux/hooks/*`
 
 That workspace layout is already evidence that agent-mux is part of the repo's current operating model.
 
@@ -87,7 +87,7 @@ The plugin and hook story spans multiple packages:
 
 - `plugins/babysitter-unified/` is the canonical plugin authoring surface.
 - `packages/extension-mux` is the compiler for harness-specific outputs.
-- `packages/hooks-mux/*` normalizes hook contracts across harnesses.
+- `packages/agent-mux/hooks/*` normalizes hook contracts across harnesses.
 - per-harness plugin bundles remain the real installation surfaces users consume.
 
 For V6, this package set is the concrete delivery path for metaplugins on legacy non-Babysitter agents. The metaplugin itself is the higher-order capability being expressed across plugin and hook surfaces; `extension-mux` only compiles the concrete outputs that carry it. The intended examples are memory systems, governance or policy engines, and discipline-enforcement layers. The `babysitter-unified` plugin family fits here as a first-party unified plugin source and deployment surface, not as the definition of metaplugins.

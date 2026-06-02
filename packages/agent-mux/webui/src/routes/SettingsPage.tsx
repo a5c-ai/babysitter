@@ -7,7 +7,7 @@ import type {
   KanbanProjectSettings,
   KanbanTaskTag,
   KanbanCollaboratorRole,
-} from "@a5c-ai/agent-comm-mux/kanban";
+} from "@a5c-ai/agent-mux-comm/kanban";
 import { LogoWordmark } from "@a5c-ai/compendium";
 import { Activity, AlertTriangle, Boxes, Cpu, Network, ServerCog, ShieldCheck, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom-v6";

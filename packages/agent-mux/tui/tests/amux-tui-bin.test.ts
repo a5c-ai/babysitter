@@ -111,7 +111,7 @@ describe('amux-tui binary entrypoint', () => {
       reconfigureLogger,
     }));
     vi.doMock('ink', () => ({ render: vi.fn() }));
-    vi.doMock('@a5c-ai/agent-comm-mux', () => ({ createClient: vi.fn() }));
+    vi.doMock('@a5c-ai/agent-mux-comm', () => ({ createClient: vi.fn() }));
     vi.doMock('@a5c-ai/agent-mux-cli/bootstrap', () => ({ registerBuiltInAdapters: vi.fn() }));
     vi.doMock('../src/index.js', () => ({
       App: vi.fn(),

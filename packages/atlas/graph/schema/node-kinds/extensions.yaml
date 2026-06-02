@@ -1208,7 +1208,7 @@ nodeKinds:
       Catalog pass 18 introduced the operator-issued lifecycle set. Catalog pass 94
       (Catalog pass 94) extended the enum to cover `webhook-event` and `vcs-event` — the
       VCS / generic-webhook normalization triggers exposed by
-      `@a5c-ai/triggers-mux` (packages/triggers-mux/src/types.ts:1, TriggerBackend
+      `@a5c-ai/agent-mux-triggers` (packages/triggers-mux/src/types.ts:1, TriggerBackend
       union: github | gitlab | bitbucket | generic-webhook).
   - name: effect
     type: string
@@ -1225,7 +1225,7 @@ nodeKinds:
     required: false
     notes: |
       `webhook` and `vcs-event` added Catalog pass 94 to capture the
-      `@a5c-ai/triggers-mux` invocation surfaces (HTTP webhook payload arriving
+      `@a5c-ai/agent-mux-triggers` invocation surfaces (HTTP webhook payload arriving
       via GitHub Actions / generic webhook receiver, normalized into a
       single event shape).
   - name: backend

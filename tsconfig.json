@@ -31,7 +31,19 @@
     { "path": "packages/agent-mux/triggers" },
     { "path": "packages/agent-mux/tasks" },
     { "path": "packages/agent-mux/tui" },
-    { "path": "packages/agent-mux/tools" }
+    { "path": "packages/agent-mux/tools" },
+    { "path": "packages/agent-mux/hooks/core" },
+    { "path": "packages/agent-mux/hooks/cli" },
+    { "path": "packages/agent-mux/hooks/adapter-claude" },
+    { "path": "packages/agent-mux/hooks/adapter-codex" },
+    { "path": "packages/agent-mux/hooks/adapter-copilot" },
+    { "path": "packages/agent-mux/hooks/adapter-cursor" },
+    { "path": "packages/agent-mux/hooks/adapter-gemini" },
+    { "path": "packages/agent-mux/hooks/adapter-hermes" },
+    { "path": "packages/agent-mux/hooks/adapter-oh-my-pi" },
+    { "path": "packages/agent-mux/hooks/adapter-openclaw" },
+    { "path": "packages/agent-mux/hooks/adapter-opencode" },
+    { "path": "packages/agent-mux/hooks/adapter-pi" }
   ],
   "files": []
 }

@@ -3,7 +3,7 @@
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import type { WorkspaceRuntimeSurface } from '@a5c-ai/agent-comm-mux';
+import type { WorkspaceRuntimeSurface } from '@a5c-ai/agent-mux-comm';
 
 import { render, screen } from '@/test/test-utils';
 import { SessionObservabilityPanel } from '../session-observability-panel';

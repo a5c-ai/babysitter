@@ -1,6 +1,6 @@
 # Triggers & CI Integration
 
-The `@a5c-ai/triggers-mux` package provides a GitHub Action and CLI for running coding agents from CI pipelines.
+The `@a5c-ai/agent-mux-triggers` package provides a GitHub Action and CLI for running coding agents from CI pipelines.
 
 ## Architecture
 

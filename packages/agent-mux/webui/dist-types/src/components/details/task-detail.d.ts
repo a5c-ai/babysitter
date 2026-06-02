@@ -1,4 +1,4 @@
-import type { KanbanExecutionContextEnvelope } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanExecutionContextEnvelope } from "@a5c-ai/agent-mux-comm/kanban";
 import type { DispatchContextAuditRecord } from "@/lib/dispatch-context-audit";
 interface TaskDetailPanelProps {
     runId: string;

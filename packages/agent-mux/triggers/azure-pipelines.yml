@@ -165,7 +165,7 @@ steps:
       set -euo pipefail
       echo "Installing @a5c-ai packages with tag: $NPM_TAG"
       npm install -g --legacy-peer-deps @a5c-ai/agent-mux-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/agent-mux-triggers@$NPM_TAG
-      npm install -g --legacy-peer-deps @a5c-ai/hooks-mux-cli@$NPM_TAG 2>/dev/null || echo "hooks-mux-cli install skipped (optional)"
+      npm install -g --legacy-peer-deps @a5c-ai/agent-mux-hooks-cli@$NPM_TAG 2>/dev/null || echo "hooks-mux-cli install skipped (optional)"
       which amux && amux --version || { echo "ERROR: amux not found after install"; exit 1; }
     name: installRuntime
     displayName: 'Install runtime packages'

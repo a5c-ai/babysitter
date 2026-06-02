@@ -5,18 +5,18 @@ const path = require('path');
 
 const packages = [
   'packages/atlas',
-  'packages/hooks-mux/core',
-  'packages/hooks-mux/cli',
-  'packages/hooks-mux/adapter-claude',
-  'packages/hooks-mux/adapter-codex',
-  'packages/hooks-mux/adapter-gemini',
-  'packages/hooks-mux/adapter-copilot',
-  'packages/hooks-mux/adapter-cursor',
-  'packages/hooks-mux/adapter-pi',
-  'packages/hooks-mux/adapter-oh-my-pi',
-  'packages/hooks-mux/adapter-opencode',
-  'packages/hooks-mux/adapter-openclaw',
-  'packages/hooks-mux/adapter-hermes',
+  'packages/agent-mux/hooks/core',
+  'packages/agent-mux/hooks/cli',
+  'packages/agent-mux/hooks/adapter-claude',
+  'packages/agent-mux/hooks/adapter-codex',
+  'packages/agent-mux/hooks/adapter-gemini',
+  'packages/agent-mux/hooks/adapter-copilot',
+  'packages/agent-mux/hooks/adapter-cursor',
+  'packages/agent-mux/hooks/adapter-pi',
+  'packages/agent-mux/hooks/adapter-oh-my-pi',
+  'packages/agent-mux/hooks/adapter-opencode',
+  'packages/agent-mux/hooks/adapter-openclaw',
+  'packages/agent-mux/hooks/adapter-hermes',
 ];
 
 const mode = process.argv[2] || 'build';
@@ -32,7 +32,7 @@ function runScript(dir, pkg, scriptName, label = scriptName) {
 
 if (mode === 'test') {
   for (const pkg of packages) {
-    if (!pkg.startsWith('packages/hooks-mux/')) {
+    if (!pkg.startsWith('packages/agent-mux/hooks/')) {
       continue;
     }
     const dir = path.resolve(__dirname, '..', pkg);
@@ -44,7 +44,7 @@ if (mode === 'test') {
 }
 
 for (const pkg of packages) {
-  if (mode === 'test' && !pkg.startsWith('packages/hooks-mux/')) {
+  if (mode === 'test' && !pkg.startsWith('packages/agent-mux/hooks/')) {
     console.log(`\n=== ${pkg} (${mode}) skipped: hooks-mux test mode only runs hooks packages ===`);
     continue;
   }

@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
-import { WorkspaceService } from "@a5c-ai/agent-comm-mux";
+import { WorkspaceService } from "@a5c-ai/agent-mux-comm";
 import { getAdapterByName } from "../../../";
 import { createRun, getSessionMarkerPath, readSessionMarker } from "@a5c-ai/babysitter-sdk";
 import { updateSessionContext } from "../../../../session/context";

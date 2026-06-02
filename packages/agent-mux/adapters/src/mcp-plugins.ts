@@ -13,7 +13,7 @@ import * as pathMod from 'node:path';
 import type {
   InstalledPlugin,
   PluginInstallOptions,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 type McpConfigPaths = Partial<Record<'global' | 'project', string>>;
 type McpServerMap = Record<string, unknown>;

@@ -4,7 +4,7 @@ import type {
   KanbanReviewDecision,
   KanbanReviewArtifact,
   KanbanWorkflowState,
-} from "@a5c-ai/agent-comm-mux/kanban";
+} from "@a5c-ai/agent-mux-comm/kanban";
 
 import type { Run } from "@/types";
 

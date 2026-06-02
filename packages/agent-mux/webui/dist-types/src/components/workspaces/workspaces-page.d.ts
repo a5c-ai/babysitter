@@ -1,4 +1,4 @@
-import type { Attachment } from "@a5c-ai/agent-comm-mux";
+import type { Attachment } from "@a5c-ai/agent-mux-comm";
 import type { WorkspaceInventoryItem, WorkspaceInventoryResponse, WorkspaceSessionSnapshot } from "@/lib/workspace-lifecycle";
 type WorkspaceSurfaceMode = "full" | "attention";
 export declare function getWorkspaceOwnershipLabel(isAuthenticated: boolean, sessions: WorkspaceSessionSnapshot[], workspaces?: WorkspaceInventoryItem[]): string;

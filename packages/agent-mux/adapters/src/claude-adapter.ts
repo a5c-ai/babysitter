@@ -23,7 +23,7 @@ import type {
   PluginInstallOptions,
   RuntimeHookDispatcher,
   RuntimeHookSetup,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 import { BaseAgentAdapter } from './base-adapter.js';
 import { mcpListPlugins, mcpInstallPlugin, mcpUninstallPlugin } from './mcp-plugins.js';
@@ -523,14 +523,14 @@ export class ClaudeAdapter extends BaseAgentAdapter {
     return listJsonlFiles(this.sessionDir());
   }
 
-  async readConfig(_cwd?: string): Promise<import('@a5c-ai/agent-comm-mux').AgentConfig> {
+  async readConfig(_cwd?: string): Promise<import('@a5c-ai/agent-mux-comm').AgentConfig> {
     const filePath = this.configSchema.configFilePaths?.[0];
     if (!filePath) return { agent: this.agent, source: 'global' };
     const data = (await readJsonFile<Record<string, unknown>>(filePath)) ?? {};
     return { agent: this.agent, source: 'global', filePaths: [filePath], ...data };
   }
 
-  async writeConfig(config: Partial<import('@a5c-ai/agent-comm-mux').AgentConfig>, _cwd?: string): Promise<void> {
+  async writeConfig(config: Partial<import('@a5c-ai/agent-mux-comm').AgentConfig>, _cwd?: string): Promise<void> {
     const filePath = this.configSchema.configFilePaths?.[0];
     if (!filePath) return;
     const existing = (await readJsonFile<Record<string, unknown>>(filePath)) ?? {};
@@ -544,7 +544,7 @@ export class ClaudeAdapter extends BaseAgentAdapter {
    * probe `~/.claude` as a secondary signal that the harness has been
    * installed and initialized at least once.
    */
-  override async detectInstallation(): Promise<import('@a5c-ai/agent-comm-mux').DetectInstallationResult> {
+  override async detectInstallation(): Promise<import('@a5c-ai/agent-mux-comm').DetectInstallationResult> {
     const base = await super.detectInstallation();
     const claudeDir = path.join(os.homedir(), '.claude');
     let hasConfigDir = false;

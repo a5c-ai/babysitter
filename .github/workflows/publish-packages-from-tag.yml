@@ -97,42 +97,42 @@ jobs:
           npm run build --workspace=@a5c-ai/atlas
 
           run_many "Build foundation packages" \
-            @a5c-ai/tasks-mux \
+            @a5c-ai/agent-mux-tasks \
             @a5c-ai/cloud \
             @a5c-ai/agent-mux-observability \
-            @a5c-ai/triggers-mux \
+            @a5c-ai/agent-mux-triggers \
             @a5c-ai/babysitter-observer-dashboard
 
           run_many "Build core packages" \
-            @a5c-ai/hooks-mux-core \
-            @a5c-ai/agent-comm-mux \
-            @a5c-ai/extension-mux
+            @a5c-ai/agent-mux-hooks-core \
+            @a5c-ai/agent-mux-comm \
+            @a5c-ai/agent-mux-extensions
 
           run_many "Build leaf adapter packages" \
             @a5c-ai/agent-mux-adapters \
             @a5c-ai/agent-mux-harness-mock \
-            @a5c-ai/transport-mux \
-            @a5c-ai/agent-config-mux \
+            @a5c-ai/agent-mux-transport \
+            @a5c-ai/agent-mux-config \
             @a5c-ai/agent-mux-ui \
-            @a5c-ai/hooks-mux-adapter-claude \
-            @a5c-ai/hooks-mux-adapter-codex \
-            @a5c-ai/hooks-mux-adapter-gemini \
-            @a5c-ai/hooks-mux-adapter-copilot \
-            @a5c-ai/hooks-mux-adapter-cursor \
-            @a5c-ai/hooks-mux-adapter-pi \
-            @a5c-ai/hooks-mux-adapter-oh-my-pi \
-            @a5c-ai/hooks-mux-adapter-opencode \
-            @a5c-ai/hooks-mux-adapter-openclaw
+            @a5c-ai/agent-mux-hooks-adapter-claude \
+            @a5c-ai/agent-mux-hooks-adapter-codex \
+            @a5c-ai/agent-mux-hooks-adapter-gemini \
+            @a5c-ai/agent-mux-hooks-adapter-copilot \
+            @a5c-ai/agent-mux-hooks-adapter-cursor \
+            @a5c-ai/agent-mux-hooks-adapter-pi \
+            @a5c-ai/agent-mux-hooks-adapter-oh-my-pi \
+            @a5c-ai/agent-mux-hooks-adapter-opencode \
+            @a5c-ai/agent-mux-hooks-adapter-openclaw
 
           run_many "Build packages depending on leaf adapters" \
-            @a5c-ai/agent-launch-mux \
-            @a5c-ai/tool-mux
+            @a5c-ai/agent-mux-launch \
+            @a5c-ai/agent-mux-tools
 
           echo "::group::Build aggregate packages"
           aggregate_pids=()
           npm run build --workspace=@a5c-ai/agent-mux-gateway &
           aggregate_pids+=("$!")
-          npm run build --workspace=@a5c-ai/hooks-mux-cli &
+          npm run build --workspace=@a5c-ai/agent-mux-hooks-cli &
           aggregate_pids+=("$!")
           build_agent_mux_webui &
           aggregate_pids+=("$!")
@@ -194,38 +194,38 @@ jobs:
 
           publish_many "Publish foundation packages" \
             @a5c-ai/atlas \
-            @a5c-ai/tasks-mux \
+            @a5c-ai/agent-mux-tasks \
             @a5c-ai/cloud \
             @a5c-ai/agent-mux-observability \
-            @a5c-ai/triggers-mux \
+            @a5c-ai/agent-mux-triggers \
             @a5c-ai/babysitter-observer-dashboard
 
           publish_many "Publish core packages" \
-            @a5c-ai/hooks-mux-core \
-            @a5c-ai/agent-comm-mux \
-            @a5c-ai/extension-mux
+            @a5c-ai/agent-mux-hooks-core \
+            @a5c-ai/agent-mux-comm \
+            @a5c-ai/agent-mux-extensions
 
           publish_many "Publish leaf adapter packages" \
             @a5c-ai/agent-mux-adapters \
             @a5c-ai/agent-mux-harness-mock \
-            @a5c-ai/transport-mux \
-            @a5c-ai/agent-config-mux \
-            @a5c-ai/agent-launch-mux \
-            @a5c-ai/tool-mux \
+            @a5c-ai/agent-mux-transport \
+            @a5c-ai/agent-mux-config \
+            @a5c-ai/agent-mux-launch \
+            @a5c-ai/agent-mux-tools \
             @a5c-ai/agent-mux-ui \
-            @a5c-ai/hooks-mux-adapter-claude \
-            @a5c-ai/hooks-mux-adapter-codex \
-            @a5c-ai/hooks-mux-adapter-gemini \
-            @a5c-ai/hooks-mux-adapter-copilot \
-            @a5c-ai/hooks-mux-adapter-cursor \
-            @a5c-ai/hooks-mux-adapter-pi \
-            @a5c-ai/hooks-mux-adapter-oh-my-pi \
-            @a5c-ai/hooks-mux-adapter-opencode \
-            @a5c-ai/hooks-mux-adapter-openclaw
+            @a5c-ai/agent-mux-hooks-adapter-claude \
+            @a5c-ai/agent-mux-hooks-adapter-codex \
+            @a5c-ai/agent-mux-hooks-adapter-gemini \
+            @a5c-ai/agent-mux-hooks-adapter-copilot \
+            @a5c-ai/agent-mux-hooks-adapter-cursor \
+            @a5c-ai/agent-mux-hooks-adapter-pi \
+            @a5c-ai/agent-mux-hooks-adapter-oh-my-pi \
+            @a5c-ai/agent-mux-hooks-adapter-opencode \
+            @a5c-ai/agent-mux-hooks-adapter-openclaw
 
           publish_many "Publish aggregate packages" \
             @a5c-ai/agent-mux-gateway \
-            @a5c-ai/hooks-mux-cli \
+            @a5c-ai/agent-mux-hooks-cli \
             @a5c-ai/agent-mux-webui
 
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/agent-mux-cli --skip-build

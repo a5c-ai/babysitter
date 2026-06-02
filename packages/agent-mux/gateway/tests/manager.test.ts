@@ -2,9 +2,9 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { RunHandleImpl } from '@a5c-ai/agent-comm-mux';
+import { RunHandleImpl } from '@a5c-ai/agent-mux-comm';
 import { afterEach, describe, expect, it } from 'vitest';
-import { WorkspaceService, resolveWorkspaceDefaultCwd } from '@a5c-ai/agent-comm-mux';
+import { WorkspaceService, resolveWorkspaceDefaultCwd } from '@a5c-ai/agent-mux-comm';
 
 import { RunManager, resolveGatewayConfig } from '../src/index.js';
 import type { ClientConn } from '../src/fanout/client-conn.js';

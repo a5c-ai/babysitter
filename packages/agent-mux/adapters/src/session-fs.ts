@@ -8,8 +8,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { writeFileAtomic, writeJsonAtomic } from '@a5c-ai/agent-comm-mux';
-import type { CostRecord, SessionMessage, SessionToolCall } from '@a5c-ai/agent-comm-mux';
+import { writeFileAtomic, writeJsonAtomic } from '@a5c-ai/agent-mux-comm';
+import type { CostRecord, SessionMessage, SessionToolCall } from '@a5c-ai/agent-mux-comm';
 
 /**
  * Recursively list all files matching `predicate` under `dir`.

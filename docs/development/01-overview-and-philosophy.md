@@ -129,7 +129,7 @@ graph TB
 | `packages/agent-mux/adapters` | Per-harness thin wrappers (data from graph) |
 | `packages/agent-mux/core` | Provider resolver, workspace service |
 | `packages/transport-mux` | HTTP proxy: protocol translation between harness ↔ provider |
-| `packages/hooks-mux` | Hook normalization: native events → canonical phases |
+| `packages/agent-mux/hooks` | Hook normalization: native events → canonical phases |
 | `packages/sdk` | Babysitter SDK: run lifecycle, session binding, MCP tools |
 | `packages/triggers-mux` | GitHub Action: trigger evaluation + agent dispatch |
 | `packages/krate` | Kubernetes operator + web UI for cloud deployment |

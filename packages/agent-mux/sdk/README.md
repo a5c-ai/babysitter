@@ -2,7 +2,7 @@
 
 Unified dispatch layer for local CLI-based AI coding agents — Claude Code, Codex, Gemini, Copilot, Cursor, OpenCode, and more.
 
-This meta-package re-exports `@a5c-ai/agent-comm-mux`, `@a5c-ai/agent-mux-adapters`, and `@a5c-ai/agent-mux-cli` as one convenient install.
+This meta-package re-exports `@a5c-ai/agent-mux-comm`, `@a5c-ai/agent-mux-adapters`, and `@a5c-ai/agent-mux-cli` as one convenient install.
 
 ## Install
 

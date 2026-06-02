@@ -15,7 +15,7 @@ import type {
   InstallMethod,
   InstallResult,
   Spawner,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 /** Collaborators the helpers need from the adapter. */
 export interface InstallContext {

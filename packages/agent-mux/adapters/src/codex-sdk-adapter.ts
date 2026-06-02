@@ -19,7 +19,7 @@ import type {
   AgentEvent,
   AgentConfig,
   CostRecord,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 import { BaseProgrammaticAdapter } from './programmatic-adapter-base.js';
 import { createVirtualRuntimeHookCapabilities } from './shared/runtime-hooks-virtual.js';

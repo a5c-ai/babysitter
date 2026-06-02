@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { translateForGenericOpenAI } from '../src/translations/generic-openai-translation.js';
-import type { ProviderConfig } from '@a5c-ai/agent-comm-mux';
+import type { ProviderConfig } from '@a5c-ai/agent-mux-comm';
 
 function makeConfig(overrides: Partial<ProviderConfig> = {}): ProviderConfig {
   return {

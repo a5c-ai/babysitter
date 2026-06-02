@@ -1,4 +1,4 @@
-import type { KanbanReviewArtifact, KanbanReviewCommentAnchor, KanbanReviewDecision, KanbanReviewFeedbackSource, KanbanReviewSnapshot } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanReviewArtifact, KanbanReviewCommentAnchor, KanbanReviewDecision, KanbanReviewFeedbackSource, KanbanReviewSnapshot } from "@a5c-ai/agent-mux-comm/kanban";
 export declare function ReviewPanel(props: {
     title: string;
     description: string;

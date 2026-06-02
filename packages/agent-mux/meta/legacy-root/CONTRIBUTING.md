@@ -21,7 +21,7 @@ npm run hooks:install
 
 ## Project layout
 
-- `packages/core` — `@a5c-ai/agent-comm-mux`
+- `packages/core` — `@a5c-ai/agent-mux-comm`
 - `packages/adapters` — `@a5c-ai/agent-mux-adapters`
 - `packages/cli` — `@a5c-ai/agent-mux-cli` (the `amux` binary)
 - `packages/agent-mux` — `@a5c-ai/agent-mux` (meta-package re-exporting the above)
@@ -44,7 +44,7 @@ All five packages ship in lock-step (configured as a `fixed` group in `.changese
 1. **Decide the new version.** All five packages ship in lock-step at the same version. Follow semver relative to the last release.
 2. **Bump every package.**
    - Update `version` in each of `packages/{core,adapters,cli,agent-mux,harness-mock}/package.json`.
-   - Update every workspace cross-dependency pin (`@a5c-ai/agent-comm-mux`, `-adapters`, `-cli`) to the new version in the packages that depend on them.
+   - Update every workspace cross-dependency pin (`@a5c-ai/agent-mux-comm`, `-adapters`, `-cli`) to the new version in the packages that depend on them.
 3. **Update `CHANGELOG.md`** with a short summary per package (or a single combined entry).
 4. **Verify locally.**
    ```bash

@@ -3,7 +3,7 @@
 import { Link, useNavigate } from "react-router-dom-v6";
 import { useEffect, useMemo, useRef, useState, type UIEvent } from "react";
 import { useStore } from "zustand";
-import type { Attachment, WorkspaceRuntimeSurface } from "@a5c-ai/agent-comm-mux";
+import type { Attachment, WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-comm";
 import type {
   AgentFlowLane,
   AgentFlowSegment,

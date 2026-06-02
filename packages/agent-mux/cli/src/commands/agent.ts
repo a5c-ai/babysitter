@@ -8,7 +8,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import type { AgentMuxClient } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient } from '@a5c-ai/agent-mux-comm';
 import type { ParsedArgs, FlagDef } from '../parse-args.js';
 import { flagBool, flagStr } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';

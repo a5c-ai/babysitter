@@ -7,8 +7,8 @@
 The current a5c.ai agent stack consists of:
 
 - **`@a5c-ai/agent-mux`** - Agent dispatch/multiplexing layer
-- **`@a5c-ai/hooks-mux`** - Hook normalization across harnesses  
-- **`@a5c-ai/extension-mux`** - Cross-harness plugin compiler
+- **`@a5c-ai/agent-mux-hooks-cli`** - Hook normalization across harnesses  
+- **`@a5c-ai/agent-mux-extensions`** - Cross-harness plugin compiler
 - **`@a5c-ai/agent-platform`** - Monolithic orchestration runtime
 - **`@a5c-ai/babysitter-sdk`** - Core SDK for orchestration
 

@@ -104,13 +104,13 @@ const updateLockVersion = (path, version) => {
   const lockUpdates = {
     "packages/agent-mux/adapters": {
       version,
-      dependencies: { "@a5c-ai/agent-comm-mux": version }
+      dependencies: { "@a5c-ai/agent-mux-comm": version }
     },
     "packages/agent-mux/cli": {
       version,
       dependencies: {
         "@a5c-ai/agent-mux-adapters": version,
-        "@a5c-ai/agent-comm-mux": version,
+        "@a5c-ai/agent-mux-comm": version,
         "@a5c-ai/agent-mux-gateway": version,
         "@a5c-ai/agent-mux-observability": version
       }
@@ -123,12 +123,12 @@ const updateLockVersion = (path, version) => {
       version,
       dependencies: {
         "@a5c-ai/agent-mux-adapters": version,
-        "@a5c-ai/agent-comm-mux": version
+        "@a5c-ai/agent-mux-comm": version
       }
     },
     "packages/agent-mux/harness-mock": {
       version,
-      dependencies: { "@a5c-ai/agent-comm-mux": version }
+      dependencies: { "@a5c-ai/agent-mux-comm": version }
     },
     "packages/agent-mux/mobile-android-app": {
       version,
@@ -146,7 +146,7 @@ const updateLockVersion = (path, version) => {
       dependencies: {
         "@a5c-ai/agent-mux-adapters": version,
         "@a5c-ai/agent-mux-cli": version,
-        "@a5c-ai/agent-comm-mux": version
+        "@a5c-ai/agent-mux-comm": version
       }
     },
     "packages/agent-mux/tui": {
@@ -164,7 +164,7 @@ const updateLockVersion = (path, version) => {
     },
     "packages/agent-mux/ui": {
       version,
-      dependencies: { "@a5c-ai/agent-comm-mux": version }
+      dependencies: { "@a5c-ai/agent-mux-comm": version }
     },
     "packages/agent-mux/watch-watchos-app": {
       version
@@ -178,7 +178,7 @@ const updateLockVersion = (path, version) => {
     },
     "packages/agent-mux/transport": {
       version,
-      dependencies: { "@a5c-ai/agent-comm-mux": version }
+      dependencies: { "@a5c-ai/agent-mux-comm": version }
     },
     "packages/agent-mux/triggers": {
       version
@@ -195,7 +195,7 @@ const updateLockVersion = (path, version) => {
       version,
       dependencies: {
         "@a5c-ai/babysitter-sdk": version,
-        "@a5c-ai/agent-comm-mux": version
+        "@a5c-ai/agent-mux-comm": version
       }
     },
     "packages/omni": {
@@ -264,18 +264,18 @@ const workspaceManifestPaths = [
   "packages/babysitter-tui-plugins/package.json",
   "packages/cloud/package.json",
   "packages/observer-dashboard/package.json",
-  "packages/hooks-mux/core/package.json",
-  "packages/hooks-mux/cli/package.json",
-  "packages/hooks-mux/adapter-claude/package.json",
-  "packages/hooks-mux/adapter-codex/package.json",
-  "packages/hooks-mux/adapter-gemini/package.json",
-  "packages/hooks-mux/adapter-copilot/package.json",
-  "packages/hooks-mux/adapter-cursor/package.json",
-  "packages/hooks-mux/adapter-pi/package.json",
-  "packages/hooks-mux/adapter-oh-my-pi/package.json",
-  "packages/hooks-mux/adapter-opencode/package.json",
-  "packages/hooks-mux/adapter-openclaw/package.json",
-  "packages/hooks-mux/adapter-hermes/package.json",
+  "packages/agent-mux/hooks/core/package.json",
+  "packages/agent-mux/hooks/cli/package.json",
+  "packages/agent-mux/hooks/adapter-claude/package.json",
+  "packages/agent-mux/hooks/adapter-codex/package.json",
+  "packages/agent-mux/hooks/adapter-gemini/package.json",
+  "packages/agent-mux/hooks/adapter-copilot/package.json",
+  "packages/agent-mux/hooks/adapter-cursor/package.json",
+  "packages/agent-mux/hooks/adapter-pi/package.json",
+  "packages/agent-mux/hooks/adapter-oh-my-pi/package.json",
+  "packages/agent-mux/hooks/adapter-opencode/package.json",
+  "packages/agent-mux/hooks/adapter-openclaw/package.json",
+  "packages/agent-mux/hooks/adapter-hermes/package.json",
   "packages/krate/core/package.json",
 ];
 
@@ -397,7 +397,7 @@ for (const path of [
   syncDependencyVersion(path, "@a5c-ai/agent-mux", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-adapters", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-cli", newAgentMuxVersion);
-  syncDependencyVersion(path, "@a5c-ai/agent-comm-mux", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-comm", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-gateway", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-observability", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-tui", newAgentMuxVersion);
@@ -407,18 +407,18 @@ for (const path of [
 }
 
 for (const path of [
-  "packages/hooks-mux/cli/package.json",
-  "packages/hooks-mux/adapter-claude/package.json",
-  "packages/hooks-mux/adapter-codex/package.json",
-  "packages/hooks-mux/adapter-gemini/package.json",
-  "packages/hooks-mux/adapter-copilot/package.json",
-  "packages/hooks-mux/adapter-cursor/package.json",
-  "packages/hooks-mux/adapter-pi/package.json",
-  "packages/hooks-mux/adapter-oh-my-pi/package.json",
-  "packages/hooks-mux/adapter-opencode/package.json",
-  "packages/hooks-mux/adapter-openclaw/package.json",
+  "packages/agent-mux/hooks/cli/package.json",
+  "packages/agent-mux/hooks/adapter-claude/package.json",
+  "packages/agent-mux/hooks/adapter-codex/package.json",
+  "packages/agent-mux/hooks/adapter-gemini/package.json",
+  "packages/agent-mux/hooks/adapter-copilot/package.json",
+  "packages/agent-mux/hooks/adapter-cursor/package.json",
+  "packages/agent-mux/hooks/adapter-pi/package.json",
+  "packages/agent-mux/hooks/adapter-oh-my-pi/package.json",
+  "packages/agent-mux/hooks/adapter-opencode/package.json",
+  "packages/agent-mux/hooks/adapter-openclaw/package.json",
 ]) {
-  syncDependencyVersion(path, "@a5c-ai/hooks-mux-core", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/agent-mux-hooks-core", newVersion);
 }
 
 for (const path of versionsJsonPaths) {

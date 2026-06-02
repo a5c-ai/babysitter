@@ -291,7 +291,7 @@ attributes:
     - "hook registration translation (per-agent generators emit native hooks.json from canonical declaration)"
     - "pattern substitution (hookFilePattern: hooks/{{name}}-{{slug}}.sh)"
     - "content packaging (Skills, Subagents, MCP Servers / Tool Providers carried inside extensions)"
-    - "proxy command resolution (hooks: { Stop: \"proxy\" } → npx @a5c-ai/hooks-mux-cli invocation)"
+    - "proxy command resolution (hooks: { Stop: \"proxy\" } → npx @a5c-ai/agent-mux-hooks-cli invocation)"
   catalogInputNodeKinds:
     - PluginTarget
     - PluginArtifact
@@ -685,7 +685,7 @@ attributes:
     - "hook registration translation (per-agent generators emit native hooks.json from canonical declaration)"
     - "pattern substitution (hookFilePattern: hooks/{{name}}-{{slug}}.sh)"
     - "content packaging (Skills, Subagents, MCP Servers / Tool Providers carried inside extensions)"
-    - "proxy command resolution (hooks: { Stop: \"proxy\" } → npx @a5c-ai/hooks-mux-cli invocation)"
+    - "proxy command resolution (hooks: { Stop: \"proxy\" } → npx @a5c-ai/agent-mux-hooks-cli invocation)"
   catalogInputNodeKinds:
     - PluginTarget
     - PluginArtifact
@@ -1079,7 +1079,7 @@ attributes:
     - "hook registration translation (per-agent generators emit native hooks.json from canonical declaration)"
     - "pattern substitution (hookFilePattern: hooks/{{name}}-{{slug}}.sh)"
     - "content packaging (Skills, Subagents, MCP Servers / Tool Providers carried inside extensions)"
-    - "proxy command resolution (hooks: { Stop: \"proxy\" } → npx @a5c-ai/hooks-mux-cli invocation)"
+    - "proxy command resolution (hooks: { Stop: \"proxy\" } → npx @a5c-ai/agent-mux-hooks-cli invocation)"
   catalogInputNodeKinds:
     - PluginTarget
     - PluginArtifact

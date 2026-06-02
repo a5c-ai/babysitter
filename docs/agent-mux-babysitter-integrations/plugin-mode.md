@@ -55,8 +55,8 @@ SDK journals resolution → next iteration
 - SDK's promptContext includes available host tools and renders them separately from external agent dispatch guidance
 
 **Files affected:**
-- `packages/hooks-mux/core/src/types/adapter.ts` — extend AdapterCapabilities
-- `packages/hooks-mux/adapter-claude/src/adapter.ts` — populate tool list
+- `packages/agent-mux/hooks/core/src/types/adapter.ts` — extend AdapterCapabilities
+- `packages/agent-mux/hooks/adapter-claude/src/adapter.ts` — populate tool list
 - `packages/sdk/src/harness/unified/capabilities.ts` — parse tool inventory
 - `packages/sdk/src/harness/unified/promptContext.ts` — include in process context
 

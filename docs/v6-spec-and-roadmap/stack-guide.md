@@ -58,15 +58,15 @@ Work mainly in:
 
 Read:
 
-- `packages/hooks-mux/README.md`
-- `packages/hooks-mux/ARCHITECTURE.md`
+- `packages/agent-mux/hooks/README.md`
+- `packages/agent-mux/hooks/ARCHITECTURE.md`
 - [Agent-Mux Integration](agent-mux-integration.md)
 
 Work mainly in:
 
-- `packages/hooks-mux/core`
-- `packages/hooks-mux/cli`
-- `packages/hooks-mux/adapter-*`
+- `packages/agent-mux/hooks/core`
+- `packages/agent-mux/hooks/cli`
+- `packages/agent-mux/hooks/adapter-*`
 - `plugins/babysitter-unified/hooks/`
 
 ## If You Need To Change Plugin Packaging
@@ -122,7 +122,7 @@ Use this rule of thumb:
 | V6 architecture scope | `docs/v6-spec-and-roadmap/` | package READMEs, adversarial analyses |
 | Orchestration runtime behavior | `packages/sdk`, `packages/babysitter`, `packages/agent-platform` | V6 docs, CLI docs |
 | Harness dispatch behavior | `packages/agent-mux/*` and `docs/agent-mux/` | V6 integration docs |
-| Hook normalization | `packages/hooks-mux/*` | per-harness plugin docs |
+| Hook normalization | `packages/agent-mux/hooks/*` | per-harness plugin docs |
 | Unified plugin packaging | `packages/extension-mux`, `plugins/babysitter-unified/` | install READMEs for concrete bundles |
 | Breakpoint routing | `packages/tasks-mux` | SDK integration docs |
 

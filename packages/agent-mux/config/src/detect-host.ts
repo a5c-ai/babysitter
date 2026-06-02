@@ -3,7 +3,7 @@
  * under a supported agent harness.
  */
 
-import type { AgentMuxClient } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient } from '@a5c-ai/agent-mux-comm';
 
 import type { ParsedArgs } from './cli-helpers.js';
 import { flagBool } from './cli-helpers.js';

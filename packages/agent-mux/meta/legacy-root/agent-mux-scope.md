@@ -1135,14 +1135,14 @@ Platform-specific: path separators, shell invocation, PTY availability, config f
 
 ```
 @a5c-ai/agent-mux          — Full convenience package: re-exports core + adapters + cli
-@a5c-ai/agent-comm-mux     — AgentMuxClient, RunHandle, all types, stream engine
+@a5c-ai/agent-mux-comm     — AgentMuxClient, RunHandle, all types, stream engine
 @a5c-ai/agent-mux-adapters — All built-in adapter implementations
 @a5c-ai/agent-mux-cli      — CLI binary (amux)
 ```
 
 ```bash
 # SDK only
-npm install @a5c-ai/agent-comm-mux @a5c-ai/agent-mux-adapters
+npm install @a5c-ai/agent-mux-comm @a5c-ai/agent-mux-adapters
 
 # SDK + CLI (everything)
 npm install @a5c-ai/agent-mux

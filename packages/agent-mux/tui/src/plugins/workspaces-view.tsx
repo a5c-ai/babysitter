@@ -5,7 +5,7 @@ import type {
   KanbanWorkspaceInventory,
   KanbanWorkspaceSessionSummary,
   KanbanWorkspaceSummary,
-} from '@a5c-ai/agent-comm-mux/kanban';
+} from '@a5c-ai/agent-mux-comm/kanban';
 import { definePlugin, type TuiViewProps } from '../plugin.js';
 import { truncateEnd, truncateMiddle, visibleWindow } from '../layout.js';
 

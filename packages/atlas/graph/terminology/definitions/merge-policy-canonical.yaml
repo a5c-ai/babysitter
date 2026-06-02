@@ -11,7 +11,7 @@ attributes:
     `persistEnv` / `unsetEnv` / `contextVars` / `additionalContext` /
     `systemMessage` collapse across handlers, and what to do on protected-
     prefix or namespace conflicts. Sourced from
-    packages/hooks-mux/core/src/merge-engine/merge.ts (MergeOptions,
+    packages/agent-mux/hooks/core/src/merge-engine/merge.ts (MergeOptions,
     MergedExecutionResult).
   status: canonical
 edges:

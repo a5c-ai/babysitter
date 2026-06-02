@@ -1,9 +1,9 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-hooks-mux-core
 attributes:
-  packageId: "@a5c-ai/hooks-mux-core"
-  packageName: "@a5c-ai/hooks-mux-core"
-  workspacePath: packages/hooks-mux/core
+  packageId: "@a5c-ai/agent-mux-hooks-core"
+  packageName: "@a5c-ai/agent-mux-hooks-core"
+  workspacePath: packages/agent-mux/hooks/core
   moduleType: typescript
   surfaceKinds:
     - discovery-consumer

@@ -38,8 +38,8 @@ import type {
   AdapterUpdateOptions,
   Spawner,
   InstallMethod,
-} from '@a5c-ai/agent-comm-mux';
-import { StreamAssembler } from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
+import { StreamAssembler } from '@a5c-ai/agent-mux-comm';
 import { runInstall, runUpdate, type InstallContext } from './adapter-install.js';
 import { assembleCostRecord, defaultSpawner } from './base-adapter-helpers.js';
 
@@ -597,7 +597,7 @@ export abstract class BaseAgentAdapter implements SubprocessAdapter {
     command: string,
     opts: { scope?: 'global' | 'project'; id?: string } = {},
   ): Promise<void> {
-    const { HookConfigManager } = await import('@a5c-ai/agent-comm-mux');
+    const { HookConfigManager } = await import('@a5c-ai/agent-mux-comm');
     const mgr = new HookConfigManager();
     const id = opts.id ?? `${this.agent}.${hookType}.${Date.now().toString(36)}`;
     await mgr.add(
@@ -633,7 +633,7 @@ export abstract class BaseAgentAdapter implements SubprocessAdapter {
     id: string,
     opts: { scope?: 'global' | 'project' } = {},
   ): Promise<boolean> {
-    const { HookConfigManager } = await import('@a5c-ai/agent-comm-mux');
+    const { HookConfigManager } = await import('@a5c-ai/agent-mux-comm');
     const mgr = new HookConfigManager();
     return await mgr.remove(id, opts.scope);
   }

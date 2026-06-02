@@ -1,5 +1,5 @@
 /**
- * @a5c-ai/agent-launch-mux
+ * @a5c-ai/agent-mux-launch
  *
  * Launch orchestration for agent-mux: plan resolution, proxy setup,
  * harness spawning, bridge hooks, and completion engines.

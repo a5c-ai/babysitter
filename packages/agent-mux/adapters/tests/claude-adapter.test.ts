@@ -3,8 +3,8 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { spawn } from 'node:child_process';
-import { StreamAssembler } from '@a5c-ai/agent-comm-mux';
-import type { ParseContext } from '@a5c-ai/agent-comm-mux';
+import { StreamAssembler } from '@a5c-ai/agent-mux-comm';
+import type { ParseContext } from '@a5c-ai/agent-mux-comm';
 import { RuntimeHookDispatcher } from '../../core/src/runtime-hook-dispatcher.js';
 import { ClaudeAdapter } from '../src/claude-adapter.js';
 

@@ -1,5 +1,5 @@
-import type { Attachment } from "@a5c-ai/agent-comm-mux";
-import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/agent-comm-mux/kanban";
+import type { Attachment } from "@a5c-ai/agent-mux-comm";
+import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/agent-mux-comm/kanban";
 import type { WorkspaceInventoryItem, WorkspaceSessionSnapshot } from "@/lib/workspace-lifecycle";
 import { type WorkspaceSidebarFeedback } from "@/components/workspaces/workspace-details-sidebar";
 type EventBuffer = {

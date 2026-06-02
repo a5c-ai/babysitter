@@ -4,8 +4,8 @@
  * @see docs/10-cli-reference.md Section 10
  */
 
-import type { AgentMuxClient, ProviderId } from '@a5c-ai/agent-comm-mux';
-import { AgentMuxError, PROVIDER_DEFAULTS, MODEL_TRANSLATION_TABLE } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient, ProviderId } from '@a5c-ai/agent-mux-comm';
+import { AgentMuxError, PROVIDER_DEFAULTS, MODEL_TRANSLATION_TABLE } from '@a5c-ai/agent-mux-comm';
 import type { ParsedArgs } from '../parse-args.js';
 import { flagBool, flagStr } from '../parse-args.js';
 import { ExitCode, errorCodeToExitCode } from '../exit-codes.js';

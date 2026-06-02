@@ -15,8 +15,8 @@ describe('agent-mux-ui browser runtime imports', () => {
   it('loads classifyTool from the browser-safe core entry', () => {
     for (const relativePath of runtimeImportFiles) {
       const source = fs.readFileSync(path.join(srcRoot, relativePath), 'utf8');
-      expect(source).toContain("@a5c-ai/agent-comm-mux/browser");
-      expect(source).not.toContain("@a5c-ai/agent-comm-mux';");
+      expect(source).toContain("@a5c-ai/agent-mux-comm/browser");
+      expect(source).not.toContain("@a5c-ai/agent-mux-comm';");
     }
   });
 });

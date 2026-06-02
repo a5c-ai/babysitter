@@ -1,31 +1,31 @@
-# @a5c-ai/agent-comm-mux
+# @a5c-ai/agent-mux-comm
 
-This README is the canonical package documentation for `@a5c-ai/agent-comm-mux`.
+This README is the canonical package documentation for `@a5c-ai/agent-mux-comm`.
 Canonical package doc path: `packages/agent-mux/core/README.md`.
 The repository reference mirror lives at `docs/agent-mux/reference/01-core-types-and-client.md` and
 should match this file for package identity, runtime dependencies, and import guidance.
 
-`@a5c-ai/agent-comm-mux` is the public Node.js core runtime package at
+`@a5c-ai/agent-mux-comm` is the public Node.js core runtime package at
 `packages/agent-mux/core/` for agent-mux. It ships:
 
 - the main Node entrypoint with `AgentMuxClient`, `createClient`, normalized events,
   run/session/config/auth/plugin contracts, provider and hook helpers, workspace
   services, and atomic filesystem helpers
-- `@a5c-ai/agent-comm-mux/browser` for browser-safe type exports plus `classifyTool`
-- `@a5c-ai/agent-comm-mux/kanban` for kanban/project/workspace planning types and helpers
-- `@a5c-ai/agent-comm-mux/automation` for automation rule, trigger, routing, and execution record types
+- `@a5c-ai/agent-mux-comm/browser` for browser-safe type exports plus `classifyTool`
+- `@a5c-ai/agent-mux-comm/kanban` for kanban/project/workspace planning types and helpers
+- `@a5c-ai/agent-mux-comm/automation` for automation rule, trigger, routing, and execution record types
 
 ## Install
 
 ```bash
-npm install @a5c-ai/agent-comm-mux
+npm install @a5c-ai/agent-mux-comm
 ```
 
 Requires Node.js `>=20.9.0`.
 
 This package is published as ESM. The export map exposes `import`, `require`, and
 `default` conditions, but they all resolve to the same ESM build. Use `import`
-from ESM projects. From CommonJS, load it with `await import('@a5c-ai/agent-comm-mux')`
+from ESM projects. From CommonJS, load it with `await import('@a5c-ai/agent-mux-comm')`
 instead of expecting a separate CJS bundle.
 
 Runtime dependencies are part of the package contract:
@@ -44,15 +44,15 @@ import {
   resolveRunOptions,
   type AuthMethodDescriptor,
   type PluginInfo,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 const client = createClient();
 ```
 
 ```ts
-import { classifyTool, type AgentEvent } from '@a5c-ai/agent-comm-mux/browser';
-import { buildKanbanProjectBoard } from '@a5c-ai/agent-comm-mux/kanban';
-import { type AutomationRule } from '@a5c-ai/agent-comm-mux/automation';
+import { classifyTool, type AgentEvent } from '@a5c-ai/agent-mux-comm/browser';
+import { buildKanbanProjectBoard } from '@a5c-ai/agent-mux-comm/kanban';
+import { type AutomationRule } from '@a5c-ai/agent-mux-comm/automation';
 ```
 
 The public surface is grouped around:
@@ -66,10 +66,10 @@ The public surface is grouped around:
 
 The supported public import seams are:
 
-- `@a5c-ai/agent-comm-mux`
-- `@a5c-ai/agent-comm-mux/browser`
-- `@a5c-ai/agent-comm-mux/kanban`
-- `@a5c-ai/agent-comm-mux/automation`
+- `@a5c-ai/agent-mux-comm`
+- `@a5c-ai/agent-mux-comm/browser`
+- `@a5c-ai/agent-mux-comm/kanban`
+- `@a5c-ai/agent-mux-comm/automation`
 
 ## Release Verification
 
@@ -77,10 +77,10 @@ Use the package-local release checks to confirm the documented export map still
 matches the packed package surface:
 
 ```bash
-npm run build --workspace=@a5c-ai/agent-comm-mux
-npm run test --workspace=@a5c-ai/agent-comm-mux
-npm run verify:release --workspace=@a5c-ai/agent-comm-mux
-npm pack --json --dry-run --workspace=@a5c-ai/agent-comm-mux
+npm run build --workspace=@a5c-ai/agent-mux-comm
+npm run test --workspace=@a5c-ai/agent-mux-comm
+npm run verify:release --workspace=@a5c-ai/agent-mux-comm
+npm pack --json --dry-run --workspace=@a5c-ai/agent-mux-comm
 ```
 
 Release reviewers should be able to confirm from this README that the package

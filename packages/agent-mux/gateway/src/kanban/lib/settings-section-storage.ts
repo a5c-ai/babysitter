@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import type { McpServerConfig } from "@a5c-ai/agent-comm-mux";
+import type { McpServerConfig } from "@a5c-ai/agent-mux-comm";
 
 export interface StoredAgentConfiguration {
   model?: string;

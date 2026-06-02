@@ -28,7 +28,7 @@ const packageDirs = [
   'packages/agent-mux/gateway', 'packages/agent-mux/tui', 'packages/agent-mux/ui',
   'packages/agent-mux/webui', 'packages/agent-mux',
   'packages/agent-mux/observability',
-  'packages/hooks-mux/core', 'packages/hooks-mux/cli',
+  'packages/agent-mux/hooks/core', 'packages/agent-mux/hooks/cli',
   'packages/krate/core',
 ];
 

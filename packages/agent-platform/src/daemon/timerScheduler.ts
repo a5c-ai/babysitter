@@ -5,7 +5,7 @@
  * Uses setInterval to check the cron expression against current time.
  */
 
-import type { TimerAutomationRule } from "@a5c-ai/agent-comm-mux";
+import type { TimerAutomationRule } from "@a5c-ai/agent-mux-comm";
 import type { TriggerCallback } from "./types";
 
 export interface TimerSchedulerHandle {

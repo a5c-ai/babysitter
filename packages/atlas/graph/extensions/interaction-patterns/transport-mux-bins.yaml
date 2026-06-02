@@ -1,9 +1,9 @@
-# Runtime CLI bin entry exposed by @a5c-ai/transport-mux.
+# Runtime CLI bin entry exposed by @a5c-ai/agent-mux-transport.
 # The package's TransportProtocol handlers (anthropic-messages, openai-chat,
 # openai-responses, openai-completions, ollama, vllm, lmstudio, llamacpp)
 # are already modeled in catalog as ModelTransportProtocol records — those
 # are NOT duplicated here. Only the user-facing CLI bin is added.
-# Wired via @a5c-ai/transport-mux PackageSurface `exposes_subcommand` edge.
+# Wired via @a5c-ai/agent-mux-transport PackageSurface `exposes_subcommand` edge.
 nodeKind: InteractionPrimitive
 id: interaction-primitive:transport-mux-amux-proxy
 attributes:

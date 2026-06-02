@@ -2,7 +2,7 @@
 # Promotes the current catalog group-level records to leaf-level primitives so codegen
 # can emit each commander.Command leaf from the v6 graph alone.
 # Source root: packages/tasks-mux/src/cli/commands/*.ts.
-# Wired via @a5c-ai/tasks-mux PackageSurface `exposes_subcommand` edge.
+# Wired via @a5c-ai/agent-mux-tasks PackageSurface `exposes_subcommand` edge.
 nodeKind: InteractionPrimitive
 id: interaction-primitive:tasks-mux-cli-auth-login
 attributes:

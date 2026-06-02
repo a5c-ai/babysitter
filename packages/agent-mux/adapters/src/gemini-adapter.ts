@@ -22,7 +22,7 @@ import type {
   InstallMethod,
   PluginInstallOptions,
   AgentConfig,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 import { BaseAgentAdapter } from './base-adapter.js';
 

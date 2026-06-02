@@ -29,7 +29,7 @@ These workspaces ship public packages or release-facing operational behavior. Th
 | `packages/tasks-mux` | Published breakpoint runtime | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |
 | `packages/extension-mux` | Published plugin compiler/runtime package | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |
 | `packages/observer-dashboard` | Published observer dashboard package | `.github/workflows/ci.yml` job `observer-dashboard`, plus `publish.yml` and `publish-packages-from-tag.yml` |
-| `packages/hooks-mux/*` | Published hooks-mux packages | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |
+| `packages/agent-mux/hooks/*` | Published hooks-mux packages | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |
 | `packages/agent-mux/*` | Published agent-mux packages | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |
 | `packages/transport-mux` | Published transport/proxy runtime package used by the agent-mux CLI/runtime chain | `.github/workflows/ci.yml` job `workspace-coverage` (`build` + `lint` + `typecheck` + `test` + `scorecard:migration`), plus `publish.yml` and `publish-packages-from-tag.yml` |
 | `packages/babysitter`, `plugins/babysitter-unified`, and generated/published harness plugin packages | Published metapackage, canonical plugin source, and harness plugin packages | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |

@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { verifyAgentMuxCoreRelease } from '../scripts/verify-release.mjs';
 
 const baseManifest = {
-  name: '@a5c-ai/agent-comm-mux',
+  name: '@a5c-ai/agent-mux-comm',
   main: './dist/index.js',
   module: './dist/index.js',
   types: './dist/index.d.ts',
@@ -96,17 +96,17 @@ function withPackageRoot(run: (packageRoot: string) => void): void {
   fs.writeFileSync(
     path.join(packageRoot, 'README.md'),
     [
-      '# @a5c-ai/agent-comm-mux',
+      '# @a5c-ai/agent-mux-comm',
       '',
-      '- `@a5c-ai/agent-comm-mux`',
-      '- `@a5c-ai/agent-comm-mux/browser`',
-      '- `@a5c-ai/agent-comm-mux/kanban`',
-      '- `@a5c-ai/agent-comm-mux/automation`',
+      '- `@a5c-ai/agent-mux-comm`',
+      '- `@a5c-ai/agent-mux-comm/browser`',
+      '- `@a5c-ai/agent-mux-comm/kanban`',
+      '- `@a5c-ai/agent-mux-comm/automation`',
       '',
-      'npm run build --workspace=@a5c-ai/agent-comm-mux',
-      'npm run test --workspace=@a5c-ai/agent-comm-mux',
-      'npm run verify:release --workspace=@a5c-ai/agent-comm-mux',
-      'npm pack --json --dry-run --workspace=@a5c-ai/agent-comm-mux',
+      'npm run build --workspace=@a5c-ai/agent-mux-comm',
+      'npm run test --workspace=@a5c-ai/agent-mux-comm',
+      'npm run verify:release --workspace=@a5c-ai/agent-mux-comm',
+      'npm pack --json --dry-run --workspace=@a5c-ai/agent-mux-comm',
       '',
     ].join('\n')
   );
@@ -202,16 +202,16 @@ describe('verifyAgentMuxCoreRelease', () => {
       fs.writeFileSync(
         path.join(packageRoot, 'README.md'),
         [
-          '# @a5c-ai/agent-comm-mux',
+          '# @a5c-ai/agent-mux-comm',
           '',
-          '- `@a5c-ai/agent-comm-mux`',
-          '- `@a5c-ai/agent-comm-mux/browser`',
-          '- `@a5c-ai/agent-comm-mux/kanban`',
+          '- `@a5c-ai/agent-mux-comm`',
+          '- `@a5c-ai/agent-mux-comm/browser`',
+          '- `@a5c-ai/agent-mux-comm/kanban`',
           '',
-          'npm run build --workspace=@a5c-ai/agent-comm-mux',
-          'npm run test --workspace=@a5c-ai/agent-comm-mux',
-          'npm run verify:release --workspace=@a5c-ai/agent-comm-mux',
-          'npm pack --json --dry-run --workspace=@a5c-ai/agent-comm-mux',
+          'npm run build --workspace=@a5c-ai/agent-mux-comm',
+          'npm run test --workspace=@a5c-ai/agent-mux-comm',
+          'npm run verify:release --workspace=@a5c-ai/agent-mux-comm',
+          'npm pack --json --dry-run --workspace=@a5c-ai/agent-mux-comm',
           '',
         ].join('\n')
       );

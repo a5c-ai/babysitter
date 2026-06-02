@@ -92,7 +92,7 @@ attributes:
   typescriptInterface: "Telemetry"
   producerIface: "@a5c-ai/agent-mux-observability createTelemetry (telemetry.ts) / createSimpleTelemetry (telemetry-simple.ts)"
   consumerIfaces:
-    - "@a5c-ai/agent-comm-mux runs / dispatcher (span emitters)"
+    - "@a5c-ai/agent-mux-comm runs / dispatcher (span emitters)"
     - "@a5c-ai/agent-mux-gateway server.ts (active-runs gauge)"
   fieldSchema:
     - "recordRunStart:fn(agent,model?):required:Counter inc"

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { StreamAssembler, buildInvocationCommand } from '@a5c-ai/agent-comm-mux';
-import type { ParseContext, RunOptions } from '@a5c-ai/agent-comm-mux';
+import { StreamAssembler, buildInvocationCommand } from '@a5c-ai/agent-mux-comm';
+import type { ParseContext, RunOptions } from '@a5c-ai/agent-mux-comm';
 import { AgentMuxRemoteAdapter } from '../src/agent-mux-remote-adapter.js';
 
 function makeContext(overrides?: Partial<ParseContext>): ParseContext {

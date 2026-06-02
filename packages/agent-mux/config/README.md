@@ -1,4 +1,4 @@
-# @a5c-ai/agent-config-mux
+# @a5c-ai/agent-mux-config
 
 Agent config mux — install, auth, host detection, and adapter configuration for the agent-mux ecosystem.
 

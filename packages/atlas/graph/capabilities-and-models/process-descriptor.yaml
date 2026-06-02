@@ -42,7 +42,7 @@ attributes:
     - "packages/agent-mux/processes/model-catalog.js"
   inputs: []
   outputs: []
-  ownerPackage: "@a5c-ai/agent-comm-mux"
+  ownerPackage: "@a5c-ai/agent-mux-comm"
   executionKinds:
     - "babysitter-process"
   evidenceRefs:

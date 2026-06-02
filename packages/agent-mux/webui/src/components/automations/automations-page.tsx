@@ -24,7 +24,7 @@ import type {
   AutomationTarget,
   TimerAutomationTrigger,
   WebhookAutomationTrigger,
-} from "@a5c-ai/agent-comm-mux/automation";
+} from "@a5c-ai/agent-mux-comm/automation";
 import type {
   AutomationRuleAction,
   AutomationRuleCollectionResponse,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { ProviderConfig } from '@a5c-ai/agent-comm-mux';
+import type { ProviderConfig } from '@a5c-ai/agent-mux-comm';
 import { translateForClaude } from '../src/translations/claude-translation.js';
 
 function makeConfig(overrides: Partial<ProviderConfig> & { provider: ProviderConfig['provider'] }): ProviderConfig {

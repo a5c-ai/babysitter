@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-agent-config-mux
 attributes:
-  packageId: "@a5c-ai/agent-config-mux"
-  packageName: "@a5c-ai/agent-config-mux"
+  packageId: "@a5c-ai/agent-mux-config"
+  packageName: "@a5c-ai/agent-mux-config"
   workspacePath: packages/agent-mux/config
   moduleType: typescript
   surfaceKinds:

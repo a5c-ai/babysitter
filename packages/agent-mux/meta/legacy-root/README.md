@@ -11,7 +11,7 @@ It spawns real subprocesses, normalizes their streaming output into a shared `Ag
 npm install @a5c-ai/agent-mux
 
 # SDK only
-npm install @a5c-ai/agent-comm-mux @a5c-ai/agent-mux-adapters
+npm install @a5c-ai/agent-mux-comm @a5c-ai/agent-mux-adapters
 
 # Zero-install CLI
 npx @a5c-ai/agent-mux --help
@@ -291,7 +291,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the manual publish / version-bump flo
 This repo is an npm workspaces monorepo. Each published package has its own README:
 
 - [`@a5c-ai/agent-mux`](packages/agent-mux/README.md) — meta-package (SDK + CLI convenience install).
-- [`@a5c-ai/agent-comm-mux`](packages/core/README.md) — core types, client, stream engine.
+- [`@a5c-ai/agent-mux-comm`](packages/core/README.md) — core types, client, stream engine.
 - [`@a5c-ai/agent-mux-adapters`](packages/adapters/README.md) — built-in harness adapters.
 - [`@a5c-ai/agent-mux-cli`](packages/cli/README.md) — the `amux` command-line binary.
 - [`@a5c-ai/agent-mux-harness-mock`](packages/harness-mock/README.md) — mock harness simulator for tests.

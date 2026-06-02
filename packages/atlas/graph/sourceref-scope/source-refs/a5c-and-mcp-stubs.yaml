@@ -147,7 +147,7 @@ edges: {}
 nodeKind: SourceRef
 id: source-ref:packages-extension-mux
 attributes:
-  description: "@a5c-ai/extension-mux — portable plugin compiler (packages/extension-mux)"
+  description: "@a5c-ai/agent-mux-extensions — portable plugin compiler (packages/extension-mux)"
   displayName: "a5c-ai/babysitter — packages/extension-mux"
   kind: monorepo-subtree
   repoUrl: https://github.com/a5c-ai/babysitter

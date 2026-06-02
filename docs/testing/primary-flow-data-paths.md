@@ -141,9 +141,9 @@ native harness hook payload on stdin
 | Step | Boundary | Data passed | Required evidence |
 | --- | --- | --- | --- |
 | 1 | Native hook | Claude/Codex/Gemini/etc. JSON stdin and native event name | Raw hook payload fixture or redacted live payload |
-| 2 | CLI entry | `bootstrap`, `invoke`, or `exec` in `packages/hooks-mux/cli/src/cli/commands` | CLI args, adapter name, native event, explicit session override if any |
+| 2 | CLI entry | `bootstrap`, `invoke`, or `exec` in `packages/agent-mux/hooks/cli/src/cli/commands` | CLI args, adapter name, native event, explicit session override if any |
 | 3 | Adapter load | `loadAdapter` resolves package and capabilities | Adapter name, capability JSON, phase mappings |
-| 4 | Normalize | Adapter builds `UnifiedHookEvent` from `packages/hooks-mux/core/src/types/event.ts` | `version`, `adapter`, `phase`, `rawEventName`, `supportLevel`, `execution.*` |
+| 4 | Normalize | Adapter builds `UnifiedHookEvent` from `packages/agent-mux/hooks/core/src/types/event.ts` | `version`, `adapter`, `phase`, `rawEventName`, `supportLevel`, `execution.*` |
 | 5 | Handler execution | `runPlan` injects event on stdin and context env into child handlers | Handler command, `HOOKS_PROXY_EVENT`, `AGENT_SESSION_ID`, `AGENT_ADAPTER`, timeout/result |
 | 6 | Merge and persist | Merge result updates session persisted env/context vars | `persistEnv`, `contextVars`, `unsetEnv`, session file diff |
 | 7 | Render | Adapter renderer writes native hook output | Native decision/output JSON and dropped/degraded fields |
@@ -197,5 +197,5 @@ agent-mux launch/run
 | Agent-mux CLI and sessions | `packages/agent-mux/cli/src/commands/run.ts`, `packages/agent-mux/cli/src/commands/launch.ts`, `packages/agent-mux/gateway/src/runs/session-runtime.ts`, `packages/agent-mux/gateway/src/runs/event-log.ts` |
 | Babysitter-agent runtime | `packages/agent-platform/src/cli/dispatch.ts`, `packages/agent-platform/src/cli/commands/harness/createRun.ts`, `packages/agent-platform/src/harness/internal/createRun/index.ts`, `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts` |
 | SDK run/session loop | `packages/sdk/src/cli/main/runCreate.ts`, `packages/sdk/src/cli/main/taskCommands.ts`, `packages/sdk/src/cli/commands/session/init.ts`, `packages/sdk/src/cli/commands/session/associate.ts` |
-| Hooks-mux | `packages/hooks-mux/cli/src/cli/commands/invoke.ts`, `packages/hooks-mux/cli/src/cli/bootstrap-runtime.ts`, `packages/hooks-mux/core/src/types/event.ts`, `packages/hooks-mux/core/src/normalizer/runner.ts` |
+| Hooks-mux | `packages/agent-mux/hooks/cli/src/cli/commands/invoke.ts`, `packages/agent-mux/hooks/cli/src/cli/bootstrap-runtime.ts`, `packages/agent-mux/hooks/core/src/types/event.ts`, `packages/agent-mux/hooks/core/src/normalizer/runner.ts` |
 | Transport-mux | `packages/transport-mux/src/index.ts`, `packages/transport-mux/tests/e2e/http-roundtrip.test.ts`, `packages/transport-mux/tests/runtime.test.ts` |

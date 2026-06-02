@@ -217,7 +217,7 @@ attributes:
 
     optional a5c GitHub App token exchange → npm ci + build agent-mux +
 
-    build @a5c-ai/triggers-mux → optional `amux install <harness>` →
+    build @a5c-ai/agent-mux-triggers → optional `amux install <harness>` →
 
     optional babysitter plugin install → optional legacy plugin install → enrich →
 

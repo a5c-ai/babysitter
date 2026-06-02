@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-transport-mux
 attributes:
-  packageId: "@a5c-ai/transport-mux"
-  packageName: "@a5c-ai/transport-mux"
+  packageId: "@a5c-ai/agent-mux-transport"
+  packageName: "@a5c-ai/agent-mux-transport"
   workspacePath: packages/transport-mux
   moduleType: typescript
   surfaceKinds:

@@ -22,7 +22,7 @@ The CLI and SDK are co-equal surfaces that share the same core layer and behave 
 | Runtime | Node.js 20.9.0 or later |
 | License | MIT |
 
-The binary is installed as part of `@a5c-ai/agent-mux` (the convenience meta-package) or standalone via `@a5c-ai/agent-mux-cli`. It depends on `@a5c-ai/agent-comm-mux` and `@a5c-ai/agent-mux-adapters`.
+The binary is installed as part of `@a5c-ai/agent-mux` (the convenience meta-package) or standalone via `@a5c-ai/agent-mux-cli`. It depends on `@a5c-ai/agent-mux-comm` and `@a5c-ai/agent-mux-adapters`.
 
 ```bash
 # Via meta-package
@@ -1030,7 +1030,7 @@ Display the full content of a session.
 
 This command is not part of the current public CLI surface.
 
-`@a5c-ai/agent-comm-mux` does not currently expose a truthful live session-watch API. Earlier
+`@a5c-ai/agent-mux-comm` does not currently expose a truthful live session-watch API. Earlier
 drafts described `mux.sessions.watch()`, but that contract was removed rather than shipping
 synthetic `AgentEvent` payloads derived from arbitrary session-file changes.
 

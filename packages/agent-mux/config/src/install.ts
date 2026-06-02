@@ -14,8 +14,8 @@ import type {
   Spawner,
   InstallResult,
   DetectInstallationResult,
-} from '@a5c-ai/agent-comm-mux';
-import { AgentMuxError } from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
+import { AgentMuxError } from '@a5c-ai/agent-mux-comm';
 
 import type { ParsedArgs, FlagDef } from './cli-helpers.js';
 import { flagBool, flagStr } from './cli-helpers.js';

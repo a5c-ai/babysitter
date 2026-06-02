@@ -4,7 +4,7 @@
   "commit": false,
   "fixed": [
     [
-      "@a5c-ai/agent-comm-mux",
+      "@a5c-ai/agent-mux-comm",
       "@a5c-ai/agent-mux-adapters",
       "@a5c-ai/agent-mux-cli",
       "@a5c-ai/agent-mux",

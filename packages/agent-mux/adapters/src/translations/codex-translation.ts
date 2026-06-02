@@ -1,4 +1,4 @@
-import type { ProviderConfig } from '@a5c-ai/agent-comm-mux';
+import type { ProviderConfig } from '@a5c-ai/agent-mux-comm';
 import type { HarnessProviderTranslation } from '../provider-translation.js';
 
 export function translateForCodex(config: ProviderConfig): HarnessProviderTranslation {

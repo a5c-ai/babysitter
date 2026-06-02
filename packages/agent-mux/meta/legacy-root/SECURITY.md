@@ -14,7 +14,7 @@ We aim to acknowledge reports within 5 business days.
 
 ## Scope
 
-- `@a5c-ai/agent-comm-mux`, `-adapters`, `-cli`, `-harness-mock`, and the meta package `@a5c-ai/agent-mux`.
+- `@a5c-ai/agent-mux-comm`, `-adapters`, `-cli`, `-harness-mock`, and the meta package `@a5c-ai/agent-mux`.
 - Published artifacts on npm (verified via npm provenance).
 
 Out of scope: issues in third-party agent CLIs (Claude Code, Codex, Cursor, etc.) — report those upstream.

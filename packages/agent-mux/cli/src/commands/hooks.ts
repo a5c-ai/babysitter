@@ -10,7 +10,7 @@
  *   handle <hookType>   Read JSON payload on stdin, dispatch, emit unified result.
  */
 
-import type { AgentMuxClient, AgentName, UnifiedHookPayload } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient, AgentName, UnifiedHookPayload } from '@a5c-ai/agent-mux-comm';
 import {
   HookConfigManager,
   HookDispatcher,
@@ -18,7 +18,7 @@ import {
   getHookCatalog,
   parseHookPayload,
   formatHookResult,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 import type { ParsedArgs } from '../parse-args.js';
 import { flagBool, flagStr } from '../parse-args.js';

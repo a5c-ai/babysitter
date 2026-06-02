@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs';
-import type { AutomationExecutionRecord, AutomationRule } from '@a5c-ai/agent-comm-mux';
-import type { KanbanActivityEntry, KanbanCollaborator, KanbanDispatchContextLabelDefinition, KanbanDispatchContextLabelRef, KanbanIssue, KanbanPermissionGrant, KanbanProject, KanbanProjectSettings, KanbanTaskTag, KanbanTeam } from '@a5c-ai/agent-comm-mux/kanban';
+import type { AutomationExecutionRecord, AutomationRule } from '@a5c-ai/agent-mux-comm';
+import type { KanbanActivityEntry, KanbanCollaborator, KanbanDispatchContextLabelDefinition, KanbanDispatchContextLabelRef, KanbanIssue, KanbanPermissionGrant, KanbanProject, KanbanProjectSettings, KanbanTaskTag, KanbanTeam } from '@a5c-ai/agent-mux-comm/kanban';
 export declare const KANBAN_BACKLOG_FILE_PATH: string;
 export type StoredKanbanProject = Omit<KanbanProject, 'metrics' | 'team' | 'settings' | 'permissions' | 'activity'> & {
     readonly team?: Partial<KanbanTeam>;

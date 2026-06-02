@@ -58,10 +58,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/agent-config-mux": "5.0.0",
-    "@a5c-ai/agent-launch-mux": "5.0.0",
+    "@a5c-ai/agent-mux-config": "5.0.0",
+    "@a5c-ai/agent-mux-launch": "5.0.0",
     "@a5c-ai/agent-mux-gateway": "5.0.0",
-    "@a5c-ai/agent-comm-mux": "5.0.0",
+    "@a5c-ai/agent-mux-comm": "5.0.0",
     "@a5c-ai/agent-mux-adapters": "5.0.0",
     "@a5c-ai/agent-mux-observability": "5.0.0",
     "@a5c-ai/agent-mux-transport": "5.0.0",

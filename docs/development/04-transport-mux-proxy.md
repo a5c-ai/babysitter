@@ -1,6 +1,6 @@
 # Transport Mux & Proxy
 
-The `@a5c-ai/transport-mux` package bridges API protocol differences between harnesses and upstream providers.
+The `@a5c-ai/agent-mux-transport` package bridges API protocol differences between harnesses and upstream providers.
 
 ## When Proxy is Needed
 

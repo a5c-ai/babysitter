@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, ReactNode, TextareaHTMLAttributes } from "react";
-import type { KanbanTaskTag } from "@a5c-ai/agent-comm-mux/kanban";
+import type { KanbanTaskTag } from "@a5c-ai/agent-mux-comm/kanban";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { cx } from "@a5c-ai/compendium";

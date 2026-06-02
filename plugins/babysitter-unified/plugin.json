@@ -357,7 +357,7 @@
   "sdk": {
     "package": "@a5c-ai/babysitter-sdk",
     "cli": "babysitter",
-    "proxyPackage": "@a5c-ai/hooks-mux-cli",
+    "proxyPackage": "@a5c-ai/agent-mux-hooks-cli",
     "scope": "@a5c-ai",
     "envPrefix": "BABYSITTER",
     "stateDir": ".a5c"

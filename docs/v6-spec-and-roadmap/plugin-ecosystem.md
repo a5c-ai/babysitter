@@ -7,7 +7,7 @@
 The current V6 plugin position is:
 
 - metaplugins are higher-order capability abstractions over plugin and hook surfaces,
-- on legacy non-Babysitter agents, `@a5c-ai/extension-mux` is the compiler and distribution path for the concrete plugin outputs those metaplugins need,
+- on legacy non-Babysitter agents, `@a5c-ai/agent-mux-extensions` is the compiler and distribution path for the concrete plugin outputs those metaplugins need,
 - `plugins/babysitter-unified/` is a first-party unified plugin source that can carry metaplugin concerns, not a synonym for metaplugins,
 - memory systems, governance layers, policy engines, and discipline-enforcement bundles are in scope as metaplugin use cases.
 
@@ -18,7 +18,7 @@ V6 does not require a future standalone meta-plugin host package before those us
 For the current repository, "plugin ecosystem" means the concrete lifecycle that already exists:
 
 - unified plugin source trees with `plugin.json`, `versions.json`, and referenced files,
-- compiler validation and per-target emission through `@a5c-ai/extension-mux`,
+- compiler validation and per-target emission through `@a5c-ai/agent-mux-extensions`,
 - git-backed marketplaces indexed by `marketplace.json`,
 - explicit CLI install, configure, update, uninstall, and registry commands,
 - compatibility checks grounded in manifests, generated outputs, and migration files.
@@ -63,7 +63,7 @@ Those checks are the current quality gate. They establish whether a plugin sourc
 
 ### Compilation Outputs
 
-`@a5c-ai/extension-mux` is the current compiler for harness-specific plugin outputs. The public surface is:
+`@a5c-ai/agent-mux-extensions` is the current compiler for harness-specific plugin outputs. The public surface is:
 
 - `compile` to emit target plugin bundles,
 - `validate` to check a unified plugin directory without writing outputs,

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { createClient } from '@a5c-ai/agent-comm-mux';
+import { createClient } from '@a5c-ai/agent-mux-comm';
 import { parseArgs } from '../../src/parse-args.js';
 import { remoteCommand, REMOTE_FLAGS, type RemoteSpawner } from '../../src/commands/remote.js';
 import { ExitCode } from '../../src/exit-codes.js';

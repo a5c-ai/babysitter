@@ -1,4 +1,4 @@
-import { type KanbanDispatchContextLabelDefinition } from "@a5c-ai/agent-comm-mux/kanban";
+import { type KanbanDispatchContextLabelDefinition } from "@a5c-ai/agent-mux-comm/kanban";
 import { type KanbanStorageDeps } from "./kanban-storage";
 export interface CreateDispatchContextLabelInput {
     readonly key: string;

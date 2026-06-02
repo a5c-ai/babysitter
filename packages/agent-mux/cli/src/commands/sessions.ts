@@ -4,8 +4,8 @@
  * @see docs/10-cli-reference.md Section 12
  */
 
-import type { AgentMuxClient, SessionQuery } from '@a5c-ai/agent-comm-mux';
-import { AgentMuxError } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient, SessionQuery } from '@a5c-ai/agent-mux-comm';
+import { AgentMuxError } from '@a5c-ai/agent-mux-comm';
 import type { ParsedArgs } from '../parse-args.js';
 import { flagBool, flagStr, flagNum, flagArr } from '../parse-args.js';
 import { ExitCode, errorCodeToExitCode } from '../exit-codes.js';

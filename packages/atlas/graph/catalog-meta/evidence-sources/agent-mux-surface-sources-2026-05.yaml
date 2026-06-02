@@ -84,9 +84,9 @@ attributes:
   displayName: hooks-mux core package source
   kindLabel: file
   trustLevel: trust-level:repo
-  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/hooks-mux/core/package.json
-  filePath: packages/hooks-mux/core/package.json
-  sourcePathOrUrl: packages/hooks-mux/core/package.json
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/agent-mux/hooks/core/package.json
+  filePath: packages/agent-mux/hooks/core/package.json
+  sourcePathOrUrl: packages/agent-mux/hooks/core/package.json
   locator: package name, version, and package surface
   capturedAt: '2026-05-05T00:00:00Z'
   observedAt: '2026-05-05T00:00:00Z'
@@ -104,9 +104,9 @@ attributes:
   displayName: hooks-mux core shared type source
   kindLabel: file
   trustLevel: trust-level:repo
-  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/hooks-mux/core/src/types/event.ts
-  filePath: packages/hooks-mux/core/src/types/event.ts
-  sourcePathOrUrl: packages/hooks-mux/core/src/types/event.ts; packages/hooks-mux/core/src/types/result.ts; packages/hooks-mux/core/src/types/lifecycle.ts; packages/hooks-mux/core/src/types/session.ts; packages/hooks-mux/core/src/merge-engine/merge.ts; packages/hooks-mux/core/src/discovery/detector.ts; packages/hooks-mux/core/src/propagation/types.ts
+  sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/agent-mux/hooks/core/src/types/event.ts
+  filePath: packages/agent-mux/hooks/core/src/types/event.ts
+  sourcePathOrUrl: packages/agent-mux/hooks/core/src/types/event.ts; packages/agent-mux/hooks/core/src/types/result.ts; packages/agent-mux/hooks/core/src/types/lifecycle.ts; packages/agent-mux/hooks/core/src/types/session.ts; packages/agent-mux/hooks/core/src/merge-engine/merge.ts; packages/agent-mux/hooks/core/src/discovery/detector.ts; packages/agent-mux/hooks/core/src/propagation/types.ts
   locator: public hook event, result, phase mapping, session, discovery, merge, and propagation type contracts
   capturedAt: '2026-05-05T00:00:00Z'
   observedAt: '2026-05-05T00:00:00Z'

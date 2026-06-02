@@ -6,8 +6,8 @@
  * consumer) gets all built-in adapters with a single call.
  */
 
-import type { AgentMuxClient } from '@a5c-ai/agent-comm-mux';
-import type { MultiAgentAdapter } from '@a5c-ai/agent-comm-mux';
+import type { AgentMuxClient } from '@a5c-ai/agent-mux-comm';
+import type { MultiAgentAdapter } from '@a5c-ai/agent-mux-comm';
 import {
   ClaudeAdapter,
   ClaudeAgentSdkAdapter,

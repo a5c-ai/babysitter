@@ -8,7 +8,7 @@ import {
   BuiltInHooksRegistry,
   parseHookPayload,
   formatHookResult,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 import { HOOK_PAYLOAD_FIXTURES } from '../../harness-mock/src/scenarios/hooks.js';
 import { ClaudeAdapter } from '../src/claude-adapter.js';
 import { CodexAdapter } from '../src/codex-adapter.js';

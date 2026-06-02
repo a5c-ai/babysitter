@@ -29,7 +29,7 @@ import type {
   RunOptions,
   AgentEvent,
   AgentConfig,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 import { BaseAgentAdapter } from './base-adapter.js';
 import { createVirtualRuntimeHookCapabilities } from './shared/runtime-hooks-virtual.js';
@@ -238,14 +238,14 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
    * Detect whether `amux` is available at the current spawner scope (local or
    * wrapped). The wrapper — docker/ssh/k8s — is applied externally.
    */
-  override async detectInstallation(): Promise<import('@a5c-ai/agent-comm-mux').DetectInstallationResult> {
+  override async detectInstallation(): Promise<import('@a5c-ai/agent-mux-comm').DetectInstallationResult> {
     try {
       const res = await this._spawner('amux', ['--version']);
       if (res.code !== 0) {
         return { installed: false, notes: `amux probe failed (code ${res.code})` };
       }
       const version = this.parseVersionOutput(res.stdout + '\n' + res.stderr);
-      const out: import('@a5c-ai/agent-comm-mux').DetectInstallationResult = {
+      const out: import('@a5c-ai/agent-mux-comm').DetectInstallationResult = {
         installed: true,
         path: 'amux',
       };
@@ -264,8 +264,8 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
    * Transport wrapping (ssh/docker/k8s) is the caller's responsibility.
    */
   override async install(
-    opts: import('@a5c-ai/agent-comm-mux').AdapterInstallOptions = {},
-  ): Promise<import('@a5c-ai/agent-comm-mux').InstallResult> {
+    opts: import('@a5c-ai/agent-mux-comm').AdapterInstallOptions = {},
+  ): Promise<import('@a5c-ai/agent-mux-comm').InstallResult> {
     const command = 'npm install -g @a5c-ai/agent-mux-cli';
     if (opts.dryRun) {
       return { ok: true, method: 'npm', command, message: `[dry-run] would execute: ${command}` };
@@ -290,8 +290,8 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
   }
 
   override async update(
-    opts: import('@a5c-ai/agent-comm-mux').AdapterUpdateOptions = {},
-  ): Promise<import('@a5c-ai/agent-comm-mux').InstallResult> {
+    opts: import('@a5c-ai/agent-mux-comm').AdapterUpdateOptions = {},
+  ): Promise<import('@a5c-ai/agent-mux-comm').InstallResult> {
     const command = 'npm update -g @a5c-ai/agent-mux-cli';
     if (opts.dryRun) {
       return { ok: true, method: 'npm', command, message: `[dry-run] would execute: ${command}` };

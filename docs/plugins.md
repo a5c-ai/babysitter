@@ -63,7 +63,7 @@ The blueprints rename does not change agent harness plugin concepts. These names
 - `CLAUDE_PLUGIN_ROOT`
 - `PI_PLUGIN_ROOT`
 - `.claude/plugins/`
-- `packages/hooks-mux/`
+- `packages/agent-mux/hooks/`
 - `packages/extension-mux/`
 - Agent plugin `plugin.json` manifests
 - Agent plugin `install.md` files

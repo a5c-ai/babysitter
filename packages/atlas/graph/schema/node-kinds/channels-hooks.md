@@ -388,7 +388,7 @@ which decision verb wins, how `persistEnv` / `unsetEnv` / `contextVars` /
 `additionalContext` / `systemMessage` collapse across handlers, and what to do on
 protected-prefix or namespace conflicts.
 
-Sourced from `packages/hooks-mux/core/src/merge-engine/merge.ts` (the `MergeOptions`
+Sourced from `packages/agent-mux/hooks/core/src/merge-engine/merge.ts` (the `MergeOptions`
 and `MergedExecutionResult` types).
 
 ### Attributes

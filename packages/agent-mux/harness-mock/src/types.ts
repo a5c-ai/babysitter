@@ -6,7 +6,7 @@
  * testing without requiring the real CLI tools to be installed.
  */
 
-import type { ErrorCode } from '@a5c-ai/agent-comm-mux';
+import type { ErrorCode } from '@a5c-ai/agent-mux-comm';
 
 // ---------------------------------------------------------------------------
 // Harness identity

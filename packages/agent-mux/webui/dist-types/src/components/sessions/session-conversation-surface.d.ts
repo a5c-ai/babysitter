@@ -1,4 +1,4 @@
-import type { Attachment, WorkspaceRuntimeSurface } from "@a5c-ai/agent-comm-mux";
+import type { Attachment, WorkspaceRuntimeSurface } from "@a5c-ai/agent-mux-comm";
 import type { SessionCost, SessionFlowModel } from "@a5c-ai/agent-mux-ui/session-flow";
 type EventBuffer = {
     events: Array<Record<string, unknown>>;

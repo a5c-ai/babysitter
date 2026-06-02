@@ -7,7 +7,7 @@ import type {
   ModelCapabilities,
   WebSocketConnection,
   WebSocketMessage,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 type ApprovalMode = 'yolo' | 'prompt' | 'deny';
 

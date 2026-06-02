@@ -19,7 +19,7 @@ import type {
   InstalledPlugin,
   PluginInstallOptions,
   AgentConfig,
-} from '@a5c-ai/agent-comm-mux';
+} from '@a5c-ai/agent-mux-comm';
 
 import { BaseAgentAdapter } from './base-adapter.js';
 import { createVirtualRuntimeHookCapabilities } from './shared/runtime-hooks-virtual.js';

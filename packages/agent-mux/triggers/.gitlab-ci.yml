@@ -28,7 +28,7 @@
     AGENT_INCLUDE_DIFF: "false"
     NPM_TAG: staging
   before_script:
-    - npm install -g --legacy-peer-deps @a5c-ai/agent-mux-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/triggers-mux@$NPM_TAG
+    - npm install -g --legacy-peer-deps @a5c-ai/agent-mux-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/agent-mux-triggers@$NPM_TAG
   script:
     - |
       set -euo pipefail

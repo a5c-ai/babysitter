@@ -1,4 +1,4 @@
-# @a5c-ai/agent-launch-mux
+# @a5c-ai/agent-mux-launch
 
 Agent launch mux — spawn/lifecycle orchestration, PTY bridge, signal handling, and completion engine for the agent-mux ecosystem.
 
