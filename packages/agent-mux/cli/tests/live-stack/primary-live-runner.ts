@@ -846,6 +846,7 @@ async function validateAgentBehavior(
   }
 
   // --- file-creation: verify the output file exists with real content (>500 bytes) ---
+  const processMode = env['LIVE_STACK_PROCESS_MODE'] ?? 'predefined';
   if (traceId) {
     const expectedFile = path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`);
     let fileSize = 0;
@@ -879,7 +880,6 @@ async function validateAgentBehavior(
   }
 
   // --- process-creation: verify agent created a process file (create mode only) ---
-  const processMode = env['LIVE_STACK_PROCESS_MODE'] ?? 'predefined';
   if (isBabysitterPlugin && processMode === 'create') {
     const processFile = path.join(cwd, '.a5c', 'processes', 'odyssey-live-test.mjs');
     let processContent = '';

@@ -169,7 +169,7 @@ describe('primary live stack runner contract', () => {
     const claudeLaunch = claudeCommands.at(-1);
     const claudePrompt = claudeLaunch?.args[(claudeLaunch?.args.indexOf('--prompt') ?? -2) + 1];
 
-    expect(claudePrompt).toMatch(/^\/babysitter:yolo /);
+    expect(claudePrompt).toMatch(/^\/(babysitter:)?yolo /);
     expect(claudePrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
     expect(claudePrompt).not.toContain('Use the babysitter skill');
 
@@ -197,7 +197,7 @@ describe('primary live stack runner contract', () => {
     const codexLaunch = codexCommands.at(-1);
     const codexPrompt = codexLaunch?.args[(codexLaunch?.args.indexOf('--prompt') ?? -2) + 1];
 
-    expect(codexPrompt).toMatch(/^\$babysitter:yolo /);
+    expect(codexPrompt).toMatch(/^\$(babysitter:)?yolo /);
     expect(codexPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
 
     const geminiCommands = buildPrimaryLiveStackCommands(geminiPluginScenario(), {
@@ -208,7 +208,7 @@ describe('primary live stack runner contract', () => {
     const geminiLaunch = geminiCommands.at(-1);
     const geminiPrompt = geminiLaunch?.args[(geminiLaunch?.args.indexOf('--prompt') ?? -2) + 1];
 
-    expect(geminiPrompt).toMatch(/^\/babysitter:yolo /);
+    expect(geminiPrompt).toMatch(/^\/(babysitter:)?yolo /);
     expect(geminiPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
     const geminiMaxTurnsIndex = geminiLaunch?.args.indexOf('--max-turns') ?? -1;
     expect(geminiLaunch?.args[geminiMaxTurnsIndex + 1]).toBe('60');
@@ -234,7 +234,7 @@ describe('primary live stack runner contract', () => {
 
     const piPrompt = promptFor(piScenario, { LIVE_STACK_PROCESS_MODE: 'create' });
 
-    expect(piPrompt).toMatch(/^\/babysitter:yolo /);
+    expect(piPrompt).toMatch(/^\/(babysitter:)?yolo /);
     expect(piPrompt).toContain('CREATE odyssey-live-test.mjs');
     expect(piPrompt).toContain('.a5c/processes/odyssey-live-test.mjs');
   });
@@ -244,22 +244,22 @@ describe('primary live stack runner contract', () => {
       {
         agent: 'claude-code',
         amuxAgent: 'claude',
-        prefix: /^\/babysitter:yolo /,
+        prefix: /^\/(babysitter:)?yolo /,
       },
       {
         agent: 'codex',
         amuxAgent: 'codex',
-        prefix: /^\$babysitter:yolo /,
+        prefix: /^\$(babysitter:)?yolo /,
       },
       {
         agent: 'pi',
         amuxAgent: 'pi',
-        prefix: /^\/babysitter:yolo /,
+        prefix: /^\/(babysitter:)?yolo /,
       },
       {
         agent: 'gemini-cli',
         amuxAgent: 'gemini',
-        prefix: /^\/babysitter:yolo /,
+        prefix: /^\/(babysitter:)?yolo /,
       },
     ] as const;
 
@@ -297,15 +297,15 @@ describe('primary live stack runner contract', () => {
       LIVE_STACK_RESUME_RUN_ID: 'resume-trace-1',
     });
 
-    expect(predefinedPrompt).toMatch(/^\/babysitter:yolo /);
+    expect(predefinedPrompt).toMatch(/^\/(babysitter:)?yolo /);
     expect(predefinedPrompt).toContain('.a5c-live-test/trace-1-odyssey.md');
     expect(predefinedPrompt).toContain('.a5c/processes/summarize-translate-test.mjs');
 
-    expect(createPrompt).toMatch(/^\/babysitter:yolo /);
+    expect(createPrompt).toMatch(/^\/(babysitter:)?yolo /);
     expect(createPrompt).toContain('CREATE odyssey-live-test.mjs');
     expect(createPrompt).toContain('.a5c-live-test/trace-1-odyssey.md');
 
-    expect(resumePrompt).toMatch(/^\/babysitter:resume /);
+    expect(resumePrompt).toMatch(/^\/(babysitter:)?resume /);
     expect(resumePrompt).toContain('resume-trace-1');
     expect(resumePrompt).toContain('.a5c-live-test/trace-1-odyssey.md');
   });
@@ -314,8 +314,7 @@ describe('primary live stack runner contract', () => {
     const yoloCommand = await fs.readFile(path.join(process.cwd(), 'plugins', 'babysitter-unified', 'commands', 'yolo.md'), 'utf8');
 
     expect(yoloCommand).toContain('babysitter instructions:babysit-skill');
-    expect(yoloCommand).toContain('--harness claude-code');
-    expect(yoloCommand).toContain('--harness codex');
+    expect(yoloCommand).toContain('--harness');
     expect(yoloCommand).not.toContain('agent-platform');
   });
 

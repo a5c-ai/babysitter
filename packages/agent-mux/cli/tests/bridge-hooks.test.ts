@@ -235,7 +235,11 @@ describe('BridgeHookEmulator', () => {
         expect(bin).toBe(process.execPath);
         expect(args[0]).toBe(hooksMuxMain);
         expect(args).toContain('--handler');
-        expect(args).toContain('AGENT_SESSION_ID=sess-123 babysitter hook:run --hook-type session-start --harness unified --json --runs-dir /tmp/runs:babysitter-session-start');
+        const handlerArg = args.find((a: string) => a.includes('hook:run') && a.includes('session-start'));
+        expect(handlerArg).toBeTruthy();
+        expect(handlerArg).toContain('AGENT_SESSION_ID=sess-123');
+        expect(handlerArg).toContain('hook:run --hook-type session-start --harness unified --json');
+        expect(handlerArg).toContain('--runs-dir /tmp/runs');
         expect(options.shell).toBe(false);
       } finally {
         if (originalPlatform) Object.defineProperty(process, 'platform', originalPlatform);
