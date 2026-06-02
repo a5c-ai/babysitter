@@ -1158,9 +1158,18 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         '        def _safe_input(*a, **kw):',
         '            try: return _orig_input(*a, **kw)',
         '            except Exception:',
-        '                from prompt_toolkit.input.vt100_parser import Vt100Parser',
         '                from prompt_toolkit.input.posixlike import PosixPipeInput',
-        '                return PosixPipeInput()',
+        '                inp = PosixPipeInput()',
+        '                import threading',
+        '                def _bridge():',
+        '                    try:',
+        '                        while True:',
+        '                            data = sys.stdin.buffer.read(1)',
+        '                            if not data: break',
+        '                            inp.feed(data.decode("utf-8", errors="replace"))',
+        '                    except: pass',
+        '                threading.Thread(target=_bridge, daemon=True).start()',
+        '                return inp',
         '        _pid.create_input = _safe_input',
         '        import prompt_toolkit.input',
         '        prompt_toolkit.input.create_input = _safe_input',
@@ -1815,9 +1824,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       });
       (child as any).__bridgeExitPromise = exitPromise;
     }
-  } else if (process.platform === 'win32' && plan.harness === 'hermes') {
-    // Hermes on Windows: always use ConPTY. prompt_toolkit's Win32Input requires a
-    // console even with the PosixPipeInput fallback (stdin not connected properly).
+  } else if (process.platform === 'win32' && plan.harness === 'hermes' && !bridgeHooks) {
+    // Hermes on Windows NI (non-bridge): use ConPTY so prompt_toolkit gets a console.
+    // In bridge-hooks mode, skip ConPTY — sitecustomize.py bridges real stdin to
+    // PosixPipeInput via a daemon thread, making stdio pipes work without ConPTY overhead.
     try {
       const nodePty: any = await import('node-pty');
       const resolved = await resolveSpawnCommand(plan.command, plan.args);
