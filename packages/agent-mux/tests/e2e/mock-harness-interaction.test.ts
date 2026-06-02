@@ -1,7 +1,7 @@
 /**
- * E2E: mock-harness interactive approval modes.
+ * E2E: agent-mux-harness-mock interactive approval modes.
  *
- * Runs the mock-harness entry in-process (since dist is not guaranteed to be
+ * Runs the agent-mux-harness-mock entry in-process (since dist is not guaranteed to be
  * built during CI) and verifies each approval mode exercises the right path:
  *   - yolo   → auto-accepts; no stdin needed
  *   - prompt → waits for user; stdin "y" is echoed and run succeeds
@@ -10,7 +10,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PassThrough } from 'node:stream';
-import { runMockHarness } from '../../harness-mock/src/bin/mock-harness.js';
+import { runMockHarness } from '../../harness-mock/src/bin/agent-mux-harness-mock.js';
 
 function collect(): { stream: PassThrough; text: () => string } {
   const s = new PassThrough();
@@ -19,7 +19,7 @@ function collect(): { stream: PassThrough; text: () => string } {
   return { stream: s, text: () => Buffer.concat(chunks).toString('utf8') };
 }
 
-describe('mock-harness interactive e2e', () => {
+describe('agent-mux-harness-mock interactive e2e', () => {
   it('yolo mode completes without stdin', async () => {
     const so = collect(); const se = collect();
     const code = await runMockHarness(
