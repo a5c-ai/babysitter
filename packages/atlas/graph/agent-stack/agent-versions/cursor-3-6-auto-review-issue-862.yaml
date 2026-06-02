@@ -1,0 +1,68 @@
+# Additive issue #862 record. This file intentionally avoids editing shared
+# Cursor current/version rollup YAML so concurrent graph-update PRs do not
+# conflict.
+nodeKind: AgentVersion
+id: agentVersion:cursor:3-6-auto-review-issue-862
+attributes:
+  agentId: "cursor"
+  agentProductId: agent:cursor
+  displayName: "Cursor 3.6 Auto-review issue #862 patch"
+  runtimeFamily: "ide-agent"
+  releaseChannel: "stable"
+  versionRange: "3.6"
+  currentVersion: "3.6"
+  releasedAt: "2026-05-29"
+  releaseNotesUrl: "https://cursor.com/changelog/auto-review"
+  cliCommand: "cursor-agent"
+  summary: "Cursor 3.6 Auto-review run mode policy patch for Shell, MCP, and Fetch tool calls."
+  assimilationNotes:
+    - "Issue #862 tracks Cursor's 2026-05-29 official changelog entry for Cursor 3.6 Auto-review Run Mode."
+    - "Auto-review is intended to let Cursor work longer with fewer approval prompts and safer execution."
+    - "Auto-review applies to Shell, MCP, and Fetch tool calls."
+    - "Allowlisted calls run immediately."
+    - "Calls that can be sandboxed run in the sandbox."
+    - "Other agent actions route to a classifier subagent."
+    - "The classifier subagent can allow the call, try a different approach, or ask for approval."
+    - "Run mode is configured at Settings > Cursor Settings > Agents > Run Mode."
+    - "The classifier agent can be steered with custom instructions."
+    - "No public installer or package-name migration was identified for this dated Cursor changelog marker."
+  releaseHighlights:
+    - "Auto-review Run Mode."
+    - "Shell, MCP, and Fetch tool-call policy scope."
+    - "Allowlist immediate execution, sandbox fallback, and classifier-subagent decision routing."
+    - "Classifier custom instructions through Cursor settings."
+  releaseTracking:
+    issue: 862
+    releaseMarker: "3.6"
+    changelogDate: "2026-05-29"
+    sourceKind: official-changelog
+    publicCliSemverIdentified: false
+    installerChangeIdentified: false
+    sharedRollupEditAvoided: true
+  autoReviewRunMode:
+    runMode: "auto-review"
+    settingsPath: "Settings > Cursor Settings > Agents > Run Mode"
+    toolScopes:
+      - Shell
+      - MCP
+      - Fetch
+    decisionFlow:
+      allowlisted: "run-immediately"
+      sandboxable: "run-in-sandbox"
+      other: "classifier-subagent"
+    classifierOutcomes:
+      - allow-call
+      - try-different-approach
+      - ask-for-approval
+    classifierInstructions:
+      customInstructionsSupported: true
+      notes: "Cursor documents that the classifier agent can be steered with custom instructions."
+    adapterImpact:
+      approvalModeMapping: "Auto-review is distinct from simple prompt/yolo modes because tool calls can be allowlisted, sandboxed, classifier-approved, redirected to a different approach, or escalated for approval."
+      toolPolicyScope: "Shell, MCP, and Fetch tool calls should be modeled as covered by the Auto-review run mode."
+      sandboxPolicy: "Sandboxable calls may execute in a sandbox before requiring approval."
+edges:
+  version_of:
+    - agent:cursor
+  sourced_from:
+    - evidence:cursor-3-6-auto-review-issue-862
