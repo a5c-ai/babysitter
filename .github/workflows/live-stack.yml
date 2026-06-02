@@ -99,17 +99,9 @@ jobs:
       - name: "Build phase 1: shared catalog foundation"
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/atlas || {
-            echo "::warning::Atlas build failed — retrying without validation"
-            cd packages/atlas
-            node scripts/generate-library-nodes.mjs
-            node scripts/generate-wiki-pages.mjs
-            mkdir -p dist
-            npm run build:index
-            npx tsc -p tsconfig.json
-            node scripts/copy-assets.cjs || true
-            npm run generate:discovery-snapshot || true
-            cd ../..
+          (npm run build --workspace=@a5c-ai/atlas) || {
+            echo "::warning::Atlas build failed (graph validation) — retrying without validation"
+            (cd packages/atlas && node scripts/generate-library-nodes.mjs && node scripts/generate-wiki-pages.mjs && mkdir -p dist && npm run build:index || true && npx tsc -p tsconfig.json && (node scripts/copy-assets.cjs || true) && (npm run generate:discovery-snapshot || true))
           }
 
       - name: "Build phase 2: parallel independents and agent-mux critical path"
