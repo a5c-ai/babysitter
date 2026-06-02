@@ -26,7 +26,7 @@
     {
       "author": "a5c-ai",
       "createdAt": "2026-05-30T10:11:38Z",
-      "body": "Triage says the gap is tracker responder semantics: outbound sync, inbound webhook/status sync, provider-specific field mapping, conflict handling, idempotency, and auth boundaries. Recommended staged approach: define tracker responder/backend contract and config model; add provider-neutral mapping and sync primitives; refactor or wrap GitHubIssuesBackend behind tracker abstraction while preserving behavior; add Jira, Linear, and GenericREST adapters; add webhook ingestion; wire tracker routing after #630 lands; add SDK/agent-platform integration only after tasks-mux backend contracts are covered by tests."
+      "body": "Triage says the gap is tracker responder semantics: outbound sync, inbound webhook/status sync, provider-specific field mapping, conflict handling, idempotency, and auth boundaries. Recommended staged approach: define tracker responder/backend contract and config model; add provider-neutral mapping and sync primitives; refactor or wrap GitHubIssuesBackend behind tracker abstraction while preserving behavior; add Jira, Linear, and GenericREST adapters; add webhook ingestion; wire tracker routing after #630 lands; add S../tula-platform integration only after tasks-mux backend contracts are covered by tests."
     }
   ],
   "latestDependencyNote": "Use #630, not the stale #620 reference in the issue body, as the active dependency for the ResponderType system.",
@@ -85,7 +85,7 @@
       "packages/tasks-mux/routing.json shows existing github-issues routing config examples.",
       "packages/tasks-mux/src/mcp/backend-resolver.ts and packages/tasks-mux/src/harness/interaction-provider.ts are routing integration surfaces.",
       "packages/tasks-mux/src/auth/types.ts includes webhookSecret patterns for GitHub app auth.",
-      "packages/agent-platform/src/daemon/webhookListener.ts has a simple HTTP webhook listener pattern, but package boundaries must be evaluated before reuse."
+      "packages/tula-platform/src/daemon/webhookListener.ts has a simple HTTP webhook listener pattern, but package boundaries must be evaluated before reuse."
     ],
     "absentInfrastructure": [
       "No ExternalTrackerBackend implementation exists.",

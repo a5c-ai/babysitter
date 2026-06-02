@@ -7,16 +7,16 @@ description: Manage Babysitter blueprints from marketplaces, including listing, 
 
 Use this skill when the user asks to manage Babysitter blueprints, marketplace installables, or the former Babysitter plugin packages.
 
-Prefer the `/babysitter:blueprints` slash command and the `babysitter blueprint:*` CLI command family:
+Prefer the `/babysitter:blueprints` slash command and the `babysitter blueprints:*` CLI command family:
 
 ```bash
-babysitter blueprint:list-installed --global
-babysitter blueprint:add-marketplace --marketplace-url <url> --global
-babysitter blueprint:list-plugins --marketplace-name <name> --global
-babysitter blueprint:install --plugin-name <name> --marketplace-name <name> --global
-babysitter blueprint:update --plugin-name <name> --marketplace-name <name> --global
-babysitter blueprint:configure --plugin-name <name> --marketplace-name <name> --global
-babysitter blueprint:uninstall --plugin-name <name> --marketplace-name <name> --global
+babysitter blueprints:list-installed --global
+babysitter blueprints:add-marketplace --marketplace-url <url> --global
+babysitter blueprints:list-plugins --marketplace-name <name> --global
+babysitter blueprints:install --plugin-name <name> --marketplace-name <name> --global
+babysitter blueprints:update --plugin-name <name> --marketplace-name <name> --global
+babysitter blueprints:configure --plugin-name <name> --marketplace-name <name> --global
+babysitter blueprints:uninstall --plugin-name <name> --marketplace-name <name> --global
 ```
 
 The old `/babysitter:plugins` slash command and `babysitter plugin:*` CLI commands are deprecated aliases. Use them only when preserving an existing instruction, and prefer rewriting new guidance to `/babysitter:blueprints` and `blueprint:*`.

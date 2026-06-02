@@ -12,7 +12,7 @@ This directory defines the replacement testing strategy after the legacy Docker 
 
 - [Test Lanes](./test-lanes.md) defines the two top-level lanes: no-model deterministic tests and model-backed tests that require real provider credentials.
 - [Harness And Plugin E2E](./harness-e2e.md) separates SDK harness/plugin setup from agent-mux plugin/session E2E.
-- [Agent Mux And Runtime E2E](./agent-mux-and-runtime-e2e.md) defines runtime coverage for `agent-mux`, `transport-mux`, `agent-core`, and `@a5c-ai/agent-platform` flows after setup preconditions are satisfied.
+- [Agent Mux And Runtime E2E](./agent-mux-and-runtime-e2e.md) defines runtime coverage for `agent-mux`, `transport-mux`, `agent-core`, and `@a5c-ai/tula-platform` flows after setup preconditions are satisfied.
 - [Pipeline Integration](./pipeline-integration.md) defines where each lane belongs in CI, staging, release, scheduled, and manual workflows.
 - [Coverage And Reporting](./coverage-and-reporting.md) defines repo-wide coverage reporting, artifacts, logs, and pass/fail evidence.
 - [Implementation Roadmap](./implementation-roadmap.md) defines rollout slices, exit criteria, and stop conditions.

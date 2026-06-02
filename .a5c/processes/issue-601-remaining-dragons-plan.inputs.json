@@ -7,7 +7,7 @@
   "maxImplementationLoops": 2,
   "verificationCommands": [
     "npm run test --workspace=@a5c-ai/agent-core",
-    "npm run test --workspace=@a5c-ai/agent-platform",
+    "npm run test --workspace=@a5c-ai/tula-platform",
     "npm run test:realtime --workspace=@a5c-ai/agent-mux-ui",
     "npm run build:runtime",
     "npm run test:agent-mux",

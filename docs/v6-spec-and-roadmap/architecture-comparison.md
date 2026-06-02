@@ -42,7 +42,7 @@ This document provides an architectural comparison between the current a5c.ai ag
 
 ```
 Monolithic Package Structure
-├── @a5c-ai/agent-platform (all functionality)
+├── @a5c-ai/tula-platform (all functionality)
 │   ├── governance/ (policies, authorities, sandbox)
 │   ├── session/ (state, context, history, memory)
 │   ├── mcp/ (channels, transport, client tools)
@@ -67,12 +67,12 @@ Layered Architecture
 ├── Runtime Layer (Engine)
 │   └── @a5c-ai/tula-runtime (filesystem-free core)
 ├── Platform Layer (Persistence + Plugins)
-│   ├── @a5c-ai/agent-platform (plugin system host)
-│   └── @a5c-ai/agent-platform-meta-plugins (extensibility)
+│   ├── @a5c-ai/tula-platform (plugin system host)
+│   └── @a5c-ai/tula-platform-meta-plugins (extensibility)
 ├── Orchestration Layer (Domain-Specific)
-│   ├── @a5c-ai/agent-platform-orchestration-plugin
+│   ├── @a5c-ai/tula-platform-orchestration-plugin
 │   ├── @a5c-ai/babysitter-sdk (unchanged)
-│   └── @a5c-ai/agent-platform (complete solution)
+│   └── @a5c-ai/tula-platform (complete solution)
 └── Supporting Packages
     ├── @a5c-ai/catalog
     ├── @a5c-ai/observer-dashboard
@@ -111,7 +111,7 @@ Layered Architecture
 ### Current Deployment
 
 **Single Package Model**:
-- Install `@a5c-ai/agent-platform`
+- Install `@a5c-ai/tula-platform`
 - Get all functionality regardless of needs
 - Large bundle size for all use cases
 - Monolithic configuration
@@ -125,8 +125,8 @@ Layered Architecture
 
 **Selective Deployment**:
 - **Runtime Only**: `@a5c-ai/tula-runtime` for embedded use
-- **Platform Core**: Add `@a5c-ai/agent-platform` for plugin hosting
-- **Complete Solution**: Add `@a5c-ai/agent-platform` for full orchestration
+- **Platform Core**: Add `@a5c-ai/tula-platform` for plugin hosting
+- **Complete Solution**: Add `@a5c-ai/tula-platform` for full orchestration
 
 **Bundle Characteristics**:
 - Runtime, platform, and complete deployments can be measured independently once slice-specific commands exist

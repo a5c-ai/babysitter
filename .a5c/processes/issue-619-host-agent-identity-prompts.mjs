@@ -415,7 +415,7 @@ export const implementHostIdentityPromptTask = defineTask('issue-619.implement-h
       role: 'senior Babysitter SDK runtime engineer',
       task: 'Implement the focused issue #619 host identity prompt-context change.',
       instructions: [
-        'You own only the SDK/agent-platform prompt-context, prompt rendering, and tests required by this issue. Do not expand into unrelated external-agent discovery or task-cancel support.',
+        'You own only the S../tula-platform prompt-context, prompt rendering, and tests required by this issue. Do not expand into unrelated external-agent discovery or task-cancel support.',
         'Issue context JSON:',
         JSON.stringify(args.issueContext, null, 2),
         'Runtime trace JSON:',

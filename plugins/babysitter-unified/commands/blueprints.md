@@ -19,19 +19,19 @@ Marketplaces are git repositories containing a `marketplace.json` manifest and b
 ### Add a marketplace
 
 ```bash
-babysitter blueprint:add-marketplace --marketplace-url <url> [--marketplace-path <relative-path>] [--marketplace-branch <ref>] [--force] --global|--project [--json]
+babysitter blueprints:add-marketplace --marketplace-url <url> [--marketplace-path <relative-path>] [--marketplace-branch <ref>] [--force] --global|--project [--json]
 ```
 
 ### Update a marketplace
 
 ```bash
-babysitter blueprint:update-marketplace --marketplace-name <name> [--marketplace-branch <ref>] --global|--project [--json]
+babysitter blueprints:update-marketplace --marketplace-name <name> [--marketplace-branch <ref>] --global|--project [--json]
 ```
 
 ### List blueprints in a marketplace
 
 ```bash
-babysitter blueprint:list-plugins --marketplace-name <name> --global|--project [--json]
+babysitter blueprints:list-plugins --marketplace-name <name> --global|--project [--json]
 ```
 
 ## Blueprint Lifecycle
@@ -39,10 +39,10 @@ babysitter blueprint:list-plugins --marketplace-name <name> --global|--project [
 For `blueprint:install`, `blueprint:update`, `blueprint:configure`, and `blueprint:list-plugins`, the `--marketplace-name` flag is auto-detected when only one marketplace is cloned for the selected scope.
 
 ```bash
-babysitter blueprint:install --plugin-name <name> [--marketplace-name <mp>] --global|--project [--json]
-babysitter blueprint:update --plugin-name <name> --marketplace-name <mp> --global|--project [--json]
-babysitter blueprint:configure --plugin-name <name> --marketplace-name <mp> --global|--project [--json]
-babysitter blueprint:uninstall --plugin-name <name> --marketplace-name <mp> --global|--project [--json]
+babysitter blueprints:install --plugin-name <name> [--marketplace-name <mp>] --global|--project [--json]
+babysitter blueprints:update --plugin-name <name> --marketplace-name <mp> --global|--project [--json]
+babysitter blueprints:configure --plugin-name <name> --marketplace-name <mp> --global|--project [--json]
+babysitter blueprints:uninstall --plugin-name <name> --marketplace-name <mp> --global|--project [--json]
 ```
 
 The `--plugin-name` flag is preserved for CLI compatibility with existing marketplace manifests. User-facing docs should call the installable a blueprint.
@@ -50,9 +50,9 @@ The `--plugin-name` flag is preserved for CLI compatibility with existing market
 ## Registry Management
 
 ```bash
-babysitter blueprint:list-installed --global|--project [--json]
-babysitter blueprint:update-registry --plugin-name <name> --plugin-version <ver> --marketplace-name <mp> --global|--project [--json]
-babysitter blueprint:remove-from-registry --plugin-name <name> --global|--project [--json]
+babysitter blueprints:list-installed --global|--project [--json]
+babysitter blueprints:update-registry --plugin-name <name> --plugin-version <ver> --marketplace-name <mp> --global|--project [--json]
+babysitter blueprints:remove-from-registry --plugin-name <name> --global|--project [--json]
 ```
 
 ## Deprecated Aliases

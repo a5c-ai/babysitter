@@ -8,7 +8,7 @@ Tula is the unified agent product that composes every layer of the babysitter ag
 |-------|---------|------|
 | L4 | `@a5c-ai/tula-core` | Loop, subagent, context, synthesis interfaces |
 | L5 | `@a5c-ai/tula-runtime` | Daemon, session, cost, observability, telemetry |
-| L6 | `@a5c-ai/agent-platform` | Harness integration, governance, interaction, storage |
+| L6 | `@a5c-ai/tula-platform` | Harness integration, governance, interaction, storage |
 | Mux | `@a5c-ai/agent-mux` | Agent multiplexer |
 | TUI | `@a5c-ai/babysitter-tui-plugins` | TUI plugins for cost, governance, status |
 

@@ -19,7 +19,7 @@ const MIN_FILES = 5;
 const MIN_SIZE = 10000;
 
 const packageDirs = [
-  'packages/sdk', 'packages/babysitter', 'packages/agent-platform',
+  'packages/sdk', 'packages/babysitter', 'packages/tula-platform',
   'packages/tula-core', 'packages/atlas',
   'packages/agent-mux/transport', 'packages/agent-mux/extensions', 'packages/agent-mux/tasks',
   'packages/agent-mux/triggers', 'packages/cloud', 'packages/observer-dashboard',

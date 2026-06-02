@@ -39,7 +39,7 @@ The graph has `agent:agent-mux` and `agent:agent-mux-remote`:
 |---------|----------|----------------------|
 | `packages/sdk/` | `@a5c-ai/babysitter-sdk` | Orchestration engine: runs, replay, storage, tasks, hooks, plugins, profiles, session, compression, MCP, CLI commands |
 | `packages/tula-core/` | `@a5c-ai/tula-core` | Thin: agentic tools, background process registry, session binding, deferred tool registry |
-| `packages/agent-platform/` | `@a5c-ai/agent-platform` | Fat CLI: wraps SDK + agent-core, adds daemon, observer, governance, harness bridge, cost, interaction |
+| `packages/tula-platform/` | `@a5c-ai/tula-platform` | Fat CLI: wraps SDK + agent-core, adds daemon, observer, governance, harness bridge, cost, interaction |
 
 ### The confusion:
 
@@ -60,9 +60,9 @@ The graph says agent-platform has Core, Runtime, Platform, and UI. The code shou
 | Graph Layer | Target Package | Current Location | What Moves |
 |-------------|---------------|------------------|------------|
 | L4 AgentCoreImpl | `@a5c-ai/babysitter-sdk` (stays) | `packages/sdk/` | Nothing — SDK IS the core. agent-core package contents fold into SDK or agent-platform. |
-| L5 AgentRuntimeImpl | `@a5c-ai/agent-platform` (stays, slimmed) | `packages/agent-platform/` | Keep: daemon, session, harness bridge, runtime. Remove: things that belong in other layers. |
+| L5 AgentRuntimeImpl | `@a5c-ai/tula-platform` (stays, slimmed) | `packages/tula-platform/` | Keep: daemon, session, harness bridge, runtime. Remove: things that belong in other layers. |
 | L6 AgentPlatformImpl | `@a5c-ai/agent-mux-extensions` (renamed from extension-mux) + `@a5c-ai/agent-catalog` | `packages/extension-mux/`, `packages/agent-catalog/` | Plugin compilation, skill discovery, marketplace |
-| L11 AgentUIImpl | `@a5c-ai/agent-platform` CLI entry | `packages/agent-platform/src/cli/` | CLI stays in agent-platform — it's the binary |
+| L11 AgentUIImpl | `@a5c-ai/tula-platform` CLI entry | `packages/tula-platform/src/cli/` | CLI stays in agent-platform — it's the binary |
 
 ### agent-core package fate
 
@@ -203,7 +203,7 @@ As described in graph-alignment-tasks.md Phase 1.3, split into graph-aligned sub
 | Package | Graph Alignment | Layer(s) |
 |---------|----------------|----------|
 | `@a5c-ai/babysitter-sdk` | Orchestration engine (annotated, not renamed) | L4, L7, L8, L13 |
-| `@a5c-ai/agent-platform` | AgentRuntimeImpl + AgentUIImpl | L5, L11 |
+| `@a5c-ai/tula-platform` | AgentRuntimeImpl + AgentUIImpl | L5, L11 |
 | `@a5c-ai/babysitter` | Metapackage (unchanged) | — |
 | `@a5c-ai/agent-mux-launch` | `mux:agent-launch-mux` | L8 |
 | `@a5c-ai/agent-mux-comm` | `mux:agent-comm-mux` | L4-L5 |
@@ -227,7 +227,7 @@ As described in graph-alignment-tasks.md Phase 1.3, split into graph-aligned sub
 | `@a5c-ai/krate-*` | Project management | L6 |
 
 **Dissolved:**
-- `@a5c-ai/tula-core` → absorbed into `@a5c-ai/agent-mux-tools` (tools) + `@a5c-ai/agent-platform` (session/registry)
+- `@a5c-ai/tula-core` → absorbed into `@a5c-ai/agent-mux-tools` (tools) + `@a5c-ai/tula-platform` (session/registry)
 - `@a5c-ai/agent-mux-adapters` → absorbed into `@a5c-ai/agent-mux-config`
 - `@a5c-ai/agent-mux-extensions` → renamed to `@a5c-ai/agent-mux-extensions`
 - `@a5c-ai/agent-mux-tasks` → renamed to `@a5c-ai/agent-mux-tasks`

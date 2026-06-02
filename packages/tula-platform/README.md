@@ -1,4 +1,4 @@
-# @a5c-ai/agent-platform
+# @a5c-ai/tula-platform
 
 Agent Platform layer — harness integration, governance, interaction, storage.
 
@@ -11,7 +11,7 @@ Agent Platform layer — harness integration, governance, interaction, storage.
 ## Installation
 
 ```bash
-npm install @a5c-ai/agent-platform
+npm install @a5c-ai/tula-platform
 ```
 
 ## Usage
@@ -19,8 +19,8 @@ npm install @a5c-ai/agent-platform
 Use this package as the reusable platform API layer. Install `@a5c-ai/tula` for the product CLI.
 
 ```ts
-import { discoverHarnesses, invokeHarness } from "@a5c-ai/agent-platform/harness";
-import { apiRunStatus } from "@a5c-ai/agent-platform/api";
+import { discoverHarnesses, invokeHarness } from "@a5c-ai/tula-platform/harness";
+import { apiRunStatus } from "@a5c-ai/tula-platform/api";
 ```
 
 Use `@a5c-ai/tula` for the product CLI and the main `babysitter` CLI for harness installation and session-state commands:
@@ -36,7 +36,7 @@ babysitter session:state --session-id demo --state-dir .a5c
 From the repo root, run:
 
 ```bash
-npm run build --workspace=@a5c-ai/agent-platform
+npm run build --workspace=@a5c-ai/tula-platform
 ```
 
 This package now builds with `tsc --build` project references for workspace-owned TypeScript packages, and it explicitly invokes the root `build:runtime:agent-platform-deps` entrypoint to prepare the runtime chain, including the `@a5c-ai/agent-mux` SDK surface. A fresh-checkout build no longer requires prebuilt upstream `dist/` output.

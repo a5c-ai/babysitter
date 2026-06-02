@@ -9,7 +9,7 @@ The application layer applies the earlier seam work to user-facing capabilities 
 ### Capability Slices In Current Surfaces
 
 **Governance Capabilities**
-- Clarify whether governance work belongs in existing plugin bundles, SDK modules, or `packages/agent-platform` seams → [Security Architecture](../security-architecture.md)
+- Clarify whether governance work belongs in existing plugin bundles, SDK modules, or `packages/tula-platform` seams → [Security Architecture](../security-architecture.md)
 - Implement policy and authority-chain behavior only through bounded slices that can be validated in the current runtime
 - Treat hard sandbox and enforcement claims as earned outcomes, not assumed architecture
 
@@ -25,7 +25,7 @@ The application layer applies the earlier seam work to user-facing capabilities 
 ### Delivery Shape For This Phase
 
 **Current Orchestration Layer**
-- Keep `packages/agent-platform` as the current orchestration package unless a later ADR approves a narrow rename or extraction
+- Keep `packages/tula-platform` as the current orchestration package unless a later ADR approves a narrow rename or extraction
 - Clarify thin-layer ambitions as internal-boundary work inside the existing package, not as a new top-level deliverable
 - Integrate capability slices through current plugin, SDK, and process-library surfaces
 
@@ -73,7 +73,7 @@ Terms such as `agent-platform`, `agent-platform-meta-plugins`, and a re-scoped `
 
 ## Explicit Non-Deliverables
 
-This phase does not create a replacement `@a5c-ai/agent-platform`, does not assume an `agent-platform` package underneath it, and does not require all major functionality to be converted into plugins. Those remain deferred until separately promoted by decision record.
+This phase does not create a replacement `@a5c-ai/tula-platform`, does not assume an `agent-platform` package underneath it, and does not require all major functionality to be converted into plugins. Those remain deferred until separately promoted by decision record.
 
 ---
 

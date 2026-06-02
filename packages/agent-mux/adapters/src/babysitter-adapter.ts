@@ -92,7 +92,7 @@ export class BabysitterAdapter extends BaseAgentAdapter {
     ],
     authFiles: [],
     installMethods: [
-      { platform: 'all', type: 'npm', command: 'npm install -g @a5c-ai/agent-platform' },
+      { platform: 'all', type: 'npm', command: 'npm install -g @a5c-ai/tula-platform' },
     ],
   };
 
@@ -318,7 +318,7 @@ export class BabysitterAdapter extends BaseAgentAdapter {
       agent: 'babysitter',
       providerName: 'Babysitter',
       steps: [
-        { step: 1, description: 'Install babysitter agent CLI', command: 'npm i -g @a5c-ai/agent-platform' },
+        { step: 1, description: 'Install babysitter agent CLI', command: 'npm i -g @a5c-ai/tula-platform' },
         { step: 2, description: 'Configure the underlying harness auth (e.g., Claude, Codex)', command: 'agent-platform discover' },
       ],
       envVars: [],

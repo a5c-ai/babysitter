@@ -9,7 +9,7 @@ import { Type } from "@sinclair/typebox";
 import { createAgentCoreSession, AgentCoreSessionHandle } from "@a5c-ai/tula-core";
 import { createAgentCoreToolDefinitions } from "@a5c-ai/tula-core";
 import { resolveExistingRunDir, resolveRunsDir } from "@a5c-ai/babysitter-sdk";
-import type { AgentCoreSessionEvent } from "@a5c-ai/agent-platform/harness";
+import type { AgentCoreSessionEvent } from "@a5c-ai/tula-platform/harness";
 import { handleHarnessCreateRun } from "./createRun";
 import {
   BOLD,
@@ -22,11 +22,11 @@ import {
   formatToolResult,
   writeVerboseBlock,
   writeVerboseLine,
-} from "@a5c-ai/agent-platform/harness";
+} from "@a5c-ai/tula-platform/harness";
 import {
   assessRun,
   discoverRuns,
-} from "@a5c-ai/agent-platform/harness";
+} from "@a5c-ai/tula-platform/harness";
 
 export interface SessionResumeArgs {
   runId?: string;

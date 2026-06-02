@@ -9,7 +9,7 @@ import { appendCostEventOnce, computeRunCostStats, extractCostEvents } from '../
 import { createRunDir, loadJournal, appendEvent } from '../../sdk/src/storage/index.js';
 import { nextUlid } from '../../sdk/src/storage/ulids.js';
 import { buildEffectIndex } from '../../sdk/src/runtime/replay/effectIndex.js';
-import { enforceSessionBudgetForRun, setSessionBudget } from '../../agent-platform/src/session/cost.js';
+import { enforceSessionBudgetForRun, setSessionBudget } from '../../tula-platform/src/session/cost.js';
 
 function getRoutePaths(app: ReturnType<typeof createTransportMuxApp>) {
   return app.routes.map((route) => route.path);

@@ -13,7 +13,7 @@
     "npm run test --workspace=@a5c-ai/tasks-mux",
     "npm run typecheck --workspace=@a5c-ai/tasks-mux",
     "npm run build --workspace=@a5c-ai/tasks-mux",
-    "npm run test --workspace=@a5c-ai/agent-platform",
+    "npm run test --workspace=@a5c-ai/tula-platform",
     "npm run test:sdk",
     "npm run verify:metadata",
     "npm run validate:processes",
@@ -33,7 +33,7 @@
     "primaryPackages": [
       "packages/tasks-mux",
       "packages/sdk",
-      "packages/agent-platform"
+      "packages/tula-platform"
     ],
     "pluginSurfaces": [
       "plugins/babysitter",
@@ -46,8 +46,8 @@
       "packages/tasks-mux/src/backends/external-tracker.ts",
       "packages/tasks-mux/src/backends/index.ts",
       "packages/sdk/src/harness/hooks/stopHookContinuation.ts",
-      "packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts",
-      "packages/agent-platform/src/harness/internal/createRun/orchestration/index.ts"
+      "packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts",
+      "packages/tula-platform/src/harness/internal/createRun/orchestration/index.ts"
     ]
   },
   "planningNotes": {
@@ -59,7 +59,7 @@
       "packages/tasks-mux/src/router.ts exposes routeTask and route decisions for internal, human, agent, tracker, and auto.",
       "packages/tasks-mux/src/backends/agent-mux.ts exposes AgentMuxResponderBackend.",
       "packages/tasks-mux/src/backends/external-tracker.ts exposes ExternalTrackerBackend.",
-      "packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts contains resolveViaTasksMuxIfRoutable.",
+      "packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts contains resolveViaTasksMuxIfRoutable.",
       "packages/sdk/src/harness/hooks/stopHookContinuation.ts imports routeTask/isHostDelegableRoute before host delegation.",
       "packages/sdk/src/tasks/types.ts and packages/sdk/src/tasks/defineTask.ts preserve and validate responderType routing metadata."
     ],

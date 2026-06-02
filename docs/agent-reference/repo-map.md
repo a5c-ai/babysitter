@@ -21,7 +21,7 @@ npm run lint:hooks-mux
 | --- | --- | --- |
 | `packages/sdk` | `@a5c-ai/babysitter-sdk` | Core runtime, storage, tasks, CLI, hooks, profiles, plugins, compression |
 | `packages/babysitter` | `@a5c-ai/babysitter` | Metapackage and `babysitter` binary |
-| `packages/agent-platform` | `@a5c-ai/agent-platform` | Platform API for harness integration, governance, interaction, and storage |
+| `packages/tula-platform` | `@a5c-ai/tula-platform` | Platform API for harness integration, governance, interaction, and storage |
 | `packages/tula` | `@a5c-ai/tula` | Unified product package and owner of the `tula` CLI implementation |
 | `packages/babysitter-tui-plugins` | `@a5c-ai/babysitter-tui-plugins` | TUI panels for status, cost, and governance |
 | `packages/atlas` | `@a5c-ai/atlas` | Atlas catalog graph SDK, CLI, and data |

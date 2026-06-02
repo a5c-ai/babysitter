@@ -465,7 +465,7 @@ A `Mux` is treated as `ExtensionInterface` (a5c-flavored contract) plus implemen
 | `@a5c-ai/catalog` (UI) | a5c/01-component-map.md | `PackageSurface` + `CiSurface` | ✅ | |
 | `@a5c-ai/tula-core` | a5c/01-component-map.md | `PackageSurface` | ✅ | |
 | `@a5c-ai/agent-mux-comm/adapters/cli/sdk/gateway/harness-mock/observability/tui/webui` | a5c/01-component-map.md | one `PackageSurface` each | ✅ | |
-| `@a5c-ai/agent-platform` | a5c/01-component-map.md, ADR-001 | covered above as AgentProduct | ✅ | |
+| `@a5c-ai/tula-platform` | a5c/01-component-map.md, ADR-001 | covered above as AgentProduct | ✅ | |
 | `@a5c-ai/agent-mux-transport` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/agent-mux-hooks-cli` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/agent-mux-extensions` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |

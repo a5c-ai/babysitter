@@ -7,8 +7,8 @@
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
  * - **Package**: `packages/agent-core/package.json` declares `@a5c-ai/agent-core`, `packages/agent-core` repository metadata, and the build script path assumptions. Rename this workspace instead of creating a new package.
  * - **Workspace links**: `package-lock.json` contains `node_modules/@a5c-ai/agent-core`, `packages/agent-core`, and downstream workspace references from `agent-platform`, `tula`, and other packages. Regenerate the lockfile after the rename rather than editing generated lock entries by hand.
- * - **Dependent imports**: `packages/agent-platform/src/**` and `packages/tula/src/**` import `@a5c-ai/agent-core`; update imports and preserve harness terminology where `agent-core` means the built-in harness rather than the npm package name.
- * - **Project references**: `packages/agent-platform/tsconfig.json` and `packages/tula/tsconfig.json` reference `../agent-core`; update to `../tula-core`.
+ * - **Dependent imports**: `packages/tula-platform/src/**` and `packages/tula/src/**` import `@a5c-ai/agent-core`; update imports and preserve harness terminology where `agent-core` means the built-in harness rather than the npm package name.
+ * - **Project references**: `packages/tula-platform/tsconfig.json` and `packages/tula/tsconfig.json` reference `../agent-core`; update to `../tula-core`.
  * - **CI/release references**: `.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/publish-packages-from-tag.yml`, and `.github/workflows/live-stack.yml` build/test/publish `@a5c-ai/agent-core` or `packages/agent-core`; update only the issue #836 package/workspace references.
  * - **Docs/spec source**: `docs/tula-stack-renames/README.md` defines the broader stack rename convention, but issue #836 scopes this run to `agent-core -> tula-core`; do not rename `agent-runtime` or `agent-platform` in this process.
  *
@@ -336,7 +336,7 @@ export const reuseAuditTask = defineTask('issue-836.reuse-audit', (args, taskCtx
         'Render a section titled exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
         'Extract keywords from the request: agent-core, tula-core, @a5c-ai/agent-core, @a5c-ai/tula-core, packages/agent-core, packages/tula-core, workspace, package-lock, tsconfig, CI, docs, atlas graph.',
         'If .a5c/reuse-audit.json exists, honor its scan globs and keyword rules.',
-        'Scan package.json, package-lock.json, packages/**/package.json, packages/**/tsconfig.json, packages/agent-core, packages/agent-platform, packages/tula, packages/atlas/graph, docs, and .github/workflows.',
+        'Scan package.json, package-lock.json, packages/**/package.json, packages/**/tsconfig.json, packages/agent-core, packages/tula-platform, packages/tula, packages/atlas/graph, docs, and .github/workflows.',
         'Separate references that are package/workspace identity from references where "agent-core" is a runtime harness name or historical prose that may intentionally remain.',
         'Do not edit files.',
         'Return JSON: { keywords, existingSurfaces, reusableTests, generatedFiles, staleReferenceClasses, intentionalTerminology, recommendedPhaseBoundaries, risks }.',
@@ -510,7 +510,7 @@ export const phaseVerificationTask = defineTask('issue-836.phase-verification', 
         `Verification focus: ${args.phase.verificationFocus}`,
         'Run the red command, targeted package tests, targeted builds, and any scanner needed to prove stale package identity references are handled for this phase.',
         'Run git diff --check.',
-        'For issue #836, include explicit checks that @a5c-ai/agent-runtime, @a5c-ai/agent-platform, packages/agent-runtime, and packages/agent-platform were not renamed.',
+        'For issue #836, include explicit checks that @a5c-ai/agent-runtime, @a5c-ai/tula-platform, packages/agent-runtime, and packages/tula-platform were not renamed.',
         'If a command fails, capture exact command, exit code, failure lines, and whether failure is caused by this phase.',
         'Return JSON: { passed, commands, failures, staleReferenceEvidence, nonGoalProtectionEvidence, lockfileEvidence, retryRecommendations }.',
       ],
@@ -592,9 +592,9 @@ export const finalVerificationTask = defineTask('issue-836.final-verification', 
       task: 'Run final verification for the complete agent-core to tula-core rename.',
       instructions: [
         'Run all commands from inputs.verificationCommands in order.',
-        'At minimum run: npm run build --workspace=@a5c-ai/tula-core, npm run test --workspace=@a5c-ai/tula-core, npm run build --workspace=@a5c-ai/agent-platform, npm run build --workspace=@a5c-ai/tula, npm run verify:metadata, and git diff --check when available.',
+        'At minimum run: npm run build --workspace=@a5c-ai/tula-core, npm run test --workspace=@a5c-ai/tula-core, npm run build --workspace=@a5c-ai/tula-platform, npm run build --workspace=@a5c-ai/tula, npm run verify:metadata, and git diff --check when available.',
         'Run stale-reference scans for @a5c-ai/agent-core and packages/agent-core. Classify each remaining hit as intentional harness/prose terminology or a blocking stale package identity reference.',
-        'Run non-goal scans proving @a5c-ai/agent-runtime and @a5c-ai/agent-platform package identities and directories remain unchanged.',
+        'Run non-goal scans proving @a5c-ai/agent-runtime and @a5c-ai/tula-platform package identities and directories remain unchanged.',
         'Confirm package-lock.json was regenerated from npm rather than hand-mutated when package/workspace metadata changed.',
         'Return JSON: { passed, commands, failures, staleReferenceReport, nonGoalProtectionReport, lockfileReport, changedFiles, residualRisks }.',
       ],

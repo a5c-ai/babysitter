@@ -115,7 +115,7 @@ runs:
         npm run build:sdk
         npm run build:agent-mux
         npm run build --workspace=@a5c-ai/tula-core
-        npm run build --workspace=@a5c-ai/agent-platform
+        npm run build --workspace=@a5c-ai/tula-platform
 
     - name: Run Babysitter
       id: babysitter
@@ -188,7 +188,7 @@ runs:
 
         # Always use JSON output for CI parsing
         ARGS+=(--json)
-        CLI=(node "$ACTION_ROOT/packages/agent-platform/dist/cli/main.js" yolo)
+        CLI=(node "$ACTION_ROOT/packages/tula-platform/dist/cli/main.js" yolo)
 
         echo "::group::Babysitter Command"
         echo "${CLI[*]} ${ARGS[*]}"

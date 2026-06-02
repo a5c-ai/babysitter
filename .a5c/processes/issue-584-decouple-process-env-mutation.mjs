@@ -27,10 +27,10 @@
  *
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
  * - Env var infrastructure already exists through direct process.env reads/writes in
- *   packages/agent-platform/src/harness/piWrapper/moduleSupport.ts,
+ *   packages/tula-platform/src/harness/piWrapper/moduleSupport.ts,
  *   packages/agent-core/src/session.ts,
  *   packages/agent-core/src/agenticTools/config/state.ts,
- *   packages/agent-platform/src/harness/agenticTools/config/state.ts, and
+ *   packages/tula-platform/src/harness/agenticTools/config/state.ts, and
  *   packages/agent-mux/cli/src/index.ts.
  * - docs/here-be-dragons.md already contains the contract table for the issue-listed
  *   AZURE_OPENAI_*, AMUX_*, and BABYSITTER_* coupling, so the implementation should
@@ -249,11 +249,11 @@ export const readIssueContextTask = defineTask('issue-584.read-issue-context', (
         `Also run gh pr view ${args.issueNumber} --json files,title,body,comments and record that it is not a PR if GitHub returns no pull request.`,
         'Read docs/here-be-dragons.md around the process.env coupling section and coupling map.',
         'Inspect only the issue-listed env mutation/read surfaces plus package scripts needed for verification:',
-        'packages/agent-platform/src/harness/piWrapper/moduleSupport.ts',
-        'packages/agent-platform/src/harness/piWrapper.ts',
+        'packages/tula-platform/src/harness/piWrapper/moduleSupport.ts',
+        'packages/tula-platform/src/harness/piWrapper.ts',
         'packages/agent-core/src/session.ts',
         'packages/agent-core/src/agenticTools/config/state.ts',
-        'packages/agent-platform/src/harness/agenticTools/config/state.ts',
+        'packages/tula-platform/src/harness/agenticTools/config/state.ts',
         'packages/agent-mux/cli/src/index.ts',
         'packages/agent-mux/observability/src/logger.ts',
         'package.json',

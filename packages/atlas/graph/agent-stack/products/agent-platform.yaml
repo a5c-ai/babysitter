@@ -3,7 +3,7 @@ id: agent:agent-platform
 attributes:
   displayName: "agent-platform"
   vendor: "a5c-ai"
-  homepageUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-platform"
+  homepageUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/tula-platform"
   primarySurface: cli
   supportTier: catalog-backed
   productKind: full-cli-agent

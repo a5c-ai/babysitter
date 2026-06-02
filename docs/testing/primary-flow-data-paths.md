@@ -57,7 +57,7 @@ operator / CI
 
 ## Flow B: Babysitter-Agent Runtime Create-Run
 
-This path tests `@a5c-ai/agent-platform` as the runtime owner. It is separate from agent-mux plugin setup.
+This path tests `@a5c-ai/tula-platform` as the runtime owner. It is separate from agent-mux plugin setup.
 
 ```text
 operator / CI
@@ -76,8 +76,8 @@ operator / CI
 
 | Step | Boundary | Data passed | Required evidence |
 | --- | --- | --- | --- |
-| 1 | `agent-platform` CLI | `call`, `create-run`, `yolo`, `plan`, `resume-run`; args parsed in `packages/agent-platform/src/cli/dispatch.ts` | Invocation command, selected harness, workspace, model, max iterations, output mode |
-| 2 | Create-run coordinator | `handleHarnessCreateRun` in `packages/agent-platform/src/harness/internal/createRun/index.ts` | Progress events for planning, process path, run creation, session binding |
+| 1 | `agent-platform` CLI | `call`, `create-run`, `yolo`, `plan`, `resume-run`; args parsed in `packages/tula-platform/src/cli/dispatch.ts` | Invocation command, selected harness, workspace, model, max iterations, output mode |
+| 2 | Create-run coordinator | `handleHarnessCreateRun` in `packages/tula-platform/src/harness/internal/createRun/index.ts` | Progress events for planning, process path, run creation, session binding |
 | 3 | Planning phase | Prompt, workspace context, selected harness, compression config | Process file path, process fingerprint or generated process report, optional planning conversation summary |
 | 4 | SDK run creation | `createRun` through `packages/sdk/src/cli/main/runCreate.ts` or SDK API | `runId`, `runDir`, process ID, entrypoint, inputs path, non-interactive metadata |
 | 5 | Session binding | Selected harness session ID from `resolveHarnessSessionIdForBinding` and SDK session state | Babysitter session ID, state file, run/session association, harness name |
@@ -195,7 +195,7 @@ agent-mux launch/run
 | Area | Source files to inspect first |
 | --- | --- |
 | Agent-mux CLI and sessions | `packages/agent-mux/cli/src/commands/run.ts`, `packages/agent-mux/cli/src/commands/launch.ts`, `packages/agent-mux/gateway/src/runs/session-runtime.ts`, `packages/agent-mux/gateway/src/runs/event-log.ts` |
-| Babysitter-agent runtime | `packages/agent-platform/src/cli/dispatch.ts`, `packages/agent-platform/src/cli/commands/harness/createRun.ts`, `packages/agent-platform/src/harness/internal/createRun/index.ts`, `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts` |
+| Babysitter-agent runtime | `packages/tula-platform/src/cli/dispatch.ts`, `packages/tula-platform/src/cli/commands/harness/createRun.ts`, `packages/tula-platform/src/harness/internal/createRun/index.ts`, `packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts` |
 | SDK run/session loop | `packages/sdk/src/cli/main/runCreate.ts`, `packages/sdk/src/cli/main/taskCommands.ts`, `packages/sdk/src/cli/commands/session/init.ts`, `packages/sdk/src/cli/commands/session/associate.ts` |
 | Hooks-mux | `packages/agent-mux/hooks/cli/src/cli/commands/invoke.ts`, `packages/agent-mux/hooks/cli/src/cli/bootstrap-runtime.ts`, `packages/agent-mux/hooks/core/src/types/event.ts`, `packages/agent-mux/hooks/core/src/normalizer/runner.ts` |
 | Transport-mux | `packages/transport-mux/src/index.ts`, `packages/transport-mux/tests/e2e/http-roundtrip.test.ts`, `packages/transport-mux/tests/runtime.test.ts` |

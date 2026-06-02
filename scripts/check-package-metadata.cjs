@@ -182,7 +182,7 @@ function verifyTulaCoreRename() {
 
 function verifyTulaCoreDependents() {
   const packageJsonPaths = [
-    'packages/agent-platform/package.json',
+    'packages/tula-platform/package.json',
     'packages/tula/package.json',
   ];
   for (const packageJsonPath of packageJsonPaths) {
@@ -193,7 +193,7 @@ function verifyTulaCoreDependents() {
   }
 
   const tsconfigPaths = [
-    'packages/agent-platform/tsconfig.json',
+    'packages/tula-platform/tsconfig.json',
     'packages/tula/tsconfig.json',
   ];
   for (const tsconfigPath of tsconfigPaths) {
@@ -205,13 +205,13 @@ function verifyTulaCoreDependents() {
   }
 
   const staleImportFiles = [
-    'packages/agent-platform/src/harness/index.ts',
-    'packages/agent-platform/src/harness/internal/createRun/utils.ts',
-    'packages/agent-platform/src/harness/internal/createRun/planProcess/phaseHelpers.ts',
-    'packages/agent-platform/src/harness/internal/createRun/orchestration/internalTools.ts',
-    'packages/agent-platform/src/harness/internal/createRun/__tests__/createRun.test.ts',
-    'packages/agent-platform/src/harness/internal/createRun/__tests__/utils.test.ts',
-    'packages/agent-platform/src/harness/amux/__tests__/amuxInvokerWiring.test.ts',
+    'packages/tula-platform/src/harness/index.ts',
+    'packages/tula-platform/src/harness/internal/createRun/utils.ts',
+    'packages/tula-platform/src/harness/internal/createRun/planProcess/phaseHelpers.ts',
+    'packages/tula-platform/src/harness/internal/createRun/orchestration/internalTools.ts',
+    'packages/tula-platform/src/harness/internal/createRun/__tests__/createRun.test.ts',
+    'packages/tula-platform/src/harness/internal/createRun/__tests__/utils.test.ts',
+    'packages/tula-platform/src/harness/amux/__tests__/amuxInvokerWiring.test.ts',
     'packages/tula/src/index.ts',
     'packages/tula/src/cli/commands/harness/resumeRun.ts',
   ];
@@ -287,7 +287,7 @@ function verifyTulaRuntimeRename() {
 
 function verifyTulaRuntimeDependents() {
   const packageJsonPaths = [
-    'packages/agent-platform/package.json',
+    'packages/tula-platform/package.json',
     'packages/tula-core/package.json',
     'packages/tula/package.json',
   ];
@@ -299,7 +299,7 @@ function verifyTulaRuntimeDependents() {
   }
 
   const tsconfigPaths = [
-    'packages/agent-platform/tsconfig.json',
+    'packages/tula-platform/tsconfig.json',
     'packages/tula/tsconfig.json',
   ];
   for (const tsconfigPath of tsconfigPaths) {

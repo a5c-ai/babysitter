@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/agent-platform",
+  "name": "@a5c-ai/tula-platform",
   "version": "5.0.0",
   "description": "Agent Platform layer — harness integration, governance, interaction, storage",
   "license": "MIT",
@@ -138,9 +138,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/a5c-ai/babysitter.git",
-    "directory": "packages/agent-platform"
+    "directory": "packages/tula-platform"
   },
-  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-platform#readme",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/tula-platform#readme",
   "bugs": {
     "url": "https://github.com/a5c-ai/babysitter/issues"
   },

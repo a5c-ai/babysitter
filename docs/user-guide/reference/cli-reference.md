@@ -50,7 +50,7 @@ The Babysitter CLI provides deterministic orchestration for event-sourced workfl
 **Package split:**
 - Install `@a5c-ai/babysitter` for the recommended end-user `babysitter` command.
 - Install `@a5c-ai/babysitter-sdk` if you need the SDK/library directly or want the underlying CLI implementation package.
-- Install `@a5c-ai/agent-platform` for runtime commands such as `call`, `resume`, `plan`, `start-server`, and `tui`.
+- Install `@a5c-ai/tula-platform` for runtime commands such as `call`, `resume`, `plan`, `start-server`, and `tui`.
 
 **Design Principles:**
 - Deterministic operations (same inputs = same outputs)
@@ -71,7 +71,7 @@ npm install -g @a5c-ai/babysitter@latest
 ### Optional Runtime CLI
 
 ```bash
-npm install -g @a5c-ai/agent-platform@latest
+npm install -g @a5c-ai/tula-platform@latest
 ```
 
 ### Via npx (No Install)
@@ -115,7 +115,7 @@ These options are available on all commands:
 
 > The default `--help` (and the usage text printed on a wrong-syntax invocation or a bare command name) lists **agent-facing** commands only — the surface a babysitter skill or hook would call. Run `babysitter --help-human` to see the commands intended for direct human use.
 
-> Runtime/orchestration commands such as `agent-platform call`, `resume`, `plan`, `doctor`, `start-server`, and `tui` are part of the optional `@a5c-ai/agent-platform` package and are not covered by this reference unless explicitly noted.
+> Runtime/orchestration commands such as `agent-platform call`, `resume`, `plan`, `doctor`, `start-server`, and `tui` are part of the optional `@a5c-ai/tula-platform` package and are not covered by this reference unless explicitly noted.
 
 ### Path Handling
 

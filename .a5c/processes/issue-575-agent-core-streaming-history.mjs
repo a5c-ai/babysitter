@@ -30,10 +30,10 @@
  *     realistic stream fixtures.
  * - Existing context/token surfaces to consider before inventing new trimming:
  *   - packages/agent-core/src/context/token-estimator.ts
- *   - packages/agent-platform/src/compression/compaction.ts
+ *   - packages/tula-platform/src/compression/compaction.ts
  * - Downstream integration boundaries to protect:
- *   - packages/agent-platform/src/harness/invoker.ts
- *   - packages/agent-platform/src/harness/internal/createRun/__tests__/createRun.test.ts
+ *   - packages/tula-platform/src/harness/invoker.ts
+ *   - packages/tula-platform/src/harness/internal/createRun/__tests__/createRun.test.ts
  *   - packages/agent-core/README.md session API documentation
  *
  * @process methodologies/superpowers/test-driven-development
@@ -228,7 +228,7 @@ export const reuseAuditTask = defineTask('issue-575.reuse-audit', (args, taskCtx
         'Do not edit files.',
         'Render a section titled exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
         'Use these keywords and variants: streaming, stream, SSE, text/event-stream, ReadableStream, chat/completions, /v1/messages, content_block_delta, message_delta, [DONE], history, conversation, messages, multi-turn, turn trimming, token estimate, getHistory, clearHistory, followUp, steer.',
-        'Scan packages/agent-core, packages/transport-mux, packages/agent-mux, packages/agent-platform, docs, and .a5c/processes. Note that `.a5c/process-library/` may be absent; report whether it exists.',
+        'Scan packages/agent-core, packages/transport-mux, packages/agent-mux, packages/tula-platform, docs, and .a5c/processes. Note that `.a5c/process-library/` may be absent; report whether it exists.',
         'Identify reusable parser logic or fixtures, compatible token-estimation helpers, current public API boundaries, and tests that already lock in old behavior.',
         'Return JSON: { processLibraryStatus, reusableImplementations, reusableTests, apiBoundaries, oldBehaviorTests, noNewInfrastructureNotes, risks }.',
       ],
@@ -401,7 +401,7 @@ export const reviewCompatibilityTask = defineTask('issue-575.review-compatibilit
         JSON.stringify(args.verification, null, 2),
         'Check provider parser robustness for split SSE frames, multi-line event payloads, [DONE], Anthropic event names, usage chunks, non-streaming fallback if intentionally retained, and malformed chunk error messages.',
         'Check history semantics for system prompt placement, follow-up persistence, failed prompts, clearHistory(), getHistory() copies, concurrent prompt rejection, and unbounded memory growth.',
-        'Check downstream compatibility with packages/agent-platform direct agent-core harness usage and existing README promises.',
+        'Check downstream compatibility with packages/tula-platform direct agent-core harness usage and existing README promises.',
         'Return JSON: { approved: boolean, findings: Array<{ severity: string, file: string, line: number, issue: string }>, missingTests, apiCompatibilityNotes, residualRisks }.',
       ],
     },

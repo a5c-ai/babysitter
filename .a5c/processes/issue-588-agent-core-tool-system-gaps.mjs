@@ -233,7 +233,7 @@ const reviewFinalDiffTask = defineTask(
         task: 'Review the final changes against issue #588 and the approved contract design.',
         instructions: [
           'Compare the issue context directly to the tests, implementation, and verification results.',
-          'Prioritize behavioral regressions, API compatibility risks, incomplete integration across agent-core/tool-mux/agent-platform, and missing tests.',
+          'Prioritize behavioral regressions, API compatibility risks, incomplete integration across agent-core/tool-m../tula-platform, and missing tests.',
           'Check that AbortSignal is shared rather than re-created independently by each tool.',
           'Check that streaming uses existing onUpdate or its replacement coherently and preserves transcript/final-result ordering.',
           'Check that metadata is authoritative enough for discovery, policy, approval, cost/rate hints, side-effect classification, and caching.',
@@ -284,7 +284,7 @@ export async function process(inputs, ctx) {
     'npm run verify:metadata',
     'npm --workspace packages/agent-core test',
     'npm --workspace packages/tool-mux test',
-    'npm --workspace packages/agent-platform test',
+    'npm --workspace packages/tula-platform test',
   ];
   const maxVerificationAttempts = inputs?.maxVerificationAttempts ?? 2;
 
@@ -311,7 +311,7 @@ export async function process(inputs, ctx) {
 
   await ctx.breakpoint({
     title: 'Unified tool contract review',
-    question: 'Review the unified tool contract before authoring tests and changing agent-core/tool-mux/agent-platform execution surfaces.',
+    question: 'Review the unified tool contract before authoring tests and changing agent-core/tool-m../tula-platform execution surfaces.',
     context: {
       runId: ctx.runId,
       contractDesign,

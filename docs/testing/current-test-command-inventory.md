@@ -57,9 +57,9 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | `@a5c-ai/agent-mux-extensions` | `test` | No-model | unit-or-integration | Mux maintainers | `test-logs/extension-mux-test.log` | ci.yml test or package-local validation when package is touched |
 | `@a5c-ai/atlas` | `verify:library-metadata` | No-model | contract | Catalog/Atlas maintainers | `test-logs/atlas-verify-library-metadata.log` | ci.yml packages-sdk/test; publish.yml validate_core |
 | `@a5c-ai/babysitter` | `lint` | No-model | static-check | Owning package maintainer | `test-logs/babysitter-lint.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/agent-platform` | `lint` | No-model | static-check | Runtime maintainers | `test-logs/agent-platform-lint.log` | ci.yml packages-sdk/test; publish.yml validate_core |
-| `@a5c-ai/agent-platform` | `test` | No-model | unit-or-integration | Runtime maintainers | `test-logs/agent-platform-test.log` | ci.yml packages-sdk/test; publish.yml validate_core |
-| `@a5c-ai/agent-platform` | `test:seams` | No-model | contract | Runtime maintainers | `test-logs/agent-platform-test-seams.log` | ci.yml packages-sdk/test; publish.yml validate_core |
+| `@a5c-ai/tula-platform` | `lint` | No-model | static-check | Runtime maintainers | `test-lo../tula-platform-lint.log` | ci.yml packages-sdk/test; publish.yml validate_core |
+| `@a5c-ai/tula-platform` | `test` | No-model | unit-or-integration | Runtime maintainers | `test-lo../tula-platform-test.log` | ci.yml packages-sdk/test; publish.yml validate_core |
+| `@a5c-ai/tula-platform` | `test:seams` | No-model | contract | Runtime maintainers | `test-lo../tula-platform-test-seams.log` | ci.yml packages-sdk/test; publish.yml validate_core |
 | `@a5c-ai/babysitter-observer-dashboard` | `lint` | No-model | static-check | Observer maintainers | `test-logs/babysitter-observer-dashboard-lint.log` | ci.yml observer-dashboard; publish.yml validate_observer_and_compiler |
 | `@a5c-ai/babysitter-observer-dashboard` | `test` | No-model | unit-or-integration | Observer maintainers | `test-logs/babysitter-observer-dashboard-test.log` | ci.yml observer-dashboard; publish.yml validate_observer_and_compiler |
 | `@a5c-ai/babysitter-observer-dashboard` | `test:coverage` | No-model | coverage | Observer maintainers | `coverage/babysitter-observer-dashboard-test-coverage` | ci.yml observer-dashboard; publish.yml validate_observer_and_compiler |

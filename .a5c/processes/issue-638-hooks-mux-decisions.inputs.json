@@ -30,13 +30,13 @@
     "packages/hooks-mux/adapter-claude/src/normalizer.ts",
     "packages/hooks-mux/adapter-claude/src/renderer.ts",
     "packages/hooks-mux/adapter-claude/src/__tests__/claude-adapter.test.ts",
-    "packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts",
-    "packages/agent-platform/src/harness/internal/createRun/orchestration/effectsHelpers.ts",
-    "packages/agent-platform/src/harness/internal/createRun/__tests__/orchestration.test.ts",
-    "packages/agent-platform/src/governance",
-    "packages/agent-platform/src/session",
-    "packages/agent-platform/src/daemon/fileWatcher.ts",
-    "packages/agent-platform/src/daemon/__tests__/fileWatcher.test.ts",
+    "packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts",
+    "packages/tula-platform/src/harness/internal/createRun/orchestration/effectsHelpers.ts",
+    "packages/tula-platform/src/harness/internal/createRun/__tests__/orchestration.test.ts",
+    "packages/tula-platform/src/governance",
+    "packages/tula-platform/src/session",
+    "packages/tula-platform/src/daemon/fileWatcher.ts",
+    "packages/tula-platform/src/daemon/__tests__/fileWatcher.test.ts",
     "packages/agent-runtime/src/daemon"
   ],
   "verificationCommands": [
@@ -44,7 +44,7 @@
     "npm run test:sdk",
     "npm run verify:metadata",
     "npm test -- --run packages/hooks-mux/core/src/merge-engine/__tests__/merge-engine.test.ts packages/hooks-mux/adapter-claude/src/__tests__/claude-adapter.test.ts",
-    "npm test -- --run packages/agent-platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/agent-platform/src/governance/__tests__/permissionEvents.test.ts packages/agent-platform/src/daemon/__tests__/fileWatcher.test.ts"
+    "npm test -- --run packages/tula-platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/tula-platform/src/governance/__tests__/permissionEvents.test.ts packages/tula-platform/src/daemon/__tests__/fileWatcher.test.ts"
   ],
   "qualityGates": [
     "Runtime trace lists live call paths from hook handler result through merge, adapter rendering, and agent-platform consumers before implementation.",

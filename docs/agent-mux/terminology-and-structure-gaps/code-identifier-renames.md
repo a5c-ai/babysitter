@@ -23,13 +23,13 @@
 
 | Current Path | Target Path |
 |-------------|------------|
-| `packages/agent-platform/src/harness/amux/` | `packages/agent-platform/src/harness/agent-mux/` |
-| `packages/agent-platform/src/harness/amux/amuxBridge.ts` | `packages/agent-platform/src/harness/agent-mux/bridge.ts` |
-| `packages/agent-platform/src/harness/amux/amuxClientFactory.ts` | `packages/agent-platform/src/harness/agent-mux/clientFactory.ts` |
-| `packages/agent-platform/src/harness/amux/amuxEventMapper.ts` | `packages/agent-platform/src/harness/agent-mux/eventMapper.ts` |
-| `packages/agent-platform/src/harness/amux/amuxHarnessMap.ts` | `packages/agent-platform/src/harness/agent-mux/harnessMap.ts` |
-| `packages/agent-platform/src/harness/amux/amuxStdinReader.ts` | `packages/agent-platform/src/harness/agent-mux/stdinReader.ts` |
-| `packages/agent-platform/src/harness/amux/amuxTypes.ts` | `packages/agent-platform/src/harness/agent-mux/types.ts` |
+| `packages/tula-platform/src/harness/amux/` | `packages/tula-platform/src/harness/agent-mux/` |
+| `packages/tula-platform/src/harness/amux/amuxBridge.ts` | `packages/tula-platform/src/harness/agent-mux/bridge.ts` |
+| `packages/tula-platform/src/harness/amux/amuxClientFactory.ts` | `packages/tula-platform/src/harness/agent-mux/clientFactory.ts` |
+| `packages/tula-platform/src/harness/amux/amuxEventMapper.ts` | `packages/tula-platform/src/harness/agent-mux/eventMapper.ts` |
+| `packages/tula-platform/src/harness/amux/amuxHarnessMap.ts` | `packages/tula-platform/src/harness/agent-mux/harnessMap.ts` |
+| `packages/tula-platform/src/harness/amux/amuxStdinReader.ts` | `packages/tula-platform/src/harness/agent-mux/stdinReader.ts` |
+| `packages/tula-platform/src/harness/amux/amuxTypes.ts` | `packages/tula-platform/src/harness/agent-mux/types.ts` |
 | `packages/agent-mux/amux-proxy/` | `packages/agent-mux/transport-proxy/` |
 | `packages/agent-mux/meta/config/amux/` | `packages/agent-mux/meta/config/agent-mux/` |
 

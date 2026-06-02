@@ -163,7 +163,7 @@ jobs:
           # redundant rebuilds through chained npm scripts.
           npm run build --workspace=@a5c-ai/babysitter-sdk
           (cd packages/tula-core && npx tsc --build --force tsconfig.json)
-          (cd packages/agent-platform && npx tsc --build tsconfig.json)
+          (cd packages/tula-platform && npx tsc --build tsconfig.json)
 
           wait_all
 
@@ -240,7 +240,7 @@ jobs:
       - name: babysitter-harness tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/agent-platform 2>&1 | tee artifacts/core-logs/babysitter-harness-tests.log
+          npm run test --workspace=@a5c-ai/tula-platform 2>&1 | tee artifacts/core-logs/babysitter-harness-tests.log
 
       - name: Upload core validation logs
         if: always()
@@ -1504,12 +1504,12 @@ jobs:
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
           npm run build --workspace=@a5c-ai/tula-core
-          npm run build --workspace=@a5c-ai/agent-platform
+          npm run build --workspace=@a5c-ai/tula-platform
 
       - name: Publish agent-platform
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/agent-platform --access public --tag "$NPM_TAG"
+        run: npm publish --workspace=@a5c-ai/tula-platform --access public --tag "$NPM_TAG"
 
   publish_staging_tula_runtime:
     name: Publish Tula Runtime
@@ -1599,7 +1599,7 @@ jobs:
           npm run build:sdk
           npm run build --workspace=@a5c-ai/tula-core
           npm run build --workspace=@a5c-ai/tula-runtime
-          npm run build --workspace=@a5c-ai/agent-platform
+          npm run build --workspace=@a5c-ai/tula-platform
           npm run build --workspace=@a5c-ai/tula
 
       - name: Publish tula

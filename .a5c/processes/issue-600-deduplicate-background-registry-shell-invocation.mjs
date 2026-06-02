@@ -22,8 +22,8 @@
  *   packages/agent-core/src/backgroundProcessRegistry.ts and
  *   packages/agent-core/src/agenticTools/background/state.ts.
  * - agent-platform still carries copied registry/state:
- *   packages/agent-platform/src/harness/backgroundProcessRegistry.ts and
- *   packages/agent-platform/src/harness/agenticTools/background/state.ts.
+ *   packages/tula-platform/src/harness/backgroundProcessRegistry.ts and
+ *   packages/tula-platform/src/harness/agenticTools/background/state.ts.
  * - Shell argv construction is repeated in session execution, foreground bash
  *   tools, and background process spawning. No shared shell invocation helper
  *   was found in the inspected paths.

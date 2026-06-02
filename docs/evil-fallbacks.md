@@ -104,48 +104,48 @@ Now includes `ErrnoException.code` (ENOENT, EACCES, etc.) in error message.
 
 ---
 
-## Agent Platform (packages/agent-platform)
+## Agent Platform (packages/tula-platform)
 
 ### Critical
 
-**Process module load retry — 3 silent attempts** — `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts:632-678` **(logged)**
+**Process module load retry — 3 silent attempts** — `packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts:632-678` **(logged)**
 Now logs each retry attempt unconditionally, not just in verbose mode.
 
 ### High
 
-**Session recovery — 3-layer fallback chain** — `packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts:166-464`
+**Session recovery — 3-layer fallback chain** — `packages/tula-platform/src/harness/internal/createRun/planProcess/phase.ts:166-464`
 If agent fails → recover from outputs → recovery prompt → host-side recovery. Three levels of silent degradation before final error. Invisible without verbose mode.
 
-~~**Process definition extraction — wrong code blocks**~~ — `packages/agent-platform/src/harness/internal/createRun/planProcess/recovery.ts:33-106` **(hardened)**
+~~**Process definition extraction — wrong code blocks**~~ — `packages/tula-platform/src/harness/internal/createRun/planProcess/recovery.ts:33-106` **(hardened)**
 Non-process code blocks are now rejected (returns `null`) instead of being extracted and executed.
 
-**Journal scan silent stop** — `packages/agent-platform/src/storage/journalWatcher.ts:83-139` **(logged)**
+**Journal scan silent stop** — `packages/tula-platform/src/storage/journalWatcher.ts:83-139` **(logged)**
 readdir error now logged with directory path and error message.
 
-**MCP reconnection — error status not exception** — `packages/agent-platform/src/mcp/client/manager.ts:242-271` **(logged)**
+**MCP reconnection — error status not exception** — `packages/tula-platform/src/mcp/client/manager.ts:242-271` **(logged)**
 Connection failures now logged after exhausting retries.
 
 ### Medium
 
-**CLI orchestration fallback** — `packages/agent-platform/src/harness/internal/createRun/orchestration/index.ts:42-44`
+**CLI orchestration fallback** — `packages/tula-platform/src/harness/internal/createRun/orchestration/index.ts:42-44`
 No Pi backend → silently falls back to subprocess CLI mode. Undocumented user-facing behavior change.
 
-**Prompt retry — no history** — `packages/agent-platform/src/harness/internal/createRun/agent-core-loop.ts:118-164` **(logged)**
+**Prompt retry — no history** — `packages/tula-platform/src/harness/internal/createRun/agent-core-loop.ts:118-164` **(logged)**
 First retry now always logged to stderr.
 
-**Effect execution retry — count swallowed** — `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts:521-630` **(logged)**
+**Effect execution retry — count swallowed** — `packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts:521-630` **(logged)**
 Now logs effect ID, attempt number, and error before each retry.
 
-**Harness name resolution — no validation** — `packages/agent-platform/src/harness/internal/createRun/agent-core-loop.ts:250-262`
+**Harness name resolution — no validation** — `packages/tula-platform/src/harness/internal/createRun/agent-core-loop.ts:250-262`
 Unknown harness names returned as-is. Typos only caught at runtime execution.
 
-**MCP config file — corrupt = empty** — `packages/agent-platform/src/mcp/client/config.ts:33-52` **(logged)**
+**MCP config file — corrupt = empty** — `packages/tula-platform/src/mcp/client/config.ts:33-52` **(logged)**
 Non-ENOENT read errors and JSON parse errors now logged distinctly.
 
-**Session state parsing — silent defaults** — `packages/agent-platform/src/session/parse.ts:78-120`
+**Session state parsing — silent defaults** — `packages/tula-platform/src/session/parse.ts:78-120`
 Malformed values silently revert to defaults. Invalid iteration counts become defaults without indication.
 
-**MCP tool execution — exception → result object** — `packages/agent-platform/src/mcp/client/executor.ts:38-59` **(logged)**
+**MCP tool execution — exception → result object** — `packages/tula-platform/src/mcp/client/executor.ts:38-59` **(logged)**
 Now logs tool name and error message before converting to result object.
 
 ---
@@ -293,28 +293,28 @@ If `hostSignalMap[name]` is undefined, silently falls back to empty array. Harne
 
 ---
 
-## Agent Platform Internals (packages/agent-platform — additional)
+## Agent Platform Internals (packages/tula-platform — additional)
 
 ### High
 
-**Azure OpenAI URL parse fallback** — `packages/agent-platform/src/harness/piWrapper/moduleSupport.ts:119-122`
+**Azure OpenAI URL parse fallback** — `packages/tula-platform/src/harness/piWrapper/moduleSupport.ts:119-122`
 `normalizeAzureOpenAiBaseUrl()` catches URL.parse errors and returns raw untrimmed value. Malformed URLs passed downstream without indication.
 
-**Azure model synthesis returns undefined silently** — `packages/agent-platform/src/harness/piWrapper/moduleSupport.ts:146-175`
+**Azure model synthesis returns undefined silently** — `packages/tula-platform/src/harness/piWrapper/moduleSupport.ts:146-175`
 `synthesizeAzureModelEntry()` returns `undefined` at multiple points without logging. Model resolution fails silently.
 
-**Non-JSON stdin lines silently discarded** — `packages/agent-platform/src/harness/amux/amuxStdinReader.ts:64-66`
+**Non-JSON stdin lines silently discarded** — `packages/tula-platform/src/harness/amux/amuxStdinReader.ts:64-66`
 `catch { continue; }` on JSON.parse. Invalid interaction events vanish. Downstream code may wait forever for a response that was malformed and discarded.
 
-**Pi module import — generic error hides real cause** — `packages/agent-platform/src/harness/piWrapper/moduleSupport.ts:86-96`
+**Pi module import — generic error hides real cause** — `packages/tula-platform/src/harness/piWrapper/moduleSupport.ts:86-96`
 Catch wraps error with "is the package installed?" but original error lost. Could be version mismatch, init error, or actual missing package.
 
 ### Medium
 
 **Inline `.catch(() => undefined)` pattern** — Multiple files:
-- `packages/agent-platform/src/api/breakpoints.ts` — task definition read
-- `packages/agent-platform/src/harness/piSecureSandbox.ts:245` — `void session.abort().catch(() => undefined)`
-- `packages/agent-platform/src/harness/piWrapper.ts:245` — same pattern
+- `packages/tula-platform/src/api/breakpoints.ts` — task definition read
+- `packages/tula-platform/src/harness/piSecureSandbox.ts:245` — `void session.abort().catch(() => undefined)`
+- `packages/tula-platform/src/harness/piWrapper.ts:245` — same pattern
 
 All errors from these operations are completely invisible.
 

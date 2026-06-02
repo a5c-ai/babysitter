@@ -211,7 +211,7 @@ const reuseAuditTask = defineTask("issue-634.reuse-audit", (args, taskCtx) => {
   const globs = args.scanGlobs?.length ? args.scanGlobs : [
     "packages/tasks-mux",
     "packages/agent-runtime",
-    "packages/agent-platform",
+    "packages/tula-platform",
     "packages/agent-core",
     "docs",
     ".a5c/processes",

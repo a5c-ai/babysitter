@@ -27,8 +27,8 @@
     "packages/agent-core/src/session.test.ts",
     "packages/agent-core/README.md",
     "packages/agent-core/src/context/token-estimator.ts",
-    "packages/agent-platform/src/harness/invoker.ts",
-    "packages/agent-platform/src/harness/internal/createRun/__tests__/createRun.test.ts",
+    "packages/tula-platform/src/harness/invoker.ts",
+    "packages/tula-platform/src/harness/internal/createRun/__tests__/createRun.test.ts",
     "packages/transport-mux/src/engines/openai.ts",
     "packages/transport-mux/src/engines/anthropic.ts",
     "packages/transport-mux/tests/transports/openai-chat.test.ts",
@@ -56,9 +56,9 @@
     "packages/transport-mux/src/engines/openai.ts already parses OpenAI/Azure SSE data lines, [DONE], content deltas, finish reasons, and usage.",
     "packages/transport-mux/src/engines/anthropic.ts already parses Anthropic message stream events including content_block_delta text_delta and message_delta usage.",
     "transport-mux tests provide realistic OpenAI chat and Anthropic stream fixtures that can inform agent-core tests without changing transport-mux behavior.",
-    "packages/agent-core/src/context/token-estimator.ts and packages/agent-platform/src/compression/compaction.ts provide existing rough token-estimation patterns for deterministic trimming decisions.",
+    "packages/agent-core/src/context/token-estimator.ts and packages/tula-platform/src/compression/compaction.ts provide existing rough token-estimation patterns for deterministic trimming decisions.",
     "packages/agent-core/README.md already documents prompt() as streaming events and abort()/dispose() behavior that the current implementation does not fully satisfy.",
-    "packages/agent-platform/src/harness/invoker.ts creates and disposes an agent-core session for the direct agent-core harness path and must remain compatible."
+    "packages/tula-platform/src/harness/invoker.ts creates and disposes an agent-core session for the direct agent-core harness path and must remain compatible."
   ],
   "acceptanceFocus": [
     "OpenAI/Azure chat completions are requested with stream: true and SSE chunks emit multiple incremental text_delta events as they arrive.",
@@ -96,7 +96,7 @@
     "npm exec --yes --package=vitest -- vitest run --config packages/agent-core/vitest.config.ts packages/agent-core/src/session.test.ts",
     "npm run test --workspace=@a5c-ai/agent-core",
     "npm run build --workspace=@a5c-ai/agent-core",
-    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/agent-platform/src/harness/internal/createRun/__tests__/createRun.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/tula-platform/src/harness/internal/createRun/__tests__/createRun.test.ts",
     "git diff --check"
   ],
   "plannedPhases": [

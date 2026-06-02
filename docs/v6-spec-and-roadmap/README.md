@@ -14,7 +14,7 @@ This directory documents a pragmatic V6 evolution for the Babysitter stack. The 
 The repository already contains the important building blocks:
 
 - `packages/sdk` is the stable center of gravity.
-- `packages/babysitter` and `packages/agent-platform` provide the CLI and agent runtime.
+- `packages/babysitter` and `packages/tula-platform` provide the CLI and agent runtime.
 - `plugins/` contains the real harness integrations and their packaging constraints.
 - The adversarial reviews show that a broad "split everything into many packages" plan is not yet justified.
 
@@ -80,7 +80,7 @@ Supporting modules:
 
 ## First Executable Slice
 
-The currently selected first executable V6 slice is the `@a5c-ai/agent-platform` seam contract. It keeps the existing package boundary intact while making runtime-domain ownership, subpath exports, and validation gates explicit.
+The currently selected first executable V6 slice is the `@a5c-ai/tula-platform` seam contract. It keeps the existing package boundary intact while making runtime-domain ownership, subpath exports, and validation gates explicit.
 
 - Decision record: [ADR-001: Babysitter-Agent Seam Contract As The First Executable V6 Slice](./decisions/ADR-001-agent-platform-seam-contract.md)
 - Repo-level validation command: `npm run verify:v6:seams`

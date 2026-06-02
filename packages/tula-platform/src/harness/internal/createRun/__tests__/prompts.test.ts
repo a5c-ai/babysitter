@@ -188,7 +188,7 @@ describe("harnessPrompts", () => {
         },
         worktree: {
           workspacePath: "/repo/workspace",
-          currentPath: "/repo/workspace/packages/agent-platform",
+          currentPath: "/repo/workspace/packages/tula-platform",
           repoAlias: "babysitter",
           branch: "staging",
         },

@@ -14,12 +14,12 @@ Files/modules that concentrate the most danger across multiple categories.
 |------|-----------|----------|
 | `packages/tula-core/src/session.ts` | coupling, caveat | 8 env vars read with complex fallback chain, 900s timeout unexplained *(model default + anthropic conversion now logged)* |
 | `packages/agent-mux/core/src/provider-resolver.ts` | coupling | 6-level region chain, 5-level model chain *(model source + Google→Vertex now logged)* |
-| `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts` | hazard, coupling, caveat | Double-cast type assertions, process.env mutations *(retry loop now logged)* |
-| `packages/agent-platform/src/harness/piWrapper/moduleSupport.ts` | coupling, caveat | Azure env mutations *(URL parse + import error now logged)* |
+| `packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts` | hazard, coupling, caveat | Double-cast type assertions, process.env mutations *(retry loop now logged)* |
+| `packages/tula-platform/src/harness/piWrapper/moduleSupport.ts` | coupling, caveat | Azure env mutations *(URL parse + import error now logged)* |
 | `packages/agent-mux/core/src/spawn-runner.ts` | hazard | 8+ PTY kill/write failures *(4 now logged in spawn-runner)* |
 | `packages/tula-core/src/agenticTools/shared/process.ts` | caveat, hazard | Ripgrep path cached at module load |
 | `packages/agent-mux/webui/src/lib/global-registry.ts` | coupling | globalThis shared mutable state, duplicated in observer-dashboard |
-| `packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts` | hazard | 3-layer recovery chain invisible without verbose *(code block extraction now rejects non-process blocks)* |
+| `packages/tula-platform/src/harness/internal/createRun/planProcess/phase.ts` | hazard | 3-layer recovery chain invisible without verbose *(code block extraction now rejects non-process blocks)* |
 | ~~`packages/sdk/src/storage/journal.ts`~~ | ~~fallback~~ | ~~Atomicity abandoned~~ → now throws on ENOENT. Queue errors logged. |
 | ~~`packages/agent-mux/core/src/kanban.ts`~~ | ~~hazard~~ | ~~2518 lines, 6+ sealed switch statements, stringly-typed status values~~ -> status/workflow mappings now use typed tables with coverage tests. |
 
@@ -42,7 +42,7 @@ Files/modules that concentrate the most danger across multiple categories.
 **FIXED:** Extracted `createGlobalRegistry<TMap>` factory. All three copies (webui, gateway, observer-dashboard) now use the same factory with domain-specific type maps. Factory is canonical source, copies marked.
 
 ### ~~Double-cast type assertions bypass all safety~~
-**Files:** `packages/tula-core/src/loop/agent-loop.ts:209`, `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts:128-129`, `packages/agent-platform/src/cost/journal.ts`
+**Files:** `packages/tula-core/src/loop/agent-loop.ts:209`, `packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts:128-129`, `packages/tula-platform/src/cost/journal.ts`
 
 **FIXED:** agent-loop.ts now validates shape at runtime before cast. effects.ts removed 3 double-casts (TaskDef has index sig, session has public abort). cost/journal.ts replaced blind cast with field-by-field validation.
 
@@ -101,12 +101,12 @@ Files/modules that concentrate the most danger across multiple categories.
 **FIXED:** #586 replaced the repeated status/workflow switch pattern with typed mapping tables and focused coverage in `packages/agent-mux/core/tests/kanban.test.ts`. Adding a new status or workflow state now has a single mapping contract and tests that enumerate the supported values.
 
 ### ~~Process definition extraction — any code block as fallback~~
-**File:** `packages/agent-platform/src/harness/internal/createRun/planProcess/recovery.ts:33-106`
+**File:** `packages/tula-platform/src/harness/internal/createRun/planProcess/recovery.ts:33-106`
 
 **FIXED:** Non-process code blocks are now rejected (`return null`) instead of being extracted and executed.
 
 ### Validation uses triple-quote-style matching
-**File:** `packages/agent-platform/src/harness/internal/createRun/planProcess/validationSource.ts:294-300`
+**File:** `packages/tula-platform/src/harness/internal/createRun/planProcess/validationSource.ts:294-300`
 
 ```typescript
 if (properties.has("agent") && kindValue !== "\"agent\"" && kindValue !== "'agent'" && kindValue !== "`agent`")
@@ -154,7 +154,7 @@ The timeout sets an abort signal but doesn't guarantee the request stops. Fetch 
 **FIXED:** Tool definitions are now tracked by both returned array and individual tool object ownership. Passing a shallow-copied definitions array to `disposeAgentCoreToolDefinitions()` still resolves the owning options and clears retained background task state.
 
 ### ~~Lazy init race on piWrapper failure~~
-**File:** `packages/agent-platform/src/harness/piWrapper.ts:82-92`
+**File:** `packages/tula-platform/src/harness/piWrapper.ts:82-92`
 
 **FIXED:** Initialization failures now record the failure and retry-after timestamp. Immediate retries rethrow the recorded failure instead of hammering session creation, while retries after the backoff window can recover from transient failures.
 

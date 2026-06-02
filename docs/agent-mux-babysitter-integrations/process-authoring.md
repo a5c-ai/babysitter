@@ -6,7 +6,7 @@ Update process creation prompts, templates, and validation to expose external ag
 
 ## Prompt Context Injection
 
-### Where: `packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts`
+### Where: `packages/tula-platform/src/harness/internal/createRun/planProcess/phase.ts`
 
 When `discoverExternalAgents()` returns agents, inject into the plan process prompt:
 
@@ -61,7 +61,7 @@ if (externalAgents.available && externalAgents.agents.some(a => a.installed)) {
 
 ## Validation Updates
 
-### `packages/agent-platform/src/harness/internal/createRun/planProcess/validationSource.ts`
+### `packages/tula-platform/src/harness/internal/createRun/planProcess/validationSource.ts`
 
 Current validation checks for `kind: "agent"` with `agent: { ... }` shape. Extend it to accept `agent.responderType: "agent"` routing metadata:
 
@@ -74,7 +74,7 @@ if (kind === "agent" && properties.has("agent")) {
 }
 ```
 
-### `packages/agent-platform/src/harness/internal/createRun/planProcess/validation.ts`
+### `packages/tula-platform/src/harness/internal/createRun/planProcess/validation.ts`
 
 In `validateProcessExport()`, don't reject processes that reference external agents even if agent-mux is not installed at validation time (it may be available at execution time):
 
@@ -88,7 +88,7 @@ if (hasExternalAgentTasks(source) && !externalAgentsAvailable) {
 
 ## Conformance Repair Prompt
 
-Update `packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts` conformance repair prompt to include external agent task format:
+Update `packages/tula-platform/src/harness/internal/createRun/planProcess/phase.ts` conformance repair prompt to include external agent task format:
 
 ```
 - External agent tasks must use kind: "agent" with agent: { responderType: "agent", adapter: "..." }
@@ -99,10 +99,10 @@ Update `packages/agent-platform/src/harness/internal/createRun/planProcess/phase
 
 | File | Change |
 |------|--------|
-| `packages/agent-platform/src/harness/internal/createRun/planProcess/phase.ts` | Inject external agents into prompt context |
-| `packages/agent-platform/src/harness/internal/createRun/planProcess/prompts.ts` | Add externalAgentsSection to prompt builder |
-| `packages/agent-platform/src/harness/internal/createRun/planProcess/validation.ts` | Accept external agent tasks |
-| `packages/agent-platform/src/harness/internal/createRun/planProcess/validationSource.ts` | Update kind shape matching |
+| `packages/tula-platform/src/harness/internal/createRun/planProcess/phase.ts` | Inject external agents into prompt context |
+| `packages/tula-platform/src/harness/internal/createRun/planProcess/prompts.ts` | Add externalAgentsSection to prompt builder |
+| `packages/tula-platform/src/harness/internal/createRun/planProcess/validation.ts` | Accept external agent tasks |
+| `packages/tula-platform/src/harness/internal/createRun/planProcess/validationSource.ts` | Update kind shape matching |
 | `packages/sdk/src/harness/externalAgentDiscovery.ts` | New — discovery API |
 
 ## Documentation Updates

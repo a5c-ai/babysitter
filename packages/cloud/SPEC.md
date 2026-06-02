@@ -41,7 +41,7 @@ The package is responsible for making the repo's deployable utilities work toget
 
 - `@a5c-ai/kanban`
 - `@a5c-ai/agent-mux-gateway`
-- `@a5c-ai/agent-platform` as an optional service/runtime
+- `@a5c-ai/tula-platform` as an optional service/runtime
 - optional observer and supporting runtime components when enabled
 
 The baseline topology is:

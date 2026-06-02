@@ -216,7 +216,7 @@ Five architectural decisions define v6:
 | **Paperclip VS Code extension removed** | Use Breakpoints Mux or Observer Dashboard for in-IDE observability. |
 | **`--plugin-root` flag removed** | Plugin discovery is now automatic. Remove the flag from your CLI invocations. |
 | **Public API: 9 to 46+ exports** | No breaking change for existing imports. New exports are additive. |
-| **`compaction`, `mcpClient`, `mcpChannels` moved** | Import from `@a5c-ai/agent-platform` instead of the root SDK. |
+| **`compaction`, `mcpClient`, `mcpChannels` moved** | Import from `@a5c-ai/tula-platform` instead of the root SDK. |
 | **zod@4 required** | Upgrade from zod@3. Schema APIs have minor breaking changes; see the [zod@4 migration guide](https://zod.dev/v4). |
 
 ---

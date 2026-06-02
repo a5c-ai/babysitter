@@ -1178,7 +1178,7 @@ suite, plus a per-surface Presentation set for agent-mux.
 - `presentation:agent-mux-watch-watchos` (kind: watch)
 - `presentation:agent-mux-watch-wearos` (kind: watch)
 
-`graph/agent-stack/presentations/agent-platform-presentation.yaml`:
+`graph/agent-stack/presentatio../tula-platform-presentation.yaml`:
 
 - `presentation:agent-platform-cli` (kind: cli)
 
@@ -5354,7 +5354,7 @@ catalog pass but cheap to unblock individually.
 - graph/catalog-meta/package-surfaces/tasks-mux.yaml (extended exposes_subcommand + exposes_endpoint)
 - graph/catalog-meta/package-surfaces/agent-mux-harness-mock.yaml (extended exposes_subcommand)
 - graph/catalog-meta/package-surfaces/babysitter-sdk.yaml (rewritten with bins + 12 subcommand groups)
-- graph/catalog-meta/package-surfaces/agent-platform.yaml (rewritten with babysitter-harness bin)
+- graph/catalog-meta/package-surfac../tula-platform.yaml (rewritten with babysitter-harness bin)
 - migration/legacy-vs-atlas-coverage-matrix.md (catalog pass 98 section appended)
 - REMODEL-NOTES.md (this section)
 

@@ -21,23 +21,23 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@a5c-ai/agent-platform": [
-        "../agent-platform/src/index.ts"
+      "@a5c-ai/tula-platform": [
+        "../tula-platform/src/index.ts"
       ],
-      "@a5c-ai/agent-platform/api": [
-        "../agent-platform/src/api/index.ts"
+      "@a5c-ai/tula-platform/api": [
+        "../tula-platform/src/api/index.ts"
       ],
-      "@a5c-ai/agent-platform/daemon": [
-        "../agent-platform/src/daemon/index.ts"
+      "@a5c-ai/tula-platform/daemon": [
+        "../tula-platform/src/daemon/index.ts"
       ],
-      "@a5c-ai/agent-platform/harness": [
-        "../agent-platform/src/harness/index.ts"
+      "@a5c-ai/tula-platform/harness": [
+        "../tula-platform/src/harness/index.ts"
       ],
-      "@a5c-ai/agent-platform/mcp/transport": [
-        "../agent-platform/src/mcp/transport/index.ts"
+      "@a5c-ai/tula-platform/mcp/transport": [
+        "../tula-platform/src/mcp/transport/index.ts"
       ],
-      "@a5c-ai/agent-platform/session": [
-        "../agent-platform/src/session/index.ts"
+      "@a5c-ai/tula-platform/session": [
+        "../tula-platform/src/session/index.ts"
       ]
     }
   },
@@ -60,7 +60,7 @@
       "path": "../tula-runtime"
     },
     {
-      "path": "../agent-platform"
+      "path": "../tula-platform"
     }
   ]
 }

@@ -15,7 +15,7 @@ The platform layer builds on the foundation by hardening plugin, session, and ex
 - Describe metaplugins as capability composition above concrete plugin and hook bundles, without requiring a new package boundary
 
 **Session Management Evolution**
-- Clarify session ownership across `packages/agent-platform`, `packages/sdk`, and plugin integration points
+- Clarify session ownership across `packages/tula-platform`, `packages/sdk`, and plugin integration points
 - Improve persistence, context propagation, and recovery only where the current runtime already exposes those seams
 - Keep session changes rollbackable and testable without introducing broad cross-package churn
 
@@ -50,7 +50,7 @@ If a future standalone package is ever pursued here, it should host proved compo
 
 **Cross-Platform Compatibility**: Windows, macOS, Linux validation for current commands and plugins
 
-**Deferred Vocabulary Guardrail**: `@a5c-ai/agent-platform`, `@a5c-ai/agent-platform-meta-plugins`, and `@a5c-ai/agent-platform-orchestration-plugin` remain non-deliverables in this phase
+**Deferred Vocabulary Guardrail**: `@a5c-ai/tula-platform`, `@a5c-ai/tula-platform-meta-plugins`, and `@a5c-ai/tula-platform-orchestration-plugin` remain non-deliverables in this phase
 
 ## Explicit Non-Deliverables
 

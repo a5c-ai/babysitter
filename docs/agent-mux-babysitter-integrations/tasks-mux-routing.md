@@ -247,5 +247,5 @@ The stop-hook handler queries tasks-mux for task routing before deciding what to
 | `packages/tasks-mux/src/types.ts` | Add ResponderType, extend Responder |
 | `packages/tasks-mux/src/backend.ts` | Support multiple backend types |
 | `packages/sdk/src/runtime/intrinsics/task.ts` | Route through tasks-mux |
-| `packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts` | Use tasks-mux routing |
+| `packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts` | Use tasks-mux routing |
 | `packages/sdk/src/harness/hooks/stopHookHandler.ts` | Query tasks-mux for routing decisions |

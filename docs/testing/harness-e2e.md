@@ -60,7 +60,7 @@ This path tests a real or mocked agent session controlled by `agent-mux`. It sho
 
 ## Path C: Babysitter-Agent Runtime E2E
 
-This path validates `@a5c-ai/agent-platform` runtime behavior. It starts from preconditions, not installers.
+This path validates `@a5c-ai/tula-platform` runtime behavior. It starts from preconditions, not installers.
 
 Valid commands include:
 

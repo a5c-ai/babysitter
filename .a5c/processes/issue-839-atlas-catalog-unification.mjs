@@ -16,7 +16,7 @@
  * - .a5c/process-library/ is not present in this checkout. Matching methodology assets live under library/methodologies and checked-in process examples live under .a5c/processes.
  * - The closest methodology matches are ATDD/TDD for acceptance-test-first implementation, GSD iterative convergence for quality scoring loops, and adversarial-spec-debates for challenge/judge review.
  * - Current agent-catalog source and contract tests live under packages/agent-catalog/src. The target package, packages/atlas, already exports a root graph API and has package.json export entries for "." and "./indexer".
- * - Existing downstream consumers import @a5c-ai/agent-catalog from packages/agent-mux/adapters, packages/sdk, hooks-mux adapters, webui/agent-platform vitest aliases, and related package manifests.
+ * - Existing downstream consumers import @a5c-ai/agent-catalog from packages/agent-mux/adapters, packages/sdk, hooks-mux adapters, web../tula-platform vitest aliases, and related package manifests.
  * - Root build/test scripts and package-lock.json still name @a5c-ai/agent-catalog; build:sdk currently builds atlas, then agent-catalog, then sdk.
  * - docs/atlas-catalog-unification/README.md is the authoritative issue reference and calls for removing packages/agent-catalog, adding @a5c-ai/atlas/catalog, migrating imports, updating workspace/tsconfig/CI, regenerating the lockfile, and building/testing.
  */

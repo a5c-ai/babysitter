@@ -9,8 +9,8 @@
  * @module cli/amuxEventsFormatter
  */
 
-import type { HarnessInvokeResult } from "@a5c-ai/agent-platform/harness";
-import { mapHarnessToAmuxAdapter, hasAmuxAdapter } from "@a5c-ai/agent-platform/harness";
+import type { HarnessInvokeResult } from "@a5c-ai/tula-platform/harness";
+import { mapHarnessToAmuxAdapter, hasAmuxAdapter } from "@a5c-ai/tula-platform/harness";
 
 /**
  * Shape of a single JSONL event line emitted in amux-events format.

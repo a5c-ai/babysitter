@@ -6,7 +6,7 @@ import { handleHarnessCreateRun } from "./commands/harness/createRun";
 import { handleHarnessResumeRun } from "./commands/harness/resumeRun";
 import { handleJsonlInteractive } from "./commands/jsonlInteractive";
 import { handleTui } from "./commands/tui";
-import { invokeHarness, detectCallerHarness, discoverHarnesses, normalizeBuiltInHarnessName } from "@a5c-ai/agent-platform/harness";
+import { invokeHarness, detectCallerHarness, discoverHarnesses, normalizeBuiltInHarnessName } from "@a5c-ai/tula-platform/harness";
 import { handleDaemonRun, handleDaemonStart, handleDaemonStatus, handleDaemonStop } from "./commands/daemon";
 import { handleMcpServe } from "./commands/mcpServe";
 import { handleSessionHistory } from "./commands/session/history";

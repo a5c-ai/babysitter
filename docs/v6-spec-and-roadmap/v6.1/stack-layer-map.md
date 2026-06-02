@@ -71,7 +71,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/agent-platform`, `@a5c-ai/agent-mux-comm` |
+| Packages | `@a5c-ai/tula-platform`, `@a5c-ai/agent-mux-comm` |
 | Node Kinds | AgentRuntimeImpl (agent-stack) |
 | Graph Cluster | agent-stack |
 | Maturity | **Mature** — agent-platform hosts the unified runtime; agent-comm-mux hosts harness dispatch |
@@ -84,7 +84,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/agent-mux-extensions`, `@a5c-ai/agent-catalog`, `@a5c-ai/agent-platform` |
+| Packages | `@a5c-ai/agent-mux-extensions`, `@a5c-ai/agent-catalog`, `@a5c-ai/tula-platform` |
 | Node Kinds | AgentPlatformImpl, Plugin, PluginTarget, PluginMarketplace, PluginArtifact (agent-stack + extensions) |
 | Graph Cluster | agent-stack, extensions |
 | Maturity | Partial — plugin compiler mature; deeper platform (team agents, marketplace identity) deferred |
@@ -99,7 +99,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/babysitter-sdk` (run dirs), `@a5c-ai/agent-platform` (workspace management) |
+| Packages | `@a5c-ai/babysitter-sdk` (run dirs), `@a5c-ai/tula-platform` (workspace management) |
 | Node Kinds | Workspace, Worktree, WorktreeSession (lifecycle) |
 | Graph Cluster | lifecycle |
 | Maturity | Partial — SDK owns `.a5c/runs/` layout; workspace materialization policy not formalized |
@@ -114,7 +114,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/babysitter-sdk` (effects, tasks), `@a5c-ai/agent-platform` (tool dispatch) |
+| Packages | `@a5c-ai/babysitter-sdk` (effects, tasks), `@a5c-ai/tula-platform` (tool dispatch) |
 | Node Kinds | Execution, Effect, Invocation (lifecycle) |
 | Graph Cluster | lifecycle |
 | Maturity | **Mature** — Effect model, task dispatch, shell/agent/orchestrator task kinds |
@@ -183,7 +183,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/babysitter-sdk`, `@a5c-ai/agent-platform` |
+| Packages | `@a5c-ai/babysitter-sdk`, `@a5c-ai/tula-platform` |
 | Node Kinds | OrchestrationPrimitive, Run, Phase, PhaseMachine, PhaseTransition, OrchestratorState (lifecycle) |
 | Graph Cluster | lifecycle |
 | Maturity | **Mature** — SDK owns effect model, replay engine, deterministic execution, event sourcing |
@@ -198,7 +198,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/agent-platform` (governance module), `@a5c-ai/agent-mux-tasks` (approval routing), `@a5c-ai/atlas` (evidence/claims) |
+| Packages | `@a5c-ai/tula-platform` (governance module), `@a5c-ai/agent-mux-tasks` (approval routing), `@a5c-ai/atlas` (evidence/claims) |
 | Node Kinds | AgentGovernanceImpl, EvidencePolicy, Claim, TrustLevel (agent-stack + catalog-meta + trust) |
 | Graph Cluster | agent-stack, catalog-meta, trust |
 | Maturity | Partial — approval gates, evidence claims, trust levels defined; broader policy framework (NIST AI RMF, OWASP) aspirational |

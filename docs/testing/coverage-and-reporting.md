@@ -23,7 +23,7 @@ Coverage reporting should make the repository-wide test story visible without tu
 The long-term target is one repository coverage artifact with package-level sections:
 
 - `@a5c-ai/babysitter-sdk`,
-- `@a5c-ai/agent-platform`,
+- `@a5c-ai/tula-platform`,
 - `@a5c-ai/tula-core`,
 - `@a5c-ai/agent-mux-transport`,
 - the `@a5c-ai/agent-mux` package family,

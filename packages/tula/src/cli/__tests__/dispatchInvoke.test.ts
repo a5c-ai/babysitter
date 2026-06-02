@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-vi.mock("@a5c-ai/agent-platform/harness", () => ({
+vi.mock("@a5c-ai/tula-platform/harness", () => ({
   invokeHarness: vi.fn().mockResolvedValue({
     success: true,
     output: "external-output",
@@ -55,7 +55,7 @@ vi.mock("../commands/session/history", () => ({
 }));
 
 import { executeAgentCliCommand } from "../dispatch";
-import { invokeHarness } from "@a5c-ai/agent-platform/harness";
+import { invokeHarness } from "@a5c-ai/tula-platform/harness";
 import { handleHarnessCreateRun } from "../commands/harness/createRun";
 
 const baseParsed = {

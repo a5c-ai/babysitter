@@ -206,7 +206,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/tula-core 2>&1 | tee artifacts/test-logs/tula-core-build.log
-          npm run build --workspace=@a5c-ai/agent-platform 2>&1 | tee artifacts/test-logs/babysitter-harness-build.log
+          npm run build --workspace=@a5c-ai/tula-platform 2>&1 | tee artifacts/test-logs/babysitter-harness-build.log
 
       - name: tula-core tests
         run: |
@@ -216,7 +216,7 @@ jobs:
       - name: babysitter-harness tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/agent-platform 2>&1 | tee artifacts/test-logs/babysitter-harness-tests.log
+          npm run test --workspace=@a5c-ai/tula-platform 2>&1 | tee artifacts/test-logs/babysitter-harness-tests.log
 
       - name: Generate unified plugin bundles
         run: |

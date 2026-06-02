@@ -376,7 +376,7 @@ export const traceTokenCostSurfacesTask = defineTask('issue-578.trace-token-cost
         'Trace agent-core prompt flow from packages/agent-core/src/session.ts through AgentCorePromptResult in packages/agent-core/src/types.ts and all downstream consumers in agent-platform.',
         'Trace transport-mux CompletionResult.usage/costRecord through codecs, server response paths, streaming done events, MetricsTracker, and tests.',
         'Trace SDK cost journaling: packages/sdk/src/cost/types.ts, packages/sdk/src/cost/journal.ts, packages/sdk/src/runtime/orchestrateIteration.ts, and packages/sdk/src/runtime/replay/effectIndex plus existing tests.',
-        'Trace agent-platform cost APIs: packages/agent-platform/src/session/cost.ts, packages/agent-platform/src/cost/effectCost.ts, createRun orchestration/effect resolution files, and amux event mapper cost/token_usage handling.',
+        'Trace agent-platform cost APIs: packages/tula-platform/src/session/cost.ts, packages/tula-platform/src/cost/effectCost.ts, createRun orchestration/effect resolution files, and amux event mapper cost/token_usage handling.',
         'Identify the authoritative point where a completion/effect has enough runId/sessionId/effectId identity to append one COST_TRACKED event without double counting.',
         'Return JSON: { agentCorePath, transportMuxPath, sdkJournalPath, agentPlatformBudgetPath, identityAvailability, doubleCountRisks, streamingGaps, targetFiles, testsToUpdate, recommendedSequence }.',
       ],
@@ -542,7 +542,7 @@ export const implementPlatformBudgetEnforcementTask = defineTask('issue-578.impl
       task: 'Implement the L6 session cost budget enforcement slice for issue #578.',
       instructions: [
         'Modify only agent-platform orchestration/session cost files and direct tests needed for this slice.',
-        'Wire run/effect cost stats into session cost aggregation using existing packages/agent-platform/src/session/cost.ts APIs where possible.',
+        'Wire run/effect cost stats into session cost aggregation using existing packages/tula-platform/src/session/cost.ts APIs where possible.',
         'Call checkBudget() and markThresholdsTriggered() at an orchestrator-safe checkpoint after authoritative COST_TRACKED data is journaled and before more work is dispatched.',
         'When autoPause is enabled and budget is exceeded, pause with an explicit budget reason rather than failing the run unexpectedly.',
         'Ensure budget alerts are not repeatedly emitted for already-triggered thresholds.',

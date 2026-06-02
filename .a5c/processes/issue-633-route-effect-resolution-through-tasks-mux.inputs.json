@@ -10,14 +10,14 @@
     "npm run typecheck --workspace=@a5c-ai/tasks-mux",
     "npm run build --workspace=@a5c-ai/tasks-mux",
     "npm run test:sdk",
-    "npm run test --workspace=@a5c-ai/agent-platform",
+    "npm run test --workspace=@a5c-ai/tula-platform",
     "npm run verify:metadata",
     "git diff --check"
   ],
   "sourceScope": {
     "primaryPackages": [
       "packages/sdk",
-      "packages/agent-platform",
+      "packages/tula-platform",
       "packages/tasks-mux"
     ],
     "pluginSurfaces": [

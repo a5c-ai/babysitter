@@ -30,7 +30,7 @@ The orchestration system centered on event-sourced runs, effects, replay, and pr
 
 ### Babysitter Agent
 
-The operational agent runtime package, currently `@a5c-ai/agent-platform`. It is part of the current executable stack, even though V6 treats some deeper runtime/platform naming as deferred vocabulary rather than committed package splits.
+The operational agent runtime package, currently `@a5c-ai/tula-platform`. It is part of the current executable stack, even though V6 treats some deeper runtime/platform naming as deferred vocabulary rather than committed package splits.
 
 ### Babysitter CLI
 

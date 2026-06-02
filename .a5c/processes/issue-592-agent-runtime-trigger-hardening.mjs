@@ -256,7 +256,7 @@ export const reuseAuditTask = defineTask("issue-592.reuse-audit", (args, taskCtx
         "Render a section titled exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).",
         "Extract keyword nouns and verbs from the issue: cron, timezone, named months, named days, L, #, @daily, @reboot, message queue, RabbitMQ, Kafka, SQS, git webhook, Slack, Discord, rate limiting, token bucket, backpressure, queue depth, deduplication, fingerprint, dead letter queue, retry, backoff, failure metrics.",
         "Scan for matching migrations, API routes, environment variables, SDK dependencies, package exports, and imports. Honor .a5c/reuse-audit.json if present.",
-        "Inspect packages/agent-runtime/src/daemon first, then packages/agent-platform/src/daemon, packages/triggers-mux, packages/krate/core trigger controllers, observability queue diagnostics, and docs/agent-layer-gaps.md.",
+        "Inspect packages/agent-runtime/src/daemon first, then packages/tula-platform/src/daemon, packages/triggers-mux, packages/krate/core trigger controllers, observability queue diagnostics, and docs/agent-layer-gaps.md.",
         "Call out existing infrastructure to reuse, especially DurableTriggerQueue, daemon status/diagnostics, triggers-mux normalization/query helpers, and krate AgentTriggerRule ideas.",
         "Call out no-match areas where new implementation is still required.",
         "Do not edit files.",

@@ -101,8 +101,8 @@
     "packages/hooks-mux/core/src",
     "packages/hooks-mux/cli/src",
     "packages/hooks-mux/adapter-claude/src",
-    "packages/agent-platform/src/harness",
-    "packages/agent-platform/src/session",
+    "packages/tula-platform/src/harness",
+    "packages/tula-platform/src/session",
     "packages/agent-mux",
     "packages/agent-catalog/src",
     "packages/atlas/graph"
@@ -123,9 +123,9 @@
     "packages/hooks-mux/core/src/propagation/__tests__/propagation.test.ts",
     "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
     "packages/hooks-mux/cli/src/__tests__/e2e/e2e-invoke.test.ts",
-    "packages/agent-platform/src/harness/backgroundTracker.ts",
-    "packages/agent-platform/src/harness/backgroundProcessRegistry.ts",
-    "packages/agent-platform/src/harness/agenticTools/background/state.ts"
+    "packages/tula-platform/src/harness/backgroundTracker.ts",
+    "packages/tula-platform/src/harness/backgroundProcessRegistry.ts",
+    "packages/tula-platform/src/harness/agenticTools/background/state.ts"
   ],
   "qualityCommands": [
     "npm run build:hooks-mux",

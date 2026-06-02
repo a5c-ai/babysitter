@@ -86,7 +86,7 @@
   "reuseAuditScanGlobs": [
     "packages/tasks-mux",
     "packages/agent-runtime",
-    "packages/agent-platform",
+    "packages/tula-platform",
     "packages/agent-core",
     "docs",
     ".a5c/processes",

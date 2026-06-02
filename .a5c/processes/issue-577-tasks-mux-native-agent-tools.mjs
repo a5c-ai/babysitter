@@ -17,7 +17,7 @@
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
  * - Existing tasks-mux responder routing exists on staging: packages/tasks-mux/src/types.ts has ResponderType, packages/tasks-mux/src/router.ts exports routeTask(), packages/tasks-mux/src/backends/agent-mux.ts implements AgentMuxResponderBackend, and packages/tasks-mux/src/backends/external-tracker.ts implements ExternalTrackerBackend.
  * - Existing SDK responder metadata exists on staging: packages/sdk/src/tasks/types.ts, defineTask.ts, kinds/index.ts, serializer tests, and hook-run tests include responderType and adapter routing metadata.
- * - Existing agent-platform effect routing partially exists: packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts tries tasks-mux routeTask() for agent/breakpoint effects and delegates agent routes to AgentMuxResponderBackend.
+ * - Existing agent-platform effect routing partially exists: packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts tries tasks-mux routeTask() for agent/breakpoint effects and delegates agent routes to AgentMuxResponderBackend.
  * - Existing tasks-mux MCP server only registers breakpoint/responder tools in packages/tasks-mux/src/mcp/server.ts; create_todo, assign_task, search_tasks, and escalate are not present.
  * - Existing agent-core and agent-platform delegation tools still expose generic task/skill delegation through injected taskHandler/skillHandler; native create_todo, assign_task, search_tasks, and escalate tools are not present.
  * - Existing agent-platform breakpoint delegation and approval-chain modules still use local webhook/pure-chain primitives; they are not yet unified behind tasks-mux BreakpointBackend/responder routing.
@@ -276,11 +276,11 @@ export const traceRuntimeCallPathsTask = defineTask("issue-577/runtime-call-path
       instructions: [
         "Do not edit files in this phase.",
         "Trace agent-core tool registration from packages/agent-core/src/agenticTools/index.ts and tools.ts into packages/agent-core/src/agenticTools/tools/delegation.ts.",
-        "Trace agent-platform harness tool registration and delegation through packages/agent-platform/src/harness/agenticTools/** and packages/agent-platform/src/harness/internal/createRun/orchestration/effects.ts.",
+        "Trace agent-platform harness tool registration and delegation through packages/tula-platform/src/harness/agenticTools/** and packages/tula-platform/src/harness/internal/createRun/orchestration/effects.ts.",
         "Trace tasks-mux MCP server registration through packages/tasks-mux/src/mcp/server.ts and packages/tasks-mux/src/mcp/tools/*.ts.",
         "Trace tasks-mux routing/backend ownership through packages/tasks-mux/src/router.ts, backend.ts, backends/index.ts, backends/agent-mux.ts, and backends/external-tracker.ts.",
         "Trace SDK task effect creation/replay through packages/sdk/src/runtime/intrinsics/task.ts, packages/sdk/src/runtime/orchestrateIteration.ts, packages/sdk/src/harness/hooks/stopHookContinuation.ts, and packages/sdk/src/cli/commands/__tests__/hookRun.test.ts.",
-        "Trace breakpoint governance through packages/agent-platform/src/breakpoints/delegation.ts and approvalChains.ts.",
+        "Trace breakpoint governance through packages/tula-platform/src/breakpoints/delegation.ts and approvalChains.ts.",
         "Return JSON with runtimeCallPaths, owners, missingEdges, compatibilityRisks, and recommendedImplementationOrder.",
       ],
     },
@@ -402,7 +402,7 @@ export const reviewTask = defineTask("issue-577/review", (args, taskCtx) => ({
       context: args,
       instructions: [
         "Review for bypasses around tasks-mux, duplicate task routing contracts, package dependency cycles, tool schema drift, untested fallback behavior, and silent fallback from agent routing to human/internal routing.",
-        "Confirm native create_todo, assign_task, search_tasks, and escalate are available from both MCP and agent-core/agent-platform tool surfaces as intended.",
+        "Confirm native create_todo, assign_task, search_tasks, and escalate are available from both MCP and agent-co../tula-platform tool surfaces as intended.",
         "Confirm breakpoint delegation and approval chains use tasks-mux BreakpointBackend/routing for external responders and preserve public compatibility.",
         "Confirm SDK task effect replay and hook-run behavior preserve legacy ctx.task behavior while honoring responderType routes.",
         "Confirm subtask dispatch uses tasks-mux to reach AgentMuxResponderBackend rather than direct agent-mux calls outside tasks-mux-owned seams.",

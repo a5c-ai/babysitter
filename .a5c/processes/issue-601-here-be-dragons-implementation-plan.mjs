@@ -218,7 +218,7 @@ export const readIssueAndRepoContextTask = defineTask('issue-601.read-issue-and-
       'printf "%s\\n" "--- target evidence scan ---"',
       'rg -n "process\\.env\\[[^\\]]+\\] =|WeakMap|initPromise|/bin/bash|it\\.skip|skipLibCheck|here-be-dragons|backgroundProcessRegistry|createExecutionTools" docs packages tsconfig.json .a5c/processes -S',
       'printf "%s\\n" "--- focused files ---"',
-      'for path in packages/agent-core/src/agenticTools/index.ts packages/agent-platform/src/harness/piWrapper.ts packages/agent-core/src/agenticTools/tools/execution.ts packages/agent-platform/src/harness/agenticTools/tools/execution.ts packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx tsconfig.json .a5c/processes/issue-601-remaining-dragons-plan.mjs; do if [ -f "$path" ]; then printf "\\n### %s\\n" "$path"; nl -ba "$path" | sed -n "1,220p"; fi; done',
+      'for path in packages/agent-core/src/agenticTools/index.ts packages/tula-platform/src/harness/piWrapper.ts packages/agent-core/src/agenticTools/tools/execution.ts packages/tula-platform/src/harness/agenticTools/tools/execution.ts packages/agent-mux/ui/src/screens/SessionDetailScreen.test.tsx tsconfig.json .a5c/processes/issue-601-remaining-dragons-plan.mjs; do if [ -f "$path" ]; then printf "\\n### %s\\n" "$path"; nl -ba "$path" | sed -n "1,220p"; fi; done',
     ].join('\n'),
     expectedExitCode: 0,
     timeout: 300000,
@@ -414,7 +414,7 @@ export const runVerificationGateTask = defineTask('issue-601.run-verification-ga
     command: [
       'set -euo pipefail',
       'npm run test --workspace=@a5c-ai/agent-core',
-      'npm run test --workspace=@a5c-ai/agent-platform',
+      'npm run test --workspace=@a5c-ai/tula-platform',
       'npm run test:realtime --workspace=@a5c-ai/agent-mux-ui',
       'npm run build:runtime',
       'npm run test:agent-mux',

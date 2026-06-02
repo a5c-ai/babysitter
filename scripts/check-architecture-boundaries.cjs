@@ -10,7 +10,7 @@ const packageFamilies = {
   "orchestration-core": [
     "@a5c-ai/babysitter-sdk",
     "@a5c-ai/babysitter",
-    "@a5c-ai/agent-platform",
+    "@a5c-ai/tula-platform",
     "@a5c-ai/tula-core",
     "@a5c-ai/tula-runtime",
     "@a5c-ai/tula",

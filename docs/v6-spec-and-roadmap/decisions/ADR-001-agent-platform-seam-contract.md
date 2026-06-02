@@ -4,11 +4,11 @@
 
 - Status: Accepted
 - Date: 2026-04-24
-- Scope: `packages/agent-platform`
+- Scope: `packages/tula-platform`
 
 ## Context
 
-V6 says the first executable slice must be small, validated, and reversible. The current repository already contains a real seam candidate inside `@a5c-ai/agent-platform`: `packages/agent-platform/src/seams/contract.ts`.
+V6 says the first executable slice must be small, validated, and reversible. The current repository already contains a real seam candidate inside `@a5c-ai/tula-platform`: `packages/tula-platform/src/seams/contract.ts`.
 
 That contract assigns every top-level runtime domain under `src/` to one owned slice, binds those slices to public subpath exports, and defines validation commands. The missing piece was not the seam manifest itself. The missing piece was the architecture record that promotes this work from "candidate implementation detail" into the explicit first executable V6 slice the roadmap requires.
 
@@ -24,8 +24,8 @@ V6 accepts the `agent-platform` seam contract as the first executable slice of t
 
 The slice is defined as:
 
-- keeping `@a5c-ai/agent-platform` as the current package boundary,
-- making seam ownership explicit through `packages/agent-platform/src/seams/contract.ts`,
+- keeping `@a5c-ai/tula-platform` as the current package boundary,
+- making seam ownership explicit through `packages/tula-platform/src/seams/contract.ts`,
 - validating that ownership through seam tests and package build output,
 - avoiding any new top-level package creation or rename in this slice.
 
@@ -38,14 +38,14 @@ npm run verify:v6:seams
 That command currently expands to:
 
 ```bash
-npm run test:seams --workspace=@a5c-ai/agent-platform
+npm run test:seams --workspace=@a5c-ai/tula-platform
 ```
 
 The seam contract itself still records the broader package-level validation commands that should remain true for the package over time:
 
 ```bash
-npm run build --workspace=@a5c-ai/agent-platform
-npm run test --workspace=@a5c-ai/agent-platform
+npm run build --workspace=@a5c-ai/tula-platform
+npm run test --workspace=@a5c-ai/tula-platform
 ```
 
 The repo-level gate intentionally stays narrower so the ownership contract can be checked independently of unrelated package-typecheck churn.
@@ -62,7 +62,7 @@ The repo-level gate intentionally stays narrower so the ownership contract can b
 
 - The seam manifest adds maintenance overhead whenever top-level `src/` domains move.
 - The slice does not by itself prove that deeper extraction is worthwhile.
-- Package-level complexity inside `@a5c-ai/agent-platform` still exists; this only constrains it.
+- Package-level complexity inside `@a5c-ai/tula-platform` still exists; this only constrains it.
 
 ## Validation
 
@@ -74,8 +74,8 @@ npm run verify:v6:seams
 
 Supporting evidence lives in:
 
-- `packages/agent-platform/src/seams/contract.ts`
-- `packages/agent-platform/src/seams/contract.test.ts`
+- `packages/tula-platform/src/seams/contract.ts`
+- `packages/tula-platform/src/seams/contract.test.ts`
 - `docs/v6-spec-and-roadmap/current-state.md`
 - `docs/v6-spec-and-roadmap/v6-implementation-roadmap.md`
 
@@ -85,7 +85,7 @@ Rollback is intentionally cheap:
 
 1. Revert the seam-contract manifest, tests, and repo-level validation command.
 2. Remove the ADR and revert the V6 docs back to candidate-slice language.
-3. Keep `@a5c-ai/agent-platform` as the unchanged package/runtime surface.
+3. Keep `@a5c-ai/tula-platform` as the unchanged package/runtime surface.
 
 This rollback does not require package renames, install migration, or cross-repo choreography.
 

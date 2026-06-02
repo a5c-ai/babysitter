@@ -13,13 +13,13 @@ import {
   apiCommitEffect,
   apiRunStatus,
   apiRunEvents,
-} from "@a5c-ai/agent-platform/api";
+} from "@a5c-ai/tula-platform/api";
 import {
   apiListEffects,
   apiShowEffect,
   apiCancelEffect,
   apiBatchCommitEffects,
-} from "@a5c-ai/agent-platform/api";
+} from "@a5c-ai/tula-platform/api";
 import {
   apiListBreakpoints,
   apiShowBreakpoint,
@@ -28,13 +28,13 @@ import {
   apiAddAutoApprovalRule,
   apiRemoveAutoApprovalRule,
   apiEvaluateAutoApproval,
-} from "@a5c-ai/agent-platform/api";
+} from "@a5c-ai/tula-platform/api";
 import {
   apiSubscribeRunEvents,
   apiUnsubscribeRunEvents,
   closeAllSubscriptions,
-} from "@a5c-ai/agent-platform/api";
-import type { ApiResult } from "@a5c-ai/agent-platform/api";
+} from "@a5c-ai/tula-platform/api";
+import type { ApiResult } from "@a5c-ai/tula-platform/api";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 

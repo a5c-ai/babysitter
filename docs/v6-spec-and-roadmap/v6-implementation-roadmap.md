@@ -242,7 +242,7 @@ Only `npm run test:architecture` is a current repository guarantee in this slice
 
 `npm run test:architecture` currently enforces:
 
-- the `@a5c-ai/agent-platform` seam contract already accepted in ADR-001,
+- the `@a5c-ai/tula-platform` seam contract already accepted in ADR-001,
 - repo package-family dependency direction across the orchestration core, dispatch layer, cross-harness support systems, downstream consumers, and first-class install bundles.
 
 The gate runs in:

@@ -179,7 +179,7 @@ Write a single cache entry with this structure:
 }
 \`\`\`
 
-The harness package provides \`readServiceCache\`, \`writeServiceCache\`, \`invalidateServiceCache\`, and \`listCachedServices\` functions in \`@a5c-ai/agent-platform\` (anycli module) for this purpose.
+The harness package provides \`readServiceCache\`, \`writeServiceCache\`, \`invalidateServiceCache\`, and \`listCachedServices\` functions in \`@a5c-ai/tula-platform\` (anycli module) for this purpose.
 
 ---
 

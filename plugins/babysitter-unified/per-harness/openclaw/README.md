@@ -75,7 +75,7 @@ OpenClaw is a **daemon-based harness**. It runs as a persistent process and expo
 3. **Each agent turn ends** -- `agent_end` hook fires asynchronously (fire-and-forget via `spawn` + `unref`), triggering `babysitter hook:run --hook-type stop --harness openclaw` to advance the orchestration iteration.
 4. **Session ends** -- `session_end` hook finalizes any active Babysitter runs.
 
-The `agent_end` handler intentionally uses `spawn` with `unref()` rather than `execFileSync` so it does not block the next agent turn. Errors are logged to `$BABYSITTER_LOG_DIR/agent-platform-end-hook.log` but never propagate to the agent.
+The `agent_end` handler intentionally uses `spawn` with `unref()` rather than `execFileSync` so it does not block the next agent turn. Errors are logged to `$BABYSITTER_LOG_D../tula-platform-end-hook.log` but never propagate to the agent.
 
 ### Dual Hook Surface
 

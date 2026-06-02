@@ -746,7 +746,7 @@ describe("GAP-JSON-004: Streaming JSONL CLI Mode", () => {
       expect(typeof data.lastSeq).toBe("number");
 
       // Cleanup: the dispatch doesn't auto-close, so import and close
-      const { closeAllSubscriptions } = await import("@a5c-ai/agent-platform/api");
+      const { closeAllSubscriptions } = await import("@a5c-ai/tula-platform/api");
       closeAllSubscriptions();
     });
 
@@ -802,7 +802,7 @@ describe("GAP-JSON-004: Streaming JSONL CLI Mode", () => {
         runId: "run-evt-shutdown",
       }, { runsDir: testBase });
 
-      const { getActiveSubscriptions } = await import("@a5c-ai/agent-platform/api");
+      const { getActiveSubscriptions } = await import("@a5c-ai/tula-platform/api");
       expect(getActiveSubscriptions().size).toBeGreaterThan(0);
 
       // Shutdown should clean up

@@ -49,6 +49,6 @@ export {
   densityFilterText,
   estimateTokens,
 } from "./compression/density-filter";
-// compaction moved to @a5c-ai/agent-platform (GAP-PERF-002)
-// mcpClient moved to @a5c-ai/agent-platform (GAP-REMOTE-006)
-// mcpChannels moved to @a5c-ai/agent-platform (interactive feature)
+// compaction moved to @a5c-ai/tula-platform (GAP-PERF-002)
+// mcpClient moved to @a5c-ai/tula-platform (GAP-REMOTE-006)
+// mcpChannels moved to @a5c-ai/tula-platform (interactive feature)

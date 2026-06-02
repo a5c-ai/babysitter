@@ -5,8 +5,8 @@
  * for a session. Supports --json and --run-id filtering.
  */
 
-import { getSessionHistory } from "@a5c-ai/agent-platform/session";
-import type { SessionHistory } from "@a5c-ai/agent-platform/session";
+import { getSessionHistory } from "@a5c-ai/tula-platform/session";
+import type { SessionHistory } from "@a5c-ai/tula-platform/session";
 
 export interface SessionHistoryArgs {
   sessionId: string;

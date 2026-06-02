@@ -319,12 +319,12 @@
       "note": "README is the canonical package-level contract."
     },
     {
-      "surface": "packages/agent-platform",
-      "packageName": "@a5c-ai/agent-platform",
+      "surface": "packages/tula-platform",
+      "packageName": "@a5c-ai/tula-platform",
       "description": "Agent Platform layer — harness integration, governance, CLI hosting, interaction, storage.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/agent-platform/README.md",
+      "canonicalHome": "../packages/tula-platform/README.md",
       "supporting": [
         "../README.md"
       ],

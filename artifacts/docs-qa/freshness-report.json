@@ -34,17 +34,17 @@
     {
       "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
       "line": 70,
-      "packageName": "@a5c-ai/agent-platform"
+      "packageName": "@a5c-ai/tula-platform"
     },
     {
       "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
       "line": 71,
-      "packageName": "@a5c-ai/agent-platform-meta-plugins"
+      "packageName": "@a5c-ai/tula-platform-meta-plugins"
     },
     {
       "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
       "line": 73,
-      "packageName": "@a5c-ai/agent-platform-orchestration-plugin"
+      "packageName": "@a5c-ai/tula-platform-orchestration-plugin"
     },
     {
       "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
@@ -64,7 +64,7 @@
     {
       "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
       "line": 128,
-      "packageName": "@a5c-ai/agent-platform"
+      "packageName": "@a5c-ai/tula-platform"
     },
     {
       "file": "docs/v6-spec-and-roadmap/current-state.md",
@@ -79,22 +79,22 @@
     {
       "file": "docs/v6-spec-and-roadmap/implementation/foundation-layer.md",
       "line": 58,
-      "packageName": "@a5c-ai/agent-platform"
+      "packageName": "@a5c-ai/tula-platform"
     },
     {
       "file": "docs/v6-spec-and-roadmap/implementation/platform-layer.md",
       "line": 53,
-      "packageName": "@a5c-ai/agent-platform"
+      "packageName": "@a5c-ai/tula-platform"
     },
     {
       "file": "docs/v6-spec-and-roadmap/implementation/platform-layer.md",
       "line": 53,
-      "packageName": "@a5c-ai/agent-platform-meta-plugins"
+      "packageName": "@a5c-ai/tula-platform-meta-plugins"
     },
     {
       "file": "docs/v6-spec-and-roadmap/implementation/platform-layer.md",
       "line": 53,
-      "packageName": "@a5c-ai/agent-platform-orchestration-plugin"
+      "packageName": "@a5c-ai/tula-platform-orchestration-plugin"
     },
     {
       "file": "docs/v6-spec-and-roadmap/package-specs.md",
@@ -104,22 +104,22 @@
     {
       "file": "docs/v6-spec-and-roadmap/package-specs.md",
       "line": 103,
-      "packageName": "@a5c-ai/agent-platform"
+      "packageName": "@a5c-ai/tula-platform"
     },
     {
       "file": "docs/v6-spec-and-roadmap/package-specs.md",
       "line": 104,
-      "packageName": "@a5c-ai/agent-platform-meta-plugins"
+      "packageName": "@a5c-ai/tula-platform-meta-plugins"
     },
     {
       "file": "docs/v6-spec-and-roadmap/package-specs.md",
       "line": 105,
-      "packageName": "@a5c-ai/agent-platform-orchestration-plugin"
+      "packageName": "@a5c-ai/tula-platform-orchestration-plugin"
     },
     {
       "file": "docs/v6-spec-and-roadmap/package-specs.md",
       "line": 111,
-      "packageName": "@a5c-ai/agent-platform-meta-plugins"
+      "packageName": "@a5c-ai/tula-platform-meta-plugins"
     },
     {
       "file": "docs/v6-spec-and-roadmap/unified-stack-architecture.md",

@@ -13,7 +13,7 @@
  */
 
 // L6 — primary barrel (re-exports overlapping symbols from L4/L5)
-export * from "@a5c-ai/agent-platform";
+export * from "@a5c-ai/tula-platform";
 
 // L4 and L5 — namespaced for unambiguous access
 import * as core from "@a5c-ai/tula-core";

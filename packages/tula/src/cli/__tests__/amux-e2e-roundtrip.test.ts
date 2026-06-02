@@ -11,14 +11,14 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import { invokeViaAgentMux } from "@a5c-ai/agent-platform/harness";
+import { invokeViaAgentMux } from "@a5c-ai/tula-platform/harness";
 import { formatResultAsAmuxEvents } from "../amuxEventsFormatter";
 import type {
   AmuxClient,
   AmuxRunHandle,
   AmuxAgentEvent,
   AmuxInteractionChannel,
-} from "@a5c-ai/agent-platform/harness";
+} from "@a5c-ai/tula-platform/harness";
 
 // ---------------------------------------------------------------------------
 // Helpers

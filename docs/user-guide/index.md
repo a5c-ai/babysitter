@@ -222,7 +222,7 @@ Choose a path based on your role and goals.
 ### Version 5.0.0
 
 - Unified the public npm surface around `@a5c-ai/babysitter` for the main CLI
-- Split optional runtime orchestration into `@a5c-ai/agent-platform`
+- Split optional runtime orchestration into `@a5c-ai/tula-platform`
 - Refreshed user-facing docs to match the current package and command boundaries
 
 ### Recent Updates

@@ -37,7 +37,7 @@
     "packages/agent-mux/adapters/src",
     "packages/hooks-mux/adapter-*",
     "packages/hooks-mux/cli/src",
-    "packages/agent-platform/vitest.config.ts",
+    "packages/tula-platform/vitest.config.ts",
     "packages/agent-mux/webui/vite.config.ts",
     "packages/agent-mux/webui/vitest.config.ts",
     "packages/agent-mux/webui/tests/vite-config.test.ts",
@@ -92,7 +92,7 @@
         "Vitest alias/config tests fail until aliases point to the atlas catalog surface."
       ],
       "greenWork": [
-        "Update sdk, agent-mux adapters, hooks-mux adapters, webui/agent-platform aliases, mocks, and package dependencies.",
+        "Update sdk, agent-mux adapters, hooks-mux adapters, web../tula-platform aliases, mocks, and package dependencies.",
         "Use @a5c-ai/atlas/catalog for catalog APIs and @a5c-ai/atlas only for root graph APIs."
       ],
       "verification": [

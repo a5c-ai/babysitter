@@ -4,12 +4,12 @@
 
 ## Phase 1: Foundation Layer
 
-The foundation layer establishes the minimum V6 base inside the current repository shape. This phase clarifies seams, validation gates, and ownership in `packages/sdk`, `packages/agent-platform`, and `plugins/*`. It does not commit V6 to creating deferred top-level packages.
+The foundation layer establishes the minimum V6 base inside the current repository shape. This phase clarifies seams, validation gates, and ownership in `packages/sdk`, `packages/tula-platform`, and `plugins/*`. It does not commit V6 to creating deferred top-level packages.
 
 ### Current-Package Seam Clarification
 
 **Runtime And Session Boundaries**
-- Clarify which runtime concerns already belong to `packages/agent-platform`
+- Clarify which runtime concerns already belong to `packages/tula-platform`
 - Isolate Pi wrapper, session handling, and structured event concerns behind internal module seams before considering any package move
 - Reduce filesystem assumptions only where current commands and tests prove the change is safe
 - Record candidate extraction boundaries as ADR-backed slices rather than package commitments
@@ -28,13 +28,13 @@ The foundation layer establishes the minimum V6 base inside the current reposito
 
 **Platform Candidate Preparation**
 - Describe plugin-system responsibilities in current-package terms
-- Identify which platform concerns are internal `packages/sdk` or `packages/agent-platform` candidates versus actual `plugins/*` responsibilities
+- Identify which platform concerns are internal `packages/sdk` or `packages/tula-platform` candidates versus actual `plugins/*` responsibilities
 - Treat filesystem abstraction and plugin registration work as candidate slices only when they can be validated independently
 
 ## Deliverables
 
 - Updated seam map for runtime, session, and hook responsibilities in current packages
-- ADR-backed first executable slice for the accepted `@a5c-ai/agent-platform` seam contract
+- ADR-backed first executable slice for the accepted `@a5c-ai/tula-platform` seam contract
 - ADR-ready candidate slices for any later extraction or rename still worth considering
 - Hook and packaging flows validated against existing commands and plugin outputs
 - Any reduced-filesystem claim stated with a baseline, command, and rollback note
@@ -55,7 +55,7 @@ The foundation layer establishes the minimum V6 base inside the current reposito
 
 ## Explicit Non-Deliverables
 
-This phase does not create `@a5c-ai/tula-runtime` or `@a5c-ai/agent-platform`. Those names remain deferred vocabulary unless later decision records promote a specific slice into scope.
+This phase does not create `@a5c-ai/tula-runtime` or `@a5c-ai/tula-platform`. Those names remain deferred vocabulary unless later decision records promote a specific slice into scope.
 
 ---
 

@@ -82,7 +82,7 @@ The next stage keeps the current monorepo shape and improves it in place:
 
 - `packages/sdk`: continue as the durable runtime/orchestration core.
 - `packages/babysitter`: remain the primary CLI package.
-- `packages/agent-platform`: remain the agent runtime while internal seams are clarified.
+- `packages/tula-platform`: remain the agent runtime while internal seams are clarified.
 - `plugins/*`: remain first-class integration boundaries and packaging reality checks.
 - `.a5c/processes` and process-library integration: remain orchestration delivery mechanisms.
 

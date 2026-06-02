@@ -7,7 +7,7 @@ import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
 import { handleSessionHistory } from "../history";
-import { addDecision, addRunSummary, saveContextSnapshot, getSessionHistoryPath } from "@a5c-ai/agent-platform/session";
+import { addDecision, addRunSummary, saveContextSnapshot, getSessionHistoryPath } from "@a5c-ai/tula-platform/session";
 
 describe("GAP-SESSION-002: session:history CLI command", () => {
   let testDir: string;

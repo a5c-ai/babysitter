@@ -103,7 +103,7 @@ npm ERR! Could not resolve dependency: @a5c-ai/babysitter-sdk@^4.0.0
 **Solutions:**
 1. Update all packages together:
    ```bash
-   npm install -g @a5c-ai/babysitter@latest @a5c-ai/agent-platform@latest
+   npm install -g @a5c-ai/babysitter@latest @a5c-ai/tula-platform@latest
    ```
 2. Clear npm cache if needed:
    ```bash
