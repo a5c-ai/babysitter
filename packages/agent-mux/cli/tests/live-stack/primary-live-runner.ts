@@ -388,13 +388,14 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
 
   let captured: Partial<LiveStackEvidenceBundle> = {};
   let missingTraceIds: readonly string[] = [];
+  let evidence: LiveStackEvidenceBundle | undefined;
   try {
     captured = mergeTraceIds(
       extractTraceIds(commandOutput),
       await discoverTraceIdsFromRunArtifacts({ scenario, cwd: options.cwd, artifactsDir: options.artifactsDir, output: commandOutput, traceId, startedAtMs }),
     );
     const artifactFiles = await writeExpectedArtifacts(options.artifactsDir, scenario, commandResults, captured);
-    const evidence = createEvidenceBundle(scenario, captured, artifactFiles);
+    evidence = createEvidenceBundle(scenario, captured, artifactFiles);
     missingTraceIds = assertEvidenceBundleComplete(scenario, evidence);
   } catch (err) {
     console.error(`[live-stack] trace/evidence discovery failed: ${err instanceof Error ? err.message : err}`);
