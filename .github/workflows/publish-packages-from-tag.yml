@@ -160,7 +160,7 @@ jobs:
           fi
 
           build_agent_core
-          npm run build --workspace=@a5c-ai/agent-runtime
+          npm run build --workspace=@a5c-ai/tula-runtime
           build_babysitter_agent
           npm run build --workspace=@a5c-ai/tula
 
@@ -236,7 +236,7 @@ jobs:
             @a5c-ai/agent-mux-tui
 
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tula-core --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/agent-runtime --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tula-runtime --skip-build
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/agent-platform --skip-build
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tula --skip-build
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter --skip-build

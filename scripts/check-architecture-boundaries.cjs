@@ -12,7 +12,7 @@ const packageFamilies = {
     "@a5c-ai/babysitter",
     "@a5c-ai/agent-platform",
     "@a5c-ai/tula-core",
-    "@a5c-ai/agent-runtime",
+    "@a5c-ai/tula-runtime",
     "@a5c-ai/tula",
   ],
   "dispatch-core": [

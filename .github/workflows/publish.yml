@@ -1511,8 +1511,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --workspace=@a5c-ai/agent-platform --access public --tag "$NPM_TAG"
 
-  publish_staging_agent_runtime:
-    name: Publish Agent Runtime
+  publish_staging_tula_runtime:
+    name: Publish Tula Runtime
     needs: publish_staging_agent_core
     runs-on: ubuntu-latest-l
     permissions:
@@ -1543,7 +1543,7 @@ jobs:
           npm ci
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Build agent-runtime
+      - name: Build tula-runtime
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
@@ -1551,16 +1551,16 @@ jobs:
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
           npm run build --workspace=@a5c-ai/tula-core
-          npm run build --workspace=@a5c-ai/agent-runtime
+          npm run build --workspace=@a5c-ai/tula-runtime
 
-      - name: Publish agent-runtime
+      - name: Publish tula-runtime
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/agent-runtime --access public --tag "$NPM_TAG"
+        run: npm publish --workspace=@a5c-ai/tula-runtime --access public --tag "$NPM_TAG"
 
   publish_staging_omni:
     name: Publish Tula
-    needs: [publish_staging_babysitter_agent, publish_staging_agent_runtime]
+    needs: [publish_staging_babysitter_agent, publish_staging_tula_runtime]
     runs-on: ubuntu-latest-l
     permissions:
       contents: read
@@ -1598,7 +1598,7 @@ jobs:
           node scripts/agent-mux-build.cjs build packages/agent-mux/sdk
           npm run build:sdk
           npm run build --workspace=@a5c-ai/tula-core
-          npm run build --workspace=@a5c-ai/agent-runtime
+          npm run build --workspace=@a5c-ai/tula-runtime
           npm run build --workspace=@a5c-ai/agent-platform
           npm run build --workspace=@a5c-ai/tula
 

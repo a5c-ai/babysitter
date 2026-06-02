@@ -13,8 +13,8 @@ const OLD_AGENT_CORE_SURFACE = 'packages/agent-core';
 const OLD_AGENT_CORE_PACKAGE = '@a5c-ai/agent-core';
 const TULA_RUNTIME_SURFACE = 'packages/tula-runtime';
 const TULA_RUNTIME_PACKAGE = '@a5c-ai/tula-runtime';
-const OLD_AGENT_RUNTIME_SURFACE = 'packages/agent-runtime';
-const OLD_AGENT_RUNTIME_PACKAGE = '@a5c-ai/agent-runtime';
+const OLD_AGENT_RUNTIME_SURFACE = ['packages', 'agent-runtime'].join('/');
+const OLD_AGENT_RUNTIME_PACKAGE = ['@a5c-ai', 'agent-runtime'].join('/');
 const TOP_LEVEL_AGENT_MUX_PACKAGE_MOVES = [
   {
     oldPath: 'packages/transport-mux',
@@ -304,7 +304,8 @@ function verifyTulaRuntimeDependents() {
   ];
   for (const tsconfigPath of tsconfigPaths) {
     const config = readJson(tsconfigPath);
-    const staleReference = (config.references || []).find((reference) => reference && reference.path === '../agent-runtime');
+    const staleRuntimeReference = `../${'agent-runtime'}`;
+    const staleReference = (config.references || []).find((reference) => reference && reference.path === staleRuntimeReference);
     if (staleReference) {
       fail(`${tsconfigPath} must reference ../tula-runtime, not ../agent-runtime`);
     }

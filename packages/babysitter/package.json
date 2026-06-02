@@ -21,7 +21,7 @@
   "dependencies": {
     "@a5c-ai/babysitter-sdk": "5.0.0",
     "@a5c-ai/tula-core": "5.0.0",
-    "@a5c-ai/agent-runtime": "5.0.0",
+    "@a5c-ai/tula-runtime": "5.0.0",
     "@a5c-ai/agent-platform": "5.0.0",
     "@a5c-ai/tula": "5.0.0"
   },

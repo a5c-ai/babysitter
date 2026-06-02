@@ -1,4 +1,4 @@
-# @a5c-ai/agent-runtime
+# @a5c-ai/tula-runtime
 
 Agent runtime layer (L5) for the Babysitter monorepo.
 
@@ -53,7 +53,7 @@ limits into their own runtime arguments.
 ## Install
 
 ```bash
-npm install @a5c-ai/agent-runtime
+npm install @a5c-ai/tula-runtime
 ```
 
 ## Build

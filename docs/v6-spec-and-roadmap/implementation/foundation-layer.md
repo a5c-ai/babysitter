@@ -55,7 +55,7 @@ The foundation layer establishes the minimum V6 base inside the current reposito
 
 ## Explicit Non-Deliverables
 
-This phase does not create `@a5c-ai/agent-runtime` or `@a5c-ai/agent-platform`. Those names remain deferred vocabulary unless later decision records promote a specific slice into scope.
+This phase does not create `@a5c-ai/tula-runtime` or `@a5c-ai/agent-platform`. Those names remain deferred vocabulary unless later decision records promote a specific slice into scope.
 
 ---
 

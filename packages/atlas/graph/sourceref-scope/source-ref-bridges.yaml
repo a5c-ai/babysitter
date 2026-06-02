@@ -130,7 +130,7 @@ nodes:
     edges:
       source_of:
         - target: agent:agent-mux
-  - id: source-ref:packages-agent-runtime
+  - id: source-ref:packages-tula-runtime
     kind: SourceRef
     edges:
       source_of:

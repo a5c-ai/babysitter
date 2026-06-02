@@ -1,5 +1,5 @@
 /**
- * Re-export shim — canonical implementation lives in @a5c-ai/agent-runtime.
+ * Re-export shim — canonical implementation lives in @a5c-ai/tula-runtime.
  * Internal agent-platform consumers continue to import via relative paths
  * through this barrel file.
  */
@@ -45,6 +45,6 @@ export {
   type DurableTriggerQueueOptions,
   type DurableTriggerRecord,
   type DurableTriggerState,
-} from "@a5c-ai/agent-runtime/daemon";
+} from "@a5c-ai/tula-runtime/daemon";
 export { executeAutomationTrigger } from "./automationExecutor";
 export { isAutomationTriggerEvent } from "./types";

@@ -1,5 +1,5 @@
 /**
- * Re-export shim — canonical implementation lives in @a5c-ai/agent-runtime.
+ * Re-export shim — canonical implementation lives in @a5c-ai/tula-runtime.
  * Internal agent-platform consumers continue to import via relative paths
  * through this barrel file.
  */
@@ -46,4 +46,4 @@ export {
   computeEffectCosts,
   type EffectCostSummary,
   type EffectCostResult,
-} from "@a5c-ai/agent-runtime/cost";
+} from "@a5c-ai/tula-runtime/cost";

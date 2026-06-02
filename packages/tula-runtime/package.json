@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/agent-runtime",
+  "name": "@a5c-ai/tula-runtime",
   "version": "5.0.0",
   "description": "Agent runtime layer (L5) — daemon, session, resource management, telemetry",
   "license": "MIT",
@@ -83,9 +83,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/a5c-ai/babysitter.git",
-    "directory": "packages/agent-runtime"
+    "directory": "packages/tula-runtime"
   },
-  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-runtime#readme",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/tula-runtime#readme",
   "bugs": {
     "url": "https://github.com/a5c-ai/babysitter/issues"
   },

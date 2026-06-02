@@ -187,11 +187,11 @@ const updateLockVersion = (path, version) => {
       version,
       dependencies: {
         "@a5c-ai/agent-mux": version,
-        "@a5c-ai/agent-runtime": version,
+        "@a5c-ai/tula-runtime": version,
         "@a5c-ai/babysitter-sdk": version
       }
     },
-    "packages/agent-runtime": {
+    "packages/tula-runtime": {
       version,
       dependencies: {
         "@a5c-ai/babysitter-sdk": version,
@@ -202,7 +202,7 @@ const updateLockVersion = (path, version) => {
       version,
       dependencies: {
         "@a5c-ai/tula-core": version,
-        "@a5c-ai/agent-runtime": version,
+        "@a5c-ai/tula-runtime": version,
         "@a5c-ai/agent-platform": version,
         "@a5c-ai/agent-mux": version,
         "@a5c-ai/babysitter-sdk": version
@@ -253,7 +253,7 @@ const workspaceManifestPaths = [
   "package.json",
   "packages/atlas/package.json",
   "packages/tula-core/package.json",
-  "packages/agent-runtime/package.json",
+  "packages/tula-runtime/package.json",
   "packages/omni/package.json",
   "packages/agent-mux/tools/package.json",
   "packages/sdk/package.json",
@@ -359,7 +359,7 @@ for (const path of [
   "package.json",
   "packages/babysitter/package.json",
   "packages/agent-platform/package.json",
-  "packages/agent-runtime/package.json",
+  "packages/tula-runtime/package.json",
   "packages/omni/package.json",
   "packages/babysitter-tui-plugins/package.json",
 ]) {
@@ -384,7 +384,7 @@ for (const path of [
   "packages/agent-mux/ui/package.json",
   "packages/agent-mux/webui/package.json",
   "packages/agent-mux/transport/package.json",
-  "packages/agent-runtime/package.json",
+  "packages/tula-runtime/package.json",
   "packages/omni/package.json",
   "packages/agent-mux/tools/package.json",
   "packages/agent-mux/launch/package.json",
@@ -392,7 +392,7 @@ for (const path of [
   "packages/babysitter-tui-plugins/package.json",
 ]) {
   syncDependencyVersion(path, "@a5c-ai/tula-core", newVersion);
-  syncDependencyVersion(path, "@a5c-ai/agent-runtime", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/tula-runtime", newVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-platform", newVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/agent-mux-adapters", newAgentMuxVersion);

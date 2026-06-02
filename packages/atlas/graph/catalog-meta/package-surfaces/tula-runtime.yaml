@@ -1,9 +1,9 @@
 nodeKind: PackageSurface
-id: package:a5c-ai-agent-runtime
+id: package:a5c-ai-tula-runtime
 attributes:
-  packageId: "@a5c-ai/agent-runtime"
-  packageName: "@a5c-ai/agent-runtime"
-  workspacePath: packages/agent-runtime
+  packageId: "@a5c-ai/tula-runtime"
+  packageName: "@a5c-ai/tula-runtime"
+  workspacePath: packages/tula-runtime
   moduleType: typescript
   surfaceKinds:
     - agent-runtime

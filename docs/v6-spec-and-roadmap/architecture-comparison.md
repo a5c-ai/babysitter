@@ -65,7 +65,7 @@ Layered Architecture
 │   ├── @a5c-ai/agent-mux-hooks-cli (evolved from hooks-mux)
 │   └── @a5c-ai/agent-mux-extensions (evolved from extension-mux)
 ├── Runtime Layer (Engine)
-│   └── @a5c-ai/agent-runtime (filesystem-free core)
+│   └── @a5c-ai/tula-runtime (filesystem-free core)
 ├── Platform Layer (Persistence + Plugins)
 │   ├── @a5c-ai/agent-platform (plugin system host)
 │   └── @a5c-ai/agent-platform-meta-plugins (extensibility)
@@ -124,7 +124,7 @@ Layered Architecture
 ### V6 Deployment Options
 
 **Selective Deployment**:
-- **Runtime Only**: `@a5c-ai/agent-runtime` for embedded use
+- **Runtime Only**: `@a5c-ai/tula-runtime` for embedded use
 - **Platform Core**: Add `@a5c-ai/agent-platform` for plugin hosting
 - **Complete Solution**: Add `@a5c-ai/agent-platform` for full orchestration
 

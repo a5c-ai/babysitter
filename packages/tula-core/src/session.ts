@@ -1,5 +1,5 @@
 import * as childProcess from "node:child_process";
-import { buildShellInvocation } from "@a5c-ai/agent-runtime";
+import { buildShellInvocation } from "@a5c-ai/tula-runtime";
 import type {
   AgentCoreHistoryEntry,
   AgentCoreJsonSchema,
