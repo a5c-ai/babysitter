@@ -1,0 +1,78 @@
+# Additive issue #859 patch. This intentionally avoids editing shared
+# upstream/current YAML files that concurrent graph-update PRs may touch.
+nodeKind: AgentVersion
+id: agent-version:codex@0.136.0
+attributes:
+  patch: true
+  currentVersion: "0.136.0"
+  releasedAt: "2026-06-01"
+  upstreamReleaseTag: "rust-v0.136.0"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.136.0"
+  summary: "Codex CLI 0.136.0 adds OSC 8 link-preserving markdown rendering, archived session lifecycle commands, app-server stdio/status/resume updates, API-key remote registration, server-token remote control websockets, Windows sandbox provisioning, image generation extension routing, command-safety hardening, and Python SDK CodexConfig documentation updates."
+  assimilationNotes:
+    - "Issue #859 tracks npm latest moving @openai/codex from 0.135.0 to 0.136.0; no npm package or install command change is required."
+    - "TUI markdown keeps web links clickable via OSC 8 metadata, and cramped tables fall back to readable key/value records while preserving link targets."
+    - "Sessions can be archived with /archive, codex archive, or codex unarchive; archived sessions are protected from resume and fork until restored."
+    - "App-server integrations can resume a thread with its initial turns page, expose richer MCP server status, and launch stdio mode with codex app-server --stdio."
+    - "Remote execution setup supports CODEX_API_KEY registration for approved OpenAI hosts, and remote-control websockets use short-lived server tokens instead of ChatGPT access tokens."
+    - "Windows sandbox support adds alpha codex sandbox setup --elevated provisioning plus requirements support for allowed Windows sandbox implementations."
+    - "A feature-gated standalone image generation extension routes through Codex image artifact completion."
+    - "Safety fixes harden /diff against repository-provided Git helpers/hooks, avoid PowerShell safety-parser execution off Windows, reject browser-origin exec-server websocket handshakes, improve sandbox cleanup, and preserve deny-read enforcement for safe-command and approval-bypass paths."
+    - "Python SDK docs and package metadata now present pip install openai-codex, and examples/docs use CodexConfig instead of AppServerConfig."
+  releaseHighlights:
+    - "OSC 8 web links and key/value fallback rendering for cramped markdown tables."
+    - "Session archive/unarchive lifecycle that blocks resume/fork until restore."
+    - "codex app-server --stdio, richer MCP status, and initial turns on thread resume."
+    - "Remote CODEX_API_KEY registration and short-lived server tokens for remote-control websockets."
+    - "Alpha elevated Windows sandbox provisioning and requirements support."
+    - "Feature-gated standalone image generation extension path."
+    - "Command-safety and sandbox-cleanup hardening."
+    - "Python SDK CodexConfig docs/package metadata refresh."
+  releaseTracking:
+    issueNumber: 859
+    releaseVersion: "0.136.0"
+    releaseTag: "rust-v0.136.0"
+    packageName: "@openai/codex"
+    packageVersion: "0.136.0"
+    previousGraphVersion: "0.135.0"
+    installMethodChanged: false
+  sessionLifecycle:
+    archiveCommands:
+      - "/archive"
+      - "codex archive"
+      - "codex unarchive"
+    archivedSessionResume: "blocked-until-restored"
+    archivedSessionFork: "blocked-until-restored"
+  appServer:
+    stdioCommand: "codex app-server --stdio"
+    threadResumeIncludesInitialTurnsPage: true
+    richerMcpServerStatus: true
+  remoteControl:
+    apiKeyRegistrationEnv: "CODEX_API_KEY"
+    websocketAuth: "short-lived-server-token"
+    previousWebsocketAuth: "ChatGPT access token"
+  terminalRendering:
+    osc8WebLinks: true
+    crampedMarkdownTables: "key-value-records"
+    preservesLinkTargetsInFallbackTables: true
+  windowsSandbox:
+    windowsElevatedSetupCommand: "codex sandbox setup --elevated"
+    windowsRequirementsSupport: true
+    maturity: "alpha"
+  imageGeneration:
+    standaloneExtension: "feature-gated"
+    artifactCompletionPipeline: "native-codex-image-artifact"
+  safetyHardening:
+    preventsRepoConfiguredDiffExecution: true
+    avoidsPowerShellParserExecutionOffWindows: true
+    rejectsBrowserOriginExecServerWebsockets: true
+    improvesSandboxCleanup: true
+    preservesDenyReadForSafeCommands: true
+  pythonSdkDocumentation:
+    installCommand: "pip install openai-codex"
+    publicConfigClass: "CodexConfig"
+    replacedConfigClass: "AppServerConfig"
+  adapterMetadata: {}
+edges:
+  sourced_from:
+    - evidence:codex-rust-v0-136-0-issue-859-additive-release
