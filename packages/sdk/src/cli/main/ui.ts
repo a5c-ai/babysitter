@@ -106,6 +106,23 @@ function buildUnknownCommandError(command: string, program: CliProgram): Babysit
     );
   }
 
+  if (command.startsWith("harness:")) {
+    if (command === "harness:install") {
+      return new BabysitterRuntimeError("DeprecatedCommand", `"${command}" is deprecated. Use the agent-mux installer instead.`, {
+        category: ErrorCategory.Validation,
+        suggestions: [`amux install <agent>`, `npx @a5c-ai/agent-mux-cli install <agent>`],
+        nextSteps: [`Run amux install --help for agent installation options.`],
+        details: { command, deprecated: true },
+      });
+    }
+    return new BabysitterRuntimeError("DeprecatedCommand", `"${command}" is deprecated. Install tula (the babysitter native agent) for runtime commands.`, {
+      category: ErrorCategory.Validation,
+      suggestions: [`npm install -g @a5c-ai/tula`, `tula --help`],
+      nextSteps: [`tula replaces babysitter harness commands. Run tula --help to see available commands.`],
+      details: { command, deprecated: true, replacement: "tula" },
+    });
+  }
+
   return new BabysitterRuntimeError("UnknownCommandError", `Unknown command: ${command}`, {
     category: ErrorCategory.Validation,
     suggestions: suggestCommand(command) ? [`Did you mean: ${suggestCommand(command)}?`] : [],
