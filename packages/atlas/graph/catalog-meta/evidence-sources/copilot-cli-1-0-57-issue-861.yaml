@@ -1,0 +1,33 @@
+# Additive issue #861 evidence patch with a unique filename. The canonical
+# evidence id may also appear in shared tracker bundles; this patch lets issue
+# work refine the source without editing those shared files.
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-57-issue-861-release
+attributes:
+  patch: true
+  displayName: "GitHub Copilot CLI v1.0.57 release notes for issue #861"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.57"
+  sourcePathOrUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.57"
+  locator: "github/copilot-cli release v1.0.57"
+  capturedAt: "2026-06-02T06:15:00Z"
+  observedAt: "2026-06-01T18:40:11Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-02T06:15:00Z"
+  notes: |
+    Official release notes for GitHub Copilot CLI 1.0.57 document process-tree
+    cancellation for shell/agent commands, immediate plugin command feedback,
+    file:// canvas previews, /cwd symlink completion, Azure DevOps-only MCP
+    behavior, HTTP/1.1 default transport with COPILOT_ENABLE_HTTP2 opt-in, MCP
+    timeout and npx registry fixes, COPILOT_HOME registry discovery, preToolUse
+    error denial behavior, showTipsOnStartup, and /diff defaulting to branch
+    diff when there are no unstaged changes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:1-0-57
+    - agent:copilot-cli

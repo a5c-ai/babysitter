@@ -1,0 +1,87 @@
+# Additive issue #861 patch. This file intentionally avoids editing shared
+# upstream-current/current-version YAML files so concurrent graph-update PRs do
+# not conflict.
+nodeKind: AgentVersion
+id: agentVersion:copilot:1-0-57
+attributes:
+  patch: true
+  agentId: "copilot"
+  agentProductId: agent:copilot-cli
+  displayName: "GitHub Copilot CLI 1.0.57"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.0.57"
+  currentVersion: "1.0.57"
+  releasedAt: "2026-06-01"
+  sourcePackage: "@github/copilot"
+  upstreamReleaseTag: "v1.0.57"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.57"
+  cliCommand: "gh copilot"
+  installMethods:
+    - install:gh-extension
+  summary: "GitHub Copilot CLI stable release updating process cancellation, plugin command feedback, MCP policy/status behavior, transport defaults, hook denial semantics, and several TUI/session surfaces."
+  assimilationNotes:
+    - "Issue #861 tracks npm latest moving from the graph's 1.0.57-3 prerelease record to stable 1.0.57."
+    - "Canceling a running shell command now terminates the whole process tree, including sandboxed and background-promoted shells."
+    - "Plugin slash commands show immediate progress feedback for install, uninstall, update, and marketplace operations."
+    - "Default networking transport is HTTP/1.1; COPILOT_ENABLE_HTTP2=1 opts into HTTP/2."
+    - "Azure DevOps-only repositories keep the built-in GitHub MCP server enabled with only the web_search tool."
+    - "MCP server timeout configuration is preserved after tool-list changes, and npx --registry MCP servers are no longer incorrectly blocked by policy."
+    - "preToolUse hook errors now deny the tool call instead of silently allowing execution."
+    - "COPILOT_HOME is honored for the server discovery registry directory."
+    - "Canvas providers can return file:// URLs for local file previews, and symlinked directories appear in /cwd completion."
+    - "No install method change; gh extension install github/gh-copilot remains the modeled install path."
+  releaseHighlights:
+    - "Whole process-tree cancellation for interrupted shell/agent commands."
+    - "HTTP/1.1 default transport with COPILOT_ENABLE_HTTP2 opt-in."
+    - "preToolUse hook errors deny tool calls."
+    - "MCP policy/status fixes and repo-level plugin marketplace behavior."
+    - "Canvas file:// preview support and symlinked /cwd completion."
+  releaseTracking:
+    issue: 861
+    oldGraphVersion: "1.0.57-3"
+    upstreamVersion: "1.0.57"
+    packageLatest: "1.0.57"
+    packagePrerelease: "1.0.57-5"
+    releasePublishedAt: "2026-06-01T18:40:11Z"
+    packageModifiedAt: "2026-06-01T18:36:17.935Z"
+  transportDefaults:
+    defaultProtocol: "http/1.1"
+    http2OptInEnv: "COPILOT_ENABLE_HTTP2"
+  cancellationBehavior:
+    shellInterruptTerminatesProcessTree: true
+    appliesTo:
+      - sandboxed-shell
+      - background-promoted-shell
+  pluginMarketplaceFeedback:
+    slashCommandsShowImmediateProgress:
+      - install
+      - uninstall
+      - update
+      - marketplace
+  hookSemantics:
+    preToolUseErrorBehavior: "deny-tool-call"
+  mcpBehavior:
+    azureDevopsOnlyGithubMcpTools:
+      - web_search
+    preservesTimeoutConfigAfterToolListChanges: true
+    allowsNpxRegistryServers: true
+  environmentVariables:
+    - name: "COPILOT_ENABLE_HTTP2"
+      purpose: "Opt into HTTP/2 transport when the default is HTTP/1.1."
+    - name: "COPILOT_HOME"
+      purpose: "Override the server discovery registry directory."
+  canvasPreview:
+    localFilePreviewUrlScheme: "file://"
+  cwdCompletion:
+    includesSymlinkedDirectories: true
+  startupTips:
+    showTipsOnStartupSetting: true
+  diffBehavior:
+    defaultsToBranchDiffWhenNoUnstagedChanges: true
+  adapterMetadata: {}
+edges:
+  version_of:
+    - agent:copilot-cli
+  sourced_from:
+    - evidence:copilot-cli-1-0-57-issue-861-release
