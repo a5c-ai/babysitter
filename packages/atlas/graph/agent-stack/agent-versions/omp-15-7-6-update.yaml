@@ -1,0 +1,78 @@
+# Additive issue #863 patch. This file intentionally avoids editing shared
+# OMP current/version YAML so concurrent graph-update PRs do not conflict.
+nodeKind: AgentVersion
+id: agentVersion:omp:15-7-6
+attributes:
+  patch: true
+  issue863ReleaseTracking:
+    releaseVersion: "15.7.6"
+    releasePublishedAt: "2026-06-01T18:52:18Z"
+    npmPublishedAt: "2026-06-01T18:53:48.387Z"
+    previousGraphVersion: "15.7.3"
+    packageName: "@oh-my-pi/pi-coding-agent"
+    packageInstallCommand: "npm install -g @oh-my-pi/pi-coding-agent"
+    upstreamReleaseTag: "v15.7.6"
+    releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.7.6"
+    npmPackageUrl: "https://www.npmjs.com/package/@oh-my-pi/pi-coding-agent/v/15.7.6"
+    releaseHighlights:
+      - "ask option descriptions render explanatory text as muted selector rows while keeping short labels."
+      - "Supplemental assistant-thinking UI renderers can attach content below visible thinking blocks."
+      - "Default-on lsp.diagnosticsDeduplicate suppresses already-shown post-edit diagnostics within a session."
+      - "ESC dismisses @/slash autocomplete before routing to the global agent interrupt handler."
+      - "Claude Code slash command discovery recurses through subdirectories, preserves basename commands, and adds namespace aliases such as /opsx:apply."
+      - "eval per-cell timeout counts the cell's own wall-clock work and pauses only while host-side agent(), parallel(), or llm() bridge calls are in flight via heartbeat."
+      - "Native Windows and Windows Terminal repaint behavior falls back to viewportRepaint when the viewport probe is unknown."
+      - "@-prefixed fuzzy file completion honors the configured maxResults 100 ceiling instead of a hard 20-result cap."
+    affectedSurfaces:
+      selectorUi:
+        askOptionDescriptions: true
+        descriptionRendering: "muted-row"
+      thinkingUi:
+        supplementalRendererExtensionApi: true
+        renderPosition: "below-visible-assistant-thinking-blocks"
+      lsp:
+        diagnosticsDeduplicate:
+          defaultEnabled: true
+          scope: "session"
+          behavior: "surface-only-new-or-changed-post-edit-diagnostics"
+      keyboard:
+        escapeAutocompleteBehavior: "dismiss-popup-before-global-interrupt"
+        removedHook: "shouldBypassAutocompleteOnEscape"
+      slashCommands:
+        claudeSubdirectoryDiscovery: "recursive"
+        preservesBasenameCommands: true
+        namespaceAliases: true
+        namespaceAliasExample: "/opsx:apply"
+      evalTool:
+        timeoutKind: "own-work-wall-clock"
+        pausedDuringBridgeCalls:
+          - "agent()"
+          - "parallel()"
+          - "llm()"
+        heartbeatPersisted: false
+        heartbeatRendered: false
+      windowsTerminal:
+        unknownViewportProbeFallback: "viewportRepaint"
+        avoidsClearScrollback: true
+      fileCompletion:
+        atMentionMaxResults: 100
+        previousHardCap: 20
+    migrationNotes:
+      - "No package or install command change was identified."
+      - "Downstream consumers should remove dependencies on shouldBypassAutocompleteOnEscape."
+      - "Eval timeout tests should account for heartbeat-paused host-side agent(), parallel(), and llm() bridge calls."
+      - "Slash command discovery fixtures should include recursive subdirectory commands and namespace aliases."
+edges:
+  sourced_from:
+    - evidence:omp-15-7-6-update-release
+    - evidence:omp-15-7-6-update-npm
+  evidenced_by:
+    - evidence:omp-15-7-6-update-release
+    - evidence:omp-15-7-6-update-npm
+---
+extendsNode:
+  id: agent:omp
+  nodeKind: AgentProduct
+edges:
+  has_version:
+    - agentVersion:omp:15-7-6

@@ -1,0 +1,57 @@
+# Dedicated issue #863 evidence records. Kept separate from date-bucket
+# evidence files to avoid conflicts with concurrent graph updates.
+nodeKind: EvidenceSource
+id: evidence:omp-15-7-6-update-release
+attributes:
+  displayName: "Oh-My-Pi v15.7.6 release notes for issue #863"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.7.6"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.7.6"
+  locator: "can1357/oh-my-pi release v15.7.6"
+  capturedAt: "2026-06-02T06:14:00Z"
+  observedAt: "2026-06-01T18:52:18Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-02T06:14:00Z"
+  notes: |
+    Issue #863 tracks Oh-My-Pi v15.7.6. The official release notes document
+    ask option descriptions, supplemental assistant-thinking UI rendering,
+    default-on lsp.diagnosticsDeduplicate, ESC/autocomplete interrupt handling,
+    recursive Claude Code slash-command discovery with namespace aliases, eval
+    timeout heartbeat semantics for agent/parallel/llm bridge calls, native
+    Windows/Windows Terminal repaint behavior, and @ file completion maxResults
+    100 behavior.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:15-7-6
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:omp-15-7-6-update-npm
+attributes:
+  displayName: "Oh-My-Pi pi-coding-agent 15.7.6 npm package metadata for issue #863"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@oh-my-pi/pi-coding-agent/v/15.7.6"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@oh-my-pi/pi-coding-agent/v/15.7.6"
+  locator: "npm @oh-my-pi/pi-coding-agent v15.7.6"
+  capturedAt: "2026-06-02T06:14:00Z"
+  observedAt: "2026-06-01T18:53:48.387Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-02T06:14:00Z"
+  notes: |
+    npm metadata reports @oh-my-pi/pi-coding-agent version 15.7.6 published on
+    2026-06-01T18:53:48.387Z. The package name and install command remain npm
+    install -g @oh-my-pi/pi-coding-agent.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:15-7-6
+    - agent:omp
