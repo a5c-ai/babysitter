@@ -1,0 +1,28 @@
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1780336675-gf27daa-update
+attributes:
+  displayName: "Amp CLI 0.0.1780336675-gf27daa npm package update"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780336675-gf27daa"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780336675-gf27daa"
+  locator: "npm @ampcode/cli v0.0.1780336675-gf27daa"
+  capturedAt: "2026-06-02T06:16:00Z"
+  observedAt: "2026-06-01T18:05:54.535Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-02T06:16:00Z"
+  notes: |
+    npm package metadata records @ampcode/cli 0.0.1780336675-gf27daa with
+    publication time 2026-06-01T18:05:54.535Z. Issue #858 tracks this version
+    as moving from the prior graph baseline 0.0.1780244579-g6b52f9. The package
+    install command remains npm install -g @ampcode/cli. No public
+    build-specific changelog was found confirming CLI flag, transport, MCP,
+    auth, subagent, install-method, or migration changes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1780336675-gf27daa
+    - agent:amp

@@ -1,0 +1,31 @@
+# Additive issue #858 patch. This file intentionally avoids editing shared
+# current-version or daily upstream YAML files that concurrent graph-update PRs
+# may touch.
+kind: NodeDocument
+nodes:
+  - kind: AgentVersion
+    id: agentVersion:amp:0-0-1780336675-gf27daa
+    patch: true
+    releaseTracking:
+      issue: "#858"
+      agentId: amp
+      sourcePackage: "@ampcode/cli"
+      installCommand: "npm install -g @ampcode/cli"
+      previousGraphVersion: "0.0.1780244579-g6b52f9"
+      trackedVersion: "0.0.1780336675-gf27daa"
+      npmPublishedAt: "2026-06-01T18:05:54.535Z"
+      capturedAt: "2026-06-02T06:16:00Z"
+      npmLatestAtCapture: "0.0.1780378195-ge506a8"
+      latestDistTagNote: "npm latest advanced after issue #858 was filed; this additive patch records the issue-specific Amp version."
+      behaviorChangeEvidence: "No public build-specific changelog or GitHub release note was found for this timestamped npm build."
+      unchangedSurfaces:
+        - cli-flags
+        - transport
+        - mcp
+        - auth
+        - subagents
+        - install-method
+        - migration
+    edges:
+      sourced_from:
+        - evidence:amp-0-0-1780336675-gf27daa-update
