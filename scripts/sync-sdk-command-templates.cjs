@@ -15,6 +15,20 @@ const TARGET_ROOT = path.join(REPO_ROOT, 'packages', 'sdk', 'src', 'prompts', 't
 const LABEL = 'sdk command templates';
 const CHECK = process.argv.includes('--check');
 const REQUIRED_SKILL_COMMANDS = ['blueprints'];
+const PRIMARY_BLUEPRINT_COMMAND_SURFACES = [
+  'README.md',
+  'plugins/babysitter/skills/help/SKILL.md',
+  'plugins/babysitter/skills/blueprints/SKILL.md',
+  'plugins/babysitter-unified/commands/help.md',
+  'plugins/babysitter-unified/per-harness/gemini/README.md',
+  'plugins/babysitter-unified/per-harness/openclaw/README.md',
+  'blueprints/a5c/marketplace/plugins/welcome/install.md',
+  'blueprints/a5c/marketplace/plugins/llm-wiki/configure.md',
+  'blueprints/a5c/marketplace/plugins/llm-wiki/install.md',
+  'packages/atlas/graph/agent-stack/interaction-primitives/interaction-primitives-babysitter.yaml',
+  'packages/atlas/graph/agent-stack/ui-impls/babysitter-ui-current.yaml',
+  'packages/atlas/graph/extensions/skills/skills-babysitter.yaml',
+];
 const OBSOLETE_CLEANUP_PATH_PATTERNS = [
   /skills[\\/]+babysit[\\/]+process[\\/]+cradle[\\/]+cleanup-runs\.js\/processes\/cleanup-runs\.js/,
   /cleanup-runs\.js\/processes\/cleanup-runs\.js/,
@@ -160,9 +174,42 @@ function assertNoObsoleteCleanupPath(label, content) {
   }
 }
 
+function assertPrimaryBlueprintCommandSurfaces() {
+  const failures = [];
+
+  for (const relativePath of PRIMARY_BLUEPRINT_COMMAND_SURFACES) {
+    const fullPath = path.join(REPO_ROOT, relativePath);
+    if (!fs.existsSync(fullPath)) {
+      failures.push(`${relativePath} is missing`);
+      continue;
+    }
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+    if (content.includes('/babysitter:plugins')) {
+      failures.push(`${relativePath} advertises deprecated /babysitter:plugins as a primary command`);
+    }
+  }
+
+  const aliasPath = path.join(REPO_ROOT, 'plugins', 'babysitter-unified', 'commands', 'plugins.md');
+  if (!fs.existsSync(aliasPath)) {
+    failures.push('plugins/babysitter-unified/commands/plugins.md must remain as a deprecated alias');
+  } else {
+    const aliasContent = fs.readFileSync(aliasPath, 'utf8');
+    if (!aliasContent.includes('deprecated alias') || !aliasContent.includes('/babysitter:blueprints')) {
+      failures.push('plugins/babysitter-unified/commands/plugins.md must clearly point to /babysitter:blueprints as the replacement');
+    }
+  }
+
+  if (failures.length > 0) {
+    throw new Error(`Blueprint command surface check failed:\n- ${failures.join('\n- ')}`);
+  }
+}
+
 function main() {
   const stale = [];
   let updated = 0;
+
+  assertPrimaryBlueprintCommandSurfaces();
 
   for (const name of REQUIRED_SKILL_COMMANDS) {
     const skillPath = path.join(REPO_ROOT, 'plugins', 'babysitter', 'skills', name, 'SKILL.md');
