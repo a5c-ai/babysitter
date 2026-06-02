@@ -45,7 +45,7 @@
     {
       "surface": "packages/tula-core",
       "packageName": "@a5c-ai/tula-core",
-      "description": "Built-in tula-core runtime and tool surface for Babysitter.",
+      "description": "Tula core runtime and tool surface for Babysitter.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
       "canonicalHome": "../packages/tula-core/README.md",

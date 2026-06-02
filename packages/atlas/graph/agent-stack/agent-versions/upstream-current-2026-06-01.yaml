@@ -1,0 +1,334 @@
+# Additive upstream release records from the 2026-06-01 agent-version tracker.
+# These avoid rewriting shared current-version files while preserving the new
+# upstream AgentVersion facts and issue links.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1780336675-gf27daa
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Sourcegraph Amp 0.0.1780336675-gf27daa"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1780336675-gf27daa"
+  currentVersion: "0.0.1780336675-gf27daa"
+  releasedAt: "2026-06-01"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780336675-gf27daa"
+  cliCommand: "amp"
+  summary: "Sourcegraph Amp npm release; public build-specific changelog details were not available for this timestamped build."
+  assimilationNotes:
+    - "Issue #858 tracks npm latest moving from 0.0.1780244579-g6b52f9 to 0.0.1780336675-gf27daa."
+    - "npm metadata shows 0.0.1780336675-gf27daa published on 2026-06-01 and assigned to the latest dist-tag."
+    - "The npm README documents npm install -g @ampcode/cli and notes the prior @sourcegraph/amp package name still works for backwards compatibility."
+    - "No public build-specific changelog or GitHub release note was found, so no CLI flag, transport, MCP, auth, subagent, or install-method change is confirmed."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1780336675-gf27daa."
+    - "No confirmed behavioral change beyond package publication."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1780336675-gf27daa-issue-858-release
+---
+nodeKind: AgentVersion
+id: agent-version:codex@0.136.0
+attributes:
+  agentId: "codex"
+  agentProductId: agent:codex
+  displayName: "Codex CLI 0.136.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.136.0"
+  currentVersion: "0.136.0"
+  releasedAt: "2026-06-01"
+  sourcePackage: "@openai/codex"
+  upstreamReleaseTag: "rust-v0.136.0"
+  releaseNotesUrl: "https://github.com/openai/codex/releases/tag/rust-v0.136.0"
+  cliCommand: "codex"
+  summary: "Codex CLI release adding OSC 8 markdown links, session archive commands, app-server stdio/resume/status updates, API-key remote registration, server-token remote control, Windows sandbox provisioning, and safety hardening."
+  assimilationNotes:
+    - "Issue #859 tracks npm latest moving from 0.135.0 to 0.136.0."
+    - "TUI markdown keeps web links clickable with OSC 8 metadata, and cramped tables render as key/value records without losing link targets."
+    - "Sessions can be archived through /archive or codex archive / codex unarchive; archived sessions are protected from resume/fork until restored."
+    - "App-server integrations can resume a thread with its initial turns page, expose richer MCP server status, and launch stdio mode with codex app-server --stdio."
+    - "Remote execution setup supports CODEX_API_KEY registration for approved OpenAI hosts, while remote-control websockets use short-lived server tokens instead of ChatGPT access tokens."
+    - "Windows admins get alpha codex sandbox setup --elevated plus requirements support for allowed Windows sandbox implementations."
+    - "A feature-gated standalone image generation extension routes through the native Codex image artifact completion pipeline."
+    - "Command-safety fixes cover /diff Git helper/hook execution, PowerShell parser execution off Windows, browser-origin exec-server websocket handshakes, sandbox cleanup, and deny-read enforcement."
+    - "Python SDK docs/package metadata now present pip install openai-codex and use CodexConfig for Codex / AsyncCodex configuration."
+  releaseHighlights:
+    - "OSC 8 web links and key/value fallback rendering for cramped markdown tables."
+    - "Session archive/unarchive lifecycle that blocks resume/fork until restore."
+    - "codex app-server --stdio, richer MCP status, and initial turns on thread resume."
+    - "Remote CODEX_API_KEY registration and short-lived server tokens for remote-control websockets."
+    - "Alpha elevated Windows sandbox provisioning."
+    - "Feature-gated image generation extension path."
+  installMethods:
+    - install:npm
+  adapterMetadata:
+    issue859ReleaseAdditions:
+      releaseVersion: "0.136.0"
+      sessionLifecycle:
+        archiveCommands:
+          - "/archive"
+          - "codex archive"
+          - "codex unarchive"
+        archivedSessionResume: "blocked-until-restored"
+        archivedSessionFork: "blocked-until-restored"
+      appServer:
+        stdioCommand: "codex app-server --stdio"
+        threadResumeIncludesInitialTurnsPage: true
+        richerMcpServerStatus: true
+      remoteControl:
+        apiKeyRegistrationEnv: "CODEX_API_KEY"
+        websocketAuth: "short-lived-server-token"
+        previousWebsocketAuth: "ChatGPT access token"
+      terminalRendering:
+        osc8WebLinks: true
+        crampedMarkdownTables: "key-value-records"
+      sandbox:
+        windowsElevatedSetupCommand: "codex sandbox setup --elevated"
+        windowsRequirementsSupport: true
+      safety:
+        rejectsBrowserOriginExecServerWebsockets: true
+        avoidsRepoConfiguredDiffExecution: true
+        preservesDenyReadForSafeCommands: true
+edges:
+  version_of:
+    - agent:codex
+  sourced_from:
+    - evidence:codex-rust-v0-136-0-issue-859-release
+---
+nodeKind: AgentVersion
+id: agentVersion:codex-sdk:6-40-0
+attributes:
+  agentId: "codex-sdk"
+  agentProductId: agent:codex-sdk
+  displayName: "OpenAI Node SDK 6.40.0"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "6.40.0"
+  currentVersion: "6.40.0"
+  releasedAt: "2026-06-01"
+  sourcePackage: "openai"
+  upstreamReleaseTag: "v6.40.0"
+  releaseNotesUrl: "https://github.com/openai/openai-node/releases/tag/v6.40.0"
+  summary: "OpenAI Node SDK release adding workload identity in audit logs, additional_tools response item support, optional ActionSearch.query, and removing the migrate CLI."
+  assimilationNotes:
+    - "Issue #860 tracks npm latest moving from 6.39.1 to 6.40.0 for the Codex SDK adapter surface."
+    - "The SDK API surface adds workload identity in audit logs and an additional_tools item in Responses."
+    - "ActionSearch.query is fixed to be optional."
+    - "The Node SDK migrate CLI was removed."
+    - "No package name or npm install method change was found."
+  releaseHighlights:
+    - "Workload identity in audit logs."
+    - "additional_tools item in Responses."
+    - "ActionSearch.query optionality fix."
+    - "Removed migrate CLI."
+  installMethods:
+    - install:npm
+  adapterMetadata:
+    issue860ReleaseAdditions:
+      responseItems:
+        additionalTools: true
+      auditLogs:
+        workloadIdentity: true
+      actionSearch:
+        queryOptional: true
+      removedCli:
+        - "migrate"
+edges:
+  version_of:
+    - agent:codex-sdk
+  sourced_from:
+    - evidence:openai-node-6-40-0-issue-860-release
+---
+nodeKind: AgentVersion
+id: agentVersion:copilot:1-0-57
+attributes:
+  agentId: "copilot"
+  agentProductId: agent:copilot-cli
+  displayName: "GitHub Copilot CLI 1.0.57"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.0.57"
+  currentVersion: "1.0.57"
+  releasedAt: "2026-06-01"
+  sourcePackage: "@github/copilot"
+  upstreamReleaseTag: "v1.0.57"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.57"
+  cliCommand: "gh copilot"
+  summary: "GitHub Copilot CLI stable release updating process cancellation, plugin command feedback, MCP policy/status behavior, transport defaults, hook denial semantics, and several TUI/session surfaces."
+  assimilationNotes:
+    - "Issue #861 tracks npm latest moving from the graph's 1.0.57-3 prerelease record to stable 1.0.57."
+    - "Canceling a running shell command now terminates the whole process tree, including sandboxed and background-promoted shells."
+    - "Plugin slash commands show immediate progress feedback for install, uninstall, update, and marketplace operations."
+    - "Default networking transport is HTTP/1.1; COPILOT_ENABLE_HTTP2=1 opts into HTTP/2."
+    - "Azure DevOps-only repositories keep the built-in GitHub MCP server enabled with only the web_search tool."
+    - "MCP server timeout configuration is preserved after tool-list changes, and npx --registry MCP servers are no longer incorrectly blocked by policy."
+    - "preToolUse hook errors now deny the tool call instead of silently allowing execution."
+    - "COPILOT_HOME is honored for the server discovery registry directory."
+    - "Canvas providers can return file:// URLs for local file previews, and symlinked directories appear in /cwd completion."
+    - "No install method change; gh extension install github/gh-copilot remains the modeled install path."
+  releaseHighlights:
+    - "Whole process-tree cancellation for interrupted shell/agent commands."
+    - "HTTP/1.1 default transport with COPILOT_ENABLE_HTTP2 opt-in."
+    - "preToolUse hook errors deny tool calls."
+    - "MCP policy/status fixes and repo-level plugin marketplace behavior."
+    - "Canvas file:// preview support and symlinked /cwd completion."
+  installMethods:
+    - install:gh-extension
+  adapterMetadata:
+    issue861ReleaseAdditions:
+      transport:
+        default: "http/1.1"
+        http2OptInEnv: "COPILOT_ENABLE_HTTP2"
+      cancellation:
+        shellInterruptTerminatesProcessTree: true
+        appliesTo:
+          - sandboxed-shell
+          - background-promoted-shell
+      hooks:
+        preToolUseErrorBehavior: "deny-tool-call"
+      mcp:
+        azureDevopsOnlyGithubMcpTools:
+          - web_search
+        preservesTimeoutConfigAfterToolListChanges: true
+        allowsNpxRegistryServers: true
+      env:
+        homeOverride: "COPILOT_HOME"
+      canvas:
+        localFilePreviewUrls: "file://"
+edges:
+  version_of:
+    - agent:copilot-cli
+  sourced_from:
+    - evidence:copilot-cli-1-0-57-issue-861-release
+---
+nodeKind: AgentVersion
+id: agentVersion:cursor:changelog-2026-05-29
+attributes:
+  agentId: "cursor"
+  agentProductId: agent:cursor
+  displayName: "Cursor 3.6 changelog 2026-05-29"
+  runtimeFamily: "ide-agent"
+  releaseChannel: "stable"
+  versionRange: "2026-05-29-changelog"
+  currentVersion: "3.6"
+  releasedAt: "2026-05-29"
+  releaseNotesUrl: "https://cursor.com/changelog/auto-review"
+  cliCommand: "cursor-agent"
+  summary: "Cursor 3.6 official changelog marker adding Auto-review run mode for Shell, MCP, and Fetch tool calls with allowlist, sandbox, and classifier-subagent decision paths."
+  assimilationNotes:
+    - "Issue #862 tracks Cursor's 2026-05-29 official changelog entry for version marker 3.6."
+    - "Auto-review is a new run mode intended to let Cursor work longer with fewer approval prompts and safer execution."
+    - "Auto-review applies to Shell, MCP, and Fetch tool calls."
+    - "Allowlisted calls run immediately, sandboxable calls run in the sandbox, and all other agent actions go to a classifier subagent."
+    - "The classifier subagent decides whether to allow the call, try a different approach, or ask for user approval."
+    - "Run mode is configured at Settings > Cursor Settings > Agents > Run Mode, and the classifier agent can be steered with custom instructions."
+    - "No public npm-style Cursor CLI package version or installer change was identified."
+  releaseHighlights:
+    - "Auto-review run mode."
+    - "Shell, MCP, and Fetch tool-call policy scope."
+    - "Allowlist, sandbox, and classifier-subagent decision flow."
+    - "Classifier custom instructions in settings."
+  installMethods:
+    - install:manual
+  adapterMetadata:
+    issue862RunMode:
+      releaseMarker: "3.6"
+      sourceKind: official-changelog
+      runMode: "auto-review"
+      settingsPath: "Settings > Cursor Settings > Agents > Run Mode"
+      toolScopes:
+        - Shell
+        - MCP
+        - Fetch
+      decisionFlow:
+        allowlisted: "run-immediately"
+        sandboxable: "run-in-sandbox"
+        other: "classifier-subagent"
+      classifierOutcomes:
+        - allow-call
+        - try-different-approach
+        - ask-for-approval
+      customClassifierInstructions: true
+      installerChangeIdentified: false
+edges:
+  version_of:
+    - agent:cursor
+  sourced_from:
+    - evidence:cursor-2026-05-29-changelog-issue-862
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:15-7-6
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 15.7.6"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "15.7.6"
+  currentVersion: "15.7.6"
+  releasedAt: "2026-06-01"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v15.7.6"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.7.6"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release adding ask option descriptions, assistant-thinking supplemental UI, LSP diagnostic dedupe, ESC/autocomplete fixes, recursive Claude slash-command discovery, eval timeout semantics, Windows Terminal repaint fixes, and broader file completion."
+  assimilationNotes:
+    - "Issue #863 tracks npm latest moving from 15.7.3 to 15.7.6."
+    - "ask option descriptions let agents keep short labels and render explanatory text as separate muted rows in selectors."
+    - "An extension API can render supplemental UI below visible assistant thinking blocks."
+    - "Default-on lsp.diagnosticsDeduplicate suppresses already-shown post-edit diagnostics within the session and surfaces only new or changed diagnostics."
+    - "ESC now drains @/slash autocomplete before routing to the global interrupt handler; the shouldBypassAutocompleteOnEscape editor hook was removed."
+    - "Claude Code slash command discovery loads subdirectory commands recursively, preserves basename commands, and adds namespace aliases such as /opsx:apply."
+    - "eval tool per-cell timeout is a wall-clock budget for the cell's own work, paused only while host-side agent(), parallel(), or llm() bridge calls are in flight via heartbeat."
+    - "Native Windows and Windows Terminal repaint behavior no longer freezes the editor when the viewport probe is unknown."
+    - "@-prefixed fuzzy file completion now honors the configured maxResults 100 instead of a hard 20-result cap."
+    - "No install method or package name change; npm install -g @oh-my-pi/pi-coding-agent remains current."
+  releaseHighlights:
+    - "ask option descriptions and supplemental assistant-thinking UI extension API."
+    - "Default-on LSP diagnostics dedupe."
+    - "ESC/autocomplete no longer aborts running agent operations while a popup is visible."
+    - "Recursive Claude Code slash-command discovery with namespace aliases."
+    - "eval timeout heartbeat semantics for nested agent/parallel/llm calls."
+    - "Windows Terminal repaint fix and 100-result fuzzy file completion."
+  installMethods:
+    - install:npm
+  adapterMetadata:
+    issue863ReleaseAdditions:
+      releaseVersion: "15.7.6"
+      selectorUi:
+        askOptionDescriptions: true
+      thinkingUi:
+        supplementalRendererExtensionApi: true
+      lsp:
+        diagnosticsDeduplicate:
+          defaultEnabled: true
+          scope: "session"
+          behavior: "suppress-previously-shown-post-edit-diagnostics"
+      keyboard:
+        escapeAutocompleteBehavior: "dismiss-popup-before-global-interrupt"
+        removedHook: "shouldBypassAutocompleteOnEscape"
+      slashCommands:
+        claudeSubdirectoryDiscovery: "recursive"
+        namespaceAliases: true
+      evalTool:
+        timeoutKind: "own-work-wall-clock"
+        pausedDuringBridgeCalls:
+          - "agent()"
+          - "parallel()"
+          - "llm()"
+        heartbeatPersisted: false
+      windowsTerminal:
+        unknownViewportProbeFallback: "viewportRepaint"
+      fileCompletion:
+        atMentionMaxResults: 100
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-15-7-6-issue-863-release

@@ -1,0 +1,169 @@
+# Evidence captured by the 2026-06-01 upstream agent-version tracker.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1780336675-gf27daa-issue-858-release
+attributes:
+  displayName: "Amp CLI 0.0.1780336675-gf27daa npm package for issue #858"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780336675-gf27daa"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1780336675-gf27daa"
+  locator: "npm @ampcode/cli v0.0.1780336675-gf27daa"
+  capturedAt: "2026-06-01T19:55:00Z"
+  observedAt: "2026-06-01T18:05:54Z"
+  observedBy: codex-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-01T19:55:00Z"
+  notes: |
+    npm latest reports @ampcode/cli 0.0.1780336675-gf27daa with publication
+    time 2026-06-01T18:05:54Z. The package README documents npm install -g
+    @ampcode/cli and states the prior @sourcegraph/amp package name remains
+    backwards compatible. No public build-specific changelog was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1780336675-gf27daa
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-136-0-issue-859-release
+attributes:
+  displayName: "Codex CLI rust-v0.136.0 release notes for issue #859"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/codex/releases/tag/rust-v0.136.0"
+  sourcePathOrUrl: "https://github.com/openai/codex/releases/tag/rust-v0.136.0"
+  locator: "openai/codex release rust-v0.136.0"
+  capturedAt: "2026-06-01T19:55:00Z"
+  observedAt: "2026-06-01T17:49:22Z"
+  observedBy: codex-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-01T19:55:00Z"
+  notes: |
+    Official release notes for Codex CLI 0.136.0 document OSC 8 markdown
+    links, archived sessions, app-server stdio and richer MCP status, API-key
+    remote registration, server-token remote-control websockets, alpha Windows
+    sandbox provisioning, image generation extension plumbing, command-safety
+    hardening, and Python SDK documentation updates.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:codex@0.136.0
+    - agent:codex
+---
+nodeKind: EvidenceSource
+id: evidence:openai-node-6-40-0-issue-860-release
+attributes:
+  displayName: "OpenAI Node SDK v6.40.0 release notes for issue #860"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/openai-node/releases/tag/v6.40.0"
+  sourcePathOrUrl: "https://github.com/openai/openai-node/releases/tag/v6.40.0"
+  locator: "openai/openai-node release v6.40.0"
+  capturedAt: "2026-06-01T19:55:00Z"
+  observedAt: "2026-06-01T18:52:48Z"
+  observedBy: codex-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-01T19:55:00Z"
+  notes: |
+    Official OpenAI Node SDK 6.40.0 release notes document workload identity in
+    audit logs, additional_tools item support in Responses, ActionSearch.query
+    optionality, and removal of the migrate CLI.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex-sdk:6-40-0
+    - agent:codex-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-57-issue-861-release
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.57 release notes for issue #861"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.57"
+  sourcePathOrUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.57"
+  locator: "github/copilot-cli release v1.0.57"
+  capturedAt: "2026-06-01T19:55:00Z"
+  observedAt: "2026-06-01T18:40:11Z"
+  observedBy: codex-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-01T19:55:00Z"
+  notes: |
+    Official release notes for GitHub Copilot CLI 1.0.57 document process-tree
+    cancellation for shell/agent commands, immediate plugin command feedback,
+    file:// canvas previews, /cwd symlink completion, Azure DevOps-only MCP
+    behavior, HTTP/1.1 default transport with COPILOT_ENABLE_HTTP2 opt-in, MCP
+    timeout and npx registry fixes, COPILOT_HOME registry discovery, preToolUse
+    error denial behavior, showTipsOnStartup, and /diff defaulting to branch
+    diff when there are no unstaged changes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:1-0-57
+    - agent:copilot-cli
+---
+nodeKind: EvidenceSource
+id: evidence:cursor-2026-05-29-changelog-issue-862
+attributes:
+  displayName: "Cursor 3.6 Auto-review changelog for issue #862"
+  kindLabel: official-changelog
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://cursor.com/changelog/auto-review"
+  sourcePathOrUrl: "https://cursor.com/changelog/auto-review"
+  locator: "Cursor changelog 3.6 Auto-review Run Mode"
+  capturedAt: "2026-06-01T19:55:00Z"
+  observedAt: "2026-05-29T00:00:00Z"
+  observedBy: codex-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-01T19:55:00Z"
+  notes: |
+    Official Cursor changelog entry 3.6, dated 2026-05-29, documents
+    Auto-review run mode for Shell, MCP, and Fetch tool calls. Allowlisted
+    calls run immediately, sandboxable calls run in the sandbox, and other
+    agent actions route to a classifier subagent that can allow the call, try
+    another approach, or ask for approval. The setting path is Settings >
+    Cursor Settings > Agents > Run Mode.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:changelog-2026-05-29
+    - agent:cursor
+---
+nodeKind: EvidenceSource
+id: evidence:omp-15-7-6-issue-863-release
+attributes:
+  displayName: "Oh-My-Pi v15.7.6 release notes for issue #863"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.7.6"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v15.7.6"
+  locator: "can1357/oh-my-pi release v15.7.6"
+  capturedAt: "2026-06-01T19:55:00Z"
+  observedAt: "2026-06-01T18:52:18Z"
+  observedBy: codex-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-01T19:55:00Z"
+  notes: |
+    Official Oh-My-Pi 15.7.6 release notes document ask option descriptions,
+    supplemental assistant-thinking UI extension API, default-on
+    lsp.diagnosticsDeduplicate, ESC/autocomplete abort fixes, recursive Claude
+    Code slash-command discovery with namespace aliases, eval timeout semantics
+    around agent/parallel/llm bridge heartbeats, Windows Terminal repaint fixes,
+    and removal of the hard 20-result cap for @ file completion.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:15-7-6
+    - agent:omp
