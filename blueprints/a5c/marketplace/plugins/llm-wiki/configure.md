@@ -50,7 +50,7 @@ Remove the proactive referencing line, keeping only the wiki location reference.
 
 **To add (if not configured during install):**
 
-1. Install qmd if not present: `/babysitter:plugins install qmd`
+1. Install qmd if not present: `/babysitter:blueprints install qmd`
 2. Add wiki collection:
    ```bash
    qmd collection add wiki --path "[WIKI_ROOT]/wiki/" --watch

@@ -18,6 +18,7 @@ The detailed rule set lives in [docs/agent-reference/process-authoring.md](./doc
 - [docs/agent-reference/command-surfaces.md](./docs/agent-reference/command-surfaces.md)
 - [docs/agent-reference/repo-map.md](./docs/agent-reference/repo-map.md)
 - [docs/agent-reference/runtime-and-layout.md](./docs/agent-reference/runtime-and-layout.md)
+- [docs/blueprints.md](./docs/blueprints.md)
 - [docs/plugins.md](./docs/plugins.md)
 
 ## Quick Commands

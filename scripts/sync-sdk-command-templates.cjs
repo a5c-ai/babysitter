@@ -185,8 +185,11 @@ function assertPrimaryBlueprintCommandSurfaces() {
     }
 
     const content = fs.readFileSync(fullPath, 'utf8');
-    if (content.includes('/babysitter:plugins')) {
+    if (content.includes('/babysitter:plugins') && !/\bdeprecated\b/i.test(content)) {
       failures.push(`${relativePath} advertises deprecated /babysitter:plugins as a primary command`);
+    }
+    if (content.includes('babysitter-plugins')) {
+      failures.push(`${relativePath} still uses the stale babysitter-plugins graph identifier`);
     }
   }
 

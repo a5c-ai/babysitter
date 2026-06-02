@@ -19,6 +19,7 @@ Those rules are captured in more detail in [docs/agent-reference/process-authori
 - [docs/agent-reference/repo-map.md](./docs/agent-reference/repo-map.md)
 - [docs/agent-reference/runtime-and-layout.md](./docs/agent-reference/runtime-and-layout.md)
 - [docs/agent-reference/process-authoring.md](./docs/agent-reference/process-authoring.md)
+- [docs/blueprints.md](./docs/blueprints.md)
 - [docs/plugins.md](./docs/plugins.md)
 
 ## Quick Commands

@@ -116,7 +116,7 @@ The extension registers 17 slash commands (15 named commands plus `/babysit` and
 | `/assimilate` | `/babysitter:assimilate` | Convert external methodologies into processes |
 | `/contrib` | `/babysitter:contrib` | Submit feedback or contributions |
 | `/help` | `/babysitter:help` | Babysitter documentation and usage help |
-| `/plugins` | `/babysitter:plugins` | Manage Babysitter plugins |
+| `/blueprints` | `/babysitter:blueprints` | Manage Babysitter blueprints |
 | `/user-install` | `/babysitter:user-install` | Set up Babysitter for your user profile |
 | `/project-install` | `/babysitter:project-install` | Onboard a project for Babysitter orchestration |
 
@@ -141,7 +141,7 @@ Skills are defined in `skills/` and exposed through OpenClaw's skill system:
 | **assimilate** | Convert external methodologies or specifications into Babysitter process definitions |
 | **contrib** | Submit feedback or contribute to the Babysitter project |
 | **help** | Documentation and usage guidance for commands, processes, and methodologies |
-| **plugins** | List, install, configure, update, or uninstall Babysitter plugins |
+| **blueprints** | List, install, configure, update, or uninstall Babysitter blueprints |
 | **user-install** | Guided user onboarding -- profile setup, dependency installation, preferences |
 | **project-install** | Guided project onboarding -- codebase analysis, profile setup, CI/CD configuration |
 

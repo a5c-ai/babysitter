@@ -138,10 +138,10 @@ edges:
     - target: layer:10-interaction
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:babysitter-plugins
+id: interaction-primitive:babysitter-blueprints
 attributes:
-  displayName: "/babysitter:plugins"
-  description: "Manage babysitter plugins (install, update, uninstall, marketplaces, create new)."
+  displayName: "/babysitter:blueprints"
+  description: "Manage Babysitter blueprints (install, update, uninstall, marketplaces, create new)."
   surface: slash-command
   availableInModes: [chat]
   requiresPermission: true

@@ -95,10 +95,10 @@ edges:
       attributes:
         mechanism: slash-command
         invocationToken: "/babysitter:help"
-    - target: interaction-primitive:babysitter-plugins
+    - target: interaction-primitive:babysitter-blueprints
       attributes:
         mechanism: slash-command
-        invocationToken: "/babysitter:plugins"
+        invocationToken: "/babysitter:blueprints"
     - target: interaction-primitive:babysitter-project-install
       attributes:
         mechanism: slash-command

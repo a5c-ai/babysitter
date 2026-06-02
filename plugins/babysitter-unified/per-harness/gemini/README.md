@@ -124,7 +124,7 @@ Invoke them in Gemini CLI with `/babysitter:<command>`.
 
 | Command | Description |
 |---------|-------------|
-| `/babysitter:plugins [action]` | Manage babysitter plugins: list installed plugins, install from marketplace, update, uninstall, or configure. |
+| `/babysitter:blueprints [action]` | Manage Babysitter blueprints: list installed blueprints, install from marketplace, update, uninstall, or configure. |
 | `/babysitter:contrib [feedback]` | Submit a bug report, feature request, bugfix PR, library contribution, or documentation answer to the babysitter project. |
 | `/babysitter:help [topic]` | Show help for babysitter commands, processes, skills, agents, or methodologies. Pass a topic like `command call` or `process tdd-quality-convergence` for targeted docs. |
 

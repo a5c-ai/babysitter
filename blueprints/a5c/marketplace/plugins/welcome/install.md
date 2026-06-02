@@ -442,5 +442,5 @@ Usage:
   - The welcome screen appears automatically at the start of each session
   - Type /welcome to show it again at any time
   - Edit .a5c/welcome/scripts/welcome.sh to customize the content
-  - See /babysitter:plugins configure welcome for more options
+  - See /babysitter:blueprints configure welcome for more options
 ```

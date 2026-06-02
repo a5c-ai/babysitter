@@ -487,17 +487,17 @@ The repository root `package.json` is workspace metadata for this monorepo. The 
 ---
 
 
-## Plugins
+## Blueprints
 
-Babysitter has its own plugin system -- and it works differently from what you might expect. A babysitter plugin is not a code module with extension points. It's a **set of natural language instructions** (markdown files) or **deterministic coded processes** (JS files) that an AI agent reads and executes. The SDK stores, versions, and distributes the instructions. The AI agent is the runtime.
+Babysitter has its own blueprint system -- and it works differently from what you might expect. A blueprint is not a code module with extension points. It's a **set of natural language instructions** (markdown files) or **deterministic coded processes** (JS files) that an AI agent reads and executes. The SDK stores, versions, and distributes the instructions. The AI agent is the runtime.
 
-This means a plugin can do anything an AI agent can do: install npm packages, generate CI/CD pipelines, set up git hooks, create Terraform configs, modify your linter rules, copy babysitter processes into your project, and interview you about your preferences along the way.
+This means a blueprint can do anything an AI agent can do: install npm packages, generate CI/CD pipelines, set up git hooks, create Terraform configs, modify your linter rules, copy babysitter processes into your project, and interview you about your preferences along the way.
 
-The official marketplace includes plugins for **security** (gitleaks, ESLint security rules, audit processes), **testing** (Vitest/Playwright/pytest setup, coverage gates, TDD processes), **deployment** (Terraform, Helm, Dockerfiles, multi-environment pipelines), **themes** (sound effects, design systems, conversational personality), **CI/CD** (GitHub Actions workflows), and **rate limiting** (exponential backoff hooks).
+The official marketplace includes blueprints for **security** (gitleaks, ESLint security rules, audit processes), **testing** (Vitest/Playwright/pytest setup, coverage gates, TDD processes), **deployment** (Terraform, Helm, Dockerfiles, multi-environment pipelines), **themes** (sound effects, design systems, conversational personality), **CI/CD** (GitHub Actions workflows), and **rate limiting** (exponential backoff hooks).
 
-To manage plugins, use the `/babysitter:plugins` command inside your harness (or `babysitter harness:plugins` from the CLI). The agent reads the plugin's install instructions, interviews you, analyzes your project, and executes the setup -- all within a babysitter orchestration run.
+To manage blueprints, use the `/babysitter:blueprints` command inside your harness (or `babysitter blueprint:*` from the CLI). The agent reads the blueprint's install instructions, interviews you, analyzes your project, and executes the setup -- all within a babysitter orchestration run.
 
-See the full [Plugins documentation](docs/plugins.md) for details on how installs work, the marketplace format, creating your own plugins, and the migration system.
+See the full [Blueprints documentation](docs/blueprints.md) for details on how installs work, the marketplace format, creating your own blueprints, and the migration system. Agent harness plugins are covered separately in [Plugins documentation](docs/plugins.md).
 
 ---
 

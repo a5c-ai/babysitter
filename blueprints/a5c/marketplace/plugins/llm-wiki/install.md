@@ -456,7 +456,7 @@ qmd collection add wiki --path "[WIKI_ROOT]/wiki/" --watch 2>/dev/null || echo "
 ```
 
 If qmd is not installed but the user wants it, suggest installing the `qmd` plugin:
-> To enable semantic search over your wiki, install the qmd plugin: `/babysitter:plugins install qmd`
+> To enable semantic search over your wiki, install the qmd blueprint: `/babysitter:blueprints install qmd`
 
 ---
 
@@ -551,5 +551,5 @@ Quick start:
   - Drop a file into [WIKI_ROOT]/raw/ and run /wiki-ingest
   - Ask a question and it will check the wiki first
   - Run /wiki-lint periodically to maintain quality
-  - See /babysitter:plugins configure llm-wiki for options
+  - See /babysitter:blueprints configure llm-wiki for options
 ```

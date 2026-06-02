@@ -284,12 +284,12 @@ edges:
     - target: skill-area:tutorial-design
 ---
 nodeKind: Skill
-id: skill:babysitter-plugins
+id: skill:babysitter-blueprints
 attributes:
-  displayName: "babysitter:plugins"
+  displayName: "babysitter:blueprints"
   description: |
-    Manage babysitter plugins — list installed plugins, install/update/
-    uninstall, manage marketplaces, and create new plugins. A plugin is
+    Manage Babysitter blueprints — list installed blueprints, install/update/
+    uninstall, manage marketplaces, and create new blueprints. A blueprint is
     a version-managed package of contextual install/uninstall/configure/
     update instructions.
   kind: claude-code-skill
