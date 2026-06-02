@@ -9,7 +9,7 @@ the SDK-injected `TuiContext`.
 
 ```bash
 npm i -g @a5c-ai/agent-mux-tui
-amux-tui
+agent-mux-tui
 ```
 
 ## Development

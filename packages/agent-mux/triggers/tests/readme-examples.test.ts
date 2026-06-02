@@ -15,7 +15,7 @@ describe('README action examples', () => {
     for (const snippet of snippets) {
       const parsed = parse(snippet!);
       if (!Array.isArray(parsed) || !parsed[0]?.uses) continue;
-      expect(parsed[0].uses).toMatch(/(?:\.\/packages\/triggers-mux|a5c-ai\/babysitter\/packages\/triggers-mux@)/);
+      expect(parsed[0].uses).toMatch(/(?:\.\/packages\/agent-mux-triggers|a5c-ai\/babysitter\/packages\/agent-mux-triggers@)/);
       expect(parsed[0].with).toBeDefined();
       expect(parsed[0].with['harness'] || parsed[0].with['trigger-query']).toBeTruthy();
     }

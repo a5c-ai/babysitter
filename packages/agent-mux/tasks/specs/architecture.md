@@ -1,11 +1,11 @@
-# tasks-mux Architecture Specification
+# agent-mux-tasks Architecture Specification
 
 ## Version and Identity
 
 - Package: `@a5c-ai/agent-mux-tasks`
 - Package version: `5.0.0`
 - CLI surface version: `5.0.0`
-- MCP server identity: `tasks-mux@0.1.0`
+- MCP server identity: `agent-mux-tasks@0.1.0`
 - Status: current packaged surface reference
 - Date: 2026-04-27
 
@@ -43,30 +43,30 @@ Source layout:
 
 ## Current CLI Surface
 
-The packaged CLI program name and npm bin name are both `tasks-mux`.
+The packaged CLI program name and npm bin name are both `agent-mux-tasks`.
 
 Supported command paths:
 
-- `tasks-mux ask`
-- `tasks-mux responders list`
-- `tasks-mux responders show <responderId>`
-- `tasks-mux breakpoints pending --responder <responderId>`
-- `tasks-mux breakpoints answer <breakpointId> --answer <text> --responder <responderId> [--confidence <0-100>]`
-- `tasks-mux breakpoints status <breakpointId>`
-- `tasks-mux breakpoints poll <breakpointId> [--timeout <seconds>] [--interval <seconds>]`
-- `tasks-mux tasks search [--query <text>] [--status <csv>] [--priority <csv>] [--assignee <id>]`
-- `tasks-mux tasks assign <taskId> --assignee <id> [--assignee-name <name>]`
-- `tasks-mux tasks approve <taskId> --responder <id> --responder-name <name> --text <text>`
-- `tasks-mux tasks close <taskId> [--message <text>]`
-- `tasks-mux tasks cancel <taskId>`
-- `tasks-mux tasks transition <taskId> --status <status> [--message <text>]`
-- `tasks-mux tasks comment <taskId> --author <id> --text <text>`
-- `tasks-mux tasks bulk --ids <csv> --action <approve|close|cancel|reassign|transition>`
-- `tasks-mux tasks stats`
-- `tasks-mux tasks export`
-- `tasks-mux responder-loop --responder <responderId> [--interval <seconds>] [--once]`
-- `tasks-mux server start`
-- `tasks-mux auth login|logout|status|server set|server clear|token set|token clear|keygen|key-push|keys`
+- `agent-mux-tasks ask`
+- `agent-mux-tasks responders list`
+- `agent-mux-tasks responders show <responderId>`
+- `agent-mux-tasks breakpoints pending --responder <responderId>`
+- `agent-mux-tasks breakpoints answer <breakpointId> --answer <text> --responder <responderId> [--confidence <0-100>]`
+- `agent-mux-tasks breakpoints status <breakpointId>`
+- `agent-mux-tasks breakpoints poll <breakpointId> [--timeout <seconds>] [--interval <seconds>]`
+- `agent-mux-tasks tasks search [--query <text>] [--status <csv>] [--priority <csv>] [--assignee <id>]`
+- `agent-mux-tasks tasks assign <taskId> --assignee <id> [--assignee-name <name>]`
+- `agent-mux-tasks tasks approve <taskId> --responder <id> --responder-name <name> --text <text>`
+- `agent-mux-tasks tasks close <taskId> [--message <text>]`
+- `agent-mux-tasks tasks cancel <taskId>`
+- `agent-mux-tasks tasks transition <taskId> --status <status> [--message <text>]`
+- `agent-mux-tasks tasks comment <taskId> --author <id> --text <text>`
+- `agent-mux-tasks tasks bulk --ids <csv> --action <approve|close|cancel|reassign|transition>`
+- `agent-mux-tasks tasks stats`
+- `agent-mux-tasks tasks export`
+- `agent-mux-tasks responder-loop --responder <responderId> [--interval <seconds>] [--once]`
+- `agent-mux-tasks server start`
+- `agent-mux-tasks auth login|logout|status|server set|server clear|token set|token clear|keygen|key-push|keys`
 
 Global options on the top-level program:
 
@@ -120,7 +120,7 @@ The package surface intentionally separates published runtime files from reposit
 
 Documentation in this package must stay aligned with:
 
-- the CLI bin name `tasks-mux`
+- the CLI bin name `agent-mux-tasks`
 - the CLI version and package version `5.0.0`
 - the MCP server identity version `0.1.0`
 - the current command tree in `src/cli/program.ts`

@@ -67,16 +67,16 @@ inputs:
 
   # ── Legacy / compatibility ───────────────────────────────────────────
   args:
-    description: Space-delimited fallback arguments passed to amux after the command.
+    description: Space-delimited fallback arguments passed to agent-mux after the command.
     required: false
   args-json:
-    description: JSON string array of additional arguments passed to amux after the command. Prefer this for values containing spaces or shell-sensitive characters.
+    description: JSON string array of additional arguments passed to agent-mux after the command. Prefer this for values containing spaces or shell-sensitive characters.
     required: false
   adapter:
     description: Alias for harness (backward compatibility).
     required: false
   plugins:
-    description: Newline-delimited plugin specs installed after harness setup. Each line is passed to amux plugin install <adapter> <plugin>.
+    description: Newline-delimited plugin specs installed after harness setup. Each line is passed to agent-mux plugin install <adapter> <plugin>.
     required: false
 
   # ── Trigger evaluation ───────────────────────────────────────────────
@@ -108,14 +108,14 @@ inputs:
     required: false
     default: '22'
   working-directory:
-    description: Working directory for amux execution.
+    description: Working directory for agent-mux execution.
     required: false
     default: ${{ github.workspace }}
   pre-run:
-    description: Optional shell commands to run after trigger match and before amux.
+    description: Optional shell commands to run after trigger match and before agent-mux.
     required: false
   post-run:
-    description: Optional shell commands to run after amux when trigger matched.
+    description: Optional shell commands to run after agent-mux when trigger matched.
     required: false
 
 outputs:
@@ -169,9 +169,9 @@ runs:
       run: |
         set -euo pipefail
         echo "Installing @a5c-ai packages with tag: $NPM_TAG"
-        npm install -g --legacy-peer-deps @a5c-ai/agent-mux-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/triggers-mux@$NPM_TAG
-        npm install -g --legacy-peer-deps @a5c-ai/hooks-mux-cli@$NPM_TAG 2>/dev/null || echo "hooks-mux-cli install skipped (optional)"
-        which amux && amux --version || { echo "ERROR: amux not found after install"; exit 1; }
+        npm install -g --legacy-peer-deps @a5c-ai/agent-mux@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/agent-mux-triggers@$NPM_TAG
+        npm install -g --legacy-peer-deps @a5c-ai/agent-mux-hooks-cli@$NPM_TAG 2>/dev/null || echo "agent-mux-hooks-cli install skipped (optional)"
+        which agent-mux && agent-mux --version || { echo "ERROR: agent-mux not found after install"; exit 1; }
 
     - name: Install harness
       if: ${{ inputs.harness != '' || inputs.adapter != '' }}
@@ -182,7 +182,7 @@ runs:
       run: |
         set -euo pipefail
         cd "$INPUT_WORKING_DIRECTORY"
-        # Map adapter names to amux agent aliases
+        # Map adapter names to agent-mux agent aliases
         AMUX_AGENT="$INPUT_HARNESS"
         case "$INPUT_HARNESS" in
           claude-code) AMUX_AGENT="claude" ;;
@@ -190,7 +190,7 @@ runs:
           copilot-cli) AMUX_AGENT="copilot" ;;
           cursor-cli) AMUX_AGENT="cursor" ;;
         esac
-        amux install "$AMUX_AGENT" || true
+        agent-mux install "$AMUX_AGENT" || true
 
     - name: Install babysitter plugin
       if: ${{ inputs.babysitter-plugin == 'true' }}
@@ -245,7 +245,7 @@ runs:
         set -euo pipefail
         while IFS= read -r plugin; do
           [ -z "$plugin" ] && continue
-          amux plugin install "$INPUT_ADAPTER" "$plugin"
+          agent-mux plugin install "$INPUT_ADAPTER" "$plugin"
         done <<< "$INPUT_PLUGINS"
 
     - name: Evaluate trigger
@@ -265,14 +265,14 @@ runs:
         if [ "$INPUT_INCLUDE_DIFF" = "true" ]; then
           INCLUDE_DIFF_ARGS+=(--include-diff)
         fi
-        triggers-mux enrich \
+        agent-mux-triggers enrich \
           --backend "$INPUT_TRIGGER_BACKEND" \
           --token "$EFFECTIVE_GITHUB_TOKEN" \
           "${INCLUDE_DIFF_ARGS[@]}" \
           --output "$EVENT_FILE"
         if [ -z "$INPUT_TRIGGER_QUERY" ]; then
           echo '{"matched":true,"reasons":["no trigger query configured"]}' > "$RESULT_FILE"
-        elif triggers-mux evaluate \
+        elif agent-mux-triggers evaluate \
           --backend "$INPUT_TRIGGER_BACKEND" \
           --query "$INPUT_TRIGGER_QUERY" \
           --token "$EFFECTIVE_GITHUB_TOKEN" \
@@ -324,9 +324,9 @@ runs:
         AMUX_TRIGGER_EVENT_PATH: ${{ steps.trigger.outputs.event }}
       run: |
         set -euo pipefail
-        AMUX="amux"
+        AMUX="agent-mux"
 
-        # Map harness names to amux aliases
+        # Map harness names to agent-mux aliases
         AMUX_HARNESS="$INPUT_HARNESS"
         case "$INPUT_HARNESS" in
           claude-code) AMUX_HARNESS="claude" ;;
@@ -391,7 +391,7 @@ runs:
           ARGS+=("${EXTRA_ARGS[@]}")
         fi
 
-        echo "::group::amux ${ARGS[*]}"
+        echo "::group::agent-mux ${ARGS[*]}"
         if $AMUX "${ARGS[@]}"; then
           echo "exit-code=0" >> "$GITHUB_OUTPUT"
         else

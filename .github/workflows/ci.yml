@@ -92,10 +92,10 @@ jobs:
           set -euo pipefail
           npm run test:architecture 2>&1 | tee artifacts/test-logs/architecture.log
 
-      - name: Build tasks-mux
+      - name: Build agent-mux-tasks
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/agent-mux-tasks 2>&1 | tee artifacts/test-logs/tasks-mux-build.log
+          npm run build --workspace=@a5c-ai/agent-mux-tasks 2>&1 | tee artifacts/test-logs/agent-mux-tasks-build.log
 
       - name: Build runtime graph
         run: |
@@ -107,15 +107,15 @@ jobs:
           set -euo pipefail
           npm run test:sdk 2>&1 | tee artifacts/test-logs/unit-tests.log
 
-      - name: Typecheck tasks-mux
+      - name: Typecheck agent-mux-tasks
         run: |
           set -euo pipefail
-          npm run typecheck --workspace=@a5c-ai/agent-mux-tasks 2>&1 | tee artifacts/test-logs/tasks-mux-typecheck.log
+          npm run typecheck --workspace=@a5c-ai/agent-mux-tasks 2>&1 | tee artifacts/test-logs/agent-mux-tasks-typecheck.log
 
-      - name: tasks-mux tests
+      - name: agent-mux-tasks tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/agent-mux-tasks 2>&1 | tee artifacts/test-logs/tasks-mux-tests.log
+          npm run test --workspace=@a5c-ai/agent-mux-tasks 2>&1 | tee artifacts/test-logs/agent-mux-tasks-tests.log
 
       - name: Build hooks-mux
         run: |
@@ -192,15 +192,15 @@ jobs:
           set -euo pipefail
           npm run test:e2e --workspace=@a5c-ai/agent-mux-webui 2>&1 | tee artifacts/test-logs/agent-mux-webui-browser-e2e.log
 
-      - name: Build extension-mux
+      - name: Build agent-mux-extensions
         run: |
           set -euo pipefail
-          npm run build --workspace=@a5c-ai/agent-mux-extensions 2>&1 | tee artifacts/test-logs/extension-mux-build.log
+          npm run build --workspace=@a5c-ai/agent-mux-extensions 2>&1 | tee artifacts/test-logs/agent-mux-extensions-build.log
 
-      - name: extension-mux tests
+      - name: agent-mux-extensions tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/agent-mux-extensions 2>&1 | tee artifacts/test-logs/extension-mux-tests.log
+          npm run test --workspace=@a5c-ai/agent-mux-extensions 2>&1 | tee artifacts/test-logs/agent-mux-extensions-tests.log
 
       - name: Build babysitter-harness
         run: |

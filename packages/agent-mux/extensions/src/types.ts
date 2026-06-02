@@ -18,7 +18,7 @@ export interface A5cPluginManifest {
 
   // Components — hook values:
   //   string path  = source script, copied to output and wired via registration
-  //   "proxy"      = passthrough to hooks-mux with noop handler (no custom logic)
+  //   "proxy"      = passthrough to agent-mux-hooks with noop handler (no custom logic)
   //   true         = stub (no-op echo '{}')
   //   null         = disabled for this target
   hooks?: Record<string, string | boolean | null>;

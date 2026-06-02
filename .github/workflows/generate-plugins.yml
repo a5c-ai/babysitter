@@ -6,7 +6,7 @@ name: Generate Plugins
 #     branches: [main, staging]
 #     paths:
 #       - 'plugins/babysitter-unified/**'
-#       - 'packages/extension-mux/**'
+#       - 'packages/agent-mux/extensions/**'
 #   workflow_dispatch:
 
 on:

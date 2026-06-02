@@ -6,7 +6,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "extension-mux": "./dist/cli.js"
+    "agent-mux-extensions": "./dist/cli.js",
+    "extension-mux": "./dist/extension-mux.js"
   },
   "scripts": {
     "build": "tsc",

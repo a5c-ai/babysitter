@@ -2,7 +2,7 @@
 
 Agent-mux persists every run as a **session**: a JSONL file written by the
 underlying CLI (Claude, Codex, Gemini, …) that you can list, resume, inspect,
-and export through the SDK or `amux` CLI.
+and export through the SDK or `agent-mux` CLI.
 
 ## Listing sessions
 
@@ -19,8 +19,8 @@ for (const s of sessions) {
 From the CLI:
 
 ```bash
-amux sessions list --agent claude
-amux sessions list --agent codex --limit 20
+agent-mux sessions list --agent claude
+agent-mux sessions list --agent codex --limit 20
 ```
 
 ## Resuming a session
@@ -37,7 +37,7 @@ await client.run({
 ```
 
 ```bash
-amux run claude --session-id abc123 "Continue from where we stopped."
+agent-mux run claude --session-id abc123 "Continue from where we stopped."
 ```
 
 ## Reading session contents

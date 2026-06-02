@@ -94,7 +94,7 @@ describe("verifyBreakpointResult", () => {
     expect(result.reason).toBe("verification disabled");
   });
 
-  it("returns verified:false when tasks-mux verifyAnswer is missing", async () => {
+  it("returns verified:false when agent-mux-tasks verifyAnswer is missing", async () => {
     vi.resetModules();
     vi.doMock("@a5c-ai/agent-mux-tasks/proven", () => ({
       verifyAnswer: undefined,
@@ -102,7 +102,7 @@ describe("verifyBreakpointResult", () => {
     const { verifyBreakpointResult: verify } = await import("../proven-verification");
     const result = await verify(makeSignedResult());
     expect(result.verified).toBe(false);
-    expect(result.reason).toBe("tasks-mux/proven does not export verifyAnswer");
+    expect(result.reason).toBe("agent-mux-tasks/proven does not export verifyAnswer");
   });
 
   it("never throws even when verifyAnswer rejects", async () => {
@@ -127,7 +127,7 @@ describe("verifyBreakpointResult", () => {
     const { verifyBreakpointResult: verify } = await import("../proven-verification");
     const result = await verify(makeSignedResult());
     expect(result.verified).toBe(false);
-    expect(result.reason).toBe("tasks-mux/proven does not export verifyAnswer");
+    expect(result.reason).toBe("agent-mux-tasks/proven does not export verifyAnswer");
   });
 
   it("skips verification entirely for unsigned result even when enabled", async () => {
@@ -218,7 +218,7 @@ describe("verifyBreakpointResult", () => {
 
     const result = await freshVerify(makeSignedResult());
     expect(result.verified).toBe(false);
-    expect(result.reason).toBe("tasks-mux/proven does not export verifyAnswer");
+    expect(result.reason).toBe("agent-mux-tasks/proven does not export verifyAnswer");
 
     vi.doUnmock("@a5c-ai/agent-mux-tasks/proven");
   });

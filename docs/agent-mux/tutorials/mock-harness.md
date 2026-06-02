@@ -7,14 +7,14 @@ The mock harness replaces the real CLI spawn with a scripted event stream. Use i
 Two equivalent switches:
 
 ```bash
-amux run claude --use-mock-harness --prompt "test"
+agent-mux run claude --use-agent-mux-harness-mock --prompt "test"
 ```
 
 or globally:
 
 ```bash
 export USE_MOCK_HARNESS=1
-amux run claude --prompt "test"
+agent-mux run claude --prompt "test"
 ```
 
 Programmatically:
@@ -42,15 +42,15 @@ The mock emits a deterministic sequence of `AgentEvent`s chosen by scenario name
 Pick one with `--scenario`:
 
 ```bash
-amux run claude --use-mock-harness --scenario tool-call --prompt "x"
+agent-mux run claude --use-agent-mux-harness-mock --scenario tool-call --prompt "x"
 ```
 
 If you invoke the package binary directly, the same agent scoping is available
 there too:
 
 ```bash
-mock-harness --agent claude --list
-mock-harness --agent claude --scenario tool-call
+agent-mux-harness-mock --agent claude --list
+agent-mux-harness-mock --agent claude --scenario tool-call
 ```
 
 Interactive approval scenarios under `packages/agent-mux/harness-mock` now model real gating semantics rather than timer-only replay:

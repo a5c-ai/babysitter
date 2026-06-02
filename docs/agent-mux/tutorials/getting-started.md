@@ -11,7 +11,7 @@ npm install -g @a5c-ai/agent-mux
 Verify:
 
 ```bash
-amux --help
+agent-mux --help
 ```
 
 You should see the top-level commands: `run`, `detect`, `agent`, `plugin`, `session`, `hooks`, `remote`.
@@ -19,7 +19,7 @@ You should see the top-level commands: `run`, `detect`, `agent`, `plugin`, `sess
 ## 2. Detect available agents
 
 ```bash
-amux detect
+agent-mux detect
 ```
 
 This probes your `PATH` for each supported adapter (`claude`, `codex`, `cursor`, `gemini`, `opencode`, `opencode-http`, `openclaw`, `copilot`, `hermes`, `pi`, `omp`) and prints version, auth status, and install suggestions for any that are missing.
@@ -27,7 +27,7 @@ This probes your `PATH` for each supported adapter (`claude`, `codex`, `cursor`,
 To install one via the bundled installer:
 
 ```bash
-amux agent install claude
+agent-mux agent install claude
 ```
 
 ## 3. Set credentials
@@ -43,7 +43,7 @@ See the per-agent pages for exact variables.
 ## 4. First run
 
 ```bash
-amux run claude --prompt "Say hello from agent-mux"
+agent-mux run claude --prompt "Say hello from agent-mux"
 ```
 
 Or programmatically:
@@ -66,7 +66,7 @@ await handle.done();
 
 ## Next steps
 
-- [Mock harness](./mock-harness.md) — test without real providers.
+- [Mock harness](./agent-mux-harness-mock.md) — test without real providers.
 - [Hooks](./hooks.md) — inject policy around tool calls.
 - [Plugins](./plugins.md) — install MCP servers.
 - [Multi-agent](./multi-agent.md) — dispatch to several agents at once.

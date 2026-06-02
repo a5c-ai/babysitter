@@ -25,6 +25,7 @@
     "node": ">=20.9.0"
   },
   "bin": {
+    "agent-mux-tui": "./dist/bin/agent-mux-tui.js",
     "amux-tui": "./dist/bin/amux-tui.js"
   },
   "main": "./dist/index.js",
@@ -56,7 +57,7 @@
   "scripts": {
     "build": "cd ../../.. && node scripts/agent-mux-build.cjs build packages/agent-mux/tui",
     "build:local": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
-    "start": "node ./dist/bin/amux-tui.js",
+    "start": "node ./dist/bin/agent-mux-tui.js",
     "dev": "npm run build && npm start",
     "test": "cd ../../.. && node scripts/agent-mux-build.cjs test packages/agent-mux/tui",
     "verify:release": "node ./scripts/verify-release.mjs",

@@ -187,7 +187,7 @@ describe('CLI Commands', () => {
           'bootstrap-only': false,
           json: true,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         expect(mockNormalizeEvent).toHaveBeenCalledWith(
@@ -220,7 +220,7 @@ describe('CLI Commands', () => {
           'bootstrap-only': false,
           json: true,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         await new Promise((resolve) => setTimeout(resolve, 0));
@@ -250,7 +250,7 @@ describe('CLI Commands', () => {
           'bootstrap-only': false,
           json: true,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         await new Promise((resolve) => setTimeout(resolve, 0));
@@ -278,7 +278,7 @@ describe('CLI Commands', () => {
           'session-id': 'test-sess',
           json: true,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -316,7 +316,7 @@ describe('CLI Commands', () => {
           'bootstrap-only': false,
           json: false,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         expect(mockRunPlan).toHaveBeenCalled();
@@ -337,7 +337,7 @@ describe('CLI Commands', () => {
           'bootstrap-only': false,
           json: false,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         expect(mockResolveHookPlan).toHaveBeenCalledWith({
@@ -365,7 +365,7 @@ describe('CLI Commands', () => {
           'bootstrap-only': false,
           json: false,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         }));
 
         expect(mockResolveHookPlan).toHaveBeenCalledWith({
@@ -405,7 +405,7 @@ describe('CLI Commands', () => {
           'bootstrap-only': false,
           json: true,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         expect(mockResolveHookPlan).toHaveBeenCalledWith({
@@ -444,7 +444,7 @@ describe('CLI Commands', () => {
           'session-id': 'boot-123',
           json: false,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         expect(mockSaveSession).toHaveBeenCalledWith(
@@ -470,7 +470,7 @@ describe('CLI Commands', () => {
           'session-id': 'boot-456',
           json: true,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -494,7 +494,7 @@ describe('CLI Commands', () => {
           'session-id': 'boot-claude-env',
           json: false,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         expect(mockSaveSession).toHaveBeenCalledWith(
@@ -541,7 +541,7 @@ describe('CLI Commands', () => {
           'session-id': 'sess-789',
           json: true,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -565,7 +565,7 @@ describe('CLI Commands', () => {
           'session-id': 'nonexistent',
           json: false,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         expect(process.exitCode).toBe(1);
@@ -587,7 +587,7 @@ describe('CLI Commands', () => {
           'session-id': 'nonexistent',
           json: true,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -611,7 +611,7 @@ describe('CLI Commands', () => {
           'session-id': 'sess-to-delete',
           json: false,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         expect(mockDeleteSession).toHaveBeenCalledWith('sess-to-delete');
@@ -630,7 +630,7 @@ describe('CLI Commands', () => {
           'session-id': 'sess-del-2',
           json: true,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -655,7 +655,7 @@ describe('CLI Commands', () => {
           'session-dir': '/nonexistent-session-dir-for-test',
           'stale-threshold': 24,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -683,7 +683,7 @@ describe('CLI Commands', () => {
           'session-dir': '/nonexistent-session-dir-for-test',
           'stale-threshold': 24,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -725,7 +725,7 @@ describe('CLI Commands', () => {
           'session-dir': '/nonexistent-session-dir-for-test',
           'stale-threshold': 24,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -750,7 +750,7 @@ describe('CLI Commands', () => {
           'session-dir': '/nonexistent-session-dir-for-test',
           'stale-threshold': 24,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -801,7 +801,7 @@ describe('CLI Commands', () => {
           'session-dir': tmpDir,
           'stale-threshold': 24,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -839,7 +839,7 @@ describe('CLI Commands', () => {
           'session-dir': tmpDir,
           'stale-threshold': 24,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -900,7 +900,7 @@ describe('CLI Commands', () => {
           'session-dir': '/nonexistent-session-dir-for-test',
           'stale-threshold': 24,
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         const output = stdout.getOutput();
@@ -936,7 +936,7 @@ describe('CLI Commands', () => {
           'session-id': 'test-sess',
           '--': [],
           _: [],
-          $0: 'a5c-hooks-mux',
+          $0: 'agent-mux-hooks',
         });
 
         expect(process.exitCode).toBe(1);

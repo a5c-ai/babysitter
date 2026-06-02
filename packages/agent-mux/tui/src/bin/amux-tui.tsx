@@ -1,41 +1,8 @@
 #!/usr/bin/env node
-import React from 'react';
-import { render } from 'ink';
-import { createClient } from '@a5c-ai/agent-mux-comm';
-import { registerBuiltInAdapters } from '@a5c-ai/agent-mux-cli/bootstrap';
-import { reconfigureLogger, setObservabilityMode } from '@a5c-ai/agent-mux-observability';
-import { App, builtinPlugins, defaultExternalPluginsDir, loadExternalPlugins } from '../index.js';
-import { runWithArgs } from './runtime.js';
 
-function builtInAdaptersDisabled(): boolean {
-  const value = process.env.AMUX_TUI_NO_BUILTIN_ADAPTERS;
-  return value === '1' || value === 'true';
-}
+export * from './agent-mux-tui.js';
 
-function chatAutoPromptDisabled(): boolean {
-  const value = process.env.AMUX_TUI_NO_AUTO_PROMPT;
-  return value === '1' || value === 'true';
-}
-
-function initialViewId(): string | undefined {
-  const value = process.env.AMUX_TUI_INITIAL_VIEW;
-  return value && value.trim() ? value.trim() : undefined;
-}
-
-export function configureLoggingFromEnv(): void {
-  const logLevel = process.env.AMUX_LOG_LEVEL?.trim();
-  const logFile = process.env.AMUX_LOG_FILE?.trim();
-  if (!logFile) {
-    return;
-  }
-  if (!process.env.AMUX_OBSERVABILITY_MODE) {
-    setObservabilityMode('full');
-  }
-  reconfigureLogger({
-    level: logLevel,
-    logFile,
-  });
-}
+import { runAgentMuxTuiCli } from './agent-mux-tui.js';
 
 const invokedAsScript = (() => {
   try {
@@ -48,30 +15,6 @@ const invokedAsScript = (() => {
 })();
 
 if (invokedAsScript) {
-  configureLoggingFromEnv();
-  void runWithArgs(process.argv.slice(2), {
-    builtinPlugins,
-    createClient,
-    defaultExternalPluginsDir,
-    loadExternalPlugins,
-    registerBuiltInAdapters: (client) => {
-      if (!builtInAdaptersDisabled()) {
-        registerBuiltInAdapters(client);
-      }
-    },
-    renderApp: ({ client, plugins }) => {
-      // Type assertion bridges Ink 5.x (React 18 types) with React 19's stricter ReactNode
-      render(
-        React.createElement(App, {
-          client,
-          plugins,
-          initialViewId: initialViewId(),
-          disableChatAutoPrompt: chatAutoPromptDisabled(),
-        }) as any,
-      );
-    },
-  }).catch((error: unknown) => {
-    process.stderr.write(`amux-tui: ${(error as Error).message}\n`);
-    process.exitCode = 1;
-  });
+  process.stderr.write('[agent-mux] "amux-tui" is deprecated, use "agent-mux-tui" instead.\n');
+  runAgentMuxTuiCli();
 }

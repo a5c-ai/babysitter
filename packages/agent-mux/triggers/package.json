@@ -26,7 +26,8 @@
     "node": ">=20.9.0"
   },
   "bin": {
-    "triggers-mux": "./dist/cli.js"
+    "agent-mux-triggers": "./dist/cli.js",
+    "triggers-mux": "./dist/triggers-mux.js"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",

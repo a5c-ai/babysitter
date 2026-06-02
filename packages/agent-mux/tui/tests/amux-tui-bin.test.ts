@@ -32,7 +32,7 @@ function renderedPlugins(render: ReturnType<typeof vi.fn>): string[] {
   return payload?.plugins.map((plugin) => plugin.name) ?? [];
 }
 
-describe('amux-tui binary entrypoint', () => {
+describe('agent-mux-tui binary entrypoint', () => {
   const env = { ...process.env };
 
   afterEach(() => {
@@ -124,7 +124,7 @@ describe('amux-tui binary entrypoint', () => {
     process.env.AMUX_LOG_FILE = '/tmp/amux.log';
     delete process.env.AMUX_OBSERVABILITY_MODE;
 
-    const { configureLoggingFromEnv } = await import('../src/bin/amux-tui.js');
+    const { configureLoggingFromEnv } = await import('../src/bin/agent-mux-tui.js');
     configureLoggingFromEnv();
 
     expect(process.env.AMUX_OBSERVABILITY_MODE).toBeUndefined();

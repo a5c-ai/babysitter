@@ -3,7 +3,7 @@
   "version": "5.0.0",
   "type": "module",
   "license": "MIT",
-  "description": "CLI binary (amux) for agent-mux",
+  "description": "CLI runtime for agent-mux",
   "author": "a5c-ai",
   "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/cli#readme",
   "repository": {
@@ -23,9 +23,6 @@
   ],
   "engines": {
     "node": ">=20.9.0"
-  },
-  "bin": {
-    "amux": "./dist/index.js"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",

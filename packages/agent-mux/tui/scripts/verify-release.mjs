@@ -12,6 +12,7 @@ const REQUIRED_BUILD_PATHS = [
   'dist/index.d.ts',
   'dist/plugin.js',
   'dist/plugin.d.ts',
+  'dist/bin/agent-mux-tui.js',
   'dist/bin/amux-tui.js',
 ];
 
@@ -22,6 +23,7 @@ const REQUIRED_PACKED_PATHS = [
   'dist/index.d.ts',
   'dist/plugin.js',
   'dist/plugin.d.ts',
+  'dist/bin/agent-mux-tui.js',
   'dist/bin/amux-tui.js',
   'specs/kanban-workspaces-spec.md',
   'specs/kanban-workspaces-subtasks.md',
@@ -76,6 +78,10 @@ export function verifyAgentMuxTuiRelease({ packageRoot, manifest, packEntries })
   expect(
     scripts.prepublishOnly === 'npm run build && npm run verify:release',
     'packages/agent-mux/tui/package.json prepublishOnly must build the package and run verify:release'
+  );
+  expect(
+    manifest.bin?.['agent-mux-tui'] === './dist/bin/agent-mux-tui.js',
+    'packages/agent-mux/tui/package.json bin.agent-mux-tui must point to ./dist/bin/agent-mux-tui.js'
   );
   expect(
     manifest.bin?.['amux-tui'] === './dist/bin/amux-tui.js',

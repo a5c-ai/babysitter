@@ -23,7 +23,7 @@ Example:
 Validate that a profile resolves cleanly:
 
 ```bash
-tasks-mux responders show security-responder
+agent-mux-tasks responders show security-responder
 ```
 
 ## Receiving Breakpoints
@@ -31,13 +31,13 @@ tasks-mux responders show security-responder
 For a one-off check:
 
 ```bash
-tasks-mux breakpoints pending --responder security-responder
+agent-mux-tasks breakpoints pending --responder security-responder
 ```
 
 For continuous polling:
 
 ```bash
-tasks-mux responder-loop --responder security-responder
+agent-mux-tasks responder-loop --responder security-responder
 ```
 
 Useful options:
@@ -50,7 +50,7 @@ Useful options:
 Answer a breakpoint directly:
 
 ```bash
-tasks-mux breakpoints answer bp_123 \
+agent-mux-tasks breakpoints answer bp_123 \
   --answer "Require SameSite cookies and a CSRF token on the form POST." \
   --responder security-responder \
   --confidence 85
@@ -59,8 +59,8 @@ tasks-mux breakpoints answer bp_123 \
 Inspect the current state:
 
 ```bash
-tasks-mux breakpoints status bp_123
-tasks-mux breakpoints poll bp_123 --timeout 300 --interval 5
+agent-mux-tasks breakpoints status bp_123
+agent-mux-tasks breakpoints poll bp_123 --timeout 300 --interval 5
 ```
 
 ## Answering Through MCP
@@ -112,7 +112,7 @@ If the workflow requires signed answers, add `sign: true` and `keyFingerprint`, 
 2. Read the referenced files and project context before drafting.
 3. Claim the breakpoint if another responder might also pick it up.
 4. Answer with a direct recommendation, supporting reasoning, and an honest confidence score.
-5. Re-check with `tasks-mux breakpoints status <breakpointId>` or `check_breakpoint_status` when you need to confirm the recorded state.
+5. Re-check with `agent-mux-tasks breakpoints status <breakpointId>` or `check_breakpoint_status` when you need to confirm the recorded state.
 
 ## Breakpoint Lifecycle
 

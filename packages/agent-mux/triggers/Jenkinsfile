@@ -1,4 +1,4 @@
-// Jenkins Pipeline template for triggers-mux — run coding agents from Jenkins.
+// Jenkins Pipeline template for agent-mux-triggers — run coding agents from Jenkins.
 //
 // Usage: reference this as a shared library or copy the stage into your Jenkinsfile.
 //
@@ -35,10 +35,10 @@ def agentMuxTrigger(Map config = [:]) {
         if [ -n "${triggerQuery}" ]; then
             EVENT_FILE=\$(mktemp)
             RESULT_FILE=\$(mktemp)
-            triggers-mux enrich \\
+            agent-mux-triggers enrich \\
                 --backend generic-webhook \\
                 --output "\$EVENT_FILE"
-            if ! triggers-mux evaluate \\
+            if ! agent-mux-triggers evaluate \\
                 --backend generic-webhook \\
                 --query "${triggerQuery}" \\
                 --output "\$RESULT_FILE"; then
@@ -47,8 +47,8 @@ def agentMuxTrigger(Map config = [:]) {
             fi
         fi
 
-        # Build and run amux command
-        CMD="amux ${command} ${harness}"
+        # Build and run agent-mux command
+        CMD="agent-mux ${command} ${harness}"
         [ -n "${provider}" ] && CMD="\$CMD ${provider}"
         [ -n "${model}" ] && CMD="\$CMD --model ${model}"
         CMD="\$CMD --max-turns ${maxTurns} --no-interactive"

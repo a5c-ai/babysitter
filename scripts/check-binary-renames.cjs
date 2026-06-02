@@ -51,7 +51,7 @@ const binaryRenames = [
     canonicalSource: "packages/agent-mux/hooks/cli/src/index.ts",
     legacyBin: "a5c-hooks-mux",
     legacyTarget: "dist/cli/a5c-hooks-mux.js",
-    legacySource: "packages/agent-mux/hooks/cli/src/a5c-hooks-mux.ts",
+    legacySource: "packages/agent-mux/hooks/cli/src/cli/a5c-hooks-mux.ts",
   },
   {
     packageName: "@a5c-ai/agent-mux-extensions",
@@ -132,6 +132,9 @@ function validateManifest(rename, errors, canonicalOwners) {
   const bin = manifest.bin ?? {};
 
   if (rename.delegatedTo) {
+    if (Object.keys(bin).length > 0) {
+      errors.push(`${rename.manifestPath} must not publish bins directly; ${rename.delegatedTo} owns the published CLI binaries.`);
+    }
     if (Object.prototype.hasOwnProperty.call(bin, "agent-mux")) {
       errors.push(`${rename.manifestPath} must not publish duplicate canonical agent-mux; ${rename.delegatedTo} owns it.`);
     }

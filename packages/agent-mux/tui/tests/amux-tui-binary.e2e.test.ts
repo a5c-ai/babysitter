@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 import * as pty from 'node-pty';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const binaryPath = path.resolve(__dirname, '../dist/bin/amux-tui.js');
-const fixturePluginPath = path.resolve(__dirname, 'fixtures/amux-tui-e2e-plugin.mjs');
+const binaryPath = path.resolve(__dirname, '../dist/bin/agent-mux-tui.js');
+const fixturePluginPath = path.resolve(__dirname, 'fixtures/agent-mux-tui-e2e-plugin.mjs');
 const agentMuxCoreDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/agent-mux-comm/dist/index.js');
 const agentMuxCliBootstrapDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/agent-mux-cli/dist/bootstrap.js');
 const observabilityDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/agent-mux-observability/dist/index.js');
@@ -205,7 +205,7 @@ function spawnBinary(options: {
   return new PtyHarness(proc);
 }
 
-describeBuiltBinary('real amux-tui binary e2e', () => {
+describeBuiltBinary('real agent-mux-tui binary e2e', () => {
   const tempDirs: string[] = [];
 
   afterEach(() => {
@@ -218,8 +218,8 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
   });
 
   it('loads external plugins and drives session detail, resume, and prompt dispatch through the real binary', async () => {
-    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-home-'));
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-state-'));
+    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-home-'));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-state-'));
     tempDirs.push(homeDir, stateDir);
 
     const pluginDir = path.resolve(__dirname, 'fixtures');
@@ -283,8 +283,8 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
   }, 30_000);
 
   it('discovers user plugins from ~/.amux/tui-plugins by default', async () => {
-    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-home-'));
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-state-'));
+    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-home-'));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-state-'));
     tempDirs.push(homeDir, stateDir);
 
     installFixturePlugin(path.join(homeDir, '.amux', 'tui-plugins'));
@@ -310,9 +310,9 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
   }, 30_000);
 
   it('honors --user-plugins-dir for binary-level plugin discovery', async () => {
-    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-home-'));
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-state-'));
-    const pluginDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-plugins-'));
+    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-home-'));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-state-'));
+    const pluginDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-plugins-'));
     tempDirs.push(homeDir, stateDir, pluginDir);
 
     installFixturePlugin(pluginDir);
@@ -339,9 +339,9 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
   }, 30_000);
 
   it('honors --no-user-plugins even when a plugin directory is configured', async () => {
-    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-home-'));
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-state-'));
-    const pluginDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-plugins-'));
+    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-home-'));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-state-'));
+    const pluginDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-plugins-'));
     tempDirs.push(homeDir, stateDir, pluginDir);
 
     installFixturePlugin(pluginDir);
@@ -367,8 +367,8 @@ describeBuiltBinary('real amux-tui binary e2e', () => {
   }, 30_000);
 
   it('keeps the sessions view interactive after a live terminal resize', async () => {
-    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-home-'));
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-state-'));
+    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-home-'));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-state-'));
     tempDirs.push(homeDir, stateDir);
 
     const pluginDir = path.resolve(__dirname, 'fixtures');

@@ -596,10 +596,10 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts/observer-compiler-logs
 
-      - name: Test extension-mux
+      - name: Test agent-mux-extensions
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/agent-mux-extensions 2>&1 | tee artifacts/observer-compiler-logs/extension-mux-tests.log
+          npm run test --workspace=@a5c-ai/agent-mux-extensions 2>&1 | tee artifacts/observer-compiler-logs/agent-mux-extensions-tests.log
 
       - name: Generate unified plugin bundles
         run: |
@@ -789,7 +789,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: tasks-mux
+          - name: agent-mux-tasks
             build: npm run build --workspace=@a5c-ai/agent-mux-tasks
             publish: npm publish --workspace=@a5c-ai/agent-mux-tasks --access public --tag "$NPM_TAG"
           - name: agent-mux-observability
@@ -869,7 +869,7 @@ jobs:
           - name: agent-comm-mux
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-mux-observability && npm run build --workspace=@a5c-ai/agent-mux-comm
             publish: npm publish --workspace=@a5c-ai/agent-mux-comm --access public --tag "$NPM_TAG"
-          - name: extension-mux
+          - name: agent-mux-extensions
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/agent-mux-extensions
             publish: npm publish --workspace=@a5c-ai/agent-mux-extensions --access public --tag "$NPM_TAG"
     steps:

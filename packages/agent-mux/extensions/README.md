@@ -11,7 +11,7 @@ npm install @a5c-ai/agent-mux-extensions
 CLI usage:
 
 ```bash
-npx @a5c-ai/agent-mux-extensions extension-mux --help
+npx --yes @a5c-ai/agent-mux-extensions --help
 ```
 
 This package ships the built compiler in `dist/` and this package README for npm auditability.

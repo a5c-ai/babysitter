@@ -17,7 +17,7 @@ export function createProgram(): Command {
   const program = new Command();
 
   program
-    .name("tasks-mux")
+    .name("agent-mux-tasks")
     .version("5.0.0")
     .description("CLI for Breakpoints Mux - route breakpoints to domain responders")
     .option(

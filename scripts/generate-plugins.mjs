@@ -53,7 +53,7 @@ function syncUnifiedPluginVersion() {
 // Build the compiler if needed
 const distCli = join(COMPILER_PKG, 'dist/cli.js');
 if (!existsSync(distCli)) {
-  console.log('[generate] Building extension-mux compiler...');
+  console.log('[generate] Building agent-mux-extensions compiler...');
   execSync('npm run build --workspace=@a5c-ai/atlas', {
     cwd: ROOT,
     stdio: 'inherit',

@@ -1,4 +1,4 @@
-# CircleCI config template for triggers-mux — run coding agents from CircleCI.
+# CircleCI config template for agent-mux-triggers — run coding agents from CircleCI.
 #
 # Usage: add the agent-mux-trigger job to your .circleci/config.yml
 #
@@ -53,12 +53,12 @@ commands:
                   if [ "<< parameters.include-diff >>" = "true" ]; then
                     DIFF_ARGS="--include-diff"
                   fi
-                  triggers-mux enrich \
+                  agent-mux-triggers enrich \
                     --backend github \
                     --token "$GITHUB_TOKEN" \
                     $DIFF_ARGS \
                     --output "$EVENT_FILE"
-                  if ! triggers-mux evaluate \
+                  if ! agent-mux-triggers evaluate \
                     --backend github \
                     --query "<< parameters.query >>" \
                     --token "$GITHUB_TOKEN" \
@@ -108,7 +108,7 @@ jobs:
       - run:
           name: Run agent
           command: |
-            CMD="amux << parameters.command >> << parameters.harness >>"
+            CMD="agent-mux << parameters.command >> << parameters.harness >>"
             [ -n "<< parameters.provider >>" ] && CMD="$CMD << parameters.provider >>"
             [ -n "<< parameters.model >>" ] && CMD="$CMD --model << parameters.model >>"
             CMD="$CMD --max-turns << parameters.max-turns >> --no-interactive"

@@ -10,7 +10,7 @@ This meta-package re-exports `@a5c-ai/agent-mux-comm`, `@a5c-ai/agent-mux-adapte
 npm install @a5c-ai/agent-mux
 ```
 
-The `amux` CLI is available via the bundled CLI package (`npx amux --help`).
+The `agent-mux` CLI is available via this package (`npx agent-mux --help`).
 
 Requires Node.js >= 20.9.0. ESM-first.
 

@@ -1,4 +1,4 @@
-# Bitbucket Pipelines template for triggers-mux — run coding agents from Bitbucket.
+# Bitbucket Pipelines template for agent-mux-triggers — run coding agents from Bitbucket.
 #
 # Usage: copy this into your bitbucket-pipelines.yml or reference as a pipe.
 #
@@ -39,12 +39,12 @@ definitions:
               if [ "${AGENT_INCLUDE_DIFF:-false}" = "true" ]; then
                 DIFF_ARGS="--include-diff"
               fi
-              triggers-mux enrich \
+              agent-mux-triggers enrich \
                 --backend bitbucket \
                 --token "$BITBUCKET_TOKEN" \
                 $DIFF_ARGS \
                 --output "$EVENT_FILE"
-              if ! triggers-mux evaluate \
+              if ! agent-mux-triggers evaluate \
                 --backend bitbucket \
                 --query "$AGENT_TRIGGER_QUERY" \
                 --token "$BITBUCKET_TOKEN" \
@@ -55,14 +55,14 @@ definitions:
               fi
             fi
 
-            # Build and run amux command
+            # Build and run agent-mux command
             HARNESS="${AGENT_HARNESS:-claude}"
             PROVIDER="${AGENT_PROVIDER:-}"
             MODEL="${AGENT_MODEL:-}"
             PROMPT="${AGENT_PROMPT:-}"
             MAX_TURNS="${AGENT_MAX_TURNS:-15}"
 
-            CMD="amux ${AGENT_COMMAND:-launch} $HARNESS"
+            CMD="agent-mux ${AGENT_COMMAND:-launch} $HARNESS"
             [ -n "$PROVIDER" ] && CMD="$CMD $PROVIDER"
             [ -n "$MODEL" ] && CMD="$CMD --model $MODEL"
             CMD="$CMD --max-turns $MAX_TURNS --no-interactive"

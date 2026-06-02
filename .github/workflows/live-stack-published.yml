@@ -221,13 +221,13 @@ jobs:
 
           # Verify installations
           echo "--- Installed versions ---"
-          amux --version 2>/dev/null || echo "amux: not found"
+          agent-mux --version 2>/dev/null || echo "agent-mux: not found"
           babysitter --version 2>/dev/null || echo "babysitter: not found"
 
       - name: Install harness agents
         run: |
-          # Install agent CLIs via amux
-          amux install ${{ matrix.scenario.amux_agent }} --json || echo "Agent install via amux failed, trying direct..."
+          # Install agent CLIs via agent-mux
+          agent-mux install ${{ matrix.scenario.amux_agent }} --json || echo "Agent install via agent-mux failed, trying direct..."
 
           # Ensure pip user-bin is on PATH
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"

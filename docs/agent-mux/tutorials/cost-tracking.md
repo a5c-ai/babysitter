@@ -64,10 +64,10 @@ for (const tool of filterEvents(events, 'tool_result')) {
 
 ```bash
 # Sum cost across every stored session for an agent
-amux sessions list --agent claude-code --json \
+agent-mux sessions list --agent claude-code --json \
   | jq -r '.[].sessionId' \
   | while read sid; do
-      amux sessions read --agent claude-code --id "$sid" --json \
+      agent-mux sessions read --agent claude-code --id "$sid" --json \
         | jq '[.events[]|select(.type=="cost")|.cost.totalUsd]|add // 0'
     done \
   | paste -sd+ | bc

@@ -12,7 +12,7 @@ import { doctorCommand } from './commands/doctor';
 
 export async function main(argv: string[] = process.argv): Promise<void> {
   await yargs(hideBin(argv))
-    .scriptName('a5c-hooks-mux')
+    .scriptName('agent-mux-hooks')
     .usage('$0 <command> [options]')
     .command(invokeCommand)
     .command(execCommand)

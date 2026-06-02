@@ -42,6 +42,7 @@
     "LICENSE"
   ],
   "bin": {
+    "agent-mux-harness-mock": "./dist/bin/agent-mux-harness-mock.js",
     "mock-harness": "./dist/bin/mock-harness.js"
   },
   "publishConfig": {

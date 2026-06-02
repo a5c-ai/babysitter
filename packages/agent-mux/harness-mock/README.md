@@ -28,15 +28,15 @@ Requires Node.js `>=20.9.0`.
 ## CLI
 
 ```bash
-mock-harness --list
-mock-harness --agent claude --list
-mock-harness --scenario claude:stream-json
-mock-harness --agent cursor --scenario error
+agent-mux-harness-mock --list
+agent-mux-harness-mock --agent claude --list
+agent-mux-harness-mock --scenario claude:stream-json
+agent-mux-harness-mock --agent cursor --scenario error
 ```
 
 `--agent <name>` filters `--list` to `<name>:*` scenarios and lets bare
 `--scenario` values resolve within that prefix. For example,
-`mock-harness --agent cursor --scenario error` resolves `cursor:error`.
+`agent-mux-harness-mock --agent cursor --scenario error` resolves `cursor:error`.
 
 ## Supported Surfaces
 
@@ -49,7 +49,7 @@ The subprocess surface is centered on these exports:
 - `SUBPROCESS_SCENARIO_EXPECTATIONS`
 - `resolveScenario(name)`
 - `listScenarioNames()`
-- `mock-harness --list`
+- `agent-mux-harness-mock --list`
 
 The canonical subprocess harness keys are:
 `claude`, `codex`, `gemini`, `copilot`, `cursor`, `opencode`, `pi`, `omp`,

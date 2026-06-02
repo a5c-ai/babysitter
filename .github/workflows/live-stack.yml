@@ -102,7 +102,7 @@ jobs:
           # Use root build scripts that know the current package layout
           npm run build:sdk || true
           npm run build:hooks-mux || true
-          npm run build:extension-mux || true
+          npm run build:agent-mux-extensions || true
           npm run build:agent-mux || true
           npm run build:runtime || true
           if [[ "$RUNNER_OS" != "Windows" ]]; then
@@ -372,11 +372,11 @@ jobs:
         run: |
           mkdir -p "$HOME/.local/bin"
           for pair in \
-            "amux:packages/agent-mux/cli/dist/index.js" \
+            "agent-mux:packages/agent-mux/sdk/dist/bin/agent-mux.js" \
             "agent-platform:packages/tula/dist/cli/main.js" \
             "tula:packages/tula/dist/cli/main.js" \
             "babysitter:packages/sdk/dist/cli/main.js" \
-            "a5c-hooks-mux:packages/agent-mux/hooks/cli/dist/cli/main.js"
+            "agent-mux-hooks:packages/agent-mux/hooks/cli/dist/cli/main.js"
           do
             name="${pair%%:*}"
             script="${pair#*:}"

@@ -28,6 +28,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
+    "agent-mux-transport-proxy": "./dist/bin/agent-mux-transport-proxy.js",
     "amux-proxy": "./dist/bin/amux-proxy.js"
   },
   "exports": {

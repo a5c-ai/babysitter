@@ -93,7 +93,7 @@ Each harness uses a different prefix to invoke the babysitter skill:
 
 ## Provider Configuration
 
-The action uses `amux launch` which handles provider resolution and proxy setup automatically. Set credentials via environment variables:
+The action uses `agent-mux launch` which handles provider resolution and proxy setup automatically. Set credentials via environment variables:
 
 ### Azure Foundry (OpenAI)
 ```yaml

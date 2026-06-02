@@ -16,7 +16,7 @@ agent-mux normalizes plugin management across adapters that support the **Model 
 ## Install
 
 ```bash
-amux plugin install claude @modelcontextprotocol/server-filesystem \
+agent-mux plugin install claude @modelcontextprotocol/server-filesystem \
   --arg /workspace
 ```
 
@@ -35,7 +35,7 @@ await client.installPlugin({
 ## List
 
 ```bash
-amux plugin list claude
+agent-mux plugin list claude
 ```
 
 Returns `InstalledPlugin[]` with the name, command, args, and env currently configured.
@@ -43,7 +43,7 @@ Returns `InstalledPlugin[]` with the name, command, args, and env currently conf
 ## Uninstall
 
 ```bash
-amux plugin uninstall claude filesystem
+agent-mux plugin uninstall claude filesystem
 ```
 
 ## Where it writes

@@ -48,7 +48,7 @@ The current TUI architecture is plugin-first:
 - built-in plugin ordering: `packages/agent-mux/tui/src/index.ts`
 - top-level shell and routing: `packages/agent-mux/tui/src/app.tsx`
 - command palette: `packages/agent-mux/tui/src/command-palette.tsx`
-- binary bootstrap: `packages/agent-mux/tui/src/bin/amux-tui.tsx`
+- binary bootstrap: `packages/agent-mux/tui/src/bin/agent-mux-tui.tsx`
 
 ### Shared kanban contract
 
