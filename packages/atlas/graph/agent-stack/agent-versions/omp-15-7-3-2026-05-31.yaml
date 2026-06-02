@@ -14,49 +14,48 @@ attributes:
     - "Provider-agnostic extractive compression and elision path for heavy context regions."
     - "Local-on-device completion backends can be used for compression."
     - "Auto thinking model selection via providers.autoThinkingModel and per-turn thinking-level classification."
-  adapterMetadata:
-    issue809ReleaseAdditions:
-      releaseVersion: "15.7.3"
-      compaction:
-        shakeCompaction:
-          introducedIn: "15.7.3"
-          packageSubpath: "@oh-my-pi/pi-agent-core/compaction"
-          primitives:
-            - collectShakeRegions
-            - applyShakeRegion
-            - applyShakeRegions
-            - summarizeShakeRegions
-          regionDetection:
-            - whole-tool-call-results
-            - large-fenced-blocks
-            - large-xml-blocks
-          compressionModes:
-            - elision
-            - extractive-compression
-          configs:
-            - default
-            - aggressive
-          completionBackend:
-            kind: injected
-            providerAgnostic: true
-            localOnDeviceSupported: true
-          notes: "Detects heavy context regions, then elides or extractively compresses them through an injected completion backend."
-      providerConfig:
-        autoThinkingModel:
-          introducedIn: "15.7.2"
-          field: "providers.autoThinkingModel"
-          notes: "Selects the model used for automatic thinking-level classification."
-        autoThinkingLevelClassification:
-          introducedIn: "15.7.2"
-          scope:
-            - user-turn
-          notes: "Classifies user turns before choosing the thinking level."
-      transcriptReplay:
-        toolResultElision:
-          introducedIn: "15.7.3"
-          affectedRegions:
-            - whole-tool-call-results
-          replayImplication: "Context replay consumers must tolerate elision placeholders or extractive summaries where the original tool-call result was too large to retain verbatim."
+  issue809ReleaseAdditions:
+    releaseVersion: "15.7.3"
+    compaction:
+      shakeCompaction:
+        introducedIn: "15.7.3"
+        packageSubpath: "@oh-my-pi/pi-agent-core/compaction"
+        primitives:
+          - collectShakeRegions
+          - applyShakeRegion
+          - applyShakeRegions
+          - summarizeShakeRegions
+        regionDetection:
+          - whole-tool-call-results
+          - large-fenced-blocks
+          - large-xml-blocks
+        compressionModes:
+          - elision
+          - extractive-compression
+        configs:
+          - default
+          - aggressive
+        completionBackend:
+          kind: injected
+          providerAgnostic: true
+          localOnDeviceSupported: true
+        notes: "Detects heavy context regions, then elides or extractively compresses them through an injected completion backend."
+    providerConfig:
+      autoThinkingModel:
+        introducedIn: "15.7.2"
+        field: "providers.autoThinkingModel"
+        notes: "Selects the model used for automatic thinking-level classification."
+      autoThinkingLevelClassification:
+        introducedIn: "15.7.2"
+        scope:
+          - user-turn
+        notes: "Classifies user turns before choosing the thinking level."
+    transcriptReplay:
+      toolResultElision:
+        introducedIn: "15.7.3"
+        affectedRegions:
+          - whole-tool-call-results
+        replayImplication: "Context replay consumers must tolerate elision placeholders or extractive summaries where the original tool-call result was too large to retain verbatim."
 edges:
   supports:
     - target: capability:supports-compaction

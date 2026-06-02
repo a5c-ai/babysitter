@@ -28,34 +28,33 @@ attributes:
     - "Recent v2.1.x: Opus 4.8, dynamic workflows, .claude/skills plugin loading, plugin init, settings.json agent dispatch, telemetry tool_parameters, and auto mode provider support."
   installMethods:
     - install:npm
-  adapterMetadata:
-    launchBehavior:
-      promptExtraFlags:
-        - flag: "--agent"
-          valueName: "name"
-          appliesTo: "claude agents dispatched sessions"
-          introducedIn: "2.1.157"
-          notes: "Overrides the `agent` field honored from settings.json for dispatched Claude agent sessions."
-    pluginDiscovery:
-      autoLoadedSkillDirectories:
-        - ".claude/skills"
-      scaffoldCommands:
-        - "claude plugin init <name>"
-      introducedIn: "2.1.157"
-      notes: "Local .claude/skills plugin auto-loading means plugin discovery should not require marketplace installation."
-    workflowSurface:
-      slashCommand: "/workflows"
-      introducedIn: "2.1.154"
-      orchestrationKind: "dynamic-background-agents"
-      notes: "Dynamic workflows let Claude create workflows and orchestrate many background agents; /workflows views active runs."
-    telemetry:
-      toolDecisionParameters:
-        eventName: "tool_decision"
-        field: "tool_parameters"
-        envVar: "OTEL_LOG_TOOL_DETAILS"
-        enabledValue: "1"
+  launchBehavior:
+    promptExtraFlags:
+      - flag: "--agent"
+        valueName: "name"
+        appliesTo: "claude agents dispatched sessions"
         introducedIn: "2.1.157"
-        notes: "When enabled, telemetry includes bash commands and MCP/skill names; downstream mappings may expose the field with privacy controls."
+        notes: "Overrides the `agent` field honored from settings.json for dispatched Claude agent sessions."
+  pluginDiscovery:
+    autoLoadedSkillDirectories:
+      - ".claude/skills"
+    scaffoldCommands:
+      - "claude plugin init <name>"
+    introducedIn: "2.1.157"
+    notes: "Local .claude/skills plugin auto-loading means plugin discovery should not require marketplace installation."
+  workflowSurface:
+    slashCommand: "/workflows"
+    introducedIn: "2.1.154"
+    orchestrationKind: "dynamic-background-agents"
+    notes: "Dynamic workflows let Claude create workflows and orchestrate many background agents; /workflows views active runs."
+  telemetry:
+    toolDecisionParameters:
+      eventName: "tool_decision"
+      field: "tool_parameters"
+      envVar: "OTEL_LOG_TOOL_DETAILS"
+      enabledValue: "1"
+      introducedIn: "2.1.157"
+      notes: "When enabled, telemetry includes bash commands and MCP/skill names; downstream mappings may expose the field with privacy controls."
   minSchemaVersion: "6.0.0"
 edges:
   version_of:

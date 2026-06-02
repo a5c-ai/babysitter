@@ -12,38 +12,37 @@ attributes:
     - "Issue #807 tracks Qwen Code 0.17.0 model-sent slash command history tracking for command-history and replay logic."
   releaseHighlights:
     - "Qwen Code 0.17.0 surfaces startup warnings on stderr, improves LogToSpan telemetry bridge errors and TUI handling, adds Feishu/Lark channel adapter support, starts skill-based RT optimization groundwork, and tracks model-sent slash command history entries."
-  adapterMetadata:
-    issue807ReleaseAdditions:
-      releaseVersion: "0.17.0"
-      startupHandling:
-        stderrStartupWarnings:
-          introducedIn: "0.17.0"
-          defaultSeverity: warning
-          fatalByDefault: false
-          notes: "Startup warnings may be emitted on stderr before TUI render and should be distinguished from fatal process failures."
-      telemetry:
-        logToSpanBridgeErrors:
-          introducedIn: "0.17.0"
-          notes: "Telemetry LogToSpan bridge error information and related TUI handling improved upstream; observability projections should preserve the richer error surface."
-      channelAdapters:
-        feishuLark:
-          introducedIn: "0.17.0"
-          adapterNames:
-            - Feishu
-            - Lark
-          channelKinds:
-            - chat-channel
-          notes: "Qwen Code 0.17.0 adds a Feishu/Lark channel adapter; catalog consumers exposing upstream channel support should include this channel capability."
-      runtimeOptimization:
-        skillBasedRtOptimization:
-          introducedIn: "0.17.0"
-          status: foundation
-          notes: "Release groundwork for skill-based RT optimization is present but not yet modeled as a stable adapter behavior."
-      commandHistory:
-        modelSentSlashCommands:
-          introducedIn: "0.17.0"
-          historySource: model-output
-          notes: "Model-sent slash command entries are tracked in command history; replay and command-history logic should account for slash commands not typed by the user."
+  issue807ReleaseAdditions:
+    releaseVersion: "0.17.0"
+    startupHandling:
+      stderrStartupWarnings:
+        introducedIn: "0.17.0"
+        defaultSeverity: warning
+        fatalByDefault: false
+        notes: "Startup warnings may be emitted on stderr before TUI render and should be distinguished from fatal process failures."
+    telemetry:
+      logToSpanBridgeErrors:
+        introducedIn: "0.17.0"
+        notes: "Telemetry LogToSpan bridge error information and related TUI handling improved upstream; observability projections should preserve the richer error surface."
+    channelAdapters:
+      feishuLark:
+        introducedIn: "0.17.0"
+        adapterNames:
+          - Feishu
+          - Lark
+        channelKinds:
+          - chat-channel
+        notes: "Qwen Code 0.17.0 adds a Feishu/Lark channel adapter; catalog consumers exposing upstream channel support should include this channel capability."
+    runtimeOptimization:
+      skillBasedRtOptimization:
+        introducedIn: "0.17.0"
+        status: foundation
+        notes: "Release groundwork for skill-based RT optimization is present but not yet modeled as a stable adapter behavior."
+    commandHistory:
+      modelSentSlashCommands:
+        introducedIn: "0.17.0"
+        historySource: model-output
+        notes: "Model-sent slash command entries are tracked in command history; replay and command-history logic should account for slash commands not typed by the user."
 edges:
   sourced_from:
     - evidence:qwen-code-release-v0-17-0-issue-807

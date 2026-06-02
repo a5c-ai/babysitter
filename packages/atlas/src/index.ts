@@ -1,13 +1,13 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import type { AtlasRecord, Edge, IndexShape, NeighborResult, SearchHit } from "./types";
 
-// Load the pre-built graph index with readFileSync instead of require()
-// so Vite's CJS-to-ESM interop doesn't try to process the 37 MB JSON
-// through its transform pipeline (which silently drops it in CI).
-const indexJson: IndexShape = JSON.parse(
-  readFileSync(join(__dirname, "index.json"), "utf8"),
-);
+// Load the pre-built graph index.  The JSON always lives in dist/ but
+// __dirname may point to src/ when Vite processes the TS source.
+const _indexPath = existsSync(join(__dirname, "index.json"))
+  ? join(__dirname, "index.json")
+  : resolve(__dirname, "..", "dist", "index.json");
+const indexJson: IndexShape = JSON.parse(readFileSync(_indexPath, "utf8"));
 
 export type { AtlasRecord, ClusterDef, Edge, EdgeKindDef, IndexShape, NeighborResult, NodeKindDef, Record_, SearchHit } from "./types";
 

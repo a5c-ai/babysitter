@@ -29,42 +29,41 @@ attributes:
     - "Clearer CLI/auth/doctor/provider failure labels and recovery guidance."
   installMethods:
     - install:npm
-  adapterMetadata:
-    issue810ReleaseAdditions:
-      releaseVersion: "2026.5.28"
-      runtimeRecovery:
-        subagentWorkspaceSeparation: true
-        promptLocalHookContext: true
-        releaseTimeoutAbortedSessionLocks: true
-        avoidStaleRestartContinuations: true
-        preserveCodexSharedRuntimeStateOnHelperFailure: true
-        notes: "Adapter health and recovery tests should account for timeout-aborted session locks and stale restart continuation behavior."
-      channelIdentity:
-        saferOutboundPluginHooks: true
-        affectedChannels:
-          - Matrix
-          - iMessage
-          - Slack
-          - Discord
-          - WhatsApp
-          - Telegram
-          - Microsoft Teams
-        notes: "Transport-mux and channel mappings should preserve canonical session keys and delivery context across outbound plugin hooks."
-      providerCatalog:
-        claudeOpus48: true
-        falKreaImageSchemas: true
-        nvidiaFeaturedModels: true
-        minimaxStreamingMusicResponses: true
-        encryptedPdfExtraction: true
-        voiceModelCatalogs: true
-        githubCopilotAgentRuntime: true
-        codexSupervisorPluginPath: true
-      healthAndRecovery:
-        malformedOptionRejection: true
-        boundedStartupAndAuthProbes: true
-        clearerAgentAuthHealthLabels: true
-        canonicalAuthProfileMigration: true
-        actionableDoctorRestartGuidance: true
+  issue810ReleaseAdditions:
+    releaseVersion: "2026.5.28"
+    runtimeRecovery:
+      subagentWorkspaceSeparation: true
+      promptLocalHookContext: true
+      releaseTimeoutAbortedSessionLocks: true
+      avoidStaleRestartContinuations: true
+      preserveCodexSharedRuntimeStateOnHelperFailure: true
+      notes: "Adapter health and recovery tests should account for timeout-aborted session locks and stale restart continuation behavior."
+    channelIdentity:
+      saferOutboundPluginHooks: true
+      affectedChannels:
+        - Matrix
+        - iMessage
+        - Slack
+        - Discord
+        - WhatsApp
+        - Telegram
+        - Microsoft Teams
+      notes: "Transport-mux and channel mappings should preserve canonical session keys and delivery context across outbound plugin hooks."
+    providerCatalog:
+      claudeOpus48: true
+      falKreaImageSchemas: true
+      nvidiaFeaturedModels: true
+      minimaxStreamingMusicResponses: true
+      encryptedPdfExtraction: true
+      voiceModelCatalogs: true
+      githubCopilotAgentRuntime: true
+      codexSupervisorPluginPath: true
+    healthAndRecovery:
+      malformedOptionRejection: true
+      boundedStartupAndAuthProbes: true
+      clearerAgentAuthHealthLabels: true
+      canonicalAuthProfileMigration: true
+      actionableDoctorRestartGuidance: true
 edges:
   version_of:
     - agent:openclaw

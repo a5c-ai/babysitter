@@ -25,45 +25,44 @@ attributes:
     - "Clickable file tool paths using OSC 8 file:// hyperlinks."
   installMethods:
     - install:npm
-  adapterMetadata:
-    issue808ReleaseAdditions:
-      releaseVersion: "0.78.0"
-      launchBehavior:
-        promptExtraFlags:
+  issue808ReleaseAdditions:
+    releaseVersion: "0.78.0"
+    launchBehavior:
+      promptExtraFlags:
+        - "--name"
+        - "-n"
+      sessionNamingFlags:
+        longFlag: "--name"
+        shortFlag: "-n"
+        valuePlaceholder: "<display-name>"
+        appliesBeforeStartup: true
+        modes:
+          - interactive
+          - print
+          - json
+          - rpc
+        notes: "Sets the session display name before Pi startup so downstream session metadata can expose the chosen startup name."
+    terminalParser:
+      builtInFileToolTitleHyperlinks:
+        encoding: "OSC 8"
+        uriScheme: "file://"
+        introducedIn: "0.78.0"
+        terminalSupportDetection: true
+        tmuxClientSupport: "supported clients pass OSC 8 hyperlinks through"
+        parserExpectation: "Terminal parsers and snapshots should tolerate OSC 8 hyperlink wrappers around file paths in built-in file tool titles."
+        fixtureCoverage: "Include an OSC 8 file:// hyperlink title fixture when parser fixtures are generated from this graph fact."
+    sessionMetadata:
+      startupDisplayName:
+        field: "sessionName"
+        aliases:
+          - "displayName"
+          - "startupDisplayName"
+        argvFlags:
           - "--name"
           - "-n"
-        sessionNamingFlags:
-          longFlag: "--name"
-          shortFlag: "-n"
-          valuePlaceholder: "<display-name>"
-          appliesBeforeStartup: true
-          modes:
-            - interactive
-            - print
-            - json
-            - rpc
-          notes: "Sets the session display name before Pi startup so downstream session metadata can expose the chosen startup name."
-      terminalParser:
-        builtInFileToolTitleHyperlinks:
-          encoding: "OSC 8"
-          uriScheme: "file://"
-          introducedIn: "0.78.0"
-          terminalSupportDetection: true
-          tmuxClientSupport: "supported clients pass OSC 8 hyperlinks through"
-          parserExpectation: "Terminal parsers and snapshots should tolerate OSC 8 hyperlink wrappers around file paths in built-in file tool titles."
-          fixtureCoverage: "Include an OSC 8 file:// hyperlink title fixture when parser fixtures are generated from this graph fact."
-      sessionMetadata:
-        startupDisplayName:
-          field: "sessionName"
-          aliases:
-            - "displayName"
-            - "startupDisplayName"
-          argvFlags:
-            - "--name"
-            - "-n"
-          introducedIn: "0.78.0"
-          captureTiming: "before startup"
-          notes: "Session metadata can expose the startup display name configured by --name / -n."
+        introducedIn: "0.78.0"
+        captureTiming: "before startup"
+        notes: "Session metadata can expose the startup display name configured by --name / -n."
 edges:
   version_of:
     - agent:pi

@@ -11,42 +11,41 @@ attributes:
     - "Issue #541 tracks Pi 0.77.0 pi.getAllTools() promptGuidelines exposure for per-tool prompt guidance projection."
   releaseHighlights:
     - "Pi 0.77.0 adds --exclude-tools / -xt, Codex subscription device-code auth, InputEvent.streamingBehavior, extension session_shutdown cleanup on SIGTERM/SIGHUP, and pi.getAllTools() promptGuidelines exposure."
-  adapterMetadata:
-    issue541ReleaseAdditions:
-      releaseVersion: "0.77.0"
-      launchBehavior:
-        promptExtraFlags:
-          - "--exclude-tools"
-          - "-xt"
-        notes: "Disables selected built-in, extension, or custom tools while leaving other tools enabled."
-      authFlows:
-        codexSubscriptionDeviceCode:
-          introducedIn: "0.77.0"
-          appliesTo:
-            - "ChatGPT Plus Codex subscription"
-            - "ChatGPT Pro Codex subscription"
-          notes: "Supports headless Codex subscription login via device-code auth."
-      extensionRuntime:
-        inputEventStreamingBehavior:
-          field: "streamingBehavior"
-          introducedIn: "0.77.0"
-          values:
-            - idle-prompt
-            - mid-stream-steer
-            - queued-follow-up
-          notes: "Lets extensions classify prompt timing relative to active generation."
-        shutdownSignals:
-          - signal: SIGTERM
-            cleanupEvent: session_shutdown
-          - signal: SIGHUP
-            cleanupEvent: session_shutdown
-          notes: "Pi runs extension session_shutdown cleanup and restores the terminal before signal exit."
-      toolDescriptorProjection:
-        getAllToolsPromptGuidelines:
-          api: "pi.getAllTools()"
-          field: "promptGuidelines"
-          introducedIn: "0.77.0"
-          notes: "Exposes per-tool prompt guidance through tool descriptors."
+  issue541ReleaseAdditions:
+    releaseVersion: "0.77.0"
+    launchBehavior:
+      promptExtraFlags:
+        - "--exclude-tools"
+        - "-xt"
+      notes: "Disables selected built-in, extension, or custom tools while leaving other tools enabled."
+    authFlows:
+      codexSubscriptionDeviceCode:
+        introducedIn: "0.77.0"
+        appliesTo:
+          - "ChatGPT Plus Codex subscription"
+          - "ChatGPT Pro Codex subscription"
+        notes: "Supports headless Codex subscription login via device-code auth."
+    extensionRuntime:
+      inputEventStreamingBehavior:
+        field: "streamingBehavior"
+        introducedIn: "0.77.0"
+        values:
+          - idle-prompt
+          - mid-stream-steer
+          - queued-follow-up
+        notes: "Lets extensions classify prompt timing relative to active generation."
+      shutdownSignals:
+        - signal: SIGTERM
+          cleanupEvent: session_shutdown
+        - signal: SIGHUP
+          cleanupEvent: session_shutdown
+        notes: "Pi runs extension session_shutdown cleanup and restores the terminal before signal exit."
+    toolDescriptorProjection:
+      getAllToolsPromptGuidelines:
+        api: "pi.getAllTools()"
+        field: "promptGuidelines"
+        introducedIn: "0.77.0"
+        notes: "Exposes per-tool prompt guidance through tool descriptors."
 edges:
   sourced_from:
     - evidence:pi-0-77-0-release-issue-541

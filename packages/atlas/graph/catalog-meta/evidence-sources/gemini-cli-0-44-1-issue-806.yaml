@@ -39,20 +39,19 @@ attributes:
     - "No launchBehavior changes are required for issue #806 because package, CLI flags, transport, model, MCP, and install metadata are unchanged."
   releaseHighlights:
     - "PTY resize hardening to prevent native crashes during Gemini CLI terminal resize events."
-  adapterMetadata:
-    issue806ReleaseAdditions:
-      releaseVersion: "0.44.1"
-      affectedSurface: terminal-pty-resize
-      regressionCoverage:
-        - "Resize events in Gemini CLI PTY-backed terminal sessions should not trigger native crashes."
-      unchangedSurfaces:
-        - launch-flags
-        - transport
-        - model-selection
-        - mcp
-        - install-method
-        - package-name
-      notes: "Install remains npm install -g @google/gemini-cli; no migration steps are required."
+  issue806ReleaseAdditions:
+    releaseVersion: "0.44.1"
+    affectedSurface: terminal-pty-resize
+    regressionCoverage:
+      - "Resize events in Gemini CLI PTY-backed terminal sessions should not trigger native crashes."
+    unchangedSurfaces:
+      - launch-flags
+      - transport
+      - model-selection
+      - mcp
+      - install-method
+      - package-name
+    notes: "Install remains npm install -g @google/gemini-cli; no migration steps are required."
 edges:
   sourced_from:
     - evidence:gemini-cli-0-44-1-issue-806-release

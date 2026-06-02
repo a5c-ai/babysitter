@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "packages/agent-core",
+    "packages/tula-core",
     "packages/agent-platform",
     "packages/agent-runtime",
     "packages/atlas",
