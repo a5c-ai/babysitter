@@ -1,0 +1,95 @@
+{
+  "name": "@a5c-ai/agent-mux-tasks",
+  "version": "5.0.0",
+  "description": "Serverless breakpoint multiplexing system with pluggable backends and cryptographic signing.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./backends": {
+      "types": "./dist/backends/index.d.ts",
+      "default": "./dist/backends/index.js"
+    },
+    "./proven": {
+      "types": "./dist/proven/index.d.ts",
+      "default": "./dist/proven/index.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp/index.d.ts",
+      "default": "./dist/mcp/index.js"
+    },
+    "./harness": {
+      "types": "./dist/harness/index.d.ts",
+      "default": "./dist/harness/index.js"
+    },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "default": "./dist/auth/index.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "default": "./dist/config.js"
+    }
+  },
+  "bin": {
+    "tasks-mux": "./dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "responder",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:packaged-surface-parity": "npm exec --yes --package=tsx@4.19.2 -- tsx src/__tests__/packaged-surface-parity.test.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "author": "a5c.ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-mux/tasks"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/tasks#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@octokit/auth-app": "^7.1.4",
+    "@octokit/rest": "^21.1.1",
+    "commander": "^12.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "open": "^10.0.3",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
+    "eslint": "^9.39.4",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.6"
+  },
+  "atlas": {
+    "layers": [
+      "L9",
+      "L14"
+    ],
+    "muxes": [
+      "tasks-mux"
+    ]
+  }
+}

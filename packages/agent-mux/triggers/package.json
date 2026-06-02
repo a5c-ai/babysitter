@@ -1,0 +1,75 @@
+{
+  "name": "@a5c-ai/agent-mux-triggers",
+  "version": "5.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Event trigger normalization, enrichment, and filtering mux for automation actions",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/triggers#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-mux/triggers"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "agent-mux",
+    "github-actions",
+    "gitlab",
+    "bitbucket",
+    "webhooks",
+    "triggers"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "bin": {
+    "triggers-mux": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./action": {
+      "import": {
+        "types": "./dist/action.d.ts",
+        "default": "./dist/action.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "test": "npm run test:unit && npm run test:e2e",
+    "prepublishOnly": "npm run verify:release",
+    "verify:release": "npm run build && npm run test:unit && npm run test:e2e && npm run test:coverage",
+    "test:unit": "vitest run --root ../.. --config vitest.config.ts packages/agent-mux/triggers/tests/action-helpers.test.ts packages/agent-mux/triggers/tests/action-metadata.test.ts packages/agent-mux/triggers/tests/backend-modules.test.ts packages/agent-mux/triggers/tests/backends.test.ts packages/agent-mux/triggers/tests/cli.test.ts packages/agent-mux/triggers/tests/enrich.test.ts packages/agent-mux/triggers/tests/query.test.ts packages/agent-mux/triggers/tests/readme-examples.test.ts packages/agent-mux/triggers/src",
+    "test:e2e": "npm run build && vitest run --root ../.. --config vitest.config.ts packages/agent-mux/triggers/tests/action.test.ts packages/agent-mux/triggers/tests/dist-cli.smoke.test.ts",
+    "test:coverage": "vitest run --root ../.. --config vitest.config.ts --coverage --coverage.include=packages/agent-mux/triggers/src/**/*.ts packages/agent-mux/triggers/tests/action-helpers.test.ts packages/agent-mux/triggers/tests/action-metadata.test.ts packages/agent-mux/triggers/tests/action.test.ts packages/agent-mux/triggers/tests/backend-modules.test.ts packages/agent-mux/triggers/tests/backends.test.ts packages/agent-mux/triggers/tests/cli.test.ts packages/agent-mux/triggers/tests/enrich.test.ts packages/agent-mux/triggers/tests/query.test.ts packages/agent-mux/triggers/tests/readme-examples.test.ts packages/agent-mux/triggers/src"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.4"
+  },
+  "atlas": {
+    "layers": [
+      "cross-cutting"
+    ],
+    "muxes": []
+  }
+}

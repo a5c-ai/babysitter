@@ -1,0 +1,98 @@
+{
+  "name": "@a5c-ai/agent-mux-transport",
+  "version": "5.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Transport/proxy runtime seam for agent-mux launcher bridging",
+  "author": "a5c-ai",
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/agent-mux/transport#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/agent-mux/transport"
+  },
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "agent-mux",
+    "transport",
+    "provider",
+    "proxy",
+    "llm"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "amux-proxy": "./dist/bin/amux-proxy.js"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./config": {
+      "import": {
+        "types": "./dist/config.d.ts",
+        "default": "./dist/config.js"
+      }
+    },
+    "./server": {
+      "import": {
+        "types": "./dist/server.d.ts",
+        "default": "./dist/server.js"
+      }
+    },
+    "./runtime": {
+      "import": {
+        "types": "./dist/runtime.d.ts",
+        "default": "./dist/runtime.js"
+      }
+    },
+    "./types": {
+      "import": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "scorecard:migration": "node ./scripts/migration-scorecard.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:unit": "vitest run --root ../.. --config vitest.config.ts packages/agent-mux/transport/tests",
+    "test:e2e": "vitest run --root ../.. --config vitest.config.ts packages/agent-mux/transport/tests/e2e",
+    "test": "npm run test:unit && npm run test:e2e"
+  },
+  "dependencies": {
+    "@a5c-ai/agent-comm-mux": "5.0.0",
+    "hono": "^4.12.14",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1"
+  },
+  "atlas": {
+    "layers": [
+      "L3"
+    ],
+    "muxes": [
+      "transport-mux"
+    ]
+  }
+}

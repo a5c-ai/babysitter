@@ -279,32 +279,32 @@
       "note": "README is the canonical package-level contract."
     },
     {
-      "surface": "packages/extension-mux",
-      "packageName": "@a5c-ai/extension-mux",
+      "surface": "packages/agent-mux/extensions",
+      "packageName": "@a5c-ai/agent-mux-extensions",
       "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
       "hasReadme": true,
       "status": "Public package",
-      "canonicalHome": "../packages/extension-mux/README.md",
+      "canonicalHome": "../packages/agent-mux/extensions/README.md",
       "supporting": [],
       "note": "README is the canonical package-level contract."
     },
     {
-      "surface": "packages/tool-mux",
-      "packageName": "@a5c-ai/tool-mux",
+      "surface": "packages/agent-mux/tools",
+      "packageName": "@a5c-ai/agent-mux-tools",
       "description": "Tool multiplexer — ToolDescriptor registry, dispatch policies, schema translation, MCP bridge.",
       "hasReadme": true,
       "status": "Public package",
-      "canonicalHome": "../packages/tool-mux/README.md",
+      "canonicalHome": "../packages/agent-mux/tools/README.md",
       "supporting": [],
       "note": "New package from tool-mux build (#215)."
     },
     {
-      "surface": "packages/tasks-mux",
-      "packageName": "@a5c-ai/tasks-mux",
+      "surface": "packages/agent-mux/tasks",
+      "packageName": "@a5c-ai/agent-mux-tasks",
       "description": "Serverless breakpoint multiplexing system with pluggable backends and cryptographic signing.",
       "hasReadme": true,
       "status": "Public package",
-      "canonicalHome": "../packages/tasks-mux/README.md",
+      "canonicalHome": "../packages/agent-mux/tasks/README.md",
       "supporting": [],
       "note": "README is the canonical package-level contract."
     },
@@ -545,24 +545,24 @@
       "note": "README is the canonical package-level contract."
     },
     {
-      "surface": "packages/transport-mux",
-      "packageName": "@a5c-ai/transport-mux",
+      "surface": "packages/agent-mux/transport",
+      "packageName": "@a5c-ai/agent-mux-transport",
       "description": "Transport/proxy runtime seam for agent-mux launcher bridging",
       "hasReadme": true,
       "status": "Public family package",
-      "canonicalHome": "../packages/transport-mux/README.md",
+      "canonicalHome": "../packages/agent-mux/transport/README.md",
       "supporting": [
         "./agent-mux/README.md"
       ],
       "note": "README is the canonical package-level contract for the published transport/proxy runtime seam."
     },
     {
-      "surface": "packages/triggers-mux",
-      "packageName": "@a5c-ai/triggers-mux",
+      "surface": "packages/agent-mux/triggers",
+      "packageName": "@a5c-ai/agent-mux-triggers",
       "description": "Trigger normalization, enrichment, filtering, and GitHub Action glue for agent-mux automation pipelines.",
       "hasReadme": true,
       "status": "Public family package",
-      "canonicalHome": "../packages/triggers-mux/README.md",
+      "canonicalHome": "../packages/agent-mux/triggers/README.md",
       "supporting": [
         "./agent-mux/README.md"
       ],

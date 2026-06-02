@@ -9,7 +9,7 @@ import { join, relative, resolve, sep } from 'node:path';
 const ROOT = resolve(import.meta.dirname, '..');
 const UNIFIED_SOURCE = join(ROOT, 'plugins/babysitter-unified');
 const DEFAULT_OUTPUT = join(ROOT, 'artifacts', 'generated-plugins');
-const COMPILER_PKG = join(ROOT, 'packages/extension-mux');
+const COMPILER_PKG = join(ROOT, 'packages/agent-mux/extensions');
 
 const args = process.argv.slice(2);
 const outputDir = resolve(ROOT, getArg('--output') || DEFAULT_OUTPUT);
@@ -58,7 +58,7 @@ if (!existsSync(distCli)) {
     cwd: ROOT,
     stdio: 'inherit',
   });
-  execSync('npm run build --workspace=@a5c-ai/extension-mux', {
+  execSync('npm run build --workspace=@a5c-ai/agent-mux-extensions', {
     cwd: ROOT,
     stdio: 'inherit',
   });

@@ -15,7 +15,7 @@ const childProcessMock = vi.hoisted(() => ({
   execSync: vi.fn(),
 }));
 
-vi.mock("@a5c-ai/tasks-mux", () => ({
+vi.mock("@a5c-ai/agent-mux-tasks", () => ({
   routeTask: taskMuxMock.routeTask,
   isHostDelegableRoute: (decision: { route: string }) =>
     decision.route === "agent-core",

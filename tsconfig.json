@@ -16,7 +16,8 @@
     { "path": "packages/agent-mux/observability" },
     { "path": "packages/agent-mux/core" },
     { "path": "packages/agent-mux/adapters" },
-    { "path": "packages/transport-mux" },
+    { "path": "packages/agent-mux/transport" },
+    { "path": "packages/agent-mux/extensions" },
     { "path": "packages/agent-mux/launch" },
     { "path": "packages/agent-mux/config" },
     { "path": "packages/agent-mux/cli" },
@@ -27,9 +28,10 @@
     { "path": "packages/agent-mux/mobile-android-app" },
     { "path": "packages/agent-mux/webui" },
     { "path": "packages/agent-mux/harness-mock" },
-    { "path": "packages/triggers-mux" },
+    { "path": "packages/agent-mux/triggers" },
+    { "path": "packages/agent-mux/tasks" },
     { "path": "packages/agent-mux/tui" },
-    { "path": "packages/tool-mux" }
+    { "path": "packages/agent-mux/tools" }
   ],
   "files": []
 }
