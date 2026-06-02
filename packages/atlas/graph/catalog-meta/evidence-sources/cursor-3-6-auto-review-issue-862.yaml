@@ -1,0 +1,30 @@
+nodeKind: EvidenceSource
+id: evidence:cursor-3-6-auto-review-issue-862
+attributes:
+  displayName: "Cursor 3.6 Auto-review changelog for issue #862"
+  kindLabel: official-changelog
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://cursor.com/changelog/auto-review"
+  sourcePathOrUrl: "https://cursor.com/changelog/auto-review"
+  locator: "Cursor changelog 3.6 Auto-review Run Mode"
+  capturedAt: "2026-06-02T06:16:00Z"
+  observedAt: "2026-05-29T00:00:00Z"
+  observedBy: codex-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-06-02T06:16:00Z"
+  notes: |
+    Official Cursor changelog entry 3.6, dated 2026-05-29, documents
+    Auto-review Run Mode. Auto-review applies to Shell, MCP, and Fetch tool
+    calls. Allowlisted calls run immediately, sandboxable calls run in the
+    sandbox, and other agent actions route to a classifier subagent that can
+    allow the call, try a different approach, or ask for approval. Cursor
+    documents the settings path as Settings > Cursor Settings > Agents > Run
+    Mode and notes that the classifier agent can be steered with custom
+    instructions.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:3-6-auto-review-issue-862
+    - agent:cursor
