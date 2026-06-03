@@ -30,6 +30,7 @@ const packageFamilies = {
   ],
   "dispatch-surfaces": [
     "@a5c-ai/tula-ui",
+    "@a5c-ai/tula-web-app",
     "@a5c-ai/tula-webui",
     "@a5c-ai/tula-tui",
     "@a5c-ai/tula-mobile-android-app",
