@@ -59,7 +59,7 @@ const packageFamilies = {
   ],
   "downstream-consumers": [
     "@a5c-ai/babysitter-observer-dashboard",
-    "@a5c-ai/babysitter-tui-plugins",
+    "@a5c-ai/tula-tui-plugins",
     "@a5c-ai/cloud",
   ],
   "atlas-family": [

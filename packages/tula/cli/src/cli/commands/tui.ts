@@ -2,7 +2,7 @@
  * tui command -- stub redirecting to adapters TUI with babysitter plugins.
  *
  * The tula dashboard uses the adapters TUI
- * with babysitter-tui-plugins instead (packages/babysitter-tui-plugins/).
+ * with babysitter-tui-plugins instead (packages/tula/tui-plugins/).
  *
  * `babysitter tui --json` still works as a non-interactive JSON fallback
  * for run listing / detail inspection.

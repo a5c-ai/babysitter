@@ -76,7 +76,7 @@ Layered Architecture
 └── Supporting Packages
     ├── @a5c-ai/catalog
     ├── @a5c-ai/observer-dashboard
-    └── @a5c-ai/babysitter-tui-plugins
+    └── @a5c-ai/tula-tui-plugins
 ```
 
 ## Key Architectural Differences

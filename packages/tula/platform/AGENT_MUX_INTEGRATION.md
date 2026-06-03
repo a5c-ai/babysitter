@@ -255,7 +255,7 @@ agent-platform has `dashboard/` with Ink components: StatusBadge, StatusLine, cu
 
 ### 4.2 After: adapters-tui Plugins
 
-Create `@a5c-ai/babysitter-tui-plugins` package that provides adapters-tui plugins:
+Create `@a5c-ai/tula-tui-plugins` package that provides adapters-tui plugins:
 
 ```typescript
 // babysitter-tui-plugins/src/status-badge.ts

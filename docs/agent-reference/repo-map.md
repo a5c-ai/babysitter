@@ -23,7 +23,7 @@ npm run lint:hooks-mux
 | `packages/babysitter` | `@a5c-ai/babysitter` | Metapackage and `babysitter` binary |
 | `packages/tula/platform` | `@a5c-ai/tula-platform` | Platform API for harness integration, governance, interaction, and storage |
 | `packages/tula` | `@a5c-ai/tula` | Unified product package and owner of the `tula` CLI implementation |
-| `packages/babysitter-tui-plugins` | `@a5c-ai/babysitter-tui-plugins` | TUI panels for status, cost, and governance |
+| `packages/tula/tui-plugins` | `@a5c-ai/tula-tui-plugins` | TUI panels for status, cost, and governance |
 | `packages/atlas` | `@a5c-ai/atlas` | Atlas catalog graph SDK, CLI, and data |
 | `packages/atlas/webui` | `@a5c-ai/atlas-webui` | Atlas graph explorer (Next.js) |
 | `packages/adapters/hooks/*` | `hooks-mux workspace packages` | Hook normalization, CLI, and harness adapters |

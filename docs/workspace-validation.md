@@ -50,7 +50,7 @@ These workspaces are part of the active monorepo and ship code or operational be
 
 | Workspace | Role | Validation path |
 | --- | --- | --- |
-| `packages/babysitter-tui-plugins` | Internal TUI plugin package for babysitter observability | `.github/workflows/ci.yml` job `workspace-coverage` |
+| `packages/tula/tui-plugins` | Internal TUI plugin package for babysitter observability | `.github/workflows/ci.yml` job `workspace-coverage` |
 
 ## Explicit exclusions
 

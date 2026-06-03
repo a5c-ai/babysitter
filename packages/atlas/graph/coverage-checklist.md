@@ -472,7 +472,7 @@ A `Mux` is treated as `ExtensionInterface` (a5c-flavored contract) plus implemen
 | `@a5c-ai/tasks-adapter` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/babysitter-sdk` | a5c/01-component-map.md, 05-sdk.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/babysitter` (top-level npm) | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
-| `@a5c-ai/babysitter-tui-plugins` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
+| `@a5c-ai/tula-tui-plugins` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/cloud` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/observer-dashboard` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/kanban` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |

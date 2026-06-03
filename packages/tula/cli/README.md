@@ -10,7 +10,7 @@ Tula is the unified agent product that composes every layer of the babysitter ag
 | L5 | `@a5c-ai/tula-runtime` | Daemon, session, cost, observability, telemetry |
 | L6 | `@a5c-ai/tula-platform` | Harness integration, governance, interaction, storage |
 | Mux | `@a5c-ai/adapters` | Agent multiplexer |
-| TUI | `@a5c-ai/babysitter-tui-plugins` | TUI plugins for cost, governance, status |
+| TUI | `@a5c-ai/tula-tui-plugins` | TUI plugins for cost, governance, status |
 
 Tula re-exports the full public API from all layers and owns the single `tula` CLI binary implementation.
 

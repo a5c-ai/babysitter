@@ -286,7 +286,7 @@ jobs:
           - @a5c-ai/babysitter + unified plugin compiler/bundles -> test + release/staging publish paths
 
           Additional active workspaces validated in this job:
-          - @a5c-ai/babysitter-tui-plugins
+          - @a5c-ai/tula-tui-plugins
           - @a5c-ai/transport-adapter (build + lint + typecheck + test + migration scorecard)
 
       - name: Build atlas catalog foundation

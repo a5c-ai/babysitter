@@ -105,7 +105,7 @@ Use it to answer three questions quickly:
 | `packages/adapters/tv-appletv-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
 | `packages/adapters/watch-watchos-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
 | `packages/adapters/watch-wearos-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
-| `packages/babysitter-tui-plugins` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Internal-only support package for the TUI surface. This map is the explicit documentation home until the workspace gets a README. |
+| `packages/tula/tui-plugins` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Internal-only support package for the TUI surface. This map is the explicit documentation home until the workspace gets a README. |
 | `packages/kradle/web` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Kradle web console. Internal-only; this map is the documentation home until the surface is promoted. |
 
 ## Coverage rules for future changes

@@ -1,5 +1,5 @@
 /**
- * @a5c-ai/babysitter-tui-plugins
+ * @a5c-ai/tula-tui-plugins
  *
  * Agent-mux TUI plugins for babysitter orchestration visibility.
  *
@@ -9,10 +9,10 @@
  * - babysitter:governance -- Breakpoint/approval governance decisions
  *
  * Usage:
- *   import { babysitterPlugins } from '@a5c-ai/babysitter-tui-plugins';
+ *   import { babysitterPlugins } from '@a5c-ai/tula-tui-plugins';
  *   // or import individual plugins:
  *   import { babysitterStatusPlugin, babysitterCostPlugin, babysitterGovernancePlugin }
- *     from '@a5c-ai/babysitter-tui-plugins';
+ *     from '@a5c-ai/tula-tui-plugins';
  */
 
 export { babysitterStatusPlugin } from './status-plugin.js';

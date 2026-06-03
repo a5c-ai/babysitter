@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/babysitter-tui-plugins",
+  "name": "@a5c-ai/tula-tui-plugins",
   "version": "5.0.0",
   "description": "Babysitter TUI plugins for adapters",
   "private": true,
@@ -43,5 +43,11 @@
       "L6"
     ],
     "muxes": []
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/tula/tui-plugins"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/tula/tui-plugins#readme"
 }

@@ -442,7 +442,7 @@ Pod cleanup spawn error and catch block both silenced.
 
 ---
 
-## Kradle Web & Observer (packages/kradle/web, packages/observer-dashboard, packages/babysitter-tui-plugins)
+## Kradle Web & Observer (packages/kradle/web, packages/observer-dashboard, packages/tula/tui-plugins)
 
 ### Critical
 
@@ -460,7 +460,7 @@ Missing env var → `null`. Upstream error → `null`. Parse error → `null`. C
 ~~**Multiple component fetch `.catch(() => {})`**~~ **(logged)** — `curated-model-catalog.jsx:117`, `runner-pool-manager.jsx:278,292`, `kanban-enhanced.jsx:423`, `stack-builder-graph.jsx:436,533`
 Model deployments, runner scaling, status updates — all fire-and-forget. UI optimistically updates; backend silently fails.
 
-~~**Journal entry skipping**~~ **(logged)** — `packages/babysitter-tui-plugins/src/data.ts:69,128,277`, `status-plugin.tsx:104`
+~~**Journal entry skipping**~~ **(logged)** — `packages/tula/tui-plugins/src/data.ts:69,128,277`, `status-plugin.tsx:104`
 `catch { // skip malformed journal entries }`. Run data silently lost. Audit trail gaps.
 
 ### Medium

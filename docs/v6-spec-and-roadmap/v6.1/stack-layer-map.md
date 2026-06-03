@@ -155,7 +155,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/tula-ui`, `@a5c-ai/tula-tui`, `@a5c-ai/tula-webui`, `@a5c-ai/babysitter-observer-dashboard`, `@a5c-ai/babysitter-tui-plugins` |
+| Packages | `@a5c-ai/tula-ui`, `@a5c-ai/tula-tui`, `@a5c-ai/tula-webui`, `@a5c-ai/babysitter-observer-dashboard`, `@a5c-ai/tula-tui-plugins` |
 | Node Kinds | Presentation, AgentUIImpl, Dashboard (agent-stack + extensions) |
 | Graph Cluster | agent-stack, extensions |
 | Maturity | **Mature** — Multi-surface: TUI, CLI, web, mobile (Android/iOS), TV (Android TV/Apple TV), watch (watchOS/Wear OS) |

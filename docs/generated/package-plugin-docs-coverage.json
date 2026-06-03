@@ -341,8 +341,8 @@
       "note": "Top-level integrated agent product."
     },
     {
-      "surface": "packages/babysitter-tui-plugins",
-      "packageName": "@a5c-ai/babysitter-tui-plugins",
+      "surface": "packages/tula/tui-plugins",
+      "packageName": "@a5c-ai/tula-tui-plugins",
       "description": "Babysitter TUI plugins for adapters",
       "hasReadme": false,
       "status": "Internal-only workspace",
@@ -703,6 +703,16 @@
       "hasReadme": true,
       "status": "Public advanced/runtime package",
       "canonicalHome": "../packages/tula/ui/README.md",
+      "supporting": [],
+      "note": ""
+    },
+    {
+      "surface": "packages/kradle/installer",
+      "packageName": "@a5c-ai/kradle-installer",
+      "description": "Kradle installer.",
+      "hasReadme": true,
+      "status": "Public advanced/runtime package",
+      "canonicalHome": "../packages/kradle/installer/README.md",
       "supporting": [],
       "note": ""
     }

@@ -217,7 +217,7 @@ const updateLockVersion = (path, version) => {
     "packages/adapters/tasks": {
       version
     },
-    "packages/babysitter-tui-plugins": {
+    "packages/tula/tui-plugins": {
       version,
       dependencies: {
         "@a5c-ai/babysitter-sdk": version,
@@ -261,7 +261,7 @@ const workspaceManifestPaths = [
   "packages/tula/platform/package.json",
   "packages/adapters/extensions/package.json",
   "packages/adapters/tasks/package.json",
-  "packages/babysitter-tui-plugins/package.json",
+  "packages/tula/tui-plugins/package.json",
   "packages/cloud/package.json",
   "packages/observer-dashboard/package.json",
   "packages/adapters/hooks/core/package.json",
@@ -361,7 +361,7 @@ for (const path of [
   "packages/tula/platform/package.json",
   "packages/tula/runtime/package.json",
   "packages/omni/package.json",
-  "packages/babysitter-tui-plugins/package.json",
+  "packages/tula/tui-plugins/package.json",
 ]) {
   syncDependencyVersion(path, "@a5c-ai/babysitter-sdk", newVersion);
 }
@@ -389,7 +389,7 @@ for (const path of [
   "packages/adapters/tools/package.json",
   "packages/adapters/launch/package.json",
   "packages/adapters/config/package.json",
-  "packages/babysitter-tui-plugins/package.json",
+  "packages/tula/tui-plugins/package.json",
 ]) {
   syncDependencyVersion(path, "@a5c-ai/tula-core", newVersion);
   syncDependencyVersion(path, "@a5c-ai/tula-runtime", newVersion);
