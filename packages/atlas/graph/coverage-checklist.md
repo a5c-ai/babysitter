@@ -289,7 +289,7 @@ A `Mux` is treated as `ExtensionInterface` (a5c-flavored contract) plus implemen
 | Blueprint lifecycle (discover → resolve → install → configure → upgrade → uninstall) | a5c/06-blueprints.md | `StateMachine` over `Blueprint` | ✅ | |
 | Migration BFS over migration graph | a5c/06-blueprints.md | attribute `Blueprint.migrationGraph` + algorithm note | ✅ | |
 | Blueprint SDK CLI commands (plugin:list/search/install/configure/upgrade/uninstall/lock/doctor/create) | a5c/06-blueprints.md | `ProcessDescriptor` for `babysitter plugin` with subcommands | ✅ | |
-| Repo example blueprints (`plugins/babysitter-codex`, `plugins/babysitter`, `plugins/babysitter-pi`, `babysitter-cursor`, `babysitter-gemini`, `babysitter-omp`, `babysitter-openclaw`, `babysitter-opencode`, `babysitter-paperclip`, `babysitter-unified`, `babysitter-github`) | a5c/00-overview.md, 06-blueprints.md | `Blueprint` instances; populated in Phase 2 | ✅ | |
+| Repo example blueprints (`plugins/babysitter-unified/per-harness/codex`, `plugins/babysitter`, `plugins/babysitter-pi`, `babysitter-cursor`, `babysitter-gemini`, `babysitter-omp`, `babysitter-openclaw`, `babysitter-opencode`, `babysitter-paperclip`, `babysitter-unified`, `babysitter-github`) | a5c/00-overview.md, 06-blueprints.md | `Blueprint` instances; populated in Phase 2 | ✅ | |
 | Blueprints are NOT extensions | a5c/00-overview.md, 06-blueprints.md, 07-extensions.md | `ScopeBoundary` on `Blueprint`: `outOfScope=ExtensionInterface` | ✅ | |
 
 ### Trust Chain (a5c-composition)

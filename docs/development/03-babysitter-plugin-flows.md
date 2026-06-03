@@ -65,7 +65,7 @@ Each harness fires lifecycle hooks differently. hooks-mux normalizes them into a
 graph LR
     subgraph "Native Hook Surfaces"
         CC["Claude Code<br/>shell hooks via hooks.json"]
-        CX["Codex<br/>shell hooks via config.toml"]
+        CX["Codex<br/>shell hooks via hooks.json"]
         PI["Pi<br/>in-process programmatic hooks"]
         GC["Gemini CLI<br/>shell hooks"]
     end
@@ -164,7 +164,7 @@ graph TB
     UPF["Unified Plugin Source<br/>(skills, hooks, commands)"] --> COMPILER["extension-mux compiler"]
 
     COMPILER --> CC_OUT["artifacts/generated-plugins/claude-code/<br/>plugin.json + hooks.json + *.sh scripts"]
-    COMPILER --> CX_OUT["artifacts/generated-plugins/codex/<br/>config + shell hooks"]
+    COMPILER --> CX_OUT["artifacts/generated-plugins/codex/<br/>.codex-plugin/plugin.json + hooks.json + shell hooks"]
     COMPILER --> PI_OUT["artifacts/generated-plugins/pi/<br/>package.json + extensions"]
     COMPILER --> GC_OUT["artifacts/generated-plugins/gemini/<br/>hooks + config"]
 ```
@@ -174,12 +174,13 @@ graph TB
 | Harness | Plugin Format | Hook Mechanism |
 |---------|---------------|----------------|
 | Claude Code | `plugin.json` + `hooks/hooks.json` + shell scripts | Shell hooks: `babysitter-proxied-session-start.sh` → `a5c-hooks-mux invoke --adapter claude` |
-| Codex | `config.toml` hooks section | Shell hooks via config registration |
+| Codex | `.codex-plugin/plugin.json` + `hooks/hooks.json` + shell scripts | Shell hooks via hooks.json (auto-detected at `./hooks/hooks.json`) |
 | Pi | `package.json` with `pi.extensions` | In-process programmatic hooks |
 | Gemini CLI | Gemini-native hook config | Shell hooks via adapter |
 
 **Installation:**
 - Claude Code: `claude plugin marketplace add a5c-ai/babysitter-claude && claude plugin install --scope project babysitter@a5c.ai`
+- Codex: `codex plugin marketplace add a5c-ai/babysitter --ref staging --sparse .agents/plugins`
 - Others: `babysitter harness:install-plugin <harness> --workspace <cwd>`
 
 ---

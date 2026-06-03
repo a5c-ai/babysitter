@@ -10,8 +10,8 @@ attributes:
   scriptVariants:
     - "shell-via-hooks-mux-cli"
   contextFiles:
-    - plugins/babysitter-codex/hooks.json
-    - packages/extension-mux/src/targets/codex.ts
+    - plugins/babysitter-unified/per-harness/codex/hooks/hooks.json
+    - packages/agent-mux/extensions/src/targets/adapters/codex.ts
 edges:
   emits_artifact:
     - target: plugin-target:codex

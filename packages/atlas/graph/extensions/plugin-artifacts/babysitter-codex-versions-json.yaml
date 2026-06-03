@@ -8,8 +8,8 @@ attributes:
   pathPattern: "versions.json"
   installerSurface: "versions.json"
   contextFiles:
-    - plugins/babysitter-codex/versions.json
-    - plugins/babysitter-codex/plugin.lock.json
+    - plugins/babysitter-unified/versions.json
+    - plugins/babysitter-unified/per-harness/codex/plugin.lock.json
 edges:
   emits_artifact:
     - target: plugin-target:codex
