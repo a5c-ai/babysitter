@@ -113,21 +113,21 @@ async function discoverViaModule(
       defaultModel: process.env.AGENT_MUX_MODEL,
       cwd: options.cwd,
     });
-    const adapters = client?.adapters;
-    if (!adapters || typeof adapters.list !== "function" || typeof adapters.installed !== "function") {
+    const adapterRegistry = client?.adapters;
+    if (!adapterRegistry || typeof adapterRegistry.list !== "function" || typeof adapterRegistry.installed !== "function") {
       return null;
     }
 
-    const adapterInfos = adapters.list();
-    const installedInfos = await adapters.installed();
+    const adapterInfos = adapterRegistry.list();
+    const installedInfos = await adapterRegistry.installed();
     const installedByAgent = new Map(
-      installedInfos.map((info) => [normalizeAgentName(info), info]),
+      installedInfos.map((info: AmuxInstalledInfo) => [normalizeAgentName(info), info]),
     );
 
     const agents = adapterInfos
-      .map((info) => normalizeModuleAgent(info, installedByAgent.get(normalizeAgentName(info)), adapters))
+      .map((info: AmuxAdapterInfo) => normalizeModuleAgent(info, installedByAgent.get(normalizeAgentName(info)), adapterRegistry))
       .filter((agent): agent is ExternalAgentInfo => agent !== null)
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a: ExternalAgentInfo, b: ExternalAgentInfo) => a.name.localeCompare(b.name));
 
     return {
       available: true,

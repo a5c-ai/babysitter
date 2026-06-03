@@ -7,8 +7,8 @@
   },
   "include": ["src"],
   "references": [
-    { "path": "../sdk" },
+    { "path": "../../sdk" },
     { "path": "../cli" },
-    { "path": "../observability" }
+    { "path": "../../adapters/observability" }
   ]
 }
