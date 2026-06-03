@@ -99,6 +99,8 @@ const requiredPublishedFrontmatterDocs = [
 
 const futurePackageReferencePrefixes = [
   "docs/v6-spec-and-roadmap/",
+  "docs/agent-mux/terminology-and-structure-gaps/",
+  "docs/daily-updates/",
 ];
 
 function normalizeSlashes(value) {

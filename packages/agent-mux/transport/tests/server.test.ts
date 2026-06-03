@@ -5,11 +5,11 @@ import { describe, expect, it } from 'vitest';
 
 import { createTransportMuxApp } from '../src/server.js';
 import { createProxyConfig } from '../src/config.js';
-import { appendCostEventOnce, computeRunCostStats, extractCostEvents } from '../../../../sdk/src/cost/journal.js';
-import { createRunDir, loadJournal, appendEvent } from '../../../../sdk/src/storage/index.js';
-import { nextUlid } from '../../../../sdk/src/storage/ulids.js';
-import { buildEffectIndex } from '../../../../sdk/src/runtime/replay/effectIndex.js';
-import { enforceSessionBudgetForRun, setSessionBudget } from '../../../../tula/platform/src/session/cost.js';
+import { appendCostEventOnce, computeRunCostStats, extractCostEvents } from '../../../sdk/src/cost/journal.js';
+import { createRunDir, loadJournal, appendEvent } from '../../../sdk/src/storage/index.js';
+import { nextUlid } from '../../../sdk/src/storage/ulids.js';
+import { buildEffectIndex } from '../../../sdk/src/runtime/replay/effectIndex.js';
+import { enforceSessionBudgetForRun, setSessionBudget } from '../../../tula/platform/src/session/cost.js';
 
 function getRoutePaths(app: ReturnType<typeof createTransportMuxApp>) {
   return app.routes.map((route) => route.path);
