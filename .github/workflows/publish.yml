@@ -2205,8 +2205,17 @@ jobs:
             --docker-password="$ACR_TOKEN" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Clean up pre-Helm resources
+      - name: Clean up legacy krate release and pre-Helm resources
         run: |
+          # Remove old krate Helm release from the legacy namespace
+          OLD_NS="${KUBE_NAMESPACE/kradle/krate}"
+          if [ "$OLD_NS" != "$KUBE_NAMESPACE" ]; then
+            helm uninstall krate -n "$OLD_NS" 2>/dev/null || true
+            kubectl delete namespace "$OLD_NS" --ignore-not-found 2>/dev/null || true
+          fi
+          # Also remove any leftover krate release in the current namespace
+          helm uninstall krate -n "$KUBE_NAMESPACE" 2>/dev/null || true
+          # Clean up pre-Helm standalone resources
           kubectl -n "$KUBE_NAMESPACE" delete ingress kradle --ignore-not-found
           kubectl -n "$KUBE_NAMESPACE" delete service kradle --ignore-not-found
           kubectl -n "$KUBE_NAMESPACE" delete deployment kradle --ignore-not-found
