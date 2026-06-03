@@ -6,7 +6,7 @@
 
 | Concept | Current Name | New Name | Examples |
 |---------|-------------|----------|---------|
-| Babysitter marketplace installables | "plugins" | **blueprints** | `plugins/a5c/marketplace/*.json`, `babysitter plugins:install`, process libraries, skills |
+| Babysitter marketplace installables | "plugins" | **blueprints** | `plugins/a5c/marketplace/*.json`, `babysitter blueprints:install`, process libraries, skills |
 | Agent harness plugins | "plugins" (keep) | **plugins** (keep) | hooks-mux generated plugins, Claude Code extensions, `.claude/plugins/` |
 
 ## What Changes
@@ -20,12 +20,12 @@ plugins/a5c/babysitter/ → blueprints/a5c/babysitter/
 ### CLI Commands
 | Current | Target |
 |---------|--------|
-| `babysitter plugins:list` | `babysitter blueprints:list` |
-| `babysitter plugins:install` | `babysitter blueprints:install` |
-| `babysitter plugins:update` | `babysitter blueprints:update` |
-| `babysitter plugins:uninstall` | `babysitter blueprints:uninstall` |
-| `babysitter plugins:create` | `babysitter blueprints:create` |
-| `babysitter plugins:marketplace` | `babysitter blueprints:marketplace` |
+| `babysitter blueprints:list` | `babysitter blueprints:list` |
+| `babysitter blueprints:install` | `babysitter blueprints:install` |
+| `babysitter blueprints:update` | `babysitter blueprints:update` |
+| `babysitter blueprints:uninstall` | `babysitter blueprints:uninstall` |
+| `babysitter blueprints:create` | `babysitter blueprints:create` |
+| `babysitter blueprints:marketplace` | `babysitter blueprints:marketplace` |
 
 ### SDK Source
 | Current Path | Target Path |
@@ -77,4 +77,4 @@ plugins/a5c/babysitter/ → blueprints/a5c/babysitter/
 
 - Keep old CLI commands as deprecated aliases for one version
 - Read from both old and new config paths
-- `babysitter plugins:*` → prints deprecation warning, forwards to `babysitter blueprints:*`
+- `babysitter blueprints:*` → prints deprecation warning, forwards to `babysitter blueprints:*`

@@ -14,12 +14,14 @@ const currentStateDocPath = path.resolve(
   packageRoot,
   "..",
   "..",
+  "..",
   "docs",
   "v6-spec-and-roadmap",
   "current-state.md",
 );
 const seamAdrPath = path.resolve(
   packageRoot,
+  "..",
   "..",
   "..",
   "docs",
