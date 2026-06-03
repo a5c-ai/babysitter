@@ -54,6 +54,54 @@
         "types": "./dist/session-flow.d.ts",
         "default": "./dist/session-flow.js"
       }
+    },
+    "./agent": {
+      "import": {
+        "types": "./dist/components/Agent/index.d.ts",
+        "default": "./dist/components/Agent/index.js"
+      }
+    },
+    "./chat": {
+      "import": {
+        "types": "./dist/components/Chat/index.d.ts",
+        "default": "./dist/components/Chat/index.js"
+      }
+    },
+    "./kanban": {
+      "import": {
+        "types": "./dist/components/Kanban/index.d.ts",
+        "default": "./dist/components/Kanban/index.js"
+      }
+    },
+    "./workspace": {
+      "import": {
+        "types": "./dist/components/Workspace/index.d.ts",
+        "default": "./dist/components/Workspace/index.js"
+      }
+    },
+    "./memory": {
+      "import": {
+        "types": "./dist/components/Memory/index.d.ts",
+        "default": "./dist/components/Memory/index.js"
+      }
+    },
+    "./session": {
+      "import": {
+        "types": "./dist/components/Session/index.d.ts",
+        "default": "./dist/components/Session/index.js"
+      }
+    },
+    "./observability": {
+      "import": {
+        "types": "./dist/components/Observability/index.d.ts",
+        "default": "./dist/components/Observability/index.js"
+      }
+    },
+    "./primitives": {
+      "import": {
+        "types": "./dist/components/Primitives/index.d.ts",
+        "default": "./dist/components/Primitives/index.js"
+      }
     }
   },
   "files": [
