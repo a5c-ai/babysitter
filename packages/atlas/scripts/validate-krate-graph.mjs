@@ -9,8 +9,8 @@ const __dirname = path.dirname(__filename);
 const packageRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(packageRoot, '..', '..');
 const indexPath = path.join(packageRoot, 'dist', 'index.json');
-const crdDir = path.join(repoRoot, 'packages', 'krate', 'charts', 'crds');
-const krateWebApiDir = path.join(repoRoot, 'packages', 'krate', 'web', 'app', 'api');
+const crdDir = path.join(repoRoot, 'packages', 'kradle', 'charts', 'crds');
+const kradleWebApiDir = path.join(repoRoot, 'packages', 'kradle', 'web', 'app', 'api');
 
 const failures = [];
 const details = {};
@@ -22,8 +22,8 @@ const auditWarnings = [];
 const dirtySourcePathCache = new Map();
 
 const SOURCE_AREAS = {
-  crds: ['packages/krate/charts/crds'],
-  krateWebApi: ['packages/krate/web/app/api'],
+  crds: ['packages/kradle/charts/crds'],
+  kradleWebApi: ['packages/kradle/web/app/api'],
 };
 
 const EXPECTED_FAMILY_COUNTS = {
@@ -42,41 +42,41 @@ const EXPECTED_COUNTS = {
   controllerReconciles: 89,
   governanceEdges: 13,
   externalMappings: 46,
-  krateWebApiEndpoints: 46,
-  krateKnowledgeFabricMemorySystems: 1,
-  krateKnowledgeSources: 5,
-  krateKnowledgeDomains: 3,
-  krateRetrievalPipelines: 3,
-  krateKnowledgeFabricUsesMemoryEdges: 1,
-  krateKnowledgeFeedsEdges: 5,
-  krateKnowledgeProvidesEdges: 4,
-  krateKnowledgeRetrievesEdges: 6,
-  krateMemorySystemIntegratesEdges: 3,
+  kradleWebApiEndpoints: 46,
+  kradleKnowledgeFabricMemorySystems: 1,
+  kradleKnowledgeSources: 5,
+  kradleKnowledgeDomains: 3,
+  kradleRetrievalPipelines: 3,
+  kradleKnowledgeFabricUsesMemoryEdges: 1,
+  kradleKnowledgeFeedsEdges: 5,
+  kradleKnowledgeProvidesEdges: 4,
+  kradleKnowledgeRetrievesEdges: 6,
+  kradleMemorySystemIntegratesEdges: 3,
   scopedDuplicateIds: 0,
-  danglingKrateTypedEdges: 0,
+  danglingKradleTypedEdges: 0,
 };
 
 const EXPECTED_CONTROLLERS = new Set([
-  'kubernetes-controller:krate-core-controller',
-  'kubernetes-controller:krate-external-sync-controller',
-  'kubernetes-controller:krate-policy-admission',
+  'kubernetes-controller:kradle-core-controller',
+  'kubernetes-controller:kradle-external-sync-controller',
+  'kubernetes-controller:kradle-policy-admission',
 ]);
 
 const SCOPED_GRAPH_FILES = [
-  'packages/atlas/graph/domain/products/krate.yaml',
-  'packages/atlas/graph/domain/products/krate-components.yaml',
-  'packages/atlas/graph/domain/products/krate-connectivity.yaml',
-  'packages/atlas/graph/domain/products/krate-inventory-gap-map.yaml',
-  'packages/atlas/graph/domain/products/krate-crd-kinds.yaml',
-  'packages/atlas/graph/domain/products/krate-controllers.yaml',
-  'packages/atlas/graph/agent-stack/platform-impls/krate-platform-current.yaml',
-  'packages/atlas/graph/agent-stack/interaction-primitives/krate-orchestration.yaml',
-  'packages/atlas/graph/extensions/api-endpoints/krate-web-api-endpoints.yaml',
-  'packages/atlas/graph/agent-stack/knowledge-fabric-impls/krate-kf-current.yaml',
-  'packages/atlas/graph/domain/knowledge-fabric/krate-company-brain-topology.yaml',
+  'packages/atlas/graph/domain/products/kradle.yaml',
+  'packages/atlas/graph/domain/products/kradle-components.yaml',
+  'packages/atlas/graph/domain/products/kradle-connectivity.yaml',
+  'packages/atlas/graph/domain/products/kradle-inventory-gap-map.yaml',
+  'packages/atlas/graph/domain/products/kradle-crd-kinds.yaml',
+  'packages/atlas/graph/domain/products/kradle-controllers.yaml',
+  'packages/atlas/graph/agent-stack/platform-impls/kradle-platform-current.yaml',
+  'packages/atlas/graph/agent-stack/interaction-primitives/kradle-orchestration.yaml',
+  'packages/atlas/graph/extensions/api-endpoints/kradle-web-api-endpoints.yaml',
+  'packages/atlas/graph/agent-stack/knowledge-fabric-impls/kradle-kf-current.yaml',
+  'packages/atlas/graph/domain/knowledge-fabric/kradle-company-brain-topology.yaml',
 ];
 
-const KRATE_TYPED_EDGE_KINDS = new Set([
+const KRADLE_TYPED_EDGE_KINDS = new Set([
   'defined_by_crd_source',
   'belongs_to_resource_family',
   'maps_to_external_resource',
@@ -98,7 +98,7 @@ function parseOptions(args) {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === '--help' || arg === '-h') {
-      console.log('Usage: node scripts/validate-krate-graph.mjs [--mode=current-source|committed-baseline|audit]');
+      console.log('Usage: node scripts/validate-kradle-graph.mjs [--mode=current-source|committed-baseline|audit]');
       process.exit(0);
     }
     if (arg === '--audit') {
@@ -208,7 +208,7 @@ function assertFamilyCounts(actual) {
   }
   for (const family of Object.keys(actual)) {
     if (!(family in EXPECTED_FAMILY_COUNTS)) {
-      fail(`unexpected Krate CRD family`, family);
+      fail(`unexpected Kradle CRD family`, family);
     }
   }
 }
@@ -276,9 +276,9 @@ function getSourceCrdKinds() {
   return kinds;
 }
 
-function getSourceKrateWebApiEndpoints() {
+function getSourceKradleWebApiEndpoints() {
   const endpoints = [];
-  for (const file of getSourceFiles(krateWebApiDir, (relative) => relative.endsWith('/route.js'))) {
+  for (const file of getSourceFiles(kradleWebApiDir, (relative) => relative.endsWith('/route.js'))) {
     const routeDir = path.dirname(file.relative).split('/app/api/')[1];
     const route = ('/api/' + routeDir)
       .replace(/\[\[\.\.\.([^\]]+)\]\]/g, ':$1*?')
@@ -309,12 +309,12 @@ arrayFromObjectMap(index.edgeKinds, 'index.edgeKinds');
 const sourceCrds = getSourceCrdKinds();
 assertSourceEqual('sourceCrdDocuments', sourceCrds.length, EXPECTED_COUNTS.crdRecords, 'crds');
 
-const crdIds = Object.keys(records).filter((id) => id.startsWith('kubernetes-crd-kind:krate-')).sort();
+const crdIds = Object.keys(records).filter((id) => id.startsWith('kubernetes-crd-kind:kradle-')).sort();
 assertEqual('crdRecords', crdIds.length, EXPECTED_COUNTS.crdRecords);
 
 const missingSourceKinds = [];
 for (const source of sourceCrds) {
-  const id = `kubernetes-crd-kind:krate-${kebab(source.kind)}`;
+  const id = `kubernetes-crd-kind:kradle-${kebab(source.kind)}`;
   const record = records[id];
   if (!record) {
     missingSourceKinds.push(id);
@@ -342,7 +342,7 @@ for (const id of crdIds) {
 }
 assertFamilyCounts(familyCounts);
 
-const controllerIds = Object.keys(records).filter((id) => id.startsWith('kubernetes-controller:krate-')).sort();
+const controllerIds = Object.keys(records).filter((id) => id.startsWith('kubernetes-controller:kradle-')).sort();
 assertEqual('controllers', controllerIds.length, EXPECTED_COUNTS.controllers);
 for (const id of EXPECTED_CONTROLLERS) {
   if (!records[id]) fail('missing expected controller', id);
@@ -350,67 +350,67 @@ for (const id of EXPECTED_CONTROLLERS) {
 
 assertEqual(
   'presentationSurfaces',
-  edgeCount(index, (edge) => edge.kind === 'surfaces_resource' && String(edge.from).startsWith('presentation:krate')),
+  edgeCount(index, (edge) => edge.kind === 'surfaces_resource' && String(edge.from).startsWith('presentation:kradle')),
   EXPECTED_COUNTS.presentationSurfaces,
 );
 assertEqual(
   'apiServes',
-  edgeCount(index, (edge) => edge.kind === 'serves_kubernetes_resource' && edge.from === 'tool-server:krate-api'),
+  edgeCount(index, (edge) => edge.kind === 'serves_kubernetes_resource' && edge.from === 'tool-server:kradle-api'),
   EXPECTED_COUNTS.apiServes,
 );
 assertEqual(
   'controllerReconciles',
-  edgeCount(index, (edge) => edge.kind === 'reconciles_resource' && String(edge.from).startsWith('kubernetes-controller:krate')),
+  edgeCount(index, (edge) => edge.kind === 'reconciles_resource' && String(edge.from).startsWith('kubernetes-controller:kradle')),
   EXPECTED_COUNTS.controllerReconciles,
 );
 assertEqual(
   'governanceEdges',
-  edgeCount(index, (edge) => edge.kind === 'governs_resource' && (String(edge.from).includes('krate') || String(edge.to).includes('krate'))),
+  edgeCount(index, (edge) => edge.kind === 'governs_resource' && (String(edge.from).includes('kradle') || String(edge.to).includes('kradle'))),
   EXPECTED_COUNTS.governanceEdges,
 );
 assertEqual(
   'externalMappings',
-  edgeCount(index, (edge) => edge.kind === 'maps_to_external_resource' && String(edge.from).startsWith('kubernetes-crd-kind:krate')),
+  edgeCount(index, (edge) => edge.kind === 'maps_to_external_resource' && String(edge.from).startsWith('kubernetes-crd-kind:kradle')),
   EXPECTED_COUNTS.externalMappings,
 );
 
-const sourceKrateWebApiEndpoints = getSourceKrateWebApiEndpoints();
-assertSourceEqual('sourceKrateWebApiEndpoints', sourceKrateWebApiEndpoints.length, EXPECTED_COUNTS.krateWebApiEndpoints, 'krateWebApi');
-const krateWebApiEndpointRecords = Object.entries(records)
-  .filter(([id, record]) => id.startsWith('api-endpoint:krate-web-') && record._kind === 'APIEndpoint')
+const sourceKradleWebApiEndpoints = getSourceKradleWebApiEndpoints();
+assertSourceEqual('sourceKradleWebApiEndpoints', sourceKradleWebApiEndpoints.length, EXPECTED_COUNTS.kradleWebApiEndpoints, 'kradleWebApi');
+const kradleWebApiEndpointRecords = Object.entries(records)
+  .filter(([id, record]) => id.startsWith('api-endpoint:kradle-web-') && record._kind === 'APIEndpoint')
   .map(([id, record]) => ({ id, ...record }));
-assertEqual('krateWebApiEndpoints', krateWebApiEndpointRecords.length, EXPECTED_COUNTS.krateWebApiEndpoints);
-const endpointKeys = new Set(krateWebApiEndpointRecords.map((record) => record.method + ' ' + record.path));
-const missingKrateWebApiEndpoints = sourceKrateWebApiEndpoints
+assertEqual('kradleWebApiEndpoints', kradleWebApiEndpointRecords.length, EXPECTED_COUNTS.kradleWebApiEndpoints);
+const endpointKeys = new Set(kradleWebApiEndpointRecords.map((record) => record.method + ' ' + record.path));
+const missingKradleWebApiEndpoints = sourceKradleWebApiEndpoints
   .filter((endpoint) => !endpointKeys.has(endpoint.method + ' ' + endpoint.path));
-if (missingKrateWebApiEndpoints.length) {
-  sourceFail('missing Krate web APIEndpoint records for source routes', JSON.stringify(missingKrateWebApiEndpoints.slice(0, 10)), 'krateWebApi');
+if (missingKradleWebApiEndpoints.length) {
+  sourceFail('missing Kradle web APIEndpoint records for source routes', JSON.stringify(missingKradleWebApiEndpoints.slice(0, 10)), 'kradleWebApi');
 }
-const krateWebEndpointEdges = edges.filter((edge) => edge.kind === 'exposed_by'
-  && String(edge.from).startsWith('api-endpoint:krate-web-')
-  && edge.to === 'package:a5c-ai-krate-web');
-assertEqual('krateWebApiEndpointExposedByEdges', krateWebEndpointEdges.length, EXPECTED_COUNTS.krateWebApiEndpoints);
-for (const record of krateWebApiEndpointRecords) {
-  if (!record.description?.includes('Source: packages/krate/web/app/api/')) fail('missing source route citation on Krate web endpoint', record.id);
+const kradleWebEndpointEdges = edges.filter((edge) => edge.kind === 'exposed_by'
+  && String(edge.from).startsWith('api-endpoint:kradle-web-')
+  && edge.to === 'package:a5c-ai-kradle-web');
+assertEqual('kradleWebApiEndpointExposedByEdges', kradleWebEndpointEdges.length, EXPECTED_COUNTS.kradleWebApiEndpoints);
+for (const record of kradleWebApiEndpointRecords) {
+  if (!record.description?.includes('Source: packages/kradle/web/app/api/')) fail('missing source route citation on Kradle web endpoint', record.id);
 }
 
-assertEqual('krateKnowledgeFabricMemorySystems', Object.keys(records).filter((id) => id === 'memory-system:krate-company-brain').length, EXPECTED_COUNTS.krateKnowledgeFabricMemorySystems);
-assertEqual('krateKnowledgeSources', Object.keys(records).filter((id) => id.startsWith('knowledge-source:krate-')).length, EXPECTED_COUNTS.krateKnowledgeSources);
-assertEqual('krateKnowledgeDomains', Object.keys(records).filter((id) => id.startsWith('knowledge-domain:krate-')).length, EXPECTED_COUNTS.krateKnowledgeDomains);
-assertEqual('krateRetrievalPipelines', Object.keys(records).filter((id) => id.startsWith('retrieval-pipeline:krate-')).length, EXPECTED_COUNTS.krateRetrievalPipelines);
-assertEqual('krateKnowledgeFabricUsesMemoryEdges', edgeCount(index, (edge) => edge.kind === 'uses_memory_system' && edge.from === 'knowledge-fabric-impl:krate.knowledge@current' && edge.to === 'memory-system:krate-company-brain'), EXPECTED_COUNTS.krateKnowledgeFabricUsesMemoryEdges);
-assertEqual('krateKnowledgeFeedsEdges', edgeCount(index, (edge) => edge.kind === 'feeds_knowledge' && String(edge.from).startsWith('knowledge-source:krate-')), EXPECTED_COUNTS.krateKnowledgeFeedsEdges);
-assertEqual('krateKnowledgeProvidesEdges', edgeCount(index, (edge) => edge.kind === 'provides_knowledge_to' && String(edge.from).startsWith('knowledge-domain:krate-')), EXPECTED_COUNTS.krateKnowledgeProvidesEdges);
-assertEqual('krateKnowledgeRetrievesEdges', edgeCount(index, (edge) => edge.kind === 'retrieves_from' && String(edge.from).startsWith('retrieval-pipeline:krate-')), EXPECTED_COUNTS.krateKnowledgeRetrievesEdges);
-assertEqual('krateMemorySystemIntegratesEdges', edgeCount(index, (edge) => edge.kind === 'memory_system_integrates' && edge.from === 'memory-system:krate-company-brain'), EXPECTED_COUNTS.krateMemorySystemIntegratesEdges);
+assertEqual('kradleKnowledgeFabricMemorySystems', Object.keys(records).filter((id) => id === 'memory-system:kradle-company-brain').length, EXPECTED_COUNTS.kradleKnowledgeFabricMemorySystems);
+assertEqual('kradleKnowledgeSources', Object.keys(records).filter((id) => id.startsWith('knowledge-source:kradle-')).length, EXPECTED_COUNTS.kradleKnowledgeSources);
+assertEqual('kradleKnowledgeDomains', Object.keys(records).filter((id) => id.startsWith('knowledge-domain:kradle-')).length, EXPECTED_COUNTS.kradleKnowledgeDomains);
+assertEqual('kradleRetrievalPipelines', Object.keys(records).filter((id) => id.startsWith('retrieval-pipeline:kradle-')).length, EXPECTED_COUNTS.kradleRetrievalPipelines);
+assertEqual('kradleKnowledgeFabricUsesMemoryEdges', edgeCount(index, (edge) => edge.kind === 'uses_memory_system' && edge.from === 'knowledge-fabric-impl:kradle.knowledge@current' && edge.to === 'memory-system:kradle-company-brain'), EXPECTED_COUNTS.kradleKnowledgeFabricUsesMemoryEdges);
+assertEqual('kradleKnowledgeFeedsEdges', edgeCount(index, (edge) => edge.kind === 'feeds_knowledge' && String(edge.from).startsWith('knowledge-source:kradle-')), EXPECTED_COUNTS.kradleKnowledgeFeedsEdges);
+assertEqual('kradleKnowledgeProvidesEdges', edgeCount(index, (edge) => edge.kind === 'provides_knowledge_to' && String(edge.from).startsWith('knowledge-domain:kradle-')), EXPECTED_COUNTS.kradleKnowledgeProvidesEdges);
+assertEqual('kradleKnowledgeRetrievesEdges', edgeCount(index, (edge) => edge.kind === 'retrieves_from' && String(edge.from).startsWith('retrieval-pipeline:kradle-')), EXPECTED_COUNTS.kradleKnowledgeRetrievesEdges);
+assertEqual('kradleMemorySystemIntegratesEdges', edgeCount(index, (edge) => edge.kind === 'memory_system_integrates' && edge.from === 'memory-system:kradle-company-brain'), EXPECTED_COUNTS.kradleMemorySystemIntegratesEdges);
 
-const danglingKrateTypedEdges = edges.filter((edge) => {
-  return KRATE_TYPED_EDGE_KINDS.has(edge.kind)
-    && (String(edge.from).includes('krate') || String(edge.to).includes('krate'))
+const danglingKradleTypedEdges = edges.filter((edge) => {
+  return KRADLE_TYPED_EDGE_KINDS.has(edge.kind)
+    && (String(edge.from).includes('kradle') || String(edge.to).includes('kradle'))
     && (!records[edge.from] || !records[edge.to]);
 });
-assertEqual('danglingKrateTypedEdges', danglingKrateTypedEdges.length, EXPECTED_COUNTS.danglingKrateTypedEdges);
-if (danglingKrateTypedEdges.length) details.danglingKrateTypedEdges = danglingKrateTypedEdges.slice(0, 10);
+assertEqual('danglingKradleTypedEdges', danglingKradleTypedEdges.length, EXPECTED_COUNTS.danglingKradleTypedEdges);
+if (danglingKradleTypedEdges.length) details.danglingKradleTypedEdges = danglingKradleTypedEdges.slice(0, 10);
 
 const scopedSeen = new Map();
 for (const relativeFile of SCOPED_GRAPH_FILES) {
@@ -428,12 +428,12 @@ assertEqual('scopedDuplicateIds', scopedDuplicates.length, EXPECTED_COUNTS.scope
 if (scopedDuplicates.length) details.scopedDuplicateSamples = scopedDuplicates.slice(0, 10);
 
 if (failures.length) {
-  console.error('[atlas:validate:krate-graph] failed');
+  console.error('[atlas:validate:kradle-graph] failed');
   console.error(JSON.stringify({ mode: options.mode, sourceMode, failures, auditWarnings, details }, null, 2));
   process.exit(1);
 }
 
-console.log('[atlas:validate:krate-graph] passed');
+console.log('[atlas:validate:kradle-graph] passed');
 console.log(JSON.stringify({
   mode: options.mode,
   sourceMode,
@@ -446,18 +446,18 @@ console.log(JSON.stringify({
   controllerReconciles: details.controllerReconciles,
   governanceEdges: details.governanceEdges,
   externalMappings: details.externalMappings,
-  krateWebApiEndpoints: details.krateWebApiEndpoints,
-  sourceKrateWebApiEndpoints: details.sourceKrateWebApiEndpoints,
-  krateWebApiEndpointExposedByEdges: details.krateWebApiEndpointExposedByEdges,
-  krateKnowledgeFabricMemorySystems: details.krateKnowledgeFabricMemorySystems,
-  krateKnowledgeSources: details.krateKnowledgeSources,
-  krateKnowledgeDomains: details.krateKnowledgeDomains,
-  krateRetrievalPipelines: details.krateRetrievalPipelines,
-  krateKnowledgeFabricUsesMemoryEdges: details.krateKnowledgeFabricUsesMemoryEdges,
-  krateKnowledgeFeedsEdges: details.krateKnowledgeFeedsEdges,
-  krateKnowledgeProvidesEdges: details.krateKnowledgeProvidesEdges,
-  krateKnowledgeRetrievesEdges: details.krateKnowledgeRetrievesEdges,
-  krateMemorySystemIntegratesEdges: details.krateMemorySystemIntegratesEdges,
-  danglingKrateTypedEdges: details.danglingKrateTypedEdges,
+  kradleWebApiEndpoints: details.kradleWebApiEndpoints,
+  sourceKradleWebApiEndpoints: details.sourceKradleWebApiEndpoints,
+  kradleWebApiEndpointExposedByEdges: details.kradleWebApiEndpointExposedByEdges,
+  kradleKnowledgeFabricMemorySystems: details.kradleKnowledgeFabricMemorySystems,
+  kradleKnowledgeSources: details.kradleKnowledgeSources,
+  kradleKnowledgeDomains: details.kradleKnowledgeDomains,
+  kradleRetrievalPipelines: details.kradleRetrievalPipelines,
+  kradleKnowledgeFabricUsesMemoryEdges: details.kradleKnowledgeFabricUsesMemoryEdges,
+  kradleKnowledgeFeedsEdges: details.kradleKnowledgeFeedsEdges,
+  kradleKnowledgeProvidesEdges: details.kradleKnowledgeProvidesEdges,
+  kradleKnowledgeRetrievesEdges: details.kradleKnowledgeRetrievesEdges,
+  kradleMemorySystemIntegratesEdges: details.kradleMemorySystemIntegratesEdges,
+  danglingKradleTypedEdges: details.danglingKradleTypedEdges,
   scopedDuplicateIds: details.scopedDuplicateIds,
 }, null, 2));

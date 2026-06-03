@@ -1,0 +1,23 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: kradle-demo-app
+  namespace: kradle-system
+  labels:
+    kradle.a5c.ai/repository: kradle-demo
+spec:
+  components:
+    - name: kradle-demo
+      type: webservice
+      properties:
+        image: kradle/mvp-model:0.1.0
+      traits:
+        - type: scaler
+          properties:
+            replicas: 1
+      scopes:
+        healthscopes.core.oam.dev: kradle-demo-health
+  workflow:
+    steps:
+      - name: deploy
+        type: deploy

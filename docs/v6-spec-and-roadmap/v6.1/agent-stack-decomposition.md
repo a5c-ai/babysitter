@@ -224,7 +224,7 @@ As described in graph-alignment-tasks.md Phase 1.3, split into graph-aligned sub
 | `@a5c-ai/agent-mux-triggers` | Automation triggers | Cross-cutting |
 | `@a5c-ai/cloud` | Deployment | Cross-cutting |
 | `@a5c-ai/observer-dashboard` | Observability UI | L11 |
-| `@a5c-ai/krate-*` | Project management | L6 |
+| `@a5c-ai/kradle-*` | Project management | L6 |
 
 **Dissolved:**
 - `@a5c-ai/tula-core` → absorbed into `@a5c-ai/agent-mux-tools` (tools) + `@a5c-ai/tula-platform` (session/registry)

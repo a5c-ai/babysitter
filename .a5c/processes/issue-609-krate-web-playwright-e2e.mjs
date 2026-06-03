@@ -1,17 +1,17 @@
 /**
- * @process repo/issue-609-krate-web-playwright-e2e
- * @description Implement issue #609: add Playwright E2E coverage for the Krate web console against staging.
+ * @process repo/issue-609-kradle-web-playwright-e2e
+ * @description Implement issue #609: add Playwright E2E coverage for the Kradle web console against staging.
  * @inputs { issueNumber: number, baseBranch: string, branchName: string, stagingUrl: string, e2eRoot: string, dependencyIssues: number[], routeSmokeMatrix: string[], crudFlows: object[], serviceDependentFlows: object[], qualityGateCommands: string[] }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], testPlan: object, verification: object, review: object, finalGate: object, delivery: object }
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
- * - packages/krate/docs/gaps/testing-gaps.md
- * - packages/krate/docs/gaps/staging-status.md
- * - packages/krate/docs/gaps/README.md
- * - packages/krate/web/README.md
- * - packages/krate/web/playwright.config.js
- * - packages/krate/web/e2e/smoke.spec.js
+ * - packages/kradle/docs/gaps/testing-gaps.md
+ * - packages/kradle/docs/gaps/staging-status.md
+ * - packages/kradle/docs/gaps/README.md
+ * - packages/kradle/web/README.md
+ * - packages/kradle/web/playwright.config.js
+ * - packages/kradle/web/e2e/smoke.spec.js
  * - library/methodologies/atdd-tdd/README.md
  * - library/methodologies/bdd-specification-by-example/README.md
  * - library/specializations/qa-testing-automation/README.md
@@ -51,13 +51,13 @@ export async function process(inputs, ctx) {
     key: 'issue-609.process-library-research',
   });
 
-  const runtimeTrace = await ctx.task(traceKrateWebE2ESurfacesTask, {
+  const runtimeTrace = await ctx.task(traceKradleWebE2ESurfacesTask, {
     inputs,
     issueContext,
     reuseAudit,
     processResearch,
   }, {
-    key: 'issue-609.trace-krate-web-e2e-surfaces',
+    key: 'issue-609.trace-kradle-web-e2e-surfaces',
   });
 
   const readiness = await ctx.task(assessStagingAndDependencyReadinessTask, {
@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
 
   if (readiness?.needsMaintainerDecision === true) {
     await ctx.breakpoint({
-      title: 'Krate E2E Staging Readiness',
+      title: 'Kradle E2E Staging Readiness',
       question: readiness.question || 'Confirm the staging auth and shared-data isolation strategy before CRUD E2E tests mutate staging resources.',
       options: [
         'Proceed with isolated staging test resources',
@@ -78,7 +78,7 @@ export async function process(inputs, ctx) {
         'Pause until staging auth and dependencies are documented',
       ],
       expert: 'owner',
-      tags: ['approval-gate', 'issue-609', 'krate-web', 'playwright', 'staging'],
+      tags: ['approval-gate', 'issue-609', 'kradle-web', 'playwright', 'staging'],
       context: {
         runId: ctx.runId,
         issueNumber,
@@ -182,7 +182,7 @@ export async function process(inputs, ctx) {
       'authoritative-issue-context',
       'reuse-audit',
       'process-library-research',
-      'krate-web-e2e-surface-trace',
+      'kradle-web-e2e-surface-trace',
       'staging-and-dependency-readiness',
       'e2e-test-plan',
       'implementation-loop',
@@ -210,11 +210,11 @@ export async function process(inputs, ctx) {
 export const readIssueContextTask = defineTask('issue-609.read-issue-context', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Read issue #609 and related GitHub context',
-  labels: ['issue-609', 'krate-web', 'github', 'context'],
+  labels: ['issue-609', 'kradle-web', 'github', 'context'],
   agent: {
-    name: 'krate-e2e-test-architect',
+    name: 'kradle-e2e-test-architect',
     prompt: {
-      role: 'senior Krate web testing architect',
+      role: 'senior Kradle web testing architect',
       task: 'Read the authoritative GitHub context for issue #609 before any implementation work.',
       instructions: [
         `Run and preserve the output of: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
@@ -233,19 +233,19 @@ export const readIssueContextTask = defineTask('issue-609.read-issue-context', (
 
 export const reuseAuditTask = defineTask('issue-609.reuse-audit', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Phase 0 reuse audit for Krate web E2E testing',
-  labels: ['issue-609', 'krate-web', 'reuse-audit', 'phase:0'],
+  title: 'Phase 0 reuse audit for Kradle web E2E testing',
+  labels: ['issue-609', 'kradle-web', 'reuse-audit', 'phase:0'],
   agent: {
-    name: 'krate-e2e-test-architect',
+    name: 'kradle-e2e-test-architect',
     prompt: {
       role: 'senior brownfield testing investigator',
       task: 'Run the mandatory reuse audit before proposing test infrastructure.',
       instructions: [
         'Extract keyword nouns and verbs from the issue: Playwright, E2E, staging, smoke, CRUD, stack, trigger rule, project, memory repo, dispatch, session, transcript, assistant, playground, provider wizard, sync, EventSource, SSE, auth cookies.',
-        'Check for .a5c/reuse-audit.json. If absent, say so explicitly and use repo-wide Krate web globs.',
+        'Check for .a5c/reuse-audit.json. If absent, say so explicitly and use repo-wide Kradle web globs.',
         'Render a top-level section named exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
         'Scan for matching Playwright config, existing e2e tests, package scripts, auth helpers, route handlers, resource CRUD helpers, page/component flows, env vars, CI workflows, and docs.',
-        'Call out that packages/krate/web/playwright.config.js currently uses testDir ./e2e, while the issue text says packages/krate/web/tests/e2e/. Decide whether to extend the current e2e directory or intentionally update config and scripts.',
+        'Call out that packages/kradle/web/playwright.config.js currently uses testDir ./e2e, while the issue text says packages/kradle/web/tests/e2e/. Decide whether to extend the current e2e directory or intentionally update config and scripts.',
         'Return JSON: { heading, keywords, configFound, existingE2E, reusableHelpers, targetFiles, mismatches, reuseRecommendations, risks }.',
         'ISSUE_CONTEXT:',
         JSON.stringify(args.issueContext, null, 2),
@@ -287,20 +287,20 @@ export const researchProcessLibraryTask = defineTask('issue-609.process-library-
   },
 }));
 
-export const traceKrateWebE2ESurfacesTask = defineTask('issue-609.trace-krate-web-e2e-surfaces', (args, taskCtx) => ({
+export const traceKradleWebE2ESurfacesTask = defineTask('issue-609.trace-kradle-web-e2e-surfaces', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Trace Krate web E2E routes, APIs, and UI flows',
-  labels: ['issue-609', 'krate-web', 'runtime-trace', 'playwright'],
+  title: 'Trace Kradle web E2E routes, APIs, and UI flows',
+  labels: ['issue-609', 'kradle-web', 'runtime-trace', 'playwright'],
   agent: {
-    name: 'krate-web-fullstack-engineer',
+    name: 'kradle-web-fullstack-engineer',
     prompt: {
-      role: 'senior Krate web full-stack engineer',
+      role: 'senior Kradle web full-stack engineer',
       task: 'Trace the live execution surfaces that the Playwright tests must exercise.',
       instructions: [
-        'Inspect packages/krate/web/playwright.config.js, packages/krate/web/e2e/smoke.spec.js, and packages/krate/web/package.json.',
-        'Trace org-scoped navigation from packages/krate/web/app/lib/krate-ui.jsx and PageFrame/sidebar rendering.',
+        'Inspect packages/kradle/web/playwright.config.js, packages/kradle/web/e2e/smoke.spec.js, and packages/kradle/web/package.json.',
+        'Trace org-scoped navigation from packages/kradle/web/app/lib/kradle-ui.jsx and PageFrame/sidebar rendering.',
         'Trace dashboard and major routes: /orgs/[org], /agents, /inference, /external, /repositories, /settings, /playground, /costs.',
-        'Trace CRUD implementations for AgentStack, AgentTriggerRule, KrateProject, and AgentMemoryRepository through UI components and /api/orgs/[org]/resources routes.',
+        'Trace CRUD implementations for AgentStack, AgentTriggerRule, KradleProject, and AgentMemoryRepository through UI components and /api/orgs/[org]/resources routes.',
         'Trace agent dispatch through stack actions, /api/orgs/[org]/agents/dispatch, run detail, session detail, and transcript components.',
         'Trace external provider wizard and /api/orgs/[org]/external/sync.',
         'Trace assistant chat/playground APIs and the known #608 env dependency.',
@@ -320,7 +320,7 @@ export const assessStagingAndDependencyReadinessTask = defineTask('issue-609.ass
   title: 'Assess staging auth, data isolation, and #608 readiness',
   labels: ['issue-609', 'staging', 'dependency', 'quality-gate'],
   agent: {
-    name: 'krate-e2e-test-architect',
+    name: 'kradle-e2e-test-architect',
     prompt: {
       role: 'senior E2E reliability engineer',
       task: 'Decide what can be run safely and deterministically against staging.',
@@ -353,7 +353,7 @@ export const authorE2ETestPlanTask = defineTask('issue-609.author-e2e-test-plan'
       task: 'Produce the concrete test plan before editing test files.',
       instructions: [
         'Partition tests into stable files such as auth.setup or fixtures, navigation smoke, resource CRUD, external providers, live updates/SSE, and service-dependent agent/assistant/playground specs.',
-        'Prefer packages/krate/web/e2e unless the plan intentionally changes playwright.config.js and package scripts to use packages/krate/web/tests/e2e.',
+        'Prefer packages/kradle/web/e2e unless the plan intentionally changes playwright.config.js and package scripts to use packages/kradle/web/tests/e2e.',
         'Define reusable helpers for unique names, API-side setup/cleanup, route-safe navigation, console/pageerror capture, auth storage state, and conditional test.skip annotations for missing env/services.',
         'For navigation smoke, assert pages render without console/page errors, raw Next.js errors, or internal server errors, and assert stable landmarks/sidebar links rather than incidental prose.',
         'For CRUD, use UI actions where feasible and API cleanup in afterEach/afterAll. Cover create, list visibility, edit/toggle where applicable, and delete for stack, trigger rule, project, and memory repository.',
@@ -371,15 +371,15 @@ export const authorE2ETestPlanTask = defineTask('issue-609.author-e2e-test-plan'
 
 export const implementPlaywrightE2ETestsTask = defineTask('issue-609.implement-playwright-e2e-tests', (args, taskCtx) => ({
   kind: 'agent',
-  title: `Implement Krate Playwright E2E tests attempt ${args.attempt}`,
-  labels: ['issue-609', 'krate-web', 'implementation', 'playwright'],
+  title: `Implement Kradle Playwright E2E tests attempt ${args.attempt}`,
+  labels: ['issue-609', 'kradle-web', 'implementation', 'playwright'],
   agent: {
-    name: 'krate-web-fullstack-engineer',
+    name: 'kradle-web-fullstack-engineer',
     prompt: {
-      role: 'senior Krate web engineer implementing browser tests',
+      role: 'senior Kradle web engineer implementing browser tests',
       task: 'Implement the planned Playwright E2E coverage without changing product behavior except for testability hooks that are justified by the plan.',
       instructions: [
-        'Work only in files required by the accepted test plan, primarily packages/krate/web/e2e and package/config files if needed.',
+        'Work only in files required by the accepted test plan, primarily packages/kradle/web/e2e and package/config files if needed.',
         'Do not duplicate the existing smoke.spec.js coverage; extend it only when it is the most maintainable place.',
         'Add helpers/fixtures for auth, unique test data, API cleanup, console/pageerror capture, and env-gated skips.',
         'Use robust Playwright selectors: roles, labels, stable accessible names, URLs, and explicit data attributes only if the UI has no accessible selector.',
@@ -405,7 +405,7 @@ export const implementPlaywrightE2ETestsTask = defineTask('issue-609.implement-p
 
 export const runE2EQualityGateTask = defineTask('issue-609.run-e2e-quality-gate', (args, taskCtx) => ({
   kind: 'agent',
-  title: `Run Krate web E2E quality gates attempt ${args.attempt}`,
+  title: `Run Kradle web E2E quality gates attempt ${args.attempt}`,
   labels: ['issue-609', 'verification', 'quality-gate', 'playwright'],
   agent: {
     name: 'playwright-qa-engineer',
@@ -413,8 +413,8 @@ export const runE2EQualityGateTask = defineTask('issue-609.run-e2e-quality-gate'
       role: 'senior QA automation engineer',
       task: 'Run and interpret the issue #609 quality gates.',
       instructions: [
-        'Run the configured qualityGateCommands from inputs, starting with targeted Playwright specs and then the broader krate-web structural/build gates.',
-        'When KRATE_E2E_URL is unavailable locally, run localhost-backed tests through the existing Playwright webServer. When staging is configured, run test:e2e:staging and record the URL without exposing secrets.',
+        'Run the configured qualityGateCommands from inputs, starting with targeted Playwright specs and then the broader kradle-web structural/build gates.',
+        'When KRADLE_E2E_URL is unavailable locally, run localhost-backed tests through the existing Playwright webServer. When staging is configured, run test:e2e:staging and record the URL without exposing secrets.',
         'Capture Playwright reports, traces, console errors, page errors, skipped tests with reasons, and cleanup results.',
         'If a failure is caused by missing #608 services, classify it as dependency-gated only if the spec was correctly skipped or explicitly expected to fail pending #608; otherwise fail the gate.',
         'Return JSON: { passed, commands, testResults, skippedWithReasons, consoleErrors, cleanupEvidence, failures, dependencyGated, artifacts }.',
@@ -463,7 +463,7 @@ export const reviewE2ECoverageAndStabilityTask = defineTask('issue-609.review-e2
 export const finalAcceptanceGateTask = defineTask('issue-609.final-acceptance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Final acceptance gate for issue #609',
-  labels: ['issue-609', 'final-gate', 'playwright', 'krate-web'],
+  labels: ['issue-609', 'final-gate', 'playwright', 'kradle-web'],
   agent: {
     name: 'quality-assessor',
     prompt: {
@@ -491,9 +491,9 @@ export const deliverIssue609Task = defineTask('issue-609.delivery', (args, taskC
     command: [
       'set -euo pipefail',
       'git status --short --branch',
-      'git add packages/krate/web .a5c/processes/issue-609-krate-web-playwright-e2e.mjs .a5c/processes/issue-609-krate-web-playwright-e2e.inputs.json',
+      'git add packages/kradle/web .a5c/processes/issue-609-kradle-web-playwright-e2e.mjs .a5c/processes/issue-609-kradle-web-playwright-e2e.inputs.json',
       'git diff --cached --check',
-      'if ! git diff --cached --quiet; then git commit -m "test(krate-web): add Playwright E2E coverage"; else echo "No staged changes to commit"; fi',
+      'if ! git diff --cached --quiet; then git commit -m "test(kradle-web): add Playwright E2E coverage"; else echo "No staged changes to commit"; fi',
       'git push -u origin "$BRANCH_NAME"',
       'gh issue comment 688 --body "$COMMENT_BODY"',
     ].join('\n'),
@@ -503,7 +503,7 @@ export const deliverIssue609Task = defineTask('issue-609.delivery', (args, taskC
         'Implemented the plan in PR #688 for issue #609.',
         '',
         'Summary:',
-        '- Added Krate web Playwright E2E coverage for browser-rendered navigation and workflow surfaces.',
+        '- Added Kradle web Playwright E2E coverage for browser-rendered navigation and workflow surfaces.',
         '- Included isolated issue-609 test data patterns, cleanup, and #608-aware service gates.',
         '- Ran the process verification gates recorded in the Babysitter run.',
         '',

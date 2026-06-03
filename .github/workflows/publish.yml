@@ -91,7 +91,7 @@ jobs:
           path: |
             packages/agent-mux/webui/node_modules/.vite
             packages/atlas/webui/.next/cache
-            packages/krate/web/.next/cache
+            packages/kradle/web/.next/cache
           key: framework-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
             framework-${{ runner.os }}-${{ github.ref_name }}-
@@ -135,7 +135,7 @@ jobs:
           run_bg npm run build --workspace=@a5c-ai/agent-mux-triggers
           run_bg npm run build:observer
           run_bg npm run build:cloud
-          run_bg bash -lc 'cd packages/krate/core && npm run build && cd ../web && npm run build'
+          run_bg bash -lc 'cd packages/kradle/core && npm run build && cd ../web && npm run build'
 
           # agent-mux critical path (sequential — each depends on previous)
           npm run build --workspace=@a5c-ai/agent-mux-observability
@@ -342,7 +342,7 @@ jobs:
     needs:
       - validate_core
       - validate_mux
-      - validate_krate
+      - validate_kradle
       - validate_cloud
       - validate_observer_and_compiler
     name: E2E Integration Tests
@@ -392,12 +392,12 @@ jobs:
           npm run test:e2e --workspace=@a5c-ai/agent-mux-triggers 2>&1 | tee artifacts/e2e-logs/triggers-e2e.log
           npm run test:coverage --workspace=@a5c-ai/agent-mux-triggers 2>&1 | tee artifacts/e2e-logs/triggers-coverage.log
 
-      - name: Krate e2e + smoke
+      - name: Kradle e2e + smoke
         run: |
           set -euo pipefail
-          cd packages/krate/core
-          npm run e2e 2>&1 | tee ../../../artifacts/e2e-logs/krate-e2e.log
-          npm run smoke 2>&1 | tee ../../../artifacts/e2e-logs/krate-smoke.log
+          cd packages/kradle/core
+          npm run e2e 2>&1 | tee ../../../artifacts/e2e-logs/kradle-e2e.log
+          npm run smoke 2>&1 | tee ../../../artifacts/e2e-logs/kradle-smoke.log
 
       - name: Cache Playwright browsers
         id: pw-cache
@@ -490,9 +490,9 @@ jobs:
           path: artifacts/cloud-logs
           if-no-files-found: warn
 
-  validate_krate:
+  validate_kradle:
     needs: build_all
-    name: Validate Krate
+    name: Validate Kradle
     runs-on: ubuntu-latest-l
     permissions:
       contents: read
@@ -533,22 +533,22 @@ jobs:
       - name: Prepare artifacts directory
         run: |
           set -euo pipefail
-          mkdir -p artifacts/krate-logs
+          mkdir -p artifacts/kradle-logs
 
       - name: Build Helm dependencies
-        run: helm dependency build packages/krate/charts 2>&1 | tee artifacts/krate-logs/helm-dep-build.log || true
+        run: helm dependency build packages/kradle/charts 2>&1 | tee artifacts/kradle-logs/helm-dep-build.log || true
 
-      - name: Test krate core
+      - name: Test kradle core
         run: |
           set -euo pipefail
-          cd packages/krate/core && npm test 2>&1 | tee ../../../artifacts/krate-logs/core-tests.log
+          cd packages/kradle/core && npm test 2>&1 | tee ../../../artifacts/kradle-logs/core-tests.log
 
-      - name: Upload krate validation logs
+      - name: Upload kradle validation logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: publish-krate-logs
-          path: artifacts/krate-logs
+          name: publish-kradle-logs
+          path: artifacts/kradle-logs
           if-no-files-found: warn
 
   validate_observer_and_compiler:
@@ -628,7 +628,7 @@ jobs:
       && needs.validate_mux.result == 'success'
       && needs.e2e_integration.result == 'success'
       && needs.validate_cloud.result == 'success'
-      && needs.validate_krate.result == 'success'
+      && needs.validate_kradle.result == 'success'
       && needs.validate_observer_and_compiler.result == 'success'
     name: Prepare Publish
     needs:
@@ -638,7 +638,7 @@ jobs:
       - validate_mux
       - e2e_integration
       - validate_cloud
-      - validate_krate
+      - validate_kradle
       - validate_observer_and_compiler
     runs-on: ubuntu-latest-l
     permissions:
@@ -809,9 +809,9 @@ jobs:
           - name: cloud
             build: npm run build:cloud
             publish: npm publish --workspace=@a5c-ai/cloud --access public --tag "$NPM_TAG"
-          - name: krate
-            build: cd packages/krate/core && npm run build
-            publish: npm publish --workspace=@a5c-ai/krate --access public --tag "$NPM_TAG"
+          - name: kradle
+            build: cd packages/kradle/core && npm run build
+            publish: npm publish --workspace=@a5c-ai/kradle --access public --tag "$NPM_TAG"
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v8
@@ -2098,17 +2098,17 @@ jobs:
           kubectl -n "$KUBE_NAMESPACE" rollout restart deployment/"$APP_NAME"
           kubectl -n "$KUBE_NAMESPACE" rollout status deployment/"$APP_NAME" --timeout=600s
 
-  deploy_krate:
-    name: Deploy Krate To AKS
+  deploy_kradle:
+    name: Deploy Kradle To AKS
     needs:
-      - validate_krate
+      - validate_kradle
     runs-on: ubuntu-latest-l
     environment:
-      name: krate-${{ github.ref_name == 'main' && 'production' || github.ref_name }}
-      url: ${{ github.ref_name == 'main' && 'https://krate.a5c.ai' || github.ref_name == 'staging' && 'https://krate-staging.a5c.ai' || 'https://krate-develop.a5c.ai' }}
+      name: kradle-${{ github.ref_name == 'main' && 'production' || github.ref_name }}
+      url: ${{ github.ref_name == 'main' && 'https://kradle.a5c.ai' || github.ref_name == 'staging' && 'https://kradle-staging.a5c.ai' || 'https://kradle-develop.a5c.ai' }}
     env:
       ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
-      APP_NAME: krate
+      APP_NAME: kradle
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -2128,27 +2128,27 @@ jobs:
           KUBE_CONFIG_SECRET: ${{ secrets.KUBE_CONFIG }}
           AZURE_CLIENT_ID_VAR: ${{ vars.AZURE_APPLICATION_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_APPLICATION_CLIENT_SECRET }}
-          KRATE_GITHUB_CLIENT_ID: ${{ vars.KRATE_GITHUB_CLIENT_ID }}
-          KRATE_GITHUB_CLIENT_SECRET: ${{ secrets.KRATE_GITHUB_CLIENT_SECRET }}
+          KRADLE_GITHUB_CLIENT_ID: ${{ vars.KRADLE_GITHUB_CLIENT_ID }}
+          KRADLE_GITHUB_CLIENT_SECRET: ${{ secrets.KRADLE_GITHUB_CLIENT_SECRET }}
         run: |
           missing=()
           [[ -n "${KUBE_CONFIG_SECRET}" ]] || missing+=("KUBE_CONFIG")
           [[ -n "${AZURE_CLIENT_ID_VAR}" ]] || missing+=("AZURE_APPLICATION_CLIENT_ID")
           [[ -n "${AZURE_CLIENT_SECRET}" ]] || missing+=("AZURE_APPLICATION_CLIENT_SECRET")
           [[ -n "${ACR_NAME}" ]] || missing+=("AZURE_ACR_NAME")
-          [[ -n "${KRATE_GITHUB_CLIENT_ID}" ]] || echo "::notice::KRATE_GITHUB_CLIENT_ID not set — GitHub OAuth will be disabled"
-          [[ -n "${KRATE_GITHUB_CLIENT_SECRET}" ]] || echo "::notice::KRATE_GITHUB_CLIENT_SECRET not set — GitHub OAuth will be disabled"
+          [[ -n "${KRADLE_GITHUB_CLIENT_ID}" ]] || echo "::notice::KRADLE_GITHUB_CLIENT_ID not set — GitHub OAuth will be disabled"
+          [[ -n "${KRADLE_GITHUB_CLIENT_SECRET}" ]] || echo "::notice::KRADLE_GITHUB_CLIENT_SECRET not set — GitHub OAuth will be disabled"
           if (( ${#missing[@]} > 0 )); then
-            echo "::error::Krate deploy missing required configuration: ${missing[*]}"
+            echo "::error::Kradle deploy missing required configuration: ${missing[*]}"
             exit 1
           fi
 
       - name: Resolve deployment target
         run: |
           case "${GITHUB_REF_NAME}" in
-            main)    NS=krate;         HOST=krate.a5c.ai ;;
-            staging) NS=krate-staging; HOST=krate-staging.a5c.ai ;;
-            develop) NS=krate-develop; HOST=krate-develop.a5c.ai ;;
+            main)    NS=kradle;         HOST=kradle.a5c.ai ;;
+            staging) NS=kradle-staging; HOST=kradle-staging.a5c.ai ;;
+            develop) NS=kradle-develop; HOST=kradle-develop.a5c.ai ;;
             *)       echo "Unsupported branch" >&2; exit 1 ;;
           esac
           echo "KUBE_NAMESPACE=$NS" >> "$GITHUB_ENV"
@@ -2168,32 +2168,32 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push krate-controller image
+      - name: Build and push kradle-controller image
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           az acr login --name "$ACR_NAME"
-          IMAGE="${ACR_NAME}.azurecr.io/krate-controller:${IMAGE_TAG}"
+          IMAGE="${ACR_NAME}.azurecr.io/kradle-controller:${IMAGE_TAG}"
           docker buildx build \
-            --file packages/krate/core/Dockerfile \
+            --file packages/kradle/core/Dockerfile \
             --tag "$IMAGE" \
-            --cache-from type=gha,scope=krate-controller \
-            --cache-to type=gha,mode=max,scope=krate-controller \
+            --cache-from type=gha,scope=kradle-controller \
+            --cache-to type=gha,mode=max,scope=kradle-controller \
             --push .
-          echo "KRATE_CONTROLLER_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          echo "KRADLE_CONTROLLER_IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
-      - name: Build and push krate-web image
+      - name: Build and push kradle-web image
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          IMAGE="${ACR_NAME}.azurecr.io/krate-web:${IMAGE_TAG}"
+          IMAGE="${ACR_NAME}.azurecr.io/kradle-web:${IMAGE_TAG}"
           docker buildx build \
-            --file packages/krate/web/Dockerfile \
+            --file packages/kradle/web/Dockerfile \
             --tag "$IMAGE" \
-            --cache-from type=gha,scope=krate-web \
-            --cache-to type=gha,mode=max,scope=krate-web \
+            --cache-from type=gha,scope=kradle-web \
+            --cache-to type=gha,mode=max,scope=kradle-web \
             --push .
-          echo "KRATE_WEB_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          echo "KRADLE_WEB_IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
       - name: Create ACR pull secret
         run: |
@@ -2207,49 +2207,49 @@ jobs:
 
       - name: Clean up pre-Helm resources
         run: |
-          kubectl -n "$KUBE_NAMESPACE" delete ingress krate --ignore-not-found
-          kubectl -n "$KUBE_NAMESPACE" delete service krate --ignore-not-found
-          kubectl -n "$KUBE_NAMESPACE" delete deployment krate --ignore-not-found
+          kubectl -n "$KUBE_NAMESPACE" delete ingress kradle --ignore-not-found
+          kubectl -n "$KUBE_NAMESPACE" delete service kradle --ignore-not-found
+          kubectl -n "$KUBE_NAMESPACE" delete deployment kradle --ignore-not-found
 
-      - name: Remove standalone KubeVela release (now managed as krate subchart)
+      - name: Remove standalone KubeVela release (now managed as kradle subchart)
         run: helm uninstall kubevela -n vela-system 2>/dev/null || true
 
       - name: Build Helm chart dependencies
         run: |
-          helm dependency update packages/krate/charts 2>&1 || echo "::notice::Helm dependency update completed (some repos may be unavailable)"
+          helm dependency update packages/kradle/charts 2>&1 || echo "::notice::Helm dependency update completed (some repos may be unavailable)"
 
-      - name: Update Krate CRDs
-        run: kubectl apply -f packages/krate/charts/crds/ --server-side --force-conflicts
+      - name: Update Kradle CRDs
+        run: kubectl apply -f packages/kradle/charts/crds/ --server-side --force-conflicts
 
-      - name: Deploy Krate via Helm
+      - name: Deploy Kradle via Helm
         env:
-          KRATE_GITHUB_CLIENT_ID: ${{ vars.KRATE_GITHUB_CLIENT_ID }}
-          KRATE_GITHUB_CLIENT_SECRET: ${{ secrets.KRATE_GITHUB_CLIENT_SECRET }}
+          KRADLE_GITHUB_CLIENT_ID: ${{ vars.KRADLE_GITHUB_CLIENT_ID }}
+          KRADLE_GITHUB_CLIENT_SECRET: ${{ secrets.KRADLE_GITHUB_CLIENT_SECRET }}
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
-          kubectl -n "$KUBE_NAMESPACE" create secret generic krate-assistant-keys \
+          kubectl -n "$KUBE_NAMESPACE" create secret generic kradle-assistant-keys \
             --from-literal=AZURE_API_KEY="${AZURE_OPENAI_API_KEY}" \
             --from-literal=AGENT_MUX_API_BASE="https://${AZURE_OPENAI_PROJECT_NAME}.services.ai.azure.com" \
-            --from-literal=KRATE_ASSISTANT_PROVIDER=openai \
-            --from-literal=KRATE_ASSISTANT_MODEL=gpt-5.5 \
+            --from-literal=KRADLE_ASSISTANT_PROVIDER=openai \
+            --from-literal=KRADLE_ASSISTANT_MODEL=gpt-5.5 \
             --from-literal=OPENAI_API_KEY="${OPENAI_API_KEY}" \
             --from-literal=GOOGLE_API_KEY="${GOOGLE_API_KEY}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-          helm upgrade --install krate packages/krate/charts \
+          helm upgrade --install kradle packages/kradle/charts \
             --namespace "$KUBE_NAMESPACE" \
             --create-namespace \
-            --set image.controller.repository="${ACR_NAME}.azurecr.io/krate-controller" \
+            --set image.controller.repository="${ACR_NAME}.azurecr.io/kradle-controller" \
             --set image.controller.tag="${GITHUB_SHA}" \
-            --set image.web.repository="${ACR_NAME}.azurecr.io/krate-web" \
+            --set image.web.repository="${ACR_NAME}.azurecr.io/kradle-web" \
             --set image.web.tag="${GITHUB_SHA}" \
             --set image.pullPolicy=Always \
             --set "global.imagePullSecrets[0].name=acr-pull" \
-            --set auth.github.clientId="${KRATE_GITHUB_CLIENT_ID}" \
-            --set auth.github.clientSecret="${KRATE_GITHUB_CLIENT_SECRET}" \
+            --set auth.github.clientId="${KRADLE_GITHUB_CLIENT_ID}" \
+            --set auth.github.clientSecret="${KRADLE_GITHUB_CLIENT_SECRET}" \
             --set admin.org=a5c-ai \
             --set admin.username=tmuskal \
             --set ingress.enabled=true \
@@ -2257,7 +2257,7 @@ jobs:
             --set "ingress.hosts[0].host=${APP_HOST}" \
             --set "ingress.hosts[0].paths[0].path=/" \
             --set "ingress.hosts[0].paths[0].pathType=Prefix" \
-            --set "ingress.tls[0].secretName=krate-tls" \
+            --set "ingress.tls[0].secretName=kradle-tls" \
             --set "ingress.tls[0].hosts[0]=${APP_HOST}" \
             --set "ingress.annotations.cert-manager\\.io/cluster-issuer=letsencrypt-production" \
             --set "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname=${APP_HOST}" \
@@ -2270,7 +2270,7 @@ jobs:
             --set "externalDependencies.kyverno.discoverExisting=true" \
             --set networkPolicy.enabled=false \
             --set apiService.enabled=false \
-            --set "assistant.existingSecret=krate-assistant-keys" \
+            --set "assistant.existingSecret=kradle-assistant-keys" \
             --timeout 300s \
             --wait
           # Force-delete pods stuck in Terminating

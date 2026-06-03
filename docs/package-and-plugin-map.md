@@ -44,7 +44,7 @@ Use it to answer three questions quickly:
 | `packages/atlas` (`./catalog` export) | Public advanced/runtime package surface | [packages/atlas/README.md](../packages/atlas/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public package surface for shared ontology/discovery/evidence assets used by other published runtimes; atlas README is the canonical package contract. |
 | `packages/tasks-mux` | Public package | [packages/tasks-mux/README.md](../packages/tasks-mux/README.md) | — | README is the canonical package-level contract. |
 | `packages/cloud` | Public package | [packages/cloud/README.md](../packages/cloud/README.md) | — | README is the canonical public docs home today; the validation matrix does not currently expose a separate central docs entrypoint for this package. |
-| `packages/krate/core` | Public package | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Kubernetes-native Git forge runtime. No package README today; this map is the documentation home until a README is added. |
+| `packages/kradle/core` | Public package | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Kubernetes-native Git forge runtime. No package README today; this map is the documentation home until a README is added. |
 | `packages/sdk` | Public package | [packages/sdk/README.md](../packages/sdk/README.md) | — | README is the canonical package-level contract. |
 
 ## Public product and operator apps
@@ -106,7 +106,7 @@ Use it to answer three questions quickly:
 | `packages/agent-mux/watch-watchos-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/agent-mux/README.md](./agent-mux/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
 | `packages/agent-mux/watch-wearos-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/agent-mux/README.md](./agent-mux/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
 | `packages/babysitter-tui-plugins` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Internal-only support package for the TUI surface. This map is the explicit documentation home until the workspace gets a README. |
-| `packages/krate/web` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Krate web console. Internal-only; this map is the documentation home until the surface is promoted. |
+| `packages/kradle/web` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Kradle web console. Internal-only; this map is the documentation home until the surface is promoted. |
 
 ## Coverage rules for future changes
 

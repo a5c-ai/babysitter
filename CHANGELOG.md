@@ -9,7 +9,7 @@
 - feat: agent-core to tula-core TDD rename (#852) (2dc9dcfb2, a5c-ai[bot], 2 hours ago)
 - feat: preflight orphan-file grep prompts (#849) (ba6e2d8f5, a5c-ai[bot], 7 hours ago)
 - feat(live-stack): add tula to vanilla and BP matrix sections (0e867fd48, Tal Muskal, 11 hours ago)
-- feat(krate): add OpenAI-compatible provider support for assistant (0fd0f82ba, Tal Muskal, 23 hours ago)
+- feat(kradle): add OpenAI-compatible provider support for assistant (0fd0f82ba, Tal Muskal, 23 hours ago)
 - feat(graph): add OpenClaw 2026.5.28 issue 810 records (#829) (80c787ffe, a5c-ai[bot], 23 hours ago)
 - feat(graph): track Copilot CLI 1.0.57-3 (#826) (6bf2b63b2, a5c-ai[bot], 23 hours ago)
 - feat(graph): track Amp 0.0.1780244579-g6b52f9 (#825) (ad9d3d027, a5c-ai[bot], 23 hours ago)
@@ -27,7 +27,7 @@
 - fix(atlas): use readFileSync instead of require for graph index JSON (ce0247dbd, Tal Muskal, 7 minutes ago)
 - fix(ci): alias atlas to dist in vitest + add graph data verification (54aee7f7b, Tal Muskal, 21 minutes ago)
 - fix(ci): externalize atlas in vitest to fix 67 adapter test failures (ffc5a5088, Tal Muskal, 41 minutes ago)
-- fix: krate default provider to anthropic, relax gemini version pin test (b660ceccd, Tal Muskal, 56 minutes ago)
+- fix: kradle default provider to anthropic, relax gemini version pin test (b660ceccd, Tal Muskal, 56 minutes ago)
 - fix: additional CI test fixes (fa888cc2a, Tal Muskal, 77 minutes ago)
 - fix(live-stack): accept missing file in resume mode (e512ef37c, Tal Muskal, 2 hours ago)
 - fix(live-stack): use absolute outputDir in resume fixture inputs (9acbf924e, Tal Muskal, 2 hours ago)
@@ -51,7 +51,7 @@
 - fix(agent-platform): auto-execute agent effects via delegation (ebcd4399b, Tal Muskal, 13 hours ago)
 - fix(agent-platform): auto-execute shell effects in orchestration host (3a9b84b95, Tal Muskal, 14 hours ago)
 - fix(live-stack): accept resume-mode completion when run+artifact exist (9b4b8c859, Tal Muskal, 14 hours ago)
-- fix(krate): add identity CRDs to KRATE_RESOURCES, enable ArgoCD+Gitea (68ef09e90, Tal Muskal, 14 hours ago)
+- fix(kradle): add identity CRDs to KRADLE_RESOURCES, enable ArgoCD+Gitea (68ef09e90, Tal Muskal, 14 hours ago)
 - fix(live-stack): use simpler 2-task process for omni tests (61640bc10, Tal Muskal, 14 hours ago)
 - fix(live-stack): omni uses simple call without --process (06fa83e22, Tal Muskal, 19 hours ago)
 - fix(agent-platform): increase MAX_CONSECUTIVE_STALLS from 2 to 5 (83934170a, Tal Muskal, 20 hours ago)
@@ -61,8 +61,8 @@
 - fix(live-stack): accept create-mode success without formal SDK run (0126a124a, Tal Muskal, 21 hours ago)
 - fix(launch): add --skip-trust for gemini-cli in addition to env var (f7c7fb29c, Tal Muskal, 22 hours ago)
 - fix(live-stack): root-cause fixes for gemini-cli, macOS, pi, omni (4443e9297, Tal Muskal, 22 hours ago)
-- fix(krate): lightweight readiness probe to prevent pod flip-flopping (581c9db58, Tal Muskal, 22 hours ago)
-- fix(krate): remove production-only JWT secret requirement for Jitsi (ad267f4cb, Tal Muskal, 23 hours ago)
+- fix(kradle): lightweight readiness probe to prevent pod flip-flopping (581c9db58, Tal Muskal, 22 hours ago)
+- fix(kradle): remove production-only JWT secret requirement for Jitsi (ad267f4cb, Tal Muskal, 23 hours ago)
 - fix(live-stack): use /resume for non-claude/codex agents in BP/Resume mode (d17e01611, Tal Muskal, 23 hours ago)
 - fix(extension-mux): templatize harness name in generated plugins (6f188c842, Tal Muskal, 23 hours ago)
 - fix(atlas): track Oh-My-Pi 15.7.3 graph updates (#827) (da5b4b314, a5c-ai[bot], 23 hours ago)
@@ -107,7 +107,7 @@
 - use 'unified' harness for session-start/end hooks (1334fbd6b, Tal Muskal, 3 hours ago)
 - map amux agent name to babysitter SDK harness name (018d055c7, Tal Muskal, 4 hours ago)
 - add SessionStart/Stop mappings to gemini and pi adapters (e195a4980, Tal Muskal, 5 hours ago)
-- add Jitsi resource kinds to KRATE_RESOURCES array (c9a80314d, Tal Muskal, 5 hours ago)
+- add Jitsi resource kinds to KRADLE_RESOURCES array (c9a80314d, Tal Muskal, 5 hours ago)
 - deliver stdin prompt through ConPTY for hermes Windows (4b92bc7a3, Tal Muskal, 6 hours ago)
 - handle Windows Node 22 PATH resolution in live-stack (850950b7f, Tal Muskal, 7 hours ago)
 - ensure Node 22 is active in live-stack test step (741489564, Tal Muskal, 7 hours ago)
@@ -219,20 +219,20 @@
 ## [Unreleased] - 2026-05-27
 
 ### feat
-- 4341056a3 feat(krate-web): add unified model catalog UI and model route management (Tal Muskal, 21 hours ago)
+- 4341056a3 feat(kradle-web): add unified model catalog UI and model route management (Tal Muskal, 21 hours ago)
 - 856661cf5 feat(atlas): track Claude Mythos Preview (a5c automation, 21 hours ago)
-- e18aedba6 feat(krate): add model route controller for Envoy AI Gateway integration (Tal Muskal, 21 hours ago)
+- e18aedba6 feat(kradle): add model route controller for Envoy AI Gateway integration (Tal Muskal, 21 hours ago)
 - c37f18de0 feat(graph): track Cohere Command A+ and Embed v4 (a5c automation, 21 hours ago)
 - b39c512e1 feat(atlas): track Mistral Large 3 and Medium 3.5 (a5c-ai agent, 21 hours ago)
-- ca359f4a4 feat(krate): add Envoy AI Gateway dependency and KrateModelRoute CRD (Tal Muskal, 21 hours ago)
+- ca359f4a4 feat(kradle): add Envoy AI Gateway dependency and KradleModelRoute CRD (Tal Muskal, 21 hours ago)
 - 25ef6dd42 feat(omni): add omni agent as amux-launchable harness with live-stack support (Tal Muskal, 21 hours ago)
-- b627b64c6 feat(krate-web): add For Agents documentation page with MCP setup guide (Tal Muskal, 22 hours ago)
-- 80cdfa162 feat(krate): add resource contract tests and server-side validation (Tal Muskal, 22 hours ago)
+- b627b64c6 feat(kradle-web): add For Agents documentation page with MCP setup guide (Tal Muskal, 22 hours ago)
+- 80cdfa162 feat(kradle): add resource contract tests and server-side validation (Tal Muskal, 22 hours ago)
 
 ### fix
 - 0e4576396 fix(hermes): add --auto-approve launch config for NI file writes (Tal Muskal, 6 minutes ago)
 - 2aefa94e4 fix(atlas): set omni plugin-target npmPublishable=false (Tal Muskal, 7 minutes ago)
-- 735811478 fix(krate): remove broken Envoy AI Gateway Helm subchart dependency (Tal Muskal, 27 minutes ago)
+- 735811478 fix(kradle): remove broken Envoy AI Gateway Helm subchart dependency (Tal Muskal, 27 minutes ago)
 - f4b8b240e fix(omni): use non-Azure proxy mode so agent-core sends Bearer auth (Tal Muskal, 20 hours ago)
 - 4ab83c990 fix(omni): inject AMUX_* proxy env vars for agent-core endpoint resolution (Tal Muskal, 20 hours ago)
 - 65b995a05 fix(omni): map 'omni' to 'omni yolo' in CLI_COMMAND_MAP, fix prompt delivery (Tal Muskal, 20 hours ago)
@@ -241,7 +241,7 @@
 - 9ecb2859e fix(gemini-cli): add --yolo launch config for auto-approval in NI mode (Tal Muskal, 21 hours ago)
 - 3451e5728 fix(live-stack): skip amux install for omni (already linked by CI workflow) (Tal Muskal, 21 hours ago)
 - 541935650 fix(agent-platform): fix PI_PARENT_PROMPT_TIMEOUT_MS=0 causing instant abort (Tal Muskal, 21 hours ago)
-- 8a704053a fix(krate): fix 4 resource schema mismatches caught by strengthened contract tests (Tal Muskal, 21 hours ago)
+- 8a704053a fix(kradle): fix 4 resource schema mismatches caught by strengthened contract tests (Tal Muskal, 21 hours ago)
 
 ### refactor
 - d2d6d00d5 refactor(agent-platform): extract agent-core-loop.ts from pi.ts (Tal Muskal, 21 hours ago)
@@ -269,14 +269,14 @@
 ## [Unreleased] - 2026-05-26
 
 ### feat
-- ca359f4a4 feat(krate): add Envoy AI Gateway dependency and KrateModelRoute CRD (Tal Muskal, 10 minutes ago)
+- ca359f4a4 feat(kradle): add Envoy AI Gateway dependency and KradleModelRoute CRD (Tal Muskal, 10 minutes ago)
 - 25ef6dd42 feat(omni): add omni agent as amux-launchable harness with live-stack support (Tal Muskal, 40 minutes ago)
-- b627b64c6 feat(krate-web): add For Agents documentation page with MCP setup guide (Tal Muskal, 57 minutes ago)
-- 80cdfa162 feat(krate): add resource contract tests and server-side validation (Tal Muskal, 63 minutes ago)
-- 11e906721 feat(krate-web): add internal tools catalog API endpoint (Tal Muskal, 11 hours ago)
-- b23aba63e feat(krate-web): split tools into internal/external sections, add memory repo selector (Tal Muskal, 11 hours ago)
+- b627b64c6 feat(kradle-web): add For Agents documentation page with MCP setup guide (Tal Muskal, 57 minutes ago)
+- 80cdfa162 feat(kradle): add resource contract tests and server-side validation (Tal Muskal, 63 minutes ago)
+- 11e906721 feat(kradle-web): add internal tools catalog API endpoint (Tal Muskal, 11 hours ago)
+- b23aba63e feat(kradle-web): split tools into internal/external sections, add memory repo selector (Tal Muskal, 11 hours ago)
 - 2b831488d feat(agent-core): add Azure OpenAI and OPENAI_MODEL env var support (Tal Muskal, 11 hours ago)
-- b6b2728f6 feat(krate): add tool categories and memory refs to AgentStack CRD (Tal Muskal, 11 hours ago)
+- b6b2728f6 feat(kradle): add tool categories and memory refs to AgentStack CRD (Tal Muskal, 11 hours ago)
 - 8ad1a61ad feat(atlas): model omni in atlas graph — product, version, 4 layer impls, presentation (Tal Muskal, 13 hours ago)
 - 2616b3e05 feat(loading): enhance loading view with circular animation and updated styles (Tal Muskal, 13 hours ago)
 
@@ -284,13 +284,13 @@
 - 9ecb2859e fix(gemini-cli): add --yolo launch config for auto-approval in NI mode (Tal Muskal, 13 minutes ago)
 - 3451e5728 fix(live-stack): skip amux install for omni (already linked by CI workflow) (Tal Muskal, 26 minutes ago)
 - 541935650 fix(agent-platform): fix PI_PARENT_PROMPT_TIMEOUT_MS=0 causing instant abort (Tal Muskal, 42 minutes ago)
-- 8a704053a fix(krate): fix 4 resource schema mismatches caught by strengthened contract tests (Tal Muskal, 43 minutes ago)
+- 8a704053a fix(kradle): fix 4 resource schema mismatches caught by strengthened contract tests (Tal Muskal, 43 minutes ago)
 - 609071852 fix(bridge-hooks): resolve Windows .cmd/.sh to node+.js to avoid shell arg splitting (Tal Muskal, 5 hours ago)
 - dcae62db5 fix: remove duplicate execFileSync import (Tal Muskal, 11 hours ago)
 - 4e536a4b0 fix(bridge-hooks): resolve .cmd to .js on Windows to avoid shell arg splitting (Tal Muskal, 11 hours ago)
-- 79f1eafa3 fix(krate-web): simplify loading page to plain spinner (Tal Muskal, 11 hours ago)
+- 79f1eafa3 fix(kradle-web): simplify loading page to plain spinner (Tal Muskal, 11 hours ago)
 - fbed6eb64 fix(agent-core): auto-detect AZURE_OPENAI_API_KEY + AZURE_OPENAI_PROJECT_NAME (Tal Muskal, 11 hours ago)
-- 97faa5145 fix(krate-web): fix header line-break and reorganize sidebar hierarchy (Tal Muskal, 12 hours ago)
+- 97faa5145 fix(kradle-web): fix header line-break and reorganize sidebar hierarchy (Tal Muskal, 12 hours ago)
 - 7481423d8 fix(sdk): add --effect-id flag to CLI argument parser (#342) (Tal Muskal, 12 hours ago)
 - a1f2d6662 fix(live-stack): hooks-mux CI link pointed to dist/index.js (no-op) (Tal Muskal, 12 hours ago)
 - 7b0a3fa2c fix(live-stack): remove npm install -g hooks-mux-cli — shadows workspace link (Tal Muskal, 12 hours ago)
@@ -337,12 +337,12 @@
 ## [Unreleased] - 2026-05-25
 
 ### feat
-- 85bf9b9b2 feat(krate-web): add stack inline editor, fix RBAC deletion cleanup (Tal Muskal, 6 hours ago)
+- 85bf9b9b2 feat(kradle-web): add stack inline editor, fix RBAC deletion cleanup (Tal Muskal, 6 hours ago)
 
 ### fix
-- af82b2659 fix(krate-web): add cache invalidation to repository, dispatch, and conflict routes (Tal Muskal, 4 hours ago)
+- af82b2659 fix(kradle-web): add cache invalidation to repository, dispatch, and conflict routes (Tal Muskal, 4 hours ago)
 - a6661b3b8 fix(live-stack): update stale test assertions for prompt text and create-mode cleanup (Tal Muskal, 6 hours ago)
-- 82b214fdd fix(krate-web): fix broken CRUD actions, API paths, and missing endpoints across console (Tal Muskal, 6 hours ago)
+- 82b214fdd fix(kradle-web): fix broken CRUD actions, API paths, and missing endpoints across console (Tal Muskal, 6 hours ago)
 - 09a5cc834 fix(live-stack): hooks-mux optional in interactive mode, not just bridged-hooks (Tal Muskal, 6 hours ago)
 - 98adc381c fix(live-stack): cross-platform BP fixture setup (bash→node) (Tal Muskal, 6 hours ago)
 - aeb77e1b9 fix(live-stack): macOS BI child_process fallback + Windows BP npm spawn (Tal Muskal, 6 hours ago)
@@ -364,14 +364,14 @@
 ### ci
 - 732ae0718 fix(ci): fix tool-mux/launch-mux build order in publish-packages-from-tag (Tal Muskal, 6 hours ago)
 - 0acb12b0c fix(ci): add push trigger to live-stack-published for GitHub workflow discovery (Tal Muskal, 12 hours ago)
-- 7068be42b fix(ci): add hooks-mux-adapter-hermes and krate to version bump paths (Tal Muskal, 12 hours ago)
+- 7068be42b fix(ci): add hooks-mux-adapter-hermes and kradle to version bump paths (Tal Muskal, 12 hours ago)
 - 690771e15 fix(ci): add agent-config-mux, agent-launch-mux, tool-mux to publish pipeline (Tal Muskal, 12 hours ago)
 - f3231e185 feat(ci): add live-stack-published workflow — tests with npm packages only (Tal Muskal, 12 hours ago)
 - 6f65d1699 fix(ci): add agent-runtime, omni, tool-mux to publish pipeline and version bumps (Tal Muskal, 24 hours ago)
 
 ### chore
 - e4a494a26 chore: trigger workflow discovery for live-stack-published (Tal Muskal, 12 hours ago)
-- 75193c134 redesign(krate-web): modern dark-first Terminal Craft design system (Tal Muskal, 12 hours ago)
+- 75193c134 redesign(kradle-web): modern dark-first Terminal Craft design system (Tal Muskal, 12 hours ago)
 - a4cc57b13 Move CLI implementation into omni (Tal Muskal, 12 hours ago)
 - 0ca99c5d8 Revert "fix(test): only require hooks-mux logs in bridged-hooks mode, not interactive" (Tal Muskal, 24 hours ago)
 

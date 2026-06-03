@@ -6,8 +6,8 @@
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
- * - packages/krate/docs/agent-identity/01-resource-model.md
- * - packages/krate/docs/agent-identity/02-migration.md
+ * - packages/kradle/docs/agent-identity/01-resource-model.md
+ * - packages/kradle/docs/agent-identity/02-migration.md
  * - .a5c/processes/issue-620-agent-identity-decoupling.mjs
  * - .a5c/processes/issue-621-agent-identity-web-console.mjs
  * - library/methodologies/superpowers/test-driven-development.js
@@ -15,7 +15,7 @@
  * - library/specializations/software-architecture/migration-strategy.js
  *
  * Note: .a5c/process-library/ was absent in this checkout. This process follows
- * adjacent Krate identity plans and uses agent tasks only; it does not create
+ * adjacent Kradle identity plans and uses agent tasks only; it does not create
  * kind: 'shell' subtasks.
  */
 
@@ -40,7 +40,7 @@ export async function process(inputs, ctx) {
 export const readIssueContextTask = defineTask('issue-622.read-context', (args) => ({
   kind: 'agent',
   title: 'Read issue #622 and identity migration specs',
-  labels: ['issue-622', 'krate', 'agent-identity', 'research'],
+  labels: ['issue-622', 'kradle', 'agent-identity', 'research'],
   context: args,
   spec: {
     task: 'Read the issue, comments, labels, and agent identity migration docs. Return acceptance criteria, dependencies, and concrete target surfaces.',
@@ -50,7 +50,7 @@ export const readIssueContextTask = defineTask('issue-622.read-context', (args) 
 
 export const reuseAuditTask = defineTask('issue-622.reuse-audit', (args) => ({
   kind: 'agent',
-  title: 'Audit existing Krate identity and dispatch surfaces',
+  title: 'Audit existing Kradle identity and dispatch surfaces',
   labels: ['issue-622', 'reuse-audit', 'compatibility'],
   context: args,
   spec: {
@@ -73,7 +73,7 @@ export const authorCompatibilityTestsTask = defineTask('issue-622.tests', (args)
 export const implementCompatibilityTask = defineTask('issue-622.implementation', (args) => ({
   kind: 'agent',
   title: 'Implement migration and compatibility changes',
-  labels: ['issue-622', 'implementation', 'krate-core', 'triggers', 'mcp'],
+  labels: ['issue-622', 'implementation', 'kradle-core', 'triggers', 'mcp'],
   context: args,
   spec: {
     task: 'Implement the smallest package-scoped changes that satisfy #622 while preserving legacy AgentStack dispatch behavior indefinitely.',
@@ -83,7 +83,7 @@ export const implementCompatibilityTask = defineTask('issue-622.implementation',
 
 export const verifyTask = defineTask('issue-622.verify', (args) => ({
   kind: 'agent',
-  title: 'Verify Krate identity migration compatibility',
+  title: 'Verify Kradle identity migration compatibility',
   labels: ['issue-622', 'verification'],
   context: args,
   spec: {

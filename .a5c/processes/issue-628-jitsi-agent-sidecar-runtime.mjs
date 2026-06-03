@@ -1,6 +1,6 @@
 /**
  * @process repo/issue-628-jitsi-agent-sidecar-runtime
- * @description Implement the Krate Jitsi agent sidecar runtime with staged IPC, Jitsi, audio, and integration gates.
+ * @description Implement the Kradle Jitsi agent sidecar runtime with staged IPC, Jitsi, audio, and integration gates.
  * @inputs { issueNumber?: number, branchName?: string, baseBranch?: string, maxImplementationAttempts?: number }
  * @outputs { success, phases, summary, runtimeCallPaths, verification, review, publish }
  *
@@ -22,18 +22,18 @@ const processFile = '.a5c/processes/issue-628-jitsi-agent-sidecar-runtime.mjs';
 const inputsFile = '.a5c/processes/issue-628-jitsi-agent-sidecar-runtime.inputs.json';
 
 const defaultSpecPaths = [
-  'packages/krate/docs/jitsi/01-architecture.md',
-  'packages/krate/docs/jitsi/02-helm-deployment.md',
-  'packages/krate/docs/jitsi/03-crds-and-controllers.md',
-  'packages/krate/docs/jitsi/06-agent-meeting-participation.md',
-  'packages/krate/docs/jitsi/07-agent-meeting-runtime.md',
-  'packages/krate/docs/agent-identity/04-meeting-integration.md',
+  'packages/kradle/docs/jitsi/01-architecture.md',
+  'packages/kradle/docs/jitsi/02-helm-deployment.md',
+  'packages/kradle/docs/jitsi/03-crds-and-controllers.md',
+  'packages/kradle/docs/jitsi/06-agent-meeting-participation.md',
+  'packages/kradle/docs/jitsi/07-agent-meeting-runtime.md',
+  'packages/kradle/docs/agent-identity/04-meeting-integration.md',
 ];
 
 const defaultQualityCommands = [
   'git diff --check',
-  'npm run test --workspace=@a5c-ai/krate',
-  'npm run build:krate',
+  'npm run test --workspace=@a5c-ai/kradle',
+  'npm run build:kradle',
   'npm run verify:metadata',
 ];
 
@@ -46,14 +46,14 @@ const readSpecTask = defineTask('issue-628.read-spec', (args, taskCtx) => ({
   agent: {
     name: 'jitsi-sidecar-spec-reader',
     prompt: {
-      role: 'senior Krate implementation planner',
+      role: 'senior Kradle implementation planner',
       task: 'Read the authoritative issue and runtime specifications for issue #628 before any implementation work.',
       instructions: [
         `Run and preserve the important details from: gh issue view ${args.issueNumber} --json title,body,labels,comments,state,url`,
         `Confirm whether #${args.issueNumber} is a PR by attempting: gh pr view ${args.issueNumber} --json files,title,body,comments`,
         `List related planning or implementation PRs with: gh pr list --state all --search "${args.issueNumber} in:body OR #${args.issueNumber} in:body OR ${args.issueNumber} in:title" --json number,title,state,headRefName,baseRefName,url,body --limit 20`,
         'Read every path in args.specPaths when present. Record missing files explicitly.',
-        'Treat packages/krate/docs/jitsi/07-agent-meeting-runtime.md as the primary runtime contract, while also reconciling Helm, controller, and agent meeting participation docs.',
+        'Treat packages/kradle/docs/jitsi/07-agent-meeting-runtime.md as the primary runtime contract, while also reconciling Helm, controller, and agent meeting participation docs.',
         'Return JSON: { title, state, labels, issueUrl, comments, relatedPullRequests, specFilesRead, missingSpecFiles, acceptanceCriteria, nonGoals, risks, dependencyStatus, rawContextSummary }.',
       ],
       args: {
@@ -79,11 +79,11 @@ const reuseAuditTask = defineTask('issue-628.reuse-audit', (args, taskCtx) => ({
       task: 'Run the mandatory Phase 0 reuse audit before proposing new runtime infrastructure.',
       instructions: [
         'Extract keywords from the issue and specs: jitsi, sidecar, socket, ipc, ndjson, stt, tts, vad, puppeteer, chromium, agent meeting, transcript, participant, speak_tts, AGENT_SOCKET_PATH, JITSI_ROOM_URL.',
-        'Check for .a5c/reuse-audit.json. If absent, say so explicitly and use targeted Krate/Jitsi globs.',
+        'Check for .a5c/reuse-audit.json. If absent, say so explicitly and use targeted Kradle/Jitsi globs.',
         'Render a top-level section named exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
         'Scan for matching docs, source files, tests, environment variables, dependency declarations, imports, routes, Kubernetes Job spec code, Helm values, and existing sidecar/socket code.',
         'Use ripgrep or repository-native search tools to gather evidence, but keep this task as an agent task under the repo policy.',
-        'If no runnable sidecar exists, include a concise "No matching existing runtime sidecar found" note while still listing adjacent reusable Krate infrastructure.',
+        'If no runnable sidecar exists, include a concise "No matching existing runtime sidecar found" note while still listing adjacent reusable Kradle infrastructure.',
         'Return JSON: { heading, keywords, configFound, directMatches, adjacentInfrastructure, packageAndDependencyMatches, envVarMatches, testMatches, noMatchNotes, reuseRecommendations, risks }.',
         '',
         'ISSUE_CONTEXT:',
@@ -129,12 +129,12 @@ const processLibraryResearchTask = defineTask('issue-628.process-library-researc
 
 const traceRuntimeTask = defineTask('issue-628.trace-runtime', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Trace Krate runtime call paths before implementation',
+  title: 'Trace Kradle runtime call paths before implementation',
   labels: ['issue-628', 'brownfield', 'runtime-trace'],
   agent: {
-    name: 'krate-runtime-tracer',
+    name: 'kradle-runtime-tracer',
     prompt: {
-      role: 'senior Krate platform engineer',
+      role: 'senior Kradle platform engineer',
       task: 'Trace the live runtime paths that issue #628 must integrate with before any implementation work.',
       instructions: [
         'Read the repository directly.',
@@ -224,7 +224,7 @@ const authorTestsTask = defineTask('issue-628.author-tests-first', (args, taskCt
         'Edit the repository directly.',
         'Read existing test harnesses and package/workspace patterns before adding tests.',
         'Do not read newly-created implementation directories for the sidecar runtime; author tests strictly from the spec text and existing contract surfaces.',
-        'Tests must freeze IPC NDJSON framing and validation, Unix socket behavior, command/event contracts, reconnect/lifecycle behavior, provider capability gating, container/package smoke behavior, Krate Job sidecar/env/volume integration, Helm values alignment, and local-Jitsi integration when configured.',
+        'Tests must freeze IPC NDJSON framing and validation, Unix socket behavior, command/event contracts, reconnect/lifecycle behavior, provider capability gating, container/package smoke behavior, Kradle Job sidecar/env/volume integration, Helm values alignment, and local-Jitsi integration when configured.',
         'Name or structure tests so failures clearly cite the matching spec/source surface.',
         'Return JSON: { changedFiles: string[], testCommands: string[], expectedFailures: string[], summary: string }.',
         '',
@@ -276,18 +276,18 @@ const redGateTask = defineTask('issue-628.red-gate', (args, taskCtx) => ({
 const implementTask = defineTask('issue-628.implement-sidecar-runtime', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement Jitsi sidecar runtime',
-  labels: ['issue-628', 'implementation', 'krate', 'jitsi'],
+  labels: ['issue-628', 'implementation', 'kradle', 'jitsi'],
   agent: {
     name: 'jitsi-sidecar-implementer',
     prompt: {
       role: 'senior Node/Kubernetes runtime engineer',
-      task: 'Implement issue #628 using the tests-first plan and existing Krate patterns.',
+      task: 'Implement issue #628 using the tests-first plan and existing Kradle patterns.',
       instructions: [
         'Edit the repository directly.',
         'Keep changes scoped to files on the traced runtime path and the new sidecar package/image/test surfaces required by the spec.',
         'Do not modify unrelated plugin/config files.',
         'Use existing workspace, controller, chart, and test conventions.',
-        'Implement in staged order: sidecar workspace/package, Dockerfile, IPC server, validation/state, Jitsi adapter lifecycle/reconnect, chat/participant/hand/reaction commands, transcript cache, capability-gated STT/TTS/VAD adapters, Krate sidecar injection/env/volume alignment, docs if behavior diverges from existing docs.',
+        'Implement in staged order: sidecar workspace/package, Dockerfile, IPC server, validation/state, Jitsi adapter lifecycle/reconnect, chat/participant/hand/reaction commands, transcript cache, capability-gated STT/TTS/VAD adapters, Kradle sidecar injection/env/volume alignment, docs if behavior diverges from existing docs.',
         'Treat STT/TTS/VAD provider calls as adapter boundaries with explicit configuration and credentials; avoid requiring external paid services for unit tests.',
         'Return JSON: { changedFiles: string[], summary: string, verificationNotes: string[], residualRisks: string[] }.',
         '',
@@ -346,7 +346,7 @@ const verificationTask = defineTask('issue-628.verify-implementation', (args, ta
       instructions: [
         'Run git status --short first and record changed files.',
         'Run every command in args.qualityCommands in order. A nonzero exit is blocking unless the command is explicitly unavailable and the final review accepts the bounded skip.',
-        'Detect whether a sidecar package/image and Dockerfile were added. If Docker is available and a sidecar Dockerfile exists, run a Docker build smoke test for krate/jitsi-agent-sidecar:test.',
+        'Detect whether a sidecar package/image and Dockerfile were added. If Docker is available and a sidecar Dockerfile exists, run a Docker build smoke test for kradle/jitsi-agent-sidecar:test.',
         `If ${args.localJitsiEnvVar} is set, run the configured local-Jitsi integration command. If it is unset, record the #623/local-Jitsi dependency explicitly as a bounded external skip.`,
         'Return JSON: { passed: boolean, gitStatus: string[], commandResults: object[], dockerSmoke: object, localJitsi: object, skipped: object[], blockingIssues: string[] }.',
       ],
@@ -393,7 +393,7 @@ const finalReviewTask = defineTask('issue-628.final-review', (args, taskCtx) => 
   agent: {
     name: 'jitsi-sidecar-final-reviewer',
     prompt: {
-      role: 'independent senior reviewer for Krate runtime changes',
+      role: 'independent senior reviewer for Kradle runtime changes',
       task: 'Decide whether the final artifacts satisfy issue #628.',
       instructions: [
         'Assess correctness, completeness, security, test coverage, operability, and scope control.',
@@ -431,7 +431,7 @@ const publishTask = defineTask('issue-628.publish', (args, taskCtx) => ({
       instructions: [
         'Inspect git status and stage only files in args.changedFiles plus any directly required lockfile/package metadata produced by those implementation files.',
         'Do not stage unrelated .agents, .codex, or plugins/babysitter changes.',
-        'Commit with message: feat(krate): add Jitsi agent sidecar runtime.',
+        'Commit with message: feat(kradle): add Jitsi agent sidecar runtime.',
         'Push args.branchName to origin.',
         'If no PR exists for args.branchName, create one against args.baseBranch titled "Implement Jitsi agent sidecar runtime" with a body that closes the issue and summarizes implementation, tests, and bounded external skips.',
         'Post an issue comment linking the PR and summarizing the implementation outcome.',
@@ -457,9 +457,9 @@ export async function process(inputs, ctx) {
   const baseBranch = inputs?.baseBranch ?? 'staging';
   const specPaths = inputs?.specPaths ?? defaultSpecPaths;
   const qualityCommands = inputs?.qualityCommands ?? defaultQualityCommands;
-  const redTestCommand = inputs?.redTestCommand ?? 'npm run test --workspace=@a5c-ai/krate';
+  const redTestCommand = inputs?.redTestCommand ?? 'npm run test --workspace=@a5c-ai/kradle';
   const localJitsiEnvVar = inputs?.localJitsiEnvVar ?? 'JITSI_LOCAL_TEST_URL';
-  const localJitsiCommand = inputs?.localJitsiCommand ?? 'npm run test --workspace=@a5c-ai/krate -- --runInBand --testNamePattern=local-jitsi';
+  const localJitsiCommand = inputs?.localJitsiCommand ?? 'npm run test --workspace=@a5c-ai/kradle -- --runInBand --testNamePattern=local-jitsi';
   const maxImplementationAttempts = inputs?.maxImplementationAttempts ?? 3;
 
   const spec = await ctx.task(readSpecTask, { issueNumber, specPaths });

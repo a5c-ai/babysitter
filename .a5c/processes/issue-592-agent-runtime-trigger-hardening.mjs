@@ -41,7 +41,7 @@
  * - Webhooks validate method/path/bearer auth and body size but have no
  *   admission policy, token bucket, queue depth cap, or deferred/rejected
  *   response contract.
- * - packages/triggers-mux and packages/krate/core have reusable trigger
+ * - packages/triggers-mux and packages/kradle/core have reusable trigger
  *   normalization/query and AgentTriggerRule concepts, but they are not a drop-
  *   in daemon event-source abstraction.
  *
@@ -256,8 +256,8 @@ export const reuseAuditTask = defineTask("issue-592.reuse-audit", (args, taskCtx
         "Render a section titled exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).",
         "Extract keyword nouns and verbs from the issue: cron, timezone, named months, named days, L, #, @daily, @reboot, message queue, RabbitMQ, Kafka, SQS, git webhook, Slack, Discord, rate limiting, token bucket, backpressure, queue depth, deduplication, fingerprint, dead letter queue, retry, backoff, failure metrics.",
         "Scan for matching migrations, API routes, environment variables, SDK dependencies, package exports, and imports. Honor .a5c/reuse-audit.json if present.",
-        "Inspect packages/agent-runtime/src/daemon first, then packages/tula/platform/src/daemon, packages/triggers-mux, packages/krate/core trigger controllers, observability queue diagnostics, and docs/agent-layer-gaps.md.",
-        "Call out existing infrastructure to reuse, especially DurableTriggerQueue, daemon status/diagnostics, triggers-mux normalization/query helpers, and krate AgentTriggerRule ideas.",
+        "Inspect packages/agent-runtime/src/daemon first, then packages/tula/platform/src/daemon, packages/triggers-mux, packages/kradle/core trigger controllers, observability queue diagnostics, and docs/agent-layer-gaps.md.",
+        "Call out existing infrastructure to reuse, especially DurableTriggerQueue, daemon status/diagnostics, triggers-mux normalization/query helpers, and kradle AgentTriggerRule ideas.",
         "Call out no-match areas where new implementation is still required.",
         "Do not edit files.",
         "Return JSON: { renderedFindings, keywords, existingInfrastructure, reusableModules, dependencyFindings, envVars, endpointFindings, gapsStillOpen, noMatchNotes, parityRisks, risksForNewInfrastructure }.",
@@ -293,7 +293,7 @@ export const traceTriggerArchitectureTask = defineTask("issue-592.trace-trigger-
         "Trace webhook listener response semantics, auth/body limits, queue handoff, and places where rate limit/backpressure responses could be returned.",
         "Trace runDaemonLoop memory queue and DurableTriggerQueue behavior, including retry, backoff, dead-letter, status, and crash-replay boundaries from #585.",
         "Trace duplicated agent-platform daemon code and recommend centralization or parity-update sequencing.",
-        "Trace packages/triggers-mux and packages/krate/core trigger code only enough to reuse concepts without coupling daemon internals to unrelated packages.",
+        "Trace packages/triggers-mux and packages/kradle/core trigger code only enough to reuse concepts without coupling daemon internals to unrelated packages.",
         "Return JSON: { currentState, runtimeCallPaths, platformCallPaths, reusableContracts, likelyFiles, testFiles, missingSurfaces, compatibilityRisks, securityRisks, proposedImplementationSlices, outOfScope }.",
       ],
       context: {

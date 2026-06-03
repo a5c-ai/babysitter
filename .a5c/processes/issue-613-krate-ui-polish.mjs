@@ -1,12 +1,12 @@
 /**
- * @process repo/issue-613-krate-ui-polish
- * @description Implement issue #613 for Krate web UI polish: stable React keys, user-visible deploy errors, color-token consistency, and radiogroup keyboard behavior.
+ * @process repo/issue-613-kradle-ui-polish
+ * @description Implement issue #613 for Kradle web UI polish: stable React keys, user-visible deploy errors, color-token consistency, and radiogroup keyboard behavior.
  * @inputs { issueNumber: number, baseBranch: string, targetBranch: string, title: string, issueUrl: string, issueBody: string, triageComment: string, targetFiles: string[], verificationCommands: string[] }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], verification: object, review: object }
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
- * - packages/krate/docs/gaps/ui-ux-remaining.md
+ * - packages/kradle/docs/gaps/ui-ux-remaining.md
  *
  * Process-library references used:
  * - methodologies/superpowers/test-driven-development.js
@@ -43,7 +43,7 @@ const MAX_REFINEMENT_ATTEMPTS = 3;
 function specBlock(args) {
   const runtimeIssue = args.issueContext?.rawIssueJson || args.issueContext?.issueSummary || args.issueBody || '';
   const runtimeTriage = args.issueContext?.commentsSummary || args.triageComment || '';
-  const runtimeGapDoc = args.issueContext?.gapDocText || 'packages/krate/docs/gaps/ui-ux-remaining.md';
+  const runtimeGapDoc = args.issueContext?.gapDocText || 'packages/kradle/docs/gaps/ui-ux-remaining.md';
   return [
     'RUNTIME-READ ISSUE CONTEXT:',
     '---',
@@ -66,7 +66,7 @@ export async function process(inputs, ctx) {
   const shared = {
     issueNumber: inputs?.issueNumber ?? 613,
     baseBranch: inputs?.baseBranch ?? 'staging',
-    targetBranch: inputs?.targetBranch ?? 'feat/issue-613-krate-ui-polish',
+    targetBranch: inputs?.targetBranch ?? 'feat/issue-613-kradle-ui-polish',
     title: inputs?.title ?? 'UI polish: index-based keys, remaining console.warn, hardcoded colors',
     issueUrl: inputs?.issueUrl,
     issueBody: inputs?.issueBody,
@@ -225,18 +225,18 @@ export async function process(inputs, ctx) {
 
 export const readIssueContextTask = defineTask('issue-613.read-issue-context', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Read issue #613 and Krate UI gap context',
-  labels: ['issue-613', 'krate', 'krate-web', 'research'],
+  title: 'Read issue #613 and Kradle UI gap context',
+  labels: ['issue-613', 'kradle', 'kradle-web', 'research'],
   agent: {
     name: 'frontend-engineer',
     prompt: {
-      role: 'senior Krate web frontend engineer',
+      role: 'senior Kradle web frontend engineer',
       task: 'Read the issue, comments, labels, and referenced gap document before planning code changes.',
       instructions: [
         `Run: gh issue view ${args.issueNumber} --json title,body,labels,comments,state,url`,
         `Confirm #${args.issueNumber} is not a PR with: gh pr view ${args.issueNumber} --json files,title,body,comments`,
         'Read all issue comments and labels carefully. Treat the issue body, triage comment, and gap document as the source of truth.',
-        'Read packages/krate/docs/gaps/ui-ux-remaining.md.',
+        'Read packages/kradle/docs/gaps/ui-ux-remaining.md.',
         'Inspect current target files only enough to determine which issue items are still unresolved on the execution branch.',
         'Capture the raw issue JSON and gap document text in the returned JSON so downstream tasks compare against runtime-read context instead of authored paraphrase.',
         'Do not modify files in this phase.',
@@ -257,9 +257,9 @@ export const readIssueContextTask = defineTask('issue-613.read-issue-context', (
 export const reuseAuditTask = defineTask('issue-613.reuse-audit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 0: Reuse-audit findings',
-  labels: ['issue-613', 'krate', 'reuse-audit', 'planning'],
+  labels: ['issue-613', 'kradle', 'reuse-audit', 'planning'],
   agent: {
-    name: 'krate-reuse-auditor',
+    name: 'kradle-reuse-auditor',
     prompt: {
       role: 'senior frontend maintenance engineer',
       task: 'Run the repo-specific reuse audit before implementation work.',
@@ -268,7 +268,7 @@ export const reuseAuditTask = defineTask('issue-613.reuse-audit', (args, taskCtx
         '',
         'Extract keyword nouns and verbs from the prompt and issue: React keys, index keys, generated row IDs, console.warn, deploy error state, hardcoded colors, CSS variables, radiogroup, arrow keys, Home, End.',
         'Start the response with exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
-        'Scan existing Krate web tests, component helpers, color variables, toast/status patterns, keyboard-handler patterns, and dynamic list identity patterns.',
+        'Scan existing Kradle web tests, component helpers, color variables, toast/status patterns, keyboard-handler patterns, and dynamic list identity patterns.',
         'Check whether .a5c/reuse-audit.json exists and honor its scan globs if present.',
         'Do not modify files in this phase.',
         'Return JSON: { findingsMarkdown, matchingInfrastructure, reusablePatterns, missingInfrastructure, targetFiles, recommendedTestFiles, noCodeChanges }.',
@@ -288,7 +288,7 @@ export const reuseAuditTask = defineTask('issue-613.reuse-audit', (args, taskCtx
 export const scopeCurrentStateTask = defineTask('issue-613.scope-current-state', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Scope unresolved UI polish against current branch',
-  labels: ['issue-613', 'krate-web', 'scope', 'diagnosis'],
+  labels: ['issue-613', 'kradle-web', 'scope', 'diagnosis'],
   agent: {
     name: 'frontend-engineer',
     prompt: {
@@ -322,7 +322,7 @@ export const scopeCurrentStateTask = defineTask('issue-613.scope-current-state',
 export const authorRegressionTestsTask = defineTask('issue-613.author-regression-tests', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Author focused regression tests first',
-  labels: ['issue-613', 'krate-web', 'tdd', 'tests'],
+  labels: ['issue-613', 'kradle-web', 'tdd', 'tests'],
   agent: {
     name: 'test-engineer',
     prompt: {
@@ -334,7 +334,7 @@ export const authorRegressionTestsTask = defineTask('issue-613.author-regression
         'CURRENT-STATE SCOPE:',
         JSON.stringify(args.scope ?? {}, null, 2),
         '',
-        'Add or extend tests under packages/krate/web/tests using existing node:test structural-test patterns unless the repo already has a stronger component test harness.',
+        'Add or extend tests under packages/kradle/web/tests using existing node:test structural-test patterns unless the repo already has a stronger component test harness.',
         'Cover dynamic key identity without brittle broad grep-only checks: mutable local rows must have generated stable IDs, server-backed rows must use resource IDs/names, and unresolved issue-scoped index keys must fail.',
         'Cover CuratedModelCatalog only if current-state scope finds the route-creation warning/error is still missing or incomplete.',
         'Cover ApprovalModeToggle keyboard behavior for ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Home, and End in a way that verifies handler presence and expected mode order.',
@@ -356,8 +356,8 @@ export const authorRegressionTestsTask = defineTask('issue-613.author-regression
 
 export const implementUiPolishTask = defineTask('issue-613.implement-ui-polish', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement scoped Krate UI polish fixes',
-  labels: ['issue-613', 'krate-web', 'implementation', 'ui-polish'],
+  title: 'Implement scoped Kradle UI polish fixes',
+  labels: ['issue-613', 'kradle-web', 'implementation', 'ui-polish'],
   agent: {
     name: 'frontend-engineer',
     prompt: {
@@ -402,7 +402,7 @@ export const implementUiPolishTask = defineTask('issue-613.implement-ui-polish',
 export const verifyQualityGatesTask = defineTask('issue-613.verify-quality-gates', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Verify deterministic quality gates',
-  labels: ['issue-613', 'krate-web', 'verification', 'quality-gate'],
+  labels: ['issue-613', 'kradle-web', 'verification', 'quality-gate'],
   agent: {
     name: 'test-engineer',
     prompt: {
@@ -437,7 +437,7 @@ export const verifyQualityGatesTask = defineTask('issue-613.verify-quality-gates
 export const reviewAgainstSpecTask = defineTask('issue-613.review-against-spec', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Review implementation against #613 spec',
-  labels: ['issue-613', 'krate-web', 'review', 'quality-gate'],
+  labels: ['issue-613', 'kradle-web', 'review', 'quality-gate'],
   agent: {
     name: 'code-reviewer',
     prompt: {
@@ -477,7 +477,7 @@ export const reviewAgainstSpecTask = defineTask('issue-613.review-against-spec',
 export const finalAcceptanceTask = defineTask('issue-613.final-acceptance', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Final acceptance gate',
-  labels: ['issue-613', 'krate-web', 'final-acceptance'],
+  labels: ['issue-613', 'kradle-web', 'final-acceptance'],
   agent: {
     name: 'code-reviewer',
     prompt: {

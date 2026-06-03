@@ -1,118 +1,118 @@
-# Krate package inventory and Atlas gap map.
-# Source of truth: packages/krate/charts/crds/*.yaml and packages/krate runtime/docs surfaces.
+# Kradle package inventory and Atlas gap map.
+# Source of truth: packages/kradle/charts/crds/*.yaml and packages/kradle runtime/docs surfaces.
 ---
 nodeKind: Topic
-id: topic:krate-crd-inventory
+id: topic:kradle-crd-inventory
 attributes:
-  displayName: "Krate CRD Inventory"
+  displayName: "Kradle CRD Inventory"
   description: |
-    Machine-readable inventory topic for Krate's Kubernetes-native API surface.
-    packages/krate/charts/crds currently defines 75 CustomResourceDefinition
+    Machine-readable inventory topic for Kradle's Kubernetes-native API surface.
+    packages/kradle/charts/crds currently defines 75 CustomResourceDefinition
     documents across agent resources, aggregated forge/CI/session/memory
     resources, external backend resources, policy resources, and repository /
     organization / identity resources.
 edges:
   relates_to:
-    - platform:krate
-    - agent-platform-impl:krate.platform@current
-    - platform-service:krate-forge
-    - platform-service:krate-agent-dispatch
-    - platform-service:krate-company-brain
-    - platform-service:krate-policy
+    - platform:kradle
+    - agent-platform-impl:kradle.platform@current
+    - platform-service:kradle-forge
+    - platform-service:kradle-agent-dispatch
+    - platform-service:kradle-company-brain
+    - platform-service:kradle-policy
 ---
 nodeKind: EvidenceSource
-id: evidence:krate-crd-source-agent-resources
+id: evidence:kradle-crd-source-agent-resources
 attributes:
-  displayName: "Krate agent CRD source"
+  displayName: "Kradle agent CRD source"
   kindLabel: file
-  sourcePathOrUrl: packages/krate/charts/crds/agent-resources.yaml
-  filePath: packages/krate/charts/crds/agent-resources.yaml
+  sourcePathOrUrl: packages/kradle/charts/crds/agent-resources.yaml
+  filePath: packages/kradle/charts/crds/agent-resources.yaml
   trustLevel: trust-level:repo
   observedAt: '2026-05-14T00:00:00Z'
   observedBy: codex
-  locator: krate-crds:agent-resources
+  locator: kradle-crds:agent-resources
 edges:
   evidences:
-    - claim:krate-crd-kind-count-75
+    - claim:kradle-crd-kind-count-75
 ---
 nodeKind: EvidenceSource
-id: evidence:krate-crd-source-aggregated-resources
+id: evidence:kradle-crd-source-aggregated-resources
 attributes:
-  displayName: "Krate aggregated resource CRD source"
+  displayName: "Kradle aggregated resource CRD source"
   kindLabel: file
-  sourcePathOrUrl: packages/krate/charts/crds/aggregated-resources.yaml
-  filePath: packages/krate/charts/crds/aggregated-resources.yaml
+  sourcePathOrUrl: packages/kradle/charts/crds/aggregated-resources.yaml
+  filePath: packages/kradle/charts/crds/aggregated-resources.yaml
   trustLevel: trust-level:repo
   observedAt: '2026-05-14T00:00:00Z'
   observedBy: codex
-  locator: krate-crds:aggregated-resources
+  locator: kradle-crds:aggregated-resources
 edges:
   evidences:
-    - claim:krate-crd-kind-count-75
+    - claim:kradle-crd-kind-count-75
 ---
 nodeKind: EvidenceSource
-id: evidence:krate-crd-source-external-resources
+id: evidence:kradle-crd-source-external-resources
 attributes:
-  displayName: "Krate external backend CRD source"
+  displayName: "Kradle external backend CRD source"
   kindLabel: file
-  sourcePathOrUrl: packages/krate/charts/crds/external-resources.yaml
-  filePath: packages/krate/charts/crds/external-resources.yaml
+  sourcePathOrUrl: packages/kradle/charts/crds/external-resources.yaml
+  filePath: packages/kradle/charts/crds/external-resources.yaml
   trustLevel: trust-level:repo
   observedAt: '2026-05-14T00:00:00Z'
   observedBy: codex
-  locator: krate-crds:external-resources
+  locator: kradle-crds:external-resources
 edges:
   evidences:
-    - claim:krate-crd-kind-count-75
+    - claim:kradle-crd-kind-count-75
 ---
 nodeKind: EvidenceSource
-id: evidence:krate-crd-source-policy-resources
+id: evidence:kradle-crd-source-policy-resources
 attributes:
-  displayName: "Krate policy CRD source"
+  displayName: "Kradle policy CRD source"
   kindLabel: file
-  sourcePathOrUrl: packages/krate/charts/crds/policy-resources.yaml
-  filePath: packages/krate/charts/crds/policy-resources.yaml
+  sourcePathOrUrl: packages/kradle/charts/crds/policy-resources.yaml
+  filePath: packages/kradle/charts/crds/policy-resources.yaml
   trustLevel: trust-level:repo
   observedAt: '2026-05-14T00:00:00Z'
   observedBy: codex
-  locator: krate-crds:policy-resources
+  locator: kradle-crds:policy-resources
 edges:
   evidences:
-    - claim:krate-crd-kind-count-75
+    - claim:kradle-crd-kind-count-75
 ---
 nodeKind: EvidenceSource
-id: evidence:krate-crd-source-repositories
+id: evidence:kradle-crd-source-repositories
 attributes:
-  displayName: "Krate repository and identity CRD source"
+  displayName: "Kradle repository and identity CRD source"
   kindLabel: file
-  sourcePathOrUrl: packages/krate/charts/crds/repositories.yaml
-  filePath: packages/krate/charts/crds/repositories.yaml
+  sourcePathOrUrl: packages/kradle/charts/crds/repositories.yaml
+  filePath: packages/kradle/charts/crds/repositories.yaml
   trustLevel: trust-level:repo
   observedAt: '2026-05-14T00:00:00Z'
   observedBy: codex
-  locator: krate-crds:repositories
+  locator: kradle-crds:repositories
 edges:
   evidences:
-    - claim:krate-crd-kind-count-75
+    - claim:kradle-crd-kind-count-75
 ---
 nodeKind: Claim
-id: claim:krate-crd-kind-count-75
+id: claim:kradle-crd-kind-count-75
 attributes:
-  subjectId: platform:krate
+  subjectId: platform:kradle
   subjectKind: Platform
   attribute: crdKindCount
   value: 75
   statement: |
-    packages/krate currently defines 75 Kubernetes CustomResourceDefinition
-    documents under packages/krate/charts/crds: 22 agent resources, 28
+    packages/kradle currently defines 75 Kubernetes CustomResourceDefinition
+    documents under packages/kradle/charts/crds: 22 agent resources, 28
     aggregated forge/CI/session/memory resources, 10 external backend resources,
     4 policy resources, and 11 repository/organization/identity resources.
   evidenceSourceIds:
-    - evidence:krate-crd-source-agent-resources
-    - evidence:krate-crd-source-aggregated-resources
-    - evidence:krate-crd-source-external-resources
-    - evidence:krate-crd-source-policy-resources
-    - evidence:krate-crd-source-repositories
+    - evidence:kradle-crd-source-agent-resources
+    - evidence:kradle-crd-source-aggregated-resources
+    - evidence:kradle-crd-source-external-resources
+    - evidence:kradle-crd-source-policy-resources
+    - evidence:kradle-crd-source-repositories
   confidence: high
   provenanceKind: repo-inspection
   evidenceStrength: strong
@@ -122,28 +122,28 @@ attributes:
   claimKind: assertion
 edges:
   claims:
-    - platform:krate
+    - platform:kradle
   evidenced_by:
-    - evidence:krate-crd-source-agent-resources
-    - evidence:krate-crd-source-aggregated-resources
-    - evidence:krate-crd-source-external-resources
-    - evidence:krate-crd-source-policy-resources
-    - evidence:krate-crd-source-repositories
+    - evidence:kradle-crd-source-agent-resources
+    - evidence:kradle-crd-source-aggregated-resources
+    - evidence:kradle-crd-source-external-resources
+    - evidence:kradle-crd-source-policy-resources
+    - evidence:kradle-crd-source-repositories
 ---
 nodeKind: TestableClaim
-id: claim-test:krate-crd-kind-count-75
+id: claim-test:kradle-crd-kind-count-75
 attributes:
-  displayName: "Krate CRD inventory count is 75"
+  displayName: "Kradle CRD inventory count is 75"
   description: |
-    Verifies the packages/krate/charts/crds source files define exactly 75
+    Verifies the packages/kradle/charts/crds source files define exactly 75
     CustomResourceDefinition documents. This claim prevents stale Atlas prose
     from drifting behind the package resource model.
   testStatus: untested
   testType: unit
-  testCommand: "node -e \"const fs=require('fs'),yaml=require('yaml'),p='packages/krate/charts/crds';let n=0;for(const f of fs.readdirSync(p).filter(x=>x.endsWith('.yaml'))){for(const d of yaml.parseAllDocuments(fs.readFileSync(p+'/'+f,'utf8'))){if(d.toJSON()?.kind==='CustomResourceDefinition')n++;}}process.exit(n===75?0:1)\""
+  testCommand: "node -e \"const fs=require('fs'),yaml=require('yaml'),p='packages/kradle/charts/crds';let n=0;for(const f of fs.readdirSync(p).filter(x=>x.endsWith('.yaml'))){for(const d of yaml.parseAllDocuments(fs.readFileSync(p+'/'+f,'utf8'))){if(d.toJSON()?.kind==='CustomResourceDefinition')n++;}}process.exit(n===75?0:1)\""
   category: graph-integrity
   priority: high
 edges:
   asserts_about:
-    - platform:krate
-    - topic:krate-crd-inventory
+    - platform:kradle
+    - topic:kradle-crd-inventory

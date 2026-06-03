@@ -1,6 +1,6 @@
 /**
  * @process repo/issue-626-jitsi-embedded-meeting
- * @description Complete the Krate embedded Jitsi meeting experience with External API lifecycle, context panel, controls, post-meeting links, responsive layout, and quality gates.
+ * @description Complete the Kradle embedded Jitsi meeting experience with External API lifecycle, context panel, controls, post-meeting links, responsive layout, and quality gates.
  * @inputs { issueNumber: number, title: string, labels: string[], issueBody: string, issueComments: array, specPaths: string[], targetSurfaces: object, qualityCommands: string[] }
  * @outputs { success, phases, reuseAudit, runtimeCallPaths, changedFiles, qualityGate, securityReview, uxReview, finalAcceptance }
  * @process specializations/web-development/nextjs-fullstack-app
@@ -40,9 +40,9 @@ const reuseAuditTask = defineTask(
   async ({ issue, auditKeywords, targetSurfaces }) => ({
     kind: 'agent',
     title: 'Phase 0 reuse audit for Jitsi embedded meeting',
-    labels: ['krate-web', 'jitsi', 'reuse-audit', 'phase:0'],
+    labels: ['kradle-web', 'jitsi', 'reuse-audit', 'phase:0'],
     agent: {
-      name: 'krate-reuse-auditor',
+      name: 'kradle-reuse-auditor',
       prompt: {
         role: 'senior brownfield web engineer',
         task: 'Run the repo-required Phase 0 reuse audit before planning or implementation work.',
@@ -50,7 +50,7 @@ const reuseAuditTask = defineTask(
           'Extract keyword nouns and verbs from issue #626 and the target surfaces.',
           'Scan the repository for existing Jitsi meeting pages, API routes, components, service helpers, CRDs, tests, env vars, and package dependencies.',
           'Treat currentStagingFindings as pre-flight evidence to verify, not as a substitute for scanning the working tree.',
-          'Pay special attention to packages/krate/web/app/pages/jitsi-pages.jsx, packages/krate/web/app/components/jitsi, packages/krate/web/app/api/orgs/[org]/jitsi, packages/krate/web/app/lib/jitsi-service.js, packages/krate/docs/jitsi, and package manifests.',
+          'Pay special attention to packages/kradle/web/app/pages/jitsi-pages.jsx, packages/kradle/web/app/components/jitsi, packages/kradle/web/app/api/orgs/[org]/jitsi, packages/kradle/web/app/lib/jitsi-service.js, packages/kradle/docs/jitsi, and package manifests.',
           'Report findings under exactly this heading: "Reuse-audit findings (REVIEW BEFORE PROCEEDING)".',
           'Classify each finding as route, component, API, service, CRD, env var, dependency, test, or prior plan.',
           'Call out existing partial implementation that must be extended rather than duplicated.',
@@ -77,9 +77,9 @@ const sourceSpecTask = defineTask(
   async ({ issue, reuseAudit, specPaths }) => ({
     kind: 'agent',
     title: 'Read issue, comments, and Jitsi UX specs',
-    labels: ['krate-web', 'jitsi', 'spec', 'phase:research'],
+    labels: ['kradle-web', 'jitsi', 'spec', 'phase:research'],
     agent: {
-      name: 'krate-spec-reader',
+      name: 'kradle-spec-reader',
       prompt: {
         role: 'senior product-minded implementation planner',
         task: 'Build the issue #626 implementation spec from authoritative sources.',
@@ -88,7 +88,7 @@ const sourceSpecTask = defineTask(
           'Read every path listed in specPaths, especially the human meeting experience spec and web management spec.',
           'Incorporate the reuse-audit findings before proposing any new route, component, API, dependency, or env var.',
           'Separate hard acceptance criteria from dependency assumptions and optional follow-ups.',
-          'Preserve these expected surfaces: EmbeddedMeeting via Jitsi External API, authenticated join flow, Krate context panel, meeting controls, post-meeting state, responsive layout, deep links, and script loading from https://meet.krate.local/external_api.js.',
+          'Preserve these expected surfaces: EmbeddedMeeting via Jitsi External API, authenticated join flow, Kradle context panel, meeting controls, post-meeting state, responsive layout, deep links, and script loading from https://meet.kradle.local/external_api.js.',
           'Do not edit source files in this phase.',
           'Return JSON: { acceptanceCriteria: array, dependencyAssumptions: array, nonGoals: array, sourceMap: array, risks: array }.',
           '',
@@ -110,18 +110,18 @@ const traceRuntimeTask = defineTask(
   'issue-626.trace-runtime-surfaces',
   async ({ issue, spec, reuseAudit, targetSurfaces }) => ({
     kind: 'agent',
-    title: 'Trace Krate meeting runtime and UI call paths',
-    labels: ['krate-web', 'jitsi', 'architecture', 'phase:research'],
+    title: 'Trace Kradle meeting runtime and UI call paths',
+    labels: ['kradle-web', 'jitsi', 'architecture', 'phase:research'],
     agent: {
-      name: 'krate-runtime-tracer',
+      name: 'kradle-runtime-tracer',
       prompt: {
-        role: 'senior Next.js and Krate platform engineer',
+        role: 'senior Next.js and Kradle platform engineer',
         task: 'Trace the live execution path for the embedded Jitsi meeting experience before implementation.',
         instructions: [
           'Trace user-facing routes from /orgs/{org}/meetings/{id} through route files, page wrappers, PageFrame/navigation, data loading, Jitsi resource lookup, client components, and API endpoints.',
           'Trace meeting actions through POST /api/orgs/{org}/jitsi/meetings/{id}/join, invite, record, and DELETE meeting endpoints into jitsi-service/controller helpers.',
           'Trace agent dispatch links through existing AgentDispatchRun and agent page conventions.',
-          'Identify existing tests and test harness conventions for Krate web components, API routes, and Playwright.',
+          'Identify existing tests and test harness conventions for Kradle web components, API routes, and Playwright.',
           'Record runtimeCallPaths with file paths, functions/components, and why each path is live.',
           'Scope future modifications to live paths unless the spec requires a new file.',
           'Do not edit source files in this phase.',
@@ -150,9 +150,9 @@ const dependencyReadinessTask = defineTask(
   async ({ issue, spec, runtimeTrace }) => ({
     kind: 'agent',
     title: 'Assess #623/#625 dependency readiness',
-    labels: ['krate-web', 'jitsi', 'dependency-gate', 'phase:planning'],
+    labels: ['kradle-web', 'jitsi', 'dependency-gate', 'phase:planning'],
     agent: {
-      name: 'krate-dependency-assessor',
+      name: 'kradle-dependency-assessor',
       prompt: {
         role: 'senior delivery lead',
         task: 'Determine whether issue #626 can proceed against current #623/#625 contracts without expanding prerequisite scope.',
@@ -183,9 +183,9 @@ const authorAcceptanceTestsTask = defineTask(
   async ({ issue, spec, runtimeTrace, testPlan }) => ({
     kind: 'agent',
     title: 'Author issue #626 acceptance tests before implementation',
-    labels: ['krate-web', 'jitsi', 'atdd', 'phase:red'],
+    labels: ['kradle-web', 'jitsi', 'atdd', 'phase:red'],
     agent: {
-      name: 'krate-atdd-test-author',
+      name: 'kradle-atdd-test-author',
       prompt: {
         role: 'senior React, Next.js, and Playwright test engineer',
         task: 'Write failing acceptance and integration coverage for issue #626 before implementation changes.',
@@ -193,9 +193,9 @@ const authorAcceptanceTestsTask = defineTask(
           'Follow outside-in ATDD. Author tests before implementation work.',
           'Base test names and assertions on the issue/spec criteria, not on current partial implementation behavior.',
           'Cover the join flow: POST /api/orgs/{org}/jitsi/meetings/{id}/join returns roomUrl and jwt, then the meeting page renders the iframe component with those values.',
-          'Cover Jitsi External API lifecycle: page-scoped script loading from https://meet.krate.local/external_api.js, construction with JWT, prejoin disabled, toolbar customization, event listeners, commands, and dispose on unmount.',
-          'Cover the Krate context panel: humans plus agents with persona/avatar treatment, recording state, invite user/agent actions, meeting metadata, and dispatch run links.',
-          'Cover meeting controls: mute/unmute, camera, screen share, chat, recording, end meeting, and invite, wired through External API commands/events or Krate API endpoints as appropriate.',
+          'Cover Jitsi External API lifecycle: page-scoped script loading from https://meet.kradle.local/external_api.js, construction with JWT, prejoin disabled, toolbar customization, event listeners, commands, and dispose on unmount.',
+          'Cover the Kradle context panel: humans plus agents with persona/avatar treatment, recording state, invite user/agent actions, meeting metadata, and dispatch run links.',
+          'Cover meeting controls: mute/unmute, camera, screen share, chat, recording, end meeting, and invite, wired through External API commands/events or Kradle API endpoints as appropriate.',
           'Cover post-meeting state: ended phase, recording finalization, and transcript/recording links.',
           'Cover auth/error/degraded states and mobile responsive layout where the context panel collapses below the iframe.',
           'Use mocked Jitsi External API for deterministic component/browser tests. Treat a real Jitsi smoke path as conditional when #623 is available.',
@@ -226,15 +226,15 @@ const implementExternalApiTask = defineTask(
   async ({ issue, spec, runtimeTrace, acceptanceTests, verificationFeedback }) => ({
     kind: 'agent',
     title: 'Implement EmbeddedMeeting External API lifecycle',
-    labels: ['krate-web', 'jitsi', 'implementation', 'phase:external-api'],
+    labels: ['kradle-web', 'jitsi', 'implementation', 'phase:external-api'],
     agent: {
-      name: 'krate-jitsi-component-implementer',
+      name: 'kradle-jitsi-component-implementer',
       prompt: {
         role: 'senior React client component engineer',
-        task: 'Complete the EmbeddedMeeting/JitsiExternalAPI integration on the live Krate meeting path.',
+        task: 'Complete the EmbeddedMeeting/JitsiExternalAPI integration on the live Kradle meeting path.',
         instructions: [
           'Extend existing Jitsi components instead of adding duplicate parallel components.',
-          'Load https://meet.krate.local/external_api.js only for the embedded meeting experience and handle loading, ready, and failure states.',
+          'Load https://meet.kradle.local/external_api.js only for the embedded meeting experience and handle loading, ready, and failure states.',
           'Instantiate window.JitsiMeetExternalAPI with domain, roomName, jwt, parentNode, displayName, prejoin bypass, toolbar customization, and interface overrides required by the spec.',
           'Wire participantJoined, participantLeft, readyToClose, recording/status, mute/video/chat/screen-share-relevant events where available.',
           'Expose an integration boundary for meeting controls to execute External API commands without duplicating Jitsi state as source of truth.',
@@ -269,9 +269,9 @@ const implementMeetingExperienceTask = defineTask(
   async ({ issue, spec, runtimeTrace, acceptanceTests, externalApiImplementation, verificationFeedback }) => ({
     kind: 'agent',
     title: 'Implement meeting page, context panel, controls, and post-meeting state',
-    labels: ['krate-web', 'jitsi', 'implementation', 'phase:meeting-experience'],
+    labels: ['kradle-web', 'jitsi', 'implementation', 'phase:meeting-experience'],
     agent: {
-      name: 'krate-meeting-experience-implementer',
+      name: 'kradle-meeting-experience-implementer',
       prompt: {
         role: 'senior full-stack Next.js engineer',
         task: 'Complete the issue #626 in-console meeting detail experience on the traced live path.',
@@ -279,8 +279,8 @@ const implementMeetingExperienceTask = defineTask(
           'Reuse existing /orgs/{org}/meetings/{id}, Jitsi service, and API route patterns.',
           'Current staging has partial Jitsi meeting scaffolding; complete it in place rather than creating a second meeting-detail implementation.',
           'Ensure the page performs the authenticated join flow and renders the embedded iframe with JWT and room URL from POST /api/orgs/{org}/jitsi/meetings/{id}/join.',
-          'Build the Krate context panel with participants, agents/persona avatars, recording controls, invite buttons, meeting metadata, and dispatch run links.',
-          'Wire controls for mute/unmute, camera, screen share, chat, recording, end meeting, and invite through the External API integration or existing Krate Jitsi API endpoints.',
+          'Build the Kradle context panel with participants, agents/persona avatars, recording controls, invite buttons, meeting metadata, and dispatch run links.',
+          'Wire controls for mute/unmute, camera, screen share, chat, recording, end meeting, and invite through the External API integration or existing Kradle Jitsi API endpoints.',
           'Handle ended/post-meeting state with recording finalization and transcript/recording links.',
           'Make the layout responsive so the context panel collapses below the iframe on narrow viewports without overlapping controls or unreadable text.',
           'Keep unrelated #623/#625 infrastructure and agent meeting runtime out of scope.',
@@ -316,11 +316,11 @@ const verifyQualityGateTask = defineTask(
   async ({ issue, spec, implementation, qualityCommands, acceptanceTests }) => ({
     kind: 'agent',
     title: 'Run issue #626 quality gates',
-    labels: ['krate-web', 'jitsi', 'verification', 'phase:quality-gate'],
+    labels: ['kradle-web', 'jitsi', 'verification', 'phase:quality-gate'],
     agent: {
-      name: 'krate-quality-verifier',
+      name: 'kradle-quality-verifier',
       prompt: {
-        role: 'senior Krate web verifier',
+        role: 'senior Kradle web verifier',
         task: 'Run and interpret the quality gates for the issue #626 implementation.',
         instructions: [
           'Run every command listed in qualityCommands from the repository root unless a command is impossible in the current environment; report exact command, exit status, and concise stdout/stderr summary.',
@@ -356,9 +356,9 @@ const securityUxReviewTask = defineTask(
   async ({ issue, spec, runtimeTrace, implementation, qualityGate }) => ({
     kind: 'agent',
     title: 'Review JWT/auth, iframe lifecycle, controls, and responsive UX',
-    labels: ['krate-web', 'jitsi', 'security', 'ux', 'phase:review'],
+    labels: ['kradle-web', 'jitsi', 'security', 'ux', 'phase:review'],
     agent: {
-      name: 'krate-security-ux-reviewer',
+      name: 'kradle-security-ux-reviewer',
       prompt: {
         role: 'senior web security and product UX reviewer',
         task: 'Review issue #626 changes for security, integration correctness, and meeting UX completeness.',
@@ -395,9 +395,9 @@ const refineImplementationTask = defineTask(
   async ({ issue, spec, runtimeTrace, acceptanceTests, implementation, qualityGate, review }) => ({
     kind: 'agent',
     title: 'Refine implementation after failed gate or review',
-    labels: ['krate-web', 'jitsi', 'refinement'],
+    labels: ['kradle-web', 'jitsi', 'refinement'],
     agent: {
-      name: 'krate-jitsi-refiner',
+      name: 'kradle-jitsi-refiner',
       prompt: {
         role: 'senior full-stack maintainer',
         task: 'Fix only the blocking failures from quality gate or review for issue #626.',
@@ -440,9 +440,9 @@ const finalAcceptanceTask = defineTask(
   async ({ issue, spec, reuseAudit, runtimeTrace, acceptanceTests, implementation, qualityGate, review }) => ({
     kind: 'agent',
     title: 'Final acceptance review for issue #626',
-    labels: ['krate-web', 'jitsi', 'acceptance', 'phase:final'],
+    labels: ['kradle-web', 'jitsi', 'acceptance', 'phase:final'],
     agent: {
-      name: 'krate-final-acceptance-reviewer',
+      name: 'kradle-final-acceptance-reviewer',
       prompt: {
         role: 'senior maintainer performing final acceptance',
         task: 'Compare issue #626 acceptance criteria directly to final artifacts and determine whether the run can be delivered.',
@@ -488,9 +488,9 @@ export async function process(inputs, ctx) {
   const issue = issueContext(inputs);
   const targetSurfaces = inputs?.targetSurfaces ?? {};
   const qualityCommands = inputs?.qualityCommands ?? [
-    'npm --prefix packages/krate/web test',
-    'npm --prefix packages/krate/web run build',
-    'npm --prefix packages/krate/web run test:e2e',
+    'npm --prefix packages/kradle/web test',
+    'npm --prefix packages/kradle/web run build',
+    'npm --prefix packages/kradle/web run test:e2e',
     'git diff --check',
   ];
   const maxVerificationAttempts = inputs?.maxVerificationAttempts ?? 2;

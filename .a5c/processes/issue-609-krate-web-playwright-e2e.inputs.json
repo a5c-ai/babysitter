@@ -2,10 +2,10 @@
   "issueNumber": 609,
   "baseBranch": "staging",
   "branchName": "plan/issue-609",
-  "title": "Add Playwright E2E tests for krate web console",
-  "stagingUrl": "https://krate-staging.a5c.ai",
-  "e2eRoot": "packages/krate/web/e2e",
-  "playwrightConfig": "packages/krate/web/playwright.config.js",
+  "title": "Add Playwright E2E tests for kradle web console",
+  "stagingUrl": "https://kradle-staging.a5c.ai",
+  "e2eRoot": "packages/kradle/web/e2e",
+  "playwrightConfig": "packages/kradle/web/playwright.config.js",
   "dependencyIssues": [608],
   "processLibrarySources": {
     "requestedPath": ".a5c/process-library",
@@ -26,50 +26,50 @@
     ]
   },
   "issueSummary": {
-    "currentState": "Commit 74a94a950 already added basic Playwright smoke coverage in packages/krate/web/e2e/smoke.spec.js, but workflows still lack browser-level E2E coverage.",
-    "goal": "Add staging-backed Playwright tests that prove Krate web console navigation, CRUD flows, external provider sync, SSE/live updates, and service-dependent agent/assistant/playground paths work in a browser.",
+    "currentState": "Commit 74a94a950 already added basic Playwright smoke coverage in packages/kradle/web/e2e/smoke.spec.js, but workflows still lack browser-level E2E coverage.",
+    "goal": "Add staging-backed Playwright tests that prove Kradle web console navigation, CRUD flows, external provider sync, SSE/live updates, and service-dependent agent/assistant/playground paths work in a browser.",
     "knownDependency": "#608 must configure staging services before assistant, real agent dispatch, session transcript, and playground model-call tests can be fully enabled."
   },
   "targetFiles": [
-    "packages/krate/web/e2e/smoke.spec.js",
-    "packages/krate/web/e2e/*.spec.js",
-    "packages/krate/web/e2e/fixtures/*.js",
-    "packages/krate/web/playwright.config.js",
-    "packages/krate/web/package.json",
-    "packages/krate/web/README.md"
+    "packages/kradle/web/e2e/smoke.spec.js",
+    "packages/kradle/web/e2e/*.spec.js",
+    "packages/kradle/web/e2e/fixtures/*.js",
+    "packages/kradle/web/playwright.config.js",
+    "packages/kradle/web/package.json",
+    "packages/kradle/web/README.md"
   ],
   "codeSurfacesToTrace": [
-    "packages/krate/web/app/lib/krate-ui.jsx",
-    "packages/krate/web/app/lib/api-auth.js",
-    "packages/krate/web/app/pages/agent-overview-pages.jsx",
-    "packages/krate/web/app/pages/agent-rule-pages.jsx",
-    "packages/krate/web/app/pages/agent-project-pages.jsx",
-    "packages/krate/web/app/pages/agent-memory-pages.jsx",
-    "packages/krate/web/app/pages/agent-run-pages.jsx",
-    "packages/krate/web/app/pages/agent-session-pages.jsx",
-    "packages/krate/web/app/pages/external-pages.jsx",
-    "packages/krate/web/app/pages/inference-pages.jsx",
-    "packages/krate/web/app/pages/playground-pages.jsx",
-    "packages/krate/web/app/pages/assistant-pages.jsx",
-    "packages/krate/web/app/pages/settings-pages.jsx",
-    "packages/krate/web/app/pages/repo-pages.jsx",
-    "packages/krate/web/app/components/agent/stack-builder.jsx",
-    "packages/krate/web/app/components/agent/stack-actions.jsx",
-    "packages/krate/web/app/components/agent/trigger-rule-form.jsx",
-    "packages/krate/web/app/components/agent/rule-actions.jsx",
-    "packages/krate/web/app/components/external/external-provider-wizard.jsx",
-    "packages/krate/web/app/components/external/external-sync-dashboard.jsx",
-    "packages/krate/web/app/components/assistant/assistant-chat.jsx",
-    "packages/krate/web/app/components/inference/inference-playground.jsx",
-    "packages/krate/web/app/components/agent/live-updates.jsx",
-    "packages/krate/web/app/api/orgs/[org]/resources/route.js",
-    "packages/krate/web/app/api/orgs/[org]/resources/[kind]/[name]/route.js",
-    "packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js",
-    "packages/krate/web/app/api/orgs/[org]/agents/events/stream/route.js",
-    "packages/krate/web/app/api/orgs/[org]/external/sync/route.js",
-    "packages/krate/web/app/api/orgs/[org]/assistant/chat/route.js",
-    "packages/krate/web/app/api/orgs/[org]/assistant/generate/route.js",
-    "packages/krate/web/app/api/watch/[[...resource]]/route.js"
+    "packages/kradle/web/app/lib/kradle-ui.jsx",
+    "packages/kradle/web/app/lib/api-auth.js",
+    "packages/kradle/web/app/pages/agent-overview-pages.jsx",
+    "packages/kradle/web/app/pages/agent-rule-pages.jsx",
+    "packages/kradle/web/app/pages/agent-project-pages.jsx",
+    "packages/kradle/web/app/pages/agent-memory-pages.jsx",
+    "packages/kradle/web/app/pages/agent-run-pages.jsx",
+    "packages/kradle/web/app/pages/agent-session-pages.jsx",
+    "packages/kradle/web/app/pages/external-pages.jsx",
+    "packages/kradle/web/app/pages/inference-pages.jsx",
+    "packages/kradle/web/app/pages/playground-pages.jsx",
+    "packages/kradle/web/app/pages/assistant-pages.jsx",
+    "packages/kradle/web/app/pages/settings-pages.jsx",
+    "packages/kradle/web/app/pages/repo-pages.jsx",
+    "packages/kradle/web/app/components/agent/stack-builder.jsx",
+    "packages/kradle/web/app/components/agent/stack-actions.jsx",
+    "packages/kradle/web/app/components/agent/trigger-rule-form.jsx",
+    "packages/kradle/web/app/components/agent/rule-actions.jsx",
+    "packages/kradle/web/app/components/external/external-provider-wizard.jsx",
+    "packages/kradle/web/app/components/external/external-sync-dashboard.jsx",
+    "packages/kradle/web/app/components/assistant/assistant-chat.jsx",
+    "packages/kradle/web/app/components/inference/inference-playground.jsx",
+    "packages/kradle/web/app/components/agent/live-updates.jsx",
+    "packages/kradle/web/app/api/orgs/[org]/resources/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/resources/[kind]/[name]/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/agents/dispatch/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/agents/events/stream/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/external/sync/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/assistant/chat/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/assistant/generate/route.js",
+    "packages/kradle/web/app/api/watch/[[...resource]]/route.js"
   ],
   "routeSmokeMatrix": [
     "/orgs/default",
@@ -98,7 +98,7 @@
     },
     {
       "name": "project-crud",
-      "kind": "KrateProject",
+      "kind": "KradleProject",
       "listRoute": "/orgs/default/agents/projects",
       "expectedUserFlow": "Create project, verify project detail and kanban board render, then delete."
     },
@@ -143,7 +143,7 @@
     },
     {
       "name": "assistant-chat",
-      "dependsOn": "#608 ANTHROPIC_API_KEY or KRATE_ASSISTANT_API_KEY",
+      "dependsOn": "#608 ANTHROPIC_API_KEY or KRADLE_ASSISTANT_API_KEY",
       "route": "/orgs/default/assistant",
       "expectedWhenReady": "Send chat message and verify assistant response renders.",
       "defaultBehaviorBeforeReady": "Skip with explicit #608 diagnostic; do not fail on known missing API key."
@@ -159,21 +159,21 @@
   "authAndIsolationRequirements": {
     "auth": "Use documented staging auth or Playwright storage state. If no noninteractive auth path exists, stop at the readiness breakpoint before CRUD implementation.",
     "namingPrefix": "issue-609-e2e",
-    "cleanup": "Every test-created Krate resource must be deleted in afterEach/afterAll using API cleanup, even if browser assertions fail.",
+    "cleanup": "Every test-created Kradle resource must be deleted in afterEach/afterAll using API cleanup, even if browser assertions fail.",
     "sharedStagingPolicy": "Do not mutate resources that were not created by the current test run."
   },
   "environmentVariables": {
-    "KRATE_E2E_URL": "Base URL for Playwright; staging default is https://krate-staging.a5c.ai.",
-    "KRATE_E2E_ORG": "Optional organization slug; default is default.",
-    "KRATE_E2E_AUTH_STATE": "Optional path to Playwright storageState for authenticated staging sessions.",
-    "KRATE_E2E_ENABLE_SERVICE_FLOWS": "Set to 1 only after #608 dependencies are configured.",
-    "KRATE_E2E_ENABLE_MUTATING_STAGING": "Set to 1 to permit CRUD tests against shared staging after auth/isolation is confirmed."
+    "KRADLE_E2E_URL": "Base URL for Playwright; staging default is https://kradle-staging.a5c.ai.",
+    "KRADLE_E2E_ORG": "Optional organization slug; default is default.",
+    "KRADLE_E2E_AUTH_STATE": "Optional path to Playwright storageState for authenticated staging sessions.",
+    "KRADLE_E2E_ENABLE_SERVICE_FLOWS": "Set to 1 only after #608 dependencies are configured.",
+    "KRADLE_E2E_ENABLE_MUTATING_STAGING": "Set to 1 to permit CRUD tests against shared staging after auth/isolation is confirmed."
   },
   "qualityGateCommands": [
-    "cd packages/krate/web && npm run test:e2e -- --reporter=list",
-    "cd packages/krate/web && KRATE_E2E_URL=https://krate-staging.a5c.ai npm run test:e2e -- --reporter=list",
-    "npm run test --workspace=@a5c-ai/krate-web",
-    "npm run build --workspace=@a5c-ai/krate-web",
+    "cd packages/kradle/web && npm run test:e2e -- --reporter=list",
+    "cd packages/kradle/web && KRADLE_E2E_URL=https://kradle-staging.a5c.ai npm run test:e2e -- --reporter=list",
+    "npm run test --workspace=@a5c-ai/kradle-web",
+    "npm run build --workspace=@a5c-ai/kradle-web",
     "git diff --check"
   ],
   "qualityGates": {
@@ -190,7 +190,7 @@
   },
   "outOfScope": [
     "Do not implement issue #608 staging env vars in this process.",
-    "Do not redesign Krate web UI or resource schemas except for minimal testability hooks justified by the test plan.",
+    "Do not redesign Kradle web UI or resource schemas except for minimal testability hooks justified by the test plan.",
     "Do not add destructive cleanup that deletes resources without the issue-609-e2e prefix.",
     "Do not replace existing unit/structural tests with Playwright tests."
   ]

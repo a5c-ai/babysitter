@@ -442,19 +442,19 @@ Pod cleanup spawn error and catch block both silenced.
 
 ---
 
-## Krate Web & Observer (packages/krate/web, packages/observer-dashboard, packages/babysitter-tui-plugins)
+## Kradle Web & Observer (packages/kradle/web, packages/observer-dashboard, packages/babysitter-tui-plugins)
 
 ### Critical
 
-~~**RBAC deletion — orphaned role bindings**~~ **(logged)** — `packages/krate/web/app/components/settings-rbac.jsx:34-36`
+~~**RBAC deletion — orphaned role bindings**~~ **(logged)** — `packages/kradle/web/app/components/settings-rbac.jsx:34-36`
 `fetch('/api/orgs/.../rolebindings', { method: 'DELETE' }).catch(() => {})`. Deletion failure = orphaned permissions. Security boundary violation.
 
-~~**SSE stream endpoint — triple null return**~~ **(logged)** — `packages/krate/web/app/api/orgs/[org]/agents/events/stream/route.js:15,23,26`
+~~**SSE stream endpoint — triple null return**~~ **(logged)** — `packages/kradle/web/app/api/orgs/[org]/agents/events/stream/route.js:15,23,26`
 Missing env var → `null`. Upstream error → `null`. Parse error → `null`. Client waits forever.
 
 ### High
 
-~~**Cache invalidation silently fails**~~ **(logged)** — `packages/krate/web/app/lib/api-errors.js:9`
+~~**Cache invalidation silently fails**~~ **(logged)** — `packages/kradle/web/app/lib/api-errors.js:9`
 `fetch('.../cache/invalidate', { method: 'POST' }).catch(() => {})`. Stale data circulates indefinitely.
 
 ~~**Multiple component fetch `.catch(() => {})`**~~ **(logged)** — `curated-model-catalog.jsx:117`, `runner-pool-manager.jsx:278,292`, `kanban-enhanced.jsx:423`, `stack-builder-graph.jsx:436,533`
@@ -465,13 +465,13 @@ Model deployments, runner scaling, status updates — all fire-and-forget. UI op
 
 ### Medium
 
-**Session cookie parsing → null** — `packages/krate/web/app/lib/krate-ui.jsx:262-263`
+**Session cookie parsing → null** — `packages/kradle/web/app/lib/kradle-ui.jsx:262-263`
 Crypto failures, format errors → `null` → logged out. No audit trail.
 
 **Clipboard copy silent failure** — Multiple components: `assistant-chat.jsx:201`, `assistant-generate.jsx:117`, `inference-helpers.jsx:167`
 `navigator.clipboard.writeText(text).catch(() => {})`. User thinks copy worked.
 
-**Theme script empty catch** — `packages/krate/web/app/layout.jsx:6`, `packages/observer-dashboard/src/app/layout.tsx:15`
+**Theme script empty catch** — `packages/kradle/web/app/layout.jsx:6`, `packages/observer-dashboard/src/app/layout.tsx:15`
 localStorage/matchMedia errors → empty catch. Theme preference not persisted.
 
 **Observer components — null on missing data** — `packages/observer-dashboard/src/app/runs/[runId]/page.tsx:107` and others

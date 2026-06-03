@@ -5,23 +5,23 @@
   "maxImplementationAttempts": 3,
   "prompt": "Implement issue #624: complete Jitsi CRDs, core controllers, webhook sync, agent bridge integration, and event bus coverage. The current staging branch may already contain partial Jitsi resource-model, web route, CLI/MCP, and test work; audit and preserve complete surfaces before filling gaps.",
   "specFiles": [
-    "packages/krate/docs/jitsi/03-crds-and-controllers.md",
-    "packages/krate/docs/jitsi/01-architecture.md",
-    "packages/krate/docs/jitsi/06-agent-meeting-participation.md",
-    "packages/krate/docs/jitsi/07-agent-meeting-runtime.md"
+    "packages/kradle/docs/jitsi/03-crds-and-controllers.md",
+    "packages/kradle/docs/jitsi/01-architecture.md",
+    "packages/kradle/docs/jitsi/06-agent-meeting-participation.md",
+    "packages/kradle/docs/jitsi/07-agent-meeting-runtime.md"
   ],
   "currentBaselineHints": {
     "observedPartialSurfaces": [
-      "packages/krate/core/src/resource-model.js contains JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, and JitsiRecording entries on current staging.",
-      "packages/krate/core/tests/jitsi-resource-model.test.js exists on current staging.",
-      "packages/krate/web/app/api/orgs/[org]/jitsi/** routes exist on current staging, including webhooks/ingest.",
-      "packages/krate/web/app/lib/jitsi-service.js and Jitsi web components exist on current staging.",
-      "packages/krate/cli/src/mcp-server.js and packages/krate/cli/tests/jitsi-mcp-tools.test.js include Jitsi meeting MCP surfaces on current staging."
+      "packages/kradle/core/src/resource-model.js contains JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, and JitsiRecording entries on current staging.",
+      "packages/kradle/core/tests/jitsi-resource-model.test.js exists on current staging.",
+      "packages/kradle/web/app/api/orgs/[org]/jitsi/** routes exist on current staging, including webhooks/ingest.",
+      "packages/kradle/web/app/lib/jitsi-service.js and Jitsi web components exist on current staging.",
+      "packages/kradle/cli/src/mcp-server.js and packages/kradle/cli/tests/jitsi-mcp-tools.test.js include Jitsi meeting MCP surfaces on current staging."
     ],
     "observedLikelyGaps": [
-      "No packages/krate/core/src/jitsi-meeting-controller.js was found during planning.",
-      "No packages/krate/core/src/jitsi-sync-controller.js was found during planning.",
-      "No packages/krate/core/src/jitsi-agent-bridge.js was found during planning.",
+      "No packages/kradle/core/src/jitsi-meeting-controller.js was found during planning.",
+      "No packages/kradle/core/src/jitsi-sync-controller.js was found during planning.",
+      "No packages/kradle/core/src/jitsi-agent-bridge.js was found during planning.",
       "The current Jitsi webhook route appears lightweight and must be audited for timing-safe HMAC validation, persistent deduplication, replay handling, participant events, room destroyed events, and recording stopped events.",
       "Chart CRD manifests and package exports must be verified rather than assumed complete."
     ]
@@ -39,27 +39,27 @@
   ],
   "targetSurfaces": {
     "coreFiles": [
-      "packages/krate/core/src/resource-model.js",
-      "packages/krate/core/src/jitsi-meeting-controller.js",
-      "packages/krate/core/src/jitsi-sync-controller.js",
-      "packages/krate/core/src/jitsi-agent-bridge.js",
-      "packages/krate/core/src/event-bus.js",
-      "packages/krate/core/src/agent-dispatch-controller.js",
-      "packages/krate/core/src/agent-mux-client.js",
-      "packages/krate/core/src/index.js"
+      "packages/kradle/core/src/resource-model.js",
+      "packages/kradle/core/src/jitsi-meeting-controller.js",
+      "packages/kradle/core/src/jitsi-sync-controller.js",
+      "packages/kradle/core/src/jitsi-agent-bridge.js",
+      "packages/kradle/core/src/event-bus.js",
+      "packages/kradle/core/src/agent-dispatch-controller.js",
+      "packages/kradle/core/src/agent-mux-client.js",
+      "packages/kradle/core/src/index.js"
     ],
     "webFiles": [
-      "packages/krate/web/app/api/orgs/[org]/jitsi/webhooks/ingest/route.js",
-      "packages/krate/web/app/lib/jitsi-service.js"
+      "packages/kradle/web/app/api/orgs/[org]/jitsi/webhooks/ingest/route.js",
+      "packages/kradle/web/app/lib/jitsi-service.js"
     ],
     "testAreas": [
-      "packages/krate/core/tests/jitsi-resource-model.test.js",
-      "packages/krate/core/tests/jitsi-meeting-controller.test.js",
-      "packages/krate/core/tests/jitsi-sync-controller.test.js",
-      "packages/krate/core/tests/jitsi-agent-bridge.test.js",
-      "packages/krate/web/tests/jitsi-webhook-ingest.test.js",
-      "packages/krate/core/tests/agent-dispatch-controller.test.js",
-      "packages/krate/core/tests/event-bus-integration.test.js"
+      "packages/kradle/core/tests/jitsi-resource-model.test.js",
+      "packages/kradle/core/tests/jitsi-meeting-controller.test.js",
+      "packages/kradle/core/tests/jitsi-sync-controller.test.js",
+      "packages/kradle/core/tests/jitsi-agent-bridge.test.js",
+      "packages/kradle/web/tests/jitsi-webhook-ingest.test.js",
+      "packages/kradle/core/tests/agent-dispatch-controller.test.js",
+      "packages/kradle/core/tests/event-bus-integration.test.js"
     ]
   },
   "qualityGates": [
@@ -71,13 +71,13 @@
     "Room, participant, and recording webhook events update resources idempotently.",
     "Event bus coverage verifies meeting-created, participant-joined, participant-left, recording-started, and agent-joined-meeting.",
     "Non-meeting agent dispatch behavior has a regression guard.",
-    "Focused Krate tests plus npm run test:sdk, npm run build:sdk, and npm run verify:metadata are run or exact blockers are documented.",
+    "Focused Kradle tests plus npm run test:sdk, npm run build:sdk, and npm run verify:metadata are run or exact blockers are documented.",
     "Final review compares the issue and Jitsi specs directly against the git diff and verification output before delivery."
   ],
   "verificationCommands": [
-    "npm run test --workspace=@a5c-ai/krate",
-    "npm run test --workspace=@a5c-ai/krate-web",
-    "npm run test --workspace=@a5c-ai/krate-cli",
+    "npm run test --workspace=@a5c-ai/kradle",
+    "npm run test --workspace=@a5c-ai/kradle-web",
+    "npm run test --workspace=@a5c-ai/kradle-cli",
     "npm run test:sdk",
     "npm run build:sdk",
     "npm run verify:metadata"

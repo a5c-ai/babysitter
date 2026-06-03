@@ -8,7 +8,7 @@
     "relatedWebConsole": 625
   },
   "issueTitle": "Jitsi: agent meeting participation - dispatch, sidecar, and MCP tools",
-  "objective": "Implement meeting-aware Krate agent dispatch so Jitsi-capable agents can join active meetings through AgentDispatchRun meeting context, a Kubernetes sidecar, in-meeting MCP tools, auto-dispatch from meeting templates, and web UI links.",
+  "objective": "Implement meeting-aware Kradle agent dispatch so Jitsi-capable agents can join active meetings through AgentDispatchRun meeting context, a Kubernetes sidecar, in-meeting MCP tools, auto-dispatch from meeting templates, and web UI links.",
   "trigger": "manual dispatch",
   "planningNotes": {
     "planOnlyArtifact": true,
@@ -19,12 +19,12 @@
     "existingIssueCommentObservation": "Issue comments mention earlier planning PR #670 and open planning PR #715. This process should still read current issue/PR state before execution and not assume prior artifacts are authoritative."
   },
   "specFiles": [
-    "packages/krate/docs/jitsi/06-agent-meeting-participation.md",
-    "packages/krate/docs/jitsi/07-agent-meeting-runtime.md",
-    "packages/krate/docs/jitsi/03-crds-and-controllers.md",
-    "packages/krate/docs/jitsi/04-web-management.md",
-    "packages/krate/docs/agent-identity/01-resource-model.md",
-    "packages/krate/docs/agent-identity/04-meeting-integration.md",
+    "packages/kradle/docs/jitsi/06-agent-meeting-participation.md",
+    "packages/kradle/docs/jitsi/07-agent-meeting-runtime.md",
+    "packages/kradle/docs/jitsi/03-crds-and-controllers.md",
+    "packages/kradle/docs/jitsi/04-web-management.md",
+    "packages/kradle/docs/agent-identity/01-resource-model.md",
+    "packages/kradle/docs/agent-identity/04-meeting-integration.md",
     "docs/agent-reference/process-authoring.md"
   ],
   "processLibraryFiles": [
@@ -44,39 +44,39 @@
   ],
   "targetSurfaces": {
     "core": [
-      "packages/krate/core/src/agent-stack-controller.js",
-      "packages/krate/core/src/agent-dispatch-controller.js",
-      "packages/krate/core/src/agent-mux-client.js",
-      "packages/krate/core/src/api-controller.js",
-      "packages/krate/core/src/resource-model.js"
+      "packages/kradle/core/src/agent-stack-controller.js",
+      "packages/kradle/core/src/agent-dispatch-controller.js",
+      "packages/kradle/core/src/agent-mux-client.js",
+      "packages/kradle/core/src/api-controller.js",
+      "packages/kradle/core/src/resource-model.js"
     ],
     "chartsAndCrds": [
-      "packages/krate/charts/crds/agent-resources.yaml",
-      "packages/krate/charts/crds/aggregated-resources.yaml",
-      "packages/krate/charts/values.yaml",
-      "packages/krate/charts/templates/deployments.yaml"
+      "packages/kradle/charts/crds/agent-resources.yaml",
+      "packages/kradle/charts/crds/aggregated-resources.yaml",
+      "packages/kradle/charts/values.yaml",
+      "packages/kradle/charts/templates/deployments.yaml"
     ],
     "web": [
-      "packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js",
-      "packages/krate/web/app/components/agent/dispatch-button.jsx",
-      "packages/krate/web/app/pages/agent-overview-pages.jsx",
-      "packages/krate/web/app/pages/agent-run-pages.jsx",
-      "packages/krate/web/app/pages/jitsi-pages.jsx",
-      "packages/krate/web/app/components/jitsi/jitsi-participant-list.jsx",
-      "packages/krate/web/app/lib/jitsi-service.js"
+      "packages/kradle/web/app/api/orgs/[org]/agents/dispatch/route.js",
+      "packages/kradle/web/app/components/agent/dispatch-button.jsx",
+      "packages/kradle/web/app/pages/agent-overview-pages.jsx",
+      "packages/kradle/web/app/pages/agent-run-pages.jsx",
+      "packages/kradle/web/app/pages/jitsi-pages.jsx",
+      "packages/kradle/web/app/components/jitsi/jitsi-participant-list.jsx",
+      "packages/kradle/web/app/lib/jitsi-service.js"
     ],
     "cliAndMcp": [
-      "packages/krate/cli/src/mcp-server.js",
-      "packages/krate/cli/tests/jitsi-mcp-tools.test.js"
+      "packages/kradle/cli/src/mcp-server.js",
+      "packages/kradle/cli/tests/jitsi-mcp-tools.test.js"
     ],
     "tests": [
-      "packages/krate/core/tests/agent-stack-controller.test.js",
-      "packages/krate/core/tests/agent-dispatch-controller.test.js",
-      "packages/krate/core/tests/agent-mux-client.test.js",
-      "packages/krate/core/tests/jitsi-resource-model.test.js",
-      "packages/krate/cli/tests/jitsi-mcp-tools.test.js",
-      "packages/krate/web/e2e/resource-crud.spec.js",
-      "packages/krate/web/e2e/smoke.spec.js"
+      "packages/kradle/core/tests/agent-stack-controller.test.js",
+      "packages/kradle/core/tests/agent-dispatch-controller.test.js",
+      "packages/kradle/core/tests/agent-mux-client.test.js",
+      "packages/kradle/core/tests/jitsi-resource-model.test.js",
+      "packages/kradle/cli/tests/jitsi-mcp-tools.test.js",
+      "packages/kradle/web/e2e/resource-crud.spec.js",
+      "packages/kradle/web/e2e/smoke.spec.js"
     ]
   },
   "acceptanceCriteria": [
@@ -105,12 +105,12 @@
     "git diff --check"
   ],
   "focusedVerificationCandidates": [
-    "node --test packages/krate/core/tests/agent-dispatch-controller.test.js",
-    "node --test packages/krate/core/tests/agent-mux-client.test.js",
-    "node --test packages/krate/core/tests/agent-stack-controller.test.js",
-    "node --test packages/krate/core/tests/jitsi-resource-model.test.js",
-    "node --test packages/krate/cli/tests/jitsi-mcp-tools.test.js",
-    "npm --prefix packages/krate/web run test:e2e -- --grep \"meeting|dispatch|participant\""
+    "node --test packages/kradle/core/tests/agent-dispatch-controller.test.js",
+    "node --test packages/kradle/core/tests/agent-mux-client.test.js",
+    "node --test packages/kradle/core/tests/agent-stack-controller.test.js",
+    "node --test packages/kradle/core/tests/jitsi-resource-model.test.js",
+    "node --test packages/kradle/cli/tests/jitsi-mcp-tools.test.js",
+    "npm --prefix packages/kradle/web run test:e2e -- --grep \"meeting|dispatch|participant\""
   ],
   "expectedPlanPhases": [
     "authoritative-context",

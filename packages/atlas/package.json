@@ -66,9 +66,9 @@
     "claims:run": "node scripts/run-testable-claims.mjs",
     "claims:untested": "node scripts/find-untested-claims.mjs",
     "quality": "node scripts/graph-quality.mjs",
-    "validate:krate-graph": "node scripts/validate-krate-graph.mjs",
-    "validate:krate-graph:audit": "node scripts/validate-krate-graph.mjs --mode=audit",
-    "validate:krate-graph:committed": "node scripts/validate-krate-graph.mjs --mode=committed-baseline"
+    "validate:kradle-graph": "node scripts/validate-kradle-graph.mjs",
+    "validate:kradle-graph:audit": "node scripts/validate-kradle-graph.mjs --mode=audit",
+    "validate:kradle-graph:committed": "node scripts/validate-kradle-graph.mjs --mode=committed-baseline"
   },
   "dependencies": {
     "js-yaml": "^4.1.1",

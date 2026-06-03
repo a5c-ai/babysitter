@@ -3,41 +3,41 @@
   "baseBranch": "staging",
   "targetBranch": "plan/issue-623",
   "processEntry": ".a5c/processes/issue-623-jitsi-helm-subchart-integration.mjs#process",
-  "chartPath": "packages/krate/charts",
-  "packagePath": "packages/krate/core",
+  "chartPath": "packages/kradle/charts",
+  "packagePath": "packages/kradle/core",
   "specFiles": [
-    "packages/krate/docs/jitsi/01-architecture.md",
-    "packages/krate/docs/jitsi/02-helm-deployment.md",
-    "packages/krate/docs/jitsi/03-crds-and-controllers.md",
+    "packages/kradle/docs/jitsi/01-architecture.md",
+    "packages/kradle/docs/jitsi/02-helm-deployment.md",
+    "packages/kradle/docs/jitsi/03-crds-and-controllers.md",
     "docs/agent-reference/process-authoring.md"
   ],
   "targetFiles": {
-    "chartMetadata": "packages/krate/charts/Chart.yaml",
-    "values": "packages/krate/charts/values.yaml",
-    "networkPolicy": "packages/krate/charts/templates/networkpolicy.yaml",
+    "chartMetadata": "packages/kradle/charts/Chart.yaml",
+    "values": "packages/kradle/charts/values.yaml",
+    "networkPolicy": "packages/kradle/charts/templates/networkpolicy.yaml",
     "secretTemplates": [
-      "packages/krate/charts/templates/auth-secret.yaml",
-      "packages/krate/charts/templates/jitsi-secret.yaml"
+      "packages/kradle/charts/templates/auth-secret.yaml",
+      "packages/kradle/charts/templates/jitsi-secret.yaml"
     ],
-    "crds": "packages/krate/charts/crds/jitsi-resources.yaml",
-    "chartReadme": "packages/krate/charts/README.md",
-    "coreReadme": "packages/krate/core/README.md",
-    "existingJitsiModel": "packages/krate/core/src/resource-model.js",
-    "existingJitsiCliTools": "packages/krate/cli/src/mcp-server.js",
-    "existingJitsiWebRoutes": "packages/krate/web/app/api/orgs/[org]/jitsi"
+    "crds": "packages/kradle/charts/crds/jitsi-resources.yaml",
+    "chartReadme": "packages/kradle/charts/README.md",
+    "coreReadme": "packages/kradle/core/README.md",
+    "existingJitsiModel": "packages/kradle/core/src/resource-model.js",
+    "existingJitsiCliTools": "packages/kradle/cli/src/mcp-server.js",
+    "existingJitsiWebRoutes": "packages/kradle/web/app/api/orgs/[org]/jitsi"
   },
   "reuseAuditSeedFindings": {
     "chartSurfaceMissing": [
-      "packages/krate/charts/Chart.yaml currently has vela-core and kyverno dependencies but no jitsi-meet dependency",
-      "packages/krate/charts/values.yaml currently has no top-level jitsi section",
-      "packages/krate/charts/crds/jitsi-resources.yaml is absent",
-      "packages/krate/charts/templates/networkpolicy.yaml currently has only generic namespace ingress/egress and no JVB UDP 10000-specific behavior"
+      "packages/kradle/charts/Chart.yaml currently has vela-core and kyverno dependencies but no jitsi-meet dependency",
+      "packages/kradle/charts/values.yaml currently has no top-level jitsi section",
+      "packages/kradle/charts/crds/jitsi-resources.yaml is absent",
+      "packages/kradle/charts/templates/networkpolicy.yaml currently has only generic namespace ingress/egress and no JVB UDP 10000-specific behavior"
     ],
     "existingReusableJitsiSurfaces": [
-      "packages/krate/core/src/resource-model.js already defines JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, and JitsiRecording resource definitions",
-      "packages/krate/cli/src/mcp-server.js already exposes Jitsi meeting MCP tools and uses KRATE_JITSI_JWT_SECRET for local JWT signing fallback",
-      "packages/krate/cli/tests/jitsi-mcp-tools.test.js already covers the CLI/MCP Jitsi meeting tool contract",
-      "packages/krate/web/app/api/orgs/[org]/jitsi and packages/krate/web/tests/jitsi-structure.test.js already provide web/API Jitsi surfaces from adjacent work"
+      "packages/kradle/core/src/resource-model.js already defines JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, and JitsiRecording resource definitions",
+      "packages/kradle/cli/src/mcp-server.js already exposes Jitsi meeting MCP tools and uses KRADLE_JITSI_JWT_SECRET for local JWT signing fallback",
+      "packages/kradle/cli/tests/jitsi-mcp-tools.test.js already covers the CLI/MCP Jitsi meeting tool contract",
+      "packages/kradle/web/app/api/orgs/[org]/jitsi and packages/kradle/web/tests/jitsi-structure.test.js already provide web/API Jitsi surfaces from adjacent work"
     ],
     "planningImplications": [
       "Do not duplicate controller, CLI, or web Jitsi work that exists or belongs to adjacent issues",
@@ -55,20 +55,20 @@
     "Verify pods/config/health expectations through Helm/package render gates and documented operational checks"
   ],
   "qualityGateCommands": [
-    "npm --prefix packages/krate/core test",
-    "npm --prefix packages/krate/core run package:check",
-    "helm dependency build packages/krate/charts",
-    "helm lint packages/krate/charts",
-    "helm template krate packages/krate/charts --set jitsi.install=true",
-    "helm template krate packages/krate/charts --set jitsi.install=false --set jitsi.external.enabled=true --set jitsi.external.url=https://meet.example.test --set jitsi.external.jwtAppId=krate",
+    "npm --prefix packages/kradle/core test",
+    "npm --prefix packages/kradle/core run package:check",
+    "helm dependency build packages/kradle/charts",
+    "helm lint packages/kradle/charts",
+    "helm template kradle packages/kradle/charts --set jitsi.install=true",
+    "helm template kradle packages/kradle/charts --set jitsi.install=false --set jitsi.external.enabled=true --set jitsi.external.url=https://meet.example.test --set jitsi.external.jwtAppId=kradle",
     "npm run verify:metadata"
   ],
   "renderAssertions": [
     "Chart.yaml includes jitsi-meet dependency from https://jitsi-contrib.github.io/jitsi-helm/ with alias jitsi-subchart and condition jitsi.install",
     "Default values include jitsi.install and jitsi.external.enabled with clear precedence",
     "Internal render supports web, prosody JWT, jicofo, jvb UDP 10000, and optional jibri values",
-    "External render does not require in-cluster Jitsi workloads and exposes external connection settings for Krate",
-    "Jitsi CRDs install from packages/krate/charts/crds/jitsi-resources.yaml",
+    "External render does not require in-cluster Jitsi workloads and exposes external connection settings for Kradle",
+    "Jitsi CRDs install from packages/kradle/charts/crds/jitsi-resources.yaml",
     "Rendered manifests do not expose literal JWT app secrets or webhook secrets from committed defaults",
     "Network policy or service behavior permits JVB UDP 10000 media traffic when internal Jitsi is installed"
   ],

@@ -296,7 +296,7 @@ This document provides curated references for cryptography, blockchain developme
   - Rust ecosystem for zkSNARKs
   - Flexible cryptographic primitives
 
-- **ZoKrates**: https://zokrates.github.io/
+- **ZoKradles**: https://zokradles.github.io/
   - Toolbox for zkSNARKs on Ethereum
   - High-level language and compiler
 

@@ -5,12 +5,12 @@
   "targetBranch": "issue/625-jitsi-web-console",
   "prompt": "Implement issue #625: Jitsi web console meeting management, settings, recordings, and MCP tools. Depend on or coordinate with issue #624 for Jitsi CRDs and controllers.",
   "specFiles": [
-    "packages/krate/docs/jitsi/04-web-management.md",
-    "packages/krate/docs/jitsi/03-crds-and-controllers.md",
-    "packages/krate/docs/jitsi/01-architecture.md",
-    "packages/krate/docs/jitsi/05-human-meeting-experience.md",
-    "packages/krate/docs/jitsi/06-agent-meeting-participation.md",
-    "packages/krate/docs/jitsi/07-agent-meeting-runtime.md"
+    "packages/kradle/docs/jitsi/04-web-management.md",
+    "packages/kradle/docs/jitsi/03-crds-and-controllers.md",
+    "packages/kradle/docs/jitsi/01-architecture.md",
+    "packages/kradle/docs/jitsi/05-human-meeting-experience.md",
+    "packages/kradle/docs/jitsi/06-agent-meeting-participation.md",
+    "packages/kradle/docs/jitsi/07-agent-meeting-runtime.md"
   ],
   "targetSurfaces": {
     "resourceKinds": [
@@ -62,27 +62,27 @@
       "agentAutoJoin"
     ],
     "mcpTools": [
-      "krate_create_meeting",
-      "krate_join_meeting",
-      "krate_list_meetings",
-      "krate_invite_to_meeting"
+      "kradle_create_meeting",
+      "kradle_join_meeting",
+      "kradle_list_meetings",
+      "kradle_invite_to_meeting"
     ]
   },
   "knownExistingInfrastructure": {
-    "navigation": "packages/krate/web/app/lib/krate-ui.jsx",
-    "settingsPage": "packages/krate/web/app/orgs/[org]/settings/page.jsx",
-    "resourceModel": "packages/krate/core/src/resource-model.js",
-    "orgApiRoutes": "packages/krate/web/app/api/orgs/[org]",
-    "mcpServer": "packages/krate/cli/src/mcp-server.js",
-    "webTests": "packages/krate/web/tests",
-    "coreTests": "packages/krate/core/tests",
-    "cliTests": "packages/krate/cli/tests/mcp-server.test.js"
+    "navigation": "packages/kradle/web/app/lib/kradle-ui.jsx",
+    "settingsPage": "packages/kradle/web/app/orgs/[org]/settings/page.jsx",
+    "resourceModel": "packages/kradle/core/src/resource-model.js",
+    "orgApiRoutes": "packages/kradle/web/app/api/orgs/[org]",
+    "mcpServer": "packages/kradle/cli/src/mcp-server.js",
+    "webTests": "packages/kradle/web/tests",
+    "coreTests": "packages/kradle/core/tests",
+    "cliTests": "packages/kradle/cli/tests/mcp-server.test.js"
   },
   "verificationCommands": [
-    "npm run test --workspace=@a5c-ai/krate",
-    "npm run test --workspace=@a5c-ai/krate-cli",
-    "npm run test --workspace=@a5c-ai/krate-web",
-    "npm run build --workspace=@a5c-ai/krate-web"
+    "npm run test --workspace=@a5c-ai/kradle",
+    "npm run test --workspace=@a5c-ai/kradle-cli",
+    "npm run test --workspace=@a5c-ai/kradle-web",
+    "npm run build --workspace=@a5c-ai/kradle-web"
   ],
   "qualityGates": {
     "requiresIssue624ReadinessCheck": true,
@@ -95,7 +95,7 @@
     "requiresBrowserSmokeWhenAvailable": true
   },
   "outOfScope": [
-    "Do not redesign non-Jitsi Krate navigation, settings, or MCP tools.",
+    "Do not redesign non-Jitsi Kradle navigation, settings, or MCP tools.",
     "Do not implement unrelated Jitsi deployment or Helm work beyond contracts required by #625.",
     "Do not bypass #624 if its CRD/controller contracts are materially unresolved; raise the dependency breakpoint instead."
   ]

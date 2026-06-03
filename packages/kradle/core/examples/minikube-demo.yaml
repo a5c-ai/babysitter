@@ -1,0 +1,190 @@
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: Organization
+metadata:
+  name: kradle
+  namespace: kradle-system
+spec:
+  displayName: Kradle
+  description: Kradle-managed default organization
+  owners:
+  - platform
+  slug: kradle
+  namespaceName: kradle-org-kradle
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: SSHKey
+metadata:
+  name: platform-deploy
+  namespace: kradle-org-kradle
+  labels:
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+spec:
+  scope: deploy
+  owner: kradle
+  repository: kradle-demo
+  title: platform deploy key
+  key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKradleDemoKey platform@example.test
+  readOnly: true
+  organizationRef: kradle
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: RepositoryPermission
+metadata:
+  name: kradle-demo-maintainers
+  namespace: kradle-org-kradle
+  labels:
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+spec:
+  repository: kradle-demo
+  subjectKind: team
+  subject: maintainers
+  permission: admin
+  organizationRef: kradle
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: Repository
+metadata:
+  name: kradle-demo
+  namespace: kradle-org-kradle
+  labels:
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+spec:
+  visibility: internal
+  defaultBranch: main
+  organizationRef: kradle
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: BranchProtection
+metadata:
+  name: main-protection
+  namespace: kradle-org-kradle
+  labels:
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+spec:
+  refs:
+  - refs/heads/main
+  requirePullRequest: true
+  organizationRef: kradle
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: RefPolicy
+metadata:
+  name: deny-internal-refs
+  namespace: kradle-org-kradle
+  labels:
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+spec:
+  deny:
+  - refs/internal/
+  organizationRef: kradle
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: RunnerPool
+metadata:
+  name: trusted-linux
+  namespace: kradle-org-kradle
+  labels:
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+spec:
+  warmReplicas: 1
+  maxReplicas: 4
+  organizationRef: kradle
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: WebhookSubscription
+metadata:
+  name: chatops
+  namespace: kradle-org-kradle
+  labels:
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+spec:
+  url: https://hooks.example.test/kradle
+  events:
+  - pullrequest.created
+  organizationRef: kradle
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: Pipeline
+metadata:
+  name: demo-pr-checks
+  labels:
+    repository: kradle-demo
+    workflow: pull-request
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+  namespace: kradle-org-kradle
+spec:
+  repository: kradle-demo
+  ref: refs/pull/1/head
+  runnerPool: trusted-linux
+  trustTier: trusted
+  steps:
+  - checkout
+  - test
+  - publish
+  organizationRef: kradle
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kradle-demo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://gitea-http.kradle-system.svc.cluster.local/kradle/platform-config.git
+    targetRevision: main
+    path: charts/kradle
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kradle-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: Issue
+metadata:
+  name: issue-1
+  namespace: kradle-org-kradle
+  labels:
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+spec:
+  repository: kradle-demo
+  title: Wire Kradle-managed permissions
+  labels:
+  - forge
+  - access
+  organizationRef: kradle
+status:
+  phase: triage
+---
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: PullRequest
+metadata:
+  name: pr-1
+  namespace: kradle-org-kradle
+  labels:
+    kradle.a5c.ai/org: kradle
+    kradle.a5c.ai/namespace: kradle-org-kradle
+spec:
+  repository: kradle-demo
+  title: Improve forge UI
+  head: feature/forge-ui
+  base: main
+  organizationRef: kradle
+status:
+  phase: Open
+  changedFiles:
+  - apps/web/app/ui-shell.jsx

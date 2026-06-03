@@ -1,19 +1,19 @@
-# Krate & Cloud Platform
+# Kradle & Cloud Platform
 
-Krate is the Kubernetes-native deployment and management layer for the a5c platform.
+Kradle is the Kubernetes-native deployment and management layer for the a5c platform.
 
 ## Components
 
 | Package | Role |
 |---------|------|
-| `packages/krate/core` | Kubernetes operator, resource model, data plane |
-| `packages/krate/web` | Next.js web UI for managing agents, repositories, workspaces |
-| `packages/krate/charts` | Helm charts and CRDs |
-| `packages/krate/sdk` | TypeScript SDK for API access |
+| `packages/kradle/core` | Kubernetes operator, resource model, data plane |
+| `packages/kradle/web` | Next.js web UI for managing agents, repositories, workspaces |
+| `packages/kradle/charts` | Helm charts and CRDs |
+| `packages/kradle/sdk` | TypeScript SDK for API access |
 
 ## Resource Model
 
-Krate manages these Kubernetes custom resources:
+Kradle manages these Kubernetes custom resources:
 
 - **Agent** — a deployed coding agent instance
 - **Workspace** — an isolated execution environment
@@ -23,7 +23,7 @@ Krate manages these Kubernetes custom resources:
 
 ## Web UI
 
-The Krate web UI provides:
+The Kradle web UI provides:
 - Repository management with issue tracking
 - Agent stack builder (Atlas-driven)
 - Workspace lifecycle (create, codespace, associations)
@@ -32,6 +32,6 @@ The Krate web UI provides:
 
 ## Deployment
 
-Krate deploys to AKS (Azure Kubernetes Service) via the atlas-driven deployment pipeline.
+Kradle deploys to AKS (Azure Kubernetes Service) via the atlas-driven deployment pipeline.
 
-See the [krate package](../../packages/krate/) for implementation details.
+See the [kradle package](../../packages/kradle/) for implementation details.

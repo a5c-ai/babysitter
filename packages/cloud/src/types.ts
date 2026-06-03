@@ -76,53 +76,53 @@ export interface AuthConfig {
   defaultAdminPassword?: string;
 }
 
-export interface KrateComponentConfig {
+export interface KradleComponentConfig {
   replicas: number;
   resources?: Record<string, unknown>;
 }
 
-export interface KrateGiteaConfig {
+export interface KradleGiteaConfig {
   enabled: boolean;
   persistence: { size: string; storageClassName?: string };
   admin: { username: string; password: string };
 }
 
-export interface KrateAgentsConfig {
+export interface KradleAgentsConfig {
   enabled: boolean;
   agentMux: { enabled: boolean; gateway: string };
 }
 
-export interface KrateDemoConfig {
+export interface KradleDemoConfig {
   enabled: boolean;
   postgres: { mode: string };
   objectStore: { mode: string };
 }
 
-export interface KrateAuthConfig {
+export interface KradleAuthConfig {
   github: { enabled: boolean; clientId: string; clientSecret: string };
   sso: { enabled: boolean };
   delegatedIdentity: { enabled: boolean };
 }
 
-export interface KrateConfig {
-  api: KrateComponentConfig;
-  controllers: KrateComponentConfig;
-  web: KrateComponentConfig;
-  webhookWorker: KrateComponentConfig;
-  gitea: KrateGiteaConfig;
-  agents: KrateAgentsConfig;
-  demo: KrateDemoConfig;
+export interface KradleConfig {
+  api: KradleComponentConfig;
+  controllers: KradleComponentConfig;
+  web: KradleComponentConfig;
+  webhookWorker: KradleComponentConfig;
+  gitea: KradleGiteaConfig;
+  agents: KradleAgentsConfig;
+  demo: KradleDemoConfig;
   argocd: { enabled: boolean; namespace: string };
-  auth: KrateAuthConfig;
+  auth: KradleAuthConfig;
 }
 
-export interface KrateImageConfig {
+export interface KradleImageConfig {
   repository: string;
   tag: string;
   pullPolicy: "IfNotPresent" | "Always";
 }
 
-export interface KrateHelmPlan {
+export interface KradleHelmPlan {
   readonly releaseName: string;
   readonly chartPath: string;
   readonly namespace: string;
@@ -156,11 +156,11 @@ export interface CloudConfig {
   namespace: string;
   releaseTag?: string;
   imageRegistry?: string;
-  image?: KrateImageConfig;
+  image?: KradleImageConfig;
   target: TargetConfig;
   ingress: IngressConfig;
   auth: AuthConfig;
-  krate: KrateConfig;
+  kradle: KradleConfig;
   agents?: AgentInstallConfig;
   storage: StorageConfig;
   execution?: ExecutionConfig;
@@ -345,7 +345,7 @@ export interface DeploymentPlan {
   readonly config: CloudConfig;
   readonly namespace: string;
   readonly releaseTag: string;
-  readonly helm: KrateHelmPlan;
+  readonly helm: KradleHelmPlan;
   readonly auth: AuthBootstrapResult;
   readonly providers: ProviderConfigurationResult;
   readonly kubernetes: {

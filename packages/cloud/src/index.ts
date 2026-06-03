@@ -3,7 +3,7 @@ export { loadCloudConfig, mergeCloudConfig, parseSetOverrides, validateCloudConf
 export { buildDeploymentPlan } from "./sdk/plans.js";
 export { renderTerraform } from "./terraform/root.js";
 export { renderKubernetes, serializeManifest } from "./kubernetes/render.js";
-export { buildKrateHelmPlan, renderHelmValuesYaml } from "./helm/krate-values.js";
+export { buildKradleHelmPlan, renderHelmValuesYaml } from "./helm/kradle-values.js";
 export { installEnvironment, getEnvironmentStatus } from "./sdk/deploy.js";
 export { upgradeEnvironment } from "./sdk/upgrade.js";
 export { bootstrapAuth } from "./sdk/auth.js";

@@ -1,21 +1,21 @@
 /**
  * @process repo/issue-610-controller-persistence
- * @description Implement issue #610: wire durable persistence for Krate external sync/write/conflict routes, agent memory resources, and Envoy model-route manifests.
+ * @description Implement issue #610: wire durable persistence for Kradle external sync/write/conflict routes, agent memory resources, and Envoy model-route manifests.
  * @inputs { issueNumber: number, baseBranch: string, workBranch: string, targetFiles: string[], verificationCommands: string[], qualityGates: string[] }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], runtimeCallPaths: string[], verification: object, review: object, delivery: object }
  *
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
- * - Existing core external persistence exists in packages/krate/core/src/api-controller.js through syncExternalBinding, createExternalWriteIntent, approveExternalWriteIntent, cancelExternalWriteIntent, detectExternalConflict, and resolveExternalConflict.
- * - Existing legacy HTTP server routes in packages/krate/core/src/http-server.js already forward full external sync and approve/cancel option objects.
- * - Live Next.js web routes under packages/krate/web/app/api/orgs/[org]/external still need request-shape fixes for sync and approve.
- * - Agent memory resources are plan-only in packages/krate/core/src/agent-memory-controller.js; callers must apply AgentMemorySnapshot, AgentRunMemoryImport, and AgentMemoryUpdate at API/dispatch boundaries.
- * - Model routes already persist KrateModelRoute resources, but no code path applies generated AIGatewayRoute manifests from generateEnvoyRouteManifest().
+ * - Existing core external persistence exists in packages/kradle/core/src/api-controller.js through syncExternalBinding, createExternalWriteIntent, approveExternalWriteIntent, cancelExternalWriteIntent, detectExternalConflict, and resolveExternalConflict.
+ * - Existing legacy HTTP server routes in packages/kradle/core/src/http-server.js already forward full external sync and approve/cancel option objects.
+ * - Live Next.js web routes under packages/kradle/web/app/api/orgs/[org]/external still need request-shape fixes for sync and approve.
+ * - Agent memory resources are plan-only in packages/kradle/core/src/agent-memory-controller.js; callers must apply AgentMemorySnapshot, AgentRunMemoryImport, and AgentMemoryUpdate at API/dispatch boundaries.
+ * - Model routes already persist KradleModelRoute resources, but no code path applies generated AIGatewayRoute manifests from generateEnvoyRouteManifest().
  * - No matching existing reconciler for AIGatewayRoute application was found in the repo scan; prefer adding a narrow apply/reconcile boundary over route-side shelling out.
  *
  * References searched before authoring:
  * - docs/agent-reference/process-authoring.md
- * - packages/krate/docs/gaps/controller-persistence.md
- * - packages/krate/docs/gaps/api-route-issues.md
+ * - packages/kradle/docs/gaps/controller-persistence.md
+ * - packages/kradle/docs/gaps/api-route-issues.md
  * - methodologies/spec-kit-brownfield.js
  * - methodologies/superpowers/verification-before-completion.js
  * - specializations/backend-development/README.md
@@ -202,12 +202,12 @@ export const collectIssueContextTask = defineTask('issue-610.collect-context', (
   agent: {
     name: 'issue-610-context-researcher',
     prompt: {
-      role: 'senior Krate maintainer',
+      role: 'senior Kradle maintainer',
       task: 'Collect authoritative context for issue #610 without editing files.',
       instructions: [
         'Run: gh issue view 610 --json title,body,labels,comments.',
         'If #610 is a pull request, also run: gh pr view 610 --json files,title,body,comments. If it is not a PR, record that fact.',
-        'Read packages/krate/docs/gaps/controller-persistence.md and packages/krate/docs/gaps/api-route-issues.md.',
+        'Read packages/kradle/docs/gaps/controller-persistence.md and packages/kradle/docs/gaps/api-route-issues.md.',
         'Check issue comments for prior planning or implementation PRs. If a prior PR exists, verify which changes are already present on the current base branch before planning duplicate work.',
         'Summarize requested behavior, labels, dependencies, stale parts of the issue, and exact acceptance criteria.',
         'Do not edit source files.',
@@ -229,10 +229,10 @@ export const reuseAuditTask = defineTask('issue-610.reuse-audit', (args, taskCtx
     name: 'issue-610-reuse-auditor',
     prompt: {
       role: 'brownfield architecture auditor',
-      task: 'Find existing Krate persistence infrastructure and decide what must be reused instead of rebuilt.',
+      task: 'Find existing Kradle persistence infrastructure and decide what must be reused instead of rebuilt.',
       instructions: [
-        'Search for persistFn, applyResource, applyResourceForOrg, createMemorySnapshot, createMemoryImport, createMemoryUpdate, generateEnvoyRouteManifest, AIGatewayRoute, and KrateModelRoute.',
-        'Inspect packages/krate/core/src/api-controller.js, packages/krate/core/src/http-server.js, packages/krate/core/src/agent-dispatch-controller.js, packages/krate/core/src/model-route-controller.js, and the live Next.js routes under packages/krate/web/app/api/orgs/[org].',
+        'Search for persistFn, applyResource, applyResourceForOrg, createMemorySnapshot, createMemoryImport, createMemoryUpdate, generateEnvoyRouteManifest, AIGatewayRoute, and KradleModelRoute.',
+        'Inspect packages/kradle/core/src/api-controller.js, packages/kradle/core/src/http-server.js, packages/kradle/core/src/agent-dispatch-controller.js, packages/kradle/core/src/model-route-controller.js, and the live Next.js routes under packages/kradle/web/app/api/orgs/[org].',
         'Identify existing tests that already cover external persistence, model route manifest generation, memory resource creation, org scoping, and web resource contracts.',
         'Find process-library references relevant to brownfield implementation, API testing, Kubernetes application, GitHub branch/PR policy, and verification-before-completion.',
         'Render a section named "Reuse-audit findings (REVIEW BEFORE PROCEEDING)" in the returned summary.',
@@ -250,9 +250,9 @@ export const reuseAuditTask = defineTask('issue-610.reuse-audit', (args, taskCtx
 export const traceRuntimeCallPathsTask = defineTask('issue-610.trace-runtime-call-paths', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Trace live persistence call paths',
-  labels: ['issue-610', 'runtime-trace', 'krate'],
+  labels: ['issue-610', 'runtime-trace', 'kradle'],
   agent: {
-    name: 'krate-runtime-call-path-tracer',
+    name: 'kradle-runtime-call-path-tracer',
     prompt: {
       role: 'senior backend engineer',
       task: 'Trace the live call paths from user/API entry points to persistence for issue #610.',
@@ -261,7 +261,7 @@ export const traceRuntimeCallPathsTask = defineTask('issue-610.trace-runtime-cal
         'For external sync, trace request body fields from route handler to syncExternalBinding to createSyncController persistFn to resourceGateway.apply/applyResource.',
         'For external write intent approve/cancel and conflict resolve, trace parameter shape and whether resources/actor fields reach the controller.',
         'For agent memory, trace dispatchAgent and any memory import/update/snapshot API surfaces. Identify every returned AgentMemorySnapshot, AgentRunMemoryImport, AgentMemoryUpdate, and AgentMemoryQuery resource that is not durably applied.',
-        'For model routes, trace KrateModelRoute POST/list/catalog through model-route-controller. Identify where an AIGatewayRoute manifest should be generated and applied without introducing ad hoc kubectl shell calls in a web route.',
+        'For model routes, trace KradleModelRoute POST/list/catalog through model-route-controller. Identify where an AIGatewayRoute manifest should be generated and applied without introducing ad hoc kubectl shell calls in a web route.',
         'Include auth registerLoginProfile and event-bus persistEvent as secondary error-handling audit items only if they are within the issue scope after reading the issue comments.',
         'Return JSON: { runtimeCallPaths: string[], missingApplyBoundaries: array, targetFiles: array, outOfScopeFiles: array, implementationOrder: array, openQuestions: array }.',
       ],
@@ -288,7 +288,7 @@ export const designFailingTestsTask = defineTask('issue-610.design-failing-tests
         'Add API-level or contract tests proving external write-intent approve passes { intentName, approvedBy, resources } rather than a bare string.',
         'Add tests for conflict resolve only if the runtime trace shows a remaining live-route persistence or argument-shape gap.',
         'Add controller/API tests proving AgentMemorySnapshot, AgentRunMemoryImport, and AgentMemoryUpdate resources are applied at the selected API/dispatch boundary with org-scoped namespace and idempotent retry behavior where feasible.',
-        'Add model-route tests proving KrateModelRoute creation also produces and applies an AIGatewayRoute manifest, and that apply failures are reported rather than silently succeeding.',
+        'Add model-route tests proving KradleModelRoute creation also produces and applies an AIGatewayRoute manifest, and that apply failures are reported rather than silently succeeding.',
         'Do not update production implementation in this task.',
         'Return JSON: { changedFiles: string[], failingCommands: array, testCases: array, expectedFailures: array, scopeNotes: array }.',
         '',
@@ -306,11 +306,11 @@ export const designFailingTestsTask = defineTask('issue-610.design-failing-tests
 export const implementPersistenceWiringTask = defineTask('issue-610.implement-persistence-wiring', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement persistence wiring',
-  labels: ['issue-610', 'implementation', 'krate-core', 'krate-web'],
+  labels: ['issue-610', 'implementation', 'kradle-core', 'kradle-web'],
   agent: {
-    name: 'krate-persistence-implementer',
+    name: 'kradle-persistence-implementer',
     prompt: {
-      role: 'senior Krate backend engineer',
+      role: 'senior Kradle backend engineer',
       task: 'Implement the narrow persistence wiring required by issue #610.',
       instructions: [
         'Read files before editing and preserve unrelated worktree changes.',
@@ -318,7 +318,7 @@ export const implementPersistenceWiringTask = defineTask('issue-610.implement-pe
         'External routes: fix live Next.js routes so sync forwards full request options and approve/cancel/resolve routes pass the object shape expected by the core controller. Do not duplicate core persistFn wiring that already exists.',
         'Core external persistence: if changing persistFn callbacks, prefer the existing applyResource/applyResourceForOrg semantics so cache invalidation, audit events, org scoping, and errors are handled consistently. Avoid new in-memory persistence.',
         'Memory persistence: apply returned AgentMemorySnapshot, AgentRunMemoryImport, and AgentMemoryUpdate resources at the API/dispatch boundary selected by the runtime trace. Preserve returned DTOs and include apply errors in API responses instead of making the operation appear successful.',
-        'Model routes: add a narrow controller/API/reconciler boundary that resolves a KrateModelRoute, generates its AIGatewayRoute manifest, and applies it through the existing resource gateway/controller apply path. Avoid spawning kubectl directly from a web route.',
+        'Model routes: add a narrow controller/API/reconciler boundary that resolves a KradleModelRoute, generates its AIGatewayRoute manifest, and applies it through the existing resource gateway/controller apply path. Avoid spawning kubectl directly from a web route.',
         'Error handling: make persistence failures observable for the caller on newly awaited persistence paths. Keep existing fire-and-forget semantics only where the issue explicitly accepts eventual persistence and status is observable.',
         'Update docs only when behavior changes from existing docs or the runtime trace identifies stale gap docs that would mislead future maintainers.',
         'Return JSON: { changedFiles: string[], summary: string, persistenceBoundaries: array, errorHandling: array, docsUpdated: array, unresolvedItems: array }.',
@@ -345,14 +345,14 @@ export const verifyPersistenceWiringTask = defineTask('issue-610.verify-persiste
   title: 'Verify persistence wiring',
   labels: ['issue-610', 'verification', 'quality-gate'],
   agent: {
-    name: 'krate-persistence-verifier',
+    name: 'kradle-persistence-verifier',
     prompt: {
       role: 'verification engineer',
       task: 'Run fresh verification and report evidence before any completion claim.',
       instructions: [
         'Run the targeted failing tests from the test plan and confirm they now pass.',
         'Run all verificationCommands from inputs that apply to the changed files. Record skipped commands with concrete reasons.',
-        'At minimum, consider node --test packages/krate/core/tests/external-persistence.test.js, node --test packages/krate/core/tests/agent-memory-controller.test.js, node --test packages/krate/core/tests/model-route-controller.test.js, node --test packages/krate/web/tests/resource-contract.test.js, npm run build:sdk, npm run test:sdk, and git diff --check.',
+        'At minimum, consider node --test packages/kradle/core/tests/external-persistence.test.js, node --test packages/kradle/core/tests/agent-memory-controller.test.js, node --test packages/kradle/core/tests/model-route-controller.test.js, node --test packages/kradle/web/tests/resource-contract.test.js, npm run build:sdk, npm run test:sdk, and git diff --check.',
         'Inspect the final diff to confirm source changes are limited to issue #610 scope.',
         'Verify no plaintext secrets, kubeconfigs, or environment-specific credentials were added.',
         'Return JSON: { passed: boolean, commandsRun: array, skippedCommands: array, evidence: array, failures: array, changedFiles: array }.',

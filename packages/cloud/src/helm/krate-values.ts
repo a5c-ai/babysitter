@@ -1,52 +1,52 @@
-import type { CloudConfig, KrateHelmPlan } from "../types.js";
+import type { CloudConfig, KradleHelmPlan } from "../types.js";
 
-export function buildKrateHelmPlan(config: CloudConfig): KrateHelmPlan {
+export function buildKradleHelmPlan(config: CloudConfig): KradleHelmPlan {
   const values: Record<string, unknown> = {
     image: {
-      repository: config.image?.repository ?? "ghcr.io/a5c-ai/krate/krate-controller",
+      repository: config.image?.repository ?? "ghcr.io/a5c-ai/kradle/kradle-controller",
       tag: config.image?.tag ?? config.releaseTag ?? "latest",
       pullPolicy: config.image?.pullPolicy ?? "IfNotPresent",
     },
-    api: { replicas: config.krate.api.replicas, resources: config.krate.api.resources ?? {} },
-    controllers: { replicas: config.krate.controllers.replicas, resources: config.krate.controllers.resources ?? {} },
-    web: { replicas: config.krate.web.replicas, resources: config.krate.web.resources ?? {} },
-    webhookWorker: { replicas: config.krate.webhookWorker.replicas, resources: config.krate.webhookWorker.resources ?? {} },
+    api: { replicas: config.kradle.api.replicas, resources: config.kradle.api.resources ?? {} },
+    controllers: { replicas: config.kradle.controllers.replicas, resources: config.kradle.controllers.resources ?? {} },
+    web: { replicas: config.kradle.web.replicas, resources: config.kradle.web.resources ?? {} },
+    webhookWorker: { replicas: config.kradle.webhookWorker.replicas, resources: config.kradle.webhookWorker.resources ?? {} },
     ingress: {
       enabled: config.ingress.hostnames.length > 0,
       className: config.ingress.ingressClassName ?? "nginx",
       hosts: config.ingress.hostnames.map(h => ({ host: h, paths: [{ path: "/", pathType: "Prefix" }] })),
       tls: config.ingress.tls
-        ? config.ingress.hostnames.map(h => ({ hosts: [h], secretName: `krate-${h.replace(/\./g, "-")}-tls` }))
+        ? config.ingress.hostnames.map(h => ({ hosts: [h], secretName: `kradle-${h.replace(/\./g, "-")}-tls` }))
         : [],
     },
     gitea: {
-      enabled: config.krate.gitea.enabled,
-      admin: config.krate.gitea.admin,
-      persistence: config.krate.gitea.persistence,
+      enabled: config.kradle.gitea.enabled,
+      admin: config.kradle.gitea.admin,
+      persistence: config.kradle.gitea.persistence,
     },
-    demo: config.krate.demo,
-    agents: config.krate.agents,
+    demo: config.kradle.demo,
+    agents: config.kradle.agents,
     auth: {
-      github: config.krate.auth.github,
-      sso: { enabled: config.krate.auth.sso.enabled },
-      delegatedIdentity: { enabled: config.krate.auth.delegatedIdentity.enabled },
+      github: config.kradle.auth.github,
+      sso: { enabled: config.kradle.auth.sso.enabled },
+      delegatedIdentity: { enabled: config.kradle.auth.delegatedIdentity.enabled },
     },
-    argocd: { enabled: config.krate.argocd.enabled, namespace: config.krate.argocd.namespace },
+    argocd: { enabled: config.kradle.argocd.enabled, namespace: config.kradle.argocd.namespace },
     storage: { className: config.storage.className ?? "standard" },
   };
 
   return {
-    releaseName: "krate",
-    chartPath: "packages/krate/charts",
+    releaseName: "kradle",
+    chartPath: "packages/kradle/charts",
     namespace: config.namespace,
     values,
     summary: [
-      `helm upgrade --install krate in ${config.namespace}`,
-      `api: ${config.krate.api.replicas} replicas`,
-      `controllers: ${config.krate.controllers.replicas} replicas`,
-      `web: ${config.krate.web.replicas} replicas`,
-      `gitea: ${config.krate.gitea.enabled ? "enabled" : "disabled"}`,
-      `agents: ${config.krate.agents.enabled ? "enabled" : "disabled"}`,
+      `helm upgrade --install kradle in ${config.namespace}`,
+      `api: ${config.kradle.api.replicas} replicas`,
+      `controllers: ${config.kradle.controllers.replicas} replicas`,
+      `web: ${config.kradle.web.replicas} replicas`,
+      `gitea: ${config.kradle.gitea.enabled ? "enabled" : "disabled"}`,
+      `agents: ${config.kradle.agents.enabled ? "enabled" : "disabled"}`,
     ],
   };
 }
@@ -80,7 +80,7 @@ function yamlValue(value: unknown, indent: number): string {
   return String(value);
 }
 
-export function renderHelmValuesYaml(plan: KrateHelmPlan): string {
+export function renderHelmValuesYaml(plan: KradleHelmPlan): string {
   const entries = Object.entries(plan.values);
   return entries.map(([k, v]) => `${k}: ${yamlValue(v, 1)}`).join("\n") + "\n";
 }

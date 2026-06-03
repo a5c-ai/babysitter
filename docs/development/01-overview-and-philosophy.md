@@ -76,7 +76,7 @@ graph TB
     subgraph "Entry Points"
         AMUX["amux CLI<br/>(agent-mux)"]
         TRIGGERS["Triggers<br/>(GitHub Action)"]
-        KRATE["Krate<br/>(Kubernetes operator + web UI)"]
+        KRATE["Kradle<br/>(Kubernetes operator + web UI)"]
     end
 
     subgraph "Orchestration"
@@ -132,7 +132,7 @@ graph TB
 | `packages/agent-mux/hooks` | Hook normalization: native events → canonical phases |
 | `packages/sdk` | Babysitter SDK: run lifecycle, session binding, MCP tools |
 | `packages/triggers-mux` | GitHub Action: trigger evaluation + agent dispatch |
-| `packages/krate` | Kubernetes operator + web UI for cloud deployment |
+| `packages/kradle` | Kubernetes operator + web UI for cloud deployment |
 | `packages/extension-mux` | Plugin generator: unified source → per-harness distributions |
 | `packages/tula/platform` | Standalone babysitter agent (internal harness) |
 

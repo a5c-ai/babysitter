@@ -101,8 +101,8 @@
     "packages/tula/platform/src/daemon/__tests__/webhookListener.test.ts",
     "packages/tula/platform/src/daemon/__tests__/loop.test.ts",
     "packages/triggers-mux/src",
-    "packages/krate/core/src/agent-trigger-controller.js",
-    "packages/krate/core/tests/agent-trigger-controller.test.js"
+    "packages/kradle/core/src/agent-trigger-controller.js",
+    "packages/kradle/core/tests/agent-trigger-controller.test.js"
   ],
   "knownCurrentState": {
     "agentRuntimeQueue": "packages/agent-runtime/src/daemon/durableQueue.ts persists trigger-queue.json records, replays pending events after restart, retries failed events with backoff, and moves exhausted records to dead-letter.",
@@ -111,7 +111,7 @@
     "cron": "timerScheduler.ts parses exactly five fields with numeric values, commas, ranges, and steps, then matches using local Date getters.",
     "fileWatcher": "fileWatcher.ts creates one watcher/debounce timer per file trigger and does not deduplicate the same changed path across overlapping rules.",
     "webhook": "webhookListener.ts supports method/path/bearer auth, 1 MiB body limit, JSON parsing, and immediate 200 ok after enqueueing callback. It has no admission/rate-limit response contract.",
-    "externalTriggerConcepts": "packages/triggers-mux normalizes CI/webhook events for agent launching, and packages/krate/core models AgentTriggerRule/AgentTriggerExecution with basic cron/webhook/comment/label concepts."
+    "externalTriggerConcepts": "packages/triggers-mux normalizes CI/webhook events for agent launching, and packages/kradle/core models AgentTriggerRule/AgentTriggerExecution with basic cron/webhook/comment/label concepts."
   },
   "reuseAuditSeed": {
     "keywordNounsAndVerbs": [
@@ -149,7 +149,7 @@
       "existing daemon tests under packages/agent-runtime/src/daemon/__tests__",
       "matching daemon tests under packages/tula/platform/src/daemon/__tests__",
       "packages/triggers-mux event normalization/query concepts",
-      "packages/krate/core AgentTriggerRule/AgentTriggerExecution concepts"
+      "packages/kradle/core AgentTriggerRule/AgentTriggerExecution concepts"
     ],
     "newInfrastructureConstraint": "Do not create a second trigger persistence or DLQ subsystem. Extend DurableTriggerQueue and reconcile package parity before adding new storage or broker abstractions."
   },

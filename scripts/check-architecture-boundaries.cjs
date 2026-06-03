@@ -65,12 +65,12 @@ const packageFamilies = {
   "atlas-family": [
     "@a5c-ai/atlas-webui",
   ],
-  "krate-family": [
-    "@a5c-ai/krate",
-    "@a5c-ai/krate-sdk",
-    "@a5c-ai/krate-cli",
-    "@a5c-ai/krate-web",
-    "@a5c-ai/krate-jitsi-agent-sidecar",
+  "kradle-family": [
+    "@a5c-ai/kradle",
+    "@a5c-ai/kradle-sdk",
+    "@a5c-ai/kradle-cli",
+    "@a5c-ai/kradle-web",
+    "@a5c-ai/kradle-jitsi-agent-sidecar",
   ],
 };
 
@@ -111,10 +111,10 @@ const familyRules = {
     rationale:
       "atlas packages form a self-contained graph SDK family; may depend on support systems but not orchestration core",
   },
-  "krate-family": {
-    allow: new Set(["support-systems", "krate-family"]),
+  "kradle-family": {
+    allow: new Set(["support-systems", "kradle-family"]),
     rationale:
-      "krate packages form a self-contained Kubernetes forge family; may depend on support systems but not orchestration core",
+      "kradle packages form a self-contained Kubernetes forge family; may depend on support systems but not orchestration core",
   },
 };
 

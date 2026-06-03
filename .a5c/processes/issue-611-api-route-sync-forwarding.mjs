@@ -1,6 +1,6 @@
 /**
  * @process repo/issue-611-api-route-sync-forwarding
- * @description Implement issue #611 for Krate web API route/controller contract drift and curated catalog deploy error surfacing.
+ * @description Implement issue #611 for Kradle web API route/controller contract drift and curated catalog deploy error surfacing.
  * @inputs { issueNumber: number, title: string, issueUrl: string, issueBody: string, triageComment: string, targetFiles: string[], verificationCommands: string[] }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], verification: object, review: object }
  *
@@ -41,16 +41,16 @@ const reuseAuditTask = defineTask(
   async (args) => ({
     kind: 'agent',
     title: 'Phase 0: Reuse-audit findings',
-    labels: ['krate', 'reuse-audit', 'planning'],
+    labels: ['kradle', 'reuse-audit', 'planning'],
     agent: {
-      name: 'krate-reuse-auditor',
+      name: 'kradle-reuse-auditor',
       prompt: {
-        role: 'senior Krate maintenance engineer',
+        role: 'senior Kradle maintenance engineer',
         task: 'Run the repo-specific reuse audit before implementation work.',
         instructions: [
           specBlock(args),
           '',
-          'Extract keyword nouns and verbs from the issue, then scan existing Krate web routes, tests, controller APIs, MCP forwarding, and UI error-state patterns.',
+          'Extract keyword nouns and verbs from the issue, then scan existing Kradle web routes, tests, controller APIs, MCP forwarding, and UI error-state patterns.',
           'Start the response with exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
           'Do not modify files in this phase.',
           'Return JSON: { findingsMarkdown, matchingInfrastructure, runtimeCallPaths, targetFiles, recommendedTestFiles, noCodeChanges }.',
@@ -58,7 +58,7 @@ const reuseAuditTask = defineTask(
       },
     },
   }),
-  { kind: 'agent', title: 'Phase 0: Reuse-audit findings', labels: ['krate', 'reuse-audit'] },
+  { kind: 'agent', title: 'Phase 0: Reuse-audit findings', labels: ['kradle', 'reuse-audit'] },
 );
 
 const diagnosisTask = defineTask(
@@ -66,9 +66,9 @@ const diagnosisTask = defineTask(
   async (args) => ({
     kind: 'agent',
     title: 'Diagnose route/controller contract drift',
-    labels: ['krate', 'diagnosis', 'api-routes'],
+    labels: ['kradle', 'diagnosis', 'api-routes'],
     agent: {
-      name: 'krate-route-diagnostician',
+      name: 'kradle-route-diagnostician',
       prompt: {
         role: 'senior debugger and API contract analyst',
         task: 'Confirm the live runtime call paths and exact root causes before code changes.',
@@ -78,7 +78,7 @@ const diagnosisTask = defineTask(
           'Use the reuse audit below as context:',
           JSON.stringify(args.reuseAudit ?? {}, null, 2),
           '',
-          'Inspect only the Krate web/API/core files needed to confirm the live call paths.',
+          'Inspect only the Kradle web/API/core files needed to confirm the live call paths.',
           'Confirm that assistant/generate already uses an existing controller method and should not be changed for that concern.',
           'Record runtimeCallPaths from entry route/component through controller or fetch boundary.',
           'Do not modify files in this phase.',
@@ -87,7 +87,7 @@ const diagnosisTask = defineTask(
       },
     },
   }),
-  { kind: 'agent', title: 'Diagnose route/controller contract drift', labels: ['krate', 'diagnosis'] },
+  { kind: 'agent', title: 'Diagnose route/controller contract drift', labels: ['kradle', 'diagnosis'] },
 );
 
 const testDesignTask = defineTask(
@@ -95,11 +95,11 @@ const testDesignTask = defineTask(
   async (args) => ({
     kind: 'agent',
     title: 'Design and add regression tests before fixes',
-    labels: ['krate', 'tdd', 'tests'],
+    labels: ['kradle', 'tdd', 'tests'],
     agent: {
-      name: 'krate-test-engineer',
+      name: 'kradle-test-engineer',
       prompt: {
-        role: 'test engineer for Krate web routes and React components',
+        role: 'test engineer for Kradle web routes and React components',
         task: 'Add focused failing regression tests before implementing fixes.',
         instructions: [
           specBlock(args),
@@ -107,7 +107,7 @@ const testDesignTask = defineTask(
           'DIAGNOSIS:',
           JSON.stringify(args.diagnosis ?? {}, null, 2),
           '',
-          'Author focused tests near the existing Krate web tests. Prefer structural or route contract tests consistent with packages/krate/web/tests unless a direct route/component test is already practical.',
+          'Author focused tests near the existing Kradle web tests. Prefer structural or route contract tests consistent with packages/kradle/web/tests unless a direct route/component test is already practical.',
           'Cover external sync forwarding of all supported body fields into syncExternalBinding options.',
           'Cover inference infer virtual model loading through an existing controller API, scoped to the org when appropriate.',
           'Cover curated catalog deploy partial-failure/error surfacing so the UI cannot report unconditional success when route auto-create fails.',
@@ -118,7 +118,7 @@ const testDesignTask = defineTask(
       },
     },
   }),
-  { kind: 'agent', title: 'Design and add regression tests before fixes', labels: ['krate', 'tdd'] },
+  { kind: 'agent', title: 'Design and add regression tests before fixes', labels: ['kradle', 'tdd'] },
 );
 
 const implementationTask = defineTask(
@@ -126,11 +126,11 @@ const implementationTask = defineTask(
   async (args) => ({
     kind: 'agent',
     title: 'Implement focused API route and UI fixes',
-    labels: ['krate', 'implementation', 'api-routes', 'ui'],
+    labels: ['kradle', 'implementation', 'api-routes', 'ui'],
     agent: {
-      name: 'krate-maintenance-engineer',
+      name: 'kradle-maintenance-engineer',
       prompt: {
-        role: 'senior Krate web maintenance engineer',
+        role: 'senior Kradle web maintenance engineer',
         task: 'Implement the focused fixes for issue #611.',
         instructions: [
           specBlock(args),
@@ -143,17 +143,17 @@ const implementationTask = defineTask(
           '',
           'Implement only the files on the live runtime paths identified by diagnosis.',
           'External sync: preserve bindingName as the first controller argument and forward the supported optional body fields as the second options object. Include namespace if the controller/tool path supports it.',
-          'Inference infer: replace the non-existent controller.listResources usage with an existing controller API. Prefer org-scoped listResourceForOrg(org, "KrateVirtualModel") unless diagnosis proves global matching is intended.',
+          'Inference infer: replace the non-existent controller.listResources usage with an existing controller API. Prefer org-scoped listResourceForOrg(org, "KradleVirtualModel") unless diagnosis proves global matching is intended.',
           'Assistant generate: do not change listResourceForOrg just because the original issue listed it; it is a confirmed existing API.',
           'Curated model catalog: surface follow-up route auto-create failure to the user instead of only console.warn. Use explicit partial-success or failure semantics based on diagnosis; default to partial-success warning if route creation is a convenience and service deploy succeeded.',
-          'Keep changes narrow. Do not refactor unrelated Krate UI, route auth, pagination, or catalog behavior.',
+          'Keep changes narrow. Do not refactor unrelated Kradle UI, route auth, pagination, or catalog behavior.',
           'Run the narrow tests until the new regressions pass.',
           'Return JSON: { changedFiles, summary, testCommands, testResults, decisions }.',
         ],
       },
     },
   }),
-  { kind: 'agent', title: 'Implement focused API route and UI fixes', labels: ['krate', 'implementation'] },
+  { kind: 'agent', title: 'Implement focused API route and UI fixes', labels: ['kradle', 'implementation'] },
 );
 
 const verificationTask = defineTask(
@@ -161,9 +161,9 @@ const verificationTask = defineTask(
   async (args) => ({
     kind: 'agent',
     title: 'Verify quality gates',
-    labels: ['krate', 'verification', 'quality-gate'],
+    labels: ['kradle', 'verification', 'quality-gate'],
     agent: {
-      name: 'krate-verifier',
+      name: 'kradle-verifier',
       prompt: {
         role: 'verification engineer',
         task: 'Run and report the quality gates for issue #611.',
@@ -183,7 +183,7 @@ const verificationTask = defineTask(
       },
     },
   }),
-  { kind: 'agent', title: 'Verify quality gates', labels: ['krate', 'verification'] },
+  { kind: 'agent', title: 'Verify quality gates', labels: ['kradle', 'verification'] },
 );
 
 const reviewTask = defineTask(
@@ -191,9 +191,9 @@ const reviewTask = defineTask(
   async (args) => ({
     kind: 'agent',
     title: 'Review implementation against issue spec',
-    labels: ['krate', 'review', 'quality-gate'],
+    labels: ['kradle', 'review', 'quality-gate'],
     agent: {
-      name: 'krate-code-reviewer',
+      name: 'kradle-code-reviewer',
       prompt: {
         role: 'senior code reviewer',
         task: 'Review the working tree diff against the issue spec and verification evidence.',
@@ -218,7 +218,7 @@ const reviewTask = defineTask(
       },
     },
   }),
-  { kind: 'agent', title: 'Review implementation against issue spec', labels: ['krate', 'review'] },
+  { kind: 'agent', title: 'Review implementation against issue spec', labels: ['kradle', 'review'] },
 );
 
 const refinementTask = defineTask(
@@ -226,11 +226,11 @@ const refinementTask = defineTask(
   async (args) => ({
     kind: 'agent',
     title: 'Refine implementation after review',
-    labels: ['krate', 'refinement'],
+    labels: ['kradle', 'refinement'],
     agent: {
-      name: 'krate-maintenance-engineer',
+      name: 'kradle-maintenance-engineer',
       prompt: {
-        role: 'senior Krate web maintenance engineer',
+        role: 'senior Kradle web maintenance engineer',
         task: 'Apply only the required fixes from review and verification.',
         instructions: [
           specBlock(args),
@@ -248,7 +248,7 @@ const refinementTask = defineTask(
       },
     },
   }),
-  { kind: 'agent', title: 'Refine implementation after review', labels: ['krate', 'refinement'] },
+  { kind: 'agent', title: 'Refine implementation after review', labels: ['kradle', 'refinement'] },
 );
 
 export async function process(inputs, ctx) {

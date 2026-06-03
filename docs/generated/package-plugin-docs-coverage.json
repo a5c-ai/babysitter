@@ -515,14 +515,14 @@
       "note": "README is the canonical package-level contract."
     },
     {
-      "surface": "packages/krate/core",
-      "packageName": "@a5c-ai/krate",
+      "surface": "packages/kradle/core",
+      "packageName": "@a5c-ai/kradle",
       "description": "Kubernetes-native forge runtime with Argo CD GitOps and Gitea-backed Git hosting.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/krate/core/README.md",
+      "canonicalHome": "../packages/kradle/core/README.md",
       "supporting": [],
-      "note": "Public npm package for the Krate Kubernetes forge platform."
+      "note": "Public npm package for the Kradle Kubernetes forge platform."
     },
     {
       "surface": "packages/observer-dashboard",

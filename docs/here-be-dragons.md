@@ -177,7 +177,7 @@ The timeout sets an abort signal but doesn't guarantee the request stops. Fetch 
 | Commented-out code blocks | 20+ files | Low accumulation — comments often explain why removed |
 | Skipped/conditional tests | 20+ suites | Mostly justified; unexplained `SessionDetailScreen` skips fixed |
 | E2E/integration tests | 6 files | Gap: no E2E for orchestration, hook-mux lifecycle, or trigger dispatch |
-| Pre-release packages (0.1.0) | 5 | atlas, atlas/webui, krate/cli, krate/sdk, compendium |
+| Pre-release packages (0.1.0) | 5 | atlas, atlas/webui, kradle/cli, kradle/sdk, compendium |
 
 ### ~~Unexplained skipped tests~~
 

@@ -1,10 +1,10 @@
 ---
 nodeKind: PackageSurface
-id: package:a5c-ai-krate
+id: package:a5c-ai-kradle
 attributes:
-  packageId: "@a5c-ai/krate"
-  packageName: "@a5c-ai/krate"
-  workspacePath: packages/krate/core
+  packageId: "@a5c-ai/kradle"
+  packageName: "@a5c-ai/kradle"
+  workspacePath: packages/kradle/core
   moduleType: esm
   surfaceKinds:
     - runtime-library
@@ -14,19 +14,19 @@ attributes:
   sourceOfTruthRole: application
   publishedTo: npm
   versionPolicy: semver
-  # Source: packages/krate/core/package.json (name, bin, scripts, description).
+  # Source: packages/kradle/core/package.json (name, bin, scripts, description).
 edges:
   references_path:
-    - target: path:krate-core
+    - target: path:kradle-core
   validated_by_ci:
-    - target: ci:a5c-ai-krate
+    - target: ci:a5c-ai-kradle
 ---
 nodeKind: PackageSurface
-id: package:a5c-ai-krate-sdk
+id: package:a5c-ai-kradle-sdk
 attributes:
-  packageId: "@a5c-ai/krate-sdk"
-  packageName: "@a5c-ai/krate-sdk"
-  workspacePath: packages/krate/sdk
+  packageId: "@a5c-ai/kradle-sdk"
+  packageName: "@a5c-ai/kradle-sdk"
+  workspacePath: packages/kradle/sdk
   moduleType: esm
   surfaceKinds:
     - sdk-consumer
@@ -35,19 +35,19 @@ attributes:
   sourceOfTruthRole: wrapper-over-graph
   publishedTo: none
   versionPolicy: semver
-  # Source: packages/krate/sdk/package.json plus src/index.js exports.
+  # Source: packages/kradle/sdk/package.json plus src/index.js exports.
 edges:
   references_path:
-    - target: path:krate-sdk
+    - target: path:kradle-sdk
   validated_by_ci:
-    - target: ci:a5c-ai-krate-sdk
+    - target: ci:a5c-ai-kradle-sdk
 ---
 nodeKind: PackageSurface
-id: package:a5c-ai-krate-cli
+id: package:a5c-ai-kradle-cli
 attributes:
-  packageId: "@a5c-ai/krate-cli"
-  packageName: "@a5c-ai/krate-cli"
-  workspacePath: packages/krate/cli
+  packageId: "@a5c-ai/kradle-cli"
+  packageName: "@a5c-ai/kradle-cli"
+  workspacePath: packages/kradle/cli
   moduleType: esm
   surfaceKinds:
     - cli
@@ -56,19 +56,19 @@ attributes:
   sourceOfTruthRole: application
   publishedTo: none
   versionPolicy: semver
-  # Source: packages/krate/cli/package.json (krate and krate-server bins).
+  # Source: packages/kradle/cli/package.json (kradle and kradle-server bins).
 edges:
   references_path:
-    - target: path:krate-cli
+    - target: path:kradle-cli
   validated_by_ci:
-    - target: ci:a5c-ai-krate-cli
+    - target: ci:a5c-ai-kradle-cli
 ---
 nodeKind: PackageSurface
-id: package:a5c-ai-krate-web
+id: package:a5c-ai-kradle-web
 attributes:
-  packageId: "@a5c-ai/krate-web"
-  packageName: "@a5c-ai/krate-web"
-  workspacePath: packages/krate/web
+  packageId: "@a5c-ai/kradle-web"
+  packageName: "@a5c-ai/kradle-web"
+  workspacePath: packages/kradle/web
   moduleType: nextjs
   surfaceKinds:
     - webui
@@ -77,19 +77,19 @@ attributes:
   sourceOfTruthRole: application
   publishedTo: none
   versionPolicy: semver
-  # Source: packages/krate/web/package.json (Next.js web console metadata).
+  # Source: packages/kradle/web/package.json (Next.js web console metadata).
 edges:
   references_path:
-    - target: path:krate-web
+    - target: path:kradle-web
   validated_by_ci:
-    - target: ci:a5c-ai-krate-web
+    - target: ci:a5c-ai-kradle-web
 ---
 nodeKind: PackageSurface
-id: package:krate-helm-chart
+id: package:kradle-helm-chart
 attributes:
-  packageId: krate
-  packageName: krate
-  workspacePath: packages/krate/charts
+  packageId: kradle
+  packageName: kradle
+  workspacePath: packages/kradle/charts
   moduleType: other
   surfaceKinds:
     - helm-chart
@@ -98,9 +98,9 @@ attributes:
   sourceOfTruthRole: application
   publishedTo: none
   versionPolicy: semver
-  # Source: packages/krate/charts/Chart.yaml (Helm chart metadata and release gate annotation).
+  # Source: packages/kradle/charts/Chart.yaml (Helm chart metadata and release gate annotation).
 edges:
   references_path:
-    - target: path:krate-chart
+    - target: path:kradle-chart
   validated_by_ci:
-    - target: ci:krate-helm-chart
+    - target: ci:kradle-helm-chart

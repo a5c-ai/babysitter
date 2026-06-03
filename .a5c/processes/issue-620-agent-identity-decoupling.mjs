@@ -1,13 +1,13 @@
 /**
  * @process repo/issue-620-agent-identity-decoupling
- * @description Implement issue #620: decouple durable agent identity/persona from AgentStack infrastructure in Krate.
+ * @description Implement issue #620: decouple durable agent identity/persona from AgentStack infrastructure in Kradle.
  * @inputs { issueNumber: number, branchName: string, baseBranch: string, targetFiles: string[], verificationCommands: string[] }
  * @outputs { success: boolean, phases: string[], reuseAudit: object, implementation: object, verification: object, review: object, delivery: object }
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
- * - packages/krate/docs/agent-identity/01-resource-model.md
- * - packages/krate/docs/agent-identity/02-migration.md
+ * - packages/kradle/docs/agent-identity/01-resource-model.md
+ * - packages/kradle/docs/agent-identity/02-migration.md
  * - library/methodologies/rpikit/rpikit-implement.js
  * - library/methodologies/rpikit/rpikit-review.js
  * - library/methodologies/superpowers/test-driven-development.js
@@ -236,7 +236,7 @@ export async function process(inputs, ctx) {
 export const reuseAuditTask = defineTask('issue-620.reuse-audit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 0 - Reuse audit for agent identity decoupling',
-  labels: ['issue-620', 'reuse-audit', 'krate', 'agent-identity'],
+  labels: ['issue-620', 'reuse-audit', 'kradle', 'agent-identity'],
   agent: {
     name: 'codebase-researcher',
     prompt: {
@@ -248,7 +248,7 @@ export const reuseAuditTask = defineTask('issue-620.reuse-audit', (args, taskCtx
         'Extract keyword nouns and verbs from issue #620 and the supplied inputs: AgentPersona, AgentSoul, AgentAppearance, AgentVoiceProfile, AgentDefinition, AgentStack, prompt composition, dispatch, trigger, MCP, SDK exports, CRD, migration, persona, stack, identity.',
         'Honor .a5c/reuse-audit.json if it exists. If it does not exist, say so and use the target files and keywords in inputs.',
         'Scan for matching migrations, API routes, CRDs, controllers, SDK exports, MCP tools, tests, docs, environment variables, and imports.',
-        'Specifically inspect packages/krate/docs/agent-identity, packages/krate/core/src, packages/krate/core/tests, packages/krate/charts/crds, packages/krate/cli/src, packages/krate/cli/tests, packages/krate/sdk/src, packages/krate/sdk/tests, and packages/krate/web where references appear.',
+        'Specifically inspect packages/kradle/docs/agent-identity, packages/kradle/core/src, packages/kradle/core/tests, packages/kradle/charts/crds, packages/kradle/cli/src, packages/kradle/cli/tests, packages/kradle/sdk/src, packages/kradle/sdk/tests, and packages/kradle/web where references appear.',
         'Record that .a5c/process-library was requested by the planning prompt; if it is absent, fall back to the checked-in library/ process library and continue.',
         'Return JSON: { heading, keywords, existingInfrastructure, matchingFiles, noMatchingInfrastructureNotes, conflictsOrDuplicates, reusablePatterns, requiredFollowUpResearch }.',
         'INPUTS JSON:',
@@ -264,18 +264,18 @@ export const reuseAuditTask = defineTask('issue-620.reuse-audit', (args, taskCtx
 
 export const readIssueAndCodebaseTask = defineTask('issue-620.read-issue-and-codebase', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Read issue #620 and trace Krate identity surfaces',
-  labels: ['issue-620', 'krate', 'context', 'codebase-research'],
+  title: 'Read issue #620 and trace Kradle identity surfaces',
+  labels: ['issue-620', 'kradle', 'context', 'codebase-research'],
   agent: {
-    name: 'krate-architecture-researcher',
+    name: 'kradle-architecture-researcher',
     prompt: {
-      role: 'senior Krate core architect',
+      role: 'senior Kradle core architect',
       task: 'Read the authoritative issue context and trace the current AgentStack-centered implementation.',
       instructions: [
         'Do not edit files.',
         `Run gh issue view ${args.issueNumber} --json title,body,labels,comments and preserve the title, labels, body, and comments.`,
         `Also run gh pr view ${args.issueNumber} --json files,title,body,comments and record whether GitHub reports that it is not a PR.`,
-        'Read packages/krate/docs/agent-identity/01-resource-model.md and packages/krate/docs/agent-identity/02-migration.md as the design source of truth.',
+        'Read packages/kradle/docs/agent-identity/01-resource-model.md and packages/kradle/docs/agent-identity/02-migration.md as the design source of truth.',
         'Trace current code paths for resource definitions, validation, CRD YAML, stack reconciliation, manual dispatch, trigger dispatch, permission review, context bundle assembly, MCP server tools, API dispatch route, and SDK exports.',
         'Use the reuse audit findings as prework and call out existing infrastructure that must be reused instead of recreated.',
         'Identify current hard requirements and compatibility constraints: AgentStack remains accepted, inline stack prompts remain functional as deprecated fallback, AgentDefinition resolves to AgentStack before permission/runtime review, and TriggerRule/DispatchRun can target either agentDefinition or agentStack.',
@@ -329,7 +329,7 @@ export const designImplementationStrategyTask = defineTask('issue-620.design-str
   agent: {
     name: 'software-architect',
     prompt: {
-      role: 'senior Krate architecture maintainer',
+      role: 'senior Kradle architecture maintainer',
       task: 'Design a compatibility-preserving implementation strategy for agent identity decoupling.',
       instructions: [
         'Do not edit files.',
@@ -340,7 +340,7 @@ export const designImplementationStrategyTask = defineTask('issue-620.design-str
         '3. Update dispatch resolution so createManualDispatch accepts agentDefinition or agentStack, stores compatible run fields, composes prompts only through the new module, and resolves AgentDefinition to AgentStack before permission review, memory, workspace, context bundle, and job creation.',
         '4. Update trigger and webhook intent paths to carry agentDefinition when present while preserving agentStack legacy paths.',
         '5. Keep AgentStack infrastructure-focused without breaking existing inline prompt and skill behavior in this implementation pass.',
-        '6. Add SDK exports and MCP tools krate_list_agents, krate_get_agent_profile, and krate_create_agent.',
+        '6. Add SDK exports and MCP tools kradle_list_agents, kradle_get_agent_profile, and kradle_create_agent.',
         '7. Add contract, controller, compatibility, and MCP/SDK tests.',
         'Identify any maintainer decision that is genuinely required. Otherwise set needsMaintainerDecision false.',
         'Return JSON: { recommendedDesign, phasePlan, targetFiles, resourceSchemaPlan, controllerPlan, dispatchPlan, triggerPlan, mcpSdkPlan, testPlan, migrationNotes, rejectedAlternatives, risks, needsMaintainerDecision, question }.',
@@ -373,7 +373,7 @@ export const authorContractTestsTask = defineTask('issue-620.author-contract-tes
         'Preserve unrelated local changes.',
         'Add tests before production code changes wherever practical.',
         'Cover resource model set membership, requiredSpec, counts, createResource, validateResource, and resourceSchemaForKind for AgentPersona, AgentSoul, AgentAppearance, AgentVoiceProfile, and AgentDefinition.',
-        'Cover chart CRD presence and schema shape for the five new resource kinds in packages/krate/charts/crds/agent-resources.yaml.',
+        'Cover chart CRD presence and schema shape for the five new resource kinds in packages/kradle/charts/crds/agent-resources.yaml.',
         'Cover prompt composition deterministic layering: AgentSoul content, AgentPersona personality and role fields, AgentDefinition roleContext, and legacy AgentStack system/developer/task prompt fallback.',
         'Cover persona resolver behavior for inline and referenced soul/appearance/voice refs, missing references, and namespace/org scoping where local patterns exist.',
         'Cover dispatch compatibility: legacy agentStack dispatch still works, AgentDefinition dispatch resolves to the referenced AgentStack, permission review still receives the stack name, run specs preserve both new and legacy target fields as designed, and job prompt uses composed output.',
@@ -396,26 +396,26 @@ export const authorContractTestsTask = defineTask('issue-620.author-contract-tes
 export const implementIdentityDecouplingTask = defineTask('issue-620.implement', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement agent identity decoupling',
-  labels: ['issue-620', 'implementation', 'krate', 'agent-identity'],
+  labels: ['issue-620', 'implementation', 'kradle', 'agent-identity'],
   agent: {
-    name: 'krate-core-implementer',
+    name: 'kradle-core-implementer',
     prompt: {
-      role: 'senior Krate core and SDK engineer',
+      role: 'senior Kradle core and SDK engineer',
       task: 'Implement issue #620 against the staged strategy and failing contract tests.',
       instructions: [
         'Edit the repository directly.',
         'Preserve unrelated local changes and do not stage or revert them.',
         `This is implementation attempt ${args.attempt}.`,
-        'Keep the change scoped to Krate core, Helm CRDs, CLI MCP, SDK exports, and focused tests unless the strategy proves another file is required.',
+        'Keep the change scoped to Kradle core, Helm CRDs, CLI MCP, SDK exports, and focused tests unless the strategy proves another file is required.',
         'Do not implement the web console work from follow-up issue #621 or migration tooling from follow-up issue #622, except for compatibility surfaces required by core dispatch/API paths.',
         'Add the five identity resources to CONFIG_KINDS and RESOURCE_DEFINITIONS with requiredSpec and field type validation updates where needed.',
         'Update resource count assertions and minimal specs in tests instead of weakening the tests.',
-        'Add the five CRDs to packages/krate/charts/crds/agent-resources.yaml and preserve existing AgentStack, AgentTriggerRule, and AgentDispatchRun compatibility.',
+        'Add the five CRDs to packages/kradle/charts/crds/agent-resources.yaml and preserve existing AgentStack, AgentTriggerRule, and AgentDispatchRun compatibility.',
         'Create agent-persona-controller.js for profile validation/resolution of persona, soul, appearance, voice, and definition refs.',
         'Create a prompt composition module with deterministic, unit-tested composition for soul -> persona -> definition -> stack fallback. Keep legacy AgentStack inline prompts functional and mark them deprecated through warnings or metadata only where local patterns support it.',
         'Update agent-dispatch-controller.js to accept agentDefinition or agentStack. Resolve AgentDefinition to AgentStack before permission review, memory, workspace, context bundle assembly, and job creation. Preserve permission checks and runtime identity behavior.',
         'Update agent-trigger-controller.js so trigger and webhook paths pass agentDefinition when present and agentStack otherwise.',
-        'Update CLI MCP tools with krate_list_agents, krate_get_agent_profile, and krate_create_agent, using existing controller/list/apply patterns.',
+        'Update CLI MCP tools with kradle_list_agents, kradle_get_agent_profile, and kradle_create_agent, using existing controller/list/apply patterns.',
         'Export new controllers and helpers from core and SDK barrels.',
         'Update docs comments or README snippets only when needed to keep test expectations and public tool descriptions accurate.',
         'Return JSON: { changedFiles, summary, compatibilityBehavior, promptCompositionBehavior, testsUpdated, risks, commitMessage }.',
@@ -447,7 +447,7 @@ export const verifyIdentityDecouplingTask = defineTask('issue-620.verify', (args
       task: 'Run and interpret the issue #620 verification gates.',
       instructions: [
         'Run the concrete commands supplied in inputs.verificationCommands plus any narrower focused checks needed by the changed files.',
-        'At minimum, run focused Krate core tests covering agent resources, persona/prompt composition, dispatch, stack, and trigger behavior; focused CLI MCP tests; focused SDK export tests; git diff --check; npm run build:krate; npm run test:krate; npm run build:sdk; npm run verify:metadata.',
+        'At minimum, run focused Kradle core tests covering agent resources, persona/prompt composition, dispatch, stack, and trigger behavior; focused CLI MCP tests; focused SDK export tests; git diff --check; npm run build:kradle; npm run test:kradle; npm run build:sdk; npm run verify:metadata.',
         'Verify no source file outside the intended target surface was changed unless justified by the strategy.',
         'Verify legacy AgentStack dispatch still passes and new AgentDefinition dispatch passes.',
         'Verify permission review still gates the resolved stack service account, roles, secrets, and config grants.',
@@ -475,7 +475,7 @@ export const reviewIdentityDecouplingTask = defineTask('issue-620.review', (args
   agent: {
     name: 'code-reviewer',
     prompt: {
-      role: 'senior Krate code reviewer',
+      role: 'senior Kradle code reviewer',
       task: 'Review the issue #620 implementation for correctness, compatibility, and scope control.',
       instructions: [
         'Inspect the final git diff and relevant changed files.',
@@ -509,7 +509,7 @@ export const finalAcceptanceGateTask = defineTask('issue-620.final-acceptance', 
   agent: {
     name: 'spec-reviewer',
     prompt: {
-      role: 'release-minded Krate maintainer',
+      role: 'release-minded Kradle maintainer',
       task: 'Decide whether the issue #620 implementation is ready for PR delivery.',
       instructions: [
         'Read the final git diff, issue context, test output evidence, review notes, and process-library constraints.',

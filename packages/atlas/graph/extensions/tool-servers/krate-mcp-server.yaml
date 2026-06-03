@@ -1,68 +1,68 @@
 nodeKind: ToolServer
-id: tool-server:krate-mcp-server
+id: tool-server:kradle-mcp-server
 attributes:
-  displayName: Krate MCP Server
-  description: MCP stdio server exported by @a5c-ai/krate-cli. It exposes Krate resource CRUD, snapshots, search, agent
+  displayName: Kradle MCP Server
+  description: MCP stdio server exported by @a5c-ai/kradle-cli. It exposes Kradle resource CRUD, snapshots, search, agent
     stack/dispatch, secret grants, external sync/conflict, and audit query tools for agent clients.
   protocol: mcp-stdio
   provenance: built-in
   category: devtools
   maintainer: a5c.ai
-  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/krate/cli
-  installCommand: npm install && npm test --workspace=@a5c-ai/krate-cli
-  npmPackage: "@a5c-ai/krate-cli"
+  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/kradle/cli
+  installCommand: npm install && npm test --workspace=@a5c-ai/kradle-cli
+  npmPackage: "@a5c-ai/kradle-cli"
   tools:
-    - tool-descriptor:krate.krate-list-resources
-    - tool-descriptor:krate.krate-get-resource
-    - tool-descriptor:krate.krate-apply-resource
-    - tool-descriptor:krate.krate-delete-resource
-    - tool-descriptor:krate.krate-snapshot
-    - tool-descriptor:krate.krate-search
-    - tool-descriptor:krate.krate-list-stacks
-    - tool-descriptor:krate.krate-dispatch-agent
-    - tool-descriptor:krate.krate-list-secrets
-    - tool-descriptor:krate.krate-create-secret
-    - tool-descriptor:krate.krate-create-stack
-    - tool-descriptor:krate.krate-sync-external
-    - tool-descriptor:krate.krate-resolve-conflict
-    - tool-descriptor:krate.krate-audit-query
+    - tool-descriptor:kradle.kradle-list-resources
+    - tool-descriptor:kradle.kradle-get-resource
+    - tool-descriptor:kradle.kradle-apply-resource
+    - tool-descriptor:kradle.kradle-delete-resource
+    - tool-descriptor:kradle.kradle-snapshot
+    - tool-descriptor:kradle.kradle-search
+    - tool-descriptor:kradle.kradle-list-stacks
+    - tool-descriptor:kradle.kradle-dispatch-agent
+    - tool-descriptor:kradle.kradle-list-secrets
+    - tool-descriptor:kradle.kradle-create-secret
+    - tool-descriptor:kradle.kradle-create-stack
+    - tool-descriptor:kradle.kradle-sync-external
+    - tool-descriptor:kradle.kradle-resolve-conflict
+    - tool-descriptor:kradle.kradle-audit-query
 edges:
   integrates_with:
-    - target: platform-service:krate-agent-dispatch
-    - target: platform-service:krate-external-backends
-    - target: platform-service:krate-company-brain
-    - target: platform-service:krate-policy
+    - target: platform-service:kradle-agent-dispatch
+    - target: platform-service:kradle-external-backends
+    - target: platform-service:kradle-company-brain
+    - target: platform-service:kradle-policy
   lib_applies_to_domain:
     - target: domain:platform-engineering
     - target: domain:devops
   contains_tool_descriptor:
-    - target: tool-descriptor:krate.krate-list-resources
-    - target: tool-descriptor:krate.krate-get-resource
-    - target: tool-descriptor:krate.krate-apply-resource
-    - target: tool-descriptor:krate.krate-delete-resource
-    - target: tool-descriptor:krate.krate-snapshot
-    - target: tool-descriptor:krate.krate-search
-    - target: tool-descriptor:krate.krate-list-stacks
-    - target: tool-descriptor:krate.krate-dispatch-agent
-    - target: tool-descriptor:krate.krate-list-secrets
-    - target: tool-descriptor:krate.krate-create-secret
-    - target: tool-descriptor:krate.krate-create-stack
-    - target: tool-descriptor:krate.krate-sync-external
-    - target: tool-descriptor:krate.krate-resolve-conflict
-    - target: tool-descriptor:krate.krate-audit-query
+    - target: tool-descriptor:kradle.kradle-list-resources
+    - target: tool-descriptor:kradle.kradle-get-resource
+    - target: tool-descriptor:kradle.kradle-apply-resource
+    - target: tool-descriptor:kradle.kradle-delete-resource
+    - target: tool-descriptor:kradle.kradle-snapshot
+    - target: tool-descriptor:kradle.kradle-search
+    - target: tool-descriptor:kradle.kradle-list-stacks
+    - target: tool-descriptor:kradle.kradle-dispatch-agent
+    - target: tool-descriptor:kradle.kradle-list-secrets
+    - target: tool-descriptor:kradle.kradle-create-secret
+    - target: tool-descriptor:kradle.kradle-create-stack
+    - target: tool-descriptor:kradle.kradle-sync-external
+    - target: tool-descriptor:kradle.kradle-resolve-conflict
+    - target: tool-descriptor:kradle.kradle-audit-query
   exposes_prompt:
-    - target: mcp-prompt:krate.krate-workspace-setup
-    - target: mcp-prompt:krate.krate-stack-config
-    - target: mcp-prompt:krate.krate-troubleshoot
+    - target: mcp-prompt:kradle.kradle-workspace-setup
+    - target: mcp-prompt:kradle.kradle-stack-config
+    - target: mcp-prompt:kradle.kradle-troubleshoot
   exposes_resource:
-    - target: mcp-resource:krate.snapshot
-    - target: mcp-resource:krate.stacks
+    - target: mcp-resource:kradle.snapshot
+    - target: mcp-resource:kradle.stacks
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-list-resources
+id: tool-descriptor:kradle.kradle-list-resources
 attributes:
-  displayName: "Krate: krate_list_resources"
-  category: krate-mcp
+  displayName: "Kradle: kradle_list_resources"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: List resources of a given kind
@@ -90,10 +90,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-get-resource
+id: tool-descriptor:kradle.kradle-get-resource
 attributes:
-  displayName: "Krate: krate_get_resource"
-  category: krate-mcp
+  displayName: "Kradle: kradle_get_resource"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Get a single resource by kind and name
@@ -128,10 +128,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-apply-resource
+id: tool-descriptor:kradle.kradle-apply-resource
 attributes:
-  displayName: "Krate: krate_apply_resource"
-  category: krate-mcp
+  displayName: "Kradle: kradle_apply_resource"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Create or update a resource
@@ -159,10 +159,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-delete-resource
+id: tool-descriptor:kradle.kradle-delete-resource
 attributes:
-  displayName: "Krate: krate_delete_resource"
-  category: krate-mcp
+  displayName: "Kradle: kradle_delete_resource"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Delete a resource
@@ -197,10 +197,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-snapshot
+id: tool-descriptor:kradle.kradle-snapshot
 attributes:
-  displayName: "Krate: krate_snapshot"
-  category: krate-mcp
+  displayName: "Kradle: kradle_snapshot"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Get full organization snapshot
@@ -217,10 +217,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-search
+id: tool-descriptor:kradle.kradle-search
 attributes:
-  displayName: "Krate: krate_search"
-  category: krate-mcp
+  displayName: "Kradle: kradle_search"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Search resources by query
@@ -248,10 +248,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-list-stacks
+id: tool-descriptor:kradle.kradle-list-stacks
 attributes:
-  displayName: "Krate: krate_list_stacks"
-  category: krate-mcp
+  displayName: "Kradle: kradle_list_stacks"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: List agent stacks
@@ -268,10 +268,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-dispatch-agent
+id: tool-descriptor:kradle.kradle-dispatch-agent
 attributes:
-  displayName: "Krate: krate_dispatch_agent"
-  category: krate-mcp
+  displayName: "Kradle: kradle_dispatch_agent"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Dispatch an agent run
@@ -329,10 +329,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-list-secrets
+id: tool-descriptor:kradle.kradle-list-secrets
 attributes:
-  displayName: "Krate: krate_list_secrets"
-  category: krate-mcp
+  displayName: "Kradle: kradle_list_secrets"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: List AgentSecretGrant resources in an org namespace
@@ -355,10 +355,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-create-secret
+id: tool-descriptor:kradle.kradle-create-secret
 attributes:
-  displayName: "Krate: krate_create_secret"
-  category: krate-mcp
+  displayName: "Kradle: kradle_create_secret"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Create an AgentSecretGrant resource
@@ -417,10 +417,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-create-stack
+id: tool-descriptor:kradle.kradle-create-stack
 attributes:
-  displayName: "Krate: krate_create_stack"
-  category: krate-mcp
+  displayName: "Kradle: kradle_create_stack"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Create an AgentStack resource
@@ -460,10 +460,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-sync-external
+id: tool-descriptor:kradle.kradle-sync-external
 attributes:
-  displayName: "Krate: krate_sync_external"
-  category: krate-mcp
+  displayName: "Kradle: kradle_sync_external"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Trigger an external sync for a binding
@@ -520,10 +520,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-resolve-conflict
+id: tool-descriptor:kradle.kradle-resolve-conflict
 attributes:
-  displayName: "Krate: krate_resolve_conflict"
-  category: krate-mcp
+  displayName: "Kradle: kradle_resolve_conflict"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Resolve an external sync conflict
@@ -560,10 +560,10 @@ attributes:
 edges: {}
 ---
 nodeKind: ToolDescriptor
-id: tool-descriptor:krate.krate-audit-query
+id: tool-descriptor:kradle.kradle-audit-query
 attributes:
-  displayName: "Krate: krate_audit_query"
-  category: krate-mcp
+  displayName: "Kradle: kradle_audit_query"
+  category: kradle-mcp
   vendor: a5c.ai
   mode: mcp-tool
   description: Query audit events with optional org/action/time filters
@@ -611,47 +611,47 @@ attributes:
 edges: {}
 ---
 nodeKind: MCPPrompt
-id: mcp-prompt:krate.krate-workspace-setup
+id: mcp-prompt:kradle.kradle-workspace-setup
 attributes:
-  displayName: krate_workspace_setup
-  name: krate_workspace_setup
+  displayName: kradle_workspace_setup
+  name: kradle_workspace_setup
   arguments: []
-  description: Guide for setting up a new krate workspace
+  description: Guide for setting up a new kradle workspace
 edges: {}
 ---
 nodeKind: MCPPrompt
-id: mcp-prompt:krate.krate-stack-config
+id: mcp-prompt:kradle.kradle-stack-config
 attributes:
-  displayName: krate_stack_config
-  name: krate_stack_config
+  displayName: kradle_stack_config
+  name: kradle_stack_config
   arguments: []
   description: Help configuring an agent stack
 edges: {}
 ---
 nodeKind: MCPPrompt
-id: mcp-prompt:krate.krate-troubleshoot
+id: mcp-prompt:kradle.kradle-troubleshoot
 attributes:
-  displayName: krate_troubleshoot
-  name: krate_troubleshoot
+  displayName: kradle_troubleshoot
+  name: kradle_troubleshoot
   arguments: []
-  description: Diagnose common krate issues
+  description: Diagnose common kradle issues
 edges: {}
 ---
 nodeKind: MCPResource
-id: mcp-resource:krate.snapshot
+id: mcp-resource:kradle.snapshot
 attributes:
-  displayName: Krate Workspace Snapshot
-  uri: krate://snapshot
+  displayName: Kradle Workspace Snapshot
+  uri: kradle://snapshot
   mimeType: application/json
   subscribable: false
   description: Current org runtime snapshot
 edges: {}
 ---
 nodeKind: MCPResource
-id: mcp-resource:krate.stacks
+id: mcp-resource:kradle.stacks
 attributes:
-  displayName: Krate Agent Stacks Resource
-  uri: krate://stacks
+  displayName: Kradle Agent Stacks Resource
+  uri: kradle://stacks
   mimeType: application/json
   subscribable: false
   description: List of configured agent stacks

@@ -90,7 +90,7 @@ jobs:
           path: |
             packages/agent-mux/webui/node_modules/.vite
             packages/atlas/webui/.next/cache
-            packages/krate/web/.next/cache
+            packages/kradle/web/.next/cache
           key: framework-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
             framework-${{ runner.os }}-${{ github.ref_name }}-
@@ -108,8 +108,8 @@ jobs:
           if [[ "$RUNNER_OS" != "Windows" ]]; then
             npm run build:observer || true
             npm run build:cloud || true
-            npm run build:krate || true
-            npm run build:krate-web || true
+            npm run build:kradle || true
+            npm run build:kradle-web || true
           fi
 
       - name: Package dist directories

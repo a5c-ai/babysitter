@@ -1,0 +1,23 @@
+{
+  "name": "@a5c-ai/kradle-jitsi-agent-sidecar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kradle Jitsi agent sidecar runtime for meeting-aware agent Jobs.",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "kradle-jitsi-agent-sidecar": "bin/sidecar.mjs",
+    "kradle-jitsi-agent-sidecar-graceful-leave": "bin/graceful-leave.mjs"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "build": "node scripts/build.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.43.1"
+  },
+  "license": "MIT"
+}

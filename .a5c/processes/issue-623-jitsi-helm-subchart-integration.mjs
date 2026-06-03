@@ -1,14 +1,14 @@
 /**
  * @process repo/issue-623-jitsi-helm-subchart-integration
- * @description Plan and execute issue #623: integrate jitsi-helm as a Krate Helm subchart with internal and external deployment modes.
+ * @description Plan and execute issue #623: integrate jitsi-helm as a Kradle Helm subchart with internal and external deployment modes.
  * @inputs { issueNumber: number, baseBranch: string, targetBranch: string, chartPath: string, specFiles: string[], targetFiles: object, qualityGateCommands: string[] }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], runtimeCallPaths: string[], reuseAudit: object, verification: object, review: object }
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
- * - packages/krate/docs/jitsi/01-architecture.md
- * - packages/krate/docs/jitsi/02-helm-deployment.md
- * - packages/krate/docs/jitsi/03-crds-and-controllers.md
+ * - packages/kradle/docs/jitsi/01-architecture.md
+ * - packages/kradle/docs/jitsi/02-helm-deployment.md
+ * - packages/kradle/docs/jitsi/03-crds-and-controllers.md
  * - specializations/devops-sre-platform/kubernetes-setup.js
  * - specializations/devops-sre-platform/iac-implementation.js
  * - specializations/devops-sre-platform/iac-testing.js
@@ -63,7 +63,7 @@ export async function process(inputs, ctx) {
     key: 'issue-623.process-library-research',
   });
 
-  const chartSurfaceTrace = await ctx.task(traceKrateChartSurfacesTask, {
+  const chartSurfaceTrace = await ctx.task(traceKradleChartSurfacesTask, {
     inputs,
     issueContext,
     reuseAudit,
@@ -183,7 +183,7 @@ export async function process(inputs, ctx) {
       'authoritative-issue-context',
       'reuse-audit',
       'process-library-research',
-      'krate-chart-surface-trace',
+      'kradle-chart-surface-trace',
       'spec-first-acceptance-plan',
       'implementation-loop',
       'helm-quality-gates',
@@ -210,11 +210,11 @@ export async function process(inputs, ctx) {
 export const readAuthoritativeIssueContextTask = defineTask('issue-623.read-authoritative-context', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Read issue #623, PR context, and Jitsi deployment specs',
-  labels: ['issue-623', 'krate', 'jitsi', 'helm', 'context'],
+  labels: ['issue-623', 'kradle', 'jitsi', 'helm', 'context'],
   agent: {
     name: 'platform-engineer',
     prompt: {
-      role: 'senior Krate platform engineer',
+      role: 'senior Kradle platform engineer',
       task: 'Build the authoritative implementation context for issue #623 before any code changes.',
       instructions: [
         `Run and preserve the output of: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
@@ -235,7 +235,7 @@ export const readAuthoritativeIssueContextTask = defineTask('issue-623.read-auth
 export const runReuseAuditTask = defineTask('issue-623.reuse-audit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 0 REUSE-AUDIT for Jitsi Helm chart infrastructure',
-  labels: ['issue-623', 'reuse-audit', 'brownfield', 'krate'],
+  labels: ['issue-623', 'reuse-audit', 'brownfield', 'kradle'],
   agent: {
     name: 'kubernetes-expert',
     prompt: {
@@ -284,20 +284,20 @@ export const researchProcessLibraryTask = defineTask('issue-623.process-library-
   },
 }));
 
-export const traceKrateChartSurfacesTask = defineTask('issue-623.trace-chart-surfaces', (args, taskCtx) => ({
+export const traceKradleChartSurfacesTask = defineTask('issue-623.trace-chart-surfaces', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Trace Krate Helm chart, CRD, and package validation surfaces',
-  labels: ['issue-623', 'helm', 'runtime-trace', 'krate'],
+  title: 'Trace Kradle Helm chart, CRD, and package validation surfaces',
+  labels: ['issue-623', 'helm', 'runtime-trace', 'kradle'],
   agent: {
     name: 'kubernetes-expert',
     prompt: {
       role: 'senior Helm chart engineer',
-      task: 'Trace the current Krate chart surfaces that issue #623 must extend.',
+      task: 'Trace the current Kradle chart surfaces that issue #623 must extend.',
       instructions: [
-        'Inspect packages/krate/charts/Chart.yaml dependency conventions, existing dependency aliases, annotations, and version style.',
-        'Inspect packages/krate/charts/values.yaml layout and existing secret/external dependency conventions.',
-        'Inspect packages/krate/charts/templates for network policy, secret, service, ingress, deployment, helper, and Argo CD patterns relevant to Jitsi.',
-        'Inspect packages/krate/charts/crds/*.yaml for CRD schema/version/naming conventions before planning jitsi-resources.yaml.',
+        'Inspect packages/kradle/charts/Chart.yaml dependency conventions, existing dependency aliases, annotations, and version style.',
+        'Inspect packages/kradle/charts/values.yaml layout and existing secret/external dependency conventions.',
+        'Inspect packages/kradle/charts/templates for network policy, secret, service, ingress, deployment, helper, and Argo CD patterns relevant to Jitsi.',
+        'Inspect packages/kradle/charts/crds/*.yaml for CRD schema/version/naming conventions before planning jitsi-resources.yaml.',
         'Inspect package validation and chart docs referenced by inputs.qualityGateCommands.',
         'Record runtimeCallPaths as chart packaging/rendering paths, from values and Chart.yaml dependency resolution through templates and CRD installation.',
         'Return JSON: { existingPatterns, targetFiles, missingFiles, runtimeCallPaths, chartDependencies, valuesConventions, crdConventions, secretConventions, networkPolicyConventions, validationSurfaces, implementationOrder, risks }.',
@@ -317,12 +317,12 @@ export const authorSpecFirstAcceptancePlanTask = defineTask('issue-623.author-ac
   agent: {
     name: 'test-strategy-architect',
     prompt: {
-      role: 'Krate Helm acceptance test architect',
+      role: 'Kradle Helm acceptance test architect',
       task: 'Define the spec-first guardrails that must fail before implementation and pass after implementation.',
       instructions: [
         'Base the plan only on the authoritative issue context, Jitsi docs, reuse audit, and chart trace. Do not redefine the issue scope from implementation convenience.',
         'Plan checks for Chart.yaml jitsi-meet dependency with condition jitsi.install and alias jitsi-subchart.',
-        'Plan checks for values.yaml jitsi section covering install mode, external mode, web, prosody JWT auth, jicofo, jvb, optional jibri, Krate room/webhook defaults, and secret references without committed secret values.',
+        'Plan checks for values.yaml jitsi section covering install mode, external mode, web, prosody JWT auth, jicofo, jvb, optional jibri, Kradle room/webhook defaults, and secret references without committed secret values.',
         'Plan checks for charts/crds/jitsi-resources.yaml with JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, JitsiParticipant if required by docs, and JitsiRecording. Explain any issue/doc mismatch, such as the issue naming JitsiRecording while docs also name JitsiParticipant.',
         'Plan checks for JWT/webhook secret management, external mode not rendering in-cluster Jitsi workload assumptions, and UDP 10000 media network policy behavior.',
         'Plan real verification evidence for every command in inputs.qualityGateCommands, including rendered-manifest assertions for internal and external modes.',
@@ -338,7 +338,7 @@ export const authorSpecFirstAcceptancePlanTask = defineTask('issue-623.author-ac
 
 export const implementJitsiHelmIntegrationTask = defineTask('issue-623.implement-jitsi-helm-integration', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Implement Jitsi Helm subchart integration for Krate',
+  title: 'Implement Jitsi Helm subchart integration for Kradle',
   labels: ['issue-623', 'implementation', 'helm', 'jitsi'],
   agent: {
     name: 'kubernetes-expert',
@@ -354,11 +354,11 @@ export const implementJitsiHelmIntegrationTask = defineTask('issue-623.implement
       instructions: [
         'Make only the source/chart/test/doc edits required for issue #623. Do not modify .a5c/processes planning artifacts.',
         'Start with the planned failing checks or equivalent validation guardrails from the acceptance plan.',
-        'Add the jitsi-meet dependency to packages/krate/charts/Chart.yaml with condition jitsi.install, repository, version, and alias aligned to the docs and upstream chart reality.',
-        'Add a complete jitsi values section in packages/krate/charts/values.yaml using existing chart conventions for nested values, external dependencies, and secrets.',
-        'Add packages/krate/charts/crds/jitsi-resources.yaml using existing CRD YAML conventions and the Jitsi docs as the schema source.',
+        'Add the jitsi-meet dependency to packages/kradle/charts/Chart.yaml with condition jitsi.install, repository, version, and alias aligned to the docs and upstream chart reality.',
+        'Add a complete jitsi values section in packages/kradle/charts/values.yaml using existing chart conventions for nested values, external dependencies, and secrets.',
+        'Add packages/kradle/charts/crds/jitsi-resources.yaml using existing CRD YAML conventions and the Jitsi docs as the schema source.',
         'Add or update templates for JWT/webhook secret references and JVB UDP 10000 media network policy behavior without committing literal secrets.',
-        'Handle external mode clearly: when jitsi.external.enabled is true, Krate has connection settings for an existing deployment and should not require in-cluster Jitsi deployment.',
+        'Handle external mode clearly: when jitsi.external.enabled is true, Kradle has connection settings for an existing deployment and should not require in-cluster Jitsi deployment.',
         'Update chart/package docs only if implementation changes documented install or verification behavior.',
         'If this is a refinement attempt, address previousVerification and previousSecurityReview directly before adding new scope.',
         'Return JSON: { changedFiles, testsOrChecksAdded, implementationNotes, externalModeBehavior, secretHandling, networkPolicyBehavior, crdKinds, risks, blockers }.',
@@ -384,7 +384,7 @@ export const runHelmQualityGateTask = defineTask('issue-623.run-helm-quality-gat
     maxTurns: 10,
     approvalMode: 'yolo',
     prompt: {
-      role: 'Krate chart verification engineer',
+      role: 'Kradle chart verification engineer',
       task: 'Run the required quality gates and capture pass/fail evidence for issue #623.',
       instructions: [
         'Run every command in inputs.qualityGateCommands from the repository root unless a command explicitly says otherwise.',
@@ -439,7 +439,7 @@ export const finalAcceptanceGateTask = defineTask('issue-623.final-acceptance-ga
         'Read the current git diff, issue #623 context, inputs.specFiles, acceptance plan, verification results, and security review.',
         'Compare the issue contract to artifacts directly. Ignore narrative about how artifacts were built.',
         'Require evidence for all issue scope items: subchart dependency, values section, external mode, CRDs, network policy, JWT secret management, and verification.',
-        'Require that implementation changed only appropriate Krate chart/source/doc/test files and did not modify process artifacts.',
+        'Require that implementation changed only appropriate Kradle chart/source/doc/test files and did not modify process artifacts.',
         'Return JSON: { passed, changedFiles, criteriaResults, missingCriteria, extraScope, verificationSummary, releaseNotes, followUps }.',
       ],
     },

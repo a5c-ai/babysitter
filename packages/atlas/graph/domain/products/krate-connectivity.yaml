@@ -1,15 +1,15 @@
 # ============================================================================
-# Krate Connectivity — Inbound edges and isolated-entity wiring
+# Kradle Connectivity — Inbound edges and isolated-entity wiring
 #
-# This file adds edges FROM existing graph entities TO krate entities,
-# and connects the 13 krate entities that previously had zero external
+# This file adds edges FROM existing graph entities TO kradle entities,
+# and connects the 13 kradle entities that previously had zero external
 # connections (presentations, claims, platform-services).
 #
 # Every referenced ID has been verified against index.json.
 # ============================================================================
 
 # ---------------------------------------------------------------------------
-# 1. ROLES that work with Krate (uses integrates_with → platform:krate)
+# 1. ROLES that work with Kradle (uses integrates_with → platform:kradle)
 # ---------------------------------------------------------------------------
 ---
 nodeKind: Role
@@ -21,8 +21,8 @@ attributes:
     help product teams ship and operate software reliably.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Platform engineers build and operate Krate as their primary forge"
+    - target: platform:kradle
+      notes: "Platform engineers build and operate Kradle as their primary forge"
 ---
 nodeKind: Role
 id: role:site-reliability-engineer
@@ -33,8 +33,8 @@ attributes:
     response, observability, and production risk reduction.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "SREs ensure Krate availability, latency, and error budgets"
+    - target: platform:kradle
+      notes: "SREs ensure Kradle availability, latency, and error budgets"
 ---
 nodeKind: Role
 id: role:sre
@@ -45,8 +45,8 @@ attributes:
     automation, error-budget discipline, and incident learning loops.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "SREs monitor and maintain Krate platform health"
+    - target: platform:kradle
+      notes: "SREs monitor and maintain Kradle platform health"
 ---
 nodeKind: Role
 id: role:devops-engineer
@@ -57,8 +57,8 @@ attributes:
     deployment workflows, and developer-operability practices.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "DevOps engineers configure CI pipelines and GitOps on Krate"
+    - target: platform:kradle
+      notes: "DevOps engineers configure CI pipelines and GitOps on Kradle"
 ---
 nodeKind: Role
 id: role:infrastructure-engineer
@@ -69,8 +69,8 @@ attributes:
     infrastructure used by application platforms.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Infrastructure engineers manage the K8s clusters running Krate"
+    - target: platform:kradle
+      notes: "Infrastructure engineers manage the K8s clusters running Kradle"
 ---
 nodeKind: Role
 id: role:release-engineer
@@ -81,8 +81,8 @@ attributes:
     readiness, and release process automation.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Release engineers use Krate pipelines for release management"
+    - target: platform:kradle
+      notes: "Release engineers use Kradle pipelines for release management"
 ---
 nodeKind: Role
 id: role:build-engineer
@@ -93,8 +93,8 @@ attributes:
     and repeatable compilation/test pipelines.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Build engineers maintain Krate CI pipeline definitions"
+    - target: platform:kradle
+      notes: "Build engineers maintain Kradle CI pipeline definitions"
 ---
 nodeKind: Role
 id: role:security-architect
@@ -105,8 +105,8 @@ attributes:
     mitigations, and secure platform architecture.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Security architects design Krate RBAC and policy profiles"
+    - target: platform:kradle
+      notes: "Security architects design Kradle RBAC and policy profiles"
 ---
 nodeKind: Role
 id: role:DevSecOps-engineer
@@ -117,8 +117,8 @@ attributes:
     and compliance evidence into delivery pipelines.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "DevSecOps engineers integrate security scanning into Krate pipelines"
+    - target: platform:kradle
+      notes: "DevSecOps engineers integrate security scanning into Kradle pipelines"
 ---
 nodeKind: Role
 id: role:cloud-architect
@@ -129,8 +129,8 @@ attributes:
     and governance patterns for platform deployments.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Cloud architects design multi-cluster Krate deployments"
+    - target: platform:kradle
+      notes: "Cloud architects design multi-cluster Kradle deployments"
 ---
 nodeKind: Role
 id: role:head-of-platform
@@ -141,8 +141,8 @@ attributes:
     ownership, and investment priorities across platform teams.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Heads of platform own Krate adoption strategy and roadmap"
+    - target: platform:kradle
+      notes: "Heads of platform own Kradle adoption strategy and roadmap"
 ---
 nodeKind: Role
 id: role:platform-product-manager
@@ -153,8 +153,8 @@ attributes:
     priorities for internal developer platforms.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Platform PMs define Krate feature priorities and user workflows"
+    - target: platform:kradle
+      notes: "Platform PMs define Kradle feature priorities and user workflows"
 ---
 nodeKind: Role
 id: role:developer-experience-engineer
@@ -165,8 +165,8 @@ attributes:
     feedback loops, and day-to-day engineering ergonomics.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "DX engineers optimize Krate developer workflows and CLI UX"
+    - target: platform:kradle
+      notes: "DX engineers optimize Kradle developer workflows and CLI UX"
 ---
 nodeKind: Role
 id: role:internal-tools-engineer
@@ -177,11 +177,11 @@ attributes:
     tools tailored to organization-specific engineering workflows.
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Internal tools engineers build custom integrations on Krate APIs"
+    - target: platform:kradle
+      notes: "Internal tools engineers build custom integrations on Kradle APIs"
 
 # ---------------------------------------------------------------------------
-# 2. WORKFLOWS that run on Krate
+# 2. WORKFLOWS that run on Kradle
 # ---------------------------------------------------------------------------
 ---
 nodeKind: Workflow
@@ -193,8 +193,8 @@ attributes:
     merging product or platform feature changes.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Feature development uses Krate repos, branches, and PRs"
+    - target: platform:kradle
+      notes: "Feature development uses Kradle repos, branches, and PRs"
 ---
 nodeKind: Workflow
 id: workflow:code-review
@@ -205,8 +205,8 @@ attributes:
     tradeoffs, enforcing standards, and approving safe merges.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Code review happens through Krate pull request reviews"
+    - target: platform:kradle
+      notes: "Code review happens through Kradle pull request reviews"
 ---
 nodeKind: Workflow
 id: workflow:release-management
@@ -217,8 +217,8 @@ attributes:
     software releases across environments.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Releases are cut via Krate pipelines and release resources"
+    - target: platform:kradle
+      notes: "Releases are cut via Kradle pipelines and release resources"
 ---
 nodeKind: Workflow
 id: workflow:pull-request-lifecycle
@@ -229,8 +229,8 @@ attributes:
     approval, merge, and post-merge follow-up.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Krate natively models the full PR lifecycle as K8s resources"
+    - target: platform:kradle
+      notes: "Kradle natively models the full PR lifecycle as K8s resources"
 ---
 nodeKind: Workflow
 id: workflow:incident-response
@@ -241,8 +241,8 @@ attributes:
     resolving, and learning from production incidents.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Incident response uses Krate hotfix PRs and agent dispatch"
+    - target: platform:kradle
+      notes: "Incident response uses Kradle hotfix PRs and agent dispatch"
 ---
 nodeKind: Workflow
 id: workflow:dependency-update
@@ -253,8 +253,8 @@ attributes:
     running checks, and merging safe upgrades.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Dependency updates dispatch agents on Krate to create update PRs"
+    - target: platform:kradle
+      notes: "Dependency updates dispatch agents on Kradle to create update PRs"
 ---
 nodeKind: Workflow
 id: workflow:hotfix-deployment
@@ -265,8 +265,8 @@ attributes:
     preserving auditability and rollback readiness.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Hotfixes use Krate fast-track pipelines with reduced approval gates"
+    - target: platform:kradle
+      notes: "Hotfixes use Kradle fast-track pipelines with reduced approval gates"
 ---
 nodeKind: Workflow
 id: workflow:vulnerability-management
@@ -277,8 +277,8 @@ attributes:
     security vulnerabilities across software assets.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Vulnerability remediation dispatches agents to patch repos on Krate"
+    - target: platform:kradle
+      notes: "Vulnerability remediation dispatches agents to patch repos on Kradle"
 ---
 nodeKind: Workflow
 id: workflow:security-audit
@@ -289,8 +289,8 @@ attributes:
     evidence against security requirements or standards.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Security audits leverage Krate code search and pipeline scanning"
+    - target: platform:kradle
+      notes: "Security audits leverage Kradle code search and pipeline scanning"
 ---
 nodeKind: Workflow
 id: workflow:change-management
@@ -301,8 +301,8 @@ attributes:
     tracking operational or production changes.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Change management uses Krate approval gates and policy enforcement"
+    - target: platform:kradle
+      notes: "Change management uses Kradle approval gates and policy enforcement"
 ---
 nodeKind: Workflow
 id: workflow:bug-triage
@@ -313,8 +313,8 @@ attributes:
     prioritizing fixes, and tracking resolution.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Bug triage uses Krate issues and agent dispatch for investigation"
+    - target: platform:kradle
+      notes: "Bug triage uses Kradle issues and agent dispatch for investigation"
 ---
 nodeKind: Workflow
 id: workflow:canary-deployment
@@ -325,11 +325,11 @@ attributes:
     before broader rollout and rollback decisions.
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Canary deployments orchestrated through Krate GitOps pipelines"
+    - target: platform:kradle
+      notes: "Canary deployments orchestrated through Kradle GitOps pipelines"
 
 # ---------------------------------------------------------------------------
-# 3. SKILL AREAS relevant to Krate
+# 3. SKILL AREAS relevant to Kradle
 # ---------------------------------------------------------------------------
 ---
 nodeKind: SkillArea
@@ -341,9 +341,9 @@ attributes:
     infrastructure, application state, and reconciled delivery.
 edges:
   applies_to:
-    - target: platform:krate
+    - target: platform:kradle
       confidence: secondary
-      notes: "GitOps principles underpin Krate's design philosophy"
+      notes: "GitOps principles underpin Kradle's design philosophy"
 ---
 nodeKind: SkillArea
 id: skill-area:ci-cd
@@ -354,9 +354,9 @@ attributes:
     deploying software through automated pipelines.
 edges:
   applies_to:
-    - target: platform:krate
+    - target: platform:kradle
       confidence: primary
-      notes: "Krate includes a full CI/CD pipeline engine as a core service"
+      notes: "Kradle includes a full CI/CD pipeline engine as a core service"
 ---
 nodeKind: SkillArea
 id: skill-area:platform-engineering
@@ -367,9 +367,9 @@ attributes:
     capabilities, and reusable operational abstractions.
 edges:
   applies_to:
-    - target: platform:krate
+    - target: platform:kradle
       confidence: primary
-      notes: "Krate is a platform engineering product — the primary use case"
+      notes: "Kradle is a platform engineering product — the primary use case"
 ---
 nodeKind: SkillArea
 id: skill-area:k8s-rbac
@@ -380,9 +380,9 @@ attributes:
     least privilege, and namespace or cluster permissions.
 edges:
   applies_to:
-    - target: platform:krate
+    - target: platform:kradle
       confidence: secondary
-      notes: "K8s RBAC foundations are used by Krate identity model"
+      notes: "K8s RBAC foundations are used by Kradle identity model"
 ---
 nodeKind: SkillArea
 id: skill-area:k8s-operator-development
@@ -393,9 +393,9 @@ attributes:
     into desired runtime state.
 edges:
   applies_to:
-    - target: platform:krate
+    - target: platform:kradle
       confidence: secondary
-      notes: "Krate controllers follow operator development patterns"
+      notes: "Kradle controllers follow operator development patterns"
 ---
 nodeKind: SkillArea
 id: skill-area:container-security
@@ -406,7 +406,7 @@ attributes:
     boundaries, and supply-chain metadata.
 edges:
   applies_to:
-    - target: platform:krate
+    - target: platform:kradle
       confidence: secondary
       notes: "Agent workspaces run as containers with security boundaries"
 ---
@@ -419,9 +419,9 @@ attributes:
     runtime configuration, and deployment metadata.
 edges:
   applies_to:
-    - target: platform:krate
+    - target: platform:kradle
       confidence: secondary
-      notes: "All Krate components and agent jobs run as containers"
+      notes: "All Kradle components and agent jobs run as containers"
 ---
 nodeKind: SkillArea
 id: skill-area:policy-as-code
@@ -432,9 +432,9 @@ attributes:
     policies checked or enforced by automation.
 edges:
   applies_to:
-    - target: platform:krate
+    - target: platform:kradle
       confidence: primary
-      notes: "Krate policy engine uses Kyverno for policy-as-code enforcement"
+      notes: "Kradle policy engine uses Kyverno for policy-as-code enforcement"
 ---
 nodeKind: SkillArea
 id: skill-area:authentication-authorization
@@ -445,65 +445,65 @@ attributes:
     permissions, tokens, and authorization boundaries.
 edges:
   applies_to:
-    - target: platform:krate
+    - target: platform:kradle
       confidence: secondary
-      notes: "Krate supports OIDC, x509, PAT, and SSH key authentication"
+      notes: "Kradle supports OIDC, x509, PAT, and SSH key authentication"
 
 # ---------------------------------------------------------------------------
-# 4. STACK PROFILES that use Krate
+# 4. STACK PROFILES that use Kradle
 # ---------------------------------------------------------------------------
 ---
 nodeKind: StackProfile
 id: stack-profile:kubernetes-platform-engineering
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Krate is a K8s-native platform engineering product"
+    - target: platform:kradle
+      notes: "Kradle is a K8s-native platform engineering product"
 ---
 nodeKind: StackProfile
 id: stack-profile:gitops-deployment
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Krate uses and enables GitOps deployment patterns"
+    - target: platform:kradle
+      notes: "Kradle uses and enables GitOps deployment patterns"
 ---
 nodeKind: StackProfile
 id: stack-profile:cicd-platform
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Krate includes a native CI/CD pipeline engine"
+    - target: platform:kradle
+      notes: "Kradle includes a native CI/CD pipeline engine"
 ---
 nodeKind: StackProfile
 id: stack-profile:coding-agent-platform
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Krate dispatches coding agents as platform-managed jobs"
+    - target: platform:kradle
+      notes: "Kradle dispatches coding agents as platform-managed jobs"
 ---
 nodeKind: StackProfile
 id: stack-profile:multi-agent-orchestration
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Krate orchestrates multiple agent stacks across repositories"
+    - target: platform:kradle
+      notes: "Kradle orchestrates multiple agent stacks across repositories"
 ---
 nodeKind: StackProfile
 id: stack-profile:autonomous-agent-fleet
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "Krate governs fleets of autonomous coding agents with approval gates"
+    - target: platform:kradle
+      notes: "Kradle governs fleets of autonomous coding agents with approval gates"
 ---
 nodeKind: StackProfile
 id: stack-profile:ai-code-review-pipeline
 edges:
   integrates_with:
-    - target: platform:krate
-      notes: "AI code review agents dispatch through Krate PR workflows"
+    - target: platform:kradle
+      notes: "AI code review agents dispatch through Kradle PR workflows"
 
 # ---------------------------------------------------------------------------
-# 5. ADDITIONAL HOSTS — Agent products that Krate can dispatch
+# 5. ADDITIONAL HOSTS — Agent products that Kradle can dispatch
 # ---------------------------------------------------------------------------
 ---
 nodeKind: Domain
@@ -545,107 +545,107 @@ nodeKind: Methodology
 id: methodology:trunk-based-development
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Krate branch protection and fast-forward merge support trunk-based development"
+    - target: platform:kradle
+      notes: "Kradle branch protection and fast-forward merge support trunk-based development"
 ---
 nodeKind: Methodology
 id: methodology:GitFlow
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Krate branch protection supports GitFlow branching models"
+    - target: platform:kradle
+      notes: "Kradle branch protection supports GitFlow branching models"
 ---
 nodeKind: Methodology
 id: methodology:Google-SRE-methodology
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Krate implements SRE principles: error budgets, SLIs on platform resources"
+    - target: platform:kradle
+      notes: "Kradle implements SRE principles: error budgets, SLIs on platform resources"
 ---
 nodeKind: Methodology
 id: methodology:chaos-engineering-methodology
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Krate's K8s-native design enables chaos testing of forge components"
+    - target: platform:kradle
+      notes: "Kradle's K8s-native design enables chaos testing of forge components"
 
 # ---------------------------------------------------------------------------
-# 11. RESPONSIBILITIES that apply to Krate
+# 11. RESPONSIBILITIES that apply to Kradle
 # ---------------------------------------------------------------------------
 ---
 nodeKind: Responsibility
 id: responsibility:deployment-management
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Deployment management uses Krate's GitOps and pipeline infrastructure"
+    - target: platform:kradle
+      notes: "Deployment management uses Kradle's GitOps and pipeline infrastructure"
 ---
 nodeKind: Responsibility
 id: responsibility:release-coordination
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Release coordination uses Krate pipelines and release resources"
+    - target: platform:kradle
+      notes: "Release coordination uses Kradle pipelines and release resources"
 ---
 nodeKind: Responsibility
 id: responsibility:security-audit
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Security audits cover Krate RBAC, policy profiles, and agent permissions"
+    - target: platform:kradle
+      notes: "Security audits cover Kradle RBAC, policy profiles, and agent permissions"
 ---
 nodeKind: Responsibility
 id: responsibility:access-control
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Access control is managed through Krate's org-scoped RBAC model"
+    - target: platform:kradle
+      notes: "Access control is managed through Kradle's org-scoped RBAC model"
 ---
 nodeKind: Responsibility
 id: responsibility:incident-response
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Incident response dispatches agents for emergency fixes on Krate"
+    - target: platform:kradle
+      notes: "Incident response dispatches agents for emergency fixes on Kradle"
 ---
 nodeKind: Responsibility
 id: responsibility:disaster-recovery
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Disaster recovery plans cover Krate etcd, Postgres, and Git data"
+    - target: platform:kradle
+      notes: "Disaster recovery plans cover Kradle etcd, Postgres, and Git data"
 ---
 nodeKind: Responsibility
 id: responsibility:ai-agent-adoption-strategy
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "AI agent adoption strategy is implemented through Krate agent stacks"
+    - target: platform:kradle
+      notes: "AI agent adoption strategy is implemented through Kradle agent stacks"
 ---
 nodeKind: Responsibility
 id: responsibility:ai-safety-guardrails
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "AI safety guardrails are enforced via Krate permission sets and policies"
+    - target: platform:kradle
+      notes: "AI safety guardrails are enforced via Kradle permission sets and policies"
 ---
 nodeKind: Responsibility
 id: responsibility:ai-agent-usage-review
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Agent usage review uses Krate session transcripts and cost tracking"
+    - target: platform:kradle
+      notes: "Agent usage review uses Kradle session transcripts and cost tracking"
 ---
 nodeKind: Responsibility
 id: responsibility:cost-optimization
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "Cost optimization uses Krate quota profiles and agent compute budgets"
+    - target: platform:kradle
+      notes: "Cost optimization uses Kradle quota profiles and agent compute budgets"
 ---
 nodeKind: Responsibility
 id: responsibility:dx-tooling-maintenance
 edges:
   applies_to:
-    - target: platform:krate
-      notes: "DX tooling maintenance covers Krate CLI, web UI, and SDK updates"
+    - target: platform:kradle
+      notes: "DX tooling maintenance covers Kradle CLI, web UI, and SDK updates"

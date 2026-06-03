@@ -454,7 +454,7 @@ nodeKinds:
 - id: node:kubernetes-crd-kind
   name: KubernetesCrdKind
   origin: derived
-  originContext: catalog pass 2026-05-14 — Kubernetes CRDs need first-class graph nodes so products such as Krate can model resource kinds, source manifests, external-resource mappings, policy governance, and controller reconciliation without overloading generic Topic or Definition records.
+  originContext: catalog pass 2026-05-14 — Kubernetes CRDs need first-class graph nodes so products such as Kradle can model resource kinds, source manifests, external-resource mappings, policy governance, and controller reconciliation without overloading generic Topic or Definition records.
   prefix: kubernetes-crd-kind
   cluster: 9-domain
   purpose: a Kubernetes CustomResourceDefinition kind that extends the Kubernetes API with a namespaced or cluster-scoped custom resource
@@ -541,7 +541,7 @@ nodeKinds:
   - id starts with kubernetes-crd-kind: null
   - kind, apiGroup, plural, servedVersions, storageVersion, and scope reflect the Kubernetes CustomResourceDefinition spec.
   examples:
-  - graph/domain/products/krate-crd-kinds.yaml
+  - graph/domain/products/kradle-crd-kinds.yaml
 - id: node:kubernetes-controller
   name: KubernetesController
   origin: derived
@@ -585,4 +585,4 @@ nodeKinds:
   invariants:
   - id starts with kubernetes-controller: null
   examples:
-  - graph/domain/products/krate-controllers.yaml
+  - graph/domain/products/kradle-controllers.yaml

@@ -1,9 +1,9 @@
 ---
 nodeKind: CiSurface
-id: ci:a5c-ai-krate
+id: ci:a5c-ai-kradle
 attributes:
-  ciId: "@a5c-ai/krate"
-  packageId: package:a5c-ai-krate
+  ciId: "@a5c-ai/kradle"
+  packageId: package:a5c-ai-kradle
   scripts:
     - build
     - test
@@ -16,46 +16,46 @@ attributes:
     - staging
     - npm
   validationCommands:
-    - "npm run check --workspace=@a5c-ai/krate"
-    - "npm run package:check --workspace=@a5c-ai/krate"
+    - "npm run check --workspace=@a5c-ai/kradle"
+    - "npm run package:check --workspace=@a5c-ai/kradle"
   artifactExpectations:
-    - "packages/krate/core/dist/**"
-    - "packages/krate/core/bin/krate-demo.mjs"
-    - "packages/krate/core/bin/krate-server.mjs"
+    - "packages/kradle/core/dist/**"
+    - "packages/kradle/core/bin/kradle-demo.mjs"
+    - "packages/kradle/core/bin/kradle-server.mjs"
   triggerEvents:
     - push
     - pr
     - tag
 edges:
   validates_package:
-    - target: package:a5c-ai-krate
+    - target: package:a5c-ai-kradle
 ---
 nodeKind: CiSurface
-id: ci:a5c-ai-krate-sdk
+id: ci:a5c-ai-kradle-sdk
 attributes:
-  ciId: "@a5c-ai/krate-sdk"
-  packageId: package:a5c-ai-krate-sdk
+  ciId: "@a5c-ai/kradle-sdk"
+  packageId: package:a5c-ai-kradle-sdk
   scripts:
     - test
   publishStrategy: internal-workspace
   releaseChannels:
     - ci
   validationCommands:
-    - "npm test --workspace=@a5c-ai/krate-sdk"
+    - "npm test --workspace=@a5c-ai/kradle-sdk"
   artifactExpectations:
-    - "packages/krate/sdk/src/index.js"
+    - "packages/kradle/sdk/src/index.js"
   triggerEvents:
     - push
     - pr
 edges:
   validates_package:
-    - target: package:a5c-ai-krate-sdk
+    - target: package:a5c-ai-kradle-sdk
 ---
 nodeKind: CiSurface
-id: ci:a5c-ai-krate-cli
+id: ci:a5c-ai-kradle-cli
 attributes:
-  ciId: "@a5c-ai/krate-cli"
-  packageId: package:a5c-ai-krate-cli
+  ciId: "@a5c-ai/kradle-cli"
+  packageId: package:a5c-ai-kradle-cli
   scripts:
     - test
     - start
@@ -63,22 +63,22 @@ attributes:
   releaseChannels:
     - ci
   validationCommands:
-    - "npm test --workspace=@a5c-ai/krate-cli"
+    - "npm test --workspace=@a5c-ai/kradle-cli"
   artifactExpectations:
-    - "packages/krate/cli/bin/krate.mjs"
-    - "packages/krate/cli/bin/krate-server.mjs"
+    - "packages/kradle/cli/bin/kradle.mjs"
+    - "packages/kradle/cli/bin/kradle-server.mjs"
   triggerEvents:
     - push
     - pr
 edges:
   validates_package:
-    - target: package:a5c-ai-krate-cli
+    - target: package:a5c-ai-kradle-cli
 ---
 nodeKind: CiSurface
-id: ci:a5c-ai-krate-web
+id: ci:a5c-ai-kradle-web
 attributes:
-  ciId: "@a5c-ai/krate-web"
-  packageId: package:a5c-ai-krate-web
+  ciId: "@a5c-ai/kradle-web"
+  packageId: package:a5c-ai-kradle-web
   scripts:
     - build
     - test
@@ -87,23 +87,23 @@ attributes:
   releaseChannels:
     - ci
   validationCommands:
-    - "npm run build --workspace=@a5c-ai/krate-web"
-    - "npm test --workspace=@a5c-ai/krate-web"
+    - "npm run build --workspace=@a5c-ai/kradle-web"
+    - "npm test --workspace=@a5c-ai/kradle-web"
   artifactExpectations:
-    - "packages/krate/web/.next/**"
-    - "packages/krate/web/app/**"
+    - "packages/kradle/web/.next/**"
+    - "packages/kradle/web/app/**"
   triggerEvents:
     - push
     - pr
 edges:
   validates_package:
-    - target: package:a5c-ai-krate-web
+    - target: package:a5c-ai-kradle-web
 ---
 nodeKind: CiSurface
-id: ci:krate-helm-chart
+id: ci:kradle-helm-chart
 attributes:
-  ciId: krate-helm-chart
-  packageId: package:krate-helm-chart
+  ciId: kradle-helm-chart
+  packageId: package:kradle-helm-chart
   scripts:
     - npm-run-check
     - helm-template
@@ -111,15 +111,15 @@ attributes:
   releaseChannels:
     - staging
   validationCommands:
-    - "npm run check --workspace=@a5c-ai/krate"
-    - "helm template krate packages/krate/charts"
+    - "npm run check --workspace=@a5c-ai/kradle"
+    - "helm template kradle packages/kradle/charts"
   artifactExpectations:
-    - "packages/krate/charts/Chart.yaml"
-    - "packages/krate/charts/crds/*.yaml"
-    - "packages/krate/charts/templates/*.yaml"
+    - "packages/kradle/charts/Chart.yaml"
+    - "packages/kradle/charts/crds/*.yaml"
+    - "packages/kradle/charts/templates/*.yaml"
   triggerEvents:
     - push
     - pr
 edges:
   validates_package:
-    - target: package:krate-helm-chart
+    - target: package:kradle-helm-chart

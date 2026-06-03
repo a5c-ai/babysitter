@@ -29,7 +29,7 @@ const packageDirs = [
   'packages/agent-mux/webui', 'packages/agent-mux',
   'packages/agent-mux/observability',
   'packages/agent-mux/hooks/core', 'packages/agent-mux/hooks/cli',
-  'packages/krate/core',
+  'packages/kradle/core',
 ];
 
 const pluginPackageNames = [

@@ -1,21 +1,21 @@
 /**
  * @process repo/issue-612-health-probes-durable-events
- * @description Implementation process for issue #612: real Krate health probes and durable broker-backed event streaming.
+ * @description Implementation process for issue #612: real Kradle health probes and durable broker-backed event streaming.
  * @inputs { issueNumber: number, title: string, issueUrl: string, issueBody: string, labels: string[], issueCommentsSummary: string, targetFiles: string[], verificationCommands: string[], relatedIssues: number[], relatedPullRequests: number[] }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], reuseAudit: object, architecture: object, verification: object, review: object, finalGate: object }
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
- * - packages/krate/core/src/agent-adapter-controller.js
- * - packages/krate/core/src/agent-stack-controller.js
- * - packages/krate/web/app/api/orgs/[org]/snapshot/route.js
- * - packages/krate/core/src/event-bus.js
- * - packages/krate/core/src/http-server.js
- * - packages/krate/web/app/api/orgs/[org]/agents/events/stream/route.js
- * - packages/krate/charts/values.yaml
- * - packages/krate/charts/templates/deployments.yaml
- * - packages/krate/docs/gaps/staging-status.md
- * - packages/krate/docs/gaps/infrastructure-deps.md
+ * - packages/kradle/core/src/agent-adapter-controller.js
+ * - packages/kradle/core/src/agent-stack-controller.js
+ * - packages/kradle/web/app/api/orgs/[org]/snapshot/route.js
+ * - packages/kradle/core/src/event-bus.js
+ * - packages/kradle/core/src/http-server.js
+ * - packages/kradle/web/app/api/orgs/[org]/agents/events/stream/route.js
+ * - packages/kradle/charts/values.yaml
+ * - packages/kradle/charts/templates/deployments.yaml
+ * - packages/kradle/docs/gaps/staging-status.md
+ * - packages/kradle/docs/gaps/infrastructure-deps.md
  *
  * Process-library references used:
  * - methodologies/atdd-tdd/atdd-tdd.js
@@ -306,11 +306,11 @@ export async function process(inputs, ctx) {
 export const readIssueContextTask = defineTask('issue-612.read-issue-context', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Read issue #612, comments, labels, and prior PRs',
-  labels: ['issue-612', 'krate', 'research'],
+  labels: ['issue-612', 'kradle', 'research'],
   agent: {
-    name: 'krate-planning-architect',
+    name: 'kradle-planning-architect',
     prompt: {
-      role: 'senior Krate platform architect',
+      role: 'senior Kradle platform architect',
       task: 'Read the issue, comments, labels, and related PR state before any implementation work.',
       instructions: [
         `Run: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
@@ -335,18 +335,18 @@ export const readIssueContextTask = defineTask('issue-612.read-issue-context', (
 export const reuseAuditTask = defineTask('issue-612.reuse-audit', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Phase 0: Reuse-audit findings',
-  labels: ['issue-612', 'reuse-audit', 'krate'],
+  labels: ['issue-612', 'reuse-audit', 'kradle'],
   agent: {
-    name: 'krate-reuse-auditor',
+    name: 'kradle-reuse-auditor',
     prompt: {
-      role: 'senior Krate maintenance engineer',
+      role: 'senior Kradle maintenance engineer',
       task: 'Run the repo-specific reuse audit before drafting new infrastructure or implementation changes.',
       instructions: [
         specBlock(args),
         '',
         'Extract keyword nouns and verbs: health probe, Gitea, Agent Mux, controller, kubectl cluster-info, Anthropic key, event bus, SSE, durable event streaming, NATS, JetStream, replay, backpressure.',
         'Start the response with exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
-        'Scan current Krate health routes/controllers, event bus/SSE code, Helm values/templates, tests, docs, SDK exports, env names, and existing NATS/dependency configuration.',
+        'Scan current Kradle health routes/controllers, event bus/SSE code, Helm values/templates, tests, docs, SDK exports, env names, and existing NATS/dependency configuration.',
         'Include any prior work from related PRs only as context; verify whether it exists in the working tree.',
         'Do not modify files in this phase.',
         'Return JSON: { findingsMarkdown, matchingInfrastructure, missingInfrastructure, envVars, runtimeCallPaths, targetFiles, testFiles, docsFiles, priorWorkStatus, noCodeChanges }.',
@@ -395,9 +395,9 @@ export const runtimeTraceTask = defineTask('issue-612.runtime-trace', (args, tas
   title: 'Trace health and event streaming runtime paths',
   labels: ['issue-612', 'architecture', 'runtime-trace'],
   agent: {
-    name: 'krate-runtime-tracer',
+    name: 'kradle-runtime-tracer',
     prompt: {
-      role: 'senior Krate runtime engineer',
+      role: 'senior Kradle runtime engineer',
       task: 'Trace the exact current runtime paths for health status and agent event streaming before implementation.',
       instructions: [
         specBlock(args),
@@ -407,7 +407,7 @@ export const runtimeTraceTask = defineTask('issue-612.runtime-trace', (args, tas
         '',
         'Trace health from web health/snapshot components/routes through controller/resource helpers and environment variables.',
         'Trace resource-change events from API controller emitters through globalEventBus into core HTTP SSE and Next.js SSE routes.',
-        'Trace Helm/env wiring for KRATE_GITEA_HTTP_URL, AGENT_MUX_URL, AGENT_GATEWAY_URL, KRATE_CONTROLLER_URL, ANTHROPIC_API_KEY, KRATE_ASSISTANT_API_KEY, and optional NATS values.',
+        'Trace Helm/env wiring for KRADLE_GITEA_HTTP_URL, AGENT_MUX_URL, AGENT_GATEWAY_URL, KRADLE_CONTROLLER_URL, ANTHROPIC_API_KEY, KRADLE_ASSISTANT_API_KEY, and optional NATS values.',
         'Identify compatibility contracts that must be preserved for existing tests and SDK consumers.',
         'Do not modify files in this phase.',
         'Return JSON: { healthCallPaths, eventCallPaths, helmEnvPaths, existingTests, compatibilityContracts, implementationFiles, riskPoints, noCodeChanges }.',
@@ -429,9 +429,9 @@ export const resolveExecutionModeTask = defineTask('issue-612.resolve-execution-
   title: 'Resolve whether to implement or verify prior work',
   labels: ['issue-612', 'prior-work', 'quality-gate'],
   agent: {
-    name: 'krate-release-triager',
+    name: 'kradle-release-triager',
     prompt: {
-      role: 'senior Krate release triager',
+      role: 'senior Kradle release triager',
       task: 'Determine whether this run should implement #612 from scratch or verify/finish prior work already present on the current branch.',
       instructions: [
         specBlock(args),
@@ -460,7 +460,7 @@ export const architectureTask = defineTask('issue-612.architecture', (args, task
   title: 'Design health probe service and durable event transport',
   labels: ['issue-612', 'architecture', 'design'],
   agent: {
-    name: 'krate-platform-architect',
+    name: 'kradle-platform-architect',
     prompt: {
       role: 'senior production platform architect',
       task: 'Design a focused implementation for real health probes and durable event streaming.',
@@ -474,7 +474,7 @@ export const architectureTask = defineTask('issue-612.architecture', (args, task
         JSON.stringify(args.executionMode ?? {}, null, 2),
         '',
         'Design a shared health probe module/service used by web health/snapshot paths and, where appropriate, controller health/status surfaces.',
-        'Health probes must run concurrently with bounded timeouts and return partial structured results for Gitea /api/v1/version, Agent Mux /healthz, Krate Controller /healthz, Kubernetes connectivity, and assistant credentials.',
+        'Health probes must run concurrently with bounded timeouts and return partial structured results for Gitea /api/v1/version, Agent Mux /healthz, Kradle Controller /healthz, Kubernetes connectivity, and assistant credentials.',
         'Use safe assistant credential validation by default: presence and format check without secret leakage; make live validation explicit, cached, or opt-in if implemented.',
         'Design event transport as a narrow abstraction preserving createEventBus/globalEventBus compatibility where practical, with in-memory local/test fallback and NATS JetStream production transport selected by env/Helm.',
         'Define durable event semantics: stable event IDs, subject/stream names, replay cursor behavior, retention, multi-replica fanout, slow-subscriber/backpressure handling, reconnect behavior, and broker outage status.',
@@ -499,9 +499,9 @@ export const contractTestsTask = defineTask('issue-612.contract-tests', (args, t
   title: 'Write contract tests before implementation',
   labels: ['issue-612', 'atdd', 'tdd', 'tests'],
   agent: {
-    name: 'krate-test-engineer',
+    name: 'kradle-test-engineer',
     prompt: {
-      role: 'test engineer for Krate production infrastructure',
+      role: 'test engineer for Kradle production infrastructure',
       task: 'Add focused failing tests that encode the #612 acceptance criteria before implementation.',
       instructions: [
         specBlock(args),
@@ -512,8 +512,8 @@ export const contractTestsTask = defineTask('issue-612.contract-tests', (args, t
         'EXECUTION MODE:',
         JSON.stringify(args.executionMode ?? {}, null, 2),
         '',
-        'Add or update tests near existing Krate core/web/deployment tests. Keep test scaffolding minimal and deterministic with injectable fetch, broker clients, command runners, and clocks.',
-        'Health tests must cover Gitea /api/v1/version, Agent Mux /healthz rather than /health, Krate Controller /healthz, bounded Kubernetes connectivity, assistant credential validation without leaking the key, timeouts, and partial failure results.',
+        'Add or update tests near existing Kradle core/web/deployment tests. Keep test scaffolding minimal and deterministic with injectable fetch, broker clients, command runners, and clocks.',
+        'Health tests must cover Gitea /api/v1/version, Agent Mux /healthz rather than /health, Kradle Controller /healthz, bounded Kubernetes connectivity, assistant credential validation without leaking the key, timeouts, and partial failure results.',
         'Event tests must cover in-memory compatibility, NATS/JetStream transport behavior through injected clients, durable replay from cursor/last-event-id, cross-subscriber fanout, slow subscriber/backpressure semantics, broker-unavailable status, and SSE route replay behavior.',
         'Helm/deployment tests must cover NATS/event env wiring and no secret literals in templates.',
         'Run the narrow tests and confirm the newly added tests fail for expected missing behavior before implementation unless execution mode is acceptance-only or the current branch already implements the feature.',
@@ -535,11 +535,11 @@ export const contractTestsTask = defineTask('issue-612.contract-tests', (args, t
 export const implementationTask = defineTask('issue-612.implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement health probes, durable events, Helm wiring, and docs',
-  labels: ['issue-612', 'implementation', 'krate'],
+  labels: ['issue-612', 'implementation', 'kradle'],
   agent: {
-    name: 'krate-platform-engineer',
+    name: 'kradle-platform-engineer',
     prompt: {
-      role: 'senior Krate platform engineer',
+      role: 'senior Kradle platform engineer',
       task: 'Implement the #612 feature set using the architecture and red tests.',
       instructions: [
         specBlock(args),
@@ -554,12 +554,12 @@ export const implementationTask = defineTask('issue-612.implementation', (args, 
         JSON.stringify(args.executionMode ?? {}, null, 2),
         '',
         'If execution mode is acceptance-only, do not reimplement working behavior. Limit changes to missing documentation, narrowly missing tests, or verification evidence needed to prove #612 on the current branch.',
-        'Implement only the scoped Krate health, event streaming, Helm/env, SDK export, and docs changes needed for #612.',
+        'Implement only the scoped Kradle health, event streaming, Helm/env, SDK export, and docs changes needed for #612.',
         'Health: create or reuse a shared probe service with injectable fetch/command runners, strict timeouts, redacted errors, concurrent execution, and structured per-dependency status.',
         'Health: update web snapshot/health route behavior without breaking current HealthMonitor shape; include controller /healthz and assistant credential status.',
         'Kubernetes: prefer existing Kubernetes controller/listResource health where it is the project pattern, but support a bounded kubectl cluster-info check only behind an injectable runner if required by acceptance criteria.',
         'Events: replace direct process-local-only behavior with a transport abstraction. Preserve createEventBus/globalEventBus APIs for tests/local usage while allowing production NATS/JetStream transport through env/config.',
-        'Events: update both packages/krate/core/src/http-server.js SSE and packages/krate/web/app/api/orgs/[org]/agents/events/stream/route.js to subscribe through the transport abstraction and support replay cursors/Last-Event-ID where practical.',
+        'Events: update both packages/kradle/core/src/http-server.js SSE and packages/kradle/web/app/api/orgs/[org]/agents/events/stream/route.js to subscribe through the transport abstraction and support replay cursors/Last-Event-ID where practical.',
         'Events: maintain JSON event payload compatibility; add stable event IDs without removing existing fields.',
         'Helm/env: wire optional NATS values into api/controllers/web workloads as needed, without committing secrets or forcing NATS for local default installs unless explicitly configured.',
         'Docs: update staging/infrastructure docs and SDK docs only where they describe the changed operational behavior.',
@@ -583,7 +583,7 @@ export const verificationTask = defineTask('issue-612.verification', (args, task
   title: 'Run quality gates',
   labels: ['issue-612', 'verification', 'quality-gate'],
   agent: {
-    name: 'krate-verifier',
+    name: 'kradle-verifier',
     prompt: {
       role: 'verification engineer',
       task: 'Run and report the quality gates for #612.',
@@ -613,7 +613,7 @@ export const reviewTask = defineTask('issue-612.review', (args, taskCtx) => ({
   title: 'Review implementation against #612',
   labels: ['issue-612', 'review', 'quality-gate'],
   agent: {
-    name: 'krate-code-reviewer',
+    name: 'kradle-code-reviewer',
     prompt: {
       role: 'senior code reviewer for production infrastructure',
       task: 'Review the implementation diff against #612 acceptance criteria and verification evidence.',
@@ -644,9 +644,9 @@ export const refinementTask = defineTask('issue-612.refinement', (args, taskCtx)
   title: 'Refine after verification or review',
   labels: ['issue-612', 'refinement'],
   agent: {
-    name: 'krate-platform-engineer',
+    name: 'kradle-platform-engineer',
     prompt: {
-      role: 'senior Krate platform engineer',
+      role: 'senior Kradle platform engineer',
       task: `Apply only blocking fixes from verification/review attempt ${args.attempt}.`,
       instructions: [
         specBlock(args),
@@ -657,7 +657,7 @@ export const refinementTask = defineTask('issue-612.refinement', (args, taskCtx)
         'REVIEW:',
         JSON.stringify(args.review ?? {}, null, 2),
         '',
-        'Apply only the required fixes. Do not broaden scope or refactor unrelated Krate surfaces.',
+        'Apply only the required fixes. Do not broaden scope or refactor unrelated Kradle surfaces.',
         'Rerun the narrow failing checks before returning.',
         'Return JSON: { changedFiles, summary, fixedIssues, testCommands, testResults, remainingRisk }.',
       ],
@@ -678,7 +678,7 @@ export const finalAcceptanceTask = defineTask('issue-612.final-acceptance', (arg
   title: 'Final acceptance and delivery readiness',
   labels: ['issue-612', 'final-acceptance'],
   agent: {
-    name: 'krate-release-reviewer',
+    name: 'kradle-release-reviewer',
     prompt: {
       role: 'release readiness reviewer',
       task: 'Decide whether #612 is complete and ready to deliver.',

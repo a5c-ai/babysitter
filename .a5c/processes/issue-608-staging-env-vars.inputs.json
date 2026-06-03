@@ -2,14 +2,14 @@
   "issueNumber": 608,
   "baseBranch": "staging",
   "branchName": "agent/issue-608-staging-env-vars",
-  "stagingHost": "krate-staging.a5c.ai",
-  "chartPath": "packages/krate/charts",
+  "stagingHost": "kradle-staging.a5c.ai",
+  "chartPath": "packages/kradle/charts",
   "deployLiveStaging": false,
   "requiredEnv": [
     "ANTHROPIC_API_KEY",
-    "KRATE_ASSISTANT_API_KEY",
-    "KRATE_GITEA_HTTP_URL",
-    "KRATE_GITEA_TOKEN",
+    "KRADLE_ASSISTANT_API_KEY",
+    "KRADLE_GITEA_HTTP_URL",
+    "KRADLE_GITEA_TOKEN",
     "AGENT_MUX_URL",
     "AGENT_GATEWAY_URL"
   ],
@@ -19,29 +19,29 @@
     "Agent dispatch reaches Agent Mux and produces job/session/transcript evidence."
   ],
   "targetFiles": [
-    "packages/krate/charts/values.yaml",
-    "packages/krate/charts/templates/deployments.yaml",
-    "packages/krate/charts/templates/gitea.yaml",
-    "packages/krate/charts/README.md",
-    "packages/krate/core/tests/deployment.test.js",
-    "packages/krate/core/scripts/validate-package.mjs",
-    "packages/krate/docs/gaps/staging-status.md",
-    "packages/krate/docs/gaps/infrastructure-deps.md"
+    "packages/kradle/charts/values.yaml",
+    "packages/kradle/charts/templates/deployments.yaml",
+    "packages/kradle/charts/templates/gitea.yaml",
+    "packages/kradle/charts/README.md",
+    "packages/kradle/core/tests/deployment.test.js",
+    "packages/kradle/core/scripts/validate-package.mjs",
+    "packages/kradle/docs/gaps/staging-status.md",
+    "packages/kradle/docs/gaps/infrastructure-deps.md"
   ],
   "runtimeTraceFiles": [
-    "packages/krate/web/app/api/orgs/[org]/snapshot/route.js",
-    "packages/krate/core/src/assistant-runtime.js",
-    "packages/krate/core/src/gitea-service.js",
-    "packages/krate/core/src/agent-mux-client.js",
-    "packages/krate/core/src/agent-dispatch-controller.js",
-    "packages/krate/web/app/api/orgs/[org]/repositories/[name]/tree/route.js",
-    "packages/krate/web/app/api/orgs/[org]/repositories/[name]/blob/[...path]/route.js"
+    "packages/kradle/web/app/api/orgs/[org]/snapshot/route.js",
+    "packages/kradle/core/src/assistant-runtime.js",
+    "packages/kradle/core/src/gitea-service.js",
+    "packages/kradle/core/src/agent-mux-client.js",
+    "packages/kradle/core/src/agent-dispatch-controller.js",
+    "packages/kradle/web/app/api/orgs/[org]/repositories/[name]/tree/route.js",
+    "packages/kradle/web/app/api/orgs/[org]/repositories/[name]/blob/[...path]/route.js"
   ],
   "verificationCommands": [
-    "node --test packages/krate/core/tests/deployment.test.js",
-    "cd packages/krate/core && node scripts/validate-package.mjs",
-    "helm template krate packages/krate/charts -n krate-system --set argocd.enabled=false",
-    "helm template krate packages/krate/charts -n krate-system --set argocd.enabled=false --set gitea.httpUrl=http://gitea-http.krate-system.svc.cluster.local:3000/krate --set agentMux.url=http://agent-mux.krate-system.svc.cluster.local:8080 --set assistant.existingSecret=krate-assistant --set gitea.token.existingSecret=krate-gitea-token",
+    "node --test packages/kradle/core/tests/deployment.test.js",
+    "cd packages/kradle/core && node scripts/validate-package.mjs",
+    "helm template kradle packages/kradle/charts -n kradle-system --set argocd.enabled=false",
+    "helm template kradle packages/kradle/charts -n kradle-system --set argocd.enabled=false --set gitea.httpUrl=http://gitea-http.kradle-system.svc.cluster.local:3000/kradle --set agentMux.url=http://agent-mux.kradle-system.svc.cluster.local:8080 --set assistant.existingSecret=kradle-assistant --set gitea.token.existingSecret=kradle-gitea-token",
     "git diff --check"
   ],
   "secretExposureChecks": [
@@ -50,7 +50,7 @@
     "Agent and verification output redacts secret values and reports only object/key names."
   ],
   "smokeChecks": [
-    "GET https://krate-staging.a5c.ai/api/orgs/default/snapshot reports Kubernetes, Gitea, and Agent Mux healthy.",
+    "GET https://kradle-staging.a5c.ai/api/orgs/default/snapshot reports Kubernetes, Gitea, and Agent Mux healthy.",
     "Assistant chat/playground returns a model response and usage metadata without API key errors.",
     "Repository tree/blob routes return source:gitea for a real repository.",
     "Dispatch creates a real Agent Mux-backed job/session/transcript path."

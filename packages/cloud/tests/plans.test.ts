@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { buildAgentInstallPlan, buildDeploymentPlan, buildKrateHelmPlan, configureProviders, environmentPreset, renderHelmValuesYaml, renderKubernetes, renderTerraform } from "../src/index.js";
+import { buildAgentInstallPlan, buildDeploymentPlan, buildKradleHelmPlan, configureProviders, environmentPreset, renderHelmValuesYaml, renderKubernetes, renderTerraform } from "../src/index.js";
 
-describe("buildKrateHelmPlan", () => {
+describe("buildKradleHelmPlan", () => {
   it("produces correct replica counts from config", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const values = plan.values as Record<string, Record<string, unknown>>;
     expect(values.api.replicas).toBe(1);
     expect(values.controllers.replicas).toBe(1);
@@ -15,7 +15,7 @@ describe("buildKrateHelmPlan", () => {
 
   it("uses staging replicas (2) for staging preset", () => {
     const config = environmentPreset("staging");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const values = plan.values as Record<string, Record<string, unknown>>;
     expect(values.api.replicas).toBe(2);
     expect(values.controllers.replicas).toBe(2);
@@ -25,7 +25,7 @@ describe("buildKrateHelmPlan", () => {
 
   it("uses prod replicas (3) for prod preset", () => {
     const config = environmentPreset("prod");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const values = plan.values as Record<string, Record<string, unknown>>;
     expect(values.api.replicas).toBe(3);
     expect(values.controllers.replicas).toBe(3);
@@ -35,20 +35,20 @@ describe("buildKrateHelmPlan", () => {
 
   it("maps ingress hostnames to helm host entries", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const ingress = plan.values.ingress as Record<string, unknown>;
     expect(ingress.enabled).toBe(true);
     expect(ingress.className).toBe("nginx");
     const hosts = ingress.hosts as Array<{ host: string; paths: Array<{ path: string; pathType: string }> }>;
     expect(hosts).toHaveLength(1);
-    expect(hosts[0].host).toBe("krate.localdev.me");
+    expect(hosts[0].host).toBe("kradle.localdev.me");
     expect(hosts[0].paths).toEqual([{ path: "/", pathType: "Prefix" }]);
   });
 
   it("maps multiple ingress hostnames correctly", () => {
     const config = environmentPreset("custom");
     config.ingress = { hostnames: ["api.example.com", "web.example.com"], tls: true, ingressClassName: "traefik" };
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const ingress = plan.values.ingress as Record<string, unknown>;
     expect(ingress.enabled).toBe(true);
     expect(ingress.className).toBe("traefik");
@@ -60,17 +60,17 @@ describe("buildKrateHelmPlan", () => {
 
   it("generates TLS secret names from hostnames when TLS is enabled", () => {
     const config = environmentPreset("staging");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const ingress = plan.values.ingress as Record<string, unknown>;
     const tls = ingress.tls as Array<{ hosts: string[]; secretName: string }>;
     expect(tls).toHaveLength(1);
-    expect(tls[0].hosts).toEqual(["krate.staging.a5c.ai"]);
-    expect(tls[0].secretName).toBe("krate-krate-staging-a5c-ai-tls");
+    expect(tls[0].hosts).toEqual(["kradle.staging.a5c.ai"]);
+    expect(tls[0].secretName).toBe("kradle-kradle-staging-a5c-ai-tls");
   });
 
   it("produces empty TLS array when TLS is disabled", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const ingress = plan.values.ingress as Record<string, unknown>;
     expect(ingress.tls).toEqual([]);
   });
@@ -78,15 +78,15 @@ describe("buildKrateHelmPlan", () => {
   it("disables ingress when no hostnames are configured", () => {
     const config = environmentPreset("custom");
     config.ingress = { hostnames: [] };
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const ingress = plan.values.ingress as Record<string, unknown>;
     expect(ingress.enabled).toBe(false);
     expect(ingress.hosts).toEqual([]);
   });
 
-  it("includes gitea config from krate config", () => {
+  it("includes gitea config from kradle config", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const gitea = plan.values.gitea as Record<string, unknown>;
     expect(gitea.enabled).toBe(true);
     expect(gitea.admin).toEqual({ username: "gitea_admin", password: "admin" });
@@ -95,21 +95,21 @@ describe("buildKrateHelmPlan", () => {
 
   it("includes agents config", () => {
     const config = environmentPreset("staging");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const agents = plan.values.agents as Record<string, unknown>;
     expect(agents.enabled).toBe(true);
   });
 
   it("includes demo config", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const demo = plan.values.demo as Record<string, unknown>;
     expect(demo.enabled).toBe(true);
   });
 
   it("includes argocd config", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const argocd = plan.values.argocd as Record<string, unknown>;
     expect(argocd.enabled).toBe(false);
     expect(argocd.namespace).toBe("argocd");
@@ -117,7 +117,7 @@ describe("buildKrateHelmPlan", () => {
 
   it("includes auth config", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const auth = plan.values.auth as Record<string, unknown>;
     expect(auth.github).toEqual({ enabled: false, clientId: "", clientSecret: "" });
     expect(auth.sso).toEqual({ enabled: false });
@@ -126,35 +126,35 @@ describe("buildKrateHelmPlan", () => {
 
   it("uses custom image config when provided", () => {
     const config = environmentPreset("minikube");
-    config.image = { repository: "my-registry.io/krate", tag: "v2.0.0", pullPolicy: "Always" };
-    const plan = buildKrateHelmPlan(config);
+    config.image = { repository: "my-registry.io/kradle", tag: "v2.0.0", pullPolicy: "Always" };
+    const plan = buildKradleHelmPlan(config);
     const image = plan.values.image as Record<string, unknown>;
-    expect(image.repository).toBe("my-registry.io/krate");
+    expect(image.repository).toBe("my-registry.io/kradle");
     expect(image.tag).toBe("v2.0.0");
     expect(image.pullPolicy).toBe("Always");
   });
 
   it("falls back to default image when not specified", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const image = plan.values.image as Record<string, unknown>;
-    expect(image.repository).toBe("ghcr.io/a5c-ai/krate/krate-controller");
+    expect(image.repository).toBe("ghcr.io/a5c-ai/kradle/kradle-controller");
     expect(image.tag).toBe("local");
     expect(image.pullPolicy).toBe("IfNotPresent");
   });
 
-  it("uses releaseName krate and chart path packages/krate/charts", () => {
+  it("uses releaseName kradle and chart path packages/kradle/charts", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
-    expect(plan.releaseName).toBe("krate");
-    expect(plan.chartPath).toBe("packages/krate/charts");
+    const plan = buildKradleHelmPlan(config);
+    expect(plan.releaseName).toBe("kradle");
+    expect(plan.chartPath).toBe("packages/kradle/charts");
     expect(plan.namespace).toBe("babysitter-local");
   });
 
   it("produces human-readable summary lines", () => {
     const config = environmentPreset("staging");
-    const plan = buildKrateHelmPlan(config);
-    expect(plan.summary).toContain("helm upgrade --install krate in babysitter-staging");
+    const plan = buildKradleHelmPlan(config);
+    expect(plan.summary).toContain("helm upgrade --install kradle in babysitter-staging");
     expect(plan.summary).toContain("api: 2 replicas");
     expect(plan.summary).toContain("controllers: 2 replicas");
     expect(plan.summary).toContain("web: 2 replicas");
@@ -166,7 +166,7 @@ describe("buildKrateHelmPlan", () => {
 describe("renderHelmValuesYaml", () => {
   it("produces valid YAML with expected top-level keys", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const yaml = renderHelmValuesYaml(plan);
     expect(yaml).toContain("image:");
     expect(yaml).toContain("api:");
@@ -184,14 +184,14 @@ describe("renderHelmValuesYaml", () => {
 
   it("renders replica counts as numbers", () => {
     const config = environmentPreset("prod");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const yaml = renderHelmValuesYaml(plan);
     expect(yaml).toContain("replicas: 3");
   });
 
   it("renders boolean values correctly", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const yaml = renderHelmValuesYaml(plan);
     expect(yaml).toMatch(/enabled: true/);
     expect(yaml).toMatch(/enabled: false/);
@@ -199,37 +199,37 @@ describe("renderHelmValuesYaml", () => {
 
   it("renders ingress hosts as YAML array entries", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const yaml = renderHelmValuesYaml(plan);
-    expect(yaml).toContain("host: krate.localdev.me");
+    expect(yaml).toContain("host: kradle.localdev.me");
     expect(yaml).toContain("path: /");
     expect(yaml).toContain("pathType: Prefix");
   });
 
   it("renders empty arrays as []", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const yaml = renderHelmValuesYaml(plan);
     expect(yaml).toContain("tls: []");
   });
 
   it("renders empty objects as {}", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const yaml = renderHelmValuesYaml(plan);
     expect(yaml).toContain("resources: {}");
   });
 
   it("ends with a trailing newline", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const yaml = renderHelmValuesYaml(plan);
     expect(yaml.endsWith("\n")).toBe(true);
   });
 
   it("does not contain undefined values", () => {
     const config = environmentPreset("minikube");
-    const plan = buildKrateHelmPlan(config);
+    const plan = buildKradleHelmPlan(config);
     const yaml = renderHelmValuesYaml(plan);
     expect(yaml).not.toContain("undefined");
   });
@@ -239,7 +239,7 @@ describe("cloud deployment plan", () => {
   it("builds a working minikube plan with helm", () => {
     const config = environmentPreset("minikube");
     const plan = buildDeploymentPlan(config);
-    expect(plan.helm.releaseName).toBe("krate");
+    expect(plan.helm.releaseName).toBe("kradle");
     expect(plan.helm.namespace).toBe("babysitter-local");
     expect(plan.helm.summary.length).toBeGreaterThan(0);
     expect(plan.kubernetes.manifests.some((manifest) => manifest.kind === "Secret")).toBe(true);
@@ -265,7 +265,7 @@ describe("cloud deployment plan", () => {
     const config = environmentPreset("minikube");
     const plan = buildDeploymentPlan(config);
     const rendered = renderKubernetes(plan);
-    expect(rendered.content).toContain("Helm values for krate");
+    expect(rendered.content).toContain("Helm values for kradle");
     expect(rendered.content).toContain("image:");
     expect(rendered.content).toContain("api:");
     expect(rendered.content).toContain("controllers:");

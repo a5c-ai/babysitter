@@ -165,7 +165,7 @@ This reference document maps community resources to the skills and agents identi
 | **Noir Language** | Rust-like language for ZK applications from Aztec. Compiles to ACIR (Abstract Circuit Intermediate Representation). | [Noir Lang](https://noir-lang.org/docs) | Active |
 | **snarkjs** | zkSNARK implementation in JavaScript & WASM. Groth16 and PLONK support. | [GitHub](https://github.com/iden3/snarkjs) |
 | **Arkworks** | Rust ecosystem for zkSNARKs. Flexible cryptographic primitives. | [Arkworks](https://arkworks.rs/) | Active |
-| **ZoKrates** | Toolbox for zkSNARKs on Ethereum. High-level language and compiler. | [ZoKrates](https://zokrates.github.io/) | Active |
+| **ZoKradles** | Toolbox for zkSNARKs on Ethereum. High-level language and compiler. | [ZoKradles](https://zokradles.github.io/) | Active |
 
 ### Curated ZK Lists
 
@@ -522,7 +522,7 @@ This reference document maps community resources to the skills and agents identi
 | SK-004 foundry-framework | Excellent | Foundry MCP Server, MCP-Forge |
 | SK-005 echidna-fuzzer | Good | building-secure-contracts skill, property-based-testing |
 | SK-006 certora-prover | Good | Certora AI Composer, Certora Prover |
-| SK-007 zk-circuits | Limited | Circom, Noir, ZoKrates (no dedicated MCP) |
+| SK-007 zk-circuits | Limited | Circom, Noir, ZoKradles (no dedicated MCP) |
 | SK-008 evm-analysis | Good | EVM MCP Tools, Solidity Contract Analyzer |
 | SK-009 hardhat-framework | Good | (via Foundry MCP, Base MCP) |
 | SK-010 subgraph-indexing | Excellent | subgraph-mcp (graphops), thegraph-mcp |

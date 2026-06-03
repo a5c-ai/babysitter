@@ -3,22 +3,22 @@
   "dependencyIssueNumber": 620,
   "baseBranch": "staging",
   "targetBranch": "issue/621-agent-identity-web-console",
-  "prompt": "Implement issue #621: Krate agent identity web console pages, persona APIs, create wizard, and persona-aware existing UI. Depend on the #620 core identity contracts and preserve legacy AgentStack fallback.",
+  "prompt": "Implement issue #621: Kradle agent identity web console pages, persona APIs, create wizard, and persona-aware existing UI. Depend on the #620 core identity contracts and preserve legacy AgentStack fallback.",
   "issueTitle": "Agent identity: web console - directory, profile pages, create wizard",
   "labels": [
     "priority:high",
     "ready-for-dev",
     "feature",
     "effort:large",
-    "krate",
-    "krate-web",
+    "kradle",
+    "kradle-web",
     "risk:high"
   ],
   "specFiles": [
-    "packages/krate/docs/agent-identity/03-web-experience.md",
-    "packages/krate/docs/agent-identity/01-resource-model.md",
-    "packages/krate/docs/agent-identity/02-migration.md",
-    "packages/krate/docs/agent-identity/04-meeting-integration.md"
+    "packages/kradle/docs/agent-identity/03-web-experience.md",
+    "packages/kradle/docs/agent-identity/01-resource-model.md",
+    "packages/kradle/docs/agent-identity/02-migration.md",
+    "packages/kradle/docs/agent-identity/04-meeting-integration.md"
   ],
   "targetSurfaces": {
     "webPages": [
@@ -82,36 +82,36 @@
     ]
   },
   "knownExistingInfrastructure": {
-    "navigation": "packages/krate/web/app/lib/krate-ui.jsx",
-    "uiShell": "packages/krate/web/app/ui-shell.jsx",
-    "agentsPage": "packages/krate/web/app/orgs/[org]/agents/page.jsx",
-    "agentComponents": "packages/krate/web/app/components/agent",
-    "componentBarrel": "packages/krate/web/app/components/index.js",
-    "agentHelpers": "packages/krate/web/app/lib/agent-utils.js",
-    "orgApiRoutes": "packages/krate/web/app/api/orgs/[org]",
-    "genericResourcesApi": "packages/krate/web/app/api/orgs/[org]/resources/route.js",
-    "dispatchApi": "packages/krate/web/app/api/orgs/[org]/agents/dispatch/route.js",
-    "commandPalette": "packages/krate/web/app/components/shell/command-palette.jsx",
-    "notificationBell": "packages/krate/web/app/components/shell/notification-bell.jsx",
-    "sessionShell": "packages/krate/web/app/components/agent/session-shell.jsx",
-    "dispatchButton": "packages/krate/web/app/components/agent/dispatch-button.jsx",
-    "meetingParticipantList": "packages/krate/web/app/components/jitsi/jitsi-participant-list.jsx",
+    "navigation": "packages/kradle/web/app/lib/kradle-ui.jsx",
+    "uiShell": "packages/kradle/web/app/ui-shell.jsx",
+    "agentsPage": "packages/kradle/web/app/orgs/[org]/agents/page.jsx",
+    "agentComponents": "packages/kradle/web/app/components/agent",
+    "componentBarrel": "packages/kradle/web/app/components/index.js",
+    "agentHelpers": "packages/kradle/web/app/lib/agent-utils.js",
+    "orgApiRoutes": "packages/kradle/web/app/api/orgs/[org]",
+    "genericResourcesApi": "packages/kradle/web/app/api/orgs/[org]/resources/route.js",
+    "dispatchApi": "packages/kradle/web/app/api/orgs/[org]/agents/dispatch/route.js",
+    "commandPalette": "packages/kradle/web/app/components/shell/command-palette.jsx",
+    "notificationBell": "packages/kradle/web/app/components/shell/notification-bell.jsx",
+    "sessionShell": "packages/kradle/web/app/components/agent/session-shell.jsx",
+    "dispatchButton": "packages/kradle/web/app/components/agent/dispatch-button.jsx",
+    "meetingParticipantList": "packages/kradle/web/app/components/jitsi/jitsi-participant-list.jsx",
     "coreIdentityContracts": [
-      "packages/krate/core/src/resource-model.js",
-      "packages/krate/core/src/agent-persona-controller.js",
-      "packages/krate/core/src/agent-prompt-composition.js",
-      "packages/krate/core/src/agent-dispatch-controller.js",
-      "packages/krate/sdk/src/index.js"
+      "packages/kradle/core/src/resource-model.js",
+      "packages/kradle/core/src/agent-persona-controller.js",
+      "packages/kradle/core/src/agent-prompt-composition.js",
+      "packages/kradle/core/src/agent-dispatch-controller.js",
+      "packages/kradle/sdk/src/index.js"
     ],
     "webTests": [
-      "packages/krate/web/tests/page-structure.test.js",
-      "packages/krate/web/tests/api-routes.test.js",
-      "packages/krate/web/tests/component-structure.test.js",
-      "packages/krate/web/tests/component-exports.test.js",
-      "packages/krate/web/tests/barrel-exports.test.js",
-      "packages/krate/web/tests/resource-contract.test.js",
-      "packages/krate/web/e2e/navigation.spec.js",
-      "packages/krate/web/e2e/smoke.spec.js"
+      "packages/kradle/web/tests/page-structure.test.js",
+      "packages/kradle/web/tests/api-routes.test.js",
+      "packages/kradle/web/tests/component-structure.test.js",
+      "packages/kradle/web/tests/component-exports.test.js",
+      "packages/kradle/web/tests/barrel-exports.test.js",
+      "packages/kradle/web/tests/resource-contract.test.js",
+      "packages/kradle/web/e2e/navigation.spec.js",
+      "packages/kradle/web/e2e/smoke.spec.js"
     ]
   },
   "processLibraryResearch": {
@@ -142,16 +142,16 @@
     "issue620StateAtPlanning": "closed after PR #661 merge according to issue comments",
     "issue621PriorPlanningContext": "issue comments mention closed planning PR #666, open planning PR #723 on plan/issue-621, and implementation work in progress; this process should re-read the current branch before implementation and treat current code as source of truth",
     "coreContractsObservedOnBranch": [
-      "Krate SDK exports createAgentPersonaController, validateAgentPersona, validateAgentDefinition, resolveAgentPersona, and resolveAgentDefinition",
-      "Krate core tests reference AgentPersona, AgentSoul, AgentAppearance, AgentVoiceProfile, and AgentDefinition",
-      "Krate CLI MCP tests reference krate_create_agent and AgentDefinition/AgentPersona resources"
+      "Kradle SDK exports createAgentPersonaController, validateAgentPersona, validateAgentDefinition, resolveAgentPersona, and resolveAgentDefinition",
+      "Kradle core tests reference AgentPersona, AgentSoul, AgentAppearance, AgentVoiceProfile, and AgentDefinition",
+      "Kradle CLI MCP tests reference kradle_create_agent and AgentDefinition/AgentPersona resources"
     ]
   },
   "acceptanceFocus": [
     "Directory page lists organization AgentPersona profiles with appearance/avatar data, role/tagline, definitions/deployments, run or meeting metrics when available, and a New Agent entry point.",
     "Profile page resolves and displays persona, soul, personality, skills, definitions, appearance, voice, and recent activity without hiding missing optional resources.",
     "Create wizard implements the documented seven steps and creates AgentPersona, AgentSoul, AgentAppearance, AgentVoiceProfile, and AgentDefinition with transaction or compensation behavior on partial failure.",
-    "Typed persona APIs use org-scoped authenticated route handlers, existing Krate resource/controller helpers, validation, cache invalidation, and resource events rather than UI-only storage.",
+    "Typed persona APIs use org-scoped authenticated route handlers, existing Kradle resource/controller helpers, validation, cache invalidation, and resource events rather than UI-only storage.",
     "Dispatch, run list, session detail, notifications, command palette, and meeting participants prefer persona display identity and preserve legacy AgentStack fallback.",
     "All new components are exported through the component barrel, follow existing component conventions, and include expected accessible controls and states.",
     "Tests cover route/page/component structure, API contracts, identity resolution, wizard partial-failure handling, and legacy fallback behavior."
@@ -160,14 +160,14 @@
     "Do not implement or modify the #620 core CRD/controller contracts beyond small compatibility fixes required to consume already-landed identity resources.",
     "Do not remove or break legacy AgentStack dispatch, stack pages, inline prompts, or stack-based UI fallback.",
     "Do not require external avatar generation or TTS providers for base workflow success; keep provider integrations behind explicit route contracts and mocks when needed.",
-    "Do not redesign unrelated Krate navigation, settings, meetings, inference, MCP, or agent stack builder surfaces.",
+    "Do not redesign unrelated Kradle navigation, settings, meetings, inference, MCP, or agent stack builder surfaces.",
     "Do not generate shell-oriented process subtasks for this repository workflow."
   ],
   "verificationCommands": [
-    "npm run test --workspace=@a5c-ai/krate-web",
-    "npm run build:krate-web",
-    "npm run test --workspace=@a5c-ai/krate",
-    "npm run test --workspace=@a5c-ai/krate-cli",
+    "npm run test --workspace=@a5c-ai/kradle-web",
+    "npm run build:kradle-web",
+    "npm run test --workspace=@a5c-ai/kradle",
+    "npm run test --workspace=@a5c-ai/kradle-cli",
     "npm run verify:metadata"
   ],
   "qualityGates": {
@@ -190,11 +190,11 @@
     },
     {
       "name": "Reuse audit",
-      "purpose": "Scan current Krate identity, web, API, route, component, navigation, MCP, and test infrastructure before proposing new surfaces."
+      "purpose": "Scan current Kradle identity, web, API, route, component, navigation, MCP, and test infrastructure before proposing new surfaces."
     },
     {
       "name": "Runtime trace",
-      "purpose": "Map loadKrateUi, org navigation, API auth/resource routes, identity contracts, existing stack-centric UI references, and test conventions."
+      "purpose": "Map loadKradleUi, org navigation, API auth/resource routes, identity contracts, existing stack-centric UI references, and test conventions."
     },
     {
       "name": "Dependency readiness",
@@ -210,7 +210,7 @@
     },
     {
       "name": "Quality gates",
-      "purpose": "Run web, Krate, CLI, build, metadata, and optional Playwright gates; iterate up to three attempts on failures."
+      "purpose": "Run web, Kradle, CLI, build, metadata, and optional Playwright gates; iterate up to three attempts on failures."
     },
     {
       "name": "Review",

@@ -1,0 +1,28 @@
+{{- if .Values.agents.enabled }}
+apiVersion: kradle.a5c.ai/v1alpha1
+kind: AgentStack
+metadata:
+  name: assistant
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+    kradle.a5c.ai/builtin: "true"
+spec:
+  organizationRef: {{ .Values.admin.org | default "default" | quote }}
+  baseAgent: claude-code
+  adapter: default
+  provider: anthropic
+  model: claude-sonnet-4-20250514
+  runtimeIdentity:
+    serviceAccountRef: {{ include "kradle.fullname" . }}
+    roleRef: {{ .Values.agents.assistantRole | default "edit" }}
+    namespace: {{ .Release.Namespace }}
+  displayName: Kradle Assistant
+  systemPrompt: |
+    You are the Kradle Assistant — an AI agent embedded in the Kradle platform.
+    You help users manage repositories, agent stacks, workspaces, deployments, and policies.
+  approvalMode: prompt
+  mcpServerRefs:
+    - kradle-mcp
+    - atlas-mcp
+{{- end }}

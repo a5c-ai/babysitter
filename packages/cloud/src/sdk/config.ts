@@ -193,11 +193,11 @@ export function validateCloudConfig(config: CloudConfig): ValidationResult {
   if (!config.ingress.hostnames.length) {
     pushMessage(errors, "ingress.hostnames", "At least one ingress hostname is required.");
   }
-  if (config.krate.api.replicas < 1) {
-    pushMessage(errors, "krate.api.replicas", "API must have at least 1 replica.");
+  if (config.kradle.api.replicas < 1) {
+    pushMessage(errors, "kradle.api.replicas", "API must have at least 1 replica.");
   }
-  if (config.krate.web.replicas < 1) {
-    pushMessage(warnings, "krate.web.replicas", "Web has zero replicas; the deployment will not expose the primary UI.");
+  if (config.kradle.web.replicas < 1) {
+    pushMessage(warnings, "kradle.web.replicas", "Web has zero replicas; the deployment will not expose the primary UI.");
   }
   if (config.auth.mode === "bootstrap-admin" && !config.auth.adminUsername.trim()) {
     pushMessage(errors, "auth.adminUsername", "Bootstrap-admin mode requires an admin username.");

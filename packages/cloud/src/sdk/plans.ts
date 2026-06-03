@@ -1,5 +1,5 @@
 import type { CloudConfig, DeploymentPlan } from "../types.js";
-import { buildKrateHelmPlan } from "../helm/krate-values.js";
+import { buildKradleHelmPlan } from "../helm/kradle-values.js";
 import { bootstrapAuth } from "./auth.js";
 import { defaultReleaseTagForEnvironment } from "./environments.js";
 import { buildAgentInstallPlan } from "./agents.js";
@@ -9,7 +9,7 @@ export function buildDeploymentPlan(config: CloudConfig): DeploymentPlan {
   const releaseTag = config.releaseTag ?? defaultReleaseTagForEnvironment(config.environment);
   const auth = bootstrapAuth(config);
   const providers = configureProviders(config);
-  const helm = buildKrateHelmPlan(config);
+  const helm = buildKradleHelmPlan(config);
 
   return {
     config,
@@ -25,7 +25,7 @@ export function buildDeploymentPlan(config: CloudConfig): DeploymentPlan {
         manifestCount: auth.manifests.length + providers.manifests.length,
         summary: [
           `namespace ${config.namespace}`,
-          `helm release: krate`,
+          `helm release: kradle`,
           ...(config.ingress.hostnames.length > 0 ? [`${config.ingress.hostnames.length} ingress hostnames`] : []),
         ],
       },

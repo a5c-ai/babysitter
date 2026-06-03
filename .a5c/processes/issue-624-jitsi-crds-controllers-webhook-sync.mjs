@@ -10,8 +10,8 @@
  * - /home/runner/.a5c/process-library/babysitter-repo/library/processes/shared/tdd-triplet.js
  * - /home/runner/.a5c/process-library/babysitter-repo/library/tdd-quality-convergence.js
  * - /home/runner/.a5c/process-library/babysitter-repo/library/reference/ADVANCED_PATTERNS.md
- * - packages/krate/docs/jitsi/03-crds-and-controllers.md
- * - packages/krate/docs/jitsi/01-architecture.md
+ * - packages/kradle/docs/jitsi/03-crds-and-controllers.md
+ * - packages/kradle/docs/jitsi/01-architecture.md
  *
  * The active process-library root for this environment is:
  * /home/runner/.a5c/process-library/babysitter-repo/library
@@ -185,12 +185,12 @@ export const readAuthoritativeIssueContextTask = defineTask('issue-624.read-auth
   agent: {
     name: 'jitsi-context-reader',
     prompt: {
-      role: 'senior Krate platform engineer',
+      role: 'senior Kradle platform engineer',
       task: 'Build the authoritative implementation context for issue #624 before any code edits.',
       instructions: [
         `Run and preserve: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
         `Attempt PR detection with: gh pr view ${args.issueNumber} --json files,title,body,comments`,
-        'Read every file listed in inputs.specFiles. Treat packages/krate/docs/jitsi/03-crds-and-controllers.md as the primary source for CRDs and controllers.',
+        'Read every file listed in inputs.specFiles. Treat packages/kradle/docs/jitsi/03-crds-and-controllers.md as the primary source for CRDs and controllers.',
         'Read the latest issue comments carefully. If prior plan or implementation PRs are mentioned, capture their status and do not assume they landed correctly.',
         'Extract acceptance criteria, dependencies, non-goals, security-sensitive requirements, and comments that change the current scope.',
         'Return JSON: { title, labels, comments, isPullRequest, prContext, specFilesRead, acceptanceCriteria, dependencies, nonGoals, securityRequirements, eventTypes, controllerContracts, webhookContracts, ambiguities }.',
@@ -213,7 +213,7 @@ export const runReuseAuditTask = defineTask('issue-624.phase-0-reuse-audit', (ar
         'Do not implement changes in this task.',
         ...specReadInstructions(args),
         'Extract keyword nouns and verbs from the issue and specs: Jitsi, meeting, provider, template, recording, participant, webhook, ingest, HMAC, dedup, JWT, room, sync, watermark, sidecar, event bus, dispatch.',
-        'Check for .a5c/reuse-audit.json. If absent, say so explicitly and use repo-wide Krate globs.',
+        'Check for .a5c/reuse-audit.json. If absent, say so explicitly and use repo-wide Kradle globs.',
         'Scan for matching migrations, API routes, environment variables, package exports, imports, SDK dependencies, resource kinds, CRD manifests, controllers, tests, and docs.',
         'Render a top-level section named exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
         'Separate direct Jitsi implementation already present from adjacent infrastructure that should be reused.',
@@ -234,7 +234,7 @@ export const traceCurrentImplementationGapsTask = defineTask('issue-624.trace-cu
   agent: {
     name: 'jitsi-runtime-tracer',
     prompt: {
-      role: 'senior Krate architecture maintainer',
+      role: 'senior Kradle architecture maintainer',
       task: 'Trace the live code paths and produce an exact gap map for issue #624.',
       instructions: [
         'Do not implement changes in this task.',
@@ -261,7 +261,7 @@ export const authorSpecDrivenTestsTask = defineTask('issue-624.author-tests-firs
   agent: {
     name: 'jitsi-test-author',
     prompt: {
-      role: 'senior Node.js test engineer for Krate core and web APIs',
+      role: 'senior Node.js test engineer for Kradle core and web APIs',
       task: 'Add or repair focused failing tests for the missing issue #624 contract before production edits.',
       instructions: [
         'Edit the repository directly, but only add or update tests and test fixtures in this task.',
@@ -288,11 +288,11 @@ export const authorSpecDrivenTestsTask = defineTask('issue-624.author-tests-firs
 export const implementMissingJitsiCoreTask = defineTask('issue-624.implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement missing Jitsi core controllers, webhook sync, events, exports, and manifests',
-  labels: ['issue-624', 'implementation', 'krate-core'],
+  labels: ['issue-624', 'implementation', 'kradle-core'],
   agent: {
     name: 'jitsi-core-implementer',
     prompt: {
-      role: 'senior Krate backend/platform engineer',
+      role: 'senior Kradle backend/platform engineer',
       task: 'Implement only the missing or partial issue #624 backend/platform contract, preserving existing working Jitsi surfaces.',
       instructions: [
         'Edit the repository directly.',
@@ -300,9 +300,9 @@ export const implementMissingJitsiCoreTask = defineTask('issue-624.implementatio
         `This is implementation attempt ${args.attempt}. Start by reading previous verification and review feedback if present.`,
         'Respect the gap matrix. Do not rewrite completed Jitsi web console or MCP features unless a backend contract break requires a small compatibility fix.',
         'Complete resource model, schema, chart CRD, and package export gaps for JitsiMeetProvider, JitsiMeetingTemplate, JitsiMeeting, and JitsiRecording.',
-        'Implement createJitsiMeetingController in packages/krate/core/src/jitsi-meeting-controller.js with injectable provider, resource, clock, JWT signer, and event bus dependencies.',
-        'Implement createJitsiSyncController in packages/krate/core/src/jitsi-sync-controller.js by following the generic external sync-controller pattern for normalized events, idempotent upserts, participant/recording state, and watermarks.',
-        'Implement createJitsiAgentBridge in packages/krate/core/src/jitsi-agent-bridge.js with explicit jitsiCapability and meetingRef gating, meeting context preparation, sidecar spec building, and agent join/left hooks.',
+        'Implement createJitsiMeetingController in packages/kradle/core/src/jitsi-meeting-controller.js with injectable provider, resource, clock, JWT signer, and event bus dependencies.',
+        'Implement createJitsiSyncController in packages/kradle/core/src/jitsi-sync-controller.js by following the generic external sync-controller pattern for normalized events, idempotent upserts, participant/recording state, and watermarks.',
+        'Implement createJitsiAgentBridge in packages/kradle/core/src/jitsi-agent-bridge.js with explicit jitsiCapability and meetingRef gating, meeting context preparation, sidecar spec building, and agent join/left hooks.',
         'Harden /api/orgs/[org]/jitsi/webhooks/ingest so it uses timing-safe signature validation, delivery deduplication/replay protection, event normalization, and delegates persistence to the Jitsi sync/controller layer.',
         'Emit or persist meeting-created, participant-joined, participant-left, recording-started, and agent-joined-meeting using the existing event bus shape.',
         'Keep #623 Jitsi Helm deployment, #625 web console UX, and #627 deep agent meeting runtime outside this patch except for stable integration seams.',
@@ -329,13 +329,13 @@ export const runQualityGatesTask = defineTask('issue-624.quality-gates', (args, 
   agent: {
     name: 'jitsi-quality-gate-runner',
     prompt: {
-      role: 'senior Krate verification engineer',
+      role: 'senior Kradle verification engineer',
       task: 'Run focused and broad verification for the issue #624 implementation.',
       instructions: [
         ...specReadInstructions(args),
         'Run the focused tests named by the acceptance test task and gap analysis.',
         'Run npm run test:sdk, npm run build:sdk, and npm run verify:metadata unless the repository state proves a narrower package command is the established gate. If a command cannot run, record the exact blocker.',
-        'Run package-specific Krate tests that cover core resource model/controllers, web API webhook ingest, CLI/SDK exports, and event bus integration.',
+        'Run package-specific Kradle tests that cover core resource model/controllers, web API webhook ingest, CLI/SDK exports, and event bus integration.',
         'Verify webhook security negative cases: missing, malformed, invalid, replayed/duplicate signatures, invalid JSON, and unknown event type behavior.',
         'Verify non-meeting agent dispatch still produces the same job/spec behavior as before.',
         'Verify no unrelated dirty files were staged or modified by this process.',
@@ -358,12 +358,12 @@ export const reviewAgainstSpecTask = defineTask('issue-624.spec-security-review'
   agent: {
     name: 'jitsi-spec-security-reviewer',
     prompt: {
-      role: 'senior code reviewer for Krate backend security and controller design',
+      role: 'senior code reviewer for Kradle backend security and controller design',
       task: 'Review the diff against the issue #624 contract and verification output.',
       instructions: [
         'Use a code-review stance. Findings must lead and be ordered by severity with file and line references.',
         ...specReadInstructions(args),
-        'Compare the diff directly to the issue body, issue comments, packages/krate/docs/jitsi/03-crds-and-controllers.md, and packages/krate/docs/jitsi/01-architecture.md.',
+        'Compare the diff directly to the issue body, issue comments, packages/kradle/docs/jitsi/03-crds-and-controllers.md, and packages/kradle/docs/jitsi/01-architecture.md.',
         'Block approval for missing controller methods, non-idempotent sync behavior, token or webhook secret leakage, missing timing-safe validation, missing duplicate delivery handling, missing event emissions, broken existing web/CLI surfaces, or untested non-meeting dispatch behavior.',
         'Check that #623, #625, and #627 scope boundaries were respected.',
         'Return JSON: { approved, findings, residualRisks, requiredFixes, changedFilesReviewed }.',

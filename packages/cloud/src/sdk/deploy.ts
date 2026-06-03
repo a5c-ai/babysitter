@@ -11,7 +11,7 @@ import type {
   InstallResult,
   StatusResource,
 } from "../types.js";
-import { renderHelmValuesYaml } from "../helm/krate-values.js";
+import { renderHelmValuesYaml } from "../helm/kradle-values.js";
 import { renderKubernetes } from "../kubernetes/render.js";
 import { renderTerraform } from "../terraform/root.js";
 import { buildDeploymentPlan } from "./plans.js";
@@ -166,7 +166,7 @@ export async function installEnvironment(config: CloudConfig, options: InstallOp
   const rootDir = workingDirectoryFor(config, options.workingDirectory);
   const terraformDirectory = path.join(rootDir, terraform.directoryName);
   const kubernetesDirectory = path.join(rootDir, "kubernetes");
-  const valuesPath = path.join(rootDir, "krate-values.yaml");
+  const valuesPath = path.join(rootDir, "kradle-values.yaml");
 
   await writeFiles(terraformDirectory, terraform.files);
   await writeFiles(kubernetesDirectory, [{ path: kubernetes.fileName, content: kubernetes.content }]);

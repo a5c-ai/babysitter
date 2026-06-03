@@ -1,9 +1,9 @@
 nodeKind: KnowledgeFabricImpl
-id: knowledge-fabric-impl:krate.knowledge@current
+id: knowledge-fabric-impl:kradle.knowledge@current
 attributes:
-  displayName: "Krate Knowledge Fabric (current) — Company Brain"
+  displayName: "Kradle Knowledge Fabric (current) — Company Brain"
   description: |
-    Krate's knowledge-fabric implementation, productized as the Company Brain: an
+    Kradle's knowledge-fabric implementation, productized as the Company Brain: an
     organization-scoped, governed memory layer that persists and retrieves durable
     knowledge across agent sessions, dispatch runs, repositories, and teams.
   knowledgeScopes:
@@ -14,7 +14,7 @@ attributes:
   retrievalStrategy: hybrid
   knowledgePersistence: database
   notes: |
-    Krate's knowledge fabric implementation: the Company Brain. Provides
+    Kradle's knowledge fabric implementation: the Company Brain. Provides
     persistent organizational memory that spans agent sessions, dispatch
     runs, and team members. NOT session-level memory (that's agent-mux) —
     this is institutional knowledge at the org scope.
@@ -32,13 +32,13 @@ attributes:
       completed dispatch sessions
 
     The company brain feeds into context assembly: before dispatching
-    an agent, Krate queries relevant memories and injects them into
+    an agent, Kradle queries relevant memories and injects them into
     the prompt alongside repo state and issue context.
 edges:
   realizes:
     - target: layer:12-knowledge-fabric
   composes:
-    - target: platform:krate
+    - target: platform:kradle
       role: knowledge-fabric
   uses_memory_system:
-    - target: memory-system:krate-company-brain
+    - target: memory-system:kradle-company-brain

@@ -29,11 +29,11 @@ describe("cloud config", () => {
   it("parses --set overrides", () => {
     const parsed = parseSetOverrides([
       "namespace=demo",
-      "krate.api.replicas=3",
+      "kradle.api.replicas=3",
       "target.clusterName=test-cluster",
     ]);
     expect(parsed.namespace).toBe("demo");
-    expect(parsed.krate?.api?.replicas).toBe(3);
+    expect(parsed.kradle?.api?.replicas).toBe(3);
     expect((parsed.target as { clusterName?: string }).clusterName).toBe("test-cluster");
   });
 
@@ -55,22 +55,22 @@ describe("cloud config", () => {
   });
 });
 
-describe("environment presets produce correct krate configs", () => {
+describe("environment presets produce correct kradle configs", () => {
   it("minikube preset has 1 replica, demo enabled, agents disabled", () => {
     const config = environmentPreset("minikube");
     expect(config.environment).toBe("minikube");
     expect(config.namespace).toBe("babysitter-local");
     expect(config.releaseTag).toBe("local");
     expect(config.target.type).toBe("minikube");
-    expect(config.krate.api.replicas).toBe(1);
-    expect(config.krate.controllers.replicas).toBe(1);
-    expect(config.krate.web.replicas).toBe(1);
-    expect(config.krate.webhookWorker.replicas).toBe(1);
-    expect(config.krate.gitea.enabled).toBe(true);
-    expect(config.krate.demo.enabled).toBe(true);
-    expect(config.krate.agents.enabled).toBe(false);
+    expect(config.kradle.api.replicas).toBe(1);
+    expect(config.kradle.controllers.replicas).toBe(1);
+    expect(config.kradle.web.replicas).toBe(1);
+    expect(config.kradle.webhookWorker.replicas).toBe(1);
+    expect(config.kradle.gitea.enabled).toBe(true);
+    expect(config.kradle.demo.enabled).toBe(true);
+    expect(config.kradle.agents.enabled).toBe(false);
     expect(config.ingress.tls).toBe(false);
-    expect(config.ingress.hostnames).toContain("krate.localdev.me");
+    expect(config.ingress.hostnames).toContain("kradle.localdev.me");
     expect(config.auth.mode).toBe("local-dev");
   });
 
@@ -80,15 +80,15 @@ describe("environment presets produce correct krate configs", () => {
     expect(config.namespace).toBe("babysitter-staging");
     expect(config.releaseTag).toBe("staging");
     expect(config.target.type).toBe("existing");
-    expect(config.krate.api.replicas).toBe(2);
-    expect(config.krate.controllers.replicas).toBe(2);
-    expect(config.krate.web.replicas).toBe(2);
-    expect(config.krate.webhookWorker.replicas).toBe(2);
-    expect(config.krate.gitea.enabled).toBe(true);
-    expect(config.krate.demo.enabled).toBe(false);
-    expect(config.krate.agents.enabled).toBe(true);
+    expect(config.kradle.api.replicas).toBe(2);
+    expect(config.kradle.controllers.replicas).toBe(2);
+    expect(config.kradle.web.replicas).toBe(2);
+    expect(config.kradle.webhookWorker.replicas).toBe(2);
+    expect(config.kradle.gitea.enabled).toBe(true);
+    expect(config.kradle.demo.enabled).toBe(false);
+    expect(config.kradle.agents.enabled).toBe(true);
     expect(config.ingress.tls).toBe(true);
-    expect(config.ingress.hostnames).toContain("krate.staging.a5c.ai");
+    expect(config.ingress.hostnames).toContain("kradle.staging.a5c.ai");
     expect(config.auth.mode).toBe("bootstrap-admin");
   });
 
@@ -98,15 +98,15 @@ describe("environment presets produce correct krate configs", () => {
     expect(config.namespace).toBe("babysitter-prod");
     expect(config.releaseTag).toBe("production");
     expect(config.target.type).toBe("existing");
-    expect(config.krate.api.replicas).toBe(3);
-    expect(config.krate.controllers.replicas).toBe(3);
-    expect(config.krate.web.replicas).toBe(3);
-    expect(config.krate.webhookWorker.replicas).toBe(3);
-    expect(config.krate.gitea.enabled).toBe(true);
-    expect(config.krate.demo.enabled).toBe(false);
-    expect(config.krate.agents.enabled).toBe(true);
+    expect(config.kradle.api.replicas).toBe(3);
+    expect(config.kradle.controllers.replicas).toBe(3);
+    expect(config.kradle.web.replicas).toBe(3);
+    expect(config.kradle.webhookWorker.replicas).toBe(3);
+    expect(config.kradle.gitea.enabled).toBe(true);
+    expect(config.kradle.demo.enabled).toBe(false);
+    expect(config.kradle.agents.enabled).toBe(true);
     expect(config.ingress.tls).toBe(true);
-    expect(config.ingress.hostnames).toContain("krate.a5c.ai");
+    expect(config.ingress.hostnames).toContain("kradle.a5c.ai");
     expect(config.auth.mode).toBe("bootstrap-admin");
   });
 
@@ -116,17 +116,17 @@ describe("environment presets produce correct krate configs", () => {
     expect(config.releaseTag).toBe("latest");
     expect(config.namespace).toBe("babysitter");
     expect(config.target.type).toBe("existing");
-    expect(config.krate.api.replicas).toBe(1);
-    expect(config.krate.gitea.enabled).toBe(true);
-    expect(config.krate.demo.enabled).toBe(false);
-    expect(config.krate.agents.enabled).toBe(false);
+    expect(config.kradle.api.replicas).toBe(1);
+    expect(config.kradle.gitea.enabled).toBe(true);
+    expect(config.kradle.demo.enabled).toBe(false);
+    expect(config.kradle.agents.enabled).toBe(false);
   });
 
   it("each preset returns an independent copy (no shared mutation)", () => {
     const first = environmentPreset("minikube");
     const second = environmentPreset("minikube");
-    first.krate.api.replicas = 99;
-    expect(second.krate.api.replicas).toBe(1);
+    first.kradle.api.replicas = 99;
+    expect(second.kradle.api.replicas).toBe(1);
   });
 });
 

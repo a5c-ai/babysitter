@@ -1,6 +1,6 @@
 # ============================================================================
-# Krate — Kubernetes-native Git Forge Runtime
-# A comprehensive subgraph modeling the Krate platform, its components,
+# Kradle — Kubernetes-native Git Forge Runtime
+# A comprehensive subgraph modeling the Kradle platform, its components,
 # resource kinds, workflows, and connectivity to the broader Atlas graph.
 # ============================================================================
 
@@ -9,20 +9,20 @@
 # ---------------------------------------------------------------------------
 ---
 nodeKind: Platform
-id: platform:krate
+id: platform:kradle
 attributes:
-  displayName: "Krate"
+  displayName: "Kradle"
   homepageUrl: "https://github.com/a5c-ai/babysitter"
   description: |
-    Krate is a Kubernetes-native Git forge runtime — a complete Git
+    Kradle is a Kubernetes-native Git forge runtime — a complete Git
     collaboration platform (comparable to GitHub or GitLab) that extends
     Kubernetes' own API server and identity model rather than running as
-    an opaque application on top of it. Krate is NOT an agent — it is
+    an opaque application on top of it. Kradle is NOT an agent — it is
     the infrastructure platform that hosts repositories, CI pipelines,
     and dispatches coding agents to work on them.
 
     Architecture follows a three-plane design:
-      - Control plane: 75 Krate CRD kinds for configuration,
+      - Control plane: 75 Kradle CRD kinds for configuration,
         identity, policy, and org structure.
       - Data plane: 23 Postgres-backed aggregated API kinds for
         high-volume mutable state (repositories, pull requests, issues,
@@ -32,7 +32,7 @@ attributes:
 
     Key properties:
       - Org-scoped tenancy: every resource belongs to an Organization.
-      - 75 total Krate CRD kinds across agent, aggregated, external backend, policy, and repository resource families.
+      - 75 total Kradle CRD kinds across agent, aggregated, external backend, policy, and repository resource families.
       - GitOps transparency: every UI action has a kubectl equivalent.
       - Agent dispatch as CI: coding agents run as K8s Jobs through
         the same pipeline infrastructure as CI.
@@ -45,9 +45,9 @@ edges:
     - target: agent:agent-mux
       notes: "Agent dispatch uses agent-mux transport for coding agent sessions"
     - target: agent:babysitter
-      notes: "Babysitter orchestrates multi-step workflows within Krate"
+      notes: "Babysitter orchestrates multi-step workflows within Kradle"
     - target: tool:docker
-      notes: "Container images for all Krate components and agent jobs"
+      notes: "Container images for all Kradle components and agent jobs"
     - target: tool:gitea
       notes: "Git hosting backend — repository storage and Git protocol"
     - target: tool:zoekt
@@ -55,84 +55,84 @@ edges:
     - target: tool:kyverno
       notes: "Policy engine enforcing org-level policy profiles"
     - target: tool:argocd
-      notes: "GitOps continuous deployment of Krate and tenant workloads"
+      notes: "GitOps continuous deployment of Kradle and tenant workloads"
     - target: tool:helm
-      notes: "Packaging and templating for Krate Helm charts"
+      notes: "Packaging and templating for Kradle Helm charts"
     - target: tool:psql
       notes: "Aggregated API server persistence for high-cardinality data"
     - target: framework:nextjs
       notes: "Web UI built on Next.js App Router"
     - target: framework:react
-      notes: "Component library for the Krate dashboard"
+      notes: "Component library for the Kradle dashboard"
   hosts:
     - target: agent:claude-code
-      notes: "Claude Code agents dispatch into Krate-managed repositories"
+      notes: "Claude Code agents dispatch into Kradle-managed repositories"
     - target: agent:codex
-      notes: "Codex agents dispatch into Krate-managed repositories"
+      notes: "Codex agents dispatch into Kradle-managed repositories"
     - target: agent:cursor
-      notes: "Cursor agents dispatch into Krate-managed repositories"
+      notes: "Cursor agents dispatch into Kradle-managed repositories"
     - target: agent:gemini-cli
-      notes: "Gemini CLI agents dispatch into Krate-managed repositories"
+      notes: "Gemini CLI agents dispatch into Kradle-managed repositories"
     - target: agent:aider
-      notes: "Aider agents dispatch into Krate-managed repositories"
+      notes: "Aider agents dispatch into Kradle-managed repositories"
     - target: agent:cline
-      notes: "Cline agents dispatch into Krate-managed repositories"
+      notes: "Cline agents dispatch into Kradle-managed repositories"
     - target: agent:continue
-      notes: "Continue agents dispatch into Krate-managed repositories"
+      notes: "Continue agents dispatch into Kradle-managed repositories"
     - target: agent:windsurf
-      notes: "Windsurf agents dispatch into Krate-managed repositories"
+      notes: "Windsurf agents dispatch into Kradle-managed repositories"
     - target: agent:devin
-      notes: "Devin agents dispatch into Krate-managed repositories"
+      notes: "Devin agents dispatch into Kradle-managed repositories"
     - target: agent:goose
-      notes: "Goose agents dispatch into Krate-managed repositories"
+      notes: "Goose agents dispatch into Kradle-managed repositories"
     - target: agent:bolt
-      notes: "Bolt agents dispatch into Krate-managed repositories"
+      notes: "Bolt agents dispatch into Kradle-managed repositories"
     - target: agent:sweep-ai
-      notes: "Sweep AI agents dispatch into Krate-managed repositories"
+      notes: "Sweep AI agents dispatch into Kradle-managed repositories"
     - target: agent:openhands
-      notes: "OpenHands agents dispatch into Krate-managed repositories"
+      notes: "OpenHands agents dispatch into Kradle-managed repositories"
     - target: agent:roo-code
-      notes: "Roo Code agents dispatch into Krate-managed repositories"
+      notes: "Roo Code agents dispatch into Kradle-managed repositories"
     - target: agent:opencode
-      notes: "OpenCode agents dispatch into Krate-managed repositories"
+      notes: "OpenCode agents dispatch into Kradle-managed repositories"
     - target: agent:hermes
-      notes: "Hermes agents dispatch into Krate-managed repositories"
+      notes: "Hermes agents dispatch into Kradle-managed repositories"
   applies_to:
     - domain:platform-engineering
     - domain:devops
     - domain:software-engineering
   supports_orchestration_primitive:
-    - target: orch-primitive:krate-agent-dispatch
-    - target: orch-primitive:krate-auto-trigger
-    - target: orch-primitive:krate-approval-gate
-    - target: orch-primitive:krate-workspace-provision
-    - target: orch-primitive:krate-context-assembly
-    - target: orch-primitive:krate-permission-review
-    - target: orch-primitive:krate-pr-as-artifact
-    - target: orch-primitive:krate-memory-consolidation
+    - target: orch-primitive:kradle-agent-dispatch
+    - target: orch-primitive:kradle-auto-trigger
+    - target: orch-primitive:kradle-approval-gate
+    - target: orch-primitive:kradle-workspace-provision
+    - target: orch-primitive:kradle-context-assembly
+    - target: orch-primitive:kradle-permission-review
+    - target: orch-primitive:kradle-pr-as-artifact
+    - target: orch-primitive:kradle-memory-consolidation
   supports_interaction_primitive:
-    - target: interaction-primitive:krate-agent-dispatch
+    - target: interaction-primitive:kradle-agent-dispatch
       attributes: { mechanism: api-endpoint }
-    - target: interaction-primitive:krate-agent-trigger-process
+    - target: interaction-primitive:kradle-agent-trigger-process
       attributes: { mechanism: event-routing }
-    - target: interaction-primitive:krate-agent-approval-decide
+    - target: interaction-primitive:kradle-agent-approval-decide
       attributes: { mechanism: ui-control }
-    - target: interaction-primitive:krate-pr-create
+    - target: interaction-primitive:kradle-pr-create
       attributes: { mechanism: api-endpoint }
-    - target: interaction-primitive:krate-pr-merge
+    - target: interaction-primitive:kradle-pr-merge
       attributes: { mechanism: api-endpoint }
-    - target: interaction-primitive:krate-pr-review
+    - target: interaction-primitive:kradle-pr-review
       attributes: { mechanism: ui-control }
-    - target: interaction-primitive:krate-memory-query
+    - target: interaction-primitive:kradle-memory-query
       attributes: { mechanism: api-endpoint }
-    - target: interaction-primitive:krate-memory-update
+    - target: interaction-primitive:kradle-memory-update
       attributes: { mechanism: ui-control }
 ---
 nodeKind: PlatformService
-id: platform-service:krate-forge
+id: platform-service:kradle-forge
 attributes:
-  displayName: "Krate Forge"
-  platformId: platform:krate
+  displayName: "Kradle Forge"
+  platformId: platform:kradle
   description: |
     Git forge services: repository hosting (via Gitea), pull requests,
     issues, reviews, branch protection, SSH key management, and
@@ -140,42 +140,42 @@ attributes:
     GitHub but as Kubernetes-native CRDs.
 edges:
   part_of:
-    - platform:krate
+    - platform:kradle
 ---
 nodeKind: PlatformService
-id: platform-service:krate-ci
+id: platform-service:kradle-ci
 attributes:
-  displayName: "Krate CI"
-  platformId: platform:krate
+  displayName: "Kradle CI"
+  platformId: platform:kradle
   description: |
     CI/CD pipeline engine: Pipeline and Job scheduling with runner pools,
     artifact collection, and pipeline-as-code definitions. Agent dispatch
     runs appear as CI Jobs in the same pipeline queue.
 edges:
   part_of:
-    - platform:krate
+    - platform:kradle
 ---
 nodeKind: PlatformService
-id: platform-service:krate-agent-dispatch
+id: platform-service:kradle-agent-dispatch
 attributes:
-  displayName: "Krate Agent Dispatch"
-  platformId: platform:krate
+  displayName: "Kradle Agent Dispatch"
+  platformId: platform:kradle
   description: |
     Agent orchestration services: AgentStack definitions, dispatch runs,
     trigger rules, approval gates, workspace provisioning, context
     assembly, and agent-mux session binding. Enables coding agents to
-    work on Krate-hosted repositories with full RBAC governance.
+    work on Kradle-hosted repositories with full RBAC governance.
 edges:
   part_of:
-    - platform:krate
+    - platform:kradle
   integrates_with:
     - target: agent:agent-mux
 ---
 nodeKind: PlatformService
-id: platform-service:krate-company-brain
+id: platform-service:kradle-company-brain
 attributes:
-  displayName: "Krate Company Brain"
-  platformId: platform:krate
+  displayName: "Kradle Company Brain"
+  platformId: platform:kradle
   description: |
     Organizational memory services: AgentMemoryRepository, memory sources,
     ontology-driven knowledge graph, memory snapshots, cross-run memory
@@ -183,13 +183,13 @@ attributes:
     knowledge that spans agent sessions and runs.
 edges:
   part_of:
-    - platform:krate
+    - platform:kradle
 ---
 nodeKind: PlatformService
-id: platform-service:krate-policy
+id: platform-service:kradle-policy
 attributes:
-  displayName: "Krate Policy Engine"
-  platformId: platform:krate
+  displayName: "Kradle Policy Engine"
+  platformId: platform:kradle
   description: |
     Policy enforcement services: PolicyProfile, PolicyTemplate, and
     PolicyBinding resources define org-level governance rules. Kyverno
@@ -198,7 +198,7 @@ attributes:
     workspace boundaries.
 edges:
   part_of:
-    - platform:krate
+    - platform:kradle
   integrates_with:
     - target: tool:kyverno
 
@@ -240,7 +240,7 @@ attributes:
     enables high-volume mutable state (e.g., pull request comments, pipeline
     logs) to live in a relational database while still being accessible
     through the standard Kubernetes API surface — kubectl, RBAC, admission
-    webhooks, and watch semantics all work transparently. Krate uses this
+    webhooks, and watch semantics all work transparently. Kradle uses this
     pattern for its 23 data-plane resource kinds.
 edges:
   applies_to:
@@ -258,7 +258,7 @@ attributes:
     Cross-org access is explicitly denied unless federation is configured.
     This differs from namespace-scoped tenancy (where a namespace is the
     boundary) and cluster-scoped tenancy (where a single tenant owns the
-    cluster). In Krate, Organizations are cluster-scoped CRDs that own
+    cluster). In Kradle, Organizations are cluster-scoped CRDs that own
     namespaces, and all org-scoped resources carry an orgRef field linking
     back to the owning Organization.
 edges:
@@ -316,10 +316,10 @@ attributes:
     must have an equivalent kubectl (or API) command, and every state
     mutation must be expressible as a declarative YAML manifest that
     can be version-controlled in Git. This ensures that platform state
-    is auditable, reproducible, and automatable. In Krate, creating a
+    is auditable, reproducible, and automatable. In Kradle, creating a
     repository via the web UI produces the same Repository CR that
     could be applied via kubectl; reviewing a pull request sets the
-    same status conditions. The platform eats its own dog food — Krate
+    same status conditions. The platform eats its own dog food — Kradle
     itself is deployed and configured via its own GitOps pipeline.
 edges:
   applies_to:
@@ -347,15 +347,15 @@ edges:
     - domain:software-engineering
 
 # ---------------------------------------------------------------------------
-# 3. Stack Profile for Krate
+# 3. Stack Profile for Kradle
 # ---------------------------------------------------------------------------
 ---
 nodeKind: StackProfile
-id: stack-profile:krate-platform
+id: stack-profile:kradle-platform
 attributes:
-  displayName: "Krate Platform Stack (K8s, Go, TypeScript, Postgres, Helm, ArgoCD)"
+  displayName: "Kradle Platform Stack (K8s, Go, TypeScript, Postgres, Helm, ArgoCD)"
   description: |
-    The technology stack underpinning the Krate Kubernetes-native Git forge
+    The technology stack underpinning the Kradle Kubernetes-native Git forge
     runtime. The control plane and aggregated API server are written in Go,
     leveraging controller-runtime and apiserver libraries. The web UI is a
     Next.js (TypeScript/React) application served from within the cluster.
@@ -363,7 +363,7 @@ attributes:
     resources. Helm charts package the deployment, and ArgoCD manages
     GitOps-driven rollouts. Docker containers run all components including
     dispatched agent jobs. Kubernetes itself is both the runtime platform
-    and the API surface that Krate extends.
+    and the API surface that Kradle extends.
   composes:
     - language:go
     - language:typescript
@@ -404,7 +404,7 @@ edges:
     - role:backend-engineer
 
 # ---------------------------------------------------------------------------
-# 4. Tool nodes for Krate components (new tools only)
+# 4. Tool nodes for Kradle components (new tools only)
 # ---------------------------------------------------------------------------
 ---
 nodeKind: Tool
@@ -417,9 +417,9 @@ attributes:
     Lightweight, self-hosted Git service written in Go. Provides
     repository hosting, pull requests, issue tracking, and a web UI
     with minimal resource footprint. Gitea is often embedded as the
-    Git backend in larger platforms — in Krate, it handles the Git
+    Git backend in larger platforms — in Kradle, it handles the Git
     protocol layer (clone, push, fetch) and repository storage while
-    Krate's own API server manages the higher-level forge abstractions
+    Kradle's own API server manages the higher-level forge abstractions
     (PR workflows, RBAC, pipelines). Supports SSH and HTTP transport,
     LFS, webhooks, and OAuth2 authentication.
 edges:
@@ -443,7 +443,7 @@ attributes:
     maintained by Sourcegraph. Indexes Git repositories and serves
     sub-second regex and literal searches across large codebases.
     Zoekt builds compact trigram indices that enable fast intersection
-    queries without full-text scanning. In Krate, Zoekt indexes all
+    queries without full-text scanning. In Kradle, Zoekt indexes all
     org-scoped repositories and powers the platform's code search UI
     and API. Supports branch-aware indexing, file filtering, and
     ranked results.
@@ -464,7 +464,7 @@ attributes:
     validate, mutate, and generate resources based on declarative
     policies written as Kubernetes CRDs. Unlike OPA/Gatekeeper which
     requires learning Rego, Kyverno policies are expressed as familiar
-    YAML with pattern matching and overlay semantics. In Krate,
+    YAML with pattern matching and overlay semantics. In Kradle,
     Kyverno enforces org-level PolicyProfiles — controlling which
     container images agents can use, what RBAC bindings are permitted,
     resource quota enforcement, and security baseline compliance.
@@ -482,27 +482,27 @@ edges:
       comparison: "Not alternatives — Kyverno is policy enforcement; Grafana is observability"
 
 # ---------------------------------------------------------------------------
-# 5. ToolServer nodes for Krate's API
+# 5. ToolServer nodes for Kradle's API
 # ---------------------------------------------------------------------------
 ---
 nodeKind: ToolServer
-id: tool-server:krate-api
+id: tool-server:kradle-api
 attributes:
-  displayName: "Krate API Server"
+  displayName: "Kradle API Server"
   description: |
-    The primary HTTP API server for Krate, serving both the Kubernetes
+    The primary HTTP API server for Kradle, serving both the Kubernetes
     aggregated API (for data-plane resources like repositories, pull
     requests, issues, pipelines) and a REST convenience layer for the
     web UI. Listens on port 3080 by default. Handles authentication
     via Kubernetes service accounts and bearer tokens, org-scoped
     authorization, webhook dispatch, and SSE streaming for real-time
     updates. The aggregated API registers with kube-apiserver so that
-    kubectl and client-go can interact with Krate resources natively.
+    kubectl and client-go can interact with Kradle resources natively.
   protocol: rest
   category: platform-api
-  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/krate/core
-  installCommand: npm install && npm run build --workspace=@a5c-ai/krate
-  npmPackage: '@a5c-ai/krate'
+  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/kradle/core
+  installCommand: npm install && npm run build --workspace=@a5c-ai/kradle
+  npmPackage: '@a5c-ai/kradle'
 edges:
   integrates_with:
     - target: tool:kubernetes
@@ -512,163 +512,163 @@ edges:
     - target: domain:platform-engineering
     - target: domain:devops
   serves_kubernetes_resource:
-    - target: kubernetes-crd-kind:krate-agent-stack
+    - target: kubernetes-crd-kind:kradle-agent-stack
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-subagent
+    - target: kubernetes-crd-kind:kradle-agent-subagent
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-tool-profile
+    - target: kubernetes-crd-kind:kradle-agent-tool-profile
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-mcp-server
+    - target: kubernetes-crd-kind:kradle-agent-mcp-server
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-skill
+    - target: kubernetes-crd-kind:kradle-agent-skill
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-trigger-rule
+    - target: kubernetes-crd-kind:kradle-agent-trigger-rule
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-context-label
+    - target: kubernetes-crd-kind:kradle-agent-context-label
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-krate-workspace-policy
+    - target: kubernetes-crd-kind:kradle-kradle-workspace-policy
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-service-account
+    - target: kubernetes-crd-kind:kradle-agent-service-account
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-role-binding
+    - target: kubernetes-crd-kind:kradle-agent-role-binding
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-secret-grant
+    - target: kubernetes-crd-kind:kradle-agent-secret-grant
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-config-grant
+    - target: kubernetes-crd-kind:kradle-agent-config-grant
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-adapter
+    - target: kubernetes-crd-kind:kradle-agent-adapter
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-transport-binding
+    - target: kubernetes-crd-kind:kradle-agent-transport-binding
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-provider-config
+    - target: kubernetes-crd-kind:kradle-agent-provider-config
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-krate-project
+    - target: kubernetes-crd-kind:kradle-kradle-project
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-gateway-config
+    - target: kubernetes-crd-kind:kradle-agent-gateway-config
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-memory-repository
+    - target: kubernetes-crd-kind:kradle-agent-memory-repository
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-memory-source
+    - target: kubernetes-crd-kind:kradle-agent-memory-source
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-memory-ontology
+    - target: kubernetes-crd-kind:kradle-agent-memory-ontology
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-memory-association
+    - target: kubernetes-crd-kind:kradle-agent-memory-association
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-krate-workspace
+    - target: kubernetes-crd-kind:kradle-kradle-workspace
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-ref-policy
+    - target: kubernetes-crd-kind:kradle-ref-policy
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-runner-pool
+    - target: kubernetes-crd-kind:kradle-runner-pool
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-webhook-subscription
+    - target: kubernetes-crd-kind:kradle-webhook-subscription
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-view
+    - target: kubernetes-crd-kind:kradle-view
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-selector
+    - target: kubernetes-crd-kind:kradle-selector
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-pull-request
+    - target: kubernetes-crd-kind:kradle-pull-request
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-issue
+    - target: kubernetes-crd-kind:kradle-issue
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-review
+    - target: kubernetes-crd-kind:kradle-review
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-pipeline
+    - target: kubernetes-crd-kind:kradle-pipeline
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-job
+    - target: kubernetes-crd-kind:kradle-job
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-webhook-delivery
+    - target: kubernetes-crd-kind:kradle-webhook-delivery
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-dispatch-run
+    - target: kubernetes-crd-kind:kradle-agent-dispatch-run
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-dispatch-attempt
+    - target: kubernetes-crd-kind:kradle-agent-dispatch-attempt
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-session
+    - target: kubernetes-crd-kind:kradle-agent-session
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-context-bundle
+    - target: kubernetes-crd-kind:kradle-agent-context-bundle
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-krate-artifact
+    - target: kubernetes-crd-kind:kradle-kradle-artifact
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-approval
+    - target: kubernetes-crd-kind:kradle-agent-approval
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-trigger-execution
+    - target: kubernetes-crd-kind:kradle-agent-trigger-execution
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-capability-requirement
+    - target: kubernetes-crd-kind:kradle-agent-capability-requirement
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-work-item-session-link
+    - target: kubernetes-crd-kind:kradle-work-item-session-link
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-work-item-workspace-link
+    - target: kubernetes-crd-kind:kradle-work-item-workspace-link
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-session-transcript
+    - target: kubernetes-crd-kind:kradle-agent-session-transcript
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-session-attachment
+    - target: kubernetes-crd-kind:kradle-agent-session-attachment
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-krate-workspace-runtime
+    - target: kubernetes-crd-kind:kradle-kradle-workspace-runtime
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-memory-snapshot
+    - target: kubernetes-crd-kind:kradle-agent-memory-snapshot
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-memory-query
+    - target: kubernetes-crd-kind:kradle-agent-memory-query
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-memory-update
+    - target: kubernetes-crd-kind:kradle-agent-memory-update
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-agent-run-memory-import
+    - target: kubernetes-crd-kind:kradle-agent-run-memory-import
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-backend-provider
+    - target: kubernetes-crd-kind:kradle-external-backend-provider
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-backend-binding
+    - target: kubernetes-crd-kind:kradle-external-backend-binding
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-backend-sync-policy
+    - target: kubernetes-crd-kind:kradle-external-backend-sync-policy
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-provider-capability-manifest
+    - target: kubernetes-crd-kind:kradle-external-provider-capability-manifest
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-webhook-delivery
+    - target: kubernetes-crd-kind:kradle-external-webhook-delivery
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-sync-event
+    - target: kubernetes-crd-kind:kradle-external-sync-event
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-sync-state
+    - target: kubernetes-crd-kind:kradle-external-sync-state
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-write-intent
+    - target: kubernetes-crd-kind:kradle-external-write-intent
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-sync-conflict
+    - target: kubernetes-crd-kind:kradle-external-sync-conflict
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-external-object-link
+    - target: kubernetes-crd-kind:kradle-external-object-link
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-policy-profile
+    - target: kubernetes-crd-kind:kradle-policy-profile
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-policy-template
+    - target: kubernetes-crd-kind:kradle-policy-template
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-policy-binding
+    - target: kubernetes-crd-kind:kradle-policy-binding
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-policy-exception-request
+    - target: kubernetes-crd-kind:kradle-policy-exception-request
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-repository
+    - target: kubernetes-crd-kind:kradle-repository
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-branch-protection
+    - target: kubernetes-crd-kind:kradle-branch-protection
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-organization
+    - target: kubernetes-crd-kind:kradle-organization
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-org-namespace-binding
+    - target: kubernetes-crd-kind:kradle-org-namespace-binding
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-sshkey
+    - target: kubernetes-crd-kind:kradle-sshkey
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-repository-permission
+    - target: kubernetes-crd-kind:kradle-repository-permission
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-user
+    - target: kubernetes-crd-kind:kradle-user
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-team
+    - target: kubernetes-crd-kind:kradle-team
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-invite
+    - target: kubernetes-crd-kind:kradle-invite
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-identity-mapping
+    - target: kubernetes-crd-kind:kradle-identity-mapping
       serviceMode: aggregated-api
-    - target: kubernetes-crd-kind:krate-auth-provider
+    - target: kubernetes-crd-kind:kradle-auth-provider
       serviceMode: aggregated-api
 ---
 nodeKind: ToolServer
-id: tool-server:krate-agent-dispatch
+id: tool-server:kradle-agent-dispatch
 attributes:
-  displayName: "Krate Agent Dispatch API"
+  displayName: "Kradle Agent Dispatch API"
   description: |
-    REST API endpoints for dispatching AI coding agents within Krate.
+    REST API endpoints for dispatching AI coding agents within Kradle.
     Handles the full dispatch lifecycle: creating AgentDispatchRun
     resources, performing permission review against org policies,
     assembling the context bundle (repo checkout, memory snapshots,
@@ -678,9 +678,9 @@ attributes:
     scheduled dispatch via CronJob resources.
   protocol: rest
   category: agent-dispatch
-  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/krate/cli
-  installCommand: npm install && npm test --workspace=@a5c-ai/krate-cli
-  npmPackage: '@a5c-ai/krate-cli'
+  repoUrl: https://github.com/a5c-ai/babysitter/tree/staging/packages/kradle/cli
+  installCommand: npm install && npm test --workspace=@a5c-ai/kradle-cli
+  npmPackage: '@a5c-ai/kradle-cli'
 edges:
   integrates_with:
     - target: agent:agent-mux
@@ -691,16 +691,16 @@ edges:
     - target: domain:software-engineering
 
 # ---------------------------------------------------------------------------
-# 6. Krate Resource Kinds as Definitions
+# 6. Kradle Resource Kinds as Definitions
 # ---------------------------------------------------------------------------
 ---
 nodeKind: Definition
-id: definition:krate-config-kinds
+id: definition:kradle-config-kinds
 attributes:
-  displayName: "Krate Configuration Resource Kinds (etcd CRDs)"
+  displayName: "Kradle Configuration Resource Kinds (etcd CRDs)"
   authoredAt: "2026-05-10T00:00:00Z"
   text: |
-    The 75 Krate CustomResourceDefinition documents that form Krate's
+    The 75 Kradle CustomResourceDefinition documents that form Kradle's
     control plane. These are low-volume, high-importance configuration
     resources stored in etcd alongside native Kubernetes objects:
 
@@ -729,14 +729,14 @@ edges:
     - skill-area:policy-as-code
 ---
 nodeKind: Definition
-id: definition:krate-aggregated-kinds
+id: definition:kradle-aggregated-kinds
 attributes:
-  displayName: "Krate Aggregated API Kinds (Postgres-backed)"
+  displayName: "Kradle Aggregated API Kinds (Postgres-backed)"
   authoredAt: "2026-05-10T00:00:00Z"
   text: |
     The 23 Postgres-backed aggregated API resource kinds that form
-    Krate's data plane. These are high-volume mutable resources served
-    by Krate's aggregated API server and stored in PostgreSQL:
+    Kradle's data plane. These are high-volume mutable resources served
+    by Kradle's aggregated API server and stored in PostgreSQL:
 
     Forge resources: Repository, RepositoryBranch, BranchProtection,
       PullRequest, PullRequestReview, PullRequestComment, Issue,
@@ -763,12 +763,12 @@ edges:
     - skill-area:api-design
 ---
 nodeKind: Definition
-id: definition:krate-identity-model
+id: definition:kradle-identity-model
 attributes:
-  displayName: "Krate Identity Model"
+  displayName: "Kradle Identity Model"
   authoredAt: "2026-05-10T00:00:00Z"
   text: |
-    Krate's identity and access control model built on Kubernetes RBAC
+    Kradle's identity and access control model built on Kubernetes RBAC
     primitives extended with org-scoped semantics:
 
     Organization: Top-level tenant boundary. Cluster-scoped CRD that
@@ -785,7 +785,7 @@ attributes:
 
     Authentication flows support OIDC, x509 client certificates,
     personal access tokens, and SSH keys. Authorization is evaluated
-    by the Kubernetes API server using Krate's custom authorizer
+    by the Kubernetes API server using Kradle's custom authorizer
     webhook, which resolves org membership and team permissions.
   status: canonical
 edges:
@@ -798,12 +798,12 @@ edges:
     - skill-area:k8s-rbac
 ---
 nodeKind: Definition
-id: definition:krate-forge-model
+id: definition:kradle-forge-model
 attributes:
-  displayName: "Krate Forge Resource Model"
+  displayName: "Kradle Forge Resource Model"
   authoredAt: "2026-05-10T00:00:00Z"
   text: |
-    The Git forge resource model in Krate — the aggregated API kinds
+    The Git forge resource model in Kradle — the aggregated API kinds
     that implement repository collaboration workflows:
 
     Repository: Org-scoped resource representing a Git repository.
@@ -836,13 +836,13 @@ edges:
     - skill-area:platform-engineering
 ---
 nodeKind: Definition
-id: definition:krate-agent-model
+id: definition:kradle-agent-model
 attributes:
-  displayName: "Krate Agent Resource Model"
+  displayName: "Kradle Agent Resource Model"
   authoredAt: "2026-05-10T00:00:00Z"
   text: |
     The resource kinds governing AI agent dispatch and execution
-    within Krate:
+    within Kradle:
 
     AgentStack: Defines a reusable agent configuration — which coding
       agent to use (Claude Code, Codex, etc.), container image, resource
@@ -874,12 +874,12 @@ edges:
     - skill-area:platform-engineering
 ---
 nodeKind: Definition
-id: definition:krate-memory-model
+id: definition:kradle-memory-model
 attributes:
-  displayName: "Krate Agent Memory Model (Company Brain)"
+  displayName: "Kradle Agent Memory Model (Company Brain)"
   authoredAt: "2026-05-10T00:00:00Z"
   text: |
-    The resource kinds implementing Krate's company brain — cross-run
+    The resource kinds implementing Kradle's company brain — cross-run
     knowledge persistence for AI agents:
 
     AgentMemoryRepository: Org-scoped resource that represents a
@@ -911,12 +911,12 @@ edges:
     - skill-area:platform-engineering
 ---
 nodeKind: Definition
-id: definition:krate-policy-model
+id: definition:kradle-policy-model
 attributes:
-  displayName: "Krate Policy Resource Model"
+  displayName: "Kradle Policy Resource Model"
   authoredAt: "2026-05-10T00:00:00Z"
   text: |
-    The resource kinds governing policy enforcement within Krate,
+    The resource kinds governing policy enforcement within Kradle,
     implemented via Kyverno and custom admission webhooks:
 
     PolicyProfile: Org-scoped bundle of policies applied to all
@@ -932,7 +932,7 @@ attributes:
       policy for a specific resource. Requires org-admin approval and
       has an optional expiry.
     AdmissionPolicy: Low-level Kyverno ClusterPolicy wrapper that
-      Krate generates from PolicyProfile/PolicyTemplate combinations.
+      Kradle generates from PolicyProfile/PolicyTemplate combinations.
       Not typically created directly by users.
 
     Policies are enforced at admission time (blocking non-compliant
@@ -950,7 +950,7 @@ edges:
     - skill-area:platform-engineering
 
 # ---------------------------------------------------------------------------
-# 7. Skill Areas specific to Krate
+# 7. Skill Areas specific to Kradle
 # ---------------------------------------------------------------------------
 ---
 nodeKind: SkillArea
@@ -986,7 +986,7 @@ attributes:
   displayName: "Git Forge Administration"
   description: |
     Operating and administering Git collaboration platforms — GitHub,
-    GitLab, Gitea, Krate, or similar. Covers repository management,
+    GitLab, Gitea, Kradle, or similar. Covers repository management,
     branch protection rules, access control (teams, deploy keys,
     OAuth apps), webhook configuration, CI/CD pipeline integration,
     migration between forges, backup and disaster recovery, and
@@ -1021,7 +1021,7 @@ attributes:
     workloads, operators, and CI service accounts; multi-tenant RBAC
     with namespace isolation; and debugging authorization with
     kubectl auth can-i and audit logs. In extended platforms like
-    Krate, includes org-scoped RBAC layering on top of native K8s
+    Kradle, includes org-scoped RBAC layering on top of native K8s
     RBAC.
   domains:
     - domain:platform-engineering
@@ -1102,11 +1102,11 @@ edges:
 # ---------------------------------------------------------------------------
 ---
 nodeKind: Workflow
-id: workflow:krate-dispatch-agent
+id: workflow:kradle-dispatch-agent
 attributes:
-  displayName: "Krate Agent Dispatch"
+  displayName: "Kradle Agent Dispatch"
   description: |
-    End-to-end workflow for dispatching an AI coding agent within Krate.
+    End-to-end workflow for dispatching an AI coding agent within Kradle.
     Triggered by a user command (UI button, kubectl create, PR comment
     /agent), a schedule (AgentSchedule), or a pipeline step.
 
@@ -1117,7 +1117,7 @@ attributes:
        org-level AgentPermissionSets and PolicyProfiles. If the requested
        tools or resource limits exceed policy, the run is rejected or
        escalated for org-admin approval.
-    3. Context bundle assembly: Krate checks out the repository at the
+    3. Context bundle assembly: Kradle checks out the repository at the
        specified branch, injects CLAUDE.md and relevant memory snapshots
        from the company brain, and prepares the agent workspace container.
     4. Agent-mux launch: The dispatch controller creates a Kubernetes Job
@@ -1141,16 +1141,16 @@ edges:
     - domain:software-engineering
 ---
 nodeKind: Workflow
-id: workflow:krate-pr-lifecycle
+id: workflow:kradle-pr-lifecycle
 attributes:
-  displayName: "Krate Pull Request Lifecycle"
+  displayName: "Kradle Pull Request Lifecycle"
   description: |
-    The full lifecycle of a pull request within Krate's Kubernetes-native
+    The full lifecycle of a pull request within Kradle's Kubernetes-native
     forge, from creation through merge.
 
     Steps:
     1. PR creation: A PullRequest aggregated API resource is created
-       (via UI, kubectl, or git push with a create-pr flag). Krate
+       (via UI, kubectl, or git push with a create-pr flag). Kradle
        syncs the underlying Git branches with Gitea.
     2. CI pipeline trigger: BranchProtection rules on the target branch
        trigger a Pipeline resource. PipelineRuns execute as Kubernetes
@@ -1182,12 +1182,12 @@ edges:
     - domain:devops
 ---
 nodeKind: Workflow
-id: workflow:krate-memory-query
+id: workflow:kradle-memory-query
 attributes:
-  displayName: "Krate Company Brain Memory Query"
+  displayName: "Kradle Company Brain Memory Query"
   description: |
     Workflow for querying and updating the company brain knowledge base
-    within Krate.
+    within Kradle.
 
     Query flow:
     1. An agent session (or human user via kubectl) creates an
@@ -1224,10 +1224,10 @@ edges:
 
 # ---------------------------------------------------------------------------
 # 9. Cross-cutting connectivity edges (via edge-only documents)
-#    These add edges from existing nodes to new Krate nodes.
+#    These add edges from existing nodes to new Kradle nodes.
 # ---------------------------------------------------------------------------
 #
-# Note: Edges FROM krate entities TO existing entities are already declared
+# Note: Edges FROM kradle entities TO existing entities are already declared
 # above on each entity. The edges below would add reverse/additional
 # connectivity that couldn't be expressed inline.
 # ---------------------------------------------------------------------------

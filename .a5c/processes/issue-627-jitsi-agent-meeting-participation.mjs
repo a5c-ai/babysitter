@@ -1,14 +1,14 @@
 /**
  * @process repo/issue-627-jitsi-agent-meeting-participation
- * @description Implement issue #627: let Jitsi-capable Krate agents join meetings through dispatch, a Job sidecar, and in-meeting MCP tools.
+ * @description Implement issue #627: let Jitsi-capable Kradle agents join meetings through dispatch, a Job sidecar, and in-meeting MCP tools.
  * @inputs { issueNumber: number, baseBranch: string, implementationBranch: string, dependencyIssues: object, specFiles: string[], targetSurfaces: object, verificationCommands: string[] }
  * @outputs { success: boolean, phases: string[], changedFiles: string[], qualityGates: object, finalGate: object }
  *
  * References used while authoring:
  * - docs/agent-reference/process-authoring.md
- * - packages/krate/docs/jitsi/06-agent-meeting-participation.md
- * - packages/krate/docs/jitsi/07-agent-meeting-runtime.md
- * - packages/krate/docs/agent-identity/04-meeting-integration.md
+ * - packages/kradle/docs/jitsi/06-agent-meeting-participation.md
+ * - packages/kradle/docs/jitsi/07-agent-meeting-runtime.md
+ * - packages/kradle/docs/agent-identity/04-meeting-integration.md
  * - library/methodologies/atdd-tdd/atdd-tdd.js
  * - library/cradle/feature-implementation-contribute.js
  * - library/specializations/software-architecture/api-design-specification.js
@@ -258,15 +258,15 @@ export const readAuthoritativeContextTask = defineTask('issue-627.read-authorita
   title: 'Read issue #627, dependency issues, and product specs',
   labels: ['issue-627', 'jitsi', 'research', 'authoritative-context'],
   agent: {
-    name: 'krate-jitsi-architect',
+    name: 'kradle-jitsi-architect',
     prompt: {
-      role: 'senior Krate architecture engineer',
+      role: 'senior Kradle architecture engineer',
       task: 'Build the authoritative implementation context for issue #627 before any source changes.',
       instructions: [
         `Run and preserve: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
         `Confirm whether #${args.issueNumber} is also a PR by attempting: gh pr view ${args.issueNumber} --json files,title,body,comments`,
         'Read every dependency issue listed in inputs.dependencyIssues with gh issue view, especially #624 Jitsi CRDs/controllers and #620 agent identity/persona.',
-        'Read all files in inputs.specFiles. Treat packages/krate/docs/jitsi/06-agent-meeting-participation.md as the primary feature spec and packages/krate/docs/agent-identity/04-meeting-integration.md as the persona integration contract.',
+        'Read all files in inputs.specFiles. Treat packages/kradle/docs/jitsi/06-agent-meeting-participation.md as the primary feature spec and packages/kradle/docs/agent-identity/04-meeting-integration.md as the persona integration contract.',
         'Inspect the current branch before planning edits; do not assume #624 or #620 is merged.',
         'Return JSON: { title, labels, issueBody, comments, dependencyIssues, specFilesRead, acceptanceCriteria, nonGoals, risks, ambiguities, targetSurfaces }.',
       ],
@@ -283,13 +283,13 @@ export const reuseAuditTask = defineTask('issue-627.reuse-audit', (args, taskCtx
   title: 'Phase 0 reuse audit for meeting-aware dispatch',
   labels: ['issue-627', 'reuse-audit', 'brownfield'],
   agent: {
-    name: 'krate-brownfield-architect',
+    name: 'kradle-brownfield-architect',
     prompt: {
       role: 'senior brownfield systems engineer',
       task: 'Run the mandatory Phase 0 reuse audit before proposing or creating new infrastructure.',
       instructions: [
         'Extract keyword nouns and verbs from the issue: Jitsi, meetingRef, meetingContext, AgentStack, AgentDefinition, AgentDispatchRun, sidecar, JWT, MCP tools, autoJoin, participant, transcript, raise hand, share screen, invite, recording, react.',
-        'Check for .a5c/reuse-audit.json. If absent, state that and use Krate-focused globs across packages/krate/core, packages/krate/web, packages/krate/cli, packages/krate/charts, packages/krate/docs, and tests.',
+        'Check for .a5c/reuse-audit.json. If absent, state that and use Kradle-focused globs across packages/kradle/core, packages/kradle/web, packages/kradle/cli, packages/kradle/charts, packages/kradle/docs, and tests.',
         'Scan for matching CRDs, resource helpers, controllers, dispatch API routes, web forms, Jitsi service helpers, MCP tools, tests, environment variables, and existing sidecar/volume patterns.',
         'Render a section named exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
         'Call out reusable adjacent infrastructure: jitsi-service JWT generation, Jitsi web pages, existing Jitsi CLI MCP tools, agent dispatch controller, agent-mux Job manifest builder, AgentStack reconciler, AgentDispatchRun CRD, and Jitsi resource model tests.',
@@ -309,7 +309,7 @@ export const auditDependencyContractsTask = defineTask('issue-627.dependency-con
   title: 'Audit #624 Jitsi and #620 identity dependency contracts',
   labels: ['issue-627', 'dependencies', 'contracts'],
   agent: {
-    name: 'krate-contract-architect',
+    name: 'kradle-contract-architect',
     prompt: {
       role: 'senior API and resource contract engineer',
       task: 'Determine the concrete dependency contract that issue #627 should build against.',
@@ -358,9 +358,9 @@ export const designImplementationStrategyTask = defineTask('issue-627.strategy',
   title: 'Design the meeting participation implementation strategy',
   labels: ['issue-627', 'architecture', 'plan'],
   agent: {
-    name: 'krate-jitsi-architect',
+    name: 'kradle-jitsi-architect',
     prompt: {
-      role: 'senior Krate feature architect',
+      role: 'senior Kradle feature architect',
       task: 'Create the implementation strategy and ordered work slices for meeting-aware agent dispatch.',
       instructions: [
         'Use the reuse audit and dependency contracts as hard context. Do not invent parallel Jitsi provider or persona models.',
@@ -386,7 +386,7 @@ export const authorAcceptanceTestsTask = defineTask('issue-627.acceptance-tests'
   title: 'Author failing acceptance and regression tests first',
   labels: ['issue-627', 'tests-first', 'atdd'],
   agent: {
-    name: 'krate-test-strategy-architect',
+    name: 'kradle-test-strategy-architect',
     prompt: {
       role: 'senior test strategy engineer',
       task: 'Create focused failing tests before implementation, then hand exact expectations to implementers.',
@@ -411,14 +411,14 @@ export const authorAcceptanceTestsTask = defineTask('issue-627.acceptance-tests'
 export const implementMeetingParticipationTask = defineTask('issue-627.implementation', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement Jitsi agent meeting participation',
-  labels: ['issue-627', 'implementation', 'krate-core', 'krate-web', 'agent-mux'],
+  labels: ['issue-627', 'implementation', 'kradle-core', 'kradle-web', 'agent-mux'],
   agent: {
-    name: 'krate-implementation-agent',
+    name: 'kradle-implementation-agent',
     responderType: 'agent',
     adapter: 'codex',
     fallbackType: 'internal',
     prompt: {
-      role: 'senior Krate implementation engineer',
+      role: 'senior Kradle implementation engineer',
       task: 'Implement issue #627 according to the strategy and failing tests.',
       instructions: [
         'Keep edits scoped to the target surfaces listed in inputs and the strategy. Do not perform unrelated refactors.',
@@ -444,7 +444,7 @@ export const runVerificationGateTask = defineTask('issue-627.verification', (arg
   title: 'Run focused and repository quality gates',
   labels: ['issue-627', 'verification', 'quality-gate'],
   agent: {
-    name: 'krate-verification-agent',
+    name: 'kradle-verification-agent',
     responderType: 'agent',
     adapter: 'codex',
     fallbackType: 'internal',
@@ -471,7 +471,7 @@ export const reviewSecurityContractsAndUxTask = defineTask('issue-627.review', (
   title: 'Review security, contracts, runtime, and UI behavior',
   labels: ['issue-627', 'review', 'security', 'contracts', 'ux'],
   agent: {
-    name: 'krate-security-contract-reviewer',
+    name: 'kradle-security-contract-reviewer',
     responderType: 'agent',
     adapter: 'codex',
     fallbackType: 'internal',

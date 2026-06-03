@@ -33,7 +33,7 @@ const MAX_FIX_ATTEMPTS = 2;
 
 export async function process(inputs, ctx) {
   const issueNumber = inputs?.issueNumber ?? 608;
-  const stagingHost = inputs?.stagingHost ?? 'krate-staging.a5c.ai';
+  const stagingHost = inputs?.stagingHost ?? 'kradle-staging.a5c.ai';
   const deployLiveStaging = inputs?.deployLiveStaging === true;
 
   const issueContext = await ctx.task(readIssueContextTask, { issueNumber }, {
@@ -255,7 +255,7 @@ export const readIssueContextTask = defineTask('issue-608.read-issue-context', (
   agent: {
     name: 'process-architect',
     prompt: {
-      role: 'senior Krate infrastructure maintainer',
+      role: 'senior Kradle infrastructure maintainer',
       task: 'Read the authoritative GitHub context for issue #608.',
       instructions: [
         `Run gh issue view ${args.issueNumber} --json title,body,labels,comments.`,
@@ -278,12 +278,12 @@ export const reuseAuditTask = defineTask('issue-608.reuse-audit', (args, taskCtx
   agent: {
     name: 'platform-engineer',
     prompt: {
-      role: 'Krate platform engineer',
+      role: 'Kradle platform engineer',
       task: 'Run the repo-specific Phase 0 reuse audit before proposing new env var infrastructure.',
       instructions: [
-        'Extract keyword nouns and verbs from issue #608: staging, env vars, ANTHROPIC_API_KEY, KRATE_ASSISTANT_API_KEY, KRATE_GITEA_HTTP_URL, KRATE_GITEA_TOKEN, AGENT_MUX_URL, AGENT_GATEWAY_URL, Helm, chart, values, deployments, secrets.',
+        'Extract keyword nouns and verbs from issue #608: staging, env vars, ANTHROPIC_API_KEY, KRADLE_ASSISTANT_API_KEY, KRADLE_GITEA_HTTP_URL, KRADLE_GITEA_TOKEN, AGENT_MUX_URL, AGENT_GATEWAY_URL, Helm, chart, values, deployments, secrets.',
         'Search for matching chart values, deployment env blocks, Kubernetes secrets, API routes, SDK dependencies, docs, tests, and imports.',
-        'Read at minimum packages/krate/docs/gaps/staging-status.md, packages/krate/docs/gaps/infrastructure-deps.md, packages/krate/charts/values.yaml, packages/krate/charts/templates/deployments.yaml, packages/krate/charts/templates/gitea.yaml, packages/krate/core/src/gitea-service.js, packages/krate/core/src/assistant-runtime.js, packages/krate/core/src/agent-mux-client.js, and packages/krate/web/app/api/orgs/[org]/snapshot/route.js.',
+        'Read at minimum packages/kradle/docs/gaps/staging-status.md, packages/kradle/docs/gaps/infrastructure-deps.md, packages/kradle/charts/values.yaml, packages/kradle/charts/templates/deployments.yaml, packages/kradle/charts/templates/gitea.yaml, packages/kradle/core/src/gitea-service.js, packages/kradle/core/src/assistant-runtime.js, packages/kradle/core/src/agent-mux-client.js, and packages/kradle/web/app/api/orgs/[org]/snapshot/route.js.',
         'Render a "Reuse-audit findings (REVIEW BEFORE PROCEEDING)" section in the output.',
         'Do not read or print secret values. Record only secret names, key names, and whether references exist.',
         'Return JSON: { findingsMarkdown, matchingInfrastructure, missingInfrastructure, envVarMatrix, reusableTests, noNewInfrastructureNeeded, filesRead }.',
@@ -330,17 +330,17 @@ export const researchProcessLibraryTask = defineTask('issue-608.research-process
 export const traceStagingEnvRuntimeTask = defineTask('issue-608.trace-runtime', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Trace staging env vars from Helm values to runtime behavior',
-  labels: ['issue-608', 'runtime-trace', 'krate', 'helm'],
+  labels: ['issue-608', 'runtime-trace', 'kradle', 'helm'],
   agent: {
     name: 'kubernetes-expert',
     prompt: {
       role: 'Kubernetes and Helm runtime tracer',
-      task: 'Trace how each required env var reaches the running Krate staging workflows.',
+      task: 'Trace how each required env var reaches the running Kradle staging workflows.',
       instructions: [
-        'Trace assistant flow from web deployment env to packages/krate/core/src/assistant-runtime.js and the chat/playground routes that surface missing API key errors.',
-        'Trace Gitea flow from Helm values/deployments/gitea service to KRATE_GITEA_HTTP_URL, KRATE_GITEA_TOKEN, createGiteaService(), repo tree/blob routes, webhook worker, and snapshot health.',
+        'Trace assistant flow from web deployment env to packages/kradle/core/src/assistant-runtime.js and the chat/playground routes that surface missing API key errors.',
+        'Trace Gitea flow from Helm values/deployments/gitea service to KRADLE_GITEA_HTTP_URL, KRADLE_GITEA_TOKEN, createGiteaService(), repo tree/blob routes, webhook worker, and snapshot health.',
         'Trace Agent Mux flow from AGENT_MUX_URL or AGENT_GATEWAY_URL to snapshot health and dispatch execution paths. Include createAgentMuxClient and createAgentDispatchController call sites.',
-        'Identify whether the chart currently supports secretKeyRef wiring for ANTHROPIC_API_KEY/KRATE_ASSISTANT_API_KEY, KRATE_GITEA_TOKEN, and Agent Mux URL values.',
+        'Identify whether the chart currently supports secretKeyRef wiring for ANTHROPIC_API_KEY/KRADLE_ASSISTANT_API_KEY, KRADLE_GITEA_TOKEN, and Agent Mux URL values.',
         'Identify the minimal files on the live execution path. Do not propose unrelated UI or fallback changes.',
         'Return JSON: { runtimeCallPaths, currentChartSupport, missingChartSupport, affectedFiles, deploymentComponents, requiredSecretRefs, endpointHealthChecks, risks }.',
       ],
@@ -364,7 +364,7 @@ export const designStagingEnvPlanTask = defineTask('issue-608.design-plan', (arg
   agent: {
     name: 'platform-engineer',
     prompt: {
-      role: 'Krate staging implementation lead',
+      role: 'Kradle staging implementation lead',
       task: 'Design the implementation plan for issue #608.',
       instructions: [
         'Use the issue context and runtime trace as the source of truth.',
@@ -401,7 +401,7 @@ export const planVerificationTask = defineTask('issue-608.plan-verification', (a
       instructions: [
         'Specify test-first assertions for chart value/schema additions, deployment env entries, secretKeyRef usage, and default behavior.',
         'Include chart rendering checks for configured and default modes. Ensure defaults do not require secret values and configured mode renders the expected env names.',
-        'Include existing package and focused tests such as packages/krate/core/tests/deployment.test.js and packages/krate/core/scripts/validate-package.mjs where applicable.',
+        'Include existing package and focused tests such as packages/kradle/core/tests/deployment.test.js and packages/kradle/core/scripts/validate-package.mjs where applicable.',
         'Include a secret exposure scan of source diff, rendered manifests, logs, PR body, and issue comment.',
         'Include staging smoke checks for health dashboard/snapshot, assistant real model call, Gitea-backed code browser/clone data, and Agent Mux dispatch producing job/session/transcript evidence.',
         'Return JSON: { preImplementationTests, dryRunCommands, secretExposureChecks, stagingSmokeChecks, passCriteria, failureTriage }.',
@@ -426,7 +426,7 @@ export const implementStagingEnvWiringTask = defineTask('issue-608.implement-wir
   agent: {
     name: 'platform-engineer',
     prompt: {
-      role: 'Krate platform engineer',
+      role: 'Kradle platform engineer',
       task: 'Implement the planned chart/configuration changes for issue #608.',
       instructions: [
         'Before editing, re-read the planned files and current diff. Preserve unrelated local changes.',
@@ -465,7 +465,7 @@ export const verifyDryRunTask = defineTask('issue-608.verify-dry-run', (args, ta
       task: 'Run and interpret the dry-run quality gates for issue #608.',
       instructions: [
         'Run the focused commands from the verification plan and inputs. Capture exact command names, exit statuses, and high-signal output summaries.',
-        'At minimum, verify chart render/default behavior, configured render behavior, packages/krate/core deployment/package checks where applicable, and git diff hygiene.',
+        'At minimum, verify chart render/default behavior, configured render behavior, packages/kradle/core deployment/package checks where applicable, and git diff hygiene.',
         'Check rendered manifests for env var names and secretKeyRef references without printing secret values.',
         'Fail if any required workflow is only partially configured, if a secret value appears in source/rendered output/logs, or if health/degraded behavior is masked.',
         'Return JSON: { passed, commands, renderedChecks, requiredEnvCoverage, secretExposureFindings, failures, changedFiles }.',
@@ -556,7 +556,7 @@ export const configureAndDeployStagingTask = defineTask('issue-608.configure-dep
       role: 'staging Kubernetes release engineer',
       task: 'Configure staging secrets/values and deploy the verified chart changes.',
       instructions: [
-        'Use only approved secret-management mechanisms for ANTHROPIC_API_KEY or KRATE_ASSISTANT_API_KEY, KRATE_GITEA_TOKEN, and any required non-secret endpoint values.',
+        'Use only approved secret-management mechanisms for ANTHROPIC_API_KEY or KRADLE_ASSISTANT_API_KEY, KRADLE_GITEA_TOKEN, and any required non-secret endpoint values.',
         'Do not echo or log secret values. Verify presence by key names, Kubernetes object metadata, and redacted command output only.',
         'Confirm or create the staging Gitea endpoint and Agent Mux gateway endpoint before rolling out the web/API/controller workloads.',
         'Apply the chart/values change to staging using the repository-standard deployment path. Capture rollout status and redacted evidence.',
