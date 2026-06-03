@@ -1,15 +1,15 @@
 FROM node:20-alpine AS build
 WORKDIR /app
-COPY packages/krate/core/package.json ./
+COPY packages/kradle/core/package.json ./
 RUN printf '{"type":"module"}\n' > /tmp/pkg-type.json
 RUN npm install --omit=dev --ignore-scripts 2>/dev/null; exit 0
-COPY packages/krate/core/src ./src
-COPY packages/krate/core/bin ./bin
-COPY packages/krate/core/scripts ./scripts
-COPY packages/krate/core/dist ./dist
-COPY packages/krate/core/docs ./docs
-COPY packages/krate/core/examples ./examples
-COPY packages/krate/core/tests ./tests
+COPY packages/kradle/core/src ./src
+COPY packages/kradle/core/bin ./bin
+COPY packages/kradle/core/scripts ./scripts
+COPY packages/kradle/core/dist ./dist
+COPY packages/kradle/core/docs ./docs
+COPY packages/kradle/core/examples ./examples
+COPY packages/kradle/core/tests ./tests
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
@@ -28,4 +28,4 @@ COPY --from=build /app/examples ./examples
 EXPOSE 3080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3080)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-CMD ["node", "bin/krate-server.mjs"]
+CMD ["node", "bin/kradle-server.mjs"]

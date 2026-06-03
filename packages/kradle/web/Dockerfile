@@ -1,19 +1,19 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-COPY packages/krate/web/package.json ./packages/krate/web/
-COPY packages/krate/sdk/package.json ./packages/krate/sdk/
-COPY packages/krate/core/package.json ./packages/krate/core/
-RUN npm install --workspace=packages/krate/web --legacy-peer-deps --ignore-scripts 2>/dev/null; exit 0
+COPY packages/kradle/web/package.json ./packages/kradle/web/
+COPY packages/kradle/sdk/package.json ./packages/kradle/sdk/
+COPY packages/kradle/core/package.json ./packages/kradle/core/
+RUN npm install --workspace=packages/kradle/web --legacy-peer-deps --ignore-scripts 2>/dev/null; exit 0
 
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY packages/krate/web ./packages/krate/web
-COPY packages/krate/sdk ./packages/krate/sdk
-COPY packages/krate/core/src ./packages/krate/core/src
-COPY packages/krate/core/package.json ./packages/krate/core/
-WORKDIR /app/packages/krate/web
+COPY packages/kradle/web ./packages/kradle/web
+COPY packages/kradle/sdk ./packages/kradle/sdk
+COPY packages/kradle/core/src ./packages/kradle/core/src
+COPY packages/kradle/core/package.json ./packages/kradle/core/
+WORKDIR /app/packages/kradle/web
 RUN npx next build --webpack
 
 FROM node:20-alpine AS runtime
@@ -34,7 +34,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-COPY --from=build /app/packages/krate/web/.next/standalone ./
-COPY --from=build /app/packages/krate/web/.next/static ./packages/krate/web/.next/static
+COPY --from=build /app/packages/kradle/web/.next/standalone ./
+COPY --from=build /app/packages/kradle/web/.next/static ./packages/kradle/web/.next/static
 EXPOSE 3000
-CMD ["node", "packages/krate/web/server.js"]
+CMD ["node", "packages/kradle/web/server.js"]
