@@ -270,7 +270,7 @@ export interface AgentCoreToolOptions {
   toolRegistry?: UnifiedToolRegistryLike;
   /** Canonical dispatcher from tool-mux used by code_executor nested tool calls. */
   toolDispatcher?: UnifiedToolDispatcherLike;
-  /** @deprecated Use toolRegistry from @a5c-ai/adapters-tools. */
+  /** @deprecated Use toolRegistry from @a5c-ai/tools-adapter. */
   deferredToolRegistry?: DeferredToolRegistry;
   /**
    * Opt-in Programmatic Tool Calling / Code Mode surface. When enabled,

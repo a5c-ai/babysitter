@@ -1,18 +1,18 @@
 /**
- * `amux launch` command implementation.
+ * `adapters launch` command implementation.
  *
  * Resolves a launch plan for a given harness+provider combination,
  * optionally starts the transport-mux runtime, then exec-forks the harness with
  * stdin/stdout passthrough and proper signal forwarding.
  */
 
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 import {
   resolveProvider,
   resolveWorkspaceDefaultCwd,
   WorkspaceService,
-} from '@a5c-ai/adapters-comm';
-import type { ProviderId, TransportId } from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
+import type { ProviderId, TransportId } from '@a5c-ai/comm-adapter';
 import { translateForHarness } from '@a5c-ai/adapters-codecs';
 import {
   getLaunchBehavior,
@@ -20,8 +20,8 @@ import {
   getBridgeCapabilities,
   getYoloLaunchArgs,
 } from '@a5c-ai/atlas/catalog';
-import { startTransportMuxRuntime } from '@a5c-ai/adapters-transport';
-import type { TransportMuxRuntime } from '@a5c-ai/adapters-transport';
+import { startTransportMuxRuntime } from '@a5c-ai/transport-adapter';
+import type { TransportMuxRuntime } from '@a5c-ai/transport-adapter';
 import type { ParsedArgs, FlagDef } from './cli-helpers.js';
 import { flagStr, flagNum, flagBool, flagArr } from './cli-helpers.js';
 import { ExitCode } from './cli-helpers.js';
@@ -286,19 +286,19 @@ async function resolveSpawnCommand(command: string, args: string[]): Promise<{ c
       if (whichOutput) {
         const { readFileSync, statSync } = await import('node:fs');
         const stat = statSync(whichOutput);
-        console.error(`[amux launch] which ${command} → ${whichOutput} (${stat.size} bytes, mode ${stat.mode.toString(8)})`);
+        console.error(`[adapters launch] which ${command} → ${whichOutput} (${stat.size} bytes, mode ${stat.mode.toString(8)})`);
         const content = readFileSync(whichOutput, 'utf8').slice(0, 500);
-        console.error(`[amux launch] script content (first 200): ${content.slice(0, 200).replace(/\n/g, '\\n')}`);
+        console.error(`[adapters launch] script content (first 200): ${content.slice(0, 200).replace(/\n/g, '\\n')}`);
         // Bash wrapper scripts (e.g. CI-generated shims): extract the node script path
         const execNodeMatch = content.match(/exec\s+node\s+"([^"]+)"/);
         if (execNodeMatch?.[1]) {
-          console.error(`[amux launch] resolved wrapper → node ${execNodeMatch[1]}`);
+          console.error(`[adapters launch] resolved wrapper → node ${execNodeMatch[1]}`);
           return { command: process.execPath, args: [execNodeMatch[1], ...args], shell: false };
         }
         // Also handle: node "path" or exec "path/node" "script"
         const nodeScriptMatch = content.match(/(?:exec\s+)?(?:"\$[^"]*node[^"]*"|node)\s+"([^"]+\.js)"/);
         if (nodeScriptMatch?.[1]) {
-          console.error(`[amux launch] resolved wrapper → node ${nodeScriptMatch[1]}`);
+          console.error(`[adapters launch] resolved wrapper → node ${nodeScriptMatch[1]}`);
           return { command: process.execPath, args: [nodeScriptMatch[1], ...args], shell: false };
         }
         return { command: whichOutput, args, shell: false };
@@ -316,7 +316,7 @@ async function resolveSpawnCommand(command: string, args: string[]): Promise<{ c
       ?? allPaths.find(p => /\.(cmd|bat)$/i.test(p))
       ?? allPaths.find(p => /\.(ps1|js)$/i.test(p))
       ?? allPaths[0];
-    console.error(`[amux launch] where ${command} → ${allPaths.join(', ')} (selected: ${resolved})`);
+    console.error(`[adapters launch] where ${command} → ${allPaths.join(', ')} (selected: ${resolved})`);
     if (resolved) {
       if (/\.js$/i.test(resolved)) {
         return { command: process.execPath, args: [resolved, ...args], shell: false };
@@ -328,7 +328,7 @@ async function resolveSpawnCommand(command: string, args: string[]): Promise<{ c
         const pathMod = await import('node:path');
         try {
           const cmdContent = readFileSync(resolved, 'utf8');
-          console.error(`[amux launch] .cmd content (first 300): ${cmdContent.slice(0, 300).replace(/\n/g, '\\n')}`);
+          console.error(`[adapters launch] .cmd content (first 300): ${cmdContent.slice(0, 300).replace(/\n/g, '\\n')}`);
           // Look for .js entry point (node/npm packages)
           const cmdDir = pathMod.dirname(resolved);
           const jsMatch = cmdContent.match(/"([^"]+\.js)"/);
@@ -337,7 +337,7 @@ async function resolveSpawnCommand(command: string, args: string[]): Promise<{ c
             const jsRaw = jsMatch[1].replace(/%~?dp0%/gi, cmdDir + pathMod.sep);
             const jsPath = pathMod.resolve(cmdDir, jsRaw);
             if (existsSync(jsPath)) {
-              console.error(`[amux launch] resolved .cmd → .js: ${jsPath}`);
+              console.error(`[adapters launch] resolved .cmd → .js: ${jsPath}`);
               return { command: process.execPath, args: [jsPath, ...args], shell: false };
             }
           }
@@ -350,10 +350,10 @@ async function resolveSpawnCommand(command: string, args: string[]): Promise<{ c
               const { statSync } = await import('node:fs');
               const exeSize = statSync(exePath).size;
               if (exeSize > 10240) {
-                console.error(`[amux launch] resolved .cmd → .exe: ${exePath} (${exeSize} bytes)`);
+                console.error(`[adapters launch] resolved .cmd → .exe: ${exePath} (${exeSize} bytes)`);
                 return { command: exePath, args, shell: false };
               } else {
-                console.error(`[amux launch] .exe shim too small (${exeSize} bytes), using .cmd fallback`);
+                console.error(`[adapters launch] .exe shim too small (${exeSize} bytes), using .cmd fallback`);
               }
             }
           }
@@ -362,9 +362,9 @@ async function resolveSpawnCommand(command: string, args: string[]): Promise<{ c
         // Node.js shell:true double-quoting (Node wraps in outer quotes for
         // cmd /s /c "...", which breaks inner escaped quotes in args).
         const quoteIfNeeded = (s: string) => s.includes(' ') || /[&|<>^()%!"',;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-        console.error(`[amux launch] .cmd fallback raw args (${args.length}): ${args.map((a, i) => `[${i}]=${a.length > 50 ? a.slice(0, 50) + '...' : a}`).join(' ')}`);
+        console.error(`[adapters launch] .cmd fallback raw args (${args.length}): ${args.map((a, i) => `[${i}]=${a.length > 50 ? a.slice(0, 50) + '...' : a}`).join(' ')}`);
         const cmdLine = `${quoteIfNeeded(resolved)} ${args.map(quoteIfNeeded).join(' ')}`;
-        console.error(`[amux launch] .cmd fallback cmdLine (first 500): ${cmdLine.slice(0, 500)}`);
+        console.error(`[adapters launch] .cmd fallback cmdLine (first 500): ${cmdLine.slice(0, 500)}`);
         return { command: process.env['ComSpec'] ?? 'cmd.exe', args: ['/c', cmdLine], shell: false };
       }
       if (/\.exe$/i.test(resolved)) {
@@ -374,7 +374,7 @@ async function resolveSpawnCommand(command: string, args: string[]): Promise<{ c
       return { command: resolved, args, shell: false };
     }
   } catch (err) {
-    console.error(`[amux launch] where ${command} failed: ${err instanceof Error ? err.message : err}`);
+    console.error(`[adapters launch] where ${command} failed: ${err instanceof Error ? err.message : err}`);
   }
   return { command, args: args.map(escapeCmdArg), shell: true };
 }
@@ -596,7 +596,7 @@ function startPromptArtifactCompletionMonitor(input: {
   return setInterval(() => {
     void (async () => {
       if (Date.now() - startedAt > PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS) {
-        console.error(`[amux launch] artifact monitor timed out after ${PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS / 1000}s — forcing completion`);
+        console.error(`[adapters launch] artifact monitor timed out after ${PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS / 1000}s — forcing completion`);
         input.onComplete();
         return;
       }
@@ -683,14 +683,14 @@ async function ensureOllamaReady(model: string): Promise<{ ok: boolean; message?
     const modelNames = lines.slice(1).map(l => l.split(/\s+/)[0]);
     const modelBase = model.split(':')[0];
     if (!modelNames.some(n => n.startsWith(modelBase))) {
-      console.error(`[amux launch] Model '${model}' not found locally. Pulling...`);
+      console.error(`[adapters launch] Model '${model}' not found locally. Pulling...`);
       const pull = spawnSync('ollama', ['pull', model], { stdio: 'inherit', timeout: 600_000 });
       if (pull.status !== 0) {
         return { ok: false, message: `Failed to pull model '${model}'` };
       }
     }
   } catch (e) {
-    console.error(`[amux launch] Warning: could not verify model availability`);
+    console.error(`[adapters launch] Warning: could not verify model availability`);
   }
 
   return { ok: true };
@@ -707,7 +707,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
 
   if (!harness) {
     const msg =
-      'Usage: amux launch <harness> [provider] [flags...]\nRun "amux launch --help" for details.';
+      'Usage: adapters launch <harness> [provider] [flags...]\nRun "adapters launch --help" for details.';
     if (jsonMode) printJsonError('VALIDATION_ERROR', msg);
     else printError(msg);
     return ExitCode.USAGE_ERROR;
@@ -805,7 +805,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     profile: flagStr(args.flags, 'profile'),
   });
   if (resolvedConfig.auth.type === 'api_key' && !resolvedConfig.auth.apiKey) {
-    const defaults = (await import('@a5c-ai/adapters-comm')).PROVIDER_DEFAULTS;
+    const defaults = (await import('@a5c-ai/comm-adapter')).PROVIDER_DEFAULTS;
     const provId = resolvedConfig.provider;
     const envKey = defaults[provId]?.envKey;
     if (envKey) {
@@ -1022,7 +1022,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         plan.env['GOOGLE_GENAI_USE_VERTEXAI'] = 'false';
         plan.env['GOOGLE_CLOUD_PROJECT'] = '';
         plan.env['GOOGLE_CLOUD_LOCATION'] = '';
-        console.error(`[amux launch] Gemini proxy: GOOGLE_API_KEY=${(plan.env['GOOGLE_API_KEY'] ?? '').slice(0, 8)}..., endpoint=${proxyOrigin}`);
+        console.error(`[adapters launch] Gemini proxy: GOOGLE_API_KEY=${(plan.env['GOOGLE_API_KEY'] ?? '').slice(0, 8)}..., endpoint=${proxyOrigin}`);
       }
 
       // Tula (agent-core): set AGENT_MUX_* env vars to route through the proxy.
@@ -1036,7 +1036,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         delete plan.env['AZURE_API_KEY'];
         delete plan.env['AZURE_OPENAI_API_KEY'];
         delete plan.env['AZURE_OPENAI_PROJECT_NAME'];
-        console.error(`[amux launch] Tula proxy: AGENT_MUX_API_BASE=${plan.env['AGENT_MUX_API_BASE']}, AGENT_MUX_MODEL=${plan.env['AGENT_MUX_MODEL']}`);
+        console.error(`[adapters launch] Tula proxy: AGENT_MUX_API_BASE=${plan.env['AGENT_MUX_API_BASE']}, AGENT_MUX_MODEL=${plan.env['AGENT_MUX_MODEL']}`);
       }
 
       // Generic OpenAI-compatible harnesses: set OPENAI_API_KEY + OPENAI_BASE_URL
@@ -1047,15 +1047,15 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         plan.env['OPENAI_API_BASE'] = `${proxyRuntime.url}/v1`;
         if (plan.harness === 'codex') {
           insertCodexOptionArgs(plan, [
-            '-c', 'model_provider="amux-proxy"',
-            '-c', 'model_providers.amux-proxy.name="amux-proxy"',
-            '-c', `model_providers.amux-proxy.base_url="${proxyRuntime.url}/v1"`,
-            '-c', 'model_providers.amux-proxy.env_key="OPENAI_API_KEY"',
-            '-c', 'model_providers.amux-proxy.wire_api="responses"',
+            '-c', 'model_provider="adapters-proxy"',
+            '-c', 'model_providers.adapters-proxy.name="adapters-proxy"',
+            '-c', `model_providers.adapters-proxy.base_url="${proxyRuntime.url}/v1"`,
+            '-c', 'model_providers.adapters-proxy.env_key="OPENAI_API_KEY"',
+            '-c', 'model_providers.adapters-proxy.wire_api="responses"',
           ]);
         }
         // hermes provider flags handled outside the proxy block (below)
-        console.error(`[amux launch] ${plan.harness} proxy: OPENAI_BASE_URL=${proxyRuntime.url}/v1`);
+        console.error(`[adapters launch] ${plan.harness} proxy: OPENAI_BASE_URL=${proxyRuntime.url}/v1`);
       }
 
       // Pi ignores OPENAI_BASE_URL — write a models.json config that registers
@@ -1068,7 +1068,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         mkdirSync(piConfigDir, { recursive: true });
         const modelsConfig = {
           providers: {
-            'amux-proxy': {
+            'adapters-proxy': {
               baseUrl: `${proxyRuntime.url}/v1`,
               api: 'openai-completions',
               apiKey: proxyRuntime.authToken ?? 'proxy-token',
@@ -1085,8 +1085,8 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         };
         const modelsPath = join(piConfigDir, 'models.json');
         writeFileSync(modelsPath, JSON.stringify(modelsConfig, null, 2));
-        plan.args.push('--provider', 'amux-proxy');
-        console.error(`[amux launch] Pi proxy config written to ${modelsPath}, proxy at ${proxyRuntime.url}`);
+        plan.args.push('--provider', 'adapters-proxy');
+        console.error(`[adapters launch] Pi proxy config written to ${modelsPath}, proxy at ${proxyRuntime.url}`);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -1130,7 +1130,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       const newPath = `${missingPaths.join(sep)}${sep}${currentPath}`;
       plan.env['PATH'] = newPath;
       process.env['PATH'] = newPath;
-      console.error(`[amux launch] hermes: added pip paths to PATH: ${missingPaths.join(', ')}`);
+      console.error(`[adapters launch] hermes: added pip paths to PATH: ${missingPaths.join(', ')}`);
     }
     if (process.platform === 'win32') {
       plan.env['TERM'] = '';
@@ -1198,7 +1198,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       baseUrl: proxyUrl,
       apiKey: proxyUrl ? 'proxy-token' : undefined,
     });
-    console.error(`[amux launch] hermes: provider=${hermesProvider} model=${targetModel} baseUrl=${proxyUrl ?? 'default'}`);
+    console.error(`[adapters launch] hermes: provider=${hermesProvider} model=${targetModel} baseUrl=${proxyUrl ?? 'default'}`);
   }
 
   // OpenCode: clear real OPENAI_API_KEY so it can't bypass proxy,
@@ -1235,7 +1235,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       }
       plan.env['OPENAI_API_KEY'] = proxyRuntime.authToken ?? 'proxy-token';
       plan.env['OPENAI_BASE_URL'] = proxyBase;
-      console.error(`[amux launch] opencode: injected proxy baseURL=${proxyBase}`);
+      console.error(`[adapters launch] opencode: injected proxy baseURL=${proxyBase}`);
     }
     const configPath = join(launchCwd, 'opencode.json');
     writeFileSync(configPath, configContent);
@@ -1243,8 +1243,8 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     const homeConfig = join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.config', 'opencode');
     mkdirSync(homeConfig, { recursive: true });
     writeFileSync(join(homeConfig, 'opencode.json'), configContent);
-    console.error(`[amux launch] opencode: wrote config to ${configPath} (OPENCODE_CONFIG set) and ${homeConfig}/opencode.json`);
-    console.error(`[amux launch] opencode: config content: ${configContent}`);
+    console.error(`[adapters launch] opencode: wrote config to ${configPath} (OPENCODE_CONFIG set) and ${homeConfig}/opencode.json`);
+    console.error(`[adapters launch] opencode: config content: ${configContent}`);
   }
 
   // Cursor: pre-create ~/.cursor/auth.json so cursor-agent skips browser OAuth.
@@ -1260,7 +1260,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     const auth = JSON.stringify({ accessToken: token, refreshToken: token, userId: 'ci-proxy', email: 'ci@proxy.local' });
     wf(pj(cursorDir, 'auth.json'), auth);
     wf(pj(cursorDir, 'credentials.json'), auth);
-    console.error(`[amux launch] Cursor auth pre-seeded at ${cursorDir}/auth.json`);
+    console.error(`[adapters launch] Cursor auth pre-seeded at ${cursorDir}/auth.json`);
   }
 
   // Bridge hooks: emulate lifecycle hooks when --bridge-hooks is set
@@ -1339,7 +1339,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       let assembler: any = null;
       let adapter: any = null;
       try {
-        const core = await import('@a5c-ai/adapters-comm');
+        const core = await import('@a5c-ai/comm-adapter');
         assembler = new core.StreamAssembler();
         // Resolve the adapter for this harness to use its parseEvent
         const adaptersModule = await import('@a5c-ai/adapters-codecs');
@@ -1484,12 +1484,12 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     } catch (ptyError: unknown) {
       // node-pty not available or posix_spawnp failed (macOS ARM64), fall back to stdio
       const ptyMsg = ptyError instanceof Error ? ptyError.message : String(ptyError);
-      console.error(`[amux launch] PTY fallback (${process.platform}/${process.arch}): ${ptyMsg}`);
+      console.error(`[adapters launch] PTY fallback (${process.platform}/${process.arch}): ${ptyMsg}`);
       ptyProcess = null;
       const { spawn } = await import('node:child_process');
       const fallbackResolved = await resolveSpawnCommand(plan.command, plan.args);
       spawnedArgsForPromptCheck = fallbackResolved.args;
-      console.error(`[amux launch] BI fallback spawn: ${fallbackResolved.command} args=${fallbackResolved.args.length} stdio=['pipe','pipe','pipe']`);
+      console.error(`[adapters launch] BI fallback spawn: ${fallbackResolved.command} args=${fallbackResolved.args.length} stdio=['pipe','pipe','pipe']`);
       child = spawn(fallbackResolved.command, fallbackResolved.args, {
         stdio: ['pipe', 'pipe', 'pipe'],
         env: { ...process.env, ...plan.env },
@@ -1517,7 +1517,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     if (prompt && bridgeLb?.promptDelivery === 'cli-flag' && bridgeLb.promptFlag && !bridgeArgs.some(a => a === prompt)) {
       bridgeArgs.push(bridgeLb.promptFlag, prompt, ...(bridgeLb.promptExtraFlags ?? []));
       promptDeliveredInArgs = true;
-      console.error(`[amux launch] BI: injected prompt via ${bridgeLb.promptFlag} (cli-flag harness)`);
+      console.error(`[adapters launch] BI: injected prompt via ${bridgeLb.promptFlag} (cli-flag harness)`);
     }
     const resolvedBridge = await resolveSpawnCommand(plan.command, bridgeArgs);
     spawnedArgsForPromptCheck = resolvedBridge.args;
@@ -1547,7 +1547,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       // Fallback: child_process.spawn with piped stdio (same as NI path).
       // Without a PTY we can't type the prompt into a terminal, so inject
       // it into the command args using the harness's NI delivery method.
-      console.error(`[amux launch] bridge-interactive: PTY unavailable (${skipBridgePty ? 'macOS ARM64 CI skip' : 'import failed'}) — using child_process fallback`);
+      console.error(`[adapters launch] bridge-interactive: PTY unavailable (${skipBridgePty ? 'macOS ARM64 CI skip' : 'import failed'}) — using child_process fallback`);
       const fallbackLb = getLaunchBehavior(plan.harness);
       const bridgeFallbackArgs = [...plan.args];
       const promptInFallbackArgs = prompt ? bridgeFallbackArgs.some(a => a === prompt) : true;
@@ -1558,7 +1558,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
           bridgeFallbackArgs.unshift(fallbackLb.execSubcommand, prompt);
         }
         promptDeliveredInArgs = bridgeFallbackArgs.some(a => a === prompt);
-        console.error(`[amux launch] BI fallback: injected prompt into args (${fallbackLb.promptDelivery})`);
+        console.error(`[adapters launch] BI fallback: injected prompt into args (${fallbackLb.promptDelivery})`);
       }
       const fallbackResolved = await resolveSpawnCommand(plan.command, bridgeFallbackArgs);
       spawnedArgsForPromptCheck = fallbackResolved.args;
@@ -1572,10 +1572,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     }
 
     // Set up adapter + assembler for parsing PTY output into structured events
-    let assembler: import('@a5c-ai/adapters-comm').StreamAssembler | null = null;
+    let assembler: import('@a5c-ai/comm-adapter').StreamAssembler | null = null;
     let adapter: { parseEvent(line: string, ctx: any): any } | null = null;
     try {
-      const core = await import('@a5c-ai/adapters-comm');
+      const core = await import('@a5c-ai/comm-adapter');
       assembler = new core.StreamAssembler();
       const adaptersModule = await import('@a5c-ai/adapters-codecs');
       const factory = adaptersModule.getAdapterFactory?.(plan.harness);
@@ -1651,7 +1651,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         for (const pattern of FATAL_ERROR_PATTERNS) {
           if (stripped.includes(pattern)) {
             fatalErrorDetected = true;
-            console.error(`[amux launch] FATAL API ERROR detected: "${pattern}" — terminating agent`);
+            console.error(`[adapters launch] FATAL API ERROR detected: "${pattern}" — terminating agent`);
             turnComplete = true;
             if (idleTimer) clearTimeout(idleTimer);
             setTimeout(completePtyPrompt, 500);
@@ -1832,7 +1832,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       const nodePty: any = await import('node-pty');
       const resolved = await resolveSpawnCommand(plan.command, plan.args);
       spawnedArgsForPromptCheck = resolved.args;
-      console.error(`[amux launch] hermes Windows: using ConPTY for stdin delivery`);
+      console.error(`[adapters launch] hermes Windows: using ConPTY for stdin delivery`);
       ptyProcess = nodePty.spawn(resolved.command, resolved.args, {
         name: 'xterm-256color',
         cols: 120,
@@ -1854,7 +1854,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       };
       child = fakeChild;
     } catch (err) {
-      console.error(`[amux launch] hermes Windows ConPTY failed, falling back to stdio: ${err instanceof Error ? err.message : err}`);
+      console.error(`[adapters launch] hermes Windows ConPTY failed, falling back to stdio: ${err instanceof Error ? err.message : err}`);
       const { spawn } = await import('node:child_process');
       const resolvedSpawn = await resolveSpawnCommand(plan.command, plan.args);
       spawnedArgsForPromptCheck = resolvedSpawn.args;
@@ -1871,7 +1871,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     const { spawn } = await import('node:child_process');
     const resolvedSpawn = await resolveSpawnCommand(plan.command, plan.args);
     spawnedArgsForPromptCheck = resolvedSpawn.args;
-    console.error(`[amux launch] spawn: ${resolvedSpawn.command} shell=${resolvedSpawn.shell} args[0..2]=${resolvedSpawn.args.slice(0, 3).join(' ')} totalArgs=${resolvedSpawn.args.length}${stdinPromptOverride ? ' (prompt→stdin)' : ''}`);
+    console.error(`[adapters launch] spawn: ${resolvedSpawn.command} shell=${resolvedSpawn.shell} args[0..2]=${resolvedSpawn.args.slice(0, 3).join(' ')} totalArgs=${resolvedSpawn.args.length}${stdinPromptOverride ? ' (prompt→stdin)' : ''}`);
     child = spawn(resolvedSpawn.command, resolvedSpawn.args, {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env, ...plan.env },
@@ -1888,7 +1888,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
       for (const pat of ['credit balance is too low', 'insufficient_quota', 'exceeded your current quota',
         'billing_not_active', 'payment required', 'rate_limit_exceeded', 'overloaded_error']) {
         if (niStderrBuf.includes(pat)) {
-          console.error(`[amux launch] FATAL API ERROR in stderr: "${pat}" — killing agent`);
+          console.error(`[adapters launch] FATAL API ERROR in stderr: "${pat}" — killing agent`);
           try { child.kill('SIGTERM'); } catch { /* */ }
           niStderrBuf = '';
           return;
@@ -1918,7 +1918,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         'billing_not_active', 'payment required', 'Your account does not have enough credits',
         'rate_limit_exceeded', 'overloaded_error']) {
         if (stripped.includes(pat)) {
-          console.error(`[amux launch] FATAL API ERROR in NI mode: "${pat}" — killing agent`);
+          console.error(`[adapters launch] FATAL API ERROR in NI mode: "${pat}" — killing agent`);
           try { child.kill('SIGTERM'); } catch { /* */ }
           niFatalBuf = '';
           return;
@@ -1938,10 +1938,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
 
   if (flagBool(args.flags, 'observe')) {
     if (isInteractive) {
-      console.error('[amux launch] Warning: --observe does not work with interactive PTY mode');
+      console.error('[adapters launch] Warning: --observe does not work with interactive PTY mode');
     } else {
       // Tee stdout to both console and a log file
-      const logPath = `.amux-launch-${Date.now()}.log`;
+      const logPath = `.adapters-launch-${Date.now()}.log`;
       const logStream = (await import('node:fs')).createWriteStream(logPath);
       child.stdout?.on('data', (chunk: Buffer) => {
         process.stdout.write(chunk);
@@ -1952,7 +1952,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         logStream.write(chunk);
       });
       child.on('exit', () => logStream.end());
-      console.error(`[amux launch] Observing output to ${logPath}`);
+      console.error(`[adapters launch] Observing output to ${logPath}`);
     }
   }
 
@@ -1983,7 +1983,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
   const needsStdinDelivery = stdinPromptOverride || !promptInArgs;
   const keepStdinOpen = launchBehavior?.stdinBehavior === 'keep-open';
   if (!isInteractive && effectivePrompt) {
-    console.error(`[amux launch] stdin: promptInArgs=${promptInArgs} stdinOverride=${!!stdinPromptOverride} keepStdinOpen=${keepStdinOpen}`);
+    console.error(`[adapters launch] stdin: promptInArgs=${promptInArgs} stdinOverride=${!!stdinPromptOverride} keepStdinOpen=${keepStdinOpen}`);
   }
 
   if (effectivePrompt && ptyProcess && !isInteractive && needsStdinDelivery) {

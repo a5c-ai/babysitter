@@ -246,7 +246,7 @@ async function handleHarnessInvoke(parsed: HarnessParsedArgs): Promise<number> {
       json: parsed.json,
       verbose: parsed.verbose,
       interactive: false,
-      outputMode: parsed.outputFormat === "amux-events" ? "amux-events" : undefined,
+      outputMode: parsed.outputFormat === "adapters-events" ? "adapters-events" : undefined,
     });
   }
 
@@ -257,8 +257,8 @@ async function handleHarnessInvoke(parsed: HarnessParsedArgs): Promise<number> {
     timeout: parsed.timeout ? Number(parsed.timeout) : undefined,
   });
 
-  // amux-events output format: JSONL compatible with agent-mux event stream
-  if (parsed.outputFormat === "amux-events") {
+  // adapters-events output format: JSONL compatible with agent-mux event stream
+  if (parsed.outputFormat === "adapters-events") {
     const lines = formatResultAsAmuxEvents(normalizedHarnessName, result);
     for (const line of lines) {
       console.log(line);
@@ -331,6 +331,6 @@ async function runHarnessCreateRun(
     verbose: parsed.verbose,
     interactive: overrides.interactive ?? parsed.interactive,
     planOnly: overrides.planOnly,
-    outputMode: parsed.outputFormat === "amux-events" ? "amux-events" : undefined,
+    outputMode: parsed.outputFormat === "adapters-events" ? "adapters-events" : undefined,
   });
 }

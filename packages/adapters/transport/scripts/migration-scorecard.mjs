@@ -31,7 +31,7 @@ const launchCommand = [
   read('packages/adapters/launch/src/launch.ts'),
 ].join('\n');
 
-const legacyPythonTests = countFiles('packages/adapters/amux-proxy/tests', '.py');
+const legacyPythonTests = countFiles('packages/adapters/adapters-proxy/tests', '.py');
 const jsContractTests =
   countFiles('packages/adapters/transport/tests', '.ts') +
   countFiles('packages/adapters/transport/tests/transports', '.ts') +
@@ -84,12 +84,12 @@ const scorecard = [
     gate: 'Legacy Python reference surface stays explicit',
     status:
       legacyPythonTests === 0 ||
-      migrationDoc.includes('Historical archive: legacy Python tests under `packages/adapters/amux-proxy/tests` remain available as reference material for the still-active historical runtime path.')
+      migrationDoc.includes('Historical archive: legacy Python tests under `packages/adapters/adapters-proxy/tests` remain available as reference material for the still-active historical runtime path.')
         ? 'green'
         : 'red',
     evidence: legacyPythonTests > 0
       ? `${legacyPythonTests} legacy Python tests remain, and migration.md marks them as reference material rather than packaged output from transport-mux`
-      : 'No legacy Python contract tests remain under packages/adapters/amux-proxy/tests',
+      : 'No legacy Python contract tests remain under packages/adapters/adapters-proxy/tests',
     retireWhen: 'Legacy tests are either removed entirely or explicitly separated from transport-mux package-artifact claims.',
   },
   {
@@ -119,12 +119,12 @@ const scorecard = [
   {
     gate: 'Launcher/runtime seam remains explicit and published',
     status:
-      launchCommand.includes('@a5c-ai/adapters-transport') &&
+      launchCommand.includes('@a5c-ai/transport-adapter') &&
       packageEntrypoint.includes("export * from './runtime.js';")
         ? 'green'
         : 'red',
     evidence:
-      launchCommand.includes('@a5c-ai/adapters-transport') &&
+      launchCommand.includes('@a5c-ai/transport-adapter') &&
       packageEntrypoint.includes("export * from './runtime.js';")
         ? 'launch.ts imports transport-mux directly and the package entrypoint exports the runtime seam'
         : 'launch.ts still bypasses the transport-mux runtime surface or the package entrypoint does not export it',

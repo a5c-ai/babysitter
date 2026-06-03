@@ -25,10 +25,10 @@ The long-term target is one repository coverage artifact with package-level sect
 - `@a5c-ai/babysitter-sdk`,
 - `@a5c-ai/tula-platform`,
 - `@a5c-ai/tula-core`,
-- `@a5c-ai/adapters-transport`,
+- `@a5c-ai/transport-adapter`,
 - the `@a5c-ai/adapters` package family,
 - the hooks-mux package family,
-- `@a5c-ai/adapters-extensions`,
+- `@a5c-ai/extensions-adapter`,
 - `@a5c-ai/cloud`,
 - docs/generator checks.
 
@@ -80,10 +80,10 @@ Scenario coverage is separate from line coverage. It tracks whether critical use
 | --- | --- | --- |
 | Codex SDK setup | Dry-run harness/plugin installer JSON | Capability-gated live setup or documented skip; do not claim agent-mux plugin-manager support unless adapter capability allows it |
 | Claude Code SDK setup | Dry-run harness/plugin installer JSON | Live setup artifact plus installed plugin manifest where selected |
-| Agent-mux adapter/session protocol | Fixture transcript through adapter tests | Live Codex/Claude session event comparison via `amux run` or SDK `createClient().run` |
+| Agent-mux adapter/session protocol | Fixture transcript through adapter tests | Live Codex/Claude session event comparison via `adapters run` or SDK `createClient().run` |
 | Transport-mux route/runtime bridge | Local route matrix, env injection, launch-plan proxy decisions, fixture stream, passthrough, metrics/cache, and cancellation tests | Live agent-core stream through transport plus agent-mux-launched external harness proxy stream with redacted launch/env/metrics artifacts |
 | Babysitter-agent runtime orchestration | Mock planner/executor run journal | Bounded model-backed process run with no installer commands |
-| Babysitter plugin through agent-mux | Mock plugin command and hook events | Capability-gated `amux run` session where `/babysitter:call` creates and completes a Babysitter run |
+| Babysitter plugin through agent-mux | Mock plugin command and hook events | Capability-gated `adapters run` session where `/babysitter:call` creates and completes a Babysitter run |
 | Hooks mux normalization | Raw hook fixture normalizer tests | Redacted live hook payload replay |
 
 Transport-mux scenario coverage should be reported as separate checklist rows, not collapsed into generic mux coverage:
@@ -94,6 +94,6 @@ Transport-mux scenario coverage should be reported as separate checklist rows, n
 - fixture stream cancellation/timeout/reconnect behavior,
 - passthrough path/query/upstream failure behavior,
 - live tula-core stream bridge,
-- live external harness bridge through `amux launch --with-proxy*`.
+- live external harness bridge through `adapters launch --with-proxy*`.
 
 A coverage summary should show scenario coverage as a checklist, not as a percentage that hides missing live evidence.

@@ -12,14 +12,14 @@ import type {
   AutomationTaskTemplate,
   TimerAutomationTrigger,
   WebhookAutomationTrigger,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 import type {
   KanbanDecompositionKind,
   KanbanDecompositionStatus,
   KanbanIssue,
   KanbanIssueSource,
   KanbanPriority,
-} from '@a5c-ai/adapters-comm/kanban';
+} from '@a5c-ai/comm-adapter/kanban';
 
 import { AppError } from '../error-handler';
 import { BacklogQueryService } from './backlog-query-service';

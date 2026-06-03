@@ -24,7 +24,7 @@ attributes:
   displayName: "agent-mux CLI"
   kind: cli
   description: |
-    Non-interactive CLI surface of agent-mux. Scriptable `amux run --json`
+    Non-interactive CLI surface of agent-mux. Scriptable `adapters run --json`
     invocation that proxies events from the bridged remote agent and exits
     on session end. Used in CI and headless automation.
   themeSupport: none

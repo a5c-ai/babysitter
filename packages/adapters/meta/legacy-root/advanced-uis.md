@@ -51,7 +51,7 @@ Dependency chain is tightest through M1: `T1.1 → T1.2 → T1.4 → T1.10 → T
 
 ## 3. M1 — Runtime hooks + gateway
 
-Goal: `amux gateway serve` runs a protocol server, a WebSocket client can connect, start a run against `claude-code`, stream events, and have an in-process `preToolUse` callback gate a tool call — without any mutation of `~/.claude/settings.json`.
+Goal: `adapters gateway serve` runs a protocol server, a WebSocket client can connect, start a run against `claude-code`, stream events, and have an in-process `preToolUse` callback gate a tool call — without any mutation of `~/.claude/settings.json`.
 
 ### T1.1 — Add `RuntimeHooks` types to core
 
@@ -96,7 +96,7 @@ Goal: `amux gateway serve` runs a protocol server, a WebSocket client can connec
 
 **Notes:** Three scenarios: `runtimeHookAllowBash`, `runtimeHookDenyWrite`, `runtimeHookTimeout`. The mock adapter supports `preToolUse: 'blocking'` so gateway e2e tasks can drive the full pipeline without a real harness.
 
-**Done when:** Scenarios are exported, documented in `docs/14-harness-mock.md`, and drivable via `amux run --use-mock-harness --scenario runtimeHookAllowBash` once the CLI glue lands in T1.12.
+**Done when:** Scenarios are exported, documented in `docs/14-harness-mock.md`, and drivable via `adapters run --use-mock-harness --scenario runtimeHookAllowBash` once the CLI glue lands in T1.12.
 
 ---
 
@@ -112,13 +112,13 @@ Goal: `amux gateway serve` runs a protocol server, a WebSocket client can connec
 - `packages/adapters/src/claude-code/adapter.ts` (modify)
 - `packages/adapters/src/claude-code/capabilities.ts` (modify — `preToolUse: 'blocking'`)
 
-**Notes:** Per-run temp dir at `${os.tmpdir()}/amux-run-${runId}/` contains: `hooks.sock` (unix domain socket, mode 0600; named pipe on Windows), `secret` (per-run shared secret, mode 0600), `hook-shim.mjs` (~40 LOC Node script), and `settings.json` pointing hook entries at `node ${tmpdir}/hook-shim.mjs <EventName>`. Claude Code spawned with `CLAUDE_CONFIG_DIR=${tmpdir}`.
+**Notes:** Per-run temp dir at `${os.tmpdir()}/adapters-run-${runId}/` contains: `hooks.sock` (unix domain socket, mode 0600; named pipe on Windows), `secret` (per-run shared secret, mode 0600), `hook-shim.mjs` (~40 LOC Node script), and `settings.json` pointing hook entries at `node ${tmpdir}/hook-shim.mjs <EventName>`. Claude Code spawned with `CLAUDE_CONFIG_DIR=${tmpdir}`.
 
 Verify first whether `CLAUDE_CONFIG_DIR` fully replaces or merges with `~/.claude/settings.json`. Document the finding in the PR. If merge-only, use a minimal overlay and rely on Claude Code's defaults for everything else.
 
 The shim reads hook JSON from stdin, connects to the socket, sends `{secret, event, payload}` framed, reads the decision frame, writes Claude Code's expected stdout format, exits with the expected code.
 
-Cleanup: `process.on('exit')` handler plus a startup sweep of `amux-run-*` dirs older than 24h.
+Cleanup: `process.on('exit')` handler plus a startup sweep of `adapters-run-*` dirs older than 24h.
 
 **Done when:** A run with runtime hooks attached creates an isolated temp dir, routes every claude-code hook event through the dispatcher, cleans up on exit (including after crash), and leaves `~/.claude/settings.json` unchanged (byte-for-byte, mtime unchanged). Ten concurrent runs with distinct hooks do not cross-talk.
 
@@ -171,7 +171,7 @@ Cleanup: `process.on('exit')` handler plus a startup sweep of `amux-run-*` dirs 
 - `packages/gateway/src/auth/tokens.ts` (new — `TokenStore` interface, `SqliteTokenStore`, `MemoryTokenStore`)
 - `packages/gateway/src/auth/hashing.ts` (new — argon2id wrapper)
 
-**Notes:** `TokenStore` exposes `create({name, ttl?}) → {id, plaintext, record}`, `verify(plaintext) → record | null`, `revoke(id)`, `list()`, `touch(id)`. Plaintext is 32 random bytes base64url-encoded, stored only as an argon2id hash. Default sqlite file: `${HOME}/.amux/gateway/tokens.db`. Constant-time verify.
+**Notes:** `TokenStore` exposes `create({name, ttl?}) → {id, plaintext, record}`, `verify(plaintext) → record | null`, `revoke(id)`, `list()`, `touch(id)`. Plaintext is 32 random bytes base64url-encoded, stored only as an argon2id hash. Default sqlite file: `${HOME}/.adapters/gateway/tokens.db`. Constant-time verify.
 
 **Done when:** `create` returns plaintext exactly once and subsequent calls cannot recover it. `verify` handles valid, revoked, expired, and unknown tokens correctly. `list` never returns hashes or plaintext.
 
@@ -232,7 +232,7 @@ Hook broker: `requestDecision(req)` generates `hookRequestId`, pushes `hook.requ
 
 ---
 
-### T1.11 — `amux gateway` CLI subcommands
+### T1.11 — `adapters gateway` CLI subcommands
 
 **Spec:** 22 (CLI section) · **Depends on:** T1.7, T1.9
 
@@ -242,10 +242,10 @@ Hook broker: `requestDecision(req)` generates `hookRequestId`, pushes `hook.requ
 - `packages/cli/src/commands/gateway/status.ts` (new)
 - `packages/cli/src/commands/gateway/index.ts` (new — router)
 - `packages/cli/src/index.ts` (modify — register subcommand)
-- `packages/gateway/examples/systemd/amux-gateway.service` (new)
-- `packages/gateway/examples/launchd/ai.a5c.amux.gateway.plist` (new)
+- `packages/gateway/examples/systemd/adapters-gateway.service` (new)
+- `packages/gateway/examples/launchd/ai.a5c.adapters.gateway.plist` (new)
 
-**Notes:** `serve` reads `--config` or `~/.amux/gateway/config.yml`, runs until SIGTERM. `tokens create --qr` prints the token plaintext and a QR code via `qrcode-terminal` encoding `{url, token}` for phone pairing. `status` hits `/healthz`.
+**Notes:** `serve` reads `--config` or `~/.adapters/gateway/config.yml`, runs until SIGTERM. `tokens create --qr` prints the token plaintext and a QR code via `qrcode-terminal` encoding `{url, token}` for phone pairing. `status` hits `/healthz`.
 
 **Done when:** All four subcommands run end-to-end. Token create shows plaintext exactly once. Tokens list never prints plaintext. systemd and launchd templates documented in the gateway README.
 
@@ -277,7 +277,7 @@ Unblocks: approvalPreview variants in T2.6, destructive-only gating in spec 25, 
 
 **Notes:** Static file server for `webuiRoot`. Defaults to `require.resolve('@a5c-ai/tula-webui/dist')`. If webui package not installed, `/` returns 404 with a helpful message pointing at install instructions. Flags: `--webui /path`, `--no-webui`.
 
-**Done when:** `amux gateway serve` serves the webui at `/` when the package is present. Override and disable flags work.
+**Done when:** `adapters gateway serve` serves the webui at `/` when the package is present. Override and disable flags work.
 
 ---
 
@@ -586,7 +586,7 @@ Goal: a user pairs iPhone or Android with the gateway via QR or short-code, sees
 - `packages/mobile-ios-app/src/native/keychain.ts`
 - `packages/mobile-ios-app/src/providers/TokenStoreProvider.tsx`
 
-**Notes:** `react-native-keychain` with `accessible: whenUnlockedThisDeviceOnly` + biometric gate on read. Item key `amux.gateway.<host>`. Access group `group.ai.a5c.amux` shared with watchOS and tvOS targets.
+**Notes:** `react-native-keychain` with `accessible: whenUnlockedThisDeviceOnly` + biometric gate on read. Item key `adapters.gateway.<host>`. Access group `group.ai.a5c.adapters` shared with watchOS and tvOS targets.
 
 **Done when:** Token persists across restarts. Biometric prompt on read. Access group writable for later targets.
 
@@ -710,7 +710,7 @@ iOS app registers for silent push (`content-available: 1`). On delivery, `PushHa
 **Files:**
 - `packages/mobile-android-app/src/native/keystore.ts`
 - `packages/mobile-android-app/src/providers/TokenStoreProvider.tsx`
-- `packages/mobile-android-app/android/app/src/main/java/ai/a5c/amux/SecureTokenStore.kt`
+- `packages/mobile-android-app/android/app/src/main/java/ai/a5c/adapters/SecureTokenStore.kt`
 
 **Notes:** `EncryptedSharedPreferences` with `MasterKey` requiring device authentication. `android:allowBackup="false"` so token doesn't enter cloud backups.
 
@@ -764,12 +764,12 @@ iOS app registers for silent push (`content-available: 1`). On delivery, `PushHa
 **Spec:** 26 · **Depends on:** T3.13
 
 **Files:**
-- `packages/mobile-android-app/android/app/src/main/java/ai/a5c/amux/WearableDataLayerBridge.kt`
+- `packages/mobile-android-app/android/app/src/main/java/ai/a5c/adapters/WearableDataLayerBridge.kt`
 - `packages/mobile-android-app/src/native/wearBridge.ts`
 - `packages/mobile-android-app/src/providers/WearBridgeProvider.tsx`
 - `packages/mobile-android-app/src/projection/wearState.ts`
 
-**Notes:** `MessageClient` for latency-sensitive messages (hook requests/decisions/short inputs) + `DataClient` for state projection at `/amux/state`. Projection shape mirrors iOS; Kotlin types from T2.9.
+**Notes:** `MessageClient` for latency-sensitive messages (hook requests/decisions/short inputs) + `DataClient` for state projection at `/adapters/state`. Projection shape mirrors iOS; Kotlin types from T2.9.
 
 **Done when:** Bridge callable from JS. Projection diffs bounded ~4 KB.
 
@@ -780,7 +780,7 @@ iOS app registers for silent push (`content-available: 1`). On delivery, `PushHa
 **Spec:** 26 · **Depends on:** T3.11
 
 **Files:**
-- `packages/mobile-android-app/android/app/src/main/java/ai/a5c/amux/AmuxFirebaseMessagingService.kt`
+- `packages/mobile-android-app/android/app/src/main/java/ai/a5c/adapters/AmuxFirebaseMessagingService.kt`
 - `packages/mobile-android-app/src/native/push.ts`
 - `packages/mobile-android-app/src/providers/NotificationProvider.tsx`
 
@@ -939,7 +939,7 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 - `packages/watch-watchos-app/AgentMuxWatchApp/Input/QuickReplies.swift`
 - `packages/watch-watchos-app/AgentMuxWatchApp/Input/Scribble.swift`
 
-**Notes:** Dictation via `SFSpeechRecognizer`. Quick replies synced from phone via `UserDefaults(suiteName: "group.ai.a5c.amux")`. Scribble as fallback.
+**Notes:** Dictation via `SFSpeechRecognizer`. Quick replies synced from phone via `UserDefaults(suiteName: "group.ai.a5c.adapters")`. Scribble as fallback.
 
 **Done when:** Dictation result appends to focused run input. Quick reply taps dispatch `sendInput`.
 
@@ -982,8 +982,8 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 - `packages/watch-wearos-app/build.gradle.kts`
 - `packages/watch-wearos-app/app/build.gradle.kts`
 - `packages/watch-wearos-app/app/src/main/AndroidManifest.xml`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/MainActivity.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/AmuxWearApp.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/MainActivity.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/AmuxWearApp.kt`
 - `packages/watch-wearos-app/package.json` (marker)
 
 **Notes:** Kotlin 2.x, AGP latest, Jetpack Compose for Wear, target Wear OS 4+.
@@ -997,12 +997,12 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 **Spec:** 28 · **Depends on:** T4.12, T3.14
 
 **Files:**
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/transport/PhoneChannel.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/transport/TransportRouter.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/transport/DirectGatewayClient.kt` (stub)
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/generated/AmuxProtocol.kt` (copy of T2.9 output)
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/transport/PhoneChannel.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/transport/TransportRouter.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/transport/DirectGatewayClient.kt` (stub)
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/generated/AmuxProtocol.kt` (copy of T2.9 output)
 
-**Notes:** `MessageClient` for low-latency messages, `DataClient` for state snapshots at `/amux/state`. Router defaults to phone; falls back after 10s unreachable.
+**Notes:** `MessageClient` for low-latency messages, `DataClient` for state snapshots at `/adapters/state`. Router defaults to phone; falls back after 10s unreachable.
 
 **Done when:** Phone channel sends/receives via emulator. Router picks correctly.
 
@@ -1013,9 +1013,9 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 **Spec:** 28 · **Depends on:** T4.13
 
 **Files:**
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/state/Store.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/state/Projections.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/state/EventBuffer.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/state/Store.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/state/Projections.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/state/EventBuffer.kt`
 
 **Notes:** `StateFlow` + reducer pattern. Pure reducers. Event buffer capped at 100 nodes per run.
 
@@ -1028,8 +1028,8 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 **Spec:** 28 · **Depends on:** T4.14
 
 **Files:**
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/ui/RunsListScreen.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/ui/RunDetailScreen.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/ui/RunsListScreen.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/ui/RunDetailScreen.kt`
 
 **Notes:** `ScalingLazyColumn` for both. Rotary input for scroll. Swipe-to-dismiss for back. Long-press for contextual menu (stop run, copy last text).
 
@@ -1042,10 +1042,10 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 **Spec:** 28 · **Depends on:** T4.15
 
 **Files:**
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/ui/rows/TextDeltaRow.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/ui/rows/ThinkingRow.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/ui/rows/ToolCallRow.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/ui/rows/ToolResultRow.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/ui/rows/TextDeltaRow.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/ui/rows/ThinkingRow.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/ui/rows/ToolCallRow.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/ui/rows/ToolResultRow.kt`
 
 **Done when:** Four row composables render; tap-to-expand opens full-screen dialog.
 
@@ -1056,7 +1056,7 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 **Spec:** 28 · **Depends on:** T4.15
 
 **Files:**
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/ui/HookApprovalScreen.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/ui/HookApprovalScreen.kt`
 
 **Notes:** Full-screen, radial countdown indicator around the edge. Distinct haptic patterns for display vs allow vs deny (`VibrationEffect.EFFECT_HEAVY_CLICK` / `EFFECT_CLICK`).
 
@@ -1069,7 +1069,7 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 **Spec:** 28 · **Depends on:** T4.17
 
 **Files:**
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/ui/HookInboxScreen.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/ui/HookInboxScreen.kt`
 
 **Done when:** Pending-hook list across runs; tap opens approval screen.
 
@@ -1080,7 +1080,7 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 **Spec:** 28 · **Depends on:** T4.17
 
 **Files:**
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/ui/NotificationReceiver.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/ui/NotificationReceiver.kt`
 - `packages/watch-wearos-app/app/src/main/AndroidManifest.xml` (modify — channel + receiver)
 
 **Notes:** Notification channel `hook_requests` with `IMPORTANCE_HIGH`. `NotificationCompat.Action` buttons (Allow/Deny) wired via `PendingIntent` to a `BroadcastReceiver` that dispatches through `TransportRouter` without activity launch.
@@ -1094,14 +1094,14 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 **Spec:** 28 · **Depends on:** T4.14, T4.19
 
 **Files:**
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/input/Dictation.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/input/QuickReplies.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/tiles/RunsTile.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/tiles/HookInboxTile.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/complications/PendingHooksComplication.kt`
-- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/amux/wear/transport/DirectGatewayClient.kt` (complete)
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/input/Dictation.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/input/QuickReplies.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/tiles/RunsTile.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/tiles/HookInboxTile.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/complications/PendingHooksComplication.kt`
+- `packages/watch-wearos-app/app/src/main/kotlin/ai/a5c/adapters/wear/transport/DirectGatewayClient.kt` (complete)
 
-**Notes:** Dictation via `RemoteInput`. Quick replies synced from phone via `DataClient` at `/amux/quick-replies`. RunsTile shows active-run count + top-1 summary; HookInboxTile shows pending-hook count + top tool name. Complications via `ComplicationDataSourceService`. Direct-WS via OkHttp WebSocket, with foreground service notification while active.
+**Notes:** Dictation via `RemoteInput`. Quick replies synced from phone via `DataClient` at `/adapters/quick-replies`. RunsTile shows active-run count + top-1 summary; HookInboxTile shows pending-hook count + top tool name. Complications via `ComplicationDataSourceService`. Direct-WS via OkHttp WebSocket, with foreground service notification while active.
 
 **Done when:** Dictation returns text. Quick replies sync from phone. Both tiles populate and refresh. Both complications populate. Direct-WS engages as fallback and shows foreground-service notification while active.
 
@@ -1109,7 +1109,7 @@ Goal: receive a hook request on the wrist, see tool name and one-line preview, t
 
 ## 7. M5 — TVs
 
-Goal: open the amux dashboard on a TV, see live runs stream with 24pt+ typography from across the room. Pair-debugging and demos get a first-class surface.
+Goal: open the adapters dashboard on a TV, see live runs stream with 24pt+ typography from across the room. Pair-debugging and demos get a first-class surface.
 
 ### tvOS branch
 
@@ -1138,7 +1138,7 @@ Goal: open the amux dashboard on a TV, see live runs stream with 24pt+ typograph
 - `packages/tv-appletv-app/src/providers/TokenStoreProvider.tsx`
 - `packages/tv-appletv-app/ios/AmuxTV/AmuxTV.entitlements`
 
-**Notes:** Same `group.ai.a5c.amux` access group as iOS and watchOS. Token written by iOS phone app is readable by tvOS app with no extra pairing step.
+**Notes:** Same `group.ai.a5c.adapters` access group as iOS and watchOS. Token written by iOS phone app is readable by tvOS app with no extra pairing step.
 
 **Done when:** TV app reads the phone-written token with no setup. QR fallback flow exists for the no-phone case.
 
@@ -1339,7 +1339,7 @@ M1 — Runtime hooks + gateway
   T1.8   Protocol v1 frames
   T1.9   WS server with auth
   T1.10  Run manager + event log + fanout + hook broker
-  T1.11  amux gateway CLI subcommands
+  T1.11  adapters gateway CLI subcommands
   T1.12  Core tool classifier
   T1.13  Serve webui from gateway (static host)
 

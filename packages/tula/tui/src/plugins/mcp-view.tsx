@@ -60,7 +60,7 @@ function McpView({ client, active }: TuiViewProps) {
     return (
       <Box flexDirection="column">
         <Text dimColor>No MCP servers installed.</Text>
-        <Text dimColor>Install via: amux mcp install &lt;agent&gt; &lt;server&gt;</Text>
+        <Text dimColor>Install via: adapters mcp install &lt;agent&gt; &lt;server&gt;</Text>
       </Box>
     );
   return (
@@ -77,7 +77,7 @@ function McpView({ client, active }: TuiViewProps) {
         </Text>
       ))}
       {rows.length > 40 ? <Text dimColor>… {rows.length - 40} more</Text> : null}
-      <Text dimColor>R: refresh · manage via: amux mcp list|install|uninstall &lt;agent&gt; [server]</Text>
+      <Text dimColor>R: refresh · manage via: adapters mcp list|install|uninstall &lt;agent&gt; [server]</Text>
     </Box>
   );
 }

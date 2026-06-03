@@ -1,4 +1,4 @@
-import { normalizeEvent, type UnifiedHookEvent, type NormalizeOptions } from '@a5c-ai/adapters-hooks-core';
+import { normalizeEvent, type UnifiedHookEvent, type NormalizeOptions } from '@a5c-ai/hooks-adapter-core';
 import { CURSOR_PHASE_MAPPINGS } from './mappings';
 import { getEventDiagnostics } from './capability-profile';
 

@@ -14,7 +14,7 @@ import type { CommandModule } from 'yargs';
 import {
   loadSession,
   materializeExecContext,
-} from '@a5c-ai/adapters-hooks-core';
+} from '@a5c-ai/hooks-adapter-core';
 import { createHooksLogger } from '../hooks-logger';
 
 interface ExecArgs {

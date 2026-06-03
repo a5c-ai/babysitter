@@ -1,11 +1,11 @@
 /**
- * `amux adapters` subcommands.
+ * `adapters adapters` subcommands.
  *
  * @see docs/10-cli-reference.md Section 8
  */
 
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
-import { AgentMuxError } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
+import { AgentMuxError } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from './cli-helpers.js';
 import { flagBool, flagStr } from './cli-helpers.js';
 import { ExitCode, errorCodeToExitCode } from './cli-helpers.js';

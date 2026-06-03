@@ -1,11 +1,11 @@
 /**
- * `amux sessions` subcommands.
+ * `adapters sessions` subcommands.
  *
  * @see docs/10-cli-reference.md Section 12
  */
 
-import type { AgentMuxClient, SessionQuery } from '@a5c-ai/adapters-comm';
-import { AgentMuxError } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient, SessionQuery } from '@a5c-ai/comm-adapter';
+import { AgentMuxError } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from '../parse-args.js';
 import { flagBool, flagStr, flagNum, flagArr } from '../parse-args.js';
 import { ExitCode, errorCodeToExitCode } from '../exit-codes.js';
@@ -35,9 +35,9 @@ export async function sessionsCommand(client: AgentMuxClient, args: ParsedArgs):
     const sessionId = args.positionals[1];
     if (!agent || !sessionId) {
       if (jsonMode) {
-        printJsonError('VALIDATION_ERROR', 'Usage: amux sessions show <agent> <session-id>');
+        printJsonError('VALIDATION_ERROR', 'Usage: adapters sessions show <agent> <session-id>');
       } else {
-        printError('Usage: amux sessions show <agent> <session-id>');
+        printError('Usage: adapters sessions show <agent> <session-id>');
       }
       return ExitCode.USAGE_ERROR;
     }
@@ -62,9 +62,9 @@ export async function sessionsCommand(client: AgentMuxClient, args: ParsedArgs):
     const sessionId = args.positionals[1];
     if (!agent || !sessionId) {
       if (jsonMode) {
-        printJsonError('VALIDATION_ERROR', 'Usage: amux sessions export <agent> <session-id>');
+        printJsonError('VALIDATION_ERROR', 'Usage: adapters sessions export <agent> <session-id>');
       } else {
-        printError('Usage: amux sessions export <agent> <session-id>');
+        printError('Usage: adapters sessions export <agent> <session-id>');
       }
       return ExitCode.USAGE_ERROR;
     }

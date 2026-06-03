@@ -1,17 +1,17 @@
-# @a5c-ai/adapters-extensions
+# @a5c-ai/extensions-adapter
 
 Cross-harness plugin compiler for converting a unified `plugin.json` source tree into harness-specific plugin packages.
 
 ## Install
 
 ```bash
-npm install @a5c-ai/adapters-extensions
+npm install @a5c-ai/extensions-adapter
 ```
 
 CLI usage:
 
 ```bash
-npx --yes @a5c-ai/adapters-extensions --help
+npx --yes @a5c-ai/extensions-adapter --help
 ```
 
 This package ships the built compiler in `dist/` and this package README for npm auditability.
@@ -35,7 +35,7 @@ import {
   compileAll,
   validateDirectory,
   validateSchema,
-} from "@a5c-ai/adapters-extensions";
+} from "@a5c-ai/extensions-adapter";
 ```
 
 The package exports the compiler pipeline and related types:
@@ -47,12 +47,12 @@ The package exports the compiler pipeline and related types:
 ## Validation
 
 ```bash
-npm run build --workspace=@a5c-ai/adapters-extensions
-npm run test --workspace=@a5c-ai/adapters-extensions
+npm run build --workspace=@a5c-ai/extensions-adapter
+npm run test --workspace=@a5c-ai/extensions-adapter
 npm run verify:metadata
-npm pack --json --dry-run --workspace=@a5c-ai/adapters-extensions
+npm pack --json --dry-run --workspace=@a5c-ai/extensions-adapter
 ```
 
 ## Release Expectations
 
-`@a5c-ai/adapters-extensions` is published from the central release workflows. Keep this README aligned with the actual command set and compiler exports, and keep `package.json#files` limited to the built compiler plus package documentation.
+`@a5c-ai/extensions-adapter` is published from the central release workflows. Keep this README aligned with the actual command set and compiler exports, and keep `package.json#files` limited to the built compiler plus package documentation.

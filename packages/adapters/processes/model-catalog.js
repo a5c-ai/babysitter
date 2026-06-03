@@ -81,7 +81,7 @@ const captureDocsContextTask = defineTask('capture-docs-context', (args, taskCtx
       `rg -n "ModelRegistry|ModelCapabilities|provider|protocol|chat|response|responses|refresh|validate|estimateCost" docs/06-capabilities-and-models.md -C 3 || true`,
       `echo ""`,
       `echo "# docs/10-cli-reference.md excerpts"`,
-      `rg -n "amux capabilities|amux models|models list|models get|models refresh|config validate" docs/10-cli-reference.md -C 3 || true`,
+      `rg -n "adapters capabilities|adapters models|models list|models get|models refresh|config validate" docs/10-cli-reference.md -C 3 || true`,
       `echo ""`,
       `echo "# current implementation excerpts"`,
       `rg -n "models\\(|model\\(|defaultModel\\(|validate\\(|refresh\\(|refreshAll\\(|lastUpdated\\(|estimateCost\\(" packages/adapters/core/src/model-registry.ts packages/adapters/cli/src/commands/models.ts packages/adapters/cli/src/index.ts -C 2 || true`,

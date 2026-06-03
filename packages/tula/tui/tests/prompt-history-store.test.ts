@@ -8,7 +8,7 @@ let tmpDir: string;
 let file: string;
 
 beforeEach(() => {
-  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-hist-'));
+  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-tui-hist-'));
   file = path.join(tmpDir, 'history');
 });
 

@@ -105,7 +105,7 @@
 - isHostDelegableRoute should check route, not backend (5dd82f650, Tal Muskal, 3 hours ago)
 - update broken process library links to point to library/ root (#793) (045a22651, Safet A, 3 hours ago)
 - use 'unified' harness for session-start/end hooks (1334fbd6b, Tal Muskal, 3 hours ago)
-- map amux agent name to babysitter SDK harness name (018d055c7, Tal Muskal, 4 hours ago)
+- map adapters agent name to babysitter SDK harness name (018d055c7, Tal Muskal, 4 hours ago)
 - add SessionStart/Stop mappings to gemini and pi adapters (e195a4980, Tal Muskal, 5 hours ago)
 - add Jitsi resource kinds to KRADLE_RESOURCES array (c9a80314d, Tal Muskal, 5 hours ago)
 - deliver stdin prompt through ConPTY for hermes Windows (4b92bc7a3, Tal Muskal, 6 hours ago)
@@ -225,7 +225,7 @@
 - c37f18de0 feat(graph): track Cohere Command A+ and Embed v4 (a5c automation, 21 hours ago)
 - b39c512e1 feat(atlas): track Mistral Large 3 and Medium 3.5 (a5c-ai agent, 21 hours ago)
 - ca359f4a4 feat(kradle): add Envoy AI Gateway dependency and KradleModelRoute CRD (Tal Muskal, 21 hours ago)
-- 25ef6dd42 feat(omni): add omni agent as amux-launchable harness with live-stack support (Tal Muskal, 21 hours ago)
+- 25ef6dd42 feat(omni): add omni agent as adapters-launchable harness with live-stack support (Tal Muskal, 21 hours ago)
 - b627b64c6 feat(kradle-web): add For Agents documentation page with MCP setup guide (Tal Muskal, 22 hours ago)
 - 80cdfa162 feat(kradle): add resource contract tests and server-side validation (Tal Muskal, 22 hours ago)
 
@@ -239,7 +239,7 @@
 - 50815d58d fix(launch): TS errors — optional chaining on adapter, rename duplicate launchBehavior (Tal Muskal, 20 hours ago)
 - ef50e66ba fix(launch): allow catalog-only harnesses (no adapter) like omni to be launched (Tal Muskal, 21 hours ago)
 - 9ecb2859e fix(gemini-cli): add --yolo launch config for auto-approval in NI mode (Tal Muskal, 21 hours ago)
-- 3451e5728 fix(live-stack): skip amux install for omni (already linked by CI workflow) (Tal Muskal, 21 hours ago)
+- 3451e5728 fix(live-stack): skip adapters install for omni (already linked by CI workflow) (Tal Muskal, 21 hours ago)
 - 541935650 fix(agent-platform): fix PI_PARENT_PROMPT_TIMEOUT_MS=0 causing instant abort (Tal Muskal, 21 hours ago)
 - 8a704053a fix(kradle): fix 4 resource schema mismatches caught by strengthened contract tests (Tal Muskal, 21 hours ago)
 
@@ -270,7 +270,7 @@
 
 ### feat
 - ca359f4a4 feat(kradle): add Envoy AI Gateway dependency and KradleModelRoute CRD (Tal Muskal, 10 minutes ago)
-- 25ef6dd42 feat(omni): add omni agent as amux-launchable harness with live-stack support (Tal Muskal, 40 minutes ago)
+- 25ef6dd42 feat(omni): add omni agent as adapters-launchable harness with live-stack support (Tal Muskal, 40 minutes ago)
 - b627b64c6 feat(kradle-web): add For Agents documentation page with MCP setup guide (Tal Muskal, 57 minutes ago)
 - 80cdfa162 feat(kradle): add resource contract tests and server-side validation (Tal Muskal, 63 minutes ago)
 - 11e906721 feat(kradle-web): add internal tools catalog API endpoint (Tal Muskal, 11 hours ago)
@@ -282,7 +282,7 @@
 
 ### fix
 - 9ecb2859e fix(gemini-cli): add --yolo launch config for auto-approval in NI mode (Tal Muskal, 13 minutes ago)
-- 3451e5728 fix(live-stack): skip amux install for omni (already linked by CI workflow) (Tal Muskal, 26 minutes ago)
+- 3451e5728 fix(live-stack): skip adapters install for omni (already linked by CI workflow) (Tal Muskal, 26 minutes ago)
 - 541935650 fix(agent-platform): fix PI_PARENT_PROMPT_TIMEOUT_MS=0 causing instant abort (Tal Muskal, 42 minutes ago)
 - 8a704053a fix(kradle): fix 4 resource schema mismatches caught by strengthened contract tests (Tal Muskal, 43 minutes ago)
 - 609071852 fix(bridge-hooks): resolve Windows .cmd/.sh to node+.js to avoid shell arg splitting (Tal Muskal, 5 hours ago)
@@ -391,14 +391,14 @@
 - 949d9609b fix(ci): agent version check discovers agents from atlas graph at runtime (Tal Muskal, 29 minutes ago)
 - 24e50bb6c fix(ci): add a5c GitHub App token to all trigger-based workflows (Tal Muskal, 49 minutes ago)
 - eb8c0c551 fix(transport-mux): add stream error handling, fix Pi proxy API type (Tal Muskal, 50 minutes ago)
-- 73b53ae76 fix(amux): restore Pi --mode json, resolve Windows spawn without shell (Tal Muskal, 80 minutes ago)
-- 4edff3e2e fix(amux): deliver prompts via stdin on Windows to avoid cmd.exe mangling (Tal Muskal, 2 hours ago)
+- 73b53ae76 fix(adapters): restore Pi --mode json, resolve Windows spawn without shell (Tal Muskal, 80 minutes ago)
+- 4edff3e2e fix(adapters): deliver prompts via stdin on Windows to avoid cmd.exe mangling (Tal Muskal, 2 hours ago)
 - f09793644 fix(live-stack): use platform-native mkdir instead of node -e on Windows (Tal Muskal, 2 hours ago)
 - ae29cffaf fix(graph): Pi uses -p flag for prompt delivery, not stdin (Tal Muskal, 2 hours ago)
 - fa900f15b fix(test): update launch tests for graph-driven launchBehavior (Tal Muskal, 3 hours ago)
-- 39422c79d fix(amux): let Pi run in interactive mode for tool-use support (Tal Muskal, 4 hours ago)
+- 39422c79d fix(adapters): let Pi run in interactive mode for tool-use support (Tal Muskal, 4 hours ago)
 - a64b877f0 fix(ci): align download-artifact version with upload, add debug listing (Tal Muskal, 4 hours ago)
-- f73d12684 fix(amux): don't duplicate prompt via stdin when already passed as CLI arg (Tal Muskal, 5 hours ago)
+- f73d12684 fix(adapters): don't duplicate prompt via stdin when already passed as CLI arg (Tal Muskal, 5 hours ago)
 - 0cf58b544 fix(ci): conditionally use --force-local tar flag (Windows only) (Tal Muskal, 14 hours ago)
 - a2e883985 fix(ci): rename breakpoints-mux → tasks-mux in all workflows (Tal Muskal, 15 hours ago)
 - c231e9e09 fix(npm): also flag plugin 5.0.0 as bad publish batch (Tal Muskal, 15 hours ago)

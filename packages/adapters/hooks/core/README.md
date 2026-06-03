@@ -1,11 +1,11 @@
-# @a5c-ai/adapters-hooks-core
+# @a5c-ai/hooks-adapter-core
 
 Canonical schemas, types, session store, merge engine, and programmatic runtime for hooks-mux.
 
 ## Install
 
 ```bash
-npm install @a5c-ai/adapters-hooks-core
+npm install @a5c-ai/hooks-adapter-core
 ```
 
 This package ships the built runtime in `dist/` and this package README for npm publish-surface auditing.
@@ -20,7 +20,7 @@ import {
   runNormalized,
   type UnifiedHookEvent,
   type UnifiedHookResult,
-} from "@a5c-ai/adapters-hooks-core";
+} from "@a5c-ai/hooks-adapter-core";
 ```
 
 The public surface includes:

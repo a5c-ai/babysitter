@@ -7,8 +7,8 @@
 The current a5c.ai agent stack consists of:
 
 - **`@a5c-ai/adapters`** - Agent dispatch/multiplexing layer
-- **`@a5c-ai/adapters-hooks-cli`** - Hook normalization across harnesses  
-- **`@a5c-ai/adapters-extensions`** - Cross-harness plugin compiler
+- **`@a5c-ai/hooks-adapter-cli`** - Hook normalization across harnesses  
+- **`@a5c-ai/extensions-adapter`** - Cross-harness plugin compiler
 - **`@a5c-ai/tula-platform`** - Monolithic orchestration runtime
 - **`@a5c-ai/babysitter-sdk`** - Core SDK for orchestration
 

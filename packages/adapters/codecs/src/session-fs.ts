@@ -8,8 +8,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { writeFileAtomic, writeJsonAtomic } from '@a5c-ai/adapters-comm';
-import type { CostRecord, SessionMessage, SessionToolCall } from '@a5c-ai/adapters-comm';
+import { writeFileAtomic, writeJsonAtomic } from '@a5c-ai/comm-adapter';
+import type { CostRecord, SessionMessage, SessionToolCall } from '@a5c-ai/comm-adapter';
 
 /**
  * Recursively list all files matching `predicate` under `dir`.

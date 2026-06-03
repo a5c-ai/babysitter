@@ -20,8 +20,8 @@ import type {
   RunOptions,
   Session,
   CostRecord,
-} from '@a5c-ai/adapters-comm';
-import { StreamAssembler } from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
+import { StreamAssembler } from '@a5c-ai/comm-adapter';
 
 import { BaseProgrammaticAdapter } from './programmatic-adapter-base.js';
 import { ClaudeAdapter } from './claude-adapter.js';

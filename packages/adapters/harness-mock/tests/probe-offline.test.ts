@@ -111,7 +111,7 @@ describe('HarnessProbe (offline)', () => {
   });
 
   it('probeAllHarnesses writes result files and profile files', async () => {
-    const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-probe-'));
+    const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-probe-'));
     const configs: Record<string, ProbeConfig> = {
       'node-probe': createNodeProbeConfig(),
       'missing-one': {

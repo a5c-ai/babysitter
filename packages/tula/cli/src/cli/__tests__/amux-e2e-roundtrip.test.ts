@@ -77,7 +77,7 @@ describe("E2E: tula <-> agent-mux round-trip", () => {
 
     const client = createMockClient(mockEvents);
 
-    // Step 1: tula invokes via the agent-platform amux bridge
+    // Step 1: tula invokes via the agent-platform adapters bridge
     const result = await invokeViaAgentMux(client, "claude-code", {
       prompt: "Fix the bug",
       model: "claude-opus-4-6",
@@ -106,7 +106,7 @@ describe("E2E: tula <-> agent-mux round-trip", () => {
       "session_end",
     ]);
 
-    // Step 3: Format as amux-events JSONL (what agent-mux babysitter adapter would parse)
+    // Step 3: Format as adapters-events JSONL (what agent-mux babysitter adapter would parse)
     // formatResultAsAmuxEvents takes (harness, result) and generates its own runId
     const jsonlLines = formatResultAsAmuxEvents("claude-code", result);
     expect(jsonlLines.length).toBeGreaterThan(0);
@@ -117,7 +117,7 @@ describe("E2E: tula <-> agent-mux round-trip", () => {
       expect(parsed.type).toBeDefined();
       expect(parsed.runId).toBeDefined();
       expect(typeof parsed.runId).toBe("string");
-      // agent should be the amux adapter name "claude" (mapped from "claude-code")
+      // agent should be the adapters adapter name "claude" (mapped from "claude-code")
       expect(parsed.agent).toBe("claude");
       expect(parsed.timestamp).toBeDefined();
     }

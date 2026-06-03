@@ -52,7 +52,7 @@ d('docker E2E (DOCKER_E2E=1)', () => {
   it('buildInvocationCommand(docker) → real docker run produces expected stdout', async () => {
     const spawnArgs: SpawnArgs = {
       command: 'echo',
-      args: ['amux-docker-e2e-marker'],
+      args: ['adapters-docker-e2e-marker'],
       env: { AGENT_MUX_E2E: '1' },
       cwd: process.cwd(),
       usePty: false,
@@ -67,6 +67,6 @@ d('docker E2E (DOCKER_E2E=1)', () => {
 
     const r = await run(built.command, built.args, { timeoutMs: 120000 });
     expect(r.exitCode).toBe(0);
-    expect(r.stdout).toContain('amux-docker-e2e-marker');
+    expect(r.stdout).toContain('adapters-docker-e2e-marker');
   }, 180000);
 });

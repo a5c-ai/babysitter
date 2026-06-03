@@ -34,9 +34,9 @@ Every time a command, skill, or hook changes in the canonical plugin, the change
 Replace manual synchronization with a deterministic compiler:
 
 ```bash
-npx @a5c-ai/adapters-extensions compile --target claude-code --output dist/claude-code
-npx @a5c-ai/adapters-extensions compile --target codex --output dist/codex
-npx @a5c-ai/adapters-extensions compile --target all --output dist/
+npx @a5c-ai/extensions-adapter compile --target claude-code --output dist/claude-code
+npx @a5c-ai/extensions-adapter compile --target codex --output dist/codex
+npx @a5c-ai/extensions-adapter compile --target all --output dist/
 ```
 
 ### Design Principles
@@ -360,7 +360,7 @@ Pinned dependency versions for SDK and hooks-mux. Used by hook scripts to instal
 }
 ```
 
-The `sdkVersion` field is used for **both** `@a5c-ai/babysitter-sdk` and `@a5c-ai/adapters-hooks-cli` installation. This is the current behavior in the codebase -- both packages share a version.
+The `sdkVersion` field is used for **both** `@a5c-ai/babysitter-sdk` and `@a5c-ai/hooks-adapter-cli` installation. This is the current behavior in the codebase -- both packages share a version.
 
 For Gemini, an optional `extensionVersion` field can be added:
 
@@ -1981,10 +1981,10 @@ fi
 # --- hooks-mux install/upgrade ---
 install_hooks_proxy() {
   local target_version="$1"
-  if npm i -g "@a5c-ai/adapters-hooks-cli@${target_version}" --loglevel=error 2>/dev/null; then
+  if npm i -g "@a5c-ai/hooks-adapter-cli@${target_version}" --loglevel=error 2>/dev/null; then
     return 0
   else
-    if npm i -g "@a5c-ai/adapters-hooks-cli@${target_version}" --prefix "$HOME/.local" --loglevel=error 2>/dev/null; then
+    if npm i -g "@a5c-ai/hooks-adapter-cli@${target_version}" --prefix "$HOME/.local" --loglevel=error 2>/dev/null; then
       export PATH="$HOME/.local/bin:$PATH"
       return 0
     fi
@@ -2021,7 +2021,7 @@ elif [ -f "$HOME/.local/bin/a5c-hooks-mux" ]; then
 fi
 
 if [ -z "$PROXY" ]; then
-  PROXY="npx -y @a5c-ai/adapters-hooks-cli@${SDK_VERSION} "
+  PROXY="npx -y @a5c-ai/hooks-adapter-cli@${SDK_VERSION} "
 fi
 
 # --- Capture stdin and delegate ---
@@ -2087,7 +2087,7 @@ The compiler should use these capabilities to determine which hooks can actually
 
 ### 6.4 versions.json Integration
 
-The `versions.json` file is emitted for every target. Hook scripts read it at runtime to determine which version of `@a5c-ai/babysitter-sdk` and `@a5c-ai/adapters-hooks-cli` to install.
+The `versions.json` file is emitted for every target. Hook scripts read it at runtime to determine which version of `@a5c-ai/babysitter-sdk` and `@a5c-ai/hooks-adapter-cli` to install.
 
 During compilation, `versions.json` is copied from the UPF source. During the bump-version release process (`scripts/bump-version.mjs`), all `versions.json` files across all plugin directories are updated synchronously:
 
@@ -2185,7 +2185,7 @@ The babysitter project uses synchronized versioning across all packages. The `sc
 2. All plugin `package.json` files (`plugins/babysitter-codex/package.json`, etc.)
 3. All plugin manifest files (`plugin.json`, `gemini-extension.json`, `openclaw.plugin.json`)
 4. All `versions.json` files (setting `sdkVersion`)
-5. All cross-package dependency references (`@a5c-ai/babysitter-sdk`, `@a5c-ai/adapters-hooks-core`)
+5. All cross-package dependency references (`@a5c-ai/babysitter-sdk`, `@a5c-ai/hooks-adapter-core`)
 6. Lock files (`package-lock.json`)
 
 ### 8.2 Post-UPF Version Flow
@@ -2198,7 +2198,7 @@ bump-version.mjs
   +-- Update UPF source (a5c-plugin.json version, versions.json sdkVersion)
   |
   +-- Run compiler for each target
-  |     npx @a5c-ai/adapters-extensions compile --target all --output dist/
+  |     npx @a5c-ai/extensions-adapter compile --target all --output dist/
   |
   +-- Each dist/<target>/ has correct version in its manifest
 ```
@@ -2237,7 +2237,7 @@ jobs:
       - run: npm run build:sdk
 
       # Compile all targets
-      - run: npx @a5c-ai/adapters-extensions compile --target all --output dist/ --verify
+      - run: npx @a5c-ai/extensions-adapter compile --target all --output dist/ --verify
 
       # Publish npm packages
       - run: cd dist/codex && npm publish --access public
@@ -2319,8 +2319,8 @@ jobs:
 1. Run the compiler for each target and compare output against the existing plugin directory:
 
 ```bash
-npx @a5c-ai/adapters-extensions compile --target claude-code --output /tmp/test-claude-code
-npx @a5c-ai/adapters-extensions diff --target claude-code --existing plugins/babysitter/
+npx @a5c-ai/extensions-adapter compile --target claude-code --output /tmp/test-claude-code
+npx @a5c-ai/extensions-adapter diff --target claude-code --existing plugins/babysitter/
 ```
 
 2. Fix any discrepancies. The compiler output should match the existing plugins exactly (modulo whitespace/formatting).
@@ -2373,7 +2373,7 @@ npx @a5c-ai/adapters-extensions diff --target claude-code --existing plugins/bab
 Compile a UPF package for one or all targets.
 
 ```
-npx @a5c-ai/adapters-extensions compile --target <name|all> --output <dir> [options]
+npx @a5c-ai/extensions-adapter compile --target <name|all> --output <dir> [options]
 
 Options:
   --target <name>    Target harness name or "all" for all targets.
@@ -2391,13 +2391,13 @@ Options:
 
 ```bash
 # Compile for Claude Code
-npx @a5c-ai/adapters-extensions compile --target claude-code --output dist/claude-code
+npx @a5c-ai/extensions-adapter compile --target claude-code --output dist/claude-code
 
 # Compile all targets with verification
-npx @a5c-ai/adapters-extensions compile --target all --output dist/ --verify
+npx @a5c-ai/extensions-adapter compile --target all --output dist/ --verify
 
 # Dry run to see what would be emitted
-npx @a5c-ai/adapters-extensions compile --target gemini --output dist/gemini --dry-run --json
+npx @a5c-ai/extensions-adapter compile --target gemini --output dist/gemini --dry-run --json
 ```
 
 **Output (JSON mode):**
@@ -2429,7 +2429,7 @@ npx @a5c-ai/adapters-extensions compile --target gemini --output dist/gemini --d
 Validate a UPF source package without compiling.
 
 ```
-npx @a5c-ai/adapters-extensions validate [options]
+npx @a5c-ai/extensions-adapter validate [options]
 
 Options:
   --source <dir>     UPF source directory (default: current directory).
@@ -2440,7 +2440,7 @@ Options:
 **Example:**
 
 ```bash
-npx @a5c-ai/adapters-extensions validate --source plugins/babysitter-unified --strict
+npx @a5c-ai/extensions-adapter validate --source plugins/babysitter-unified --strict
 ```
 
 ### 10.3 `diff`
@@ -2448,7 +2448,7 @@ npx @a5c-ai/adapters-extensions validate --source plugins/babysitter-unified --s
 Compare compiled output against an existing plugin directory.
 
 ```
-npx @a5c-ai/adapters-extensions diff --target <name> --existing <dir> [options]
+npx @a5c-ai/extensions-adapter diff --target <name> --existing <dir> [options]
 
 Options:
   --target <name>    Target harness name.
@@ -2460,7 +2460,7 @@ Options:
 **Example:**
 
 ```bash
-npx @a5c-ai/adapters-extensions diff --target codex --existing plugins/babysitter-codex
+npx @a5c-ai/extensions-adapter diff --target codex --existing plugins/babysitter-codex
 ```
 
 **Output:**
@@ -2480,7 +2480,7 @@ Files with differences:
 Scaffold a new UPF plugin.
 
 ```
-npx @a5c-ai/adapters-extensions init --name <name> [options]
+npx @a5c-ai/extensions-adapter init --name <name> [options]
 
 Options:
   --name <name>      Plugin name.
@@ -2491,7 +2491,7 @@ Options:
 **Example:**
 
 ```bash
-npx @a5c-ai/adapters-extensions init --name my-plugin --template full --output plugins/my-plugin
+npx @a5c-ai/extensions-adapter init --name my-plugin --template full --output plugins/my-plugin
 ```
 
 Creates:
@@ -2516,7 +2516,7 @@ plugins/my-plugin/
 Show available compilation targets and their capabilities.
 
 ```
-npx @a5c-ai/adapters-extensions list-targets [options]
+npx @a5c-ai/extensions-adapter list-targets [options]
 
 Options:
   --json             Output structured JSON.
@@ -2678,7 +2678,7 @@ Full compiler pipeline tests that compile a known UPF source and validate the co
 
 ```bash
 # Compile a test fixture UPF source for each target
-npx @a5c-ai/adapters-extensions compile --target all --source test/fixtures/test-plugin --output test/output --verify
+npx @a5c-ai/extensions-adapter compile --target all --source test/fixtures/test-plugin --output test/output --verify
 ```
 
 Integration test assertions:
@@ -2693,11 +2693,11 @@ Compiled output for each target is stored as committed snapshots. CI compares fr
 
 ```bash
 # Update snapshots (when intentional changes are made)
-npx @a5c-ai/adapters-extensions compile --target all --output test/snapshots --source test/fixtures/test-plugin
+npx @a5c-ai/extensions-adapter compile --target all --output test/snapshots --source test/fixtures/test-plugin
 
 # CI check: compile and compare (fails if output differs from snapshot)
-npx @a5c-ai/adapters-extensions compile --target all --output /tmp/test-output --source test/fixtures/test-plugin
-npx @a5c-ai/adapters-extensions diff --target all --existing test/snapshots
+npx @a5c-ai/extensions-adapter compile --target all --output /tmp/test-output --source test/fixtures/test-plugin
+npx @a5c-ai/extensions-adapter diff --target all --existing test/snapshots
 ```
 
 Snapshot tests catch unintentional changes to emitted output format, whitespace, field ordering, and file structure.
@@ -2708,9 +2708,9 @@ The `diff` CLI command (section 10.3) is the primary regression detection tool d
 
 ```bash
 # Compare compiled output against the hand-maintained plugin directory
-npx @a5c-ai/adapters-extensions diff --target codex --existing plugins/babysitter-codex
-npx @a5c-ai/adapters-extensions diff --target pi --existing plugins/babysitter-pi
-npx @a5c-ai/adapters-extensions diff --target all --existing plugins/
+npx @a5c-ai/extensions-adapter diff --target codex --existing plugins/babysitter-codex
+npx @a5c-ai/extensions-adapter diff --target pi --existing plugins/babysitter-pi
+npx @a5c-ai/extensions-adapter diff --target all --existing plugins/
 ```
 
 The diff command:

@@ -12,7 +12,7 @@ attributes:
   scope: project
   evaluationContext: project
   expansion: literal
-  notes: amux CLI bin entrypoint package.
+  notes: adapters CLI bin entrypoint package.
 ---
 nodeKind: PathDescriptor
 id: path:agent-mux-gateway
@@ -42,7 +42,7 @@ attributes:
   scope: project
   evaluationContext: project
   expansion: literal
-  notes: Ink-based amux-tui bin entrypoint.
+  notes: Ink-based adapters-tui bin entrypoint.
 ---
 nodeKind: PathDescriptor
 id: path:agent-mux-ui
@@ -117,7 +117,7 @@ attributes:
   scope: project
   evaluationContext: project
   expansion: literal
-  notes: Umbrella @a5c-ai/adapters re-export with amux bin.
+  notes: Umbrella @a5c-ai/adapters re-export with adapters bin.
 ---
 nodeKind: PathDescriptor
 id: path:agent-mux-adapters

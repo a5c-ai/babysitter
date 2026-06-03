@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-extension-mux
 attributes:
-  packageId: "@a5c-ai/adapters-extensions"
-  packageName: "@a5c-ai/adapters-extensions"
+  packageId: "@a5c-ai/extensions-adapter"
+  packageName: "@a5c-ai/extensions-adapter"
   workspacePath: packages/extension-mux
   moduleType: typescript
   surfaceKinds:
@@ -12,4 +12,4 @@ attributes:
   versionPolicy: semver
 edges:
   references_path:
-    - target: path:amux-hooks-project
+    - target: path:adapters-hooks-project

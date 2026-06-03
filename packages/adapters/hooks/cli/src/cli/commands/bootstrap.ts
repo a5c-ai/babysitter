@@ -13,7 +13,7 @@ import {
   normalizeEvent,
   loadSession,
   saveSession,
-} from '@a5c-ai/adapters-hooks-core';
+} from '@a5c-ai/hooks-adapter-core';
 import { loadAdapter } from '../adapter-loader';
 import {
   prepareBootstrapSession,

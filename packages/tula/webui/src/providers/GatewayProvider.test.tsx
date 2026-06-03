@@ -72,7 +72,7 @@ describe('GatewayProvider', () => {
 
   it('waits for stored auth validation before mounting the live gateway layer', async () => {
     window.localStorage.setItem(
-      'amux.webui.auth',
+      'adapters.webui.auth',
       JSON.stringify({ gatewayUrl: 'http://localhost:57751', token: 'stale-token' }),
     );
     connectMock.mockRejectedValue(
@@ -103,7 +103,7 @@ describe('GatewayProvider', () => {
 
   it('normalizes stored app route URLs back to the gateway base origin', async () => {
     window.localStorage.setItem(
-      'amux.webui.auth',
+      'adapters.webui.auth',
       JSON.stringify({
         gatewayUrl: 'http://localhost:57751/sessions/rollout-2026-04-27T15-37-25-019dcef1-c795-7552-a983-71a1c631d64c',
         token: 'valid-token',
@@ -125,7 +125,7 @@ describe('GatewayProvider', () => {
     expect(screen.getByTestId('gateway-url').textContent).toBe('http://localhost:57751');
     expect(screen.getByTestId('authenticated').textContent).toBe('yes');
     await waitFor(() => {
-      expect(JSON.parse(window.localStorage.getItem('amux.webui.auth') ?? '{}')).toMatchObject({
+      expect(JSON.parse(window.localStorage.getItem('adapters.webui.auth') ?? '{}')).toMatchObject({
         gatewayUrl: 'http://localhost:57751',
         token: 'valid-token',
       });

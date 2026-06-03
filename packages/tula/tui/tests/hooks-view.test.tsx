@@ -52,7 +52,7 @@ let prevCwd: string;
 let prevHome: string | undefined;
 
 beforeEach(() => {
-  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-hooks-'));
+  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-hooks-'));
   prevCwd = process.cwd();
   prevHome = process.env.HOME;
   process.chdir(tmp);
@@ -68,8 +68,8 @@ afterEach(() => {
 
 describe('hooks-view', () => {
   it('lists registered hooks', async () => {
-    fs.mkdirSync(path.join(tmp, '.amux'), { recursive: true });
-    fs.writeFileSync(path.join(tmp, '.amux', 'hooks.json'), JSON.stringify({
+    fs.mkdirSync(path.join(tmp, '.adapters'), { recursive: true });
+    fs.writeFileSync(path.join(tmp, '.adapters', 'hooks.json'), JSON.stringify({
       version: 1,
       hooks: [
         { id: 'h1', agent: '*', hookType: 'PreToolUse', handler: 'builtin', target: 'noop', enabled: true },
@@ -90,7 +90,7 @@ describe('hooks-view', () => {
   });
 
   it('removes hook on d + y', async () => {
-    const hooksPath = path.join(tmp, '.amux', 'hooks.json');
+    const hooksPath = path.join(tmp, '.adapters', 'hooks.json');
     fs.mkdirSync(path.dirname(hooksPath), { recursive: true });
     fs.writeFileSync(hooksPath, JSON.stringify({
       version: 1,

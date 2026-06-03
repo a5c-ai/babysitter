@@ -30,7 +30,7 @@ commands:
             npm install -g --legacy-peer-deps \
               @a5c-ai/adapters-cli@<< parameters.npm-tag >> \
               @a5c-ai/babysitter-sdk@<< parameters.npm-tag >> \
-              @a5c-ai/adapters-triggers@<< parameters.npm-tag >>
+              @a5c-ai/triggers-adapter@<< parameters.npm-tag >>
 
   evaluate-trigger:
     parameters:

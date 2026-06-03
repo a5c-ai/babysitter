@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, ReactNode, TextareaHTMLAttributes } from "react";
-import type { KanbanTaskTag } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanTaskTag } from "@a5c-ai/comm-adapter/kanban";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { cx } from "@a5c-ai/compendium";

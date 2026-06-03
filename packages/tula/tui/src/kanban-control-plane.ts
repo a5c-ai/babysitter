@@ -9,7 +9,7 @@ import type {
   KanbanWorkspaceActionResponse,
   KanbanWorkspaceInventory,
   KanbanWorkspaceInventoryQuery,
-} from '@a5c-ai/adapters-comm/kanban';
+} from '@a5c-ai/comm-adapter/kanban';
 
 type EmptyToolArgs = Record<string, never>;
 

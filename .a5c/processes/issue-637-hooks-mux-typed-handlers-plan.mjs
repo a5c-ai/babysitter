@@ -6,7 +6,7 @@
  *
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
  * - Matching existing infrastructure found in hooks-mux plan types, plan resolver ordering, normalizer runner shell execution, merge/result parsing,
- *   programmatic engine fanout, CLI invoke parsing, hooks-mux tests, agent-platform AMUX bridge, and agent-platform MCP/tool registry surfaces.
+ *   programmatic engine fanout, CLI invoke parsing, hooks-mux tests, agent-platform ADAPTERS bridge, and agent-platform MCP/tool registry surfaces.
  * - The active process-library binding is `/home/runner/.a5c/process-library/babysitter-repo/library`. Matching methodology guidance is
  *   available there under `methodologies/atdd-tdd/atdd-tdd.js`, `methodologies/process-hardening/process-hardening-patterns.js`,
  *   `methodologies/superpowers/verification-before-completion.js`, and `tdd-quality-convergence.js`.
@@ -25,7 +25,7 @@
  * - packages/hooks-mux/core/src/normalizer/runner.ts
  * - packages/hooks-mux/core/src/normalizer/plan-resolver.ts
  * - packages/tula/platform/src/mcp/client/toolRegistry.ts
- * - packages/tula/platform/src/harness/amux/amuxBridge.ts
+ * - packages/tula/platform/src/harness/adapters/amuxBridge.ts
  *
  * @process methodologies/atdd-tdd/atdd-tdd
  * @process methodologies/process-hardening/process-hardening-patterns
@@ -309,7 +309,7 @@ export const reuseAuditAndPriorArtTask = defineTask('issue-637.reuse-audit-and-p
         'Resolve the active process-library binding with `babysitter process-library:active --json`; use that binding for methodology lookups.',
         'Record whether repo-local `.a5c/process-library/` exists, but do not treat its absence as a blocker when the active process-library binding is available.',
         'Read `methodologies/atdd-tdd/atdd-tdd.js`, `methodologies/process-hardening/process-hardening-patterns.js`, `methodologies/superpowers/verification-before-completion.js`, and `tdd-quality-convergence.js` from the active process-library binding only enough to extract process guidance.',
-        'Inspect current base branch files, especially packages/hooks-mux/core/src/types/plan.ts, packages/hooks-mux/core/src/normalizer/runner.ts, packages/hooks-mux/core/src/normalizer/plan-resolver.ts, packages/hooks-mux/core/src/api.ts, packages/hooks-mux/core/src/index.ts, and packages/tula/platform/src/harness/amux/amuxBridge.ts.',
+        'Inspect current base branch files, especially packages/hooks-mux/core/src/types/plan.ts, packages/hooks-mux/core/src/normalizer/runner.ts, packages/hooks-mux/core/src/normalizer/plan-resolver.ts, packages/hooks-mux/core/src/api.ts, packages/hooks-mux/core/src/index.ts, and packages/tula/platform/src/harness/adapters/amuxBridge.ts.',
         'Inspect PR #695 files and summary as prior art. Treat it as a reference, not source of truth, unless it is merged into the current base branch.',
         'Render a section exactly titled: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
         'Return JSON: { reuseAuditConfigPresent, keywords, matchingInfrastructure, currentBaseStatus, priorArt, processLibraryFindings, reuseConstraints, staleOrMisleadingDocs, recommendedProcessShape }.',
@@ -360,7 +360,7 @@ export const traceRuntimeSurfacesTask = defineTask('issue-637.trace-runtime-surf
       instructions: [
         'Trace HookPlanEntry and HandlerRef from CLI/programmatic creation through plan resolution, handler sorting, runPlan fanout, runHandler dispatch, timeout/error policy, result parsing, merge behavior, and adapter rendering.',
         'Trace exported APIs from packages/hooks-mux/core/src/api.ts, packages/hooks-mux/core/src/index.ts, and normalizer exports so new executor seams can be consumed without private imports.',
-        'Trace how agent-platform AMUX bridge forwards hook handler config and where MCP/tool registry or agent responder infrastructure already exists.',
+        'Trace how agent-platform ADAPTERS bridge forwards hook handler config and where MCP/tool registry or agent responder infrastructure already exists.',
         'Identify existing test suites that can host contract tests without excessive new harness code.',
         'Return JSON: { runtimeCallPaths, exportedSurfaces, testSurfaces, bridgeSurfaces, mcpRegistrySurfaces, promptAgentSurfaces, compatibilityRisks, recommendedFilePlan }.',
       ],
@@ -474,7 +474,7 @@ export const updateBridgeAndDocsTask = defineTask('issue-637.update-bridge-and-d
       instructions: [
         'Use the contract and implementation summary below:',
         JSON.stringify({ contract: args.contract, implementation: args.implementation }, null, 2),
-        'Inspect packages/tula/platform/src/harness/amux/amuxBridge.ts and related AMUX tests. Update only if current bridge code drops or narrows handler type config.',
+        'Inspect packages/tula/platform/src/harness/adapters/amuxBridge.ts and related ADAPTERS tests. Update only if current bridge code drops or narrows handler type config.',
         'Do not implement full live MCP/tool-mux integration here if #576 is not ready. Document the seam and residual dependency instead.',
         'Update docs/agent-stack/hooks/missing-capabilities.md section 1 from gap language to implemented/core-seam language only where the code actually supports it.',
         'Add or update tests for bridge pass-through when production bridge code changes.',

@@ -111,7 +111,7 @@ describe('agent-mux-tui binary entrypoint', () => {
       reconfigureLogger,
     }));
     vi.doMock('ink', () => ({ render: vi.fn() }));
-    vi.doMock('@a5c-ai/adapters-comm', () => ({ createClient: vi.fn() }));
+    vi.doMock('@a5c-ai/comm-adapter', () => ({ createClient: vi.fn() }));
     vi.doMock('@a5c-ai/adapters-cli/bootstrap', () => ({ registerBuiltInAdapters: vi.fn() }));
     vi.doMock('../src/index.js', () => ({
       App: vi.fn(),
@@ -121,7 +121,7 @@ describe('agent-mux-tui binary entrypoint', () => {
     }));
 
     process.env.AGENT_MUX_LOG_LEVEL = 'debug';
-    process.env.AGENT_MUX_LOG_FILE = '/tmp/amux.log';
+    process.env.AGENT_MUX_LOG_FILE = '/tmp/adapters.log';
     delete process.env.AGENT_MUX_OBSERVABILITY_MODE;
 
     const { configureLoggingFromEnv } = await import('../src/bin/agent-mux-tui.js');
@@ -131,7 +131,7 @@ describe('agent-mux-tui binary entrypoint', () => {
     expect(setObservabilityMode).toHaveBeenCalledWith('full');
     expect(reconfigureLogger).toHaveBeenCalledWith({
       level: 'debug',
-      logFile: '/tmp/amux.log',
+      logFile: '/tmp/adapters.log',
     });
   });
 });

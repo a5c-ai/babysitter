@@ -127,7 +127,7 @@ outputs:
     value: ${{ steps.trigger.outputs.event }}
   exit-code:
     description: agent-mux exit code. Empty when trigger did not match.
-    value: ${{ steps.amux.outputs.exit-code }}
+    value: ${{ steps.adapters.outputs.exit-code }}
 
 runs:
   using: composite
@@ -169,8 +169,8 @@ runs:
       run: |
         set -euo pipefail
         echo "Installing @a5c-ai packages with tag: $NPM_TAG"
-        npm install -g --legacy-peer-deps @a5c-ai/adapters@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/adapters-triggers@$NPM_TAG
-        npm install -g --legacy-peer-deps @a5c-ai/adapters-hooks-cli@$NPM_TAG 2>/dev/null || echo "agent-mux-hooks-cli install skipped (optional)"
+        npm install -g --legacy-peer-deps @a5c-ai/adapters@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/triggers-adapter@$NPM_TAG
+        npm install -g --legacy-peer-deps @a5c-ai/hooks-adapter-cli@$NPM_TAG 2>/dev/null || echo "agent-mux-hooks-cli install skipped (optional)"
         which agent-mux && agent-mux --version || { echo "ERROR: agent-mux not found after install"; exit 1; }
 
     - name: Install harness
@@ -302,7 +302,7 @@ runs:
         bash -euo pipefail -c "$INPUT_PRE_RUN"
 
     - name: Run agent-mux
-      id: amux
+      id: adapters
       if: ${{ steps.trigger.outputs.matched == 'true' }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
@@ -324,7 +324,7 @@ runs:
         AGENT_MUX_TRIGGER_EVENT_PATH: ${{ steps.trigger.outputs.event }}
       run: |
         set -euo pipefail
-        AMUX="agent-mux"
+        ADAPTERS="agent-mux"
 
         # Map harness names to agent-mux aliases
         AGENT_MUX_HARNESS="$INPUT_HARNESS"
@@ -392,7 +392,7 @@ runs:
         fi
 
         echo "::group::agent-mux ${ARGS[*]}"
-        if $AMUX "${ARGS[@]}"; then
+        if $ADAPTERS "${ARGS[@]}"; then
           echo "exit-code=0" >> "$GITHUB_OUTPUT"
         else
           status=$?

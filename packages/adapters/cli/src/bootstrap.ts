@@ -6,8 +6,8 @@
  * consumer) gets all built-in adapters with a single call.
  */
 
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
-import type { MultiAgentAdapter } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
+import type { MultiAgentAdapter } from '@a5c-ai/comm-adapter';
 import {
   ClaudeAdapter,
   ClaudeAgentSdkAdapter,
@@ -81,7 +81,7 @@ export function registerBuiltInAdapters(client: AgentMuxClient): void {
       // programmatic/HTTP adapters). Log to stderr so callers can diagnose
       // without crashing the whole process.
       const name = (adapter as { agent?: string }).agent ?? adapter.constructor.name;
-      process.stderr.write(`[amux] skipping adapter ${name}: ${(e as Error).message}\n`);
+      process.stderr.write(`[adapters] skipping adapter ${name}: ${(e as Error).message}\n`);
     }
   }
 }

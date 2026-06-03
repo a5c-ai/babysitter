@@ -3,7 +3,7 @@ import { ThemeProvider as UiThemeProvider, darkTheme, lightTheme } from '@a5c-ai
 
 type ThemeMode = 'light' | 'dark';
 
-const STORAGE_KEY = 'amux.webui.theme';
+const STORAGE_KEY = 'adapters.webui.theme';
 const ThemeModeContext = createContext<{ mode: ThemeMode; toggle(): void } | null>(null);
 
 function readThemeMode(): ThemeMode {

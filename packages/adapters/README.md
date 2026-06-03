@@ -14,7 +14,7 @@ This directory is the unified parent for all content migrated from the former
 - `core/`, `adapters/`, `cli/`, `sdk/`, `gateway/`, `harness-mock/`, `observability/`
 - `ui/`, `webui/`, `tui/`
 - platform app packages under `mobile-*`, `tv-*`, and `watch-*`
-- `amux-proxy/` for the Python proxy package
+- `adapters-proxy/` for the Python proxy package
 
 ## Migrated Repo Assets
 

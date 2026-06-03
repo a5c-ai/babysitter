@@ -1,6 +1,6 @@
 # Setup Guide
 
-This guide covers the current packaged surface for `@a5c-ai/adapters-tasks`.
+This guide covers the current packaged surface for `@a5c-ai/tasks-adapter`.
 
 ## Prerequisites
 
@@ -12,14 +12,14 @@ This guide covers the current packaged surface for `@a5c-ai/adapters-tasks`.
 From the published package:
 
 ```bash
-npm install @a5c-ai/adapters-tasks
+npm install @a5c-ai/tasks-adapter
 ```
 
 From the monorepo root while working on this package:
 
 ```bash
 npm install
-npm run build --workspace=@a5c-ai/adapters-tasks
+npm run build --workspace=@a5c-ai/tasks-adapter
 ```
 
 ## Package Topology
@@ -52,10 +52,10 @@ Source layout:
 Run these from the monorepo root:
 
 ```bash
-npm run build --workspace=@a5c-ai/adapters-tasks
-npm run typecheck --workspace=@a5c-ai/adapters-tasks
-npm run test --workspace=@a5c-ai/adapters-tasks
-npm run test:packaged-surface-parity --workspace=@a5c-ai/adapters-tasks
+npm run build --workspace=@a5c-ai/tasks-adapter
+npm run typecheck --workspace=@a5c-ai/tasks-adapter
+npm run test --workspace=@a5c-ai/tasks-adapter
+npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter
 ```
 
 ## CLI Setup
@@ -90,7 +90,7 @@ Using the published package:
   "mcpServers": {
     "agent-mux-tasks": {
       "command": "npx",
-      "args": ["-y", "@a5c-ai/adapters-tasks", "server", "start"]
+      "args": ["-y", "@a5c-ai/tasks-adapter", "server", "start"]
     }
   }
 }
@@ -111,7 +111,7 @@ Using a local monorepo checkout after building the package:
 
 `server start` respects the package CLI globals, so local integrations can also pass `--responder-dir`, `--repo-root`, and `--config-root` when responder discovery needs to point at a specific checkout.
 
-The package also exports HTTP MCP helpers from `@a5c-ai/adapters-tasks/mcp`, but HTTP transport is a programmatic API surface, not a separate CLI package or command.
+The package also exports HTTP MCP helpers from `@a5c-ai/tasks-adapter/mcp`, but HTTP transport is a programmatic API surface, not a separate CLI package or command.
 
 ## Registered MCP Tools
 

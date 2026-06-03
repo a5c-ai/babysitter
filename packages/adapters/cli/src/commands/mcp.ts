@@ -1,4 +1,4 @@
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';
 import { printError } from '../output.js';
@@ -9,7 +9,7 @@ export async function mcpCommand(
 ): Promise<number> {
   if (args.flags.help) {
     process.stdout.write([
-      'Usage: amux mcp <subcommand> <agent> [args] [flags]',
+      'Usage: adapters mcp <subcommand> <agent> [args] [flags]',
       '',
       'Manage Model Context Protocol (MCP) servers per agent',
       '',
@@ -23,9 +23,9 @@ export async function mcpCommand(
       '  --global                        Use global configuration (default)',
       '',
       'Examples:',
-      '  amux mcp list claude',
-      '  amux mcp install claude filesystem',
-      '  amux mcp install claude filesystem --project',
+      '  adapters mcp list claude',
+      '  adapters mcp install claude filesystem',
+      '  adapters mcp install claude filesystem --project',
     ].join('\n') + '\n');
     return ExitCode.SUCCESS;
   }

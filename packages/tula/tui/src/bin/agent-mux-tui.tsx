@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import React from 'react';
 import { render } from 'ink';
-import { createClient } from '@a5c-ai/adapters-comm';
+import { createClient } from '@a5c-ai/comm-adapter';
 import { registerBuiltInAdapters } from '@a5c-ai/adapters-cli/bootstrap';
 import { reconfigureLogger, setObservabilityMode } from '@a5c-ai/adapters-observability';
 import { App, builtinPlugins, defaultExternalPluginsDir, loadExternalPlugins } from '../index.js';

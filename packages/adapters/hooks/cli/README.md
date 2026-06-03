@@ -1,11 +1,11 @@
-# @a5c-ai/adapters-hooks-cli
+# @a5c-ai/hooks-adapter-cli
 
 CLI entrypoint for hooks-mux.
 
 ## Install
 
 ```bash
-npm install -g @a5c-ai/adapters-hooks-cli
+npm install -g @a5c-ai/hooks-adapter-cli
 ```
 
 This package ships the built CLI in `dist/` and this package README for npm publish-surface auditing.

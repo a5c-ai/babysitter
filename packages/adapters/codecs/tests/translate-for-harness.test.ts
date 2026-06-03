@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { ProviderConfig, AgentName } from '@a5c-ai/adapters-comm';
+import type { ProviderConfig, AgentName } from '@a5c-ai/comm-adapter';
 import { translateForHarness } from '../src/translate-for-harness.js';
 
 function makeConfig(overrides: Partial<ProviderConfig> & { provider: ProviderConfig['provider'] }): ProviderConfig {

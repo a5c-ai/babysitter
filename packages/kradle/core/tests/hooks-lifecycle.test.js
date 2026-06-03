@@ -347,7 +347,7 @@ describe('agent-dispatch-controller — lifecycleEmitter wiring', () => {
     const attempt = createResource('AgentDispatchAttempt', { name: 'attempt-1' }, {
       organizationRef: 'default', agentDispatchRun: 'run-persist', attemptReason: 'initial',
       agentStackSnapshot: {},
-    }, { agentMuxSessionId: 'sess-xyz', agentMuxRunId: 'amux-run-1' });
+    }, { agentMuxSessionId: 'sess-xyz', agentMuxRunId: 'adapters-run-1' });
 
     controller.persistSessionEvent(
       { type: 'completion', role: 'system', content: 'done' },

@@ -86,7 +86,7 @@ jobs:
       - name: Start kind cluster
         uses: helm/kind-action@v1
         with:
-          cluster_name: amux-e2e
+          cluster_name: adapters-e2e
       - name: Run k8s-gated E2E
         env:
           K8S_E2E: '1'

@@ -42,7 +42,7 @@ export interface TuiViewProps {
   workspaceSelection?: { workspacePath: string };
   /** Optional return target for detail surfaces such as session-detail. */
   returnViewId?: string;
-  /** Sessions currently backed by an amux-managed run (keyed `${agent}:${sessionId}`). */
+  /** Sessions currently backed by an adapters-managed run (keyed `${agent}:${sessionId}`). */
   activeSessions?: ReadonlySet<string>;
 }
 

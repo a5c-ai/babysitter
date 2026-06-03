@@ -605,7 +605,7 @@ export function App({
       if (/ENOENT/.test(msg)) {
         const m = msg.match(/spawn (\S+)/);
         const bin = m?.[1] ?? 'agent CLI';
-        setStatus(`Error: ${bin} is not installed. Try: amux install ${bin}`);
+        setStatus(`Error: ${bin} is not installed. Try: adapters install ${bin}`);
       } else {
         setStatus(`Error: ${msg}`);
       }

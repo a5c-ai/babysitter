@@ -376,7 +376,7 @@ export const traceTokenCostSurfacesTask = defineTask('issue-578.trace-token-cost
         'Trace agent-core prompt flow from packages/agent-core/src/session.ts through AgentCorePromptResult in packages/agent-core/src/types.ts and all downstream consumers in agent-platform.',
         'Trace transport-mux CompletionResult.usage/costRecord through codecs, server response paths, streaming done events, MetricsTracker, and tests.',
         'Trace SDK cost journaling: packages/sdk/src/cost/types.ts, packages/sdk/src/cost/journal.ts, packages/sdk/src/runtime/orchestrateIteration.ts, and packages/sdk/src/runtime/replay/effectIndex plus existing tests.',
-        'Trace agent-platform cost APIs: packages/tula/platform/src/session/cost.ts, packages/tula/platform/src/cost/effectCost.ts, createRun orchestration/effect resolution files, and amux event mapper cost/token_usage handling.',
+        'Trace agent-platform cost APIs: packages/tula/platform/src/session/cost.ts, packages/tula/platform/src/cost/effectCost.ts, createRun orchestration/effect resolution files, and adapters event mapper cost/token_usage handling.',
         'Identify the authoritative point where a completion/effect has enough runId/sessionId/effectId identity to append one COST_TRACKED event without double counting.',
         'Return JSON: { agentCorePath, transportMuxPath, sdkJournalPath, agentPlatformBudgetPath, identityAvailability, doubleCountRisks, streamingGaps, targetFiles, testsToUpdate, recommendedSequence }.',
       ],

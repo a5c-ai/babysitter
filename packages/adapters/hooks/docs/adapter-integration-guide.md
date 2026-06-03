@@ -1,12 +1,12 @@
 # Adapter Integration Guide
 
-Per-harness setup instructions for integrating `@a5c-ai/adapters-hooks-cli` with each supported agent harness.
+Per-harness setup instructions for integrating `@a5c-ai/hooks-adapter-cli` with each supported agent harness.
 
 ---
 
 ## Overview
 
-The hooks-mux system normalizes hook execution across agent harnesses. Each harness has a dedicated adapter package (`@a5c-ai/adapters-hooks-<name>`) that translates between harness-native hook contracts and the canonical event model.
+The hooks-mux system normalizes hook execution across agent harnesses. Each harness has a dedicated adapter package (`@a5c-ai/hooks-adapter-<name>`) that translates between harness-native hook contracts and the canonical event model.
 
 To use the proxy with any harness:
 
@@ -18,7 +18,7 @@ To use the proxy with any harness:
 
 ## Claude Code
 
-**Adapter package:** `@a5c-ai/adapters-hooks-claude`
+**Adapter package:** `@a5c-ai/hooks-adapter-claude`
 **Family:** Shell-hook
 **Session ID:** Native (`session_id` from stdin payload)
 **Env persistence:** Native env file (`CLAUDE_ENV_FILE`)
@@ -33,25 +33,25 @@ Add to `.claude/settings.json`:
     "SessionStart": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event SessionStart"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event SessionStart"
       }
     ],
     "PreToolUse": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event PreToolUse"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event PreToolUse"
       }
     ],
     "PostToolUse": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event PostToolUse"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event PostToolUse"
       }
     ],
     "Stop": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event Stop"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event Stop"
       }
     ]
   }
@@ -70,7 +70,7 @@ To initialize session context without running any hook logic:
     "SessionStart": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event SessionStart --bootstrap-only"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event SessionStart --bootstrap-only"
       }
     ]
   }
@@ -85,7 +85,7 @@ Claude also supports the dedicated bootstrap command on `SessionStart`:
     "SessionStart": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli bootstrap --adapter claude"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli bootstrap --adapter claude"
       }
     ]
   }
@@ -121,7 +121,7 @@ still persists and later `invoke` or `exec` flows can rehydrate it from the stor
 
 ## Codex
 
-**Adapter package:** `@a5c-ai/adapters-hooks-codex`
+**Adapter package:** `@a5c-ai/hooks-adapter-codex`
 **Family:** Shell-hook
 **Session ID:** Native
 **Env persistence:** Wrapper only
@@ -131,7 +131,7 @@ still persists and later `invoke` or `exec` flows can rehydrate it from the stor
 Configure in your Codex hooks configuration:
 
 ```bash
-npx -y @a5c-ai/adapters-hooks-cli invoke --adapter codex
+npx -y @a5c-ai/hooks-adapter-cli invoke --adapter codex
 ```
 
 Codex does not provide native downstream env injection. If handlers persist env that later
@@ -163,7 +163,7 @@ because Codex can launch multiple matching native hooks concurrently.
 
 ## Gemini CLI
 
-**Adapter package:** `@a5c-ai/adapters-hooks-gemini`
+**Adapter package:** `@a5c-ai/hooks-adapter-gemini`
 **Family:** Shell-hook
 **Session ID:** Derived (from env or payload heuristics)
 **Env persistence:** Wrapper only
@@ -175,8 +175,8 @@ Configure in your Gemini CLI extension:
 ```json
 {
   "hooks": {
-    "onSessionStart": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter gemini",
-    "onToolUse": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter gemini"
+    "onSessionStart": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter gemini",
+    "onToolUse": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter gemini"
   }
 }
 ```
@@ -202,7 +202,7 @@ Configure in your Gemini CLI extension:
 
 ## GitHub Copilot
 
-**Adapter package:** `@a5c-ai/adapters-hooks-copilot`
+**Adapter package:** `@a5c-ai/hooks-adapter-copilot`
 **Family:** Shell-hook
 **Session ID:** Synthetic (no native session concept)
 **Env persistence:** Wrapper only
@@ -212,7 +212,7 @@ Configure in your Gemini CLI extension:
 Configure in your Copilot agent hooks:
 
 ```bash
-npx -y @a5c-ai/adapters-hooks-cli invoke --adapter copilot
+npx -y @a5c-ai/hooks-adapter-cli invoke --adapter copilot
 ```
 
 ### Capabilities
@@ -237,7 +237,7 @@ npx -y @a5c-ai/adapters-hooks-cli invoke --adapter copilot
 
 ## Cursor
 
-**Adapter package:** `@a5c-ai/adapters-hooks-cursor`
+**Adapter package:** `@a5c-ai/hooks-adapter-cursor`
 **Family:** Shell-hook
 **Session ID:** Synthetic (no stable session identifier)
 **Env persistence:** None
@@ -249,7 +249,7 @@ Configure in `.cursor/hooks.json`:
 ```json
 {
   "hooks": {
-    "onFileChange": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter cursor --bootstrap-only"
+    "onFileChange": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter cursor --bootstrap-only"
   }
 }
 ```
@@ -277,7 +277,7 @@ Configure in `.cursor/hooks.json`:
 
 ## Pi
 
-**Adapter package:** `@a5c-ai/adapters-hooks-pi`
+**Adapter package:** `@a5c-ai/hooks-adapter-pi`
 **Family:** In-process
 **Session ID:** Native
 **Env persistence:** Runtime hook
@@ -287,8 +287,8 @@ Configure in `.cursor/hooks.json`:
 Pi uses a programmatic adapter rather than CLI shell hooks:
 
 ```typescript
-import { createAdapter, registerHandler, runNormalized } from '@a5c-ai/adapters-hooks-core';
-import { createPiAdapter } from '@a5c-ai/adapters-hooks-pi';
+import { createAdapter, registerHandler, runNormalized } from '@a5c-ai/hooks-adapter-core';
+import { createPiAdapter } from '@a5c-ai/hooks-adapter-pi';
 
 const adapter = createPiAdapter();
 // Register handlers programmatically
@@ -317,7 +317,7 @@ registerHandler({
 
 ## Oh-My-Pi
 
-**Adapter package:** `@a5c-ai/adapters-hooks-oh-my-pi`
+**Adapter package:** `@a5c-ai/hooks-adapter-oh-my-pi`
 **Family:** In-process
 **Session ID:** Native
 **Env persistence:** Runtime hook
@@ -327,7 +327,7 @@ registerHandler({
 Similar to Pi, Oh-My-Pi uses the programmatic adapter:
 
 ```typescript
-import { createOhMyPiAdapter } from '@a5c-ai/adapters-hooks-oh-my-pi';
+import { createOhMyPiAdapter } from '@a5c-ai/hooks-adapter-oh-my-pi';
 
 const adapter = createOhMyPiAdapter();
 ```
@@ -348,7 +348,7 @@ const adapter = createOhMyPiAdapter();
 
 ## OpenCode
 
-**Adapter package:** `@a5c-ai/adapters-hooks-opencode`
+**Adapter package:** `@a5c-ai/hooks-adapter-opencode`
 **Family:** In-process
 **Session ID:** Derived
 **Env persistence:** Wrapper only
@@ -356,7 +356,7 @@ const adapter = createOhMyPiAdapter();
 ### Setup
 
 ```typescript
-import { createOpenCodeAdapter } from '@a5c-ai/adapters-hooks-opencode';
+import { createOpenCodeAdapter } from '@a5c-ai/hooks-adapter-opencode';
 
 const adapter = createOpenCodeAdapter();
 ```
@@ -377,7 +377,7 @@ const adapter = createOpenCodeAdapter();
 
 ## OpenClaw
 
-**Adapter package:** `@a5c-ai/adapters-hooks-openclaw`
+**Adapter package:** `@a5c-ai/hooks-adapter-openclaw`
 **Family:** In-process
 **Session ID:** Derived
 **Env persistence:** Wrapper only
@@ -385,7 +385,7 @@ const adapter = createOpenCodeAdapter();
 ### Setup
 
 ```typescript
-import { createOpenClawAdapter } from '@a5c-ai/adapters-hooks-openclaw';
+import { createOpenClawAdapter } from '@a5c-ai/hooks-adapter-openclaw';
 
 const adapter = createOpenClawAdapter();
 ```
@@ -410,16 +410,16 @@ To verify your adapter setup and check for integration issues:
 
 ```bash
 # Check all adapters
-npx -y @a5c-ai/adapters-hooks-cli doctor
+npx -y @a5c-ai/hooks-adapter-cli doctor
 
 # Check a specific adapter
-npx -y @a5c-ai/adapters-hooks-cli doctor --adapter claude
+npx -y @a5c-ai/hooks-adapter-cli doctor --adapter claude
 
 # JSON output for scripting
-npx -y @a5c-ai/adapters-hooks-cli doctor --json
+npx -y @a5c-ai/hooks-adapter-cli doctor --json
 
 # Include session health with custom stale threshold
-npx -y @a5c-ai/adapters-hooks-cli doctor --stale-threshold 48
+npx -y @a5c-ai/hooks-adapter-cli doctor --stale-threshold 48
 ```
 
 The doctor command probes each adapter package, reports capability profiles, generates integration warnings for capability gaps, and checks session store health including stale session detection.

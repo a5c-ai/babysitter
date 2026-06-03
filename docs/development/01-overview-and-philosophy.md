@@ -22,7 +22,7 @@ graph TB
 
     subgraph "Runtime Layer"
         ADAPTERS["Adapters<br/>(thin wrappers, data from graph)"]
-        LAUNCH["Launch<br/>(amux launch)"]
+        LAUNCH["Launch<br/>(adapters launch)"]
         PROXY["Proxy<br/>(transport-mux)"]
         HOOKS["Hooks<br/>(hooks-mux)"]
     end
@@ -74,7 +74,7 @@ graph TB
     end
 
     subgraph "Entry Points"
-        AMUX["amux CLI<br/>(agent-mux)"]
+        ADAPTERS["adapters CLI<br/>(agent-mux)"]
         TRIGGERS["Triggers<br/>(GitHub Action)"]
         KRADLE["Kradle<br/>(Kubernetes operator + web UI)"]
     end
@@ -102,14 +102,14 @@ graph TB
         MORE["...8 more"]
     end
 
-    DEV --> AMUX
+    DEV --> ADAPTERS
     CI --> TRIGGERS
-    TRIGGERS --> AMUX
-    KRADLE --> AMUX
+    TRIGGERS --> ADAPTERS
+    KRADLE --> ADAPTERS
 
-    AMUX --> CATALOG
-    AMUX --> PROXY
-    AMUX --> CC & CX & PI & GC & MORE
+    ADAPTERS --> CATALOG
+    ADAPTERS --> PROXY
+    ADAPTERS --> CC & CX & PI & GC & MORE
 
     CC & CX & PI --> HOOKS
     HOOKS --> SDK
@@ -125,7 +125,7 @@ graph TB
 |---------|------|
 | `packages/atlas` | Knowledge graph: YAML definitions → JSON index |
 | `@a5c-ai/atlas/catalog` | Query API over the atlas graph |
-| `packages/adapters/cli` | `amux` CLI: launch, install, run |
+| `packages/adapters/cli` | `adapters` CLI: launch, install, run |
 | `packages/adapters/adapters` | Per-harness thin wrappers (data from graph) |
 | `packages/adapters/core` | Provider resolver, workspace service |
 | `packages/transport-mux` | HTTP proxy: protocol translation between harness ↔ provider |

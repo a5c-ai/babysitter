@@ -19,7 +19,7 @@ import type {
   DetectInstallationResult,
   InteractionResponse,
   ProgrammaticRun,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 import type {
   Options as ClaudeSdkOptions,
   Query as ClaudeSdkQuery,

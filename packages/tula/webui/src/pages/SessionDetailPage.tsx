@@ -14,7 +14,7 @@ import {
   type SessionCost,
   type SessionFlowModel,
 } from '@a5c-ai/tula-ui/session-flow';
-import type { Attachment, WorkspaceRuntimeSurface } from '@a5c-ai/adapters-comm';
+import type { Attachment, WorkspaceRuntimeSurface } from '@a5c-ai/comm-adapter';
 import { Button } from '@a5c-ai/compendium';
 
 import { SessionWorkspaceShell } from '../components/sessions/session-workspace-shell.js';

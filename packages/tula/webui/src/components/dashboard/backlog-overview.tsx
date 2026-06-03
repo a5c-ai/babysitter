@@ -14,7 +14,7 @@ import type {
   KanbanTaskTag,
   KanbanReviewArtifact,
   KanbanWorkflowState,
-} from "@a5c-ai/adapters-comm/kanban";
+} from "@a5c-ai/comm-adapter/kanban";
 import {
   Activity,
   AlertCircle,

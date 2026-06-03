@@ -49,8 +49,8 @@ function resolveScopePaths(options: ProviderProfilesFileOptions = {}): {
   projectPath: string;
 } {
   return {
-    globalPath: path.join(os.homedir(), '.amux', 'providers.json'),
-    projectPath: path.join(options.cwd ?? process.cwd(), '.amux', 'providers.json'),
+    globalPath: path.join(os.homedir(), '.adapters', 'providers.json'),
+    projectPath: path.join(options.cwd ?? process.cwd(), '.adapters', 'providers.json'),
   };
 }
 
@@ -129,7 +129,7 @@ export function updateProviderDefaults(
 }
 
 /**
- * Load a named profile from ~/.amux/providers.json and .amux/providers.json.
+ * Load a named profile from ~/.adapters/providers.json and .adapters/providers.json.
  * Project-level file takes precedence over global.
  */
 export function loadProfile(profileName: string): ProviderProfileEntry | null {

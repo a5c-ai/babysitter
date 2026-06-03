@@ -1,5 +1,5 @@
-import type { AgentMuxClient, WorkspaceSessionBinding } from '@a5c-ai/adapters-comm';
-import { WorkspaceService } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient, WorkspaceSessionBinding } from '@a5c-ai/comm-adapter';
+import { WorkspaceService } from '@a5c-ai/comm-adapter';
 
 import type { ParsedArgs, FlagDef } from '../parse-args.js';
 import { flagArr, flagBool, flagStr } from '../parse-args.js';
@@ -74,8 +74,8 @@ export async function workspacesCommand(_client: AgentMuxClient, args: ParsedArg
         const name = args.positionals[0] ?? flagStr(args.flags, 'name');
         const repos = flagArr(args.flags, 'repo');
         if (!name) {
-          if (json) printJsonError('VALIDATION_ERROR', 'Usage: amux workspaces create <name> --repo <path> [--repo <path>...]');
-          else printError('Usage: amux workspaces create <name> --repo <path> [--repo <path>...]');
+          if (json) printJsonError('VALIDATION_ERROR', 'Usage: adapters workspaces create <name> --repo <path> [--repo <path>...]');
+          else printError('Usage: adapters workspaces create <name> --repo <path> [--repo <path>...]');
           return ExitCode.USAGE_ERROR;
         }
         if (repos.length === 0) {
@@ -100,8 +100,8 @@ export async function workspacesCommand(_client: AgentMuxClient, args: ParsedArg
       case 'archive': {
         const identifier = args.positionals[0];
         if (!identifier) {
-          if (json) printJsonError('VALIDATION_ERROR', 'Usage: amux workspaces archive <workspace>');
-          else printError('Usage: amux workspaces archive <workspace>');
+          if (json) printJsonError('VALIDATION_ERROR', 'Usage: adapters workspaces archive <workspace>');
+          else printError('Usage: adapters workspaces archive <workspace>');
           return ExitCode.USAGE_ERROR;
         }
         const archived = await service.archiveWorkspace(identifier);
@@ -112,8 +112,8 @@ export async function workspacesCommand(_client: AgentMuxClient, args: ParsedArg
       case 'cleanup': {
         const identifier = args.positionals[0];
         if (!identifier) {
-          if (json) printJsonError('VALIDATION_ERROR', 'Usage: amux workspaces cleanup <workspace>');
-          else printError('Usage: amux workspaces cleanup <workspace>');
+          if (json) printJsonError('VALIDATION_ERROR', 'Usage: adapters workspaces cleanup <workspace>');
+          else printError('Usage: adapters workspaces cleanup <workspace>');
           return ExitCode.USAGE_ERROR;
         }
         const cleaned = await service.cleanupWorkspace(identifier);
@@ -124,8 +124,8 @@ export async function workspacesCommand(_client: AgentMuxClient, args: ParsedArg
       case 'recover': {
         const identifier = args.positionals[0];
         if (!identifier) {
-          if (json) printJsonError('VALIDATION_ERROR', 'Usage: amux workspaces recover <workspace>');
-          else printError('Usage: amux workspaces recover <workspace>');
+          if (json) printJsonError('VALIDATION_ERROR', 'Usage: adapters workspaces recover <workspace>');
+          else printError('Usage: adapters workspaces recover <workspace>');
           return ExitCode.USAGE_ERROR;
         }
         const recovered = await service.recoverWorkspace(identifier);
@@ -136,8 +136,8 @@ export async function workspacesCommand(_client: AgentMuxClient, args: ParsedArg
       case 'delete': {
         const identifier = args.positionals[0];
         if (!identifier) {
-          if (json) printJsonError('VALIDATION_ERROR', 'Usage: amux workspaces delete <workspace> [--force]');
-          else printError('Usage: amux workspaces delete <workspace> [--force]');
+          if (json) printJsonError('VALIDATION_ERROR', 'Usage: adapters workspaces delete <workspace> [--force]');
+          else printError('Usage: adapters workspaces delete <workspace> [--force]');
           return ExitCode.USAGE_ERROR;
         }
         await service.deleteWorkspace(identifier, { forceCleanup: flagBool(args.flags, 'force') === true });

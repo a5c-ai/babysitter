@@ -367,7 +367,7 @@ agent-platform cleanup --keep-days 7 --harness claude-code --workspace .
 
 ```bash
 # Install an agent harness CLI (preferred)
-amux install claude-code
+adapters install claude-code
 
 # Install a Babysitter harness plugin globally
 babysitter harness:install-plugin claude-code
@@ -376,7 +376,7 @@ babysitter harness:install-plugin claude-code
 babysitter harness:install-plugin codex --workspace /path/to/repo
 ```
 
-> **Note:** `babysitter harness:install` and `babysitter harness:discover` are deprecated. Use `amux install <agent>` for agent installation and `tula` for runtime commands.
+> **Note:** `babysitter harness:install` and `babysitter harness:discover` are deprecated. Use `adapters install <agent>` for agent installation and `tula` for runtime commands.
 
 `harness:install-plugin` is the canonical scriptable install path for Babysitter plugins. For non-Claude harnesses it resolves to the published package installer shape tested in the SDK, for example `npx --yes @a5c-ai/babysitter-codex install --workspace /path/to/repo`.
 

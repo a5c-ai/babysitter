@@ -19,7 +19,7 @@ import type {
   KanbanReviewDecision,
   KanbanReviewFeedbackSource,
   KanbanReviewSnapshot,
-} from "@a5c-ai/adapters-comm/kanban";
+} from "@a5c-ai/comm-adapter/kanban";
 
 function decisionLabel(decision: KanbanReviewArtifact["decision"]): string {
   switch (decision) {

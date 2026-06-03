@@ -1,4 +1,4 @@
-import type { McpServerConfig } from "@a5c-ai/adapters-comm";
+import type { McpServerConfig } from "@a5c-ai/comm-adapter";
 export interface StoredAgentConfiguration {
     model?: string;
     provider?: string;

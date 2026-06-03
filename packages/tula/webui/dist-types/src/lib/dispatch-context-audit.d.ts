@@ -1,4 +1,4 @@
-import type { KanbanBacklogSnapshot, KanbanDispatchContextExecutionEnvelope } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanBacklogSnapshot, KanbanDispatchContextExecutionEnvelope } from "@a5c-ai/comm-adapter/kanban";
 export interface DispatchContextAuditRecord {
     readonly issueId: string;
     readonly issueKey: string;

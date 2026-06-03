@@ -1,12 +1,12 @@
-# `amux-triggers` CLI subcommand surface.
+# `adapters-triggers` CLI subcommand surface.
 # Source: packages/triggers-mux/src/cli.ts:18-69 (main()), package.json:28 (bin entry).
 nodeKind: InteractionPrimitive
-id: interaction-primitive:amux-triggers-enrich
+id: interaction-primitive:adapters-triggers-enrich
 attributes:
-  displayName: "amux-triggers enrich"
+  displayName: "adapters-triggers enrich"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux-triggers"
+  parentBin: "adapters-triggers"
   subcommandVerb: "enrich"
   flags:
     - "--backend:1:select trigger backend (github|gitlab|bitbucket|generic-webhook)"
@@ -27,12 +27,12 @@ edges:
     - target: package:a5c-ai-triggers
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:amux-triggers-evaluate
+id: interaction-primitive:adapters-triggers-evaluate
 attributes:
-  displayName: "amux-triggers evaluate"
+  displayName: "adapters-triggers evaluate"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux-triggers"
+  parentBin: "adapters-triggers"
   subcommandVerb: "evaluate"
   flags:
     - "--backend:1:select trigger backend"
@@ -55,12 +55,12 @@ edges:
     - target: package:a5c-ai-triggers
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:amux-triggers-help
+id: interaction-primitive:adapters-triggers-help
 attributes:
-  displayName: "amux-triggers --help"
+  displayName: "adapters-triggers --help"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux-triggers"
+  parentBin: "adapters-triggers"
   subcommandVerb: "--help"
   flags:
     - "--help:0:print usage and supported flags / query examples to stdout"

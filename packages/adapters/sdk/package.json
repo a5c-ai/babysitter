@@ -16,7 +16,7 @@
   },
   "keywords": [
     "agent-mux",
-    "amux",
+    "adapters",
     "claude",
     "codex",
     "coding-agent",
@@ -32,7 +32,7 @@
   "types": "./dist/index.d.ts",
   "bin": {
     "agent-mux": "./dist/bin/agent-mux.js",
-    "amux": "./dist/bin/amux.js"
+    "adapters": "./dist/bin/adapters.js"
   },
   "exports": {
     ".": {
@@ -55,7 +55,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/adapters-comm": "5.0.0",
+    "@a5c-ai/comm-adapter": "5.0.0",
     "@a5c-ai/adapters-codecs": "5.0.0",
     "@a5c-ai/adapters-cli": "5.0.0"
   },

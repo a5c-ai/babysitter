@@ -2,7 +2,7 @@
 
 ## Version and Identity
 
-- Package: `@a5c-ai/adapters-tasks`
+- Package: `@a5c-ai/tasks-adapter`
 - Package version: `5.0.0`
 - CLI surface version: `5.0.0`
 - MCP server identity: `agent-mux-tasks@0.1.0`

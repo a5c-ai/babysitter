@@ -525,7 +525,7 @@ describe('primary live stack runner contract', () => {
 
     expect(result.status).toBe('failed');
     expect(result.failure).toContain('missing live-model credential env');
-    expect(result.commands.at(-1)?.command).toBe('amux');
+    expect(result.commands.at(-1)?.command).toBe('adapters');
   });
 
   it('fails credential-present runs unless the explicit live execution flag is set', async () => {
@@ -573,8 +573,8 @@ describe('primary live stack runner contract', () => {
         return {
           status: 0,
           stdout: [
-            'agentMuxRunId: amux-run-1',
-            'agentMuxSessionId: amux-session-1',
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
             `babysitterRunId: ${completedRunId}`,
             'babysitterEffectId: effect-1',
             'hookEventId: hook-1',
@@ -624,8 +624,8 @@ describe('primary live stack runner contract', () => {
         return {
           status: 0,
           stdout: [
-            'agentMuxRunId: amux-run-1',
-            'agentMuxSessionId: amux-session-1',
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
             `babysitterRunId: ${runId}`,
             'babysitterEffectId: effect-1',
             'hookEventId: hook-1',
@@ -676,8 +676,8 @@ describe('primary live stack runner contract', () => {
         return {
           status: 0,
           stdout: [
-            'agentMuxRunId: amux-run-1',
-            'agentMuxSessionId: amux-session-1',
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
             `babysitterRunId: ${runId}`,
             'babysitterEffectId: effect-1',
             'hookEventId: hook-1',
@@ -729,8 +729,8 @@ describe('primary live stack runner contract', () => {
         return {
           status: 0,
           stdout: [
-            'agentMuxRunId: amux-run-1',
-            'agentMuxSessionId: amux-session-1',
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
             `babysitterRunId: ${runId}`,
             'babysitterEffectId: effect-1',
             'hookEventId: hook-1',
@@ -788,8 +788,8 @@ describe('primary live stack runner contract', () => {
         return {
           status: 0,
           stdout: [
-            'agentMuxRunId: amux-run-1',
-            'agentMuxSessionId: amux-session-1',
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
             `babysitterRunId: ${runId}`,
             'babysitterEffectId: effect-1',
             `transportTraceId: ${traceId}`,
@@ -849,8 +849,8 @@ describe('primary live stack runner contract', () => {
         return {
           status: 0,
           stdout: [
-            'agentMuxRunId: amux-run-1',
-            'agentMuxSessionId: amux-session-1',
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
             `babysitterRunId: ${runId}`,
             'babysitterEffectId: effect-1',
             'hookEventId: hook-1',
@@ -906,8 +906,8 @@ describe('primary live stack runner contract', () => {
         return {
           status: 0,
           stdout: [
-            'agentMuxRunId: amux-run-1',
-            'agentMuxSessionId: amux-session-1',
+            'agentMuxRunId: adapters-run-1',
+            'agentMuxSessionId: adapters-session-1',
             `babysitterRunId: ${runId}`,
             'babysitterEffectId: effect-1',
             'hookEventId: hook-1',
@@ -1045,7 +1045,7 @@ describe('primary live stack runner contract', () => {
         const transcript = '{"type":"turn_end","message":{"stopReason":"toolUse"},"toolResults":[]}';
         await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
         await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), transcript.repeat(80));
-        return { status: 0, stdout: '', stderr: '[amux launch] agent wrote invalid transcript artifact' };
+        return { status: 0, stdout: '', stderr: '[adapters launch] agent wrote invalid transcript artifact' };
       },
     });
 
@@ -1091,7 +1091,7 @@ describe('primary live stack runner contract', () => {
         return {
           status: 143,
           stdout: transcript,
-          stderr: '[amux launch] exit=143 captured=3444 chunks=6',
+          stderr: '[adapters launch] exit=143 captured=3444 chunks=6',
         };
       },
     });
@@ -1133,7 +1133,7 @@ describe('primary live stack runner contract', () => {
         if (!command.args.includes('launch')) return { status: 0, stdout: '{}', stderr: '' };
         await fs.mkdir(path.join(cwd, '.a5c-live-test'), { recursive: true });
         await fs.writeFile(path.join(cwd, '.a5c-live-test', `${traceId}-odyssey.md`), 'terminal transcript without greek markdown\n'.repeat(80));
-        return { status: 0, stdout: 'terminal transcript without task output', stderr: '[amux launch] agent wrote invalid transcript artifact' };
+        return { status: 0, stdout: 'terminal transcript without task output', stderr: '[adapters launch] agent wrote invalid transcript artifact' };
       },
     });
 
@@ -1150,7 +1150,7 @@ describe('primary live stack runner contract', () => {
       env: { AZURE_API_KEY: 'sk-live-secret', AGENT_MUX_API_BASE: 'https://foundry.example.test', LIVE_STACK_TRACE_ID: 'transport-trace-1' },
       executeCommand: async () => ({
         status: 0,
-        stdout: 'transportTraceId: transport-trace-1\nagentMuxRunId: amux-1\nagentMuxSessionId: sess-1',
+        stdout: 'transportTraceId: transport-trace-1\nagentMuxRunId: adapters-1\nagentMuxSessionId: sess-1',
         stderr: '',
       }),
     });

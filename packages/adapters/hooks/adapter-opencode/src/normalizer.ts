@@ -1,4 +1,4 @@
-import type { UnifiedHookEvent, UnifiedExecutionContext } from '@a5c-ai/adapters-hooks-core';
+import type { UnifiedHookEvent, UnifiedExecutionContext } from '@a5c-ai/hooks-adapter-core';
 import { getOpenCodePhaseMapping, SHELL_ENV_NATIVE_HOOK } from './mappings';
 import { resolveSessionId } from './session-resolver';
 

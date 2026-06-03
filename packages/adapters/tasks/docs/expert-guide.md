@@ -1,6 +1,6 @@
 # Responder Guide
 
-This guide is for responders who receive and answer breakpoints through `@a5c-ai/adapters-tasks`.
+This guide is for responders who receive and answer breakpoints through `@a5c-ai/tasks-adapter`.
 
 ## Responder Profile
 

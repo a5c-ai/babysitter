@@ -1,5 +1,5 @@
 /**
- * E2E: `amux install <fake-agent> --dry-run` smoke test.
+ * E2E: `adapters install <fake-agent> --dry-run` smoke test.
  *
  * Verifies the install pipeline end-to-end (argument parsing, command
  * dispatch, JSON output) without touching the real system.
@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { runCliInProcess } from './harness.js';
 import { setColorEnabled } from '../../cli/src/output.js';
 
-describe('E2E: amux install --dry-run', () => {
+describe('E2E: adapters install --dry-run', () => {
   beforeEach(() => setColorEnabled(false));
 
   it('returns exit 0 for an unknown agent in dry-run', async () => {

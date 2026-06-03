@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from '../../src/parse-args.js';
 import { skillCommand } from '../../src/commands/skill.js';
 import { ExitCode } from '../../src/exit-codes.js';
@@ -22,7 +22,7 @@ function args(sub: string | undefined, positionals: string[], flags: Record<stri
 }
 
 beforeEach(() => {
-  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-skill-'));
+  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-skill-'));
   prevCwd = process.cwd();
   process.chdir(tmp);
   fs.mkdirSync(path.join(tmp, '.a5c'));

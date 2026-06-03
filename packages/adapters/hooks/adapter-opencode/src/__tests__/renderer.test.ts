@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { UnifiedHookResult } from '@a5c-ai/adapters-hooks-core';
+import type { UnifiedHookResult } from '@a5c-ai/hooks-adapter-core';
 import { renderOpenCodeOutput } from '../renderer';
 
 describe('renderOpenCodeOutput', () => {

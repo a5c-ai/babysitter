@@ -8,7 +8,7 @@ const analyzeTask = defineTask('analyze-cli', (args, ctx) => ({
     name: 'generalist',
     prompt: {
       role: 'Senior Software Engineer',
-      task: 'Check `packages/adapters/cli` to ensure `amux run` properly parses `--prompt` and `--non-interactive` flags and passes `nonInteractive: true` to `RunOptions` ONLY when appropriate. Fix if necessary.',
+      task: 'Check `packages/adapters/cli` to ensure `adapters run` properly parses `--prompt` and `--non-interactive` flags and passes `nonInteractive: true` to `RunOptions` ONLY when appropriate. Fix if necessary.',
       outputFormat: 'JSON'
     },
     outputSchema: { type: 'object', required: ['status', 'changes'] }

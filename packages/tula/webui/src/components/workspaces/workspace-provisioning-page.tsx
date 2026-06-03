@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@a5c-ai/compendium";
 import { useBacklog } from "@/hooks/use-backlog";
 
-import type { KanbanIntegrationProvider } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanIntegrationProvider } from "@a5c-ai/comm-adapter/kanban";
 
 type WorkspaceProvisionMode = "host" | "project" | "issue";
 

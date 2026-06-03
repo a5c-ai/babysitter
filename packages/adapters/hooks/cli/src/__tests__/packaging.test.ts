@@ -14,7 +14,7 @@ describe('hooks-mux CLI packaging', () => {
     const dependencies = packageJson.dependencies ?? {};
 
     for (const adapterName of KNOWN_ADAPTERS) {
-      expect(dependencies[`@a5c-ai/adapters-hooks-${adapterName}`]).toBeTruthy();
+      expect(dependencies[`@a5c-ai/hooks-adapter-${adapterName}`]).toBeTruthy();
     }
   });
 });

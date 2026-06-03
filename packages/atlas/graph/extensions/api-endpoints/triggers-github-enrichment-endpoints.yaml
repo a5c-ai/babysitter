@@ -11,8 +11,8 @@ attributes:
   authRequired: true
 edges:
   called_by_trigger:
-    - target: operational-trigger:amux-triggers-github
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-github
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: APIEndpoint
 id: api-endpoint:github-commits-by-sha
@@ -24,5 +24,5 @@ attributes:
   authRequired: true
 edges:
   called_by_trigger:
-    - target: operational-trigger:amux-triggers-github
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-github
+    - target: operational-trigger:adapters-triggers-action

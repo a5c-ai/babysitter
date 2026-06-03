@@ -22,8 +22,8 @@ type GatewayAuthContextValue = {
   logout(message?: string): void;
 };
 
-const STORAGE_KEY = 'amux.webui.auth';
-const AUTH_ERROR_STORAGE_KEY = 'amux.webui.auth-error';
+const STORAGE_KEY = 'adapters.webui.auth';
+const AUTH_ERROR_STORAGE_KEY = 'adapters.webui.auth-error';
 const SNAPSHOT_POLL_INTERVAL_MS = 15_000;
 const GatewayAuthContext = createContext<GatewayAuthContextValue | null>(null);
 

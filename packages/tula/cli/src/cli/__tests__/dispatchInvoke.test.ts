@@ -83,7 +83,7 @@ describe("tula invoke dispatch", () => {
       prompt: "list tools",
       workspace: "/tmp/workspace",
       model: "gpt-test",
-      outputFormat: "amux-events",
+      outputFormat: "adapters-events",
     } as never);
 
     expect(code).toBe(0);
@@ -97,7 +97,7 @@ describe("tula invoke dispatch", () => {
       json: false,
       verbose: false,
       interactive: false,
-      outputMode: "amux-events",
+      outputMode: "adapters-events",
     }));
   });
 

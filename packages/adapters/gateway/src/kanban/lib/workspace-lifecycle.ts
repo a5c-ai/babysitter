@@ -14,8 +14,8 @@ import type {
   WorkspaceService,
   WorkspaceSessionBinding,
   WorkspaceSummary as ManagedWorkspaceSummary,
-} from "@a5c-ai/adapters-comm";
-import type { KanbanReviewSummary } from "@a5c-ai/adapters-comm";
+} from "@a5c-ai/comm-adapter";
+import type { KanbanReviewSummary } from "@a5c-ai/comm-adapter";
 import type {
   KanbanWorkspaceOwnershipHostSummary,
   KanbanWorkspaceOwnershipIssueSummary,
@@ -28,7 +28,7 @@ import type {
   KanbanWorkspaceSessionSummary,
   KanbanWorkspaceStatus,
   KanbanWorkspaceSummary,
-} from "@a5c-ai/adapters-comm/kanban";
+} from "@a5c-ai/comm-adapter/kanban";
 
 const execFile = promisify(execFileCallback);
 
@@ -159,7 +159,7 @@ const defaultDeps: WorkspaceLifecycleDeps = {
 };
 
 async function loadAgentMuxCore() {
-  return await import("@a5c-ai/adapters-comm");
+  return await import("@a5c-ai/comm-adapter");
 }
 
 function cloneRebaseSurface(rebase: WorkspaceRebaseSurface | null | undefined): WorkspaceRebaseSurface | undefined {

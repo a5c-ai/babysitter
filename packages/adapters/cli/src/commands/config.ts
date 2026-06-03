@@ -1,4 +1,4 @@
 /**
- * Re-export shim — config logic now lives in @a5c-ai/adapters-config.
+ * Re-export shim — config logic now lives in @a5c-ai/config-adapter.
  */
-export { configCommand } from '@a5c-ai/adapters-config';
+export { configCommand } from '@a5c-ai/config-adapter';

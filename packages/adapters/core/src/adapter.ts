@@ -324,7 +324,7 @@ export interface AgentAdapter {
   /**
    * Install a hook into the harness's native config (e.g. claude's
    * ~/.claude/settings.json). Default implementation in BaseAdapter
-   * only writes to .amux/hooks.json — override to also wire the
+   * only writes to .adapters/hooks.json — override to also wire the
    * harness natively so it actually fires the hook.
    */
   installHook?(hookType: string, command: string, opts?: { scope?: 'global' | 'project'; id?: string }): Promise<void>;

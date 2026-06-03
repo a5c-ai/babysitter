@@ -1,11 +1,11 @@
 /**
- * `amux models` subcommands.
+ * `adapters models` subcommands.
  *
  * @see docs/10-cli-reference.md Section 10
  */
 
-import type { AgentMuxClient, ProviderId } from '@a5c-ai/adapters-comm';
-import { AgentMuxError, PROVIDER_DEFAULTS, MODEL_TRANSLATION_TABLE } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient, ProviderId } from '@a5c-ai/comm-adapter';
+import { AgentMuxError, PROVIDER_DEFAULTS, MODEL_TRANSLATION_TABLE } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from '../parse-args.js';
 import { flagBool, flagStr } from '../parse-args.js';
 import { ExitCode, errorCodeToExitCode } from '../exit-codes.js';
@@ -35,9 +35,9 @@ export async function modelsCommand(client: AgentMuxClient, args: ParsedArgs): P
     const modelId = args.positionals[1];
     if (!agent || !modelId) {
       if (jsonMode) {
-        printJsonError('VALIDATION_ERROR', 'Usage: amux models info <agent> <model>');
+        printJsonError('VALIDATION_ERROR', 'Usage: adapters models info <agent> <model>');
       } else {
-        printError('Usage: amux models info <agent> <model>');
+        printError('Usage: adapters models info <agent> <model>');
       }
       return ExitCode.USAGE_ERROR;
     }
@@ -76,9 +76,9 @@ export async function modelsCommand(client: AgentMuxClient, args: ParsedArgs): P
     const provider = flagStr(args.flags, 'provider');
     if (!agent || !modelId) {
       if (jsonMode) {
-        printJsonError('VALIDATION_ERROR', 'Usage: amux models set <agent> <model> [--provider <provider>]');
+        printJsonError('VALIDATION_ERROR', 'Usage: adapters models set <agent> <model> [--provider <provider>]');
       } else {
-        printError('Usage: amux models set <agent> <model> [--provider <provider>]');
+        printError('Usage: adapters models set <agent> <model> [--provider <provider>]');
       }
       return ExitCode.USAGE_ERROR;
     }

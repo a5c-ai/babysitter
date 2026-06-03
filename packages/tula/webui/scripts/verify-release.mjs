@@ -47,7 +47,7 @@ export function verifyAgentMuxWebuiRelease({ packageRoot, manifest, packEntries 
     'packages/adapters/webui/package.json publishConfig.access must stay public'
   );
   expect(
-    scripts['build:realtime'] === 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/adapters-comm && npm run build --workspace=@a5c-ai/tula-ui && npm run build',
+    scripts['build:realtime'] === 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/comm-adapter && npm run build --workspace=@a5c-ai/tula-ui && npm run build',
     'packages/adapters/webui/package.json build:realtime must remain the package-local realtime build entrypoint'
   );
   expect(

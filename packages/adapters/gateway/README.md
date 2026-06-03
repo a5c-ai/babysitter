@@ -12,9 +12,9 @@ Current scope:
 
 Service templates:
 
-- `examples/systemd/amux-gateway.service`
-- `examples/launchd/ai.a5c.amux.gateway.plist`
+- `examples/systemd/adapters-gateway.service`
+- `examples/launchd/ai.a5c.adapters.gateway.plist`
 
 If the web UI package is not installed, `/` returns a helpful 404. Install
 `@a5c-ai/tula-webui` alongside this package or start the CLI with
-`amux gateway serve --webui /path/to/dist`.
+`adapters gateway serve --webui /path/to/dist`.

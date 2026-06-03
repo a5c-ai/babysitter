@@ -9,7 +9,7 @@ import { TruncatedId } from "@/components/shared/truncated-id";
 import { ExecutionContextPanel } from "@/components/shared/execution-context-panel";
 import type { DispatchContextAuditRecord } from "@/lib/dispatch-context-audit";
 import type { TaskDetail } from "@/types";
-import type { KanbanExecutionContextEnvelope } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanExecutionContextEnvelope } from "@a5c-ai/comm-adapter/kanban";
 
 /** Tiny copy-to-clipboard button (icon only) — magenta hover */
 function CopyButton({ text }: { text: string }) {

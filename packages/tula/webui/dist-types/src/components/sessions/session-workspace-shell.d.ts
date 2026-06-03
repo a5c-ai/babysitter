@@ -1,5 +1,5 @@
-import type { Attachment } from "@a5c-ai/adapters-comm";
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/adapters-comm";
+import type { Attachment } from "@a5c-ai/comm-adapter";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/comm-adapter";
 import type { SessionCost, SessionFlowModel } from "@a5c-ai/tula-ui/session-flow";
 import { type WorkspacePanelSizes } from "@/lib/workspace-layout-state";
 type EventBuffer = {

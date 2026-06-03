@@ -18,7 +18,7 @@ import {
   type KanbanReviewDecision,
   type KanbanReviewStatus,
   type KanbanReviewSnapshot,
-} from "@a5c-ai/adapters-comm/kanban";
+} from "@a5c-ai/comm-adapter/kanban";
 
 const REVIEW_FILE_PATH =
   process.env.KANBAN_REVIEW_FILE ?? path.join(os.homedir(), ".a5c", "kanban-review-artifacts.json");

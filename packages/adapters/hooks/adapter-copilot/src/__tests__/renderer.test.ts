@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderCopilotOutput, serializeOutput } from '../renderer';
-import type { MergedExecutionResult } from '@a5c-ai/adapters-hooks-core';
+import type { MergedExecutionResult } from '@a5c-ai/hooks-adapter-core';
 
 function makeMergedResult(overrides: Partial<MergedExecutionResult> = {}): MergedExecutionResult {
   return {

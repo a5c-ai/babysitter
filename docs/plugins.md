@@ -33,14 +33,14 @@ Use this table when you need the canonical entrypoint for a specific Babysitter 
 | `@a5c-ai/babysitter-pi` | [plugins/babysitter-unified/per-harness/pi/README.md](../plugins/babysitter-unified/per-harness/pi/README.md) | Generated from the unified source; README is the canonical package-level contract. |
 <!-- supported-harness-plugins:end -->
 
-## Bridge Flags for amux Launch
+## Bridge Flags for adapters Launch
 
-When launching agents through `amux launch`, two bridge flags control how Babysitter hooks and interactive orchestration integrate with the harness:
+When launching agents through `adapters launch`, two bridge flags control how Babysitter hooks and interactive orchestration integrate with the harness:
 
 - `--bridge-interactive` enables an interactive bridge layer that proxies stdin/stdout through an intermediary capable of injecting Babysitter hook responses and orchestration signals while preserving the harness's native TUI.
 - `--bridge-hooks` enables hook bridging. The bridge intercepts hook lifecycle events and forwards them to the Babysitter session-start hook.
 
-The `hookSupport` and `bridgeCapabilities` attributes in the atlas graph agent version nodes describe which harnesses support these flags natively. See the [amux CLI reference](agent-mux/reference/10-cli-reference.md) for the full flag table.
+The `hookSupport` and `bridgeCapabilities` attributes in the atlas graph agent version nodes describe which harnesses support these flags natively. See the [adapters CLI reference](agent-mux/reference/10-cli-reference.md) for the full flag table.
 
 ## Plugin Mode And External Responders
 

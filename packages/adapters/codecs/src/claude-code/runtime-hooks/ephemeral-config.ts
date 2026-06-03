@@ -3,7 +3,7 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-const RUNTIME_HOOK_DIR_PREFIX = 'amux-run-';
+const RUNTIME_HOOK_DIR_PREFIX = 'adapters-run-';
 const STALE_RUNTIME_HOOK_AGE_MS = 24 * 60 * 60 * 1000;
 const CLAUDE_HOOK_EVENTS = [
   'PreToolUse',
@@ -101,7 +101,7 @@ export interface ClaudeRuntimeHookConfig {
 
 function buildSocketPath(runId: string): string {
   if (process.platform === 'win32') {
-    return `\\\\.\\pipe\\amux-claude-${runId}-${crypto.randomBytes(4).toString('hex')}`;
+    return `\\\\.\\pipe\\adapters-claude-${runId}-${crypto.randomBytes(4).toString('hex')}`;
   }
   return path.join(os.tmpdir(), `${RUNTIME_HOOK_DIR_PREFIX}${runId}`, 'hooks.sock');
 }

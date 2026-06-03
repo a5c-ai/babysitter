@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/adapters-transport",
+  "name": "@a5c-ai/transport-adapter",
   "version": "5.0.0",
   "type": "module",
   "license": "MIT",
@@ -29,7 +29,7 @@
   "types": "./dist/index.d.ts",
   "bin": {
     "agent-mux-transport-proxy": "./dist/bin/agent-mux-transport-proxy.js",
-    "amux-proxy": "./dist/bin/amux-proxy.js"
+    "adapters-proxy": "./dist/bin/adapters-proxy.js"
   },
   "exports": {
     ".": {
@@ -81,7 +81,7 @@
     "test": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
-    "@a5c-ai/adapters-comm": "5.0.0",
+    "@a5c-ai/comm-adapter": "5.0.0",
     "hono": "^4.12.14",
     "ws": "^8.20.0"
   },

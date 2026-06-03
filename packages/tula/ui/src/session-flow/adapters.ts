@@ -40,7 +40,7 @@ import type {
   TurnEndEvent,
   TurnStartEvent,
   ImageOutputEvent,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import type { SessionCost, SessionFlowEventBuffer, SessionFlowRun, SessionFlowRunInput } from './types.js';
 import { toTimestamp } from './utils.js';

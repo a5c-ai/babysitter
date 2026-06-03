@@ -4,7 +4,7 @@ attributes:
   agentProductId: agent:agent-mux-remote
   versionRange: ">=1.0.0"
   releasedAt: "2025-01-01"
-  cliCommand: "amux"
+  cliCommand: "adapters"
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"

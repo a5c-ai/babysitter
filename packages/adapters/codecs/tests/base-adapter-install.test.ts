@@ -3,7 +3,7 @@
  * and per-adapter overrides (claude, gemini, cursor, agent-mux-remote).
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import type { Spawner } from '@a5c-ai/adapters-comm';
+import type { Spawner } from '@a5c-ai/comm-adapter';
 
 import {
   ClaudeAdapter,
@@ -293,17 +293,17 @@ describe('CursorAdapter install/update (standard base adapter logic)', () => {
 // ---------------------------------------------------------------------------
 
 describe('AgentMuxRemoteAdapter transport-agnostic overrides', () => {
-  it('detectInstallation probes plain `amux --version` via the spawner', async () => {
+  it('detectInstallation probes plain `adapters --version` via the spawner', async () => {
     const adapter = new AgentMuxRemoteAdapter();
     const { spawner, calls } = spawnerFrom((cmd, args) => {
-      if (cmd === 'amux' && args.includes('--version')) return { code: 0, stdout: '0.1.0', stderr: '' };
+      if (cmd === 'adapters' && args.includes('--version')) return { code: 0, stdout: '0.1.0', stderr: '' };
       return { code: 1, stdout: '', stderr: '' };
     });
     adapter.setSpawner(spawner);
     const res = await adapter.detectInstallation();
     expect(res.installed).toBe(true);
     expect(res.version).toBe('0.1.0');
-    expect(calls[0]!.cmd).toBe('amux');
+    expect(calls[0]!.cmd).toBe('adapters');
     expect(calls[0]!.args).toContain('--version');
   });
 

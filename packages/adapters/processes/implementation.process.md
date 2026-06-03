@@ -17,7 +17,7 @@ Iterative, spec-driven TDD implementation of `@a5c-ai/adapters` across 10 phases
 | 6 | Plugin Manager | 09 | Plugin install/list/remove, registries |
 | 7 | Process Lifecycle | 11 | ProcessTracker, signals, PTY, cross-platform |
 | 8 | Built-in Adapters | 12, 06 | All 10 adapters (claude through hermes) |
-| 9 | CLI Binary | 10 | amux CLI commands |
+| 9 | CLI Binary | 10 | adapters CLI commands |
 | 10 | Final Integration | All 12 | Full system test, polish, tech debt cleanup |
 
 ## Per-Phase Cycle

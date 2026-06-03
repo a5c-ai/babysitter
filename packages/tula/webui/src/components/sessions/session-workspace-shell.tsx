@@ -2,8 +2,8 @@
 
 import { Link, useNavigate } from "react-router-dom-v6";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Attachment } from "@a5c-ai/adapters-comm";
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/adapters-comm";
+import type { Attachment } from "@a5c-ai/comm-adapter";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/comm-adapter";
 import type { SessionCost, SessionFlowModel } from "@a5c-ai/tula-ui/session-flow";
 import { ExternalLink, GripVertical, LayoutDashboard, MessagesSquare, PanelLeft, PanelRight, Search, TerminalSquare, Workflow } from "lucide-react";
 

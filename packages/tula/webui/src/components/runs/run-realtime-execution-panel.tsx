@@ -3,7 +3,7 @@
 import { Link } from "react-router-dom-v6";
 import { useEffect, useMemo } from "react";
 import { useStore } from "zustand";
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/adapters-comm";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/comm-adapter";
 
 import { useGatewayAuth } from "@/components/agent-mux/gateway-provider";
 import { SessionObservabilityPanel } from "@/components/sessions/session-observability-panel";

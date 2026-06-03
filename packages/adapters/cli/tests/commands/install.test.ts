@@ -1,5 +1,5 @@
 /**
- * Tests for `amux install` / `amux update` / `amux detect` / `amux uninstall`.
+ * Tests for `adapters install` / `adapters update` / `adapters detect` / `adapters uninstall`.
  *
  * Uses real adapters (ClaudeAdapter, CodexAdapter, CursorAdapter) registered
  * through the client's AdapterRegistry, with an injectable Spawner to keep
@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { createClient, type AgentAdapter, type Spawner } from '@a5c-ai/adapters-comm';
+import { createClient, type AgentAdapter, type Spawner } from '@a5c-ai/comm-adapter';
 import { ClaudeAdapter, CodexAdapter, CursorAdapter } from '@a5c-ai/adapters-codecs';
 
 import {

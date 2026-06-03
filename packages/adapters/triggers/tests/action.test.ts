@@ -6,7 +6,7 @@ import { evaluateActionTrigger } from '../src/action.js';
 
 describe('agent-mux action trigger flow', () => {
   it('evaluates an event payload from disk like the composite action', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'amux-trigger-'));
+    const dir = await mkdtemp(join(tmpdir(), 'adapters-trigger-'));
     const eventPath = join(dir, 'event.json');
     await writeFile(eventPath, JSON.stringify({
       action: 'created',

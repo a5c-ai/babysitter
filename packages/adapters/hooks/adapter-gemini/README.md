@@ -1,11 +1,11 @@
-# @a5c-ai/adapters-hooks-gemini
+# @a5c-ai/hooks-adapter-gemini
 
 Gemini CLI harness adapter for hooks-mux.
 
 ## Install
 
 ```bash
-npm install @a5c-ai/adapters-hooks-gemini @a5c-ai/adapters-hooks-core
+npm install @a5c-ai/hooks-adapter-gemini @a5c-ai/hooks-adapter-core
 ```
 
 This package ships the built adapter runtime in `dist/` and this package README for npm publish-surface auditing.
@@ -17,7 +17,7 @@ import {
   createAdapter,
   normalizeGemini,
   renderGeminiOutput,
-} from "@a5c-ai/adapters-hooks-gemini";
+} from "@a5c-ai/hooks-adapter-gemini";
 ```
 
 The package exposes Gemini-specific normalization, phase mappings, rendering helpers, and session-resolution utilities for the hooks-mux execution pipeline.

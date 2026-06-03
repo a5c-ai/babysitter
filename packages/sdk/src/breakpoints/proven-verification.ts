@@ -1,5 +1,5 @@
 /**
- * Optional integration with @a5c-ai/adapters-tasks proven subsystem.
+ * Optional integration with @a5c-ai/tasks-adapter proven subsystem.
  *
  * Provides cryptographic verification of breakpoint answers when the
  * agent-mux-tasks package is available as an optional peer dependency.
@@ -86,7 +86,7 @@ export async function verifyBreakpointResult(
   // The module is an optional peer dependency -- the import may fail at runtime.
   // We use a string variable to prevent TypeScript from statically resolving the import.
   try {
-    const modulePath = "@a5c-ai/adapters-tasks/proven";
+    const modulePath = "@a5c-ai/tasks-adapter/proven";
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const proven = await import(/* webpackIgnore: true */ modulePath) as {
       verifyAnswer?: (

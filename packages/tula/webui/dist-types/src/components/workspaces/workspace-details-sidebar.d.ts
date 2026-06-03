@@ -1,5 +1,5 @@
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/adapters-comm";
-import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/adapters-comm/kanban";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/comm-adapter";
+import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/comm-adapter/kanban";
 import type { WorkspaceInventoryItem } from "@/lib/workspace-lifecycle";
 type WorkspaceSidebarAction = "rebase-start" | "rebase-auto-resolve" | "rebase-open-in-editor" | "rebase-mark-resolved" | "rebase-abort";
 export interface WorkspaceSidebarFeedback {

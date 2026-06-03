@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanReviewArtifact } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanReviewArtifact } from "@a5c-ai/comm-adapter/kanban";
 
 import { createMockRun, createMockTaskEffect } from "@/test/fixtures";
 

@@ -1,4 +1,4 @@
-import type { TransportId } from '@a5c-ai/adapters-comm';
+import type { TransportId } from '@a5c-ai/comm-adapter';
 
 export interface HarnessProviderTranslation {
   env: Record<string, string>;

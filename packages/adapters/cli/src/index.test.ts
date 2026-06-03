@@ -2,16 +2,16 @@ import { describe, expect, it } from "vitest";
 import { resolveCliLoggerConfig } from "./loggingConfig.js";
 
 describe("resolveCliLoggerConfig", () => {
-  it("uses CLI logging flags without mutating AMUX env vars", () => {
+  it("uses CLI logging flags without mutating ADAPTERS env vars", () => {
     const env: NodeJS.ProcessEnv = {};
 
     const config = resolveCliLoggerConfig({
       debug: true,
       logLevel: "warn",
-      logFile: "/tmp/amux.log",
+      logFile: "/tmp/adapters.log",
     }, env);
 
-    expect(config).toEqual({ level: "warn", logFile: "/tmp/amux.log" });
+    expect(config).toEqual({ level: "warn", logFile: "/tmp/adapters.log" });
     expect(env.AGENT_MUX_LOG_LEVEL).toBeUndefined();
     expect(env.AGENT_MUX_LOG_FILE).toBeUndefined();
     expect(env.AGENT_MUX_OBSERVABILITY_MODE).toBeUndefined();

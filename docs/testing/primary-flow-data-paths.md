@@ -26,7 +26,7 @@ This is the primary plugin E2E for Claude Code. Codex uses the same shape only a
 operator / CI
   -> babysitter harness:install claude
   -> babysitter harness:install-plugin claude
-  -> agent-mux CLI (`amux run` or launch path)
+  -> agent-mux CLI (`adapters run` or launch path)
   -> agent-mux adapter/runtime session
   -> external harness process (Claude Code primary)
   -> Babysitter plugin command inside the harness session

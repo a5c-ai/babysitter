@@ -25,7 +25,7 @@ const sessions = [
 ];
 
 function sessionDir() {
-  const dir = process.env.AGENT_MUX_TUI_E2E_STATE_DIR || path.join(process.cwd(), '.tmp-amux-tui-e2e');
+  const dir = process.env.AGENT_MUX_TUI_E2E_STATE_DIR || path.join(process.cwd(), '.tmp-adapters-tui-e2e');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }

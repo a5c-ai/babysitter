@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { StreamAssembler } from '@a5c-ai/adapters-comm';
-import type { AgentEvent, ParseContext } from '@a5c-ai/adapters-comm';
+import { StreamAssembler } from '@a5c-ai/comm-adapter';
+import type { AgentEvent, ParseContext } from '@a5c-ai/comm-adapter';
 import { ClaudeAdapter } from '../../adapters/src/claude-adapter.js';
 import { CodexAdapter } from '../../adapters/src/codex-adapter.js';
 import { GeminiAdapter } from '../../adapters/src/gemini-adapter.js';

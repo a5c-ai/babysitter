@@ -16,7 +16,7 @@
   },
   "keywords": [
     "agent-mux",
-    "amux",
+    "adapters",
     "cli",
     "coding-agent",
     "ai"
@@ -55,13 +55,13 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/adapters-config": "5.0.0",
-    "@a5c-ai/adapters-launch": "5.0.0",
+    "@a5c-ai/config-adapter": "5.0.0",
+    "@a5c-ai/launch-adapter": "5.0.0",
     "@a5c-ai/adapters-gateway": "5.0.0",
-    "@a5c-ai/adapters-comm": "5.0.0",
+    "@a5c-ai/comm-adapter": "5.0.0",
     "@a5c-ai/adapters-codecs": "5.0.0",
     "@a5c-ai/adapters-observability": "5.0.0",
-    "@a5c-ai/adapters-transport": "5.0.0",
+    "@a5c-ai/transport-adapter": "5.0.0",
     "qrcode-terminal": "^0.12.0",
     "yaml": "^2.8.3"
   },

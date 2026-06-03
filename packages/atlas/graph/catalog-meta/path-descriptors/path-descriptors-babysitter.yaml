@@ -170,11 +170,11 @@ edges:
 
 ---
 nodeKind: PathDescriptor
-id: path:amux-hooks-project
+id: path:adapters-hooks-project
 attributes:
-  pathId: amux-hooks-project
+  pathId: adapters-hooks-project
   displayName: agent-mux project hooks registry
-  path: .amux/hooks.json
+  path: .adapters/hooks.json
   pathKind: config-file
   ownerKind: GraphDocument
   ownerId: graph:agent-catalog
@@ -186,18 +186,18 @@ attributes:
 
     unified hook system. Maps `(agent, hookType) → handler(target)`;
 
-    overrides matching ids in the global ~/.amux/hooks.json. Source:
+    overrides matching ids in the global ~/.adapters/hooks.json. Source:
 
     docs/agent-mux/reference/15-hooks.md.
 
     '
 ---
 nodeKind: PathDescriptor
-id: path:amux-hooks-global
+id: path:adapters-hooks-global
 attributes:
-  pathId: amux-hooks-global
+  pathId: adapters-hooks-global
   displayName: agent-mux global hooks registry
-  path: ~/.amux/hooks.json
+  path: ~/.adapters/hooks.json
   pathKind: config-file
   ownerKind: GraphDocument
   ownerId: graph:agent-catalog
@@ -207,7 +207,7 @@ attributes:
   expansion: home
   notes: 'User-scope hook registrations for agent-mux; overridden per-id
 
-    by `.amux/hooks.json` (project). Source:
+    by `.adapters/hooks.json` (project). Source:
 
     docs/agent-mux/reference/15-hooks.md.
 

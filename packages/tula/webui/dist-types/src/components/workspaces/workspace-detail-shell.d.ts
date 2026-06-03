@@ -1,5 +1,5 @@
-import type { Attachment } from "@a5c-ai/adapters-comm";
-import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/adapters-comm/kanban";
+import type { Attachment } from "@a5c-ai/comm-adapter";
+import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/comm-adapter/kanban";
 import type { WorkspaceInventoryItem, WorkspaceSessionSnapshot } from "@/lib/workspace-lifecycle";
 import { type WorkspaceSidebarFeedback } from "@/components/workspaces/workspace-details-sidebar";
 type EventBuffer = {

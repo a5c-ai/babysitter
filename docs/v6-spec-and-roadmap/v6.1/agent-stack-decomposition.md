@@ -61,7 +61,7 @@ The graph says agent-platform has Core, Runtime, Platform, and UI. The code shou
 |-------------|---------------|------------------|------------|
 | L4 AgentCoreImpl | `@a5c-ai/babysitter-sdk` (stays) | `packages/sdk/` | Nothing — SDK IS the core. agent-core package contents fold into SDK or agent-platform. |
 | L5 AgentRuntimeImpl | `@a5c-ai/tula-platform` (stays, slimmed) | `packages/tula/platform/` | Keep: daemon, session, harness bridge, runtime. Remove: things that belong in other layers. |
-| L6 AgentPlatformImpl | `@a5c-ai/adapters-extensions` (renamed from extension-mux) + `@a5c-ai/agent-catalog` | `packages/extension-mux/`, `packages/agent-catalog/` | Plugin compilation, skill discovery, marketplace |
+| L6 AgentPlatformImpl | `@a5c-ai/extensions-adapter` (renamed from extension-mux) + `@a5c-ai/agent-catalog` | `packages/extension-mux/`, `packages/agent-catalog/` | Plugin compilation, skill discovery, marketplace |
 | L11 AgentUIImpl | `@a5c-ai/tula-platform` CLI entry | `packages/tula/platform/src/cli/` | CLI stays in agent-platform — it's the binary |
 
 ### agent-core package fate
@@ -91,7 +91,7 @@ The graph's `mux:tasks-mux` description: "The lone live Trust Chain primitive �
 
 | Current Package | Target | What Changes |
 |----------------|--------|-------------|
-| `@a5c-ai/adapters-tasks` | `@a5c-ai/adapters-tasks` | Rename package, keep all functionality (approval routing, cryptographic signing, pluggable backends, MCP) |
+| `@a5c-ai/tasks-adapter` | `@a5c-ai/tasks-adapter` | Rename package, keep all functionality (approval routing, cryptographic signing, pluggable backends, MCP) |
 
 The tasks-mux scope is broader than breakpoints — it's the trust chain for ALL task resolutions, not just breakpoints. Future: Linear/GitHub/Slack task backends, task routing policies, multi-responder coordination.
 
@@ -205,29 +205,29 @@ As described in graph-alignment-tasks.md Phase 1.3, split into graph-aligned sub
 | `@a5c-ai/babysitter-sdk` | Orchestration engine (annotated, not renamed) | L4, L7, L8, L13 |
 | `@a5c-ai/tula-platform` | AgentRuntimeImpl + AgentUIImpl | L5, L11 |
 | `@a5c-ai/babysitter` | Metapackage (unchanged) | — |
-| `@a5c-ai/adapters-launch` | `mux:agent-launch-mux` | L8 |
-| `@a5c-ai/adapters-comm` | `mux:agent-comm-mux` | L4-L5 |
-| `@a5c-ai/adapters-config` | `mux:agent-config-mux` | L5-L6 |
-| `@a5c-ai/adapters-cli` | Composition CLI (`amux`) | L10 |
+| `@a5c-ai/launch-adapter` | `mux:agent-launch-mux` | L8 |
+| `@a5c-ai/comm-adapter` | `mux:agent-comm-mux` | L4-L5 |
+| `@a5c-ai/config-adapter` | `mux:agent-config-mux` | L5-L6 |
+| `@a5c-ai/adapters-cli` | Composition CLI (`adapters`) | L10 |
 | `@a5c-ai/adapters-gateway` | Remote API | L6 |
 | `@a5c-ai/tula-tui` | Presentation | L11 |
 | `@a5c-ai/tula-ui` | Shared UI | L11 |
 | `@a5c-ai/tula-webui` | Web UI | L11 |
 | `@a5c-ai/adapters-observability` | Telemetry | Cross-cutting |
-| `@a5c-ai/adapters-hooks-*` | `mux:hooks-mux` | Cross-cutting |
-| `@a5c-ai/adapters-transport` | `mux:transport-mux` | L3 |
-| `@a5c-ai/adapters-extensions` | `mux:extension-mux` (renamed from extension-mux) | L6 |
-| `@a5c-ai/adapters-tasks` | `mux:tasks-mux` (renamed from tasks-mux) | L9, L14 |
-| `@a5c-ai/adapters-tools` | `mux:tool-mux` (new, seeded from agent-core) | L8 |
+| `@a5c-ai/hooks-adapter-*` | `mux:hooks-mux` | Cross-cutting |
+| `@a5c-ai/transport-adapter` | `mux:transport-mux` | L3 |
+| `@a5c-ai/extensions-adapter` | `mux:extension-mux` (renamed from extension-mux) | L6 |
+| `@a5c-ai/tasks-adapter` | `mux:tasks-mux` (renamed from tasks-mux) | L9, L14 |
+| `@a5c-ai/tools-adapter` | `mux:tool-mux` (new, seeded from agent-core) | L8 |
 | `@a5c-ai/agent-catalog` | Knowledge catalog | L12 |
 | `@a5c-ai/atlas` | Graph data + indexer | Cross-cutting |
-| `@a5c-ai/adapters-triggers` | Automation triggers | Cross-cutting |
+| `@a5c-ai/triggers-adapter` | Automation triggers | Cross-cutting |
 | `@a5c-ai/cloud` | Deployment | Cross-cutting |
 | `@a5c-ai/observer-dashboard` | Observability UI | L11 |
 | `@a5c-ai/kradle-*` | Project management | L6 |
 
 **Dissolved:**
-- `@a5c-ai/tula-core` → absorbed into `@a5c-ai/adapters-tools` (tools) + `@a5c-ai/tula-platform` (session/registry)
-- `@a5c-ai/adapters-codecs` → absorbed into `@a5c-ai/adapters-config`
-- `@a5c-ai/adapters-extensions` → renamed to `@a5c-ai/adapters-extensions`
-- `@a5c-ai/adapters-tasks` → renamed to `@a5c-ai/adapters-tasks`
+- `@a5c-ai/tula-core` → absorbed into `@a5c-ai/tools-adapter` (tools) + `@a5c-ai/tula-platform` (session/registry)
+- `@a5c-ai/adapters-codecs` → absorbed into `@a5c-ai/config-adapter`
+- `@a5c-ai/extensions-adapter` → renamed to `@a5c-ai/extensions-adapter`
+- `@a5c-ai/tasks-adapter` → renamed to `@a5c-ai/tasks-adapter`

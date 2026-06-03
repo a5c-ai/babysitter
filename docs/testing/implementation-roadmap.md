@@ -28,8 +28,8 @@ This roadmap turns the strategy into implementation slices. Each slice must land
 
 | Install mode | Setup path | Launch path | Required proof |
 | --- | --- | --- | --- |
-| `babysitter-plugin` | Generate plugin packages, install the target agent with `amux install`, install the local Babysitter SDK, then install the Babysitter plugin for the target harness | `amux launch <agent> <provider>` with a `/babysitter:call ...` prompt | Agent-mux IDs, Babysitter run/effect IDs, native hook evidence, hooks-mux event evidence, transport trace, redacted provider trace |
-| `vanilla` | Install the target agent with `amux install` only | `amux launch <agent> <provider>` with a normal non-Babysitter prompt | Agent-mux IDs, session ID, transport trace, redacted provider trace |
+| `babysitter-plugin` | Generate plugin packages, install the target agent with `adapters install`, install the local Babysitter SDK, then install the Babysitter plugin for the target harness | `adapters launch <agent> <provider>` with a `/babysitter:call ...` prompt | Agent-mux IDs, Babysitter run/effect IDs, native hook evidence, hooks-mux event evidence, transport trace, redacted provider trace |
+| `vanilla` | Install the target agent with `adapters install` only | `adapters launch <agent> <provider>` with a normal non-Babysitter prompt | Agent-mux IDs, session ID, transport trace, redacted provider trace |
 
 Both modes use agent-mux for external agent installation and launch. The test code reads the selected mode from workflow env and must not enumerate scenario matrices internally.
 
@@ -52,7 +52,7 @@ A slice is complete only when it includes:
 3. Add shared fixture transcript format and migrate one agent-mux or transport-mux test to consume it.
 4. Add no-model harness dry-run tests for Codex and Claude Code.
 5. Add transport-mux fixture and agent-core event stream replay scenarios.
-6. Add credential-gated transport-mux bridge smoke for agent-core and one external harness through `amux launch --with-proxy*`.
+6. Add credential-gated transport-mux bridge smoke for agent-core and one external harness through `adapters launch --with-proxy*`.
 7. Expand live-stack artifacts into a merged scenario checklist in the workflow summary.
 8. Extract reusable testing workflows only if `publish.yml` grows too large or another workflow needs the same lane contract.
 

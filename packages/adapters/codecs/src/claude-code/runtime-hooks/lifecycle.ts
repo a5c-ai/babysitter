@@ -1,4 +1,4 @@
-import type { RunOptions, RuntimeHookDispatcher, RuntimeHookSetup } from '@a5c-ai/adapters-comm';
+import type { RunOptions, RuntimeHookDispatcher, RuntimeHookSetup } from '@a5c-ai/comm-adapter';
 
 import {
   createClaudeRuntimeHookConfig,

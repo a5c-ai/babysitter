@@ -1,4 +1,4 @@
-import type { Attachment } from '@a5c-ai/adapters-comm';
+import type { Attachment } from '@a5c-ai/comm-adapter';
 
 export type ProtocolVersion = '1';
 

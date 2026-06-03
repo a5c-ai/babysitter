@@ -101,7 +101,7 @@ function buildProviderAutomationPlan(config: CloudConfig): ProviderConfiguration
 
   return {
     scope: "project",
-    filePath: ".amux/providers.json",
+    filePath: ".adapters/providers.json",
     providersFile: {
       version: 1,
       ...(defaultRoute ? { defaults: { provider: defaultRoute.provider, model: defaultRoute.model } } : {}),
@@ -114,9 +114,9 @@ function buildProviderAutomationPlan(config: CloudConfig): ProviderConfiguration
 
 function resolveProvidersFilePath(scope: ProviderAutomationScope, cwd?: string): string {
   if (scope === "global") {
-    return path.join(os.homedir(), ".amux", "providers.json");
+    return path.join(os.homedir(), ".adapters", "providers.json");
   }
-  return path.join(cwd ?? process.cwd(), ".amux", "providers.json");
+  return path.join(cwd ?? process.cwd(), ".adapters", "providers.json");
 }
 
 function writeProvidersFile(filePath: string, providersFile: AgentMuxProvidersFile): void {

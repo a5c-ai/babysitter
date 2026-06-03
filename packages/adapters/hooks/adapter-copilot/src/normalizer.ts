@@ -1,5 +1,5 @@
-import type { UnifiedHookEvent } from '@a5c-ai/adapters-hooks-core';
-import { normalizeEvent } from '@a5c-ai/adapters-hooks-core';
+import type { UnifiedHookEvent } from '@a5c-ai/hooks-adapter-core';
+import { normalizeEvent } from '@a5c-ai/hooks-adapter-core';
 import { COPILOT_PHASE_MAPPINGS } from './mappings';
 import { resolveSyntheticSessionId } from './session-resolver';
 

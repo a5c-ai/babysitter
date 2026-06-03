@@ -1,5 +1,5 @@
 /**
- * Tests for the wiring between invokeHarness and the amux bridge.
+ * Tests for the wiring between invokeHarness and the adapters bridge.
  *
  * External harnesses are routed through agent-mux exclusively.
  * Pi remains direct; agent-core/internal route through create-run orchestration.
@@ -98,7 +98,7 @@ import { createAgentCoreSession } from "@a5c-ai/tula-core";
 // Helpers
 // ---------------------------------------------------------------------------
 
-function createMockAgentMuxClient(output = "amux-output"): AgentMuxClient {
+function createMockAgentMuxClient(output = "adapters-output"): AgentMuxClient {
   async function* emptyStream(): AsyncGenerator<AmuxAgentEvent> {
     yield {
       type: "text_delta",
@@ -135,20 +135,20 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("invokeHarness amux wiring", () => {
-  it("routes external harnesses through amux exclusively", async () => {
+describe("invokeHarness adapters wiring", () => {
+  it("routes external harnesses through adapters exclusively", async () => {
     const mockClient = createMockAgentMuxClient();
     vi.mocked(getAgentMuxClient).mockResolvedValue(mockClient);
     vi.mocked(invokeViaAgentMux).mockResolvedValue({
       success: true,
-      output: "amux-result",
+      output: "adapters-result",
       exitCode: 0,
       duration: 42,
       harness: "claude-code",
       sessionId: "s-1",
       totalCost: 0,
       events: [],
-      lastMessage: "amux-result",
+      lastMessage: "adapters-result",
     });
 
     const result = await invokeHarness("claude-code", {
@@ -162,10 +162,10 @@ describe("invokeHarness amux wiring", () => {
       "claude-code",
       expect.objectContaining({ prompt: "test prompt" }),
     );
-    expect(result.output).toBe("amux-result");
+    expect(result.output).toBe("adapters-result");
   });
 
-  it("throws for unknown harness without amux adapter", async () => {
+  it("throws for unknown harness without adapters adapter", async () => {
     await expect(
       invokeHarness("unknown-harness", { prompt: "test" }),
     ).rejects.toThrow(/No agent-mux adapter/);
@@ -174,7 +174,7 @@ describe("invokeHarness amux wiring", () => {
     expect(invokeViaAgentMux).not.toHaveBeenCalled();
   });
 
-  it("uses direct invocation for pi harness even when amux is available", async () => {
+  it("uses direct invocation for pi harness even when adapters is available", async () => {
     const mockClient = createMockAgentMuxClient();
     vi.mocked(getAgentMuxClient).mockResolvedValue(mockClient);
 
@@ -182,13 +182,13 @@ describe("invokeHarness amux wiring", () => {
       prompt: "test prompt",
     });
 
-    // Should not even check amux for pi -- goes through direct CLI path
+    // Should not even check adapters for pi -- goes through direct CLI path
     expect(getAgentMuxClient).not.toHaveBeenCalled();
     expect(invokeViaAgentMux).not.toHaveBeenCalled();
     expect(result.harness).toBe("pi");
   });
 
-  it("routes agent-core harness through create-run orchestration even when amux is available", async () => {
+  it("routes agent-core harness through create-run orchestration even when adapters is available", async () => {
     const mockClient = createMockAgentMuxClient();
     vi.mocked(getAgentMuxClient).mockResolvedValue(mockClient);
 
@@ -215,7 +215,7 @@ describe("invokeHarness amux wiring", () => {
     expect(result.output).toBe("orchestrated-output");
   });
 
-  it("routes internal harness alias through create-run orchestration even when amux is available", async () => {
+  it("routes internal harness alias through create-run orchestration even when adapters is available", async () => {
     const mockClient = createMockAgentMuxClient();
     vi.mocked(getAgentMuxClient).mockResolvedValue(mockClient);
 
@@ -235,19 +235,19 @@ describe("invokeHarness amux wiring", () => {
     expect(result.output).toBe("orchestrated-output");
   });
 
-  it("routes codex through amux", async () => {
+  it("routes codex through adapters", async () => {
     const mockClient = createMockAgentMuxClient();
     vi.mocked(getAgentMuxClient).mockResolvedValue(mockClient);
     vi.mocked(invokeViaAgentMux).mockResolvedValue({
       success: true,
-      output: "amux-codex",
+      output: "adapters-codex",
       exitCode: 0,
       duration: 10,
       harness: "codex",
       sessionId: "s-2",
       totalCost: 0,
       events: [],
-      lastMessage: "amux-codex",
+      lastMessage: "adapters-codex",
     });
 
     const result = await invokeHarness("codex", {
@@ -255,6 +255,6 @@ describe("invokeHarness amux wiring", () => {
     });
 
     expect(invokeViaAgentMux).toHaveBeenCalledOnce();
-    expect(result.output).toBe("amux-codex");
+    expect(result.output).toBe("adapters-codex");
   });
 });

@@ -6,7 +6,7 @@
  *
  * Usage:
  * ```typescript
- * import { createConfiguredEngine } from '@a5c-ai/adapters-hooks-oh-my-pi';
+ * import { createConfiguredEngine } from '@a5c-ai/hooks-adapter-oh-my-pi';
  *
  * const engine = createConfiguredEngine();
  *
@@ -27,7 +27,7 @@
  * ```
  */
 
-import { createHooksEngine, type HooksEngine } from '@a5c-ai/adapters-hooks-core';
+import { createHooksEngine, type HooksEngine } from '@a5c-ai/hooks-adapter-core';
 import { createAdapter } from './adapter';
 import { OH_MY_PI_PHASE_MAPPINGS } from './mappings';
 

@@ -1,4 +1,4 @@
-import type { AgentEvent } from '@a5c-ai/adapters-comm';
+import type { AgentEvent } from '@a5c-ai/comm-adapter';
 
 export interface ProgrammaticMockConfig {
   name?: string;

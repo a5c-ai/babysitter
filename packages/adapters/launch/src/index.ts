@@ -1,5 +1,5 @@
 /**
- * @a5c-ai/adapters-launch
+ * @a5c-ai/launch-adapter
  *
  * Launch orchestration for agent-mux: plan resolution, proxy setup,
  * harness spawning, bridge hooks, and completion engines.

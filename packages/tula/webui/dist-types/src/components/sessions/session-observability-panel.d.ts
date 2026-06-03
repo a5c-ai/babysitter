@@ -1,5 +1,5 @@
 import { type SessionFlowModel } from "@a5c-ai/tula-ui/session-flow";
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/adapters-comm";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/comm-adapter";
 interface EventBuffer {
     events: Array<Record<string, unknown>>;
 }

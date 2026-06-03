@@ -70,11 +70,11 @@ parameters:
   - name: args
     type: string
     default: ''
-    displayName: 'Space-delimited fallback arguments passed to amux after the command.'
+    displayName: 'Space-delimited fallback arguments passed to adapters after the command.'
   - name: argsJson
     type: string
     default: ''
-    displayName: 'JSON string array of additional arguments passed to amux after the command.'
+    displayName: 'JSON string array of additional arguments passed to adapters after the command.'
   - name: adapter
     type: string
     default: ''
@@ -110,15 +110,15 @@ parameters:
   - name: workingDirectory
     type: string
     default: '$(Build.SourcesDirectory)'
-    displayName: 'Working directory for amux execution.'
+    displayName: 'Working directory for adapters execution.'
   - name: preRun
     type: string
     default: ''
-    displayName: 'Optional shell commands to run after trigger match and before amux.'
+    displayName: 'Optional shell commands to run after trigger match and before adapters.'
   - name: postRun
     type: string
     default: ''
-    displayName: 'Optional shell commands to run after amux when trigger matched.'
+    displayName: 'Optional shell commands to run after adapters when trigger matched.'
   - name: actionRef
     type: string
     default: 'staging'
@@ -164,9 +164,9 @@ steps:
   - bash: |
       set -euo pipefail
       echo "Installing @a5c-ai packages with tag: $NPM_TAG"
-      npm install -g --legacy-peer-deps @a5c-ai/adapters-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/adapters-triggers@$NPM_TAG
-      npm install -g --legacy-peer-deps @a5c-ai/adapters-hooks-cli@$NPM_TAG 2>/dev/null || echo "hooks-mux-cli install skipped (optional)"
-      which amux && amux --version || { echo "ERROR: amux not found after install"; exit 1; }
+      npm install -g --legacy-peer-deps @a5c-ai/adapters-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/triggers-adapter@$NPM_TAG
+      npm install -g --legacy-peer-deps @a5c-ai/hooks-adapter-cli@$NPM_TAG 2>/dev/null || echo "hooks-mux-cli install skipped (optional)"
+      which adapters && adapters --version || { echo "ERROR: adapters not found after install"; exit 1; }
     name: installRuntime
     displayName: 'Install runtime packages'
     env:
@@ -179,7 +179,7 @@ steps:
         INPUT_HARNESS="$INPUT_ADAPTER"
       fi
       cd "$INPUT_WORKING_DIRECTORY"
-      # Map adapter names to amux agent aliases
+      # Map adapter names to adapters agent aliases
       AGENT_MUX_AGENT="$INPUT_HARNESS"
       case "$INPUT_HARNESS" in
         claude-code) AGENT_MUX_AGENT="claude" ;;
@@ -187,7 +187,7 @@ steps:
         copilot-cli) AGENT_MUX_AGENT="copilot" ;;
         cursor-cli) AGENT_MUX_AGENT="cursor" ;;
       esac
-      amux install "$AGENT_MUX_AGENT" || true
+      adapters install "$AGENT_MUX_AGENT" || true
     name: installHarness
     displayName: 'Install harness'
     condition: or(ne('${{ parameters.harness }}', ''), ne('${{ parameters.adapter }}', ''))
@@ -251,7 +251,7 @@ steps:
       fi
       while IFS= read -r plugin; do
         [ -z "$plugin" ] && continue
-        amux plugin install "$INPUT_ADAPTER" "$plugin"
+        adapters plugin install "$INPUT_ADAPTER" "$plugin"
       done <<< "$INPUT_PLUGINS"
     name: installPluginsLegacy
     displayName: 'Install plugins (legacy)'
@@ -326,9 +326,9 @@ steps:
       if [ -z "$INPUT_HARNESS" ]; then
         INPUT_HARNESS="$INPUT_ADAPTER"
       fi
-      AMUX="amux"
+      ADAPTERS="adapters"
 
-      # Map harness names to amux aliases
+      # Map harness names to adapters aliases
       AGENT_MUX_HARNESS="$INPUT_HARNESS"
       case "$INPUT_HARNESS" in
         claude-code) AGENT_MUX_HARNESS="claude" ;;
@@ -393,8 +393,8 @@ steps:
         ARGS+=("${EXTRA_ARGS[@]}")
       fi
 
-      echo "##[group]amux ${ARGS[*]}"
-      if $AMUX "${ARGS[@]}"; then
+      echo "##[group]adapters ${ARGS[*]}"
+      if $ADAPTERS "${ARGS[@]}"; then
         echo "##vso[task.setvariable variable=exit-code;isOutput=true]0"
       else
         status=$?
@@ -402,7 +402,7 @@ steps:
         exit "$status"
       fi
       echo "##[endgroup]"
-    name: amux
+    name: adapters
     displayName: 'Run agent-mux'
     condition: eq(variables['trigger.matched'], 'true')
     workingDirectory: ${{ parameters.workingDirectory }}
@@ -464,7 +464,7 @@ steps:
 #   GH `id: resolve-runtime`  → Azure `name: resolveRuntime` → outputs $(resolveRuntime.tag)
 #   GH `id: trigger`          → Azure `name: trigger`        → outputs $(trigger.matched),
 #                                                                       $(trigger.event)
-#   GH `id: amux`             → Azure `name: amux`           → output  $(amux.exit-code)
+#   GH `id: adapters`             → Azure `name: adapters`           → output  $(adapters.exit-code)
 #   GH `id: a5c-token`        → Azure `name: a5cToken`       → output  $(a5cToken.a5c_token)
 #   Conditions on output variables (same job) use `variables['stepName.varName']`.
 #
@@ -527,7 +527,7 @@ steps:
 # Outputs exposed by this template (consumer wiring):
 #   matched   → $(trigger.matched)
 #   event     → $(trigger.event)
-#   exit-code → $(amux.exit-code)
+#   exit-code → $(adapters.exit-code)
 #   To consume across jobs, define a job-level `output` referencing the variable
 #   (e.g. `output: triggerMatched: $[ dependencies.<job>.outputs['trigger.matched'] ]`).
 #
@@ -540,5 +540,5 @@ steps:
 #   Azure Pipelines step templates have no `required: true` flag. The `harness`
 #   parameter has an empty default and the consuming pipeline must supply it.
 #   Failure-on-empty is enforced indirectly by the conditions on dependent steps
-#   (installHarness and amux will error at runtime if both `harness` and `adapter`
+#   (installHarness and adapters will error at runtime if both `harness` and `adapter`
 #   are empty).

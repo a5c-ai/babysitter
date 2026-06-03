@@ -11,7 +11,7 @@ npm install @a5c-ai/babysitter-sdk
 Optional breakpoint routing support:
 
 ```bash
-npm install @a5c-ai/adapters-tasks
+npm install @a5c-ai/tasks-adapter
 ```
 
 This package ships the built runtime in `dist/`, bundled command/skill templates in `skills/`, and this package README for npm auditability.

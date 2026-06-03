@@ -70,7 +70,7 @@ function ConfigView({ client, active }: TuiViewProps) {
           )}
         </Box>
       </Box>
-      <Text dimColor>↑/↓: select agent · use `amux config set &lt;agent&gt; &lt;field&gt; &lt;value&gt;` to edit</Text>
+      <Text dimColor>↑/↓: select agent · use `adapters config set &lt;agent&gt; &lt;field&gt; &lt;value&gt;` to edit</Text>
     </Box>
   );
 }

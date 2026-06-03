@@ -1,4 +1,4 @@
-import type { KanbanExecutionContextEnvelope } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanExecutionContextEnvelope } from "@a5c-ai/comm-adapter/kanban";
 import type { DispatchContextAuditRecord } from "@/lib/dispatch-context-audit";
 interface TaskDetailPanelProps {
     runId: string;

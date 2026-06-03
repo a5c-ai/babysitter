@@ -1,5 +1,5 @@
 import * as fs from 'node:fs';
-import type { ProviderConfig, ProviderId } from '@a5c-ai/adapters-comm';
+import type { ProviderConfig, ProviderId } from '@a5c-ai/comm-adapter';
 import type { HarnessProviderTranslation } from '../provider-translation.js';
 
 function mergeWithExistingConfig(generatedConfig: string): string {

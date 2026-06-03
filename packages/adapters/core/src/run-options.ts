@@ -204,7 +204,7 @@ export interface RunOptions {
   /** Provider configuration for model/provider selection. */
   providerConfig?: import('./provider-config.js').ProviderConfig;
 
-  /** Named provider profile from ~/.amux/providers.json. */
+  /** Named provider profile from ~/.adapters/providers.json. */
   providerProfile?: string;
 }
 

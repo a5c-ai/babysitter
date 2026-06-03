@@ -2,7 +2,7 @@
  * Formats tula invocation results as agent-mux compatible
  * JSONL events.
  *
- * When `--output-format amux-events` is used, the `invoke` command
+ * When `--output-format adapters-events` is used, the `invoke` command
  * outputs one JSON object per line to stdout so agent-mux's babysitter
  * adapter can parse our output as a normalised event stream.
  *
@@ -13,7 +13,7 @@ import type { HarnessInvokeResult } from "@a5c-ai/tula-platform/harness";
 import { mapHarnessToAmuxAdapter, hasAmuxAdapter } from "@a5c-ai/tula-platform/harness";
 
 /**
- * Shape of a single JSONL event line emitted in amux-events format.
+ * Shape of a single JSONL event line emitted in adapters-events format.
  * Matches the AmuxAgentEvent interface so agent-mux can consume it.
  */
 interface AmuxJsonlEvent {

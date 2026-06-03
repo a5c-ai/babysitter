@@ -1208,7 +1208,7 @@ nodeKinds:
       Catalog pass 18 introduced the operator-issued lifecycle set. Catalog pass 94
       (Catalog pass 94) extended the enum to cover `webhook-event` and `vcs-event` — the
       VCS / generic-webhook normalization triggers exposed by
-      `@a5c-ai/adapters-triggers` (packages/triggers-mux/src/types.ts:1, TriggerBackend
+      `@a5c-ai/triggers-adapter` (packages/triggers-mux/src/types.ts:1, TriggerBackend
       union: github | gitlab | bitbucket | generic-webhook).
   - name: effect
     type: string
@@ -1225,7 +1225,7 @@ nodeKinds:
     required: false
     notes: |
       `webhook` and `vcs-event` added Catalog pass 94 to capture the
-      `@a5c-ai/adapters-triggers` invocation surfaces (HTTP webhook payload arriving
+      `@a5c-ai/triggers-adapter` invocation surfaces (HTTP webhook payload arriving
       via GitHub Actions / generic webhook receiver, normalized into a
       single event shape).
   - name: backend
@@ -1250,7 +1250,7 @@ nodeKinds:
     notes: |
       Catalog pass 94 — captures how the trigger is fired:
       `normalize-and-evaluate` (CLI: enrich → evaluate → exit-code 0 or 78,
-      packages/triggers-mux/src/cli.ts:50), `direct-cli` (manual amux-triggers
+      packages/triggers-mux/src/cli.ts:50), `direct-cli` (manual adapters-triggers
       invocation), `reusable-action` (GitHub Action composite at
       packages/triggers-mux/action.yml).
   - name: payloadShape
@@ -1274,7 +1274,7 @@ nodeKinds:
     required: false
     notes: |
       Catalog pass 94 — bin entry that fires the trigger
-      (packages/triggers-mux/package.json:28 — `amux-triggers` →
+      (packages/triggers-mux/package.json:28 — `adapters-triggers` →
       `./dist/cli.js`).
   - name: enrichmentSources
     type: list<enum<workflow-event-payload,github-rest-api,local-git-show,git-diff-unified>>
@@ -1294,7 +1294,7 @@ nodeKinds:
     required: false
     notes: |
       Catalog pass 95 — `<code>:<symbol>:<meaning>` triples for the trigger's
-      process-exit contract. For amux-triggers (packages/triggers-mux/src/cli.ts:65):
+      process-exit contract. For adapters-triggers (packages/triggers-mux/src/cli.ts:65):
       `0:matched:trigger query matched, downstream pipeline runs`,
       `78:skip:trigger query did not match (action.yml:165 treats 78 as soft-skip)`,
       `1:error:invalid args / unhandled exception`.
@@ -1400,7 +1400,7 @@ nodeKinds:
     contains-operator, equals-operator). For codegen of a parser the
     productions need to be enumerated rather than collapsed into a
     single `queryDsl` enum tag. Cross-cutting NodeKind: any DSL-parser
-    rebuild (not just amux-triggers) can reuse this shape.
+    rebuild (not just adapters-triggers) can reuse this shape.
   prefix: grammar
   cluster: 13-catalog-meta
   purpose: |

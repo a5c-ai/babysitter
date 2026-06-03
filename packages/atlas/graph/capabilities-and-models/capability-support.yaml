@@ -1873,15 +1873,15 @@ edges:
     - target: capability:interactive-mode
 ---
 nodeKind: CapabilitySupport
-id: capabilitySupport:amux-proxy:streaming
+id: capabilitySupport:adapters-proxy:streaming
 attributes:
-  supportId: "capabilitySupport:amux-proxy:streaming"
+  supportId: "capabilitySupport:adapters-proxy:streaming"
   capabilityId: "streaming"
   supportLevel: "native"
   subjectKind: "TransportRuntime"
-  subjectId: "transportRuntime:amux-proxy"
+  subjectId: "transportRuntime:adapters-proxy"
   versionRange: ">=0.0.0"
-  notes: "amux-proxy protocol/provider bridge"
+  notes: "adapters-proxy protocol/provider bridge"
   evidenceRefs:
     - "repo-transport-mux-readme"
     - "repo-transport-mux-architecture"
@@ -1891,15 +1891,15 @@ edges:
     - target: capability:streaming
 ---
 nodeKind: CapabilitySupport
-id: capabilitySupport:amux-proxy:proxy-transport-emulation
+id: capabilitySupport:adapters-proxy:proxy-transport-emulation
 attributes:
-  supportId: "capabilitySupport:amux-proxy:proxy-transport-emulation"
+  supportId: "capabilitySupport:adapters-proxy:proxy-transport-emulation"
   capabilityId: "proxy-transport-emulation"
   supportLevel: "native"
   subjectKind: "TransportRuntime"
-  subjectId: "transportRuntime:amux-proxy"
+  subjectId: "transportRuntime:adapters-proxy"
   versionRange: ">=0.0.0"
-  notes: "amux-proxy protocol/provider bridge"
+  notes: "adapters-proxy protocol/provider bridge"
   evidenceRefs:
     - "repo-transport-mux-readme"
     - "repo-transport-mux-architecture"
@@ -1909,15 +1909,15 @@ edges:
     - target: capability:proxy-transport-emulation
 ---
 nodeKind: CapabilitySupport
-id: capabilitySupport:amux-proxy:model-discovery
+id: capabilitySupport:adapters-proxy:model-discovery
 attributes:
-  supportId: "capabilitySupport:amux-proxy:model-discovery"
+  supportId: "capabilitySupport:adapters-proxy:model-discovery"
   capabilityId: "model-discovery"
   supportLevel: "native"
   subjectKind: "TransportRuntime"
-  subjectId: "transportRuntime:amux-proxy"
+  subjectId: "transportRuntime:adapters-proxy"
   versionRange: ">=0.0.0"
-  notes: "amux-proxy protocol/provider bridge"
+  notes: "adapters-proxy protocol/provider bridge"
   evidenceRefs:
     - "repo-transport-mux-readme"
     - "repo-transport-mux-architecture"
@@ -1927,15 +1927,15 @@ edges:
     - target: capability:model-discovery
 ---
 nodeKind: CapabilitySupport
-id: capabilitySupport:amux-proxy:token-counting
+id: capabilitySupport:adapters-proxy:token-counting
 attributes:
-  supportId: "capabilitySupport:amux-proxy:token-counting"
+  supportId: "capabilitySupport:adapters-proxy:token-counting"
   capabilityId: "token-counting"
   supportLevel: "native"
   subjectKind: "TransportRuntime"
-  subjectId: "transportRuntime:amux-proxy"
+  subjectId: "transportRuntime:adapters-proxy"
   versionRange: ">=0.0.0"
-  notes: "amux-proxy protocol/provider bridge"
+  notes: "adapters-proxy protocol/provider bridge"
   evidenceRefs:
     - "repo-transport-mux-readme"
     - "repo-transport-mux-architecture"
@@ -1945,15 +1945,15 @@ edges:
     - target: capability:token-counting
 ---
 nodeKind: CapabilitySupport
-id: capabilitySupport:amux-proxy:tool-calling
+id: capabilitySupport:adapters-proxy:tool-calling
 attributes:
-  supportId: "capabilitySupport:amux-proxy:tool-calling"
+  supportId: "capabilitySupport:adapters-proxy:tool-calling"
   capabilityId: "tool-calling"
   supportLevel: "native"
   subjectKind: "TransportRuntime"
-  subjectId: "transportRuntime:amux-proxy"
+  subjectId: "transportRuntime:adapters-proxy"
   versionRange: ">=0.0.0"
-  notes: "amux-proxy protocol/provider bridge"
+  notes: "adapters-proxy protocol/provider bridge"
   evidenceRefs:
     - "repo-transport-mux-readme"
     - "repo-transport-mux-architecture"

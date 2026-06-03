@@ -1,11 +1,11 @@
-# @a5c-ai/adapters-hooks-opencode
+# @a5c-ai/hooks-adapter-opencode
 
 OpenCode harness adapter for hooks-mux.
 
 ## Install
 
 ```bash
-npm install @a5c-ai/adapters-hooks-opencode @a5c-ai/adapters-hooks-core
+npm install @a5c-ai/hooks-adapter-opencode @a5c-ai/hooks-adapter-core
 ```
 
 This package ships the built adapter runtime in `dist/` and this package README for npm publish-surface auditing.
@@ -17,7 +17,7 @@ import {
   createAdapter,
   createConfiguredEngine,
   normalizeOpenCode,
-} from "@a5c-ai/adapters-hooks-opencode";
+} from "@a5c-ai/hooks-adapter-opencode";
 ```
 
 The package exposes OpenCode-specific normalization, phase mappings, session utilities, and an in-process configured engine for hooks-mux integrations.

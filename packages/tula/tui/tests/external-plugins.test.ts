@@ -7,7 +7,7 @@ import { loadExternalPlugins } from '../src/external-plugins.js';
 let tmpDir: string;
 
 beforeEach(() => {
-  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-tui-ext-'));
+  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-tui-ext-'));
 });
 
 afterEach(() => {

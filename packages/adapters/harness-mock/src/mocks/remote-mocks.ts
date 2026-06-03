@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import type { AgentEvent } from '@a5c-ai/adapters-comm';
+import type { AgentEvent } from '@a5c-ai/comm-adapter';
 import type {
   MockConnection,
   MockServerInfo,

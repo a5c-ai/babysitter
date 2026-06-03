@@ -10,7 +10,7 @@ import * as path from 'node:path';
 import { writeFileAtomic, writeJsonAtomic } from '../src/atomic-fs.js';
 
 async function tmpdir(): Promise<string> {
-  return fs.mkdtemp(path.join(os.tmpdir(), 'amux-atomic-'));
+  return fs.mkdtemp(path.join(os.tmpdir(), 'adapters-atomic-'));
 }
 
 describe('atomic-fs', () => {

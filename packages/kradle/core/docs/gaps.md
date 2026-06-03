@@ -146,7 +146,7 @@ Additional provider work now documented but not implemented:
 
 ----
 
-[ ] - add tools mux to enforce external tool use granular permissions beyond amux support for sanboxing and policy enforcement.
+[ ] - add tools mux to enforce external tool use granular permissions beyond adapters support for sanboxing and policy enforcement.
 
 ## External provider implementation-ready gaps
 

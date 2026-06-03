@@ -1,6 +1,6 @@
 # Triggers & CI Integration
 
-The `@a5c-ai/adapters-triggers` package provides a GitHub Action and CLI for running coding agents from CI pipelines.
+The `@a5c-ai/triggers-adapter` package provides a GitHub Action and CLI for running coding agents from CI pipelines.
 
 ## Architecture
 
@@ -14,7 +14,7 @@ graph LR
         ENRICH["Enrich<br/>(normalize + fetch changes)"]
         EVAL["Evaluate<br/>(trigger query match)"]
         SETUP["Setup<br/>(install harness + plugin)"]
-        LAUNCH["Launch<br/>(amux launch)"]
+        LAUNCH["Launch<br/>(adapters launch)"]
     end
 
     GH --> ENRICH --> EVAL

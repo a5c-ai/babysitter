@@ -10,7 +10,7 @@ describe('ClaudeAdapter plugin methods (MCP servers in ~/.claude/settings.json)'
   const prevUserProfile = process.env['USERPROFILE'];
 
   beforeEach(async () => {
-    home = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-claude-plugins-'));
+    home = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-claude-plugins-'));
     process.env['HOME'] = home;
     process.env['USERPROFILE'] = home;
   });

@@ -5,7 +5,7 @@
  */
 
 import type { CommandModule } from 'yargs';
-import { deleteSession } from '@a5c-ai/adapters-hooks-core';
+import { deleteSession } from '@a5c-ai/hooks-adapter-core';
 
 interface ClearSessionArgs {
   'session-id': string;

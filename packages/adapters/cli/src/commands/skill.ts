@@ -1,5 +1,5 @@
 /**
- * `amux skill <subcommand> <agent> [args] [--global|--project]`
+ * `adapters skill <subcommand> <agent> [args] [--global|--project]`
  *
  * Skills are file-convention only — no underlying harness command.
  * We copy/remove skill folders into per-agent locations.
@@ -7,7 +7,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs, FlagDef } from '../parse-args.js';
 import { flagBool, flagStr } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';
@@ -57,7 +57,7 @@ export async function skillCommand(
 
   if (args.flags.help || (!args.subcommand && args.positionals.length === 0)) {
     process.stdout.write([
-      'Usage: amux skill <subcommand> <agent> [args] [--global|--project]',
+      'Usage: adapters skill <subcommand> <agent> [args] [--global|--project]',
       '',
       'Manage skill folders for an agent (file-convention based, no native command).',
       '',
@@ -74,9 +74,9 @@ export async function skillCommand(
       '  --project                          Use the project-level skills dir',
       '',
       'Examples:',
-      '  amux skill list claude',
-      '  amux skill add claude ./skills/my-skill --global',
-      '  amux skill remove claude my-skill --project',
+      '  adapters skill list claude',
+      '  adapters skill add claude ./skills/my-skill --global',
+      '  adapters skill remove claude my-skill --project',
     ].join('\n') + '\n');
     return ExitCode.SUCCESS;
   }
@@ -105,7 +105,7 @@ export async function skillCommand(
   const paths = getSkillPaths(agent);
   if (!paths) {
     if (json) printJsonError('VALIDATION_ERROR', `Unknown agent for skills: ${agent}`);
-    else printError(`Unknown agent for skills: ${agent}. Try: amux skill agents`);
+    else printError(`Unknown agent for skills: ${agent}. Try: adapters skill agents`);
     return ExitCode.USAGE_ERROR;
   }
 
@@ -148,7 +148,7 @@ export async function skillCommand(
       const source = args.positionals[1];
       if (!source) {
         if (json) printJsonError('VALIDATION_ERROR', 'Missing source folder');
-        else printError('Usage: amux skill add <agent> <source-folder> [--name <n>] [--global|--project]');
+        else printError('Usage: adapters skill add <agent> <source-folder> [--name <n>] [--global|--project]');
         return ExitCode.USAGE_ERROR;
       }
       const absSource = path.resolve(source);
@@ -179,7 +179,7 @@ export async function skillCommand(
       const name = args.positionals[1];
       if (!name) {
         if (json) printJsonError('VALIDATION_ERROR', 'Missing skill name');
-        else printError('Usage: amux skill remove <agent> <name> [--global|--project]');
+        else printError('Usage: adapters skill remove <agent> <name> [--global|--project]');
         return ExitCode.USAGE_ERROR;
       }
       const scope = resolveScope(args, 'project');

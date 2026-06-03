@@ -56,7 +56,7 @@ describe('transport-mux config', () => {
     expect(errors).toEqual([]);
   });
 
-  it('projects process env for the amux-proxy runtime', () => {
+  it('projects process env for the adapters-proxy runtime', () => {
     const env = createProxyProcessEnv(
       {
         targetProvider: 'bedrock',

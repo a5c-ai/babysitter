@@ -21,18 +21,18 @@ The control-plane shape is:
 3. `packages/adapters/adapters/src/translate-for-harness.ts` chooses the harness-facing protocol contract.
 4. `packages/adapters/transport` is the package seam where that future runtime can converge once cutover work is complete.
 
-Historical references still exist under `packages/adapters/amux-proxy`, but this package is now the active JS runtime seam for published launcher flows.
+Historical references still exist under `packages/adapters/adapters-proxy`, but this package is now the active JS runtime seam for published launcher flows.
 
 ## What this package means right now
 
 - it is a published npm deliverable used by the agent-mux CLI/runtime stack
 - `src/config.ts`, `src/server.ts`, `src/runtime.ts`, and `src/types.ts` provide the transport/proxy runtime seam consumed by launcher flows
-- package entrypoints and the `amux-proxy` bin are part of the public runtime surface
+- package entrypoints and the `adapters-proxy` bin are part of the public runtime surface
 - the docs capture the protocol/provider split and the current runtime boundary
 
 ## Placeholder contract notes
 
-- `POST /v1/count_tokens` now delegates to provider-aware token counting through the runtime completion engine and returns `{ "count": number }`, matching the legacy `amux-proxy` cutover target instead of a local JSON-length heuristic. Invalid JSON and provider/request failures return explicit error responses, and providers without token-count support return `501`.
+- `POST /v1/count_tokens` now delegates to provider-aware token counting through the runtime completion engine and returns `{ "count": number }`, matching the legacy `adapters-proxy` cutover target instead of a local JSON-length heuristic. Invalid JSON and provider/request failures return explicit error responses, and providers without token-count support return `501`.
 - `GET /metrics` and `GET /cache/stats` are retained for cutover parity with the legacy proxy. `/metrics` exposes in-process request/error/token counters; `/cache/stats` returns `{ "enabled": false }` until this package owns a real cache implementation.
 - `/passthrough/*` is expected to strip only the `/passthrough` prefix, preserve the remaining path and query string, and fail with `501` when no completion engine or resolvable upstream `apiBase` exists.
 
@@ -41,9 +41,9 @@ Historical references still exist under `packages/adapters/amux-proxy`, but this
 Use these workspace gates when changing the runtime seam or its migration docs:
 
 ```bash
-npm run build --workspace=@a5c-ai/adapters-transport
-npm run test --workspace=@a5c-ai/adapters-transport
-npm run scorecard:migration --workspace=@a5c-ai/adapters-transport
+npm run build --workspace=@a5c-ai/transport-adapter
+npm run test --workspace=@a5c-ai/transport-adapter
+npm run scorecard:migration --workspace=@a5c-ai/transport-adapter
 ```
 
 Passing those commands proves the runtime seam still compiles, its runtime tests still pass, and the migration scorecard still sees metadata and docs that match the published runtime policy.

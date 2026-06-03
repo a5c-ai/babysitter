@@ -1,6 +1,6 @@
 # agent-mux
 
-`@a5c-ai/adapters` is a unified TypeScript SDK and CLI (`amux`) for driving heterogeneous coding-agent harnesses — Claude Code, Codex, Gemini, Copilot, Cursor, OpenCode, OpenCode HTTP, pi, omp, openclaw, hermes, qwen — through one contract.
+`@a5c-ai/adapters` is a unified TypeScript SDK and CLI (`adapters`) for driving heterogeneous coding-agent harnesses — Claude Code, Codex, Gemini, Copilot, Cursor, OpenCode, OpenCode HTTP, pi, omp, openclaw, hermes, qwen — through one contract.
 
 It spawns real subprocesses, normalizes their streaming output into a shared `AgentEvent` stream, and exposes each harness's sessions, config, auth, and plugins through a single `AgentMuxClient` interface. Invocations can run locally, in Docker, over SSH, or in a Kubernetes pod with no code change.
 
@@ -11,7 +11,7 @@ It spawns real subprocesses, normalizes their streaming output into a shared `Ag
 npm install @a5c-ai/adapters
 
 # SDK only
-npm install @a5c-ai/adapters-comm @a5c-ai/adapters-codecs
+npm install @a5c-ai/comm-adapter @a5c-ai/adapters-codecs
 
 # Zero-install CLI
 npx @a5c-ai/adapters --help
@@ -23,13 +23,13 @@ Requires Node.js 20.9.0 or later. ESM-first, with a CJS compatibility shim.
 
 ```bash
 # Run a prompt against a harness you have installed locally
-amux run --agent claude-code --prompt "Summarize README.md"
+adapters run --agent claude-code --prompt "Summarize README.md"
 
 # Streaming JSON events (one per line)
-amux run --agent codex --prompt "Add a test for foo()" --json
+adapters run --agent codex --prompt "Add a test for foo()" --json
 
 # Pick a profile (named RunOptions preset)
-amux run --profile fast-claude --prompt "..."
+adapters run --profile fast-claude --prompt "..."
 ```
 
 SDK:
@@ -62,15 +62,15 @@ await handle.done;
 | `openclaw` | `openclaw` | `~/.openclaw/sessions` |
 | `hermes` | `hermes` | `~/.hermes/sessions` |
 | `qwen` | `qwen` | `~/.qwen/sessions` |
-| `agent-mux-remote` | `amux` | (transport-delegated) |
+| `agent-mux-remote` | `adapters` | (transport-delegated) |
 
-Install or update any of them through `amux`:
+Install or update any of them through `adapters`:
 
 ```bash
-amux install claude-code          # npm / brew / manual, adapter-specified
-amux update codex
-amux detect --all --json          # probe installations
-amux detect-host                  # is this shell already inside a harness?
+adapters install claude-code          # npm / brew / manual, adapter-specified
+adapters update codex
+adapters detect --all --json          # probe installations
+adapters detect-host                  # is this shell already inside a harness?
 ```
 
 ## Features
@@ -85,34 +85,34 @@ Every harness — regardless of wire format (JSONL, stream-json envelopes, SSE, 
 One option flips where the subprocess actually runs: `local`, `docker` (with volumes/image/env), `ssh` (identity file, remote cwd), or `k8s` (namespace, image, pod spec overlay). The adapter contract is unchanged — streaming, sessions, and cost events still flow back over the chosen transport.
 
 ### Hooks
-`amux hooks install` wires a command to a harness event (`PreToolUse`, `PostToolUse`, `Stop`, `UserPromptSubmit`, …). Native hooks are written into the harness's own config (e.g. `~/.claude/settings.json`); harnesses without native hook support get a virtual hook layer driven off the event stream. Same UX, different mechanism.
+`adapters hooks install` wires a command to a harness event (`PreToolUse`, `PostToolUse`, `Stop`, `UserPromptSubmit`, …). Native hooks are written into the harness's own config (e.g. `~/.claude/settings.json`); harnesses without native hook support get a virtual hook layer driven off the event stream. Same UX, different mechanism.
 
 ### MCP plugins
-`amux plugins install <server> --agent claude` adds an MCP server entry in the harness's config file. Supported on claude, codex, gemini, cursor, opencode, opencode-http, openclaw (and qwen via MCP-compatible config). `list` / `uninstall` work symmetrically.
+`adapters plugins install <server> --agent claude` adds an MCP server entry in the harness's config file. Supported on claude, codex, gemini, cursor, opencode, opencode-http, openclaw (and qwen via MCP-compatible config). `list` / `uninstall` work symmetrically.
 
 ### Skills & sub-agents
-`amux skill add <agent> <folder>` copies a skill folder into the harness convention path (e.g. `.claude/skills/`, `.codex/skills/`). `amux agent add <agent> <file>` does the same for sub-agent definitions (e.g. `.claude/agents/`). Both accept `--global` / `--project` scope, `--force` to overwrite, and have `list` / `remove` / `where` subcommands. File-convention only — no native harness command needed.
+`adapters skill add <agent> <folder>` copies a skill folder into the harness convention path (e.g. `.claude/skills/`, `.codex/skills/`). `adapters agent add <agent> <file>` does the same for sub-agent definitions (e.g. `.claude/agents/`). Both accept `--global` / `--project` scope, `--force` to overwrite, and have `list` / `remove` / `where` subcommands. File-convention only — no native harness command needed.
 
 ### Auth & install detection
-`amux doctor` reports each harness's binary presence, version, auth state (env var, config file, browser token), and config directory health. `amux detect --all --json` is the machine-readable form. `amux install <agent>` / `update <agent>` dispatches to the adapter-declared install method (npm, brew, curl script).
+`adapters doctor` reports each harness's binary presence, version, auth state (env var, config file, browser token), and config directory health. `adapters detect --all --json` is the machine-readable form. `adapters install <agent>` / `update <agent>` dispatches to the adapter-declared install method (npm, brew, curl script).
 
 ### Capabilities & models
 Every adapter declares an `AgentCapabilities` record (streaming, thinking, parallel tools, MCP, PTY requirement, image IO, skills, subagents, platforms) and a `ModelCapabilities[]` list (context window, pricing, thinking budgets, tool support). Build agent pickers, cost estimators, and feature-gated UIs directly off the declared capability surface.
 
 ### Cost tracking
-Adapters that expose pricing/usage emit `cost` events (input/output tokens, cache reads, USD). `amux run --json` surfaces them on stdout; the SDK bubbles them through `handle.events()` alongside text.
+Adapters that expose pricing/usage emit `cost` events (input/output tokens, cache reads, USD). `adapters run --json` surfaces them on stdout; the SDK bubbles them through `handle.events()` alongside text.
 
 ### Profiles
-`RunOptions` presets under a name. `amux profiles` lists them; `amux run --profile fast-claude` applies one. Layerable over explicit flags.
+`RunOptions` presets under a name. `adapters profiles` lists them; `adapters run --profile fast-claude` applies one. Layerable over explicit flags.
 
 ### Mock harness
-`@a5c-ai/adapters-harness-mock` ships deterministic scenario scripts (`claudeCodeSuccess`, `codexToolError`, …) and a `MockProcess` that replays them without any real binary, API key, or network. Pair with `WorkspaceSandbox` to test file-operation side effects. `amux run --use-mock-harness` drives the full CLI against mocks.
+`@a5c-ai/adapters-harness-mock` ships deterministic scenario scripts (`claudeCodeSuccess`, `codexToolError`, …) and a `MockProcess` that replays them without any real binary, API key, or network. Pair with `WorkspaceSandbox` to test file-operation side effects. `adapters run --use-mock-harness` drives the full CLI against mocks.
 
 ### Remote bootstrap
-`amux remote install <host> --harness <agent>` uploads the SDK, installs the harness on the target, and verifies. Works over ssh and k8s; used to stand up stateless runners.
+`adapters remote install <host> --harness <agent>` uploads the SDK, installs the harness on the target, and verifies. Works over ssh and k8s; used to stand up stateless runners.
 
 ### Host detection
-`amux detect-host` returns which harness (if any) this shell is already running inside — useful for adapters that want to refuse re-entry or skip re-auth.
+`adapters detect-host` returns which harness (if any) this shell is already running inside — useful for adapters that want to refuse re-entry or skip re-auth.
 
 ## SDK examples
 
@@ -207,11 +207,11 @@ async function runWithBudget(agent: string, prompt: string, maxUsd: number) {
 
 ```bash
 # Realtime: filter cost events from JSON stream
-amux run --agent claude-code --prompt '...' --json | jq 'select(.type=="cost")'
+adapters run --agent claude-code --prompt '...' --json | jq 'select(.type=="cost")'
 
 # Non-realtime: sum cost from a stored session
-amux sessions list --agent claude-code --json
-amux sessions read --agent claude-code --id <sid> --json \
+adapters sessions list --agent claude-code --json
+adapters sessions read --agent claude-code --id <sid> --json \
   | jq '[.events[]|select(.type=="cost")|.cost.totalUsd]|add'
 ```
 
@@ -232,22 +232,22 @@ client.run({ agent: 'gemini', prompt: '...', invocation: {
 }});
 ```
 
-Remote bootstrap (installs `amux` + harness on the target, then verifies):
+Remote bootstrap (installs `adapters` + harness on the target, then verifies):
 
 ```bash
-amux remote install builder.example.com --harness claude-code
-amux remote update  builder.example.com --harness codex --mode ssh
+adapters remote install builder.example.com --harness claude-code
+adapters remote update  builder.example.com --harness codex --mode ssh
 ```
 
 See [docs/13-invocation-modes.md](docs/13-invocation-modes.md).
 
 ## Docker
 
-The repository ships a `Dockerfile` that builds an image with one or more harnesses pre-installed via `amux install`:
+The repository ships a `Dockerfile` that builds an image with one or more harnesses pre-installed via `adapters install`:
 
 ```bash
-docker build --build-arg HARNESSES=claude-code,codex -t amux .
-docker run --rm -it -v "$PWD:/workspace" amux run --agent claude-code --prompt '...'
+docker build --build-arg HARNESSES=claude-code,codex -t adapters .
+docker run --rm -it -v "$PWD:/workspace" adapters run --agent claude-code --prompt '...'
 ```
 
 ## Testing with harness-mock
@@ -291,9 +291,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the manual publish / version-bump flo
 This repo is an npm workspaces monorepo. Each published package has its own README:
 
 - [`@a5c-ai/adapters`](packages/adapters/README.md) — meta-package (SDK + CLI convenience install).
-- [`@a5c-ai/adapters-comm`](packages/core/README.md) — core types, client, stream engine.
+- [`@a5c-ai/comm-adapter`](packages/core/README.md) — core types, client, stream engine.
 - [`@a5c-ai/adapters-codecs`](packages/adapters/README.md) — built-in harness adapters.
-- [`@a5c-ai/adapters-cli`](packages/cli/README.md) — the `amux` command-line binary.
+- [`@a5c-ai/adapters-cli`](packages/cli/README.md) — the `adapters` command-line binary.
 - [`@a5c-ai/adapters-harness-mock`](packages/harness-mock/README.md) — mock harness simulator for tests.
 
 License: MIT.

@@ -10,8 +10,8 @@ import type {
   Session,
   SessionSummary,
   WorkspaceSessionBinding,
-} from '@a5c-ai/adapters-comm';
-import { WorkspaceService, detectHostHarness } from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
+import { WorkspaceService, detectHostHarness } from '@a5c-ai/comm-adapter';
 
 import type { GatewayConfig } from '../config.js';
 import { createGatewayRunClient } from '../builtin-adapters.js';

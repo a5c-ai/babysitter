@@ -2,8 +2,8 @@ import * as Keychain from 'react-native-keychain';
 
 import type { StoredGatewayAuth } from '../types.js';
 
-const ACCESS_GROUP = 'group.ai.a5c.amux';
-const KEY_PREFIX = 'amux.gateway.';
+const ACCESS_GROUP = 'group.ai.a5c.adapters';
+const KEY_PREFIX = 'adapters.gateway.';
 
 function serviceForHost(host: string): string {
   return `${KEY_PREFIX}${host.replace(/^https?:\/\//, '').replace(/\/+$/, '')}`;

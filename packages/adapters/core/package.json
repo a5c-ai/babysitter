@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/adapters-comm",
+  "name": "@a5c-ai/comm-adapter",
   "version": "5.0.0",
   "type": "module",
   "license": "MIT",

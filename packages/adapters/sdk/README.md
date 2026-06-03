@@ -2,7 +2,7 @@
 
 Unified dispatch layer for local CLI-based AI coding agents — Claude Code, Codex, Gemini, Copilot, Cursor, OpenCode, and more.
 
-This meta-package re-exports `@a5c-ai/adapters-comm`, `@a5c-ai/adapters-codecs`, and `@a5c-ai/adapters-cli` as one convenient install.
+This meta-package re-exports `@a5c-ai/comm-adapter`, `@a5c-ai/adapters-codecs`, and `@a5c-ai/adapters-cli` as one convenient install.
 
 ## Install
 

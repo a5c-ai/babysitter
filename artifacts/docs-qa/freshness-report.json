@@ -14,7 +14,7 @@
     {
       "file": "docs/v6-spec-and-roadmap/agent-mux-integration.md",
       "line": 40,
-      "packageName": "@a5c-ai/amux-proxy"
+      "packageName": "@a5c-ai/adapters-proxy"
     },
     {
       "file": "docs/v6-spec-and-roadmap/architecture-comparison.md",
@@ -129,7 +129,7 @@
   ],
   "versionClaims": [
     {
-      "file": "docs/agent-mux/archive/design/amux-provider-config.md",
+      "file": "docs/agent-mux/archive/design/adapters-provider-config.md",
       "line": 5,
       "claim": "v1.0"
     },

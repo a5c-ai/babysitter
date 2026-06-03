@@ -5,7 +5,7 @@
  * Uses setInterval to check the cron expression against current time.
  */
 
-import type { TimerAutomationRule } from "@a5c-ai/adapters-comm";
+import type { TimerAutomationRule } from "@a5c-ai/comm-adapter";
 import type { TriggerCallback } from "./types";
 
 export interface TimerSchedulerHandle {

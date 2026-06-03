@@ -2,11 +2,11 @@ import * as Notifications from 'expo-notifications';
 
 import type { HookNotificationPayload } from '../types.js';
 
-export const HOOK_ALLOW_ACTION = 'amux.hook.allow';
-export const HOOK_DENY_ACTION = 'amux.hook.deny';
+export const HOOK_ALLOW_ACTION = 'adapters.hook.allow';
+export const HOOK_DENY_ACTION = 'adapters.hook.deny';
 
 export async function configurePushCategories(): Promise<void> {
-  await Notifications.setNotificationCategoryAsync('amux-hook', [
+  await Notifications.setNotificationCategoryAsync('adapters-hook', [
     { identifier: HOOK_ALLOW_ACTION, buttonTitle: 'Allow', options: { opensAppToForeground: false } },
     { identifier: HOOK_DENY_ACTION, buttonTitle: 'Deny', options: { opensAppToForeground: false } },
   ]);

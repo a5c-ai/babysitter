@@ -3,12 +3,12 @@ import { execFileSync } from "node:child_process";
 
 /**
  * These tests verify routing classification by spawning a child process
- * to call the real @a5c-ai/adapters-tasks module — completely isolated from
+ * to call the real @a5c-ai/tasks-adapter module — completely isolated from
  * vitest's mock system which leaks across thread-pooled test files.
  */
 
 function evalTasksMux(code: string): unknown {
-  const script = `const m = require("@a5c-ai/adapters-tasks"); ${code}`;
+  const script = `const m = require("@a5c-ai/tasks-adapter"); ${code}`;
   const result = execFileSync(process.execPath, ["-e", script], {
     encoding: "utf8",
     timeout: 5000,

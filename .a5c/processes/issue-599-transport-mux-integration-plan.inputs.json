@@ -62,7 +62,7 @@
     "packages/transport-mux/src/config.ts",
     "packages/transport-mux/src/runtime.ts",
     "packages/transport-mux/src/index.ts",
-    "packages/transport-mux/src/bin/amux-proxy.ts",
+    "packages/transport-mux/src/bin/adapters-proxy.ts",
     "packages/transport-mux/tests/server.test.ts",
     "packages/transport-mux/tests/runtime.test.ts",
     "packages/transport-mux/tests/config.test.ts",

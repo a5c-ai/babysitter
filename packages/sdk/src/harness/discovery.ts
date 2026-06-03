@@ -145,7 +145,7 @@ export async function discoverHarnesses(): Promise<HarnessDiscoveryResult[]> {
   try {
     return await discoverHarnessesViaAmux();
   } catch (e) {
-    process.stderr.write(`[babysitter] amux harness discovery failed, falling back to legacy: ${e instanceof Error ? e.message : String(e)}\n`);
+    process.stderr.write(`[babysitter] adapters harness discovery failed, falling back to legacy: ${e instanceof Error ? e.message : String(e)}\n`);
   }
 
   return discoverHarnessesLegacy();

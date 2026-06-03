@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/adapters-tasks",
+  "name": "@a5c-ai/tasks-adapter",
   "version": "5.0.0",
   "description": "Serverless breakpoint multiplexing system with pluggable backends and cryptographic signing.",
   "type": "module",

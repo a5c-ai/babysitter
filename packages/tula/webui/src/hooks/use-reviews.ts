@@ -17,7 +17,7 @@ import type {
   KanbanReviewStatus,
   KanbanReviewSnapshot,
   KanbanReviewTargetType,
-} from "@a5c-ai/adapters-comm/kanban";
+} from "@a5c-ai/comm-adapter/kanban";
 
 import { useSmartPolling } from "./use-smart-polling";
 

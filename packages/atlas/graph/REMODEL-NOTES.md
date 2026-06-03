@@ -574,7 +574,7 @@ both new NodeKinds (catalog pass 9c remodel comment retained).
 ### Part B — seed examples (multi-doc YAML)
 
 - `graph/extensions/transport-runtimes/transport-runtimes-canonical.yaml`
-  (3 TransportRuntime entries: `terminal-cli`, `shell-hook-runtime`, `amux-proxy`)
+  (3 TransportRuntime entries: `terminal-cli`, `shell-hook-runtime`, `adapters-proxy`)
 - `graph/extensions/provider-versions/provider-versions-anthropic-openai.yaml`
   (3 ProviderVersion entries: `anthropic-ge-0-0-0`, `openai-ge-0-0-0`, `google-ge-0-0-0`)
 
@@ -615,7 +615,7 @@ Subject mapping:
 |----------------------------------------|----------------------------------------|
 | transportRuntime:terminal-cli          | transport-runtime:terminal-cli         |
 | transportRuntime:shell-hook-runtime    | transport-runtime:shell-hook-runtime   |
-| transportRuntime:amux-proxy            | transport-runtime:amux-proxy           |
+| transportRuntime:adapters-proxy            | transport-runtime:adapters-proxy           |
 | providerVersion:anthropic:ge-0-0-0     | provider-version:anthropic-ge-0-0-0    |
 | providerVersion:openai:ge-0-0-0        | provider-version:openai-ge-0-0-0       |
 | providerVersion:google:ge-0-0-0        | provider-version:google-ge-0-0-0       |
@@ -3228,7 +3228,7 @@ The catalog pass 76 out-of-band deletion of ~57 records left 15 records orphaned
 
 | Source | Edge | Target |
 | --- | --- | --- |
-| 11 a5c-* PackageSurfaces | `references_path` | path:amux-hooks-global / amux-hooks-project / a5c-runs-dir / agent-catalog-graph / catalog-api (matched by package responsibility) |
+| 11 a5c-* PackageSurfaces | `references_path` | path:adapters-hooks-global / adapters-hooks-project / a5c-runs-dir / agent-catalog-graph / catalog-api (matched by package responsibility) |
 | `package:a5c-ai-catalog` | `references_path` | path:catalog-api |
 | `project:graph` | `groups_workspace` | workspace:local-developer-default |
 | `ontology:v6-current` | `has_version` | agent-version:babysitter@current (schema-permitted target; semantically loose but recorded) |
@@ -4766,9 +4766,9 @@ NodeKind. **Result: 0 new anti-patterns.**
 
 
 
-## Catalog pass 94 — @a5c-ai/adapters-triggers package surface modeled (2026-05-04)
+## Catalog pass 94 — @a5c-ai/triggers-adapter package surface modeled (2026-05-04)
 
-Catalog pass 94 catalogs `packages/triggers-mux/` (`@a5c-ai/adapters-triggers` v0.4.9) into atlas
+Catalog pass 94 catalogs `packages/triggers-mux/` (`@a5c-ai/triggers-adapter` v0.4.9) into atlas
 as `OperationalTrigger` records, capturing all four `TriggerBackend`
 variants plus the reusable composite GitHub Action.
 
@@ -4779,16 +4779,16 @@ variants plus the reusable composite GitHub Action.
 - 5 source modules: action.ts, enrich.ts, query.ts, cli.ts, index.ts +
   6 backend modules (github, gitlab, bitbucket, generic-webhook,
   utils, index).
-- 1 CLI binary (`amux-triggers` → ./dist/cli.js).
+- 1 CLI binary (`adapters-triggers` → ./dist/cli.js).
 - 1 reusable GitHub Action composite (`packages/triggers-mux/action.yml`
   with 16 inputs / 3 outputs / 7 steps).
 - Dispatch model (1 line): enricher reads payload (workflow event JSON
   or local) → normalizer per backend → optional REST/git diff
   enrichment → `evaluateTrigger` against compact key:value query →
   exit 0 (matched) / 78 (skip) / non-zero (error); GH Action wraps
-  this with harness/plugin install + pre-run/amux/post-run.
+  this with harness/plugin install + pre-run/adapters/post-run.
 - Key integration points: GitHub Actions composite, agent-mux CLI
-  (`packages/adapters/sdk/dist/bin/amux.js`), babysitter platform
+  (`packages/adapters/sdk/dist/bin/adapters.js`), babysitter platform
   (workspace consumer).
 
 ### Schema delta
@@ -4852,9 +4852,9 @@ dangling / parse 0 / 0 / 0.
 - Dead-EdgeKinds 11 (≤ 13 cap honored).
 
 
-## Catalog pass 95 - @a5c-ai/adapters-triggers package deep-decomposition (catalog pass 95, 2026-05-04)
+## Catalog pass 95 - @a5c-ai/triggers-adapter package deep-decomposition (catalog pass 95, 2026-05-04)
 
-catalog pass 95 deepens catalog pass 94 trigger modeling so the @a5c-ai/adapters-triggers package
+catalog pass 95 deepens catalog pass 94 trigger modeling so the @a5c-ai/triggers-adapter package
 can be regenerated from the atlas graph alone. catalog pass 94 had compressed seven
 decomposable surfaces into string attributes on five OperationalTrigger
 records; catalog pass 95 promotes each surface to first-class records with edges.
@@ -4869,7 +4869,7 @@ records; catalog pass 95 promotes each surface to first-class records with edges
 | 4 | Per-backend REST endpoints | APIEndpoint (reused) | 2 | packages/triggers-mux/src/enrich.ts:61-96 |
 | 5 | NormalizedTriggerEvent + TriggerChange payload schemas | SharedContextSpec (extended w/ fieldSchema, typescriptInterface) | 2 | packages/triggers-mux/src/types.ts:3-28 |
 | 6 | Exit-code semantics (0/78/non-zero) | exitCodeSemantics attribute on OperationalTrigger | 5 records carry it | packages/triggers-mux/src/cli.ts:65 + action.yml:165,217-220 |
-| 7 | amux-triggers CLI subcommands | InteractionPrimitive (kind=cli-subcommand, new attrs parentBin/subcommandVerb/flags/subcommandExitCodes) | 3 (enrich, evaluate, --help) | packages/triggers-mux/src/cli.ts:18-69 |
+| 7 | adapters-triggers CLI subcommands | InteractionPrimitive (kind=cli-subcommand, new attrs parentBin/subcommandVerb/flags/subcommandExitCodes) | 3 (enrich, evaluate, --help) | packages/triggers-mux/src/cli.ts:18-69 |
 
 Total: 36 new graph records (19+9+1+2+2+3) + catalog pass 94 5 OperationalTrigger
 records updated with new edges and exitCodeSemantics.
@@ -4877,7 +4877,7 @@ records updated with new edges and exitCodeSemantics.
 The action.yml step count is 9, not 7 as the brief estimated -- the
 brief-stated "7 steps" miscounted; verbatim action.yml:80-232 defines:
 1 setup-node, 2 a5c-token, 3 build-runtime, 4 install-harness,
-5 install-plugins, 6 evaluate-trigger, 7 pre-run, 8 run-amux, 9 post-run.
+5 install-plugins, 6 evaluate-trigger, 7 pre-run, 8 run-adapters, 9 post-run.
 Authored all 9 (no fabrication).
 
 GitLab / Bitbucket / generic-webhook backends do NOT call REST
@@ -4944,7 +4944,7 @@ this expectation here. No allowlist change needed.
 
 ### Codegen-readiness verdict for the triggers package
 
-GREEN -- given atlas alone, the @a5c-ai/adapters-triggers package can be
+GREEN -- given atlas alone, the @a5c-ai/triggers-adapter package can be
 regenerated: package.json from PackageSurface + exposes_subcommand,
 action.yml from the 5 OperationalTriggers + 19 FrontmatterFields + 9
 GithubActionSteps, src/types.ts from the 2 SharedContextSpec field
@@ -5009,7 +5009,7 @@ Top-level mux + catalog packages:
 2. `agent-mux` — multi-subpackage tree (9 subpackages with package.json):
    `core`, `cli`, `gateway`, `tui`, `ui`, `webui`, `harness-mock`,
    `observability`, `sdk` (umbrella @a5c-ai/adapters), `adapters`.
-   Plus 3 non-published dirs (`amux-proxy`, `meta`, `processes`).
+   Plus 3 non-published dirs (`adapters-proxy`, `meta`, `processes`).
 3. `extension-mux` — single package (already PackageSurface).
 4. `hooks-mux` — single core package (already PackageSurface) + 9 adapter
    subdirs (claude/codex/copilot/cursor/gemini/oh-my-pi/openclaw/opencode/pi).
@@ -5067,7 +5067,7 @@ the package and path nodes report non-orphan after the catalog pass.
 
 ### Modeling decisions
 
-- **Concrete deferral**: agent-mux/`amux-proxy`, `meta`, and `processes`
+- **Concrete deferral**: agent-mux/`adapters-proxy`, `meta`, and `processes`
   have no `package.json` — they are non-published source directories.
   Out of scope for PackageSurface modeling (no publish surface to track).
   Their content (proxy-server logic, build metadata, process JSON)
@@ -5136,20 +5136,20 @@ mux subpackage has a graph record.
 ### Top remaining gaps
 
 None for codegen-readiness. The agent-mux umbrella tree's three
-non-published dirs (`amux-proxy`, `meta`, `processes`) are intentionally
+non-published dirs (`adapters-proxy`, `meta`, `processes`) are intentionally
 unmodeled (no publish surface). If a future catalog pass promotes any of them to
 publishable packages, they'll need PackageSurface + PathDescriptor records
 following the catalog pass 96 pattern.
 
-## catalog pass 97a — `amux` CLI subcommand catalog
+## catalog pass 97a — `adapters` CLI subcommand catalog
 
 Authored 74 `InteractionPrimitive[kind=cli-subcommand]` records under
 `graph/extensions/interaction-patterns/agent-mux-cli-subcommands.yaml`,
-covering every leaf subcommand of `amux` (per
+covering every leaf subcommand of `adapters` (per
 `packages/adapters/cli/src/commands/*.ts` + `commands/gateway/*.ts`).
 Wired each as `exposes_subcommand` from
 `package:a5c-ai-agent-mux-cli` (catalog pass 96). Each record carries
-`parentBin: amux`, `subcommandVerb`, per-subcommand `flags` list
+`parentBin: adapters`, `subcommandVerb`, per-subcommand `flags` list
 (`<flag>:<arity>:<purpose>`), and `subcommandExitCodes` distilled from
 `packages/adapters/cli/src/exit-codes.ts:10-27` plus
 `errorCodeToExitCode` mappings. Description embeds source-file:line
@@ -5182,13 +5182,13 @@ tasks-mux, hooks-mux/core) into 40 graph records.
   `interactive:*` harness-mock approval scenarios + 5 SharedContextSpec
   for harness-mock fixture-config schemas (HarnessScenario,
   StdinInteraction, HttpServerConfig, WebSocketConfig, MockEvent)
-- 1 InteractionPrimitive[kind=cli-subcommand] for the `amux-proxy` bin
+- 1 InteractionPrimitive[kind=cli-subcommand] for the `adapters-proxy` bin
   (transport-mux ModelTransportProtocol records left untouched per spec)
 - 6 InteractionPrimitive[kind=cli-subcommand] for the
   `tasks-mux` top-level CLI groups + 2 APIEndpoint for the MCP
   HTTP transport (`/mcp`, `/healthz`) + 6 SharedContextSpec for the
   zod-validated wire schemas / BreakpointBackend interface
-- 8 SharedContextSpec for @a5c-ai/adapters-hooks-core (UnifiedHookEvent,
+- 8 SharedContextSpec for @a5c-ai/hooks-adapter-core (UnifiedHookEvent,
   UnifiedExecutionContext, UnifiedHookResult, MergedExecutionResult,
   PhaseMapping, SessionState, DetectedHarness, PropagationOptions)
 

@@ -11,15 +11,15 @@ Complete remaining tech debt items from the provider-mux/launcher feature implem
 - `translateProvider` as optional adapter interface method
 - Config file permissions check
 
-### Phase 2: Python amux-proxy Improvements
+### Phase 2: Python adapters-proxy Improvements
 - `/v1/models` endpoint for provider model discovery
 - Ollama server lifecycle management (start/stop)
 - `/v1/count_tokens` token estimation endpoint
 
 ### Phase 3: CLI Extensions
-- `amux models --provider` / `--harness` filtering
+- `adapters models --provider` / `--harness` filtering
 - Ollama model pre-check before launch
-- Root package.json scripts for amux-proxy
+- Root package.json scripts for adapters-proxy
 
 ### Verification Gate
 Full TypeScript + Python test suite run.

@@ -46,7 +46,7 @@ function PluginsView({ client, active }: TuiViewProps) {
   return (
     <Box flexDirection="column">
       <Text bold>Agent-native plugins</Text>
-      <Text dimColor>(see also: amux plugin / amux mcp)</Text>
+      <Text dimColor>(see also: adapters plugin / adapters mcp)</Text>
       {rows.slice(0, 40).map((r, i) => (
         <Text key={r.agent + ':' + r.pluginName + ':' + i}>
           <Text color="cyan">{r.agent.padEnd(14)}</Text>{' '}

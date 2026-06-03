@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/adapters-hooks-core",
+  "name": "@a5c-ai/hooks-adapter-core",
   "version": "5.0.0",
   "description": "Canonical schemas, types, session store, and merge engine for the hooks-mux system",
   "license": "MIT",

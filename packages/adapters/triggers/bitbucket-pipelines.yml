@@ -29,7 +29,7 @@ definitions:
             npm install -g --legacy-peer-deps \
               @a5c-ai/adapters-cli@$NPM_TAG \
               @a5c-ai/babysitter-sdk@$NPM_TAG \
-              @a5c-ai/adapters-triggers@$NPM_TAG
+              @a5c-ai/triggers-adapter@$NPM_TAG
 
             # Trigger evaluation (optional)
             if [ -n "${AGENT_TRIGGER_QUERY:-}" ]; then

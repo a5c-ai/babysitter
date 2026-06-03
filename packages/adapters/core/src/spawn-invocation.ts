@@ -186,7 +186,7 @@ function generatePodName(agent: string): string {
   const safe = agent.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 30) || 'agent';
   const rand = Math.random().toString(36).slice(2, 8);
   const seq = (++k8sPodCounter).toString(36);
-  return `amux-${safe}-${Date.now().toString(36)}-${seq}-${rand}`;
+  return `adapters-${safe}-${Date.now().toString(36)}-${seq}-${rand}`;
 }
 
 function buildK8sInvocation(

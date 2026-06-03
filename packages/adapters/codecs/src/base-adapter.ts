@@ -38,8 +38,8 @@ import type {
   AdapterUpdateOptions,
   Spawner,
   InstallMethod,
-} from '@a5c-ai/adapters-comm';
-import { StreamAssembler } from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
+import { StreamAssembler } from '@a5c-ai/comm-adapter';
 import { runInstall, runUpdate, type InstallContext } from './adapter-install.js';
 import { assembleCostRecord, defaultSpawner } from './base-adapter-helpers.js';
 
@@ -578,9 +578,9 @@ export abstract class BaseAgentAdapter implements SubprocessAdapter {
   }
 
   /**
-   * Default hook installation: registers in .amux/hooks.json only.
+   * Default hook installation: registers in .adapters/hooks.json only.
    * Override in subclasses to also write native harness config (e.g.
-   * ~/.claude/settings.json) so the hook fires without amux present.
+   * ~/.claude/settings.json) so the hook fires without adapters present.
    */
   async installHook(
     hookType: string,
@@ -591,13 +591,13 @@ export abstract class BaseAgentAdapter implements SubprocessAdapter {
     await this.writeNativeHook(hookType, command);
   }
 
-  /** Register a hook in the unified .amux/hooks.json store. */
+  /** Register a hook in the unified .adapters/hooks.json store. */
   protected async registerHookInConfig(
     hookType: string,
     command: string,
     opts: { scope?: 'global' | 'project'; id?: string } = {},
   ): Promise<void> {
-    const { HookConfigManager } = await import('@a5c-ai/adapters-comm');
+    const { HookConfigManager } = await import('@a5c-ai/comm-adapter');
     const mgr = new HookConfigManager();
     const id = opts.id ?? `${this.agent}.${hookType}.${Date.now().toString(36)}`;
     await mgr.add(
@@ -633,7 +633,7 @@ export abstract class BaseAgentAdapter implements SubprocessAdapter {
     id: string,
     opts: { scope?: 'global' | 'project' } = {},
   ): Promise<boolean> {
-    const { HookConfigManager } = await import('@a5c-ai/adapters-comm');
+    const { HookConfigManager } = await import('@a5c-ai/comm-adapter');
     const mgr = new HookConfigManager();
     return await mgr.remove(id, opts.scope);
   }

@@ -1,6 +1,6 @@
 /**
- * `amux install <agent>`, `amux update <agent>`, `amux detect <agent>`,
- * and `amux uninstall <agent>` commands.
+ * `adapters install <agent>`, `adapters update <agent>`, `adapters detect <agent>`,
+ * and `adapters uninstall <agent>` commands.
  *
  * Dispatches to the adapter's per-agent install/update/detect methods,
  * so each harness may override behavior.
@@ -14,8 +14,8 @@ import type {
   Spawner,
   InstallResult,
   DetectInstallationResult,
-} from '@a5c-ai/adapters-comm';
-import { AgentMuxError } from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
+import { AgentMuxError } from '@a5c-ai/comm-adapter';
 
 import type { ParsedArgs, FlagDef } from './cli-helpers.js';
 import { flagBool, flagStr } from './cli-helpers.js';
@@ -54,8 +54,8 @@ export interface InstallCommandDeps {
 }
 
 /**
- * Handle `amux install [<agent>] [--all]`, `amux update [<agent>] [--all]`,
- * `amux detect [<agent>] [--all]`, and `amux uninstall <agent>`.
+ * Handle `adapters install [<agent>] [--all]`, `adapters update [<agent>] [--all]`,
+ * `adapters detect [<agent>] [--all]`, and `adapters uninstall <agent>`.
  */
 export async function installCommand(
   client: AgentMuxClient,
@@ -87,12 +87,12 @@ export async function installCommand(
   const agent = args.positionals[0];
   if (!agent) {
     const msg = mode === 'install'
-      ? 'Usage: amux install <agent> | amux install --all'
+      ? 'Usage: adapters install <agent> | adapters install --all'
       : mode === 'update'
-      ? 'Usage: amux update <agent> | amux update --all'
+      ? 'Usage: adapters update <agent> | adapters update --all'
       : mode === 'detect'
-      ? 'Usage: amux detect <agent> | amux detect --all'
-      : 'Usage: amux uninstall <agent>';
+      ? 'Usage: adapters detect <agent> | adapters detect --all'
+      : 'Usage: adapters uninstall <agent>';
     if (jsonMode) printJsonError('VALIDATION_ERROR', msg);
     else printError(msg);
     return ExitCode.USAGE_ERROR;

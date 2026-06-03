@@ -1,4 +1,4 @@
-import type { UnifiedHookResult } from '@a5c-ai/adapters-hooks-core';
+import type { UnifiedHookResult } from '@a5c-ai/hooks-adapter-core';
 
 /**
  * Pi native hook output formats.

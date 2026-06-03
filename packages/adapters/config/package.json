@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/adapters-config",
+  "name": "@a5c-ai/config-adapter",
   "version": "5.0.0",
   "type": "module",
   "license": "MIT",
@@ -50,7 +50,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/adapters-comm": "5.0.0"
+    "@a5c-ai/comm-adapter": "5.0.0"
   },
   "atlas": {
     "layers": [

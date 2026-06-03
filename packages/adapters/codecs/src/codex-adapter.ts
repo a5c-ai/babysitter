@@ -20,7 +20,7 @@ import type {
   AgentEvent,
   AgentConfig,
   InstallMethod,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import { BaseAgentAdapter } from './base-adapter.js';
 

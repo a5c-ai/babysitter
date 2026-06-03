@@ -36,8 +36,8 @@ for pkg in packages/adapters/*/package.json; do
 done
 
 # Python package (pyproject.toml + __init__.py)
-PYPROJECT="packages/adapters/amux-proxy/pyproject.toml"
-PYINIT="packages/adapters/amux-proxy/src/amux_proxy/__init__.py"
+PYPROJECT="packages/adapters/adapters-proxy/pyproject.toml"
+PYINIT="packages/adapters/adapters-proxy/src/adapters_proxy/__init__.py"
 
 sed -i "s/^version = \".*\"/version = \"${VERSION}\"/" "${PYPROJECT}"
 echo "  ✓ ${PYPROJECT}"

@@ -1,7 +1,7 @@
 import * as net from 'node:net';
 
-import { formatHookResult } from '@a5c-ai/adapters-comm';
-import type { RuntimeHookDispatcher } from '@a5c-ai/adapters-comm';
+import { formatHookResult } from '@a5c-ai/comm-adapter';
+import type { RuntimeHookDispatcher } from '@a5c-ai/comm-adapter';
 
 const HOOK_EVENT_MAP = {
   PreToolUse: { kind: 'preToolUse', mode: 'blocking' },

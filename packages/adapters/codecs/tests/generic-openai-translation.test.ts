@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { translateForGenericOpenAI } from '../src/translations/generic-openai-translation.js';
-import type { ProviderConfig } from '@a5c-ai/adapters-comm';
+import type { ProviderConfig } from '@a5c-ai/comm-adapter';
 
 function makeConfig(overrides: Partial<ProviderConfig> = {}): ProviderConfig {
   return {

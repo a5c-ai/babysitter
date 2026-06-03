@@ -27,7 +27,7 @@ import type {
   CostRecord,
   InstalledPlugin,
   PluginInstallOptions,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import { BaseRemoteAdapter } from './remote-adapter-base.js';
 import { createVirtualRuntimeHookCapabilities } from './shared/runtime-hooks-virtual.js';

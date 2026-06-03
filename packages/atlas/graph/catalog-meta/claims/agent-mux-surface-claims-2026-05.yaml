@@ -5,7 +5,7 @@ attributes:
   subjectKind: PackageSurface
   attribute: surfaceKinds
   value: '@a5c-ai/tula-tui is modeled as a TUI and bin-entrypoint package surface.'
-  statement: The agent-mux TUI package surface is grounded in its package metadata and amux-tui binary entrypoint.
+  statement: The agent-mux TUI package surface is grounded in its package metadata and adapters-tui binary entrypoint.
   evidenceSourceIds:
     - evidence:agent-mux-tui-package-source
   confidence: high
@@ -51,7 +51,7 @@ attributes:
   subjectKind: PackageSurface
   attribute: surfaceKinds
   value: '@a5c-ai/adapters-cli is modeled as a CLI and bin-entrypoint package surface.'
-  statement: The agent-mux CLI package surface is grounded in its package metadata and amux binary entrypoint.
+  statement: The agent-mux CLI package surface is grounded in its package metadata and adapters binary entrypoint.
   evidenceSourceIds:
     - evidence:agent-mux-cli-package-source
   confidence: high
@@ -73,7 +73,7 @@ attributes:
   subjectId: package:a5c-ai-agent-mux-cli
   subjectKind: PackageSurface
   attribute: exposes_subcommand
-  value: agent-mux CLI exposes amux leaf subcommands as cli-subcommand InteractionPrimitive records with exit-code metadata.
+  value: agent-mux CLI exposes adapters leaf subcommands as cli-subcommand InteractionPrimitive records with exit-code metadata.
   statement: The agent-mux CLI subcommand surface is grounded in command handler source files and the shared exit-code mapping.
   evidenceSourceIds:
     - evidence:agent-mux-cli-command-source
@@ -96,7 +96,7 @@ attributes:
   subjectId: package:a5c-ai-hooks-mux-core
   subjectKind: PackageSurface
   attribute: surfaceKinds
-  value: '@a5c-ai/adapters-hooks-core is modeled as the package surface exposing normalized hook payload schemas.'
+  value: '@a5c-ai/hooks-adapter-core is modeled as the package surface exposing normalized hook payload schemas.'
   statement: The hooks-mux core package surface is grounded in package metadata and core package source files.
   evidenceSourceIds:
     - evidence:hooks-mux-core-package-source
@@ -188,7 +188,7 @@ attributes:
   subjectId: package:a5c-ai-tasks-mux
   subjectKind: PackageSurface
   attribute: surfaceKinds
-  value: '@a5c-ai/adapters-tasks is modeled as a breakpoint-runtime package surface.'
+  value: '@a5c-ai/tasks-adapter is modeled as a breakpoint-runtime package surface.'
   statement: The tasks-mux package surface is grounded in package metadata and runtime source files.
   evidenceSourceIds:
     - evidence:tasks-mux-package-source

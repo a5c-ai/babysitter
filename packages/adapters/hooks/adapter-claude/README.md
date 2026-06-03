@@ -1,11 +1,11 @@
-# @a5c-ai/adapters-hooks-claude
+# @a5c-ai/hooks-adapter-claude
 
 Claude Code harness adapter for hooks-mux.
 
 ## Install
 
 ```bash
-npm install @a5c-ai/adapters-hooks-claude @a5c-ai/adapters-hooks-core
+npm install @a5c-ai/hooks-adapter-claude @a5c-ai/hooks-adapter-core
 ```
 
 This package ships the built adapter runtime in `dist/` and this package README for npm publish-surface auditing.
@@ -17,7 +17,7 @@ import {
   createAdapter,
   normalizeClaude,
   renderClaudeOutput,
-} from "@a5c-ai/adapters-hooks-claude";
+} from "@a5c-ai/hooks-adapter-claude";
 ```
 
 The package exposes Claude-specific normalization, phase mappings, rendering helpers, and session-resolution utilities for the hooks-mux execution pipeline.

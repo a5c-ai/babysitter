@@ -25,7 +25,7 @@ describe.each(cases)('$name adapter MCP plugin parity', ({ make }) => {
   const prevUserProfile = process.env['USERPROFILE'];
 
   beforeEach(async () => {
-    home = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-mcp-parity-'));
+    home = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-mcp-parity-'));
     process.env['HOME'] = home;
     process.env['USERPROFILE'] = home;
   });

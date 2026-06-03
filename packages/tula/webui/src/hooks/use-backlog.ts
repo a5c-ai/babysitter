@@ -13,7 +13,7 @@ import type {
   KanbanProjectSettings,
   KanbanTaskTag,
   KanbanWorkflowState,
-} from "@a5c-ai/adapters-comm/kanban";
+} from "@a5c-ai/comm-adapter/kanban";
 
 import { useSmartPolling } from "./use-smart-polling";
 

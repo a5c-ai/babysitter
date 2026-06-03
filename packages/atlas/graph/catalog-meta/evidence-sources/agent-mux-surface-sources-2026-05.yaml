@@ -7,7 +7,7 @@ attributes:
   sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/tui/package.json
   filePath: packages/adapters/tui/package.json
   sourcePathOrUrl: packages/adapters/tui/package.json
-  locator: package name, version, amux-tui binary, and package surface
+  locator: package name, version, adapters-tui binary, and package surface
   capturedAt: '2026-05-05T00:00:00Z'
   observedAt: '2026-05-05T00:00:00Z'
   observedBy: a5c-ai-catalog
@@ -47,7 +47,7 @@ attributes:
   sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/cli/package.json
   filePath: packages/adapters/cli/package.json
   sourcePathOrUrl: packages/adapters/cli/package.json
-  locator: package name, version, amux binary, and package surface
+  locator: package name, version, adapters binary, and package surface
   capturedAt: '2026-05-05T00:00:00Z'
   observedAt: '2026-05-05T00:00:00Z'
   observedBy: a5c-ai-catalog
@@ -67,7 +67,7 @@ attributes:
   sourceUrl: https://github.com/a5c-ai/babysitter/blob/main/packages/adapters/cli/src/commands
   filePath: packages/adapters/cli/src/commands
   sourcePathOrUrl: packages/adapters/cli/src/commands; packages/adapters/cli/src/exit-codes.ts
-  locator: command handlers and exit-code mapping used by amux subcommands
+  locator: command handlers and exit-code mapping used by adapters subcommands
   capturedAt: '2026-05-05T00:00:00Z'
   observedAt: '2026-05-05T00:00:00Z'
   observedBy: a5c-ai-catalog

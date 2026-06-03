@@ -1,7 +1,7 @@
 nodeKind: OperationalTrigger
-id: operational-trigger:amux-triggers-github
+id: operational-trigger:adapters-triggers-github
 attributes:
-  displayName: amux-triggers — GitHub backend
+  displayName: adapters-triggers — GitHub backend
   triggerKind: webhook-event
   effect: 'Normalizes a GitHub Actions event payload (issue / pull_request /
 
@@ -28,7 +28,7 @@ attributes:
   dispatchModel: normalize-and-evaluate
   payloadShape: NormalizedTriggerEvent
   queryDsl: key-colon-value
-  cliEntrypoint: amux-triggers
+  cliEntrypoint: adapters-triggers
   enrichmentSources:
   - workflow-event-payload
   - github-rest-api
@@ -38,7 +38,7 @@ attributes:
   - Sets GITHUB_OUTPUT matched=true|false (action.yml:170)
   - Writes enriched event JSON to RUNNER_TEMP/agent-mux-event.json
   - Writes evaluation result JSON to RUNNER_TEMP/agent-mux-trigger.json
-  - On match runs pre-run, then `amux <command>`, then post-run (action.yml:174-232)
+  - On match runs pre-run, then `adapters <command>`, then post-run (action.yml:174-232)
   sourceCitation: 'packages/triggers-mux/src/backends/github.ts:4 (normalizeGithub),
 
     packages/triggers-mux/src/enrich.ts:61 (enrichGithubFromApi),
@@ -59,12 +59,12 @@ edges:
   - target: api-endpoint:github-pulls-files
   - target: api-endpoint:github-commits-by-sha
   parsed_by_grammar:
-  - target: grammar:amux-triggers-query-dsl
+  - target: grammar:adapters-triggers-query-dsl
 ---
 nodeKind: OperationalTrigger
-id: operational-trigger:amux-triggers-gitlab
+id: operational-trigger:adapters-triggers-gitlab
 attributes:
-  displayName: amux-triggers — GitLab backend
+  displayName: adapters-triggers — GitLab backend
   triggerKind: webhook-event
   effect: 'Normalizes a GitLab webhook payload (merge_request / push / note)
 
@@ -86,7 +86,7 @@ attributes:
   dispatchModel: normalize-and-evaluate
   payloadShape: NormalizedTriggerEvent
   queryDsl: key-colon-value
-  cliEntrypoint: amux-triggers
+  cliEntrypoint: adapters-triggers
   enrichmentSources:
   - workflow-event-payload
   - local-git-show
@@ -108,12 +108,12 @@ edges:
   has_payload_schema:
   - target: shared-context-spec:normalized-trigger-event
   parsed_by_grammar:
-  - target: grammar:amux-triggers-query-dsl
+  - target: grammar:adapters-triggers-query-dsl
 ---
 nodeKind: OperationalTrigger
-id: operational-trigger:amux-triggers-bitbucket
+id: operational-trigger:adapters-triggers-bitbucket
 attributes:
-  displayName: amux-triggers — Bitbucket backend
+  displayName: adapters-triggers — Bitbucket backend
   triggerKind: webhook-event
   effect: 'Normalizes a Bitbucket Cloud webhook payload (pullrequest:created /
 
@@ -136,7 +136,7 @@ attributes:
   dispatchModel: normalize-and-evaluate
   payloadShape: NormalizedTriggerEvent
   queryDsl: key-colon-value
-  cliEntrypoint: amux-triggers
+  cliEntrypoint: adapters-triggers
   enrichmentSources:
   - workflow-event-payload
   - local-git-show
@@ -154,12 +154,12 @@ edges:
   has_payload_schema:
   - target: shared-context-spec:normalized-trigger-event
   parsed_by_grammar:
-  - target: grammar:amux-triggers-query-dsl
+  - target: grammar:adapters-triggers-query-dsl
 ---
 nodeKind: OperationalTrigger
-id: operational-trigger:amux-triggers-generic-webhook
+id: operational-trigger:adapters-triggers-generic-webhook
 attributes:
-  displayName: amux-triggers — generic webhook backend
+  displayName: adapters-triggers — generic webhook backend
   triggerKind: webhook-event
   effect: 'Fallback normalizer for generic JSON webhook payloads. Accepts
 
@@ -180,7 +180,7 @@ attributes:
   dispatchModel: normalize-and-evaluate
   payloadShape: NormalizedTriggerEvent
   queryDsl: key-colon-value
-  cliEntrypoint: amux-triggers
+  cliEntrypoint: adapters-triggers
   enrichmentSources:
   - workflow-event-payload
   - local-git-show
@@ -202,10 +202,10 @@ edges:
   has_payload_schema:
   - target: shared-context-spec:normalized-trigger-event
   parsed_by_grammar:
-  - target: grammar:amux-triggers-query-dsl
+  - target: grammar:adapters-triggers-query-dsl
 ---
 nodeKind: OperationalTrigger
-id: operational-trigger:amux-triggers-action
+id: operational-trigger:adapters-triggers-action
 attributes:
   displayName: Agent Mux — reusable GitHub Action composite
   triggerKind: vcs-event
@@ -217,11 +217,11 @@ attributes:
 
     optional a5c GitHub App token exchange → npm ci + build agent-mux +
 
-    build @a5c-ai/adapters-triggers → optional `amux install <harness>` →
+    build @a5c-ai/triggers-adapter → optional `adapters install <harness>` →
 
     optional babysitter plugin install → optional legacy plugin install → enrich →
 
-    evaluate (exit-code 78 means skip) → if matched: pre-run, amux launch
+    evaluate (exit-code 78 means skip) → if matched: pre-run, adapters launch
 
     <harness> [<provider>] [--model M] [--prompt P] [--max-turns N]
 
@@ -244,18 +244,18 @@ attributes:
   sideEffects:
   - Outputs matched=true|false on the step (action.yml:67)
   - Outputs event=<path-to-enriched-json> (action.yml:70)
-  - Outputs exit-code=<amux exit code> (action.yml:73)
+  - Outputs exit-code=<adapters exit code> (action.yml:73)
   - May install agent-mux harness + plugins side-effectfully before evaluation (action.yml:103-129)
-  - Sets AGENT_MUX_TRIGGER_EVENT_PATH env var for pre-run, amux, post-run steps
+  - Sets AGENT_MUX_TRIGGER_EVENT_PATH env var for pre-run, adapters, post-run steps
   sourceCitation: 'packages/triggers-mux/action.yml (full composite action; inputs
 
     1-65, outputs 66-75, steps 77-232).
 
     '
   exitCodeSemantics:
-  - "0:matched-and-amux-success:trigger matched and amux exited 0 (action.yml:215)"
+  - "0:matched-and-adapters-success:trigger matched and adapters exited 0 (action.yml:215)"
   - "78:skip:trigger query did not match (action.yml:165 swallows 78 from evaluate)"
-  - "non-zero:amux-failure:propagated from amux exit (action.yml:217-220)"
+  - "non-zero:adapters-failure:propagated from adapters exit (action.yml:217-220)"
 edges:
   implemented_by:
   - target: package:a5c-ai-triggers
@@ -265,7 +265,7 @@ edges:
   - target: api-endpoint:github-pulls-files
   - target: api-endpoint:github-commits-by-sha
   parsed_by_grammar:
-  - target: grammar:amux-triggers-query-dsl
+  - target: grammar:adapters-triggers-query-dsl
   executes_step:
   - target: github-action-step:triggers-action-setup-node
   - target: github-action-step:triggers-action-a5c-token
@@ -275,7 +275,7 @@ edges:
   - target: github-action-step:triggers-action-install-plugins
   - target: github-action-step:triggers-action-evaluate-trigger
   - target: github-action-step:triggers-action-pre-run
-  - target: github-action-step:triggers-action-run-amux
+  - target: github-action-step:triggers-action-run-adapters
   - target: github-action-step:triggers-action-post-run
   defines_frontmatter_field:
   - target: frontmatter-field:triggers-action-input-command

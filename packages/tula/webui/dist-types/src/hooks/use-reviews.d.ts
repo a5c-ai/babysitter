@@ -1,4 +1,4 @@
-import type { KanbanCiGate, KanbanIntegrationProvider, KanbanMergeStatus, KanbanPublishStatus, KanbanPullRequestStatus, KanbanReviewArtifact, KanbanReviewCommentAnchor, KanbanReviewDecision, KanbanReviewFeedbackSource, KanbanReviewStatus, KanbanReviewSnapshot, KanbanReviewTargetType } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanCiGate, KanbanIntegrationProvider, KanbanMergeStatus, KanbanPublishStatus, KanbanPullRequestStatus, KanbanReviewArtifact, KanbanReviewCommentAnchor, KanbanReviewDecision, KanbanReviewFeedbackSource, KanbanReviewStatus, KanbanReviewSnapshot, KanbanReviewTargetType } from "@a5c-ai/comm-adapter/kanban";
 export interface ReviewQuery {
     targetType?: KanbanReviewTargetType;
     targetId?: string;
@@ -50,7 +50,7 @@ export declare function submitReviewAction(input: {
 export declare function useReviews(query?: ReviewQuery, interval?: number): {
     snapshot: KanbanReviewSnapshot | null;
     artifacts: readonly KanbanReviewArtifact[];
-    queue: readonly import("@a5c-ai/adapters-comm").KanbanReviewQueueItem[];
+    queue: readonly import("@a5c-ai/comm-adapter").KanbanReviewQueueItem[];
     summary: {
         readonly total: number;
         readonly issueCount: number;

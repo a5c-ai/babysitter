@@ -1,6 +1,6 @@
 import type { DispatchContextAuditRecord } from "@/lib/dispatch-context-audit";
 import type { TaskDetail } from "@/types";
-import type { KanbanExecutionContextEnvelope } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanExecutionContextEnvelope } from "@a5c-ai/comm-adapter/kanban";
 export declare function AgentPanel({ task, executionContexts, executionAudits, }: {
     task: TaskDetail | null;
     executionContexts?: readonly KanbanExecutionContextEnvelope[];

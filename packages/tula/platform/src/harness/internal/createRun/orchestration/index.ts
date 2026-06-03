@@ -261,7 +261,7 @@ async function resolveViaTasksMuxForCli(
     };
   };
   try {
-    mux = await importOptionalModule("@a5c-ai/adapters-tasks") as typeof mux;
+    mux = await importOptionalModule("@a5c-ai/tasks-adapter") as typeof mux;
   } catch {
     return undefined;
   }

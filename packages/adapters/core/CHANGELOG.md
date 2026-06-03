@@ -1,4 +1,4 @@
-# @a5c-ai/adapters-comm
+# @a5c-ai/comm-adapter
 
 ## 0.4.9
 
@@ -14,12 +14,12 @@
 
 - Adds:
 
-  - **CLI `amux skill`** — file-convention skill management (`list`/`add`/`remove`/`where`/`agents`) with `--global`/`--project` scope. Per-agent path registry covers claude, codex, cursor, opencode, gemini, copilot.
-  - **CLI `amux mcp --global`** — explicit scope flag (was project-only).
-  - **CLI `amux plugin --json`** — emits `CAPABILITY_ERROR` envelope for unsupported agents; `plugins` aliased to `plugin` for back-compat.
+  - **CLI `adapters skill`** — file-convention skill management (`list`/`add`/`remove`/`where`/`agents`) with `--global`/`--project` scope. Per-agent path registry covers claude, codex, cursor, opencode, gemini, copilot.
+  - **CLI `adapters mcp --global`** — explicit scope flag (was project-only).
+  - **CLI `adapters plugin --json`** — emits `CAPABILITY_ERROR` envelope for unsupported agents; `plugins` aliased to `plugin` for back-compat.
   - **TUI auth-view (`a`)** — per-adapter `client.auth.check` status with method/identity, `R` to refresh.
   - **TUI config-view (`c`)** — agent picker with pretty-JSON `client.config.get` browser.
-  - **TUI user-plugin discovery** — loads `~/.amux/tui-plugins/*.{mjs,cjs,js}` (override via `$AGENT_MUX_TUI_PLUGINS_DIR` or `--user-plugins-dir`; opt out with `--no-user-plugins`).
+  - **TUI user-plugin discovery** — loads `~/.adapters/tui-plugins/*.{mjs,cjs,js}` (override via `$AGENT_MUX_TUI_PLUGINS_DIR` or `--user-plugins-dir`; opt out with `--no-user-plugins`).
   - **Adapters auth-config** — recognizes nested OAuth `tokens.{access,refresh,id}_token`, decodes JWT id_tokens for email/sub, surfaces `hasRefreshToken` and `expiresAt`. Soft-optional keytar via `tryKeychainLookup` (no hard dep). codex/cursor/gemini/opencode adapters report the actual auth method.
 
 ## 0.2.0

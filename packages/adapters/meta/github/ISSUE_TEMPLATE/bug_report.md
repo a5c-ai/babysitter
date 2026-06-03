@@ -20,7 +20,7 @@ labels: bug
 
 ## Environment
 
-- agent-mux version: <!-- `amux --version` -->
+- agent-mux version: <!-- `adapters --version` -->
 - Node: <!-- `node -v` -->
 - OS:
 - Agent (if adapter-specific): claude / codex / cursor / gemini / opencode / openclaw / copilot / hermes / pi / omp / agent-mux-remote

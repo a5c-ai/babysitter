@@ -62,7 +62,7 @@ jobs:
           fi
           node scripts/sync-workspace-versions.mjs --version "$TARGET_VERSION"
           npm run build --workspace=@a5c-ai/atlas
-          npm run build --workspace=@a5c-ai/adapters-extensions
+          npm run build --workspace=@a5c-ai/extensions-adapter
           npm run generate:plugins
 
       - name: Sync generated plugin repositories

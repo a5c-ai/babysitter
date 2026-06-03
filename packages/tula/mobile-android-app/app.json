@@ -13,7 +13,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "android": {
-      "package": "ai.a5c.amux",
+      "package": "ai.a5c.adapters",
       "permissions": [
         "CAMERA",
         "POST_NOTIFICATIONS",

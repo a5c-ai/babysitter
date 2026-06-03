@@ -79,18 +79,18 @@ jobs:
             node -e "
               const input = JSON.parse(process.env.DISPATCH_MATRIX || '[]');
               const agents = {
-                'claude': {agent:'claude-code', amux_agent:'claude'},
-                'codex': {agent:'codex', amux_agent:'codex'},
-                'pi': {agent:'pi', amux_agent:'pi'},
-                'gemini': {agent:'gemini-cli', amux_agent:'gemini'},
-                'hermes': {agent:'hermes', amux_agent:'hermes'},
+                'claude': {agent:'claude-code', adapters_agent:'claude'},
+                'codex': {agent:'codex', adapters_agent:'codex'},
+                'pi': {agent:'pi', adapters_agent:'pi'},
+                'gemini': {agent:'gemini-cli', adapters_agent:'gemini'},
+                'hermes': {agent:'hermes', adapters_agent:'hermes'},
               };
               const models = {
-                'foundry-gpt55': {provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
-                'google-gemini31': {provider:'google', amux_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'},
-                'anthropic-sonnet46': {provider:'anthropic', amux_provider:'anthropic', model:'claude-sonnet-4-6', required_env:'ANTHROPIC_API_KEY'},
-                'foundry-deepseek': {provider:'foundry-openai', amux_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
-                'foundry-gpt54mini': {provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.4-mini', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'foundry-gpt55': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'google-gemini31': {provider:'google', adapters_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'},
+                'anthropic-sonnet46': {provider:'anthropic', adapters_provider:'anthropic', model:'claude-sonnet-4-6', required_env:'ANTHROPIC_API_KEY'},
+                'foundry-deepseek': {provider:'foundry-openai', adapters_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'foundry-gpt54mini': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.4-mini', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
               };
               const modes = {
                 'ni': {id:'non-interactive', interactive:'false', bridge_interactive:'false', bridge_hooks:'false'},
@@ -114,13 +114,13 @@ jobs:
                 return selected.model === 'gpt-5.4-mini' && !miniBpSupported(entry) ? models['foundry-gpt55'] : selected;
               }
               function toScenario(entry) {
-                const a = agents[entry.agent] || {agent: entry.agent, amux_agent: entry.agent};
+                const a = agents[entry.agent] || {agent: entry.agent, adapters_agent: entry.agent};
                 const m = modelFor(entry);
                 return {
                   id: 'live.agent-mux.' + a.agent + '.' + m.provider + '.' + m.model,
-                  agent_path: 'agent-mux', agent: a.agent, amux_agent: a.amux_agent,
+                  agent_path: 'agent-mux', agent: a.agent, adapters_agent: a.adapters_agent,
                   integration_type: 'third-party-plugin',
-                  provider: m.provider, amux_provider: m.amux_provider, model: m.model,
+                  provider: m.provider, adapters_provider: m.adapters_provider, model: m.model,
                   required_env: m.required_env, live: entry.live !== false,
                   process_mode: entry.process_mode || 'predefined',
                 };
@@ -146,11 +146,11 @@ jobs:
           else
             # Default: claude+codex+pi vanilla NI with gpt-5.5
             node -e "
-              const foundry = {provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'};
+              const foundry = {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'};
               const vanillaInstall = {id:'vanilla', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'agent-mux-events,transport-mux-trace,provider-trace-redacted'};
               const ni = {id:'non-interactive', interactive:'false', bridge_interactive:'false', bridge_hooks:'false'};
-              function scenario(agent, amux_agent, m) {
-                return {id:'live.agent-mux.'+agent+'.'+m.provider+'.'+m.model, agent_path:'agent-mux', agent, amux_agent, integration_type:'third-party-plugin', provider:m.provider, amux_provider:m.amux_provider, model:m.model, required_env:m.required_env, live:true, process_mode:'predefined'};
+              function scenario(agent, adapters_agent, m) {
+                return {id:'live.agent-mux.'+agent+'.'+m.provider+'.'+m.model, agent_path:'agent-mux', agent, adapters_agent, integration_type:'third-party-plugin', provider:m.provider, adapters_provider:m.adapters_provider, model:m.model, required_env:m.required_env, live:true, process_mode:'predefined'};
               }
               const vanillaNi = [
                 {scenario: scenario('claude-code','claude',foundry), interaction_mode: ni, install_mode: vanillaInstall},
@@ -210,7 +210,7 @@ jobs:
           npm install -g @a5c-ai/babysitter-sdk@${NPM_TAG}
 
           # Install hooks-mux CLI
-          npm install -g @a5c-ai/adapters-hooks-cli@${NPM_TAG}
+          npm install -g @a5c-ai/hooks-adapter-cli@${NPM_TAG}
 
           # Install node-pty for interactive modes
           npm install -g node-pty || echo "node-pty install failed (optional)"
@@ -227,7 +227,7 @@ jobs:
       - name: Install harness agents
         run: |
           # Install agent CLIs via agent-mux
-          agent-mux install ${{ matrix.scenario.amux_agent }} --json || echo "Agent install via agent-mux failed, trying direct..."
+          agent-mux install ${{ matrix.scenario.adapters_agent }} --json || echo "Agent install via agent-mux failed, trying direct..."
 
           # Ensure pip user-bin is on PATH
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
@@ -244,7 +244,7 @@ jobs:
           LIVE_STACK_SCENARIO_ID: ${{ matrix.scenario.id }}
           LIVE_STACK_AGENT_PATH: ${{ matrix.scenario.agent_path }}
           LIVE_STACK_AGENT: ${{ matrix.scenario.agent }}
-          LIVE_STACK_AGENT_MUX_AGENT: ${{ matrix.scenario.amux_agent }}
+          LIVE_STACK_AGENT_MUX_AGENT: ${{ matrix.scenario.adapters_agent }}
           LIVE_STACK_INTEGRATION_TYPE: ${{ matrix.scenario.integration_type }}
           LIVE_STACK_BABYSITTER_HARNESS: ${{ matrix.scenario.babysitter_harness }}
           LIVE_STACK_INSTALL_MODE: ${{ matrix.install_mode.id }}
@@ -255,7 +255,7 @@ jobs:
           LIVE_STACK_BRIDGE_HOOKS: ${{ matrix.interaction_mode.bridge_hooks }}
           LIVE_STACK_USE_AGENT_MUX_RUN: 'false'
           LIVE_STACK_PROVIDER: ${{ matrix.scenario.provider }}
-          LIVE_STACK_AGENT_MUX_PROVIDER: ${{ matrix.scenario.amux_provider }}
+          LIVE_STACK_AGENT_MUX_PROVIDER: ${{ matrix.scenario.adapters_provider }}
           LIVE_STACK_MODEL: ${{ matrix.scenario.model }}
           LIVE_STACK_CREDENTIAL_MODE: github-org-secrets-and-vars
           LIVE_STACK_REQUIRED_ENV: ${{ matrix.scenario.required_env }}

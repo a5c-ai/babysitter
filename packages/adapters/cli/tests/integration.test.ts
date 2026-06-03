@@ -46,7 +46,7 @@ describe('CLI integration', () => {
         const code = await main([]);
         expect(code).toBe(0);
         const output = io.stdout.join('');
-        expect(output).toContain('amux');
+        expect(output).toContain('adapters');
         expect(output).toContain('Usage');
       } finally {
         io.restore();
@@ -60,7 +60,7 @@ describe('CLI integration', () => {
       try {
         const code = await main(['--version']);
         expect(code).toBe(0);
-        expect(io.stdout.join('')).toMatch(/amux v\d+\.\d+\.\d+/);
+        expect(io.stdout.join('')).toMatch(/adapters v\d+\.\d+\.\d+/);
       } finally {
         io.restore();
       }
@@ -73,7 +73,7 @@ describe('CLI integration', () => {
       try {
         const code = await main(['-V']);
         expect(code).toBe(0);
-        expect(io.stdout.join('')).toContain('amux v');
+        expect(io.stdout.join('')).toContain('adapters v');
       } finally {
         io.restore();
       }
@@ -86,7 +86,7 @@ describe('CLI integration', () => {
       try {
         const code = await main(['version']);
         expect(code).toBe(0);
-        expect(io.stdout.join('')).toContain('amux v');
+        expect(io.stdout.join('')).toContain('adapters v');
       } finally {
         io.restore();
       }
@@ -125,7 +125,7 @@ describe('CLI integration', () => {
       try {
         const code = await main(['help', 'run']);
         expect(code).toBe(0);
-        expect(io.stdout.join('')).toContain('amux run');
+        expect(io.stdout.join('')).toContain('adapters run');
       } finally {
         io.restore();
       }
@@ -138,7 +138,7 @@ describe('CLI integration', () => {
       try {
         const code = await main(['run', '--help']);
         expect(code).toBe(0);
-        expect(io.stdout.join('')).toContain('amux run');
+        expect(io.stdout.join('')).toContain('adapters run');
       } finally {
         io.restore();
       }

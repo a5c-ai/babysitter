@@ -1,4 +1,4 @@
-import type { AdapterCapabilities } from '@a5c-ai/adapters-hooks-core';
+import type { AdapterCapabilities } from '@a5c-ai/hooks-adapter-core';
 import { getPluginTargetDescriptor } from '@a5c-ai/atlas/catalog';
 
 /**

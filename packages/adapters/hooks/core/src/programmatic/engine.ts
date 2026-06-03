@@ -109,7 +109,7 @@ async function executeHandler(
  *
  * Usage:
  * ```typescript
- * import { createHooksEngine } from '@a5c-ai/adapters-hooks-core';
+ * import { createHooksEngine } from '@a5c-ai/hooks-adapter-core';
  *
  * const engine = createHooksEngine({
  *   adapter: 'pi',

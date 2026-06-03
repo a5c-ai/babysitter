@@ -58,7 +58,7 @@ if (!existsSync(distCli)) {
     cwd: ROOT,
     stdio: 'inherit',
   });
-  execSync('npm run build --workspace=@a5c-ai/adapters-extensions', {
+  execSync('npm run build --workspace=@a5c-ai/extensions-adapter', {
     cwd: ROOT,
     stdio: 'inherit',
   });

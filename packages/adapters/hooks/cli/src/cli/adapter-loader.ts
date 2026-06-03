@@ -2,7 +2,7 @@
  * Dynamic adapter resolution.
  *
  * Attempts to load a harness adapter package by convention:
- *   @a5c-ai/adapters-hooks-<name>
+ *   @a5c-ai/hooks-adapter-<name>
  *
  * Each adapter package is expected to export:
  *   - createAdapter(): AdapterCapabilities
@@ -19,8 +19,8 @@ import type {
   MergedExecutionResult,
   PhaseMapping,
   UnifiedHookEvent,
-} from '@a5c-ai/adapters-hooks-core';
-import { detectHarness } from '@a5c-ai/adapters-hooks-core';
+} from '@a5c-ai/hooks-adapter-core';
+import { detectHarness } from '@a5c-ai/hooks-adapter-core';
 
 export type AdapterNormalizer = (
   nativeEventName: string,
@@ -106,7 +106,7 @@ export function loadAdapter(adapterName: string): LoadedAdapter {
     adapterName = detected.adapter;
   }
 
-  const packageName = `@a5c-ai/adapters-hooks-${adapterName}`;
+  const packageName = `@a5c-ai/hooks-adapter-${adapterName}`;
 
   let mod: Record<string, unknown>;
   try {

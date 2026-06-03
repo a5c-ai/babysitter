@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { ProviderConfig } from '@a5c-ai/adapters-comm';
+import type { ProviderConfig } from '@a5c-ai/comm-adapter';
 import { translateForOpenCode } from '../src/translations/opencode-translation.js';
 
 function makeConfig(overrides: Partial<ProviderConfig> & { provider: ProviderConfig['provider'] }): ProviderConfig {

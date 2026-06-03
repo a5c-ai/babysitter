@@ -11,11 +11,11 @@ describe("issue #606 AgentMuxResponderBackend contract", () => {
 
   it("maps a mock agent-mux client response to a breakpoint answer", async () => {
     const handle = {
-      runId: "amux-run-1",
+      runId: "adapters-run-1",
       agent: "codex",
       model: "gpt-5.4",
       result: vi.fn().mockResolvedValue({
-        runId: "amux-run-1",
+        runId: "adapters-run-1",
         agent: "codex",
         model: "gpt-5.4",
         sessionId: "session-1",

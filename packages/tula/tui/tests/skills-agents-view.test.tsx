@@ -43,7 +43,7 @@ let prevHome: string | undefined;
 let prevUserProfile: string | undefined;
 
 beforeEach(() => {
-  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-view-'));
+  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-view-'));
   prevCwd = process.cwd();
   prevHome = process.env.HOME;
   prevUserProfile = process.env.USERPROFILE;

@@ -7,14 +7,14 @@ import type {
   AutomationExecutionStatus,
   AutomationRule,
   WebhookAutomationRule,
-} from "@a5c-ai/adapters-comm/automation";
+} from "@a5c-ai/comm-adapter/automation";
 import type {
   KanbanAcceptanceCriterion,
   KanbanAssignee,
   KanbanDecompositionItem,
   KanbanIssueSource,
   KanbanLabel,
-} from "@a5c-ai/adapters-comm/kanban";
+} from "@a5c-ai/comm-adapter/kanban";
 
 import { AppError } from "../error-handler";
 import {

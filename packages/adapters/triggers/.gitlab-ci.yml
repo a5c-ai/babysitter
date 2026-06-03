@@ -28,7 +28,7 @@
     AGENT_INCLUDE_DIFF: "false"
     NPM_TAG: staging
   before_script:
-    - npm install -g --legacy-peer-deps @a5c-ai/adapters-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/adapters-triggers@$NPM_TAG
+    - npm install -g --legacy-peer-deps @a5c-ai/adapters-cli@$NPM_TAG @a5c-ai/babysitter-sdk@$NPM_TAG @a5c-ai/triggers-adapter@$NPM_TAG
   script:
     - |
       set -euo pipefail
@@ -57,7 +57,7 @@
         fi
       fi
 
-      # Build amux command
+      # Build adapters command
       AGENT_MUX_ARGS="$AGENT_COMMAND $AGENT_HARNESS"
       if [ -n "$AGENT_PROVIDER" ]; then
         AGENT_MUX_ARGS="$AGENT_MUX_ARGS $AGENT_PROVIDER"
@@ -73,5 +73,5 @@
         AGENT_MUX_ARGS="$AGENT_MUX_ARGS --prompt \"$AGENT_PROMPT\""
       fi
 
-      echo "Running: amux $AGENT_MUX_ARGS"
-      eval amux $AGENT_MUX_ARGS
+      echo "Running: adapters $AGENT_MUX_ARGS"
+      eval adapters $AGENT_MUX_ARGS

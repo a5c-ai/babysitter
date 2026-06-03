@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { verifyAgentMuxCoreRelease } from '../scripts/verify-release.mjs';
 
 const baseManifest = {
-  name: '@a5c-ai/adapters-comm',
+  name: '@a5c-ai/comm-adapter',
   main: './dist/index.js',
   module: './dist/index.js',
   types: './dist/index.d.ts',
@@ -96,17 +96,17 @@ function withPackageRoot(run: (packageRoot: string) => void): void {
   fs.writeFileSync(
     path.join(packageRoot, 'README.md'),
     [
-      '# @a5c-ai/adapters-comm',
+      '# @a5c-ai/comm-adapter',
       '',
-      '- `@a5c-ai/adapters-comm`',
-      '- `@a5c-ai/adapters-comm/browser`',
-      '- `@a5c-ai/adapters-comm/kanban`',
-      '- `@a5c-ai/adapters-comm/automation`',
+      '- `@a5c-ai/comm-adapter`',
+      '- `@a5c-ai/comm-adapter/browser`',
+      '- `@a5c-ai/comm-adapter/kanban`',
+      '- `@a5c-ai/comm-adapter/automation`',
       '',
-      'npm run build --workspace=@a5c-ai/adapters-comm',
-      'npm run test --workspace=@a5c-ai/adapters-comm',
-      'npm run verify:release --workspace=@a5c-ai/adapters-comm',
-      'npm pack --json --dry-run --workspace=@a5c-ai/adapters-comm',
+      'npm run build --workspace=@a5c-ai/comm-adapter',
+      'npm run test --workspace=@a5c-ai/comm-adapter',
+      'npm run verify:release --workspace=@a5c-ai/comm-adapter',
+      'npm pack --json --dry-run --workspace=@a5c-ai/comm-adapter',
       '',
     ].join('\n')
   );
@@ -202,16 +202,16 @@ describe('verifyAgentMuxCoreRelease', () => {
       fs.writeFileSync(
         path.join(packageRoot, 'README.md'),
         [
-          '# @a5c-ai/adapters-comm',
+          '# @a5c-ai/comm-adapter',
           '',
-          '- `@a5c-ai/adapters-comm`',
-          '- `@a5c-ai/adapters-comm/browser`',
-          '- `@a5c-ai/adapters-comm/kanban`',
+          '- `@a5c-ai/comm-adapter`',
+          '- `@a5c-ai/comm-adapter/browser`',
+          '- `@a5c-ai/comm-adapter/kanban`',
           '',
-          'npm run build --workspace=@a5c-ai/adapters-comm',
-          'npm run test --workspace=@a5c-ai/adapters-comm',
-          'npm run verify:release --workspace=@a5c-ai/adapters-comm',
-          'npm pack --json --dry-run --workspace=@a5c-ai/adapters-comm',
+          'npm run build --workspace=@a5c-ai/comm-adapter',
+          'npm run test --workspace=@a5c-ai/comm-adapter',
+          'npm run verify:release --workspace=@a5c-ai/comm-adapter',
+          'npm pack --json --dry-run --workspace=@a5c-ai/comm-adapter',
           '',
         ].join('\n')
       );

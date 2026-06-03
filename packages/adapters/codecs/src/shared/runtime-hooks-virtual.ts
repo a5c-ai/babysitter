@@ -1,4 +1,4 @@
-import type { RuntimeHookCapabilities, RuntimeHookMode } from '@a5c-ai/adapters-comm';
+import type { RuntimeHookCapabilities, RuntimeHookMode } from '@a5c-ai/comm-adapter';
 
 const NONBLOCKING: RuntimeHookMode = 'nonblocking';
 

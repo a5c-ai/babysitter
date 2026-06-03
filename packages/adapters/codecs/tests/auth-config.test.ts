@@ -18,7 +18,7 @@ function makeJwt(payload: Record<string, unknown>): string {
 }
 
 beforeEach(() => {
-  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-auth-'));
+  tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-auth-'));
 });
 afterEach(() => fs.rmSync(tmp, { recursive: true, force: true }));
 

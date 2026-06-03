@@ -2,10 +2,10 @@
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-workspaces-list
 attributes:
-  displayName: "amux workspaces list"
+  displayName: "adapters workspaces list"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "workspaces list"
   flags: []
   subcommandExitCodes:
@@ -18,10 +18,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-workspaces-create
 attributes:
-  displayName: "amux workspaces create"
+  displayName: "adapters workspaces create"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "workspaces create"
   flags:
     - "--repo:N:cloned repo path (repeatable, required)"
@@ -40,10 +40,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-workspaces-archive
 attributes:
-  displayName: "amux workspaces archive"
+  displayName: "adapters workspaces archive"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "workspaces archive"
   flags: []
   subcommandExitCodes:
@@ -57,10 +57,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-workspaces-cleanup
 attributes:
-  displayName: "amux workspaces cleanup"
+  displayName: "adapters workspaces cleanup"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "workspaces cleanup"
   flags: []
   subcommandExitCodes:
@@ -74,10 +74,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-workspaces-recover
 attributes:
-  displayName: "amux workspaces recover"
+  displayName: "adapters workspaces recover"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "workspaces recover"
   flags: []
   subcommandExitCodes:
@@ -91,10 +91,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-workspaces-delete
 attributes:
-  displayName: "amux workspaces delete"
+  displayName: "adapters workspaces delete"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "workspaces delete"
   flags:
     - "--force:0:remove on-disk artefacts before deletion"
@@ -109,10 +109,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-workspaces-sync-sessions
 attributes:
-  displayName: "amux workspaces sync-sessions"
+  displayName: "adapters workspaces sync-sessions"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "workspaces sync-sessions"
   flags: []
   subcommandExitCodes:
@@ -126,10 +126,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-launch
 attributes:
-  displayName: "amux launch"
+  displayName: "adapters launch"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "launch"
   flags:
     - "--api-key:1:provider API key"
@@ -173,10 +173,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-detect-host
 attributes:
-  displayName: "amux detect-host"
+  displayName: "adapters detect-host"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "detect-host"
   flags: []
   subcommandExitCodes:
@@ -188,10 +188,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-doctor
 attributes:
-  displayName: "amux doctor"
+  displayName: "adapters doctor"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "doctor"
   flags: []
   subcommandExitCodes:
@@ -204,10 +204,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-tui
 attributes:
-  displayName: "amux tui"
+  displayName: "adapters tui"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "tui"
   flags:
     - "--agent:1:default agent for new prompts (default claude-code)"
@@ -223,37 +223,37 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-remote-install
 attributes:
-  displayName: "amux remote install"
+  displayName: "adapters remote install"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "remote install"
   flags:
     - "--mode:1:ssh|docker|k8s|local (default ssh)"
-    - "--harness:1:harness to install after amux (default claude)"
+    - "--harness:1:harness to install after adapters (default claude)"
     - "--image:1:docker image (docker mode)"
     - "--identity-file:1:ssh key path"
     - "--port:1:ssh port"
     - "--namespace:1:k8s namespace"
     - "--context:1:k8s context"
-    - "--force:0:reinstall even if amux already present"
+    - "--force:0:reinstall even if adapters already present"
     - "--dry-run:0:print planned commands without executing"
   subcommandExitCodes:
     - "0:success:remote install completed"
     - "1:general-error:remote command non-zero or spawn failed"
     - "2:usage-error:VALIDATION_ERROR (bad mode / missing host or image)"
   description: |
-    Install amux + harness on a remote host via ssh/docker/k8s/local.
-    Probes, installs amux, installs harness, verifies. Source:
+    Install adapters + harness on a remote host via ssh/docker/k8s/local.
+    Probes, installs adapters, installs harness, verifies. Source:
     packages/adapters/cli/src/commands/remote.ts:121-234.
 ---
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-remote-update
 attributes:
-  displayName: "amux remote update"
+  displayName: "adapters remote update"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "remote update"
   flags:
     - "--mode:1:ssh|docker|k8s|local (default ssh)"
@@ -269,5 +269,5 @@ attributes:
     - "1:general-error:remote command non-zero or spawn failed"
     - "2:usage-error:VALIDATION_ERROR (bad mode / missing host or image)"
   description: |
-    Update amux + harness on a remote host (npm update -g + amux update).
+    Update adapters + harness on a remote host (npm update -g + adapters update).
     Source: packages/adapters/cli/src/commands/remote.ts:121-234.

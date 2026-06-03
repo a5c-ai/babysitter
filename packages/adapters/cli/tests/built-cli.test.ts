@@ -27,7 +27,7 @@ suite('built CLI (dist/index.js)', () => {
     });
     expect(res.status).toBe(0);
     const out = res.stdout + res.stderr;
-    expect(out).toContain('amux');
+    expect(out).toContain('adapters');
     expect(out).toContain('Usage:');
   });
 
@@ -36,7 +36,7 @@ suite('built CLI (dist/index.js)', () => {
       encoding: 'utf8',
     });
     expect(res.status).toBe(0);
-    expect(res.stdout + res.stderr).toMatch(/amux\s+v\d+\.\d+\.\d+/);
+    expect(res.stdout + res.stderr).toMatch(/adapters\s+v\d+\.\d+\.\d+/);
   });
 
   it('adapters list exits 0 and contains all 11 built-in adapters', () => {
@@ -66,7 +66,7 @@ suite('built CLI (dist/index.js)', () => {
   });
 
   it('gateway serve starts the built server and accepts a CLI-issued token', { timeout: 60000 }, async () => {
-    const tempDir = mkdtempSync(join(tmpdir(), 'amux-built-cli-'));
+    const tempDir = mkdtempSync(join(tmpdir(), 'adapters-built-cli-'));
     const configPath = join(tempDir, 'gateway.config.json');
     const tokenDbPath = join(tempDir, 'tokens.db');
     const eventLogDir = join(tempDir, 'events');

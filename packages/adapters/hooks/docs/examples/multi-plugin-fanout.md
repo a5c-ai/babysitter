@@ -77,13 +77,13 @@ In `.claude/settings.json`:
     "SessionStart": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event SessionStart"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event SessionStart"
       }
     ],
     "PreToolUse": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event PreToolUse"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event PreToolUse"
       }
     ]
   }
@@ -225,8 +225,8 @@ The proxy emits structured diagnostics during fan-out. Check handler order and m
 
 ```bash
 # Enable debug logging
-AGENT_HOOKS_LOG_LEVEL=debug npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event SessionStart
+AGENT_HOOKS_LOG_LEVEL=debug npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event SessionStart
 
 # Enable trace file
-AGENT_HOOKS_TRACE_FILE=./trace.jsonl npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event SessionStart
+AGENT_HOOKS_TRACE_FILE=./trace.jsonl npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event SessionStart
 ```

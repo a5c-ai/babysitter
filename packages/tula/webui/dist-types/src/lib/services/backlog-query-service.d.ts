@@ -1,4 +1,4 @@
-import { type KanbanBacklogOverview, type KanbanBacklogSummary, type KanbanCollaboratorRole, type KanbanIssueCreateResult, type KanbanIssue, type KanbanPermissionGrant, type KanbanProjectSettings, type KanbanRepositoryProvider, type KanbanRepositorySettings, type KanbanTeamSettings, type KanbanWorkflowState, type KanbanIssueWorkspaceLinkInput } from '@a5c-ai/adapters-comm/kanban';
+import { type KanbanBacklogOverview, type KanbanBacklogSummary, type KanbanCollaboratorRole, type KanbanIssueCreateResult, type KanbanIssue, type KanbanPermissionGrant, type KanbanProjectSettings, type KanbanRepositoryProvider, type KanbanRepositorySettings, type KanbanTeamSettings, type KanbanWorkflowState, type KanbanIssueWorkspaceLinkInput } from '@a5c-ai/comm-adapter/kanban';
 import { ReviewService } from '../review-service';
 import { RunQueryService } from './run-query-service';
 import { type KanbanStorageDeps } from './kanban-storage';

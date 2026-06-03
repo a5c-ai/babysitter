@@ -109,7 +109,7 @@ const DEFAULT_TIMEOUT_MS = 900_000;
  * Invokes a harness CLI and returns the result.
  *
  * The function first attempts to route through agent-mux (if @agent-mux/core
- * is installed and the harness has an amux adapter mapping). When agent-mux
+ * is installed and the harness has an adapters adapter mapping). When agent-mux
  * is unavailable, it falls back to direct child-process invocation.
  *
  * Pi uses direct invocation and agent-core uses create-run orchestration;

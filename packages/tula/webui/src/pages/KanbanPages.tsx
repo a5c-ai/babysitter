@@ -4,8 +4,8 @@ import { useStore } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom-v6';
 import { LogoWordmark } from '@a5c-ai/compendium';
-import type { Attachment, WorkspaceRuntimeSurface } from '@a5c-ai/adapters-comm';
-import type { KanbanWorkspaceSessionSummary } from '@a5c-ai/adapters-comm/kanban';
+import type { Attachment, WorkspaceRuntimeSurface } from '@a5c-ai/comm-adapter';
+import type { KanbanWorkspaceSessionSummary } from '@a5c-ai/comm-adapter/kanban';
 import { useGateway, useStopRun } from '@a5c-ai/tula-ui';
 import type { Run } from '../types/index.js';
 

@@ -1,4 +1,4 @@
-import type { MergedExecutionResult } from '@a5c-ai/adapters-hooks-core';
+import type { MergedExecutionResult } from '@a5c-ai/hooks-adapter-core';
 
 /**
  * Cursor native output fields that are documented/supported per event type.

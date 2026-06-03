@@ -16,7 +16,7 @@ afterEach(() => {
   _resetAmuxInstallClientCache();
 });
 
-describe("install amux bridge", () => {
+describe("install adapters bridge", () => {
   it("discovers harnesses from an injected agent-mux module", async () => {
     _setAmuxInstallModuleForTesting({
       createClient: () => ({
@@ -57,7 +57,7 @@ describe("install amux bridge", () => {
             install: async () => ({
               ok: true,
               method: "mock",
-              command: "amux install codex",
+              command: "adapters install codex",
               message: "installed",
               stdout: "ok",
             }),
@@ -74,7 +74,7 @@ describe("install amux bridge", () => {
       success: true,
       status: "planned",
       summary: "installed",
-      command: "amux install codex",
+      command: "adapters install codex",
       output: "ok",
     });
   });

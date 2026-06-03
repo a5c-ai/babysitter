@@ -1,6 +1,6 @@
 /**
  * Live integration test: verifies the REAL round-trip by spawning the
- * actual tula CLI with `--output-format amux-events` and parsing
+ * actual tula CLI with `--output-format adapters-events` and parsing
  * its JSONL output.
  *
  * These tests are skipped when the tula CLI is not available on
@@ -91,18 +91,18 @@ function tryParseJson(line: string): Record<string, unknown> | null {
 // ---------------------------------------------------------------------------
 
 describe(
-  "Live integration: tula CLI amux-events output",
+  "Live integration: tula CLI adapters-events output",
   { timeout: 30000 },
   () => {
     describe.skipIf(!CLI_AVAILABLE)("with tula CLI", () => {
-      it("invoke with --output-format amux-events produces valid JSONL", async () => {
+      it("invoke with --output-format adapters-events produces valid JSONL", async () => {
         // Use invoke with a fast-failing prompt so no real harness is required for availability.
-        // We invoke it with --output-format amux-events to test that the CLI
+        // We invoke it with --output-format adapters-events to test that the CLI
         // accepts the flag. If the command doesn't support --output-format,
         // tula should still emit session_start/session_end.
         //
         // NOTE: invoke requires a harness name and prompt, so we use
-        // a command that will fail fast but still exercise the amux-events
+        // a command that will fail fast but still exercise the adapters-events
         // output pathway. We use discover --json as a fallback
         // if invoke is not available.
         const { lines, exitCode } = await spawnBabysitter(
@@ -112,7 +112,7 @@ describe(
             "--prompt",
             "echo test",
             "--output-format",
-            "amux-events",
+            "adapters-events",
             "--timeout",
             "5000",
           ],

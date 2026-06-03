@@ -20,7 +20,7 @@ import type {
   AgentEvent,
   AgentConfig,
   CostRecord,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import { BaseProgrammaticAdapter } from './programmatic-adapter-base.js';
 import { createVirtualRuntimeHookCapabilities } from './shared/runtime-hooks-virtual.js';

@@ -1,4 +1,4 @@
-import type { UnifiedHookEvent, UnifiedExecutionContext } from '@a5c-ai/adapters-hooks-core';
+import type { UnifiedHookEvent, UnifiedExecutionContext } from '@a5c-ai/hooks-adapter-core';
 import { getOpenClawPhaseMapping, classifyHookOrigin } from './mappings';
 import type { OpenClawHookOrigin } from './mappings';
 

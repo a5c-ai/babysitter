@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/adapters-hooks-cli",
+  "name": "@a5c-ai/hooks-adapter-cli",
   "version": "5.0.0",
   "description": "CLI entrypoint for the hooks-mux system",
   "license": "MIT",
@@ -34,17 +34,17 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@a5c-ai/adapters-hooks-claude": "5.0.0",
-    "@a5c-ai/adapters-hooks-codex": "5.0.0",
-    "@a5c-ai/adapters-hooks-copilot": "5.0.0",
-    "@a5c-ai/adapters-hooks-cursor": "5.0.0",
-    "@a5c-ai/adapters-hooks-gemini": "5.0.0",
-    "@a5c-ai/adapters-hooks-hermes": "5.0.0",
-    "@a5c-ai/adapters-hooks-oh-my-pi": "5.0.0",
-    "@a5c-ai/adapters-hooks-openclaw": "5.0.0",
-    "@a5c-ai/adapters-hooks-opencode": "5.0.0",
-    "@a5c-ai/adapters-hooks-pi": "5.0.0",
-    "@a5c-ai/adapters-hooks-core": "5.0.0",
+    "@a5c-ai/hooks-adapter-claude": "5.0.0",
+    "@a5c-ai/hooks-adapter-codex": "5.0.0",
+    "@a5c-ai/hooks-adapter-copilot": "5.0.0",
+    "@a5c-ai/hooks-adapter-cursor": "5.0.0",
+    "@a5c-ai/hooks-adapter-gemini": "5.0.0",
+    "@a5c-ai/hooks-adapter-hermes": "5.0.0",
+    "@a5c-ai/hooks-adapter-oh-my-pi": "5.0.0",
+    "@a5c-ai/hooks-adapter-openclaw": "5.0.0",
+    "@a5c-ai/hooks-adapter-opencode": "5.0.0",
+    "@a5c-ai/hooks-adapter-pi": "5.0.0",
+    "@a5c-ai/hooks-adapter-core": "5.0.0",
     "yargs": "^17.0.0"
   },
   "devDependencies": {

@@ -18,7 +18,7 @@ export interface BuiltInHookEntry {
   fn: BuiltInHookFn;
 }
 
-const DEFAULT_LOG_PATH = path.join(os.homedir(), '.amux', 'hook-log.jsonl');
+const DEFAULT_LOG_PATH = path.join(os.homedir(), '.adapters', 'hook-log.jsonl');
 
 async function appendJsonl(file: string, obj: unknown): Promise<void> {
   await fs.mkdir(path.dirname(file), { recursive: true });
@@ -33,7 +33,7 @@ export class BuiltInHooksRegistry {
     // Generic: log every hook payload as JSONL.
     this.register({
       id: 'log',
-      description: 'Append the hook payload to ~/.amux/hook-log.jsonl.',
+      description: 'Append the hook payload to ~/.adapters/hook-log.jsonl.',
       fn: async (payload) => {
         await appendJsonl(logPath, {
           t: payload.timestamp,
@@ -51,7 +51,7 @@ export class BuiltInHooksRegistry {
       description: 'Emit a single-line trace to stdout.',
       fn: (payload) => ({
         decision: 'allow',
-        stdout: `[amux hook] ${payload.agent}/${payload.hookType} ${payload.sessionId ?? ''}\n`,
+        stdout: `[adapters hook] ${payload.agent}/${payload.hookType} ${payload.sessionId ?? ''}\n`,
       }),
     });
 

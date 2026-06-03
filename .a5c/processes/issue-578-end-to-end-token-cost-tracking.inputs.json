@@ -44,7 +44,7 @@
     "packages/sdk/src/runtime/__tests__/effectCostTracking.test.ts",
     "packages/tula/platform/src/session/cost.ts",
     "packages/tula/platform/src/cost/effectCost.ts",
-    "packages/tula/platform/src/harness/amux/amuxEventMapper.ts",
+    "packages/tula/platform/src/harness/adapters/amuxEventMapper.ts",
     "packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts",
     "packages/tula/platform/src/harness/internal/createRun/orchestration/index.ts"
   ],

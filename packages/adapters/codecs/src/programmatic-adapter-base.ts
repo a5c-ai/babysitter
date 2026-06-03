@@ -24,7 +24,7 @@ import type {
   CostRecord,
   SpawnArgs,
   ParseContext,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 /**
  * Abstract base class for programmatic adapters. Provides shared utilities

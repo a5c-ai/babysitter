@@ -11,7 +11,7 @@ const baseManifest = {
     access: 'public',
   },
   scripts: {
-    'build:realtime': 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/adapters-comm && npm run build --workspace=@a5c-ai/tula-ui && npm run build',
+    'build:realtime': 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/comm-adapter && npm run build --workspace=@a5c-ai/tula-ui && npm run build',
     test: 'vitest run --config vitest.config.ts',
     'test:realtime':
       'vitest run --root ../../.. --config vitest.config.ts "packages/adapters/webui/src/pages/SessionDetailPage.test.ts" "packages/adapters/webui/src/pages/SessionDetailPage.route.test.tsx" "packages/adapters/webui/src/release-verification.test.ts"',

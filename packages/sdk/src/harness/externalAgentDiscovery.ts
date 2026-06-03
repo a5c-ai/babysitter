@@ -102,8 +102,8 @@ async function discoverViaModule(
   options: ExternalAgentDiscoveryOptions,
 ): Promise<ExternalAgentDiscovery | null> {
   try {
-    const amux = await loadAmuxModule();
-    const createClient = amux?.createClient;
+    const adapters = await loadAmuxModule();
+    const createClient = adapters?.createClient;
     if (typeof createClient !== "function") {
       return null;
     }
@@ -189,7 +189,7 @@ async function discoverViaCli(
 ): Promise<ExternalAgentDiscovery | null> {
   try {
     const stdout = await execFilePromise(
-      "amux",
+      "adapters",
       ["doctor", "--json"],
       {
         cwd: options.cwd,

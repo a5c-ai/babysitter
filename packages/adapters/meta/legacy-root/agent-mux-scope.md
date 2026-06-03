@@ -9,7 +9,7 @@
 |---|---|
 | npm scope | `@a5c-ai` |
 | Core package | `@a5c-ai/adapters` |
-| CLI binary | `amux` |
+| CLI binary | `adapters` |
 | Language | TypeScript, targeting Node 20+ |
 | License | MIT |
 
@@ -41,7 +41,7 @@ A unified dispatch and introspection layer for local CLI-based AI coding agents.
 
 **Profile** — a named set of `RunOptions` stored in `~/.agent-mux/` or `.agent-mux/`. Consumers can switch profiles without changing code.
 
-**Plugin** — an extension to an agent's capabilities (skills, tools, themes, MCP servers, channel connectors, etc.). Plugin support is agent-specific and gated by capabilities. Managed through a unified `amux plugins` interface.
+**Plugin** — an extension to an agent's capabilities (skills, tools, themes, MCP servers, channel connectors, etc.). Plugin support is agent-specific and gated by capabilities. Managed through a unified `adapters plugins` interface.
 
 ---
 
@@ -524,7 +524,7 @@ interface InstallMethod {
 
 ## 12. Agent install metadata (per built-in adapter)
 
-Each adapter declares `installMethods: InstallMethod[]`. Used by `amux install <agent>` and the `AdapterRegistry.installInstructions()` API.
+Each adapter declares `installMethods: InstallMethod[]`. Used by `adapters install <agent>` and the `AdapterRegistry.installInstructions()` API.
 
 ```
 Claude Code
@@ -899,10 +899,10 @@ abstract class BaseAgentAdapter implements AgentAdapter {
 
 ## 21. CLI — all commands and flags
 
-### Binary: `amux`
+### Binary: `adapters`
 
 ```
-amux [command] [flags]
+adapters [command] [flags]
 
   --agent, -a       Agent name
   --model, -m       Model ID
@@ -913,9 +913,9 @@ amux [command] [flags]
   --no-color
 ```
 
-### `amux run`
+### `adapters run`
 ```
-amux run [agent] <prompt>
+adapters run [agent] <prompt>
 
   --model, -m
   --stream / --no-stream
@@ -943,9 +943,9 @@ amux run [agent] <prompt>
   --quiet, -q
 ```
 
-### `amux install`
+### `adapters install`
 ```
-amux install <agent>
+adapters install <agent>
   # Detects platform, prints the exact command(s) to run, and optionally executes them.
   # Runs through all installMethods for the current platform in order.
   # Checks for prerequisites before attempting installation.
@@ -955,85 +955,85 @@ amux install <agent>
   --yes, -y        Non-interactive: run install commands without prompting
 
 Examples:
-  amux install claude       # → npm install -g @anthropic-ai/claude-code
-  amux install codex        # → npm install -g @openai/codex
-  amux install copilot      # → gh extension install github/gh-copilot
-  amux install opencode     # → brew install opencode/tap/opencode (macOS)
+  adapters install claude       # → npm install -g @anthropic-ai/claude-code
+  adapters install codex        # → npm install -g @openai/codex
+  adapters install copilot      # → gh extension install github/gh-copilot
+  adapters install opencode     # → brew install opencode/tap/opencode (macOS)
                             #   npm install -g opencode (linux/win)
-  amux install cursor       # → Opens download page (no CLI installer available)
-  amux install --dry-run gemini  # Prints install command without running
+  adapters install cursor       # → Opens download page (no CLI installer available)
+  adapters install --dry-run gemini  # Prints install command without running
 ```
 
-### `amux adapters`
+### `adapters adapters`
 ```
-amux adapters list              # All registered adapters: installed status, version, auth
-amux adapters detect <agent>    # Detect single adapter: version, path, auth state
-```
-
-### `amux capabilities`
-```
-amux capabilities <agent>
-amux capabilities <agent> --model <model>
-amux capabilities <agent> --json
+adapters adapters list              # All registered adapters: installed status, version, auth
+adapters adapters detect <agent>    # Detect single adapter: version, path, auth state
 ```
 
-### `amux models`
+### `adapters capabilities`
 ```
-amux models list <agent>
-amux models list <agent> --json
-amux models get <agent> <model>
-amux models refresh <agent>
+adapters capabilities <agent>
+adapters capabilities <agent> --model <model>
+adapters capabilities <agent> --json
 ```
 
-### `amux plugins`
+### `adapters models`
+```
+adapters models list <agent>
+adapters models list <agent> --json
+adapters models get <agent> <model>
+adapters models refresh <agent>
+```
+
+### `adapters plugins`
 ```
 # List installed plugins for an agent
-amux plugins list <agent>
-amux plugins list <agent> --json
+adapters plugins list <agent>
+adapters plugins list <agent> --json
 
 # Install a plugin (capability-gated)
-amux plugins install <agent> <plugin-id>
+adapters plugins install <agent> <plugin-id>
   --version              Pin to version
   --global               Install globally (vs project-local)
   --yes, -y              Skip confirmation
 
 # Uninstall
-amux plugins uninstall <agent> <plugin-id>
+adapters plugins uninstall <agent> <plugin-id>
   --yes, -y
 
 # Update
-amux plugins update <agent> <plugin-id>
-amux plugins update <agent> --all
+adapters plugins update <agent> <plugin-id>
+adapters plugins update <agent> --all
 
 # Search marketplace (cross-agent or agent-specific)
-amux plugins search <query>
+adapters plugins search <query>
   --agent                Filter by agent
   --format               Filter by plugin format (npm-package | skill-file | etc.)
   --registry             Search specific registry only
   --json
 
 # Browse marketplace by agent or category
-amux plugins browse [agent]
+adapters plugins browse [agent]
   --category             e.g. coding | communication | automation
   --sort                 downloads | updated | name
   --json
 
 # Plugin detail
-amux plugins info <plugin-id> [--agent <agent>]
+adapters plugins info <plugin-id> [--agent <agent>]
 
 Examples:
-  amux plugins list openclaw
-  amux plugins install openclaw @openclaw/browser-skill
-  amux plugins install opencode opencode-tokenscope
-  amux plugins install pi @mariozechner/pi-subagents
-  amux plugins search "web browser" --agent openclaw
-  amux plugins browse opencode --category coding
-  amux plugins update openclaw --all
+  adapters plugins list openclaw
+  adapters plugins install openclaw @openclaw/browser-skill
+  adapters plugins install opencode opencode-tokenscope
+  adapters plugins install pi @mariozechner/pi-subagents
+  adapters plugins search "web browser" --agent openclaw
+  adapters plugins browse opencode --category coding
+  adapters plugins update openclaw --all
 ```
 
-### `amux sessions`
+### `adapters sessions`
 ```
-amux sessions list <agent> [options]
+adapters sessions list <agent> [options]
   --since, --until
   --model
   --tag
@@ -1041,19 +1041,19 @@ amux sessions list <agent> [options]
   --sort           date | cost | turns
   --json
 
-amux sessions show <agent> <session-id>
+adapters sessions show <agent> <session-id>
   --format         json | jsonl | markdown
 
-amux sessions search <query> [--agent <a>] [--since] [--until]
-amux sessions export <agent> <session-id> [--format]
-amux sessions diff <agent>:<id> <agent>:<id>
-amux sessions resume <agent> <session-id>
-amux sessions fork <agent> <session-id>
+adapters sessions search <query> [--agent <a>] [--since] [--until]
+adapters sessions export <agent> <session-id> [--format]
+adapters sessions diff <agent>:<id> <agent>:<id>
+adapters sessions resume <agent> <session-id>
+adapters sessions fork <agent> <session-id>
 ```
 
-### `amux cost`
+### `adapters cost`
 ```
-amux cost report
+adapters cost report
   --agent
   --since, --until
   --model
@@ -1062,41 +1062,41 @@ amux cost report
   --json
 ```
 
-### `amux config`
+### `adapters config`
 ```
-amux config get <agent> [field]
-amux config set <agent> <field> <value>
-amux config schema <agent>
-amux config validate <agent>
-amux config mcp list <agent>
-amux config mcp add <agent>
-amux config mcp remove <agent> <name>
-```
-
-### `amux profiles`
-```
-amux profiles list [--scope global|project]
-amux profiles show <name>
-amux profiles set <name> [run flags]
-amux profiles delete <name>
-amux profiles apply <name>
+adapters config get <agent> [field]
+adapters config set <agent> <field> <value>
+adapters config schema <agent>
+adapters config validate <agent>
+adapters config mcp list <agent>
+adapters config mcp add <agent>
+adapters config mcp remove <agent> <name>
 ```
 
-### `amux auth`
+### `adapters profiles`
 ```
-amux auth check [agent]
-amux auth setup <agent>
+adapters profiles list [--scope global|project]
+adapters profiles show <name>
+adapters profiles set <name> [run flags]
+adapters profiles delete <name>
+adapters profiles apply <name>
 ```
 
-### `amux init`
+### `adapters auth`
 ```
-amux init    # Create .agent-mux/ in current directory with defaults
+adapters auth check [agent]
+adapters auth setup <agent>
+```
+
+### `adapters init`
+```
+adapters init    # Create .agent-mux/ in current directory with defaults
 ```
 
 ### Pipe / stdin
 ```bash
-echo "refactor this" | amux run claude --json
-amux run codex "explain this" --json | jq 'select(.type == "text_delta")'
+echo "refactor this" | adapters run claude --json
+adapters run codex "explain this" --json | jq 'select(.type == "text_delta")'
 ```
 
 ---
@@ -1135,14 +1135,14 @@ Platform-specific: path separators, shell invocation, PTY availability, config f
 
 ```
 @a5c-ai/adapters          — Full convenience package: re-exports core + adapters + cli
-@a5c-ai/adapters-comm     — AgentMuxClient, RunHandle, all types, stream engine
+@a5c-ai/comm-adapter     — AgentMuxClient, RunHandle, all types, stream engine
 @a5c-ai/adapters-codecs — All built-in adapter implementations
-@a5c-ai/adapters-cli      — CLI binary (amux)
+@a5c-ai/adapters-cli      — CLI binary (adapters)
 ```
 
 ```bash
 # SDK only
-npm install @a5c-ai/adapters-comm @a5c-ai/adapters-codecs
+npm install @a5c-ai/comm-adapter @a5c-ai/adapters-codecs
 
 # SDK + CLI (everything)
 npm install @a5c-ai/adapters

@@ -1,5 +1,5 @@
 /**
- * `amux hooks <agent> <subcommand> [args]` — manage and dispatch hooks.
+ * `adapters hooks <agent> <subcommand> [args]` — manage and dispatch hooks.
  *
  * Subcommands:
  *   discover            List native hook types supported by the harness.
@@ -10,7 +10,7 @@
  *   handle <hookType>   Read JSON payload on stdin, dispatch, emit unified result.
  */
 
-import type { AgentMuxClient, AgentName, UnifiedHookPayload } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient, AgentName, UnifiedHookPayload } from '@a5c-ai/comm-adapter';
 import {
   HookConfigManager,
   HookDispatcher,
@@ -18,7 +18,7 @@ import {
   getHookCatalog,
   parseHookPayload,
   formatHookResult,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import type { ParsedArgs } from '../parse-args.js';
 import { flagBool, flagStr } from '../parse-args.js';
@@ -56,7 +56,7 @@ export async function hooksCommand(
   const agent = args.subcommand as AgentName | undefined;
   const sub = args.positionals[0];
   if (!agent || !sub) {
-    const msg = 'Usage: amux hooks <agent> <discover|list|add|remove|set|handle> [...]';
+    const msg = 'Usage: adapters hooks <agent> <discover|list|add|remove|set|handle> [...]';
     if (json) printJsonError('VALIDATION_ERROR', msg);
     else printError(msg);
     return ExitCode.USAGE_ERROR;
@@ -136,7 +136,7 @@ async function add(
 ): Promise<number> {
   const hookType = args.positionals[1];
   if (!hookType) {
-    const msg = 'Usage: amux hooks <agent> add <hookType> [--handler ...] [--target ...]';
+    const msg = 'Usage: adapters hooks <agent> add <hookType> [--handler ...] [--target ...]';
     if (json) printJsonError('VALIDATION_ERROR', msg);
     else printError(msg);
     return ExitCode.USAGE_ERROR;
@@ -168,7 +168,7 @@ async function remove(
 ): Promise<number> {
   const id = args.positionals[1];
   if (!id) {
-    const msg = 'Usage: amux hooks <agent> remove <id>';
+    const msg = 'Usage: adapters hooks <agent> remove <id>';
     if (json) printJsonError('VALIDATION_ERROR', msg);
     else printError(msg);
     return ExitCode.USAGE_ERROR;
@@ -188,7 +188,7 @@ async function set(
 ): Promise<number> {
   const id = args.positionals[1];
   if (!id) {
-    const msg = 'Usage: amux hooks <agent> set <id> [--priority N] [--enabled true|false] [--target ...]';
+    const msg = 'Usage: adapters hooks <agent> set <id> [--priority N] [--enabled true|false] [--target ...]';
     if (json) printJsonError('VALIDATION_ERROR', msg);
     else printError(msg);
     return ExitCode.USAGE_ERROR;
@@ -218,7 +218,7 @@ async function handle(
 ): Promise<number> {
   const hookType = args.positionals[1];
   if (!hookType) {
-    process.stderr.write('Usage: amux hooks <agent> handle <hookType>\n');
+    process.stderr.write('Usage: adapters hooks <agent> handle <hookType>\n');
     return ExitCode.USAGE_ERROR;
   }
   const raw = await readStdin();

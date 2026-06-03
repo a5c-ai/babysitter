@@ -50,7 +50,7 @@
     "packages/tula/platform/src/harness/internal/createRun/orchestration/index.ts",
     "packages/tula/platform/src/harness/internal/createRun/planProcess/phase.ts",
     "packages/tula/platform/src/harness/internal/createRun/planProcess/validation.ts",
-    "packages/tula/platform/src/harness/amux/amuxBridge.ts",
+    "packages/tula/platform/src/harness/adapters/amuxBridge.ts",
     ".github/workflows/live-stack.yml"
   ],
   "targetTestFiles": [

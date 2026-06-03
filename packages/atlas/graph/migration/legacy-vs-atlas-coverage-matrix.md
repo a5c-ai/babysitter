@@ -120,21 +120,21 @@ catalog-faithful (codegen-ready).
 | --- | --- | --- | --- |
 | `agent-catalog` | exports, projection types | PackageSurface + all NodeKinds it projects | GREEN |
 | `agent-mux/core` | adapter-registry, capabilities, host-detection, hook-catalog, hook-dispatcher, builtin-hooks | AgentRuntimeImpl, AgentCapabilities (Capability), HostDetectionRule, HookSurface, HookMapping; builtin-hooks runtime-only (out of scope) | GREEN |
-| `agent-mux/cli` | amux bin entrypoint | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
+| `agent-mux/cli` | adapters bin entrypoint | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
 | `agent-mux/gateway` | HTTP gateway, fanout server, kanban control plane | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
 | `agent-mux/tui` | Ink TUI + plugins | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
 | `agent-mux/ui` | shared React/RN components, session-flow | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
 | `agent-mux/webui` | browser app | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
 | `agent-mux/harness-mock` | mock harness emulator | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
 | `agent-mux/observability` | logger + telemetry library | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
-| `agent-mux/sdk` (umbrella @a5c-ai/adapters) | re-export + amux bin | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
+| `agent-mux/sdk` (umbrella @a5c-ai/adapters) | re-export + adapters bin | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
 | `agent-mux/adapters` | per-harness adapters bundle | PackageSurface + PathDescriptor (catalog pass 96-new); adapter behavior on AgentRuntimeImpl | GREEN |
 | `extension-mux` | PluginTarget×17, schema/transform/emit | PluginTargetDescriptor + PackageSurface | GREEN |
 | `hooks-mux/core` | HookMapping records, MergePolicy, DecisionVerb | HookMapping, HookSurface, MergePolicy, DecisionVerb | GREEN |
 | `tasks-mux` | Zod-defined breakpoint types | BreakpointStrategy, ResponderProfile, BreakpointAnswer, DecisionMemory, HumanCheckpoint | GREEN |
 | `transport-mux` | 8 SUPPORTED_TRANSPORTS | ModelTransportProtocol×8 (existing) | GREEN |
 
-Out-of-scope dirs (no `package.json`): `agent-mux/amux-proxy`,
+Out-of-scope dirs (no `package.json`): `agent-mux/adapters-proxy`,
 `agent-mux/meta`, `agent-mux/processes` — non-published source directories
 under the umbrella package, not catalog-modelable.
 

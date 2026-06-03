@@ -47,10 +47,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@a5c-ai/atlas/catalog': path.resolve(rootDir, '..', '..', 'atlas', 'src', 'catalog', 'index.ts'),
-      '@a5c-ai/adapters-comm/automation': path.resolve(rootDir, '..', 'core', 'src', 'automation.ts'),
-      '@a5c-ai/adapters-comm/kanban': path.resolve(rootDir, '..', 'core', 'src', 'kanban.ts'),
-      '@a5c-ai/adapters-comm/browser': path.resolve(rootDir, '..', 'core', 'src', 'browser.ts'),
-      '@a5c-ai/adapters-comm': path.resolve(rootDir, '..', 'core', 'src', 'index.ts'),
+      '@a5c-ai/comm-adapter/automation': path.resolve(rootDir, '..', 'core', 'src', 'automation.ts'),
+      '@a5c-ai/comm-adapter/kanban': path.resolve(rootDir, '..', 'core', 'src', 'kanban.ts'),
+      '@a5c-ai/comm-adapter/browser': path.resolve(rootDir, '..', 'core', 'src', 'browser.ts'),
+      '@a5c-ai/comm-adapter': path.resolve(rootDir, '..', 'core', 'src', 'index.ts'),
       '@a5c-ai/tula-ui/gateway': path.resolve(rootDir, '..', 'ui', 'src', 'gateway.ts'),
       '@a5c-ai/tula-ui/session-flow': path.resolve(rootDir, '..', 'ui', 'src', 'session-flow.ts'),
       '@a5c-ai/tula-ui': path.resolve(rootDir, '..', 'ui', 'src', 'index.ts'),

@@ -7,7 +7,7 @@ import { expect, test, type APIRequestContext, type Page, type TestInfo } from "
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const testPort = Number.parseInt(process.env.AGENT_MUX_WEBUI_E2E_PORT ?? "4175", 10);
-const stateFile = path.resolve(__dirname, `../../.tmp/amux-webui-e2e-state-${testPort}.json`);
+const stateFile = path.resolve(__dirname, `../../.tmp/adapters-webui-e2e-state-${testPort}.json`);
 
 type FixtureState = {
   baseUrl: string;
@@ -69,7 +69,7 @@ async function authenticatePage(page: Page, request: APIRequestContext, testInfo
   };
 
   await page.addInitScript((input) => {
-    window.localStorage.setItem("amux.webui.auth", JSON.stringify(input));
+    window.localStorage.setItem("adapters.webui.auth", JSON.stringify(input));
   }, auth);
 }
 

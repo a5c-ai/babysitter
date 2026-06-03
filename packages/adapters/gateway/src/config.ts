@@ -1,7 +1,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import type { RunHandle, RunOptions } from '@a5c-ai/adapters-comm';
+import type { RunHandle, RunOptions } from '@a5c-ai/comm-adapter';
 
 import type { BootstrapAuthMode } from './auth/bootstrap.js';
 import type { TokenStore } from './auth/tokens.js';
@@ -48,8 +48,8 @@ export const DEFAULT_GATEWAY_CONFIG: Readonly<GatewayConfig> = Object.freeze({
   unauthenticatedTimeoutMs: 5000,
   maxPendingFrames: 1024,
   tokenStoreKind: 'sqlite',
-  tokenDbPath: path.join(os.homedir(), '.amux', 'gateway', 'tokens.db'),
-  eventLogDir: path.join(os.homedir(), '.amux', 'gateway', 'events'),
+  tokenDbPath: path.join(os.homedir(), '.adapters', 'gateway', 'tokens.db'),
+  eventLogDir: path.join(os.homedir(), '.adapters', 'gateway', 'events'),
   maxEventsPerRun: 100_000,
   replayBufferSize: 512,
   maxConcurrentRuns: 16,

@@ -1,4 +1,4 @@
-# @a5c-ai/adapters-tasks
+# @a5c-ai/tasks-adapter
 
 Breakpoint routing library, MCP server, and CLI for responder-driven review flows.
 
@@ -7,22 +7,22 @@ Breakpoint routing library, MCP server, and CLI for responder-driven review flow
 Use the published npm package in consumers. Install it locally in a project or run it directly with `npx`.
 
 ```bash
-npm install --save-dev @a5c-ai/adapters-tasks
-npx --yes @a5c-ai/adapters-tasks --help
+npm install --save-dev @a5c-ai/tasks-adapter
+npx --yes @a5c-ai/tasks-adapter --help
 ```
 
 ## CLI
 
 The published executable is `agent-mux-tasks`. The supported consumer workflow is either:
 
-- run the published package with `npx --yes @a5c-ai/adapters-tasks ...`
-- install `@a5c-ai/adapters-tasks` and invoke `agent-mux-tasks ...`
+- run the published package with `npx --yes @a5c-ai/tasks-adapter ...`
+- install `@a5c-ai/tasks-adapter` and invoke `agent-mux-tasks ...`
 
 ```bash
-npx --yes @a5c-ai/adapters-tasks --help
-npx --yes @a5c-ai/adapters-tasks responders list
-npx --yes @a5c-ai/adapters-tasks auth login
-npx --yes @a5c-ai/adapters-tasks server start
+npx --yes @a5c-ai/tasks-adapter --help
+npx --yes @a5c-ai/tasks-adapter responders list
+npx --yes @a5c-ai/tasks-adapter auth login
+npx --yes @a5c-ai/tasks-adapter server start
 ```
 
 If the published package is already installed locally or globally, use the bin directly:
@@ -100,7 +100,7 @@ import {
   createBackend,
   createBreakpointMcpServer,
   BreakpointMuxInteractionProvider,
-} from "@a5c-ai/adapters-tasks";
+} from "@a5c-ai/tasks-adapter";
 ```
 
 ## Published Package Contents
@@ -116,10 +116,10 @@ The npm tarball is intentionally limited to:
 ## Validation
 
 ```bash
-npm run build --workspace=@a5c-ai/adapters-tasks
-npm run typecheck --workspace=@a5c-ai/adapters-tasks
-npm run test:packaged-surface-parity --workspace=@a5c-ai/adapters-tasks
-npm pack --json --dry-run --workspace=@a5c-ai/adapters-tasks
+npm run build --workspace=@a5c-ai/tasks-adapter
+npm run typecheck --workspace=@a5c-ai/tasks-adapter
+npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter
+npm pack --json --dry-run --workspace=@a5c-ai/tasks-adapter
 ```
 
 Keep this README aligned with the exported CLI, MCP, and package topology surfaced by `packages/adapters/tasks/`.

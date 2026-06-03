@@ -56,7 +56,7 @@ function makeOverview() {
           projectId: 'project-1',
           key: 'ACA-398',
           title: 'Implement kanban view',
-          summary: 'List-first kanban surface for amux-tui',
+          summary: 'List-first kanban surface for adapters-tui',
           description: 'Ship a keyboard-driven kanban tab.',
           status: 'ready',
           priority: 'high',

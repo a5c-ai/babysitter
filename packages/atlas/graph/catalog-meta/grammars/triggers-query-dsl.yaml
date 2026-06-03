@@ -1,9 +1,9 @@
 # Source: parseQuery() at packages/triggers-mux/src/query.ts:75-100,
 # evaluateExpression() at lines 55-73, globToRegExp() at lines 20-37.
 nodeKind: Grammar
-id: grammar:amux-triggers-query-dsl
+id: grammar:adapters-triggers-query-dsl
 attributes:
-  displayName: "amux-triggers TriggerQuery DSL"
+  displayName: "adapters-triggers TriggerQuery DSL"
   dslName: TriggerQuery
   surfaceVariants:
     - "compact-key-value"
@@ -44,8 +44,8 @@ attributes:
   sourceCitation: "packages/triggers-mux/src/query.ts:20-100"
 edges:
   grammar_parses_for:
-    - target: operational-trigger:amux-triggers-github
-    - target: operational-trigger:amux-triggers-gitlab
-    - target: operational-trigger:amux-triggers-bitbucket
-    - target: operational-trigger:amux-triggers-generic-webhook
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-github
+    - target: operational-trigger:adapters-triggers-gitlab
+    - target: operational-trigger:adapters-triggers-bitbucket
+    - target: operational-trigger:adapters-triggers-generic-webhook
+    - target: operational-trigger:adapters-triggers-action

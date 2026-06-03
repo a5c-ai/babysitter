@@ -3411,7 +3411,7 @@ edgeKinds:
   description: |
     Catalog pass 95 — an OperationalTrigger's query DSL is defined by a Grammar
     record (productions + tokens + operators). Wires
-    operational-trigger:amux-triggers-* → grammar:amux-triggers-query-dsl.
+    operational-trigger:adapters-triggers-* → grammar:adapters-triggers-query-dsl.
   source:
   - OperationalTrigger
   target:
@@ -3433,7 +3433,7 @@ edgeKinds:
   origin: a5c
   description: |
     Catalog pass 95 — an OperationalTrigger calls an outbound APIEndpoint as
-    part of its enrichment phase (e.g. amux-triggers-github calling
+    part of its enrichment phase (e.g. adapters-triggers-github calling
     `/repos/{owner}/{repo}/pulls/{n}/files` to lift changed files).
     Distinct from `fires_operational_trigger` (which goes the opposite
     direction, APIEndpoint → trigger).
@@ -3478,7 +3478,7 @@ edgeKinds:
   description: |
     Catalog pass 95 — a PackageSurface exposes a CLI subcommand modeled as
     an InteractionPrimitive[kind=cli-subcommand]. Used to enumerate
-    `amux-triggers enrich|evaluate|help` against
+    `adapters-triggers enrich|evaluate|help` against
     `package:a5c-ai-triggers`.
   source:
   - PackageSurface

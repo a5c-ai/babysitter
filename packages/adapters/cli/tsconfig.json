@@ -5,13 +5,13 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@a5c-ai/adapters-config": [
+      "@a5c-ai/config-adapter": [
         "../config/src/index.ts"
       ],
-      "@a5c-ai/adapters-launch": [
+      "@a5c-ai/launch-adapter": [
         "../launch/src/index.ts"
       ],
-      "@a5c-ai/adapters-transport": [
+      "@a5c-ai/transport-adapter": [
         "../transport/src/index.ts"
       ]
     }

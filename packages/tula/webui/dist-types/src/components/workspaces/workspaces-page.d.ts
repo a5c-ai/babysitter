@@ -1,4 +1,4 @@
-import type { Attachment } from "@a5c-ai/adapters-comm";
+import type { Attachment } from "@a5c-ai/comm-adapter";
 import type { WorkspaceInventoryItem, WorkspaceInventoryResponse, WorkspaceSessionSnapshot } from "@/lib/workspace-lifecycle";
 type WorkspaceSurfaceMode = "full" | "attention";
 export declare function getWorkspaceOwnershipLabel(isAuthenticated: boolean, sessions: WorkspaceSessionSnapshot[], workspaces?: WorkspaceInventoryItem[]): string;

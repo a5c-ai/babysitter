@@ -1,6 +1,6 @@
 "use client";
 import React, { Suspense, lazy } from "react";
-import type { KanbanExecutionContextEnvelope } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanExecutionContextEnvelope } from "@a5c-ai/comm-adapter/kanban";
 
 import type { DispatchContextAuditRecord } from "@/lib/dispatch-context-audit";
 import { Kbd } from "@/components/shared/kbd";

@@ -26,17 +26,17 @@ const REQUIRED_PACKED_PATHS = [
 ];
 
 const REQUIRED_README_EXPORTS = [
-  '@a5c-ai/adapters-comm',
-  '@a5c-ai/adapters-comm/browser',
-  '@a5c-ai/adapters-comm/kanban',
-  '@a5c-ai/adapters-comm/automation',
+  '@a5c-ai/comm-adapter',
+  '@a5c-ai/comm-adapter/browser',
+  '@a5c-ai/comm-adapter/kanban',
+  '@a5c-ai/comm-adapter/automation',
 ];
 
 const REQUIRED_README_COMMANDS = [
-  'npm run build --workspace=@a5c-ai/adapters-comm',
-  'npm run test --workspace=@a5c-ai/adapters-comm',
-  'npm run verify:release --workspace=@a5c-ai/adapters-comm',
-  'npm pack --json --dry-run --workspace=@a5c-ai/adapters-comm',
+  'npm run build --workspace=@a5c-ai/comm-adapter',
+  'npm run test --workspace=@a5c-ai/comm-adapter',
+  'npm run verify:release --workspace=@a5c-ai/comm-adapter',
+  'npm pack --json --dry-run --workspace=@a5c-ai/comm-adapter',
 ];
 
 function expect(condition, message) {
@@ -75,8 +75,8 @@ export function verifyAgentMuxCoreRelease({ packageRoot, manifest, packEntries }
   const readme = fs.readFileSync(path.join(packageRoot, 'README.md'), 'utf8');
 
   expect(
-    manifest.name === '@a5c-ai/adapters-comm',
-    'packages/adapters/core/package.json name must stay @a5c-ai/adapters-comm'
+    manifest.name === '@a5c-ai/comm-adapter',
+    'packages/adapters/core/package.json name must stay @a5c-ai/comm-adapter'
   );
   expect(
     manifest.publishConfig?.access === 'public',

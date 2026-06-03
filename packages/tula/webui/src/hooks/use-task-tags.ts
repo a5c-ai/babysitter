@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { KanbanTaskTag } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanTaskTag } from "@a5c-ai/comm-adapter/kanban";
 
 import { loadTaskTags } from "./use-backlog";
 

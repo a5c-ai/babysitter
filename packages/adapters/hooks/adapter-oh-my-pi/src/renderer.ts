@@ -1,4 +1,4 @@
-import type { MergedExecutionResult } from '@a5c-ai/adapters-hooks-core';
+import type { MergedExecutionResult } from '@a5c-ai/hooks-adapter-core';
 
 /**
  * Oh-My-Pi native output fields that are supported per event type.

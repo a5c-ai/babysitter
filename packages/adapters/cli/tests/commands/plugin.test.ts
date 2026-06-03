@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from '../../src/parse-args.js';
 import { pluginCommand } from '../../src/commands/plugin.js';
 import { ExitCode } from '../../src/exit-codes.js';
@@ -72,8 +72,8 @@ describe('plugin command', () => {
     const exitCode = await pluginCommand(mockClient, mockArgs);
 
     expect(exitCode).toBe(ExitCode.SUCCESS);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Usage: amux plugin'));
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Note: Plugin support varies by agent. Use "amux mcp" for MCP servers.'));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Usage: adapters plugin'));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Note: Plugin support varies by agent. Use "adapters mcp" for MCP servers.'));
   });
 
   it('should show error for missing subcommand', async () => {

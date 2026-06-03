@@ -12,7 +12,7 @@ export type {
   AgentMuxClient,
   AgentAdapter,
   Spawner,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 // Re-export CLI helper types
 export type {

@@ -1,6 +1,6 @@
 # Responder Profile System
 
-This directory contains packaged responder profile examples for `@a5c-ai/adapters-tasks`.
+This directory contains packaged responder profile examples for `@a5c-ai/tasks-adapter`.
 
 ## Schema
 

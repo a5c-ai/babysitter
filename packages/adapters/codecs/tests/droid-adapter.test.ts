@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { DroidAdapter } from '../src/droid-adapter.js';
-import type { RunOptions } from '@a5c-ai/adapters-comm';
+import type { RunOptions } from '@a5c-ai/comm-adapter';
 
 describe('DroidAdapter', () => {
   let adapter: DroidAdapter;

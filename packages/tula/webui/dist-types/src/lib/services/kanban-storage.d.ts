@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs';
-import type { AutomationExecutionRecord, AutomationRule } from '@a5c-ai/adapters-comm';
-import type { KanbanActivityEntry, KanbanCollaborator, KanbanDispatchContextLabelDefinition, KanbanDispatchContextLabelRef, KanbanIssue, KanbanPermissionGrant, KanbanProject, KanbanProjectSettings, KanbanTaskTag, KanbanTeam } from '@a5c-ai/adapters-comm/kanban';
+import type { AutomationExecutionRecord, AutomationRule } from '@a5c-ai/comm-adapter';
+import type { KanbanActivityEntry, KanbanCollaborator, KanbanDispatchContextLabelDefinition, KanbanDispatchContextLabelRef, KanbanIssue, KanbanPermissionGrant, KanbanProject, KanbanProjectSettings, KanbanTaskTag, KanbanTeam } from '@a5c-ai/comm-adapter/kanban';
 export declare const KANBAN_BACKLOG_FILE_PATH: string;
 export type StoredKanbanProject = Omit<KanbanProject, 'metrics' | 'team' | 'settings' | 'permissions' | 'activity'> & {
     readonly team?: Partial<KanbanTeam>;

@@ -220,7 +220,7 @@ export const reuseAndCompletionAuditTask = defineTask("issue-633.reuse-and-compl
         "Do not edit files in this phase.",
         "Extract keywords: tasks-mux, routeTask, ResponderType, AgentMuxResponderBackend, BreakpointBackend, ExternalTrackerBackend, orchestrateIteration, resolveAndPostEffect, stop-hook, agent-core, agent-mux, tracker, human, internal.",
         "Scan package dependencies and imports in packages/tasks-mux, packages/sdk, packages/tula/platform, plugins/babysitter, and plugins/babysitter-unified.",
-        "Scan environment variables relevant to AMUX, BMUX, AGENT_SESSION_ID, AGENT_PLUGIN_ROOT, and AGENT_CAPABILITIES_JSON.",
+        "Scan environment variables relevant to ADAPTERS, BMUX, AGENT_SESSION_ID, AGENT_PLUGIN_ROOT, and AGENT_CAPABILITIES_JSON.",
         "Scan docs and tests for existing tasks-mux routing coverage.",
         "Classify every matching seam as reusable, implemented-but-needs-verification, missing, stale, or off-path.",
         "If the current checkout already implements a requirement, plan verification and hardening instead of duplicating code.",

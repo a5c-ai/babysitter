@@ -272,7 +272,7 @@ Parse errors are counted internally but the count is not returned or logged. Cal
 ### High
 
 **Harness discovery falls back to legacy probing silently** — `packages/sdk/src/harness/discovery.ts:144-151` **(logged)**
-`discoverHarnesses()` tries amux discovery first, any error falls back to legacy direct probing. User never knows which path was taken. Degraded behavior (slower, less capable) is invisible.
+`discoverHarnesses()` tries adapters discovery first, any error falls back to legacy direct probing. User never knows which path was taken. Degraded behavior (slower, less capable) is invisible.
 
 **Config resolution — 10+ `??` chains without logging** — `packages/sdk/src/config/configValidation.ts:49-86`
 `overrides?.field ?? parseEnvVar(..., DEFAULTS.field)` repeated for every config key. No logging of which source (override, env var, default) was selected. Effective config is unauditable.
@@ -303,7 +303,7 @@ If `hostSignalMap[name]` is undefined, silently falls back to empty array. Harne
 **Azure model synthesis returns undefined silently** — `packages/tula/platform/src/harness/piWrapper/moduleSupport.ts:146-175`
 `synthesizeAzureModelEntry()` returns `undefined` at multiple points without logging. Model resolution fails silently.
 
-**Non-JSON stdin lines silently discarded** — `packages/tula/platform/src/harness/amux/amuxStdinReader.ts:64-66`
+**Non-JSON stdin lines silently discarded** — `packages/tula/platform/src/harness/adapters/amuxStdinReader.ts:64-66`
 `catch { continue; }` on JSON.parse. Invalid interaction events vanish. Downstream code may wait forever for a response that was malformed and discarded.
 
 **Pi module import — generic error hides real cause** — `packages/tula/platform/src/harness/piWrapper/moduleSupport.ts:86-96`
@@ -373,8 +373,8 @@ YAML parse errors → `{ frontmatter: {}, content }`. Missing metadata without i
 **Tasks-mux config → undefined** — `packages/tasks-mux/src/config.ts:115-124`
 File read, JSON parse, and validation errors all collapse to `undefined`. Missing config silently accepted.
 
-**Proxy auth token → random UUID** — `packages/transport-mux/src/bin/amux-proxy.ts:27`
-`process.env.AMUX_PROXY_AUTH_TOKEN || randomUUID()`. Silent fallback to random token if env not set.
+**Proxy auth token → random UUID** — `packages/transport-mux/src/bin/adapters-proxy.ts:27`
+`process.env.ADAPTERS_PROXY_AUTH_TOKEN || randomUUID()`. Silent fallback to random token if env not set.
 
 **Extension env var cascades** — `packages/extension-mux/src/transformHelpers.ts:108,117-118`
 `process.env.${pluginRootEnvVar} || process.env.PLUGIN_ROOT || path.resolve(...)`. No log of which path taken.

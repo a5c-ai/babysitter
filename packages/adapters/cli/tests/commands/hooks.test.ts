@@ -4,7 +4,7 @@ import * as os from 'node:os';
 import * as fs from 'node:fs/promises';
 import { main } from '../../src/index.js';
 
-describe('amux hooks', () => {
+describe('adapters hooks', () => {
   let cwd: string;
   let home: string;
   const prevCwd = process.cwd();
@@ -12,8 +12,8 @@ describe('amux hooks', () => {
   const prevUserProfile = process.env['USERPROFILE'];
 
   beforeEach(async () => {
-    cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-hooks-cli-'));
-    home = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-hooks-home-'));
+    cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-hooks-cli-'));
+    home = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-hooks-home-'));
     process.chdir(cwd);
     process.env['HOME'] = home;
     process.env['USERPROFILE'] = home;

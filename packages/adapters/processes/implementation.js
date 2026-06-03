@@ -324,9 +324,9 @@ const PHASES = [
   },
   {
     number: 9,
-    title: 'CLI Binary (amux) — Command Reference',
+    title: 'CLI Binary (adapters) — Command Reference',
     specs: ['docs/10-cli-reference.md'],
-    description: 'Implement the amux CLI binary with all commands: run, adapters, models, sessions, config, auth, profiles, plugins, install, version, help. Wire up to the SDK.',
+    description: 'Implement the adapters CLI binary with all commands: run, adapters, models, sessions, config, auth, profiles, plugins, install, version, help. Wire up to the SDK.',
   },
   {
     number: 10,
@@ -393,9 +393,9 @@ export async function process(inputs, ctx) {
           `Read spec 01 at "${args.projectRoot}/docs/01-core-types-and-client.md" sections 1.1-1.3 for package structure.`,
           `Project root is "${args.projectRoot}".`,
           'Set up a TypeScript monorepo with these packages:',
-          '  - packages/adapters/core/ — @a5c-ai/adapters-comm (types, client, stream engine)',
+          '  - packages/adapters/core/ — @a5c-ai/comm-adapter (types, client, stream engine)',
           '  - packages/adapters/adapters/ — @a5c-ai/adapters-codecs (built-in adapters)',
-          '  - packages/adapters/cli/ — @a5c-ai/adapters-cli (amux binary)',
+          '  - packages/adapters/cli/ — @a5c-ai/adapters-cli (adapters binary)',
           '  - packages/adapters/sdk/ — @a5c-ai/adapters (meta-package)',
           'Create: tsconfig.json (strict, ESM, path aliases), package.json (workspaces), vitest.config.ts.',
           'Set up each package with its own package.json, tsconfig.json, src/index.ts.',

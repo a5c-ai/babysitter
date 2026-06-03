@@ -1,5 +1,5 @@
 {
-  "name": "@a5c-ai/adapters-hooks-oh-my-pi",
+  "name": "@a5c-ai/hooks-adapter-oh-my-pi",
   "version": "5.0.0",
   "description": "oh-my-pi harness adapter for the hooks-mux system",
   "license": "MIT",
@@ -30,7 +30,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@a5c-ai/adapters-hooks-core": "5.0.0"
+    "@a5c-ai/hooks-adapter-core": "5.0.0"
   },
   "devDependencies": {
     "rimraf": "^6.0.0",

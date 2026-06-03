@@ -8,7 +8,7 @@ const TRANSPORT_MUX_DOC_EVIDENCE_IDS = [
 ] as const;
 
 const TRANSPORT_MUX_SCORECARD_OVERRIDE_ENV = "A5C_AGENT_CATALOG_TRANSPORT_MUX_CUTOVER";
-const TRANSPORT_MUX_RUNTIME_SUBJECT_ID = "transportRuntime:amux-proxy";
+const TRANSPORT_MUX_RUNTIME_SUBJECT_ID = "transportRuntime:adapters-proxy";
 const TRANSPORT_MUX_PROVISIONAL_GAP =
   "transport-mux document-backed runtime claims stay provisional until packages/transport-mux scorecard:migration is green.";
 
@@ -86,7 +86,7 @@ function evaluateTransportMuxCutover(): boolean {
   const packageEntrypoint = readRepoFile("packages/transport-mux/src/index.ts");
   const launchCommand = readRepoFile("packages/adapters/cli/src/commands/launch.ts");
 
-  const legacyPythonTests = countFiles("packages/adapters/amux-proxy/tests", ".py");
+  const legacyPythonTests = countFiles("packages/adapters/adapters-proxy/tests", ".py");
   const jsContractTests =
     countFiles("packages/transport-mux/tests", ".ts") +
     countFiles("packages/transport-mux/tests/transports", ".ts") +
@@ -112,13 +112,13 @@ function evaluateTransportMuxCutover(): boolean {
   const scorecard = [
     legacyPythonTests === 0 ||
       migrationDoc.includes(
-        "Historical archive: legacy Python tests under `packages/adapters/amux-proxy/tests` remain available as reference material for the still-active historical runtime path.",
+        "Historical archive: legacy Python tests under `packages/adapters/adapters-proxy/tests` remain available as reference material for the still-active historical runtime path.",
       ),
     packageJson.private !== true &&
       Array.isArray(packageJson.files) &&
       packageJson.publishConfig?.access === "public",
     Boolean(packageJson.scripts?.["scorecard:migration"]) && jsContractTests > 0,
-    launchCommand.includes("@a5c-ai/adapters-transport") && packageEntrypoint.includes("export * from './runtime.js';"),
+    launchCommand.includes("@a5c-ai/transport-adapter") && packageEntrypoint.includes("export * from './runtime.js';"),
     docsHonestyChecks.every(Boolean),
   ];
 
@@ -155,7 +155,7 @@ export function effectiveTransportMuxUnresolvedGaps(unresolvedGaps: string[], ev
 }
 
 export function shouldSurfaceTransportRuntime(runtimeId: string): boolean {
-  if (runtimeId !== "amux-proxy") {
+  if (runtimeId !== "adapters-proxy") {
     return true;
   }
   return isTransportMuxCutoverReady();

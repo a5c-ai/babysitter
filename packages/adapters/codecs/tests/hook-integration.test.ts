@@ -8,7 +8,7 @@ import {
   BuiltInHooksRegistry,
   parseHookPayload,
   formatHookResult,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 import { HOOK_PAYLOAD_FIXTURES } from '../../harness-mock/src/scenarios/hooks.js';
 import { ClaudeAdapter } from '../src/claude-adapter.js';
 import { CodexAdapter } from '../src/codex-adapter.js';
@@ -23,9 +23,9 @@ import { HermesAdapter } from '../src/hermes-adapter.js';
 
 describe('hook fixtures → dispatcher → formatter', () => {
   it('parses and dispatches every fixture without throwing', async () => {
-    const logFile = path.join(await fs.mkdtemp(path.join(os.tmpdir(), 'amux-hooks-fx-')), 'log.jsonl');
+    const logFile = path.join(await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-hooks-fx-')), 'log.jsonl');
     const builtins = new BuiltInHooksRegistry(logFile);
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-hooks-cfg-'));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-hooks-cfg-'));
     const mgr = new HookConfigManager(path.join(dir, 'g.json'), path.join(dir, 'p.json'));
     await mgr.add({
       id: 'catchall',
@@ -58,7 +58,7 @@ describe('ClaudeAdapter.installHook writes ~/.claude/settings.json', () => {
   const prevCwd = process.cwd();
 
   beforeEach(async () => {
-    home = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-claude-hook-'));
+    home = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-claude-hook-'));
     process.env['HOME'] = home;
     process.env['USERPROFILE'] = home;
     process.chdir(home);
@@ -73,21 +73,21 @@ describe('ClaudeAdapter.installHook writes ~/.claude/settings.json', () => {
   it('appends a hook entry under settings.hooks[hookType]', async () => {
     const adapter = new ClaudeAdapter();
     const id = 'test-hook-1';
-    await adapter.installHook('PreToolUse', 'amux hooks claude handle PreToolUse', { id });
+    await adapter.installHook('PreToolUse', 'adapters hooks claude handle PreToolUse', { id });
     const raw = await fs.readFile(path.join(home, '.claude', 'settings.json'), 'utf8');
     const doc = JSON.parse(raw);
     expect(doc.hooks.PreToolUse).toBeDefined();
-    expect(doc.hooks.PreToolUse[0].hooks[0].command).toMatch(/amux hooks claude handle/);
+    expect(doc.hooks.PreToolUse[0].hooks[0].command).toMatch(/adapters hooks claude handle/);
   });
 
   it('CodexAdapter writes ~/.codex/config.json hooks[hookType]', async () => {
     const adapter = new CodexAdapter();
-    await adapter.installHook('OnStop', 'amux hooks codex handle OnStop', { id: 'c-1' });
+    await adapter.installHook('OnStop', 'adapters hooks codex handle OnStop', { id: 'c-1' });
     const doc = JSON.parse(
       await fs.readFile(path.join(home, '.codex', 'config.json'), 'utf8'),
     );
     expect(doc.hooks.OnStop).toBeDefined();
-    expect(doc.hooks.OnStop[0].command).toMatch(/amux hooks codex handle/);
+    expect(doc.hooks.OnStop[0].command).toMatch(/adapters hooks codex handle/);
   });
 
   it.each([
@@ -100,22 +100,22 @@ describe('ClaudeAdapter.installHook writes ~/.claude/settings.json', () => {
     ['openclaw', OpenClawAdapter, path.join('.openclaw', 'config.json')],
   ] as const)('%s adapter writes hooks[hookType] to native JSON config', async (_name, Ctor, relPath) => {
     const adapter = new Ctor();
-    await adapter.installHook!('test-hook', 'amux handle', { id: `${_name}-1` });
+    await adapter.installHook!('test-hook', 'adapters handle', { id: `${_name}-1` });
     const doc = JSON.parse(await fs.readFile(path.join(home, relPath), 'utf8'));
     expect(Array.isArray(doc.hooks['test-hook'])).toBe(true);
-    expect(doc.hooks['test-hook'][0].command).toBe('amux handle');
+    expect(doc.hooks['test-hook'][0].command).toBe('adapters handle');
   });
 
   it('HermesAdapter writes hook to YAML config (flat nested hooks: block)', async () => {
     const adapter = new HermesAdapter();
-    await adapter.installHook!('onEvent', 'amux hermes handle', { id: 'h-yaml-1' });
+    await adapter.installHook!('onEvent', 'adapters hermes handle', { id: 'h-yaml-1' });
     const text = await fs.readFile(path.join(home, '.hermes', 'cli-config.yaml'), 'utf8');
     expect(text).toContain('hooks:');
-    expect(text).toMatch(/\n\s*onEvent:\s*amux hermes handle/);
+    expect(text).toMatch(/\n\s*onEvent:\s*adapters hermes handle/);
     // Append a second hook and assert chaining with &&
     await adapter.installHook!('onEvent', 'second-cmd', { id: 'h-yaml-2' });
     const text2 = await fs.readFile(path.join(home, '.hermes', 'cli-config.yaml'), 'utf8');
-    expect(text2).toMatch(/onEvent:\s*.*amux hermes handle && second-cmd/);
+    expect(text2).toMatch(/onEvent:\s*.*adapters hermes handle && second-cmd/);
   });
 
   it('appends to existing hooks array without clobbering', async () => {

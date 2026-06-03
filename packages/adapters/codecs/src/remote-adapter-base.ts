@@ -27,7 +27,7 @@ import type {
   SpawnArgs,
   ParseContext,
   AgentEvent,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 /**
  * Abstract base class for remote adapters. Provides shared utilities

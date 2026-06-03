@@ -1,5 +1,5 @@
-import type { AgentName, ProviderConfig, TransportId } from '@a5c-ai/adapters-comm';
-import { getHarnessDefaultTransport } from '@a5c-ai/adapters-comm';
+import type { AgentName, ProviderConfig, TransportId } from '@a5c-ai/comm-adapter';
+import { getHarnessDefaultTransport } from '@a5c-ai/comm-adapter';
 import type { HarnessProviderTranslation } from './provider-translation.js';
 import { getProviderTranslation } from '@a5c-ai/atlas/catalog';
 import type { ProviderTranslationRecord, ProviderTranslationEnvMapping } from '@a5c-ai/atlas/catalog';

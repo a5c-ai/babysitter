@@ -28,7 +28,7 @@ describe('triggers CLI', () => {
   });
 
   it('returns 78 for trigger query non-matches', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'amux-cli-'));
+    const dir = await mkdtemp(join(tmpdir(), 'adapters-cli-'));
     const eventPath = join(dir, 'event.json');
     await writeFile(eventPath, JSON.stringify({ comment: { body: 'plain comment' } }), 'utf8');
 

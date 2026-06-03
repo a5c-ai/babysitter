@@ -1,4 +1,4 @@
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';
 import { printError } from '../output.js';
@@ -10,14 +10,14 @@ export async function tuiCommand(
   if (args.flags.help) {
     process.stdout.write(
       [
-        'Usage: amux tui [--agent <name>]',
+        'Usage: adapters tui [--agent <name>]',
         '',
         'Launches the Ink-based agent-mux TUI with the default plugin set.',
         '',
         'Options:',
         '  --agent <name>            Default agent for new prompts (default: claude-code)',
         '  --user-plugins-dir <dir>  Override user-plugin discovery dir',
-        '                            (default: $AGENT_MUX_TUI_PLUGINS_DIR or ~/.amux/tui-plugins)',
+        '                            (default: $AGENT_MUX_TUI_PLUGINS_DIR or ~/.adapters/tui-plugins)',
         '  --no-user-plugins         Skip discovering user plugins from the directory',
       ].join('\n') + '\n',
     );

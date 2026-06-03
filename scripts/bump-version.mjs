@@ -104,13 +104,13 @@ const updateLockVersion = (path, version) => {
   const lockUpdates = {
     "packages/adapters/adapters": {
       version,
-      dependencies: { "@a5c-ai/adapters-comm": version }
+      dependencies: { "@a5c-ai/comm-adapter": version }
     },
     "packages/adapters/cli": {
       version,
       dependencies: {
         "@a5c-ai/adapters-codecs": version,
-        "@a5c-ai/adapters-comm": version,
+        "@a5c-ai/comm-adapter": version,
         "@a5c-ai/adapters-gateway": version,
         "@a5c-ai/adapters-observability": version
       }
@@ -123,12 +123,12 @@ const updateLockVersion = (path, version) => {
       version,
       dependencies: {
         "@a5c-ai/adapters-codecs": version,
-        "@a5c-ai/adapters-comm": version
+        "@a5c-ai/comm-adapter": version
       }
     },
     "packages/adapters/harness-mock": {
       version,
-      dependencies: { "@a5c-ai/adapters-comm": version }
+      dependencies: { "@a5c-ai/comm-adapter": version }
     },
     "packages/adapters/mobile-android-app": {
       version,
@@ -146,7 +146,7 @@ const updateLockVersion = (path, version) => {
       dependencies: {
         "@a5c-ai/adapters-codecs": version,
         "@a5c-ai/adapters-cli": version,
-        "@a5c-ai/adapters-comm": version
+        "@a5c-ai/comm-adapter": version
       }
     },
     "packages/adapters/tui": {
@@ -164,7 +164,7 @@ const updateLockVersion = (path, version) => {
     },
     "packages/adapters/ui": {
       version,
-      dependencies: { "@a5c-ai/adapters-comm": version }
+      dependencies: { "@a5c-ai/comm-adapter": version }
     },
     "packages/adapters/watch-watchos-app": {
       version
@@ -178,7 +178,7 @@ const updateLockVersion = (path, version) => {
     },
     "packages/adapters/transport": {
       version,
-      dependencies: { "@a5c-ai/adapters-comm": version }
+      dependencies: { "@a5c-ai/comm-adapter": version }
     },
     "packages/adapters/triggers": {
       version
@@ -195,7 +195,7 @@ const updateLockVersion = (path, version) => {
       version,
       dependencies: {
         "@a5c-ai/babysitter-sdk": version,
-        "@a5c-ai/adapters-comm": version
+        "@a5c-ai/comm-adapter": version
       }
     },
     "packages/omni": {
@@ -211,7 +211,7 @@ const updateLockVersion = (path, version) => {
     "packages/adapters/tools": {
       version,
       dependencies: {
-        "@a5c-ai/adapters-transport": version
+        "@a5c-ai/transport-adapter": version
       }
     },
     "packages/adapters/tasks": {
@@ -397,13 +397,13 @@ for (const path of [
   syncDependencyVersion(path, "@a5c-ai/adapters", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/adapters-codecs", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/adapters-cli", newAgentMuxVersion);
-  syncDependencyVersion(path, "@a5c-ai/adapters-comm", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/comm-adapter", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/adapters-gateway", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/adapters-observability", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/tula-tui", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/tula-ui", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/tula-webui", newAgentMuxVersion);
-  syncDependencyVersion(path, "@a5c-ai/adapters-transport", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/transport-adapter", newAgentMuxVersion);
 }
 
 for (const path of [
@@ -418,7 +418,7 @@ for (const path of [
   "packages/adapters/hooks/adapter-opencode/package.json",
   "packages/adapters/hooks/adapter-openclaw/package.json",
 ]) {
-  syncDependencyVersion(path, "@a5c-ai/adapters-hooks-core", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/hooks-adapter-core", newVersion);
 }
 
 for (const path of versionsJsonPaths) {

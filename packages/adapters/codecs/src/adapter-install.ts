@@ -15,7 +15,7 @@ import type {
   InstallMethod,
   InstallResult,
   Spawner,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 /** Collaborators the helpers need from the adapter. */
 export interface InstallContext {

@@ -19,7 +19,7 @@ const baseManifest = {
     },
   },
   scripts: {
-    'build:realtime': 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/adapters-comm && npm run build',
+    'build:realtime': 'npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/comm-adapter && npm run build',
     test: 'vitest run --root ../../.. --config vitest.config.ts packages/adapters/ui',
     'test:realtime':
       'vitest run --root ../../.. --config vitest.config.ts "packages/adapters/ui/src/session-flow*.test.ts" "packages/adapters/ui/src/screens/SessionDetailScreen.test.tsx" "packages/adapters/ui/src/release-verification.test.ts"',

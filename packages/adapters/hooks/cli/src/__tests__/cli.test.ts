@@ -14,8 +14,8 @@ vi.mock('../cli/adapter-loader', () => ({
   KNOWN_ADAPTERS: ['claude', 'codex', 'copilot'] as const,
 }));
 
-// Mock @a5c-ai/adapters-hooks-core
-vi.mock('@a5c-ai/adapters-hooks-core', () => ({
+// Mock @a5c-ai/hooks-adapter-core
+vi.mock('@a5c-ai/hooks-adapter-core', () => ({
   CANONICAL_PHASES: ['session.start', 'session.stop'],
   LIFECYCLE_SCOPES: ['session', 'turn', 'tool', 'task'],
   normalizeEvent: vi.fn((opts: Record<string, unknown>) => ({
@@ -83,7 +83,7 @@ import {
   adaptOutput,
   propagateEnv,
   materializeExecContext,
-} from '@a5c-ai/adapters-hooks-core';
+} from '@a5c-ai/hooks-adapter-core';
 
 const mockLoadAdapter = vi.mocked(loadAdapter);
 const mockNormalizeEvent = vi.mocked(normalizeEvent);

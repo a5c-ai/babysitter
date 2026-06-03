@@ -24,7 +24,7 @@ import type {
   AutomationTarget,
   TimerAutomationTrigger,
   WebhookAutomationTrigger,
-} from "@a5c-ai/adapters-comm/automation";
+} from "@a5c-ai/comm-adapter/automation";
 import type {
   AutomationRuleAction,
   AutomationRuleCollectionResponse,

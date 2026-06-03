@@ -3,7 +3,7 @@
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-setup-node
 attributes:
-  displayName: "amux-triggers action step 1: Setup Node.js"
+  displayName: "adapters-triggers action step 1: Setup Node.js"
   order: 1
   stepName: "Setup Node.js"
   shell: none
@@ -12,12 +12,12 @@ attributes:
   sourceCitation: "packages/triggers-mux/action.yml:80-83"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-a5c-token
 attributes:
-  displayName: "amux-triggers action step 2: Generate a5c GitHub App token"
+  displayName: "adapters-triggers action step 2: Generate a5c GitHub App token"
   order: 2
   stepName: "Generate a5c GitHub App token"
   shell: none
@@ -29,12 +29,12 @@ attributes:
   sourceCitation: "packages/triggers-mux/action.yml:85-89"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-build-runtime
 attributes:
-  displayName: "amux-triggers action step 3: Build agent-mux action runtime"
+  displayName: "adapters-triggers action step 3: Build agent-mux action runtime"
   order: 3
   stepName: "Build agent-mux action runtime"
   shell: bash
@@ -46,16 +46,16 @@ attributes:
     cd "$REPO_ROOT"
     npm ci
     npm run build:agent-mux
-    npm run build --workspace=@a5c-ai/adapters-triggers
+    npm run build --workspace=@a5c-ai/triggers-adapter
   sourceCitation: "packages/triggers-mux/action.yml:91-101"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-install-harness
 attributes:
-  displayName: "amux-triggers action step 4: Install harness"
+  displayName: "adapters-triggers action step 4: Install harness"
   order: 4
   stepName: "Install harness"
   shell: bash
@@ -72,12 +72,12 @@ attributes:
   sourceCitation: "packages/triggers-mux/action.yml:158-169"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-install-babysitter-plugin
 attributes:
-  displayName: "amux-triggers action step 5: Install babysitter plugin"
+  displayName: "adapters-triggers action step 5: Install babysitter plugin"
   order: 5
   stepName: "Install babysitter plugin"
   shell: bash
@@ -100,12 +100,12 @@ attributes:
   sourceCitation: "packages/triggers-mux/action.yml:171-199"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-install-plugins
 attributes:
-  displayName: "amux-triggers action step 6: Install plugins (legacy)"
+  displayName: "adapters-triggers action step 6: Install plugins (legacy)"
   order: 6
   stepName: "Install plugins (legacy)"
   shell: bash
@@ -124,12 +124,12 @@ attributes:
   sourceCitation: "packages/triggers-mux/action.yml:201-211"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-evaluate-trigger
 attributes:
-  displayName: "amux-triggers action step 7: Evaluate trigger"
+  displayName: "adapters-triggers action step 7: Evaluate trigger"
   order: 7
   stepName: "Evaluate trigger"
   shell: bash
@@ -176,12 +176,12 @@ attributes:
   sourceCitation: "packages/triggers-mux/action.yml:216-258"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-pre-run
 attributes:
-  displayName: "amux-triggers action step 8: Pre-run pipeline commands"
+  displayName: "adapters-triggers action step 8: Pre-run pipeline commands"
   order: 8
   stepName: "Pre-run pipeline commands"
   shell: bash
@@ -196,16 +196,16 @@ attributes:
   sourceCitation: "packages/triggers-mux/action.yml:259-269"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: GithubActionStep
-id: github-action-step:triggers-action-run-amux
+id: github-action-step:triggers-action-run-adapters
 attributes:
-  displayName: "amux-triggers action step 9: Run agent-mux"
+  displayName: "adapters-triggers action step 9: Run agent-mux"
   order: 9
   stepName: "Run agent-mux"
   shell: bash
-  stepId: "amux"
+  stepId: "adapters"
   workingDirectory: "${{ inputs.working-directory }}"
   conditional: "${{ steps.trigger.outputs.matched == 'true' }}"
   envVars:
@@ -227,7 +227,7 @@ attributes:
   runScript: |
     set -euo pipefail
     REPO_ROOT=$(cd "$ACTION_ROOT/../.." && pwd)
-    AMUX="node $REPO_ROOT/packages/adapters/cli/dist/index.js"
+    ADAPTERS="node $REPO_ROOT/packages/adapters/cli/dist/index.js"
     ARGS=()
     if [ "$INPUT_COMMAND" = "launch" ] || [ "$INPUT_COMMAND" = "run" ]; then
       ARGS+=("$INPUT_COMMAND")
@@ -262,7 +262,7 @@ attributes:
       read -r -a EXTRA_ARGS <<< "$INPUT_ARGS"
       ARGS+=("${EXTRA_ARGS[@]}")
     fi
-    if $AMUX "${ARGS[@]}"; then
+    if $ADAPTERS "${ARGS[@]}"; then
       echo "exit-code=0" >> "$GITHUB_OUTPUT"
     else
       status=$?
@@ -272,12 +272,12 @@ attributes:
   sourceCitation: "packages/triggers-mux/action.yml:270-360"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action
 ---
 nodeKind: GithubActionStep
 id: github-action-step:triggers-action-post-run
 attributes:
-  displayName: "amux-triggers action step 10: Post-run pipeline commands"
+  displayName: "adapters-triggers action step 10: Post-run pipeline commands"
   order: 10
   stepName: "Post-run pipeline commands"
   shell: bash
@@ -292,4 +292,4 @@ attributes:
   sourceCitation: "packages/triggers-mux/action.yml:362-372"
 edges:
   executed_by_trigger:
-    - target: operational-trigger:amux-triggers-action
+    - target: operational-trigger:adapters-triggers-action

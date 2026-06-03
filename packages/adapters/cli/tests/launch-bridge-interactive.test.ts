@@ -54,7 +54,7 @@ vi.mock('node-pty', () => {
   };
 });
 
-vi.mock('@a5c-ai/adapters-transport', () => ({
+vi.mock('@a5c-ai/transport-adapter', () => ({
   startTransportMuxRuntime: vi.fn(),
 }));
 
@@ -79,7 +79,7 @@ vi.mock('@a5c-ai/adapters-codecs', () => ({
   })),
 }));
 
-vi.mock('@a5c-ai/adapters-comm', () => ({
+vi.mock('@a5c-ai/comm-adapter', () => ({
   PROVIDER_DEFAULTS: {},
   StreamAssembler: class {
     feed(line: string) { return line; }
@@ -291,7 +291,7 @@ describe('bridge-interactive spawn', () => {
 
   it('preseeds first-run trust state for CI harness launches', async () => {
     const { launchCommand, LAUNCH_FLAGS, parseArgs } = await importModules();
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-launch-home-'));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-launch-home-'));
     const originalHome = process.env['HOME'];
     const originalUserProfile = process.env['USERPROFILE'];
     const originalCi = process.env['CI'];
@@ -442,7 +442,7 @@ describe('bridge-interactive spawn', () => {
 
   it('exits bridge-interactive CI sessions when the requested prompt artifact is complete', async () => {
     const { launchCommand, LAUNCH_FLAGS, parseArgs } = await importModules();
-    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-bridge-artifact-'));
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-bridge-artifact-'));
     const originalCwd = process.cwd();
     process.chdir(cwd);
 
@@ -472,7 +472,7 @@ describe('bridge-interactive spawn', () => {
 
   it('exits prompt-injected interactive CI sessions when the requested prompt artifact is complete', async () => {
     const { launchCommand, LAUNCH_FLAGS, parseArgs } = await importModules();
-    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-interactive-artifact-'));
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-interactive-artifact-'));
     const originalCwd = process.cwd();
     process.chdir(cwd);
 

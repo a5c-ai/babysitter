@@ -23,7 +23,7 @@ const originalRequire = Module.prototype.require;
 
 function patchAdapterPackageResolution(): void {
   Module.prototype.require = function patchedRequire(this: NodeJS.Module, id: string) {
-    if (id === '@a5c-ai/adapters-hooks-codex') {
+    if (id === '@a5c-ai/hooks-adapter-codex') {
       return codexAdapterModule;
     }
     return originalRequire.call(this, id);

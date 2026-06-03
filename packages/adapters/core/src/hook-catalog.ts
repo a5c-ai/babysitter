@@ -2,7 +2,7 @@
  * Per-harness hook type catalog.
  *
  * Lists the hook types each harness natively supports. Used by
- * `amux hooks <agent> discover` and to validate `add` / `set` operations.
+ * `adapters hooks <agent> discover` and to validate `add` / `set` operations.
  *
  * The catalog is conservative: it reflects documented, stable hook names
  * at the time of writing. Unknown hook types are still accepted (marked

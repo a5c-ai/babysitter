@@ -1,4 +1,4 @@
-# @a5c-ai/adapters-triggers
+# @a5c-ai/triggers-adapter
 
 Trigger glue for running any coding agent from CI. Normalizes GitHub, GitLab, Bitbucket, and generic webhook payloads into one event shape, enriches GitHub events with changed files and optional diffs, and evaluates compact trigger queries before launching agent-mux.
 

@@ -57,7 +57,7 @@ export function LoginPage(): JSX.Element {
         <p className="eyebrow">agent-mux webui</p>
         <h1>Attach to your gateway</h1>
         <p className="lede auth-note">
-          The token is stored in <code>localStorage.amux.webui.auth</code>. That is convenient and
+          The token is stored in <code>localStorage.adapters.webui.auth</code>. That is convenient and
           less secure than an OS keychain.
         </p>
         <form onSubmit={handleSubmit} className="auth-form">

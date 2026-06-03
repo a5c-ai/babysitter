@@ -144,8 +144,8 @@ jobs:
           set -euo pipefail
 
           # --- Axis definitions ---
-          # Agents: id → amux_agent mapping
-          # Models: id → {provider, amux_provider, model, required_env}
+          # Agents: id → adapters_agent mapping
+          # Models: id → {provider, adapters_provider, model, required_env}
           # Modes: id → {interactive, bridge_interactive, bridge_hooks}
 
           if [ -n "${DISPATCH_MATRIX:-}" ] && [ "${DISPATCH_MATRIX:-}" != "null" ] && [ "${DISPATCH_MATRIX:-}" != "" ]; then
@@ -156,26 +156,26 @@ jobs:
             node -e "
               const input = JSON.parse(process.env.DISPATCH_MATRIX || '[]');
               const agents = {
-                'claude': {agent:'claude-code', amux_agent:'claude'},
-                'codex': {agent:'codex', amux_agent:'codex'},
-                'pi': {agent:'pi', amux_agent:'pi'},
-                'gemini': {agent:'gemini-cli', amux_agent:'gemini'},
-                'copilot': {agent:'copilot-cli', amux_agent:'copilot'},
-                'cursor': {agent:'cursor-cli', amux_agent:'cursor'},
-                'hermes': {agent:'hermes', amux_agent:'hermes'},
-                'opencode': {agent:'opencode', amux_agent:'opencode'},
-                'openclaw': {agent:'openclaw', amux_agent:'openclaw'},
-                'omp': {agent:'omp', amux_agent:'omp'},
-                'droid': {agent:'droid', amux_agent:'droid'},
-                'amp': {agent:'amp', amux_agent:'amp'},
-                'tula': {agent:'tula', amux_agent:'tula', agent_path:'tula'},
+                'claude': {agent:'claude-code', adapters_agent:'claude'},
+                'codex': {agent:'codex', adapters_agent:'codex'},
+                'pi': {agent:'pi', adapters_agent:'pi'},
+                'gemini': {agent:'gemini-cli', adapters_agent:'gemini'},
+                'copilot': {agent:'copilot-cli', adapters_agent:'copilot'},
+                'cursor': {agent:'cursor-cli', adapters_agent:'cursor'},
+                'hermes': {agent:'hermes', adapters_agent:'hermes'},
+                'opencode': {agent:'opencode', adapters_agent:'opencode'},
+                'openclaw': {agent:'openclaw', adapters_agent:'openclaw'},
+                'omp': {agent:'omp', adapters_agent:'omp'},
+                'droid': {agent:'droid', adapters_agent:'droid'},
+                'amp': {agent:'amp', adapters_agent:'amp'},
+                'tula': {agent:'tula', adapters_agent:'tula', agent_path:'tula'},
               };
               const models = {
-                'foundry-gpt55': {provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
-                'google-gemini31': {provider:'google', amux_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'},
-                'anthropic-sonnet46': {provider:'anthropic', amux_provider:'anthropic', model:'claude-sonnet-4-6', required_env:'ANTHROPIC_API_KEY'},
-                'foundry-deepseek': {provider:'foundry-openai', amux_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
-                'foundry-gpt54mini': {provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.4-mini', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'foundry-gpt55': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'google-gemini31': {provider:'google', adapters_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'},
+                'anthropic-sonnet46': {provider:'anthropic', adapters_provider:'anthropic', model:'claude-sonnet-4-6', required_env:'ANTHROPIC_API_KEY'},
+                'foundry-deepseek': {provider:'foundry-openai', adapters_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
+                'foundry-gpt54mini': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.4-mini', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
               };
               const modes = {
                 'ni': {id:'non-interactive', interactive:'false', bridge_interactive:'false', bridge_hooks:'false'},
@@ -199,9 +199,9 @@ jobs:
                 const m = modelFor(entry);
                 return {
                   id: 'live.agent-mux.' + a.agent + '.' + m.provider + '.' + m.model,
-                  agent_path: a.agent_path || 'agent-mux', agent: a.agent, amux_agent: a.amux_agent,
+                  agent_path: a.agent_path || 'agent-mux', agent: a.agent, adapters_agent: a.adapters_agent,
                   integration_type: a.agent_path === 'tula' ? 'runtime-cli' : 'third-party-plugin',
-                  provider: m.provider, amux_provider: m.amux_provider, model: m.model,
+                  provider: m.provider, adapters_provider: m.adapters_provider, model: m.model,
                   required_env: m.required_env, live: entry.live !== false,
                   process_mode: entry.process_mode || 'predefined',
                 };
@@ -233,9 +233,9 @@ jobs:
             # Claude Code (foundry-gpt55), Codex (google-gemini31), Pi (foundry-deepseek)
             # vanilla + BP, live
             node -e "
-              const foundry = {provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'};
-              const google = {provider:'google', amux_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'};
-              const deepseek = {provider:'foundry-openai', amux_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'};
+              const foundry = {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'};
+              const google = {provider:'google', adapters_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'};
+              const deepseek = {provider:'foundry-openai', adapters_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'};
               const vanillaInstall = {id:'vanilla', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'agent-mux-events,transport-mux-trace,provider-trace-redacted'};
               const bpInstall = {id:'babysitter-plugin', required_trace_ids:'agentMuxRunId,agentMuxSessionId,transportTraceId', expected_artifacts:'agent-mux-events,plugin-command-transcript,transport-mux-trace,provider-trace-redacted'};
 
@@ -244,15 +244,15 @@ jobs:
               const interactive = {id:'interactive', interactive:'true', bridge_interactive:'false', bridge_hooks:'false'};
               const bridgedHooks = {id:'bridged-hooks', interactive:'false', bridge_interactive:'true', bridge_hooks:'true'};
 
-              function scenario(agent, amux_agent, m, process_mode) {
-                return {id:'live.agent-mux.'+agent+'.'+m.provider+'.'+m.model, agent_path:'agent-mux', agent, amux_agent, integration_type:'third-party-plugin', provider:m.provider, amux_provider:m.amux_provider, model:m.model, required_env:m.required_env, live:true, process_mode: process_mode || 'predefined'};
+              function scenario(agent, adapters_agent, m, process_mode) {
+                return {id:'live.agent-mux.'+agent+'.'+m.provider+'.'+m.model, agent_path:'agent-mux', agent, adapters_agent, integration_type:'third-party-plugin', provider:m.provider, adapters_provider:m.adapters_provider, model:m.model, required_env:m.required_env, live:true, process_mode: process_mode || 'predefined'};
               }
 
               const claude = scenario('claude-code','claude',foundry);
               const codex = scenario('codex','codex',google);
               const pi = scenario('pi','pi',deepseek);
               // Tula is a runtime-cli agent with native babysitter support
-              const tulaScenario = {id:'live.agent-mux.tula.foundry-openai.gpt-5.5', agent_path:'tula', agent:'tula', amux_agent:'tula', integration_type:'runtime-cli', provider:'foundry-openai', amux_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE', live:true, process_mode:'predefined'};
+              const tulaScenario = {id:'live.agent-mux.tula.foundry-openai.gpt-5.5', agent_path:'tula', agent:'tula', adapters_agent:'tula', integration_type:'runtime-cli', provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE', live:true, process_mode:'predefined'};
 
               // Vanilla NI: claude+codex+pi+tula NI
               const vanillaNi = [
@@ -403,7 +403,7 @@ jobs:
           LIVE_STACK_SCENARIO_ID: ${{ matrix.scenario.id }}
           LIVE_STACK_AGENT_PATH: ${{ matrix.scenario.agent_path }}
           LIVE_STACK_AGENT: ${{ matrix.scenario.agent }}
-          LIVE_STACK_AGENT_MUX_AGENT: ${{ matrix.scenario.amux_agent }}
+          LIVE_STACK_AGENT_MUX_AGENT: ${{ matrix.scenario.adapters_agent }}
           LIVE_STACK_INTEGRATION_TYPE: ${{ matrix.scenario.integration_type }}
           LIVE_STACK_BABYSITTER_HARNESS: ${{ matrix.scenario.babysitter_harness }}
           LIVE_STACK_INSTALL_MODE: ${{ matrix.install_mode.id }}
@@ -414,7 +414,7 @@ jobs:
           LIVE_STACK_BRIDGE_HOOKS: ${{ matrix.interaction_mode.bridge_hooks }}
           LIVE_STACK_USE_AGENT_MUX_RUN: 'false'
           LIVE_STACK_PROVIDER: ${{ matrix.scenario.provider }}
-          LIVE_STACK_AGENT_MUX_PROVIDER: ${{ matrix.scenario.amux_provider }}
+          LIVE_STACK_AGENT_MUX_PROVIDER: ${{ matrix.scenario.adapters_provider }}
           LIVE_STACK_MODEL: ${{ matrix.scenario.model }}
           LIVE_STACK_CREDENTIAL_MODE: github-org-secrets-and-vars
           LIVE_STACK_REQUIRED_ENV: ${{ matrix.scenario.required_env }}

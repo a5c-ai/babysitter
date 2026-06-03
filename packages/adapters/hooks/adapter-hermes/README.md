@@ -1,11 +1,11 @@
-# @a5c-ai/adapters-hooks-hermes
+# @a5c-ai/hooks-adapter-hermes
 
 Hermes harness adapter for hooks-mux.
 
 ## Install
 
 ```bash
-npm install @a5c-ai/adapters-hooks-hermes @a5c-ai/adapters-hooks-core
+npm install @a5c-ai/hooks-adapter-hermes @a5c-ai/hooks-adapter-core
 ```
 
 This package ships the built adapter runtime in `dist/` and this package README for npm publish-surface auditing.
@@ -17,7 +17,7 @@ import {
   createAdapter,
   normalizeHermesEvent,
   renderHermesOutput,
-} from "@a5c-ai/adapters-hooks-hermes";
+} from "@a5c-ai/hooks-adapter-hermes";
 ```
 
 The package exposes Hermes-specific normalization, phase mappings, rendering helpers, and session-resolution utilities for the hooks-mux execution pipeline.

@@ -2,8 +2,8 @@
 
 import { Link, useNavigate } from "react-router-dom-v6";
 import { useEffect, useMemo, useState } from "react";
-import type { WorkspaceRuntimeSurface } from "@a5c-ai/adapters-comm";
-import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/adapters-comm/kanban";
+import type { WorkspaceRuntimeSurface } from "@a5c-ai/comm-adapter";
+import type { KanbanIntegrationProvider, KanbanReviewArtifact } from "@a5c-ai/comm-adapter/kanban";
 import { AlertCircle, ArrowUpDown, ExternalLink, FileText, GitBranch, Loader2, Wrench } from "lucide-react";
 
 import { Button, Select, cx } from "@a5c-ai/compendium";

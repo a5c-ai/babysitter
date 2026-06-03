@@ -138,7 +138,7 @@ attributes:
   displayName: "Hook Registration"
   kind: concept
   description: |
-    A record in `.amux/hooks.json` (project) or `~/.amux/hooks.json`
+    A record in `.adapters/hooks.json` (project) or `~/.adapters/hooks.json`
     (global) that maps `(agent, hookType) → handler(target)`. Project
     registrations override global registrations matched by `id`.
     Handlers are one of `builtin` (in-process), `command` (shell

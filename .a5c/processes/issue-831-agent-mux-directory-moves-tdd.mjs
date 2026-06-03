@@ -306,7 +306,7 @@ export const reuseAuditTask = defineTask("issue-831/reuse-audit", (args) => ({
       context: args,
       instructions: [
         "Start the report with exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).",
-        "Extract keywords: transport-mux, extension-mux, triggers-mux, tasks-mux, tool-mux, hooks-mux, amux-proxy, package workspaces, tsconfig references, CI workflows, atlas graph, package-lock, import paths.",
+        "Extract keywords: transport-mux, extension-mux, triggers-mux, tasks-mux, tool-mux, hooks-mux, adapters-proxy, package workspaces, tsconfig references, CI workflows, atlas graph, package-lock, import paths.",
         "Scan package.json, tsconfig.json, scripts, .github/workflows, packages/atlas/graph, docs, and each target package package.json/tsconfig.",
         "Identify existing helper scripts such as scripts/agent-mux-build.cjs and scripts/hooks-mux-build.cjs that may need path updates or can be reused for verification.",
         "Record all source and target directories, package names, bin names, workspace globs, and references that must change.",
@@ -517,7 +517,7 @@ export const finalVerificationTask = defineTask("issue-831/final-verification", 
       context: args,
       instructions: [
         "Run every command in inputs.verificationCommands and record exact output summaries.",
-        "Run stale-reference scans for old directory paths, old package names, and legacy amux directory names.",
+        "Run stale-reference scans for old directory paths, old package names, and legacy adapters directory names.",
         "Verify all packageMoves and legacyDirectoryMoves are present at target paths and absent from old paths.",
         "Verify root workspaces, tsconfig references, package-lock, CI workflows, atlas graph metadata, docs, source imports, and package scripts are internally consistent.",
         "Return JSON with passed, commandsRun, staleReferenceReport, moveReport, workspaceReport, failures, and evidence.",

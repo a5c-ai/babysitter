@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { AmpAdapter } from '../src/amp-adapter.js';
-import type { RunOptions } from '@a5c-ai/adapters-comm';
+import type { RunOptions } from '@a5c-ai/comm-adapter';
 
 describe('AmpAdapter', () => {
   let adapter: AmpAdapter;

@@ -1,4 +1,4 @@
-import type { WorkspaceRuntimeLogLine, WorkspaceRuntimeSurface, WorkspaceTerminalCommand } from '@a5c-ai/adapters-comm';
+import type { WorkspaceRuntimeLogLine, WorkspaceRuntimeSurface, WorkspaceTerminalCommand } from '@a5c-ai/comm-adapter';
 
 import type { LoggedRunEvent } from './event-log.js';
 import type { RunEntry } from './types.js';

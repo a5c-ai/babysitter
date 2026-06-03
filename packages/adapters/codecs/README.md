@@ -7,7 +7,7 @@ Mock infrastructure is not part of this package anymore. Import subprocess, SDK,
 ## Install
 
 ```bash
-npm install @a5c-ai/adapters-codecs @a5c-ai/adapters-comm
+npm install @a5c-ai/adapters-codecs @a5c-ai/comm-adapter
 ```
 
 Requires Node.js >= 20.9.0. ESM-only.
@@ -16,7 +16,7 @@ Requires Node.js >= 20.9.0. ESM-only.
 
 ```ts
 import { registerBuiltinAdapters } from '@a5c-ai/adapters-codecs';
-import { defaultRegistry } from '@a5c-ai/adapters-comm';
+import { defaultRegistry } from '@a5c-ai/comm-adapter';
 
 registerBuiltinAdapters(defaultRegistry);
 ```

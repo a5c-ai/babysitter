@@ -6,7 +6,7 @@ import {
   normalizeKanbanDispatchContextLabelKey,
   normalizeKanbanDispatchContextLabels,
   type KanbanDispatchContextLabelDefinition,
-} from "@a5c-ai/adapters-comm/kanban";
+} from "@a5c-ai/comm-adapter/kanban";
 
 import { AppError } from "../error-handler.js";
 import {

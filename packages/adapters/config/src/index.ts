@@ -1,5 +1,5 @@
 /**
- * @a5c-ai/adapters-config
+ * @a5c-ai/config-adapter
  *
  * Install, config, auth, host-detection, and adapter-listing logic
  * for agent-mux. Extracted from the CLI package so these capabilities

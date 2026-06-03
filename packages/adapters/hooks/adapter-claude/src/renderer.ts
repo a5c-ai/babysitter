@@ -1,4 +1,4 @@
-import type { UnifiedHookEvent, UnifiedHookResult } from '@a5c-ai/adapters-hooks-core';
+import type { UnifiedHookEvent, UnifiedHookResult } from '@a5c-ai/hooks-adapter-core';
 
 /**
  * Claude Code native hook output formats.

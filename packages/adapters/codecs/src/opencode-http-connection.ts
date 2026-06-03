@@ -8,7 +8,7 @@ import type {
   CostRecord,
   HttpConnection,
   RunOptions,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 import type { OpenCodeHttpAdapter } from './opencode-http-adapter.js';
 
 export interface OpenCodeHttpConnectionOptions {

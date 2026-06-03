@@ -51,7 +51,7 @@ Each layer solves a specific interoperability problem:
 |-----|---------|----------|
 | **hooks-mux** | Each harness has different hook event names, payloads, output formats | Normalizes native events to canonical phases, runs unified handlers, renders results back to harness format |
 | **transport-mux** | Harnesses speak different API protocols (Anthropic, OpenAI, Google) | HTTP proxy translates between the harness's native protocol and any upstream provider |
-| **agent-mux** | Harnesses have different CLI surfaces, capabilities, plugin loading | Unified `amux launch` resolves provider config, starts proxy if needed, spawns harness with correct args |
+| **agent-mux** | Harnesses have different CLI surfaces, capabilities, plugin loading | Unified `adapters launch` resolves provider config, starts proxy if needed, spawns harness with correct args |
 
 ---
 
@@ -132,17 +132,17 @@ graph LR
 
 ### agent-mux: Unified Launch Surface
 
-`amux launch` resolves provider config, decides if a proxy is needed, prepares harness automation state, and spawns the harness:
+`adapters launch` resolves provider config, decides if a proxy is needed, prepares harness automation state, and spawns the harness:
 
 ```mermaid
 sequenceDiagram
     participant U as User / CI
-    participant AM as amux launch
+    participant AM as adapters launch
     participant CAT as agent-catalog
     participant TM as transport-mux
     participant H as Harness
 
-    U->>AM: amux launch claude foundry --model gpt-5.5
+    U->>AM: adapters launch claude foundry --model gpt-5.5
     AM->>AM: resolveProvider(foundry) → ProviderConfig
     AM->>AM: translateForHarness(claude, config) → proxyRequired=true
     AM->>CAT: getBridgeCapabilities(claude)
@@ -237,7 +237,7 @@ The harness runs headless with `-p` or `exec`. No native hooks fire. The agent d
 
 ```mermaid
 sequenceDiagram
-    participant AM as amux launch
+    participant AM as adapters launch
     participant CC as Claude Code (-p mode)
     participant SDK as babysitter SDK
 
@@ -266,11 +266,11 @@ sequenceDiagram
 
 ### Bridge-Hooks (Emulated)
 
-When the harness is non-interactive but the babysitter lifecycle needs hooks, `amux launch --bridge-hooks` emulates them via CLI calls:
+When the harness is non-interactive but the babysitter lifecycle needs hooks, `adapters launch --bridge-hooks` emulates them via CLI calls:
 
 ```mermaid
 sequenceDiagram
-    participant AM as amux launch
+    participant AM as adapters launch
     participant BHE as BridgeHookEmulator
     participant CC as Claude Code (-p mode)
     participant SDK as babysitter SDK
@@ -301,7 +301,7 @@ The harness runs interactively via PTY but presents structured NDJSON output ext
 
 ```mermaid
 sequenceDiagram
-    participant AM as amux launch
+    participant AM as adapters launch
     participant PTY as node-pty
     participant CC as Claude Code (interactive, TTY)
     participant HM as hooks-mux (native)
@@ -464,7 +464,7 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant AM as amux launch
+    participant AM as adapters launch
     participant CX as Codex (exec mode)
     participant SDK as babysitter CLI
     participant TM as transport-mux (if proxying)
@@ -492,7 +492,7 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant AM as amux launch
+    participant AM as adapters launch
     participant PI as Pi (--prompt mode)
     participant SDK as babysitter CLI
     participant TM as transport-mux proxy

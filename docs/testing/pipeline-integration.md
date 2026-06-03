@@ -122,7 +122,7 @@ Package owners may initially wire these bundles as workflow steps that call exis
 | `npm run test:no-model:mux` | No-model | Agent-mux, transport-mux route/runtime/env/launch-plan, hooks-mux, gateway, and fixture compatibility checks |
 | `npm run test:no-model:harness-setup` | No-model | `harness:list`, install dry-runs, plugin install dry-runs, discovery fixtures |
 | `npm run test:model-backed` | Model-backed | All selected live provider/harness tests with credential gates |
-| `npm run test:model-backed:agent-mux-plugin` | Model-backed | Capability-gated `amux run` plugin/session tests with Babysitter plugin preconditions |
+| `npm run test:model-backed:agent-mux-plugin` | Model-backed | Capability-gated `adapters run` plugin/session tests with Babysitter plugin preconditions |
 | `npm run test:model-backed:runtime` | Model-backed | Agent-core, transport-mux bridge, agent-mux session smoke, and agent-platform runtime smoke; agent-platform jobs do not run installers |
 | `npm run test:model-backed:transport-mux` | Model-backed | Agent-core stream through transport-mux plus agent-mux-launched external harness proxy smoke with credential gates |
 | `npm run coverage:repo` | No-model plus reports | Merge package coverage and scenario summaries into one artifact |

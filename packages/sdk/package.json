@@ -54,15 +54,15 @@
     "puppeteer": "^24.0.0"
   },
   "peerDependencies": {
-    "@a5c-ai/adapters-tasks": "^5.0.0"
+    "@a5c-ai/tasks-adapter": "^5.0.0"
   },
   "peerDependenciesMeta": {
-    "@a5c-ai/adapters-tasks": {
+    "@a5c-ai/tasks-adapter": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@a5c-ai/adapters-tasks": "5.0.0",
+    "@a5c-ai/tasks-adapter": "5.0.0",
     "@eslint/js": "^9.39.4",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.11.30",

@@ -1,4 +1,4 @@
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 
 import type { ParsedArgs } from '../../parse-args.js';
 import type { FlagDef } from '../../parse-args.js';

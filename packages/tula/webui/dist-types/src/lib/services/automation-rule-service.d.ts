@@ -1,5 +1,5 @@
-import type { AutomationExecutionRecord, AutomationRule, AutomationRuleLifecycleState } from '@a5c-ai/adapters-comm';
-import type { KanbanIssue } from '@a5c-ai/adapters-comm/kanban';
+import type { AutomationExecutionRecord, AutomationRule, AutomationRuleLifecycleState } from '@a5c-ai/comm-adapter';
+import type { KanbanIssue } from '@a5c-ai/comm-adapter/kanban';
 import { BacklogQueryService } from './backlog-query-service';
 import { type KanbanStorageDeps } from './kanban-storage';
 export declare const AUTOMATION_RULE_STATES: readonly ["draft", "active", "paused", "disabled", "archived"];

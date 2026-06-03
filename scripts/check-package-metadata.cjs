@@ -19,32 +19,32 @@ const TOP_LEVEL_AGENT_MUX_PACKAGE_MOVES = [
   {
     oldPath: 'packages/transport-mux',
     newPath: 'packages/adapters/transport',
-    oldName: '@a5c-ai/adapters-transport',
-    newName: '@a5c-ai/adapters-transport',
+    oldName: '@a5c-ai/transport-adapter',
+    newName: '@a5c-ai/transport-adapter',
   },
   {
     oldPath: 'packages/extension-mux',
     newPath: 'packages/adapters/extensions',
-    oldName: '@a5c-ai/adapters-extensions',
-    newName: '@a5c-ai/adapters-extensions',
+    oldName: '@a5c-ai/extensions-adapter',
+    newName: '@a5c-ai/extensions-adapter',
   },
   {
     oldPath: 'packages/triggers-mux',
     newPath: 'packages/adapters/triggers',
-    oldName: '@a5c-ai/adapters-triggers',
-    newName: '@a5c-ai/adapters-triggers',
+    oldName: '@a5c-ai/triggers-adapter',
+    newName: '@a5c-ai/triggers-adapter',
   },
   {
     oldPath: 'packages/tasks-mux',
     newPath: 'packages/adapters/tasks',
-    oldName: '@a5c-ai/adapters-tasks',
-    newName: '@a5c-ai/adapters-tasks',
+    oldName: '@a5c-ai/tasks-adapter',
+    newName: '@a5c-ai/tasks-adapter',
   },
   {
     oldPath: 'packages/tool-mux',
     newPath: 'packages/adapters/tools',
-    oldName: '@a5c-ai/adapters-tools',
-    newName: '@a5c-ai/adapters-tools',
+    oldName: '@a5c-ai/tools-adapter',
+    newName: '@a5c-ai/tools-adapter',
   },
 ];
 

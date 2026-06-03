@@ -1,7 +1,7 @@
 import type { ParsedArgs as CoreParsedArgs } from "@a5c-ai/babysitter-sdk";
 
 /** Supported output formats for harness invocation results. */
-export type HarnessOutputFormat = "json" | "text" | "amux-events";
+export type HarnessOutputFormat = "json" | "text" | "adapters-events";
 
 export interface HarnessParsedArgs extends CoreParsedArgs {
   anycliService?: string;

@@ -314,7 +314,7 @@ const implementStreamingTask = defineTask('issue-580.implement-streaming-contrac
         JSON.stringify({ mcp: args.mcpImplementation, governanceCostCompaction: args.governanceCostCompaction }, null, 2),
         '---',
         'Propagate StreamingOutputOptions through MCP and effect routing where output is available.',
-        'Preserve existing CLI, JSON, TUI, and amux-events output-mode behavior; add contract tests for no duplicate output and no lost streamed text.',
+        'Preserve existing CLI, JSON, TUI, and adapters-events output-mode behavior; add contract tests for no duplicate output and no lost streamed text.',
         'Keep streaming changes explicit and typed rather than printing directly from low-level helpers.',
         'Return JSON: { changedFiles: string[], streamingSummary: string, outputModesCovered: string[], risks: string[] }.',
       ],

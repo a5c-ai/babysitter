@@ -1,5 +1,5 @@
 /**
- * `amux agent <subcommand> <agent> [args] [--global|--project]`
+ * `adapters agent <subcommand> <agent> [args] [--global|--project]`
  *
  * Custom sub-agent management. Like skills, this is file-convention only
  * — no underlying harness command. We copy/remove agent definition files
@@ -8,7 +8,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs, FlagDef } from '../parse-args.js';
 import { flagBool, flagStr } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';
@@ -76,7 +76,7 @@ export async function agentCommand(
 
   if (args.flags.help || (!args.subcommand && args.positionals.length === 0)) {
     process.stdout.write([
-      'Usage: amux agent <subcommand> <agent> [args] [--global|--project]',
+      'Usage: adapters agent <subcommand> <agent> [args] [--global|--project]',
       '',
       'Manage custom sub-agents for a harness (file-convention based, no native command).',
       '',
@@ -93,9 +93,9 @@ export async function agentCommand(
       '  --project                          Use the project-level agents dir',
       '',
       'Examples:',
-      '  amux agent list claude',
-      '  amux agent add claude ./my-agent.md --global',
-      '  amux agent remove claude my-agent.md --project',
+      '  adapters agent list claude',
+      '  adapters agent add claude ./my-agent.md --global',
+      '  adapters agent remove claude my-agent.md --project',
     ].join('\n') + '\n');
     return ExitCode.SUCCESS;
   }
@@ -124,7 +124,7 @@ export async function agentCommand(
   const paths = getSubagentPaths(agent);
   if (!paths) {
     if (json) printJsonError('VALIDATION_ERROR', `Unknown agent for sub-agents: ${agent}`);
-    else printError(`Unknown agent for sub-agents: ${agent}. Try: amux agent agents`);
+    else printError(`Unknown agent for sub-agents: ${agent}. Try: adapters agent agents`);
     return ExitCode.USAGE_ERROR;
   }
 
@@ -154,7 +154,7 @@ export async function agentCommand(
       const source = args.positionals[1];
       if (!source) {
         if (json) printJsonError('VALIDATION_ERROR', 'Missing source path');
-        else printError('Usage: amux agent add <agent> <source> [--name <n>] [--global|--project]');
+        else printError('Usage: adapters agent add <agent> <source> [--name <n>] [--global|--project]');
         return ExitCode.USAGE_ERROR;
       }
       const absSource = path.resolve(source);
@@ -186,7 +186,7 @@ export async function agentCommand(
       const name = args.positionals[1];
       if (!name) {
         if (json) printJsonError('VALIDATION_ERROR', 'Missing sub-agent name');
-        else printError('Usage: amux agent remove <agent> <name> [--global|--project]');
+        else printError('Usage: adapters agent remove <agent> <name> [--global|--project]');
         return ExitCode.USAGE_ERROR;
       }
       const scope = resolveScope(args, 'project');

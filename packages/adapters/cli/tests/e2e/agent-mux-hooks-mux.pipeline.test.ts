@@ -24,8 +24,8 @@ describe('agent-mux hooks-mux no-SDK wiring matrix', () => {
   const previousXdgStateHome = process.env['XDG_STATE_HOME'];
 
   beforeEach(async () => {
-    cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-hooks-mux-'));
-    home = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-hooks-mux-home-'));
+    cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-hooks-mux-'));
+    home = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-hooks-mux-home-'));
     process.chdir(cwd);
     process.env['HOME'] = home;
     process.env['USERPROFILE'] = home;
@@ -39,7 +39,7 @@ describe('agent-mux hooks-mux no-SDK wiring matrix', () => {
     restoreEnv('XDG_STATE_HOME', previousXdgStateHome);
   });
 
-  matrixIt('routes a native hook payload from amux hooks into hooks-mux', async () => {
+  matrixIt('routes a native hook payload from adapters hooks into hooks-mux', async () => {
     const lane = readMatrixLane();
     const repoRoot = path.resolve(__dirname, '../../../../..');
     const hooksMuxCli = path.join(repoRoot, 'packages', 'hooks-mux', 'cli', 'dist', 'cli', 'main.js');
@@ -49,7 +49,7 @@ describe('agent-mux hooks-mux no-SDK wiring matrix', () => {
     await fs.mkdir(evidenceDir, { recursive: true });
     const evidencePath = path.join(evidenceDir, `${sanitize(lane.agentMuxAgent)}-${sanitize(lane.hooksAdapter)}.jsonl`);
     const handlerPath = path.join(cwd, 'hooks-mux-handler.mjs');
-    const bridgePath = path.join(cwd, 'amux-to-hooks-mux-bridge.mjs');
+    const bridgePath = path.join(cwd, 'adapters-to-hooks-mux-bridge.mjs');
 
     await fs.writeFile(handlerPath, handlerScript(evidencePath), 'utf8');
     await fs.writeFile(bridgePath, bridgeScript(hooksMuxCli, lane.hooksAdapter, lane.nativeEvent, handlerPath), 'utf8');

@@ -1,11 +1,11 @@
 /**
- * `amux config` subcommands.
+ * `adapters config` subcommands.
  *
  * @see docs/10-cli-reference.md Section 16
  */
 
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
-import { AgentMuxError } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
+import { AgentMuxError } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from './cli-helpers.js';
 import { flagBool, flagStr } from './cli-helpers.js';
 import { ExitCode, errorCodeToExitCode } from './cli-helpers.js';
@@ -37,9 +37,9 @@ export async function configCommand(client: AgentMuxClient, args: ParsedArgs): P
     const value = args.positionals[2];
     if (!agent || !field || value === undefined) {
       if (jsonMode) {
-        printJsonError('VALIDATION_ERROR', 'Usage: amux config set <agent> <field> <value>');
+        printJsonError('VALIDATION_ERROR', 'Usage: adapters config set <agent> <field> <value>');
       } else {
-        printError('Usage: amux config set <agent> <field> <value>');
+        printError('Usage: adapters config set <agent> <field> <value>');
       }
       return ExitCode.USAGE_ERROR;
     }

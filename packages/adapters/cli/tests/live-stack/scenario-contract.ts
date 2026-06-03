@@ -230,16 +230,16 @@ export function assertEvidenceBundleComplete(scenario: LiveStackScenario, bundle
 function setupCommandsFor(agentPath: LiveStackAgentPath, agent: LiveStackAgentId, agentMuxAgent: LiveStackAgentMuxAgentId, installMode: LiveStackInstallMode): readonly string[] {
   if (agentPath === 'agent-platform') return ['agent-platform create-run --harness internal'];
   if (agentPath === 'tula') return ['tula call'];
-  if (installMode === 'vanilla') return [`amux install ${agentMuxAgent}`, agent === 'agent-platform' ? 'amux run babysitter' : `amux launch ${agentMuxAgent}`];
+  if (installMode === 'vanilla') return [`adapters install ${agentMuxAgent}`, agent === 'agent-platform' ? 'adapters run babysitter' : `adapters launch ${agentMuxAgent}`];
   return [
     'npm run generate:plugins',
-    `amux install ${agentMuxAgent}`,
+    `adapters install ${agentMuxAgent}`,
     'npm install --global ./packages/sdk',
     'npm install --global ./packages/adapters/hooks/cli',
     `babysitter harness:install-plugin ${agent}`,
     'mkdir -p .a5c-live-test',
     'cp fixtures/summarize-translate-test.mjs .a5c/processes/',
-    agent === 'agent-platform' ? 'amux run babysitter' : `amux launch ${agentMuxAgent}`,
+    agent === 'agent-platform' ? 'adapters run babysitter' : `adapters launch ${agentMuxAgent}`,
   ];
 }
 

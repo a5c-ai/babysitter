@@ -36,7 +36,7 @@ attributes:
   streamingFraming: sse
   toolUseSchema: |
     Wire format is whatever the upstream provider speaks; the proxy
-    forwards bytes verbatim. Used by amux-proxy when the harness and
+    forwards bytes verbatim. Used by adapters-proxy when the harness and
     upstream already share a compatible contract.
   thinkingChannel: none
   cacheControl: passthrough

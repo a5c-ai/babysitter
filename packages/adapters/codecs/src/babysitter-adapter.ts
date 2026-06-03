@@ -21,7 +21,7 @@ import type {
   RunOptions,
   AgentEvent,
   AgentConfig,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import { BaseAgentAdapter } from './base-adapter.js';
 
@@ -148,7 +148,7 @@ export class BabysitterAdapter extends BaseAgentAdapter {
       args.push('--non-interactive');
     }
 
-    args.push('--output-format', 'amux-events');
+    args.push('--output-format', 'adapters-events');
 
     const timeout = options.timeout || 120000;
 
@@ -180,7 +180,7 @@ export class BabysitterAdapter extends BaseAgentAdapter {
     const base = { runId: context.runId, agent: this.agent, timestamp: ts };
 
     // babysitter outputs structured JSON with a 'type' field
-    // matching agent-mux event types when --output-format amux-events is used
+    // matching agent-mux event types when --output-format adapters-events is used
     if (obj['type'] && obj['runId']) {
       return obj as unknown as AgentEvent;
     }

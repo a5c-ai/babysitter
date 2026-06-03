@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-tasks-mux
 attributes:
-  packageId: "@a5c-ai/adapters-tasks"
-  packageName: "@a5c-ai/adapters-tasks"
+  packageId: "@a5c-ai/tasks-adapter"
+  packageName: "@a5c-ai/tasks-adapter"
   workspacePath: packages/tasks-mux
   moduleType: typescript
   surfaceKinds:
@@ -12,7 +12,7 @@ attributes:
   versionPolicy: semver
 edges:
   references_path:
-    - target: path:amux-hooks-global
+    - target: path:adapters-hooks-global
   exposes_subcommand:
     - target: interaction-primitive:tasks-mux-cli-ask
     - target: interaction-primitive:tasks-mux-cli-responders

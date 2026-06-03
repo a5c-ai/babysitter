@@ -1,13 +1,13 @@
 /**
  * Schema-translation layer.
  *
- * Re-exports the format-level conversion helpers from `@a5c-ai/adapters-transport`
+ * Re-exports the format-level conversion helpers from `@a5c-ai/transport-adapter`
  * and adds thin adapters between `NormalizedToolDefinition` (transport-mux
  * canonical form) and `ToolDescriptor` (tool-mux lifecycle form).
  */
 
-import type { CodecCapabilities, NormalizedToolDefinition } from '@a5c-ai/adapters-transport';
-import { convertTools } from '@a5c-ai/adapters-transport';
+import type { CodecCapabilities, NormalizedToolDefinition } from '@a5c-ai/transport-adapter';
+import { convertTools } from '@a5c-ai/transport-adapter';
 
 import type { ToolDescriptor, ToolSource } from './types.js';
 

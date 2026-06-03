@@ -4,7 +4,7 @@
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-command
 attributes:
-  displayName: "amux-triggers action input: command"
+  displayName: "adapters-triggers action input: command"
   name: command
   valueType: string
   required: "no"
@@ -15,27 +15,27 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-args
 attributes:
-  displayName: "amux-triggers action input: args"
+  displayName: "adapters-triggers action input: args"
   name: args
   valueType: string
   required: "no"
   appliesTo: github-action-input
-  description: "Space-delimited fallback arguments passed to amux after the command."
+  description: "Space-delimited fallback arguments passed to adapters after the command."
 ---
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-args-json
 attributes:
-  displayName: "amux-triggers action input: args-json"
+  displayName: "adapters-triggers action input: args-json"
   name: args-json
   valueType: string
   required: "no"
   appliesTo: github-action-input
-  description: "JSON string array of additional arguments passed to amux after the command. Prefer this for values containing spaces or shell-sensitive characters."
+  description: "JSON string array of additional arguments passed to adapters after the command. Prefer this for values containing spaces or shell-sensitive characters."
 ---
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-adapter
 attributes:
-  displayName: "amux-triggers action input: adapter"
+  displayName: "adapters-triggers action input: adapter"
   name: adapter
   valueType: string
   required: "no"
@@ -45,7 +45,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-prompt
 attributes:
-  displayName: "amux-triggers action input: prompt"
+  displayName: "adapters-triggers action input: prompt"
   name: prompt
   valueType: string
   required: "no"
@@ -55,7 +55,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-harness
 attributes:
-  displayName: "amux-triggers action input: harness"
+  displayName: "adapters-triggers action input: harness"
   name: harness
   valueType: enum
   required: "yes"
@@ -74,7 +74,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-provider
 attributes:
-  displayName: "amux-triggers action input: provider"
+  displayName: "adapters-triggers action input: provider"
   name: provider
   valueType: enum
   required: "no"
@@ -90,7 +90,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-model
 attributes:
-  displayName: "amux-triggers action input: model"
+  displayName: "adapters-triggers action input: model"
   name: model
   valueType: string
   required: "no"
@@ -100,7 +100,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-interaction-mode
 attributes:
-  displayName: "amux-triggers action input: interaction-mode"
+  displayName: "adapters-triggers action input: interaction-mode"
   name: interaction-mode
   valueType: enum
   required: "no"
@@ -115,7 +115,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-max-turns
 attributes:
-  displayName: "amux-triggers action input: max-turns"
+  displayName: "adapters-triggers action input: max-turns"
   name: max-turns
   valueType: string
   required: "no"
@@ -126,7 +126,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-with-proxy
 attributes:
-  displayName: "amux-triggers action input: with-proxy"
+  displayName: "adapters-triggers action input: with-proxy"
   name: with-proxy
   valueType: bool
   required: "no"
@@ -137,7 +137,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-proxy-log-level
 attributes:
-  displayName: "amux-triggers action input: proxy-log-level"
+  displayName: "adapters-triggers action input: proxy-log-level"
   name: proxy-log-level
   valueType: enum
   required: "no"
@@ -153,7 +153,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-babysitter-plugin
 attributes:
-  displayName: "amux-triggers action input: babysitter-plugin"
+  displayName: "adapters-triggers action input: babysitter-plugin"
   name: babysitter-plugin
   valueType: bool
   required: "no"
@@ -164,7 +164,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-process-file
 attributes:
-  displayName: "amux-triggers action input: process-file"
+  displayName: "adapters-triggers action input: process-file"
   name: process-file
   valueType: string
   required: "no"
@@ -174,7 +174,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-babysitter-prompt-prefix
 attributes:
-  displayName: "amux-triggers action input: babysitter-prompt-prefix"
+  displayName: "adapters-triggers action input: babysitter-prompt-prefix"
   name: babysitter-prompt-prefix
   valueType: string
   required: "no"
@@ -184,17 +184,17 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-plugins
 attributes:
-  displayName: "amux-triggers action input: plugins"
+  displayName: "adapters-triggers action input: plugins"
   name: plugins
   valueType: string
   required: "no"
   appliesTo: github-action-input
-  description: "Newline-delimited plugin specs installed after harness setup. Each line is passed to amux plugin install <adapter> <plugin>."
+  description: "Newline-delimited plugin specs installed after harness setup. Each line is passed to adapters plugin install <adapter> <plugin>."
 ---
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-trigger-backend
 attributes:
-  displayName: "amux-triggers action input: trigger-backend"
+  displayName: "adapters-triggers action input: trigger-backend"
   name: trigger-backend
   valueType: enum
   required: "no"
@@ -205,7 +205,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-trigger-query
 attributes:
-  displayName: "amux-triggers action input: trigger-query"
+  displayName: "adapters-triggers action input: trigger-query"
   name: trigger-query
   valueType: string
   required: "no"
@@ -215,7 +215,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-include-diff
 attributes:
-  displayName: "amux-triggers action input: include-diff"
+  displayName: "adapters-triggers action input: include-diff"
   name: include-diff
   valueType: bool
   required: "no"
@@ -226,7 +226,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-use-a5c-token-exchange
 attributes:
-  displayName: "amux-triggers action input: use-a5c-token-exchange"
+  displayName: "adapters-triggers action input: use-a5c-token-exchange"
   name: use-a5c-token-exchange
   valueType: bool
   required: "no"
@@ -237,7 +237,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-github-token
 attributes:
-  displayName: "amux-triggers action input: github-token"
+  displayName: "adapters-triggers action input: github-token"
   name: github-token
   valueType: string
   required: "no"
@@ -248,7 +248,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-node-version
 attributes:
-  displayName: "amux-triggers action input: node-version"
+  displayName: "adapters-triggers action input: node-version"
   name: node-version
   valueType: string
   required: "no"
@@ -259,39 +259,39 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-working-directory
 attributes:
-  displayName: "amux-triggers action input: working-directory"
+  displayName: "adapters-triggers action input: working-directory"
   name: working-directory
   valueType: string
   required: "no"
   defaultValue: "${{ github.workspace }}"
   appliesTo: github-action-input
-  description: "Working directory for amux execution."
+  description: "Working directory for adapters execution."
 ---
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-pre-run
 attributes:
-  displayName: "amux-triggers action input: pre-run"
+  displayName: "adapters-triggers action input: pre-run"
   name: pre-run
   valueType: string
   required: "no"
   appliesTo: github-action-input
-  description: "Optional shell commands to run after trigger match and before amux."
+  description: "Optional shell commands to run after trigger match and before adapters."
 ---
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-input-post-run
 attributes:
-  displayName: "amux-triggers action input: post-run"
+  displayName: "adapters-triggers action input: post-run"
   name: post-run
   valueType: string
   required: "no"
   appliesTo: github-action-input
-  description: "Optional shell commands to run after amux when trigger matched."
+  description: "Optional shell commands to run after adapters when trigger matched."
 ---
 # Outputs (action.yml:66-75)
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-output-matched
 attributes:
-  displayName: "amux-triggers action output: matched"
+  displayName: "adapters-triggers action output: matched"
   name: matched
   valueType: bool
   required: "yes"
@@ -302,7 +302,7 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-output-event
 attributes:
-  displayName: "amux-triggers action output: event"
+  displayName: "adapters-triggers action output: event"
   name: event
   valueType: string
   required: "yes"
@@ -313,11 +313,11 @@ attributes:
 nodeKind: FrontmatterField
 id: frontmatter-field:triggers-action-output-exit-code
 attributes:
-  displayName: "amux-triggers action output: exit-code"
+  displayName: "adapters-triggers action output: exit-code"
   name: exit-code
   valueType: string
   required: "no"
-  defaultValue: "${{ steps.amux.outputs.exit-code }}"
+  defaultValue: "${{ steps.adapters.outputs.exit-code }}"
   appliesTo: github-action-output
   description: "agent-mux exit code. Empty when trigger did not match."
 

@@ -1,5 +1,5 @@
-import { CANONICAL_PHASES, LIFECYCLE_SCOPES } from '@a5c-ai/adapters-hooks-core';
-import type { PhaseMapping } from '@a5c-ai/adapters-hooks-core';
+import { CANONICAL_PHASES, LIFECYCLE_SCOPES } from '@a5c-ai/hooks-adapter-core';
+import type { PhaseMapping } from '@a5c-ai/hooks-adapter-core';
 import { listHookMappingsByAdapterFamily } from '@a5c-ai/atlas/catalog';
 import type { HookMappingDescriptor } from '@a5c-ai/atlas/catalog';
 

@@ -702,7 +702,7 @@ describe('persistSessionEvent', () => {
       agentStackSnapshot: {},
       contextBundleDigest: 'sha256:abc',
     });
-    attempt.status = { agentMuxSessionId: 'sess-42', agentMuxRunId: 'amux-42', startedAt: new Date().toISOString() };
+    attempt.status = { agentMuxSessionId: 'sess-42', agentMuxRunId: 'adapters-42', startedAt: new Date().toISOString() };
 
     return { run, attempt };
   }

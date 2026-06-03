@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ExitCode, errorCodeToExitCode } from '../src/exit-codes.js';
-import type { ErrorCode } from '@a5c-ai/adapters-comm';
+import type { ErrorCode } from '@a5c-ai/comm-adapter';
 
 describe('ExitCode constants', () => {
   it('has SUCCESS = 0', () => {

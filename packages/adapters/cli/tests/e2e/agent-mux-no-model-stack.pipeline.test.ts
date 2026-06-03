@@ -3,7 +3,7 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { main } from '../../src/index.js';
-import { startTransportMuxRuntime, type CompletionEngine, type CompletionRequest, type CompletionResult, type CompletionStreamEvent, type TransportMuxRuntime } from '@a5c-ai/adapters-transport';
+import { startTransportMuxRuntime, type CompletionEngine, type CompletionRequest, type CompletionResult, type CompletionStreamEvent, type TransportMuxRuntime } from '@a5c-ai/transport-adapter';
 
 interface MatrixLane {
   agent: string;
@@ -57,8 +57,8 @@ describe('agent-mux no-model stack matrix', () => {
   ]);
 
   beforeEach(async () => {
-    cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-no-model-stack-'));
-    home = await fs.mkdtemp(path.join(os.tmpdir(), 'amux-no-model-home-'));
+    cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-no-model-stack-'));
+    home = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-no-model-home-'));
     binDir = path.join(cwd, 'bin');
     await fs.mkdir(binDir, { recursive: true });
     process.chdir(cwd);
@@ -191,7 +191,7 @@ function createRecordingEngine(text: string): RecordingCompletionEngine {
 
 async function writeProviderProfile(agent: string, runtimeUrl: string): Promise<void> {
   const profile = providerProfileForAgent(agent, runtimeUrl);
-  const providersPath = path.join(cwd, '.amux', 'providers.json');
+  const providersPath = path.join(cwd, '.adapters', 'providers.json');
   await fs.mkdir(path.dirname(providersPath), { recursive: true });
   await fs.writeFile(providersPath, JSON.stringify({ version: 1, profiles: { [PROFILE_NAME]: profile } }, null, 2), 'utf8');
 }

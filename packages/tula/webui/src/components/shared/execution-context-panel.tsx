@@ -1,6 +1,6 @@
 "use client";
 
-import type { KanbanExecutionContextEnvelope } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanExecutionContextEnvelope } from "@a5c-ai/comm-adapter/kanban";
 
 import { cx } from "@a5c-ai/compendium";
 

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { StreamAssembler } from '@a5c-ai/adapters-comm';
-import type { ParseContext } from '@a5c-ai/adapters-comm';
+import { StreamAssembler } from '@a5c-ai/comm-adapter';
+import type { ParseContext } from '@a5c-ai/comm-adapter';
 import { OpenCodeAdapter } from '../src/opencode-adapter.js';
 
 function makeContext(overrides?: Partial<ParseContext>): ParseContext {

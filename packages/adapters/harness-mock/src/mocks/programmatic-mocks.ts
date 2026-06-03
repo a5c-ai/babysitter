@@ -1,4 +1,4 @@
-import type { AgentEvent, RunOptions } from '@a5c-ai/adapters-comm';
+import type { AgentEvent, RunOptions } from '@a5c-ai/comm-adapter';
 import type {
   MockStreamEvent,
   ProgrammaticMockBuilder,

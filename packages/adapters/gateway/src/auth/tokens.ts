@@ -44,7 +44,7 @@ interface StoredTokenRecord extends TokenRecord {
 }
 
 function defaultSqlitePath(): string {
-  return path.join(os.homedir(), '.amux', 'gateway', 'tokens.db');
+  return path.join(os.homedir(), '.adapters', 'gateway', 'tokens.db');
 }
 
 function now(): number {

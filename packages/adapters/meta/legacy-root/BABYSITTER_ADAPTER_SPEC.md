@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-agent-mux adds a `babysitter` adapter that allows agent-mux users to target babysitter-harness as an agent. When someone runs `amux run --agent babysitter --prompt "..."`, agent-mux spawns the babysitter CLI as a subprocess, streams its output as normalized `AgentEvent`s, and handles interaction (approvals, input).
+agent-mux adds a `babysitter` adapter that allows agent-mux users to target babysitter-harness as an agent. When someone runs `adapters run --agent babysitter --prompt "..."`, agent-mux spawns the babysitter CLI as a subprocess, streams its output as normalized `AgentEvent`s, and handles interaction (approvals, input).
 
 This is the **reverse direction** of the babysitter-harness integration — where babysitter-harness consumes agent-mux as a library, the babysitter adapter lets agent-mux consume babysitter as a target.
 
@@ -290,10 +290,10 @@ For agent-mux to parse babysitter output, babysitter-harness must support output
 agent-platform invoke --harness claude-code --prompt "..." --json
 
 # Agent-mux compatible output (new)
-agent-platform invoke --harness claude-code --prompt "..." --json --output-format amux-events
+agent-platform invoke --harness claude-code --prompt "..." --json --output-format adapters-events
 ```
 
-When `--output-format amux-events` is set, babysitter-harness outputs one `AgentEvent` JSON per line to stdout:
+When `--output-format adapters-events` is set, babysitter-harness outputs one `AgentEvent` JSON per line to stdout:
 
 ```jsonl
 {"type":"session_start","runId":"run-123","agent":"babysitter","timestamp":"2026-04-19T12:00:00Z","sessionId":"sess-abc"}
@@ -361,16 +361,16 @@ const DEFAULT_ADAPTERS = [
 
 ```bash
 # Run babysitter via agent-mux
-amux run --agent babysitter --prompt "Fix all lint errors" --env BABYSITTER_HARNESS=claude-code
+adapters run --agent babysitter --prompt "Fix all lint errors" --env BABYSITTER_HARNESS=claude-code
 
 # List babysitter sessions
-amux sessions --agent babysitter
+adapters sessions --agent babysitter
 
 # Resume a babysitter run
-amux run --agent babysitter --session-id run-123
+adapters run --agent babysitter --session-id run-123
 
 # Run babysitter in Docker
-amux run --agent babysitter --prompt "..." --invocation docker --image babysitter:latest
+adapters run --agent babysitter --prompt "..." --invocation docker --image babysitter:latest
 ```
 
 ### 5.3 TUI Integration
@@ -378,7 +378,7 @@ amux run --agent babysitter --prompt "..." --invocation docker --image babysitte
 When running babysitter through agent-mux TUI:
 
 ```bash
-amux tui --agent babysitter
+adapters tui --agent babysitter
 ```
 
 The TUI displays babysitter events using the standard agent-mux event renderers. babysitter-specific information (iteration count, pending effects, governance decisions) can be displayed via babysitter TUI plugins if installed.
@@ -400,7 +400,7 @@ agent-mux's `maxTurns` is a simple counter. babysitter's orchestration model is 
 When targeting babysitter, agent-mux's skill discovery should delegate to babysitter:
 
 ```bash
-amux skills --agent babysitter
+adapters skills --agent babysitter
 # → calls: babysitter skill:discover --json
 ```
 

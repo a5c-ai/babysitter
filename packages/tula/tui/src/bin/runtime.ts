@@ -81,7 +81,7 @@ export function printHelp(stdout: NodeJS.WritableStream = process.stdout): void 
       '',
       'Options:',
       '  --user-plugins-dir <dir>  Override user-plugin discovery dir',
-      '                            (default: $AGENT_MUX_TUI_PLUGINS_DIR or ~/.amux/tui-plugins)',
+      '                            (default: $AGENT_MUX_TUI_PLUGINS_DIR or ~/.adapters/tui-plugins)',
       '  --no-user-plugins         Skip discovering user plugins from the directory',
       '  -h, --help                Show this help',
     ].join('\n') + '\n',

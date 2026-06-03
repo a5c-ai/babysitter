@@ -1,4 +1,4 @@
-import { classifyTool, type AgentName, type ToolClassification } from '@a5c-ai/adapters-comm/browser';
+import { classifyTool, type AgentName, type ToolClassification } from '@a5c-ai/comm-adapter/browser';
 
 import type { ReactNode } from 'react';
 

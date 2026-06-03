@@ -69,7 +69,7 @@ describe('control renderers', () => {
     { name: 'timeout', ev: ev({ type: 'timeout', kind: 'inactivity' }), expects: [/inactivity/] },
     { name: 'turn_limit', ev: ev({ type: 'turn_limit', maxTurns: 10 }), expects: [/10/] },
     { name: 'stream_fallback', ev: ev({ type: 'stream_fallback', capability: 'thinking', reason: 'unsupported' }), expects: [/thinking/, /unsupported/] },
-    { name: 'auth_error', ev: ev({ type: 'auth_error', message: 'no key', guidance: 'run amux auth' }), expects: [/no key/, /amux auth/] },
+    { name: 'auth_error', ev: ev({ type: 'auth_error', message: 'no key', guidance: 'run adapters auth' }), expects: [/no key/, /adapters auth/] },
     { name: 'rate_limit_error', ev: ev({ type: 'rate_limit_error', message: 'too fast', retryAfterMs: 1000 }), expects: [/too fast/] },
     { name: 'context_exceeded', ev: ev({ type: 'context_exceeded', usedTokens: 200, maxTokens: 100 }), expects: [/200\/100/] },
     { name: 'crash', ev: ev({ type: 'crash', exitCode: 137, stderr: 'oom' }), expects: [/137/, /oom/] },

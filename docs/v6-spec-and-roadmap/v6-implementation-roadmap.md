@@ -193,11 +193,11 @@ Current V6-facing commands that can be cited today are:
 - `npm run test:hooks-mux`
 - `npm run build:agent-mux`
 - `npm run test:agent-mux`
-- `npm run build --workspace=@a5c-ai/adapters-tasks`
-- `npm run typecheck --workspace=@a5c-ai/adapters-tasks`
-- `npm run test --workspace=@a5c-ai/adapters-tasks`
-- `npm run build --workspace=@a5c-ai/adapters-extensions`
-- `npm run test --workspace=@a5c-ai/adapters-extensions`
+- `npm run build --workspace=@a5c-ai/tasks-adapter`
+- `npm run typecheck --workspace=@a5c-ai/tasks-adapter`
+- `npm run test --workspace=@a5c-ai/tasks-adapter`
+- `npm run build --workspace=@a5c-ai/extensions-adapter`
+- `npm run test --workspace=@a5c-ai/extensions-adapter`
 - `npm run verify:metadata`
 - `npm run docs:qa`
 - `npm run validate:ci --prefix plugins/<plugin>`

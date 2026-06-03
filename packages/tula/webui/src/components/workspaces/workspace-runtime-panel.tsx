@@ -6,8 +6,8 @@ import type {
   WorkspaceRuntimeLogLine,
   WorkspaceRuntimeSurface,
   WorkspaceTerminalCommand,
-} from "@a5c-ai/adapters-comm";
-import type { KanbanExecutionContextEnvelope } from "@a5c-ai/adapters-comm/kanban";
+} from "@a5c-ai/comm-adapter";
+import type { KanbanExecutionContextEnvelope } from "@a5c-ai/comm-adapter/kanban";
 import {
   ExternalLink,
   GitBranch,

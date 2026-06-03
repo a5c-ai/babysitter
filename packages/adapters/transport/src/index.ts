@@ -24,7 +24,7 @@ export { createAnthropicCompletionEngine } from './engines/anthropic.js';
 export type { AnthropicCompletionEngineOptions } from './engines/anthropic.js';
 
 export const TRANSPORT_MUX_RUNTIME = {
-  packageName: '@a5c-ai/adapters-transport',
+  packageName: '@a5c-ai/transport-adapter',
   status: 'internal-placeholder',
   publishable: false,
   launcherIntegrated: true,

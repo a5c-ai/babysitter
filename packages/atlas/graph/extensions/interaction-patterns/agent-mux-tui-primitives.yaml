@@ -1,7 +1,7 @@
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-tui-command-palette
 attributes:
-  displayName: "amux TUI command palette"
+  displayName: "adapters TUI command palette"
   kind: tui-command
   surface: prompt-ui
   description: |
@@ -14,7 +14,7 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-tui-prompt-input
 attributes:
-  displayName: "amux TUI prompt input"
+  displayName: "adapters TUI prompt input"
   kind: tui-command
   surface: prompt-ui
   description: |
@@ -27,7 +27,7 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-tui-model-picker
 attributes:
-  displayName: "amux TUI model picker"
+  displayName: "adapters TUI model picker"
   kind: tui-command
   surface: prompt-ui
   description: |

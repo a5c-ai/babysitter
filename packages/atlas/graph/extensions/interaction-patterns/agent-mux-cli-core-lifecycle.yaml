@@ -2,10 +2,10 @@
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-run
 attributes:
-  displayName: "amux run"
+  displayName: "adapters run"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "run"
   flags:
     - "--stream:0:enable streaming output"
@@ -70,10 +70,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-install
 attributes:
-  displayName: "amux install"
+  displayName: "adapters install"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "install"
   flags:
     - "--all:0:install every registered agent"
@@ -93,10 +93,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-update
 attributes:
-  displayName: "amux update"
+  displayName: "adapters update"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "update"
   flags:
     - "--all:0:update every registered agent"
@@ -113,10 +113,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-detect
 attributes:
-  displayName: "amux detect"
+  displayName: "adapters detect"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "detect"
   flags:
     - "--all:0:detect every registered agent"
@@ -133,10 +133,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-uninstall
 attributes:
-  displayName: "amux uninstall"
+  displayName: "adapters uninstall"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "uninstall"
   flags: []
   subcommandExitCodes:
@@ -151,10 +151,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-adapters-list
 attributes:
-  displayName: "amux adapters list"
+  displayName: "adapters adapters list"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "adapters list"
   flags: []
   subcommandExitCodes:
@@ -167,10 +167,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-adapters-detect
 attributes:
-  displayName: "amux adapters detect"
+  displayName: "adapters adapters detect"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "adapters detect"
   flags: []
   subcommandExitCodes:
@@ -185,10 +185,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-adapters-info
 attributes:
-  displayName: "amux adapters info"
+  displayName: "adapters adapters info"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "adapters info"
   flags: []
   subcommandExitCodes:
@@ -202,10 +202,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-models-list
 attributes:
-  displayName: "amux models list"
+  displayName: "adapters models list"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "models list"
   flags: []
   subcommandExitCodes:
@@ -219,10 +219,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-models-info
 attributes:
-  displayName: "amux models info"
+  displayName: "adapters models info"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "models info"
   flags: []
   subcommandExitCodes:
@@ -231,16 +231,16 @@ attributes:
     - "2:usage-error:missing <agent> or <model>"
     - "3:agent-not-found:AGENT_NOT_FOUND when modelId unknown"
   description: |
-    Print details for one model (alias: `amux models get`). Source:
+    Print details for one model (alias: `adapters models get`). Source:
     packages/adapters/cli/src/commands/models.ts:144-168.
 ---
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-models-refresh
 attributes:
-  displayName: "amux models refresh"
+  displayName: "adapters models refresh"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "models refresh"
   flags: []
   subcommandExitCodes:
@@ -254,10 +254,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-models-current
 attributes:
-  displayName: "amux models current"
+  displayName: "adapters models current"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "models current"
   flags: []
   subcommandExitCodes:
@@ -271,10 +271,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-models-set
 attributes:
-  displayName: "amux models set"
+  displayName: "adapters models set"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "models set"
   flags:
     - "--provider:1:override provider when setting model"

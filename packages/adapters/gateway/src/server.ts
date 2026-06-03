@@ -2,8 +2,8 @@ import * as http from 'node:http';
 
 import { Hono, type Context } from 'hono';
 import { WebSocketServer } from 'ws';
-import type { Attachment } from '@a5c-ai/adapters-comm';
-import { resolveWorkspaceDefaultCwd, WorkspaceService } from '@a5c-ai/adapters-comm';
+import type { Attachment } from '@a5c-ai/comm-adapter';
+import { resolveWorkspaceDefaultCwd, WorkspaceService } from '@a5c-ai/comm-adapter';
 
 import {
   BootstrapAuthService,

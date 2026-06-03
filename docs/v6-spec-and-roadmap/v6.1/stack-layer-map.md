@@ -26,7 +26,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/adapters-transport` (proxy), `@a5c-ai/adapters-cli` (provider config) |
+| Packages | `@a5c-ai/transport-adapter` (proxy), `@a5c-ai/adapters-cli` (provider config) |
 | Node Kinds | Provider, ModelProviderProduct, ModelProviderVersion (compute + capabilities-and-models) |
 | Graph Cluster | compute |
 | Maturity | Partial — provider routing implemented in transport-mux proxy |
@@ -41,7 +41,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/adapters-transport` |
+| Packages | `@a5c-ai/transport-adapter` |
 | Node Kinds | TransportProxy, TransportClient, ModelTransportProtocol, TransportProtocol (compute + capabilities-and-models) |
 | Graph Cluster | compute |
 | Maturity | Implemented — HTTP proxy with codec translation |
@@ -56,7 +56,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/tula-core`, `@a5c-ai/adapters-comm` |
+| Packages | `@a5c-ai/tula-core`, `@a5c-ai/comm-adapter` |
 | Node Kinds | AgentCoreImpl (agent-stack) |
 | Graph Cluster | agent-stack |
 | Maturity | **Mature** — Dual implementation path (unified + harness-neutral) |
@@ -71,7 +71,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/tula-platform`, `@a5c-ai/adapters-comm` |
+| Packages | `@a5c-ai/tula-platform`, `@a5c-ai/comm-adapter` |
 | Node Kinds | AgentRuntimeImpl (agent-stack) |
 | Graph Cluster | agent-stack |
 | Maturity | **Mature** — agent-platform hosts the unified runtime; agent-comm-mux hosts harness dispatch |
@@ -84,7 +84,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/adapters-extensions`, `@a5c-ai/agent-catalog`, `@a5c-ai/tula-platform` |
+| Packages | `@a5c-ai/extensions-adapter`, `@a5c-ai/agent-catalog`, `@a5c-ai/tula-platform` |
 | Node Kinds | AgentPlatformImpl, Plugin, PluginTarget, PluginMarketplace, PluginArtifact (agent-stack + extensions) |
 | Graph Cluster | agent-stack, extensions |
 | Maturity | Partial — plugin compiler mature; deeper platform (team agents, marketplace identity) deferred |
@@ -127,7 +127,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/adapters-tasks` (approval gates) |
+| Packages | `@a5c-ai/tasks-adapter` (approval gates) |
 | Node Kinds | Sandbox, PermissionMode (lifecycle + security) |
 | Graph Cluster | lifecycle, security |
 | Maturity | Partial — tasks-mux handles human approval; filesystem/network policy enforcement deferred |
@@ -198,7 +198,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/tula-platform` (governance module), `@a5c-ai/adapters-tasks` (approval routing), `@a5c-ai/atlas` (evidence/claims) |
+| Packages | `@a5c-ai/tula-platform` (governance module), `@a5c-ai/tasks-adapter` (approval routing), `@a5c-ai/atlas` (evidence/claims) |
 | Node Kinds | AgentGovernanceImpl, EvidencePolicy, Claim, TrustLevel (agent-stack + catalog-meta + trust) |
 | Graph Cluster | agent-stack, catalog-meta, trust |
 | Maturity | Partial — approval gates, evidence claims, trust levels defined; broader policy framework (NIST AI RMF, OWASP) aspirational |

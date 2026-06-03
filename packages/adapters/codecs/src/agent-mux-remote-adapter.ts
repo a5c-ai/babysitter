@@ -1,13 +1,13 @@
 /**
  * AgentMuxRemoteAdapter — pass-through adapter that delegates to another
- * `amux` CLI installation. Transport is out of scope: this adapter emits
- * plain `amux run ...` spawn args, and the caller wraps them with the
+ * `adapters` CLI installation. Transport is out of scope: this adapter emits
+ * plain `adapters run ...` spawn args, and the caller wraps them with the
  * desired invocation mode (local/docker/ssh/k8s) via
  * `buildInvocationCommand()`.
  *
- * This lets agent-mux nest: a local amux invocation dispatches to a second
- * amux executing in a docker container, on a remote SSH host, or in a k8s
- * pod. All structured events are forwarded verbatim — the remote `amux run`
+ * This lets agent-mux nest: a local adapters invocation dispatches to a second
+ * adapters executing in a docker container, on a remote SSH host, or in a k8s
+ * pod. All structured events are forwarded verbatim — the remote `adapters run`
  * emits JSONL which we pass through unchanged.
  *
  * Configuration is read from RunOptions.env:
@@ -29,7 +29,7 @@ import type {
   RunOptions,
   AgentEvent,
   AgentConfig,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import { BaseAgentAdapter } from './base-adapter.js';
 import { createVirtualRuntimeHookCapabilities } from './shared/runtime-hooks-virtual.js';
@@ -43,7 +43,7 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
   constructor(agent?: string, cliCommand?: string) {
     super();
     this.agent = agent ?? this.constructor.name.replace(/Adapter$/, '').toLowerCase().replace(/agentmuxremote/, 'agent-mux-remote');
-    this.cliCommand = cliCommand ?? 'amux';
+    this.cliCommand = cliCommand ?? 'adapters';
   }
   readonly hostEnvSignals = [] as const;
 
@@ -90,7 +90,7 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
     ],
     authFiles: [],
     installMethods: [
-      { platform: 'all', type: 'manual', command: 'Install amux on the target (see `amux remote install <host>`).' },
+      { platform: 'all', type: 'manual', command: 'Install adapters on the target (see `adapters remote install <host>`).' },
     ],
   };
 
@@ -106,14 +106,14 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
     supportsProjectConfig: false,
   };
 
-  /** Resolve the remote agent name (which agent to invoke inside the nested amux). */
+  /** Resolve the remote agent name (which agent to invoke inside the nested adapters). */
   private resolveRemoteAgent(options: RunOptions): string {
     const env = options.env ?? {};
     return env['AGENT_MUX_REMOTE_AGENT'] ?? process.env['AGENT_MUX_REMOTE_AGENT'] ?? 'claude';
   }
 
   /**
-   * Emit `amux run --json --agent <agent> --prompt <...>` args.
+   * Emit `adapters run --json --agent <agent> --prompt <...>` args.
    *
    * The caller is responsible for wrapping these with an invocation mode
    * (ssh/docker/k8s) via `buildInvocationCommand()`. This keeps the adapter
@@ -155,10 +155,10 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
     return event as unknown as AgentEvent;
   }
 
-  /** Detect version via the local spawner running plain `amux --version`. */
+  /** Detect version via the local spawner running plain `adapters --version`. */
   async detectVersion(): Promise<string | null> {
     try {
-      const res = await this._spawner('amux', ['--version']);
+      const res = await this._spawner('adapters', ['--version']);
       if (res.code !== 0) return null;
       const match = (res.stdout + '\n' + res.stderr).match(/\d+\.\d+\.\d+(?:-[\w.]+)?/);
       return match ? match[0] : null;
@@ -184,15 +184,15 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
       agent: 'agent-mux-remote',
       providerName: 'agent-mux (remote)',
       steps: [
-        { step: 1, description: 'Install amux on the target (local, remote SSH host, docker image, or k8s pod).' },
+        { step: 1, description: 'Install adapters on the target (local, remote SSH host, docker image, or k8s pod).' },
         { step: 2, description: 'Set RunOptions.invocation to select the transport (ssh/docker/k8s).' },
-        { step: 3, description: 'Optionally set AGENT_MUX_REMOTE_AGENT to choose which agent the nested amux invokes.' },
+        { step: 3, description: 'Optionally set AGENT_MUX_REMOTE_AGENT to choose which agent the nested adapters invokes.' },
       ],
       envVars: [
         { name: 'AGENT_MUX_REMOTE_AGENT', description: 'Agent to invoke on the remote (default: claude)', required: false },
       ],
       documentationUrls: [],
-      verifyCommand: 'amux --version',
+      verifyCommand: 'adapters --version',
     };
   }
 
@@ -201,13 +201,13 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
   }
 
   async parseSessionFile(_filePath: string): Promise<Session> {
-    throw new Error('agent-mux-remote does not store sessions locally; use `amux sessions list` on the remote.');
+    throw new Error('agent-mux-remote does not store sessions locally; use `adapters sessions list` on the remote.');
   }
 
-  /** List remote sessions via plain `amux sessions list --json` (transport is external). */
+  /** List remote sessions via plain `adapters sessions list --json` (transport is external). */
   async listSessionFiles(_cwd?: string): Promise<string[]> {
     try {
-      const res = await this._spawner('amux', ['sessions', 'list', '--json']);
+      const res = await this._spawner('adapters', ['sessions', 'list', '--json']);
       if (res.code !== 0) return [];
       const parsed = JSON.parse(res.stdout);
       const data = Array.isArray(parsed) ? parsed : (parsed?.data ?? []);
@@ -235,37 +235,37 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
   }
 
   /**
-   * Detect whether `amux` is available at the current spawner scope (local or
+   * Detect whether `adapters` is available at the current spawner scope (local or
    * wrapped). The wrapper — docker/ssh/k8s — is applied externally.
    */
-  override async detectInstallation(): Promise<import('@a5c-ai/adapters-comm').DetectInstallationResult> {
+  override async detectInstallation(): Promise<import('@a5c-ai/comm-adapter').DetectInstallationResult> {
     try {
-      const res = await this._spawner('amux', ['--version']);
+      const res = await this._spawner('adapters', ['--version']);
       if (res.code !== 0) {
-        return { installed: false, notes: `amux probe failed (code ${res.code})` };
+        return { installed: false, notes: `adapters probe failed (code ${res.code})` };
       }
       const version = this.parseVersionOutput(res.stdout + '\n' + res.stderr);
-      const out: import('@a5c-ai/adapters-comm').DetectInstallationResult = {
+      const out: import('@a5c-ai/comm-adapter').DetectInstallationResult = {
         installed: true,
-        path: 'amux',
+        path: 'adapters',
       };
       if (version) out.version = version;
       return out;
     } catch (err) {
       return {
         installed: false,
-        notes: err instanceof Error ? `amux probe error: ${err.message}` : 'amux probe error',
+        notes: err instanceof Error ? `adapters probe error: ${err.message}` : 'adapters probe error',
       };
     }
   }
 
   /**
-   * Install amux via `npm install -g @a5c-ai/adapters-cli`.
+   * Install adapters via `npm install -g @a5c-ai/adapters-cli`.
    * Transport wrapping (ssh/docker/k8s) is the caller's responsibility.
    */
   override async install(
-    opts: import('@a5c-ai/adapters-comm').AdapterInstallOptions = {},
-  ): Promise<import('@a5c-ai/adapters-comm').InstallResult> {
+    opts: import('@a5c-ai/comm-adapter').AdapterInstallOptions = {},
+  ): Promise<import('@a5c-ai/comm-adapter').InstallResult> {
     const command = 'npm install -g @a5c-ai/adapters-cli';
     if (opts.dryRun) {
       return { ok: true, method: 'npm', command, message: `[dry-run] would execute: ${command}` };
@@ -290,8 +290,8 @@ export class AgentMuxRemoteAdapter extends BaseAgentAdapter {
   }
 
   override async update(
-    opts: import('@a5c-ai/adapters-comm').AdapterUpdateOptions = {},
-  ): Promise<import('@a5c-ai/adapters-comm').InstallResult> {
+    opts: import('@a5c-ai/comm-adapter').AdapterUpdateOptions = {},
+  ): Promise<import('@a5c-ai/comm-adapter').InstallResult> {
     const command = 'npm update -g @a5c-ai/adapters-cli';
     if (opts.dryRun) {
       return { ok: true, method: 'npm', command, message: `[dry-run] would execute: ${command}` };

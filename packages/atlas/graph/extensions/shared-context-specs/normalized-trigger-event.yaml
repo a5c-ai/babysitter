@@ -7,10 +7,10 @@ attributes:
   displayName: "NormalizedTriggerEvent payload schema"
   contextKind: "trigger-event-envelope"
   typescriptInterface: "NormalizedTriggerEvent"
-  producerIface: "@a5c-ai/adapters-triggers backend normalizers (github|gitlab|bitbucket|generic-webhook)"
+  producerIface: "@a5c-ai/triggers-adapter backend normalizers (github|gitlab|bitbucket|generic-webhook)"
   consumerIfaces:
-    - "@a5c-ai/adapters-triggers evaluateTrigger (packages/triggers-mux/src/query.ts:102)"
-    - "amux run pipeline (downstream pre-run, agent-mux, post-run via AGENT_MUX_TRIGGER_EVENT_PATH)"
+    - "@a5c-ai/triggers-adapter evaluateTrigger (packages/triggers-mux/src/query.ts:102)"
+    - "adapters run pipeline (downstream pre-run, agent-mux, post-run via AGENT_MUX_TRIGGER_EVENT_PATH)"
   fieldSchema:
     - "backend:enum<github|gitlab|bitbucket|generic-webhook>:required:Trigger backend the payload was normalized from"
     - "eventName:string:required:Backend-native event name (e.g. 'issue_comment','pull_request','push','merge_request','pullrequest:created','webhook')"
@@ -37,7 +37,7 @@ attributes:
   displayName: "TriggerChange payload field schema"
   contextKind: "trigger-event-change-entry"
   typescriptInterface: "TriggerChange"
-  producerIface: "@a5c-ai/adapters-triggers backend normalizers + enrichGithubFromApi + enrichWithLocalGit + enrichDiffsWithLocalGit"
+  producerIface: "@a5c-ai/triggers-adapter backend normalizers + enrichGithubFromApi + enrichWithLocalGit + enrichDiffsWithLocalGit"
   consumerIfaces:
     - "evaluateTrigger path/files/diff query keys"
   fieldSchema:

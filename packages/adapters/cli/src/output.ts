@@ -1,5 +1,5 @@
 /**
- * Output formatting utilities for the amux CLI.
+ * Output formatting utilities for the adapters CLI.
  *
  * Supports human-readable tables/text and JSON output modes.
  * Color is supported via ANSI codes, gated by --no-color / NO_COLOR / TTY detection.

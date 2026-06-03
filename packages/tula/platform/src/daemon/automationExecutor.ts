@@ -20,7 +20,7 @@ import type {
   KanbanLabel,
   KanbanPriority,
   KanbanProject,
-} from "@a5c-ai/adapters-comm";
+} from "@a5c-ai/comm-adapter";
 
 import type { AutomationTriggerEvent } from "./types";
 

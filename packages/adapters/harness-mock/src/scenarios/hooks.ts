@@ -1,7 +1,7 @@
 /**
  * Hook payload fixtures — deterministic JSON payloads that each harness
  * would send to a hook script on stdin. Useful in tests for driving
- * parseHookPayload, HookDispatcher, and `amux hooks handle` end-to-end.
+ * parseHookPayload, HookDispatcher, and `adapters hooks handle` end-to-end.
  */
 
 import type { HarnessScenario } from '../types.js';

@@ -13,7 +13,7 @@ The current stack has one strong center and several supporting seams:
 - `@a5c-ai/babysitter-sdk` remains the orchestration core.
 - `@a5c-ai/babysitter` and `@a5c-ai/tula-platform` provide the operational CLI and runtime surfaces.
 - `packages/adapters/*` provide the dispatch layer for harness-facing agent execution.
-- `@a5c-ai/adapters-hooks-cli`, `@a5c-ai/adapters-extensions`, and `@a5c-ai/adapters-tasks` are focused support subsystems that normalize hooks, compile plugins, and route human approvals.
+- `@a5c-ai/hooks-adapter-cli`, `@a5c-ai/extensions-adapter`, and `@a5c-ai/tasks-adapter` are focused support subsystems that normalize hooks, compile plugins, and route human approvals.
 - `plugins/babysitter-unified/` is the canonical plugin source, while per-harness plugin bundles remain the user-installable outputs.
 
 This is a unified executable stack with explicit package families, not a promise that every family must become its own larger platform.
@@ -31,7 +31,7 @@ flowchart TD
   LIB[Process library and project processes<br/>library/, .a5c/processes, ~/.a5c]
   BP[tasks-mux<br/>human approval routing]
   APM[extension-mux<br/>plugin compilation]
-  AMUX[agent-mux packages<br/>core, adapters, cli, sdk, gateway]
+  ADAPTERS[agent-mux packages<br/>core, adapters, cli, sdk, gateway]
   UI[User surfaces<br/>TUI, web UI, mobile, docs]
 
   U --> APM
@@ -43,8 +43,8 @@ flowchart TD
   CLI --> SDK
   SDK --> LIB
   SDK --> BP
-  CLI --> AMUX
-  AMUX --> UI
+  CLI --> ADAPTERS
+  ADAPTERS --> UI
 ```
 
 ## Responsibility Map

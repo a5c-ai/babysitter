@@ -2,10 +2,10 @@
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-auth-check
 attributes:
-  displayName: "amux auth check"
+  displayName: "adapters auth check"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "auth check"
   flags: []
   subcommandExitCodes:
@@ -19,10 +19,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-auth-setup
 attributes:
-  displayName: "amux auth setup"
+  displayName: "adapters auth setup"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "auth setup"
   flags: []
   subcommandExitCodes:
@@ -37,10 +37,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-plugin-list
 attributes:
-  displayName: "amux plugin list"
+  displayName: "adapters plugin list"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "plugin list"
   flags: []
   subcommandExitCodes:
@@ -55,10 +55,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-plugin-install
 attributes:
-  displayName: "amux plugin install"
+  displayName: "adapters plugin install"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "plugin install"
   flags: []
   subcommandExitCodes:
@@ -73,10 +73,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-plugin-enable
 attributes:
-  displayName: "amux plugin enable"
+  displayName: "adapters plugin enable"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "plugin enable"
   flags: []
   subcommandExitCodes:
@@ -91,10 +91,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-plugin-disable
 attributes:
-  displayName: "amux plugin disable"
+  displayName: "adapters plugin disable"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "plugin disable"
   flags: []
   subcommandExitCodes:
@@ -109,10 +109,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-plugin-marketplace
 attributes:
-  displayName: "amux plugin marketplace"
+  displayName: "adapters plugin marketplace"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "plugin marketplace"
   flags: []
   subcommandExitCodes:
@@ -127,10 +127,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-mcp-list
 attributes:
-  displayName: "amux mcp list"
+  displayName: "adapters mcp list"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "mcp list"
   flags:
     - "--global:0:use global configuration (default)"
@@ -146,10 +146,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-mcp-install
 attributes:
-  displayName: "amux mcp install"
+  displayName: "adapters mcp install"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "mcp install"
   flags:
     - "--global:0:install globally (default)"
@@ -164,10 +164,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-mcp-uninstall
 attributes:
-  displayName: "amux mcp uninstall"
+  displayName: "adapters mcp uninstall"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "mcp uninstall"
   flags:
     - "--global:0:operate on global config"
@@ -181,10 +181,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-skill-list
 attributes:
-  displayName: "amux skill list"
+  displayName: "adapters skill list"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "skill list"
   flags:
     - "--global:0:list global skills"
@@ -199,10 +199,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-skill-add
 attributes:
-  displayName: "amux skill add"
+  displayName: "adapters skill add"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "skill add"
   flags:
     - "--name:1:override copied skill folder name"
@@ -220,10 +220,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-skill-remove
 attributes:
-  displayName: "amux skill remove"
+  displayName: "adapters skill remove"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "skill remove"
   flags:
     - "--global:0:remove from user scope"
@@ -239,10 +239,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-skill-where
 attributes:
-  displayName: "amux skill where"
+  displayName: "adapters skill where"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "skill where"
   flags: []
   subcommandExitCodes:
@@ -255,10 +255,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-skill-agents
 attributes:
-  displayName: "amux skill agents"
+  displayName: "adapters skill agents"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "skill agents"
   flags: []
   subcommandExitCodes:
@@ -270,10 +270,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-agent-list
 attributes:
-  displayName: "amux agent list"
+  displayName: "adapters agent list"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "agent list"
   flags:
     - "--global:0:list global sub-agents"
@@ -288,10 +288,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-agent-add
 attributes:
-  displayName: "amux agent add"
+  displayName: "adapters agent add"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "agent add"
   flags:
     - "--name:1:override copied agent file/folder name"
@@ -309,10 +309,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-agent-remove
 attributes:
-  displayName: "amux agent remove"
+  displayName: "adapters agent remove"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "agent remove"
   flags:
     - "--global:0:remove from user scope"
@@ -328,10 +328,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-agent-where
 attributes:
-  displayName: "amux agent where"
+  displayName: "adapters agent where"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "agent where"
   flags: []
   subcommandExitCodes:
@@ -344,10 +344,10 @@ attributes:
 nodeKind: InteractionPrimitive
 id: interaction-primitive:agent-mux-cli-agent-agents
 attributes:
-  displayName: "amux agent agents"
+  displayName: "adapters agent agents"
   kind: cli-subcommand
   surface: cli
-  parentBin: "amux"
+  parentBin: "adapters"
   subcommandVerb: "agent agents"
   flags: []
   subcommandExitCodes:

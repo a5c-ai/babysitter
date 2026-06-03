@@ -4,7 +4,7 @@
  * Built-in adapter implementations for all supported agents.
  */
 
-export { type AgentName, type BuiltInAgentName } from '@a5c-ai/adapters-comm';
+export { type AgentName, type BuiltInAgentName } from '@a5c-ai/comm-adapter';
 
 // Base adapter classes and global registry
 export { BaseAgentAdapter, defaultSpawner, registerAdapterFactory, getAdapterFactory, listRegisteredAdapters } from './base-adapter.js';

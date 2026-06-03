@@ -64,7 +64,7 @@ export async function resolveExternalAgentEffectsForRun(args: {
 
   let mux: TasksMuxModule;
   try {
-    mux = await import("@a5c-ai/adapters-tasks") as unknown as TasksMuxModule;
+    mux = await import("@a5c-ai/tasks-adapter") as unknown as TasksMuxModule;
   } catch {
     return { attempted: 0, resolved: [] };
   }

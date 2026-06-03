@@ -3,7 +3,7 @@ import {
   type SessionState,
   type UnifiedHookEvent,
   propagateEnv,
-} from '@a5c-ai/adapters-hooks-core';
+} from '@a5c-ai/hooks-adapter-core';
 import type { loadAdapter } from './adapter-loader';
 
 export function tryParseJson(raw: string): unknown | undefined {

@@ -1,4 +1,4 @@
-import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanReviewDecision, KanbanReviewArtifact, KanbanWorkflowState } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanReviewDecision, KanbanReviewArtifact, KanbanWorkflowState } from "@a5c-ai/comm-adapter/kanban";
 import type { Run } from "@/types";
 export type BabysitterOverlayStage = "dispatch" | "executing" | "review" | "recovery" | "done";
 export interface BoardExecutionOverlay {

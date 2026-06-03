@@ -1,4 +1,4 @@
-import type { KanbanReviewArtifact, KanbanReviewCommentAnchor, KanbanReviewDecision, KanbanReviewFeedbackSource, KanbanReviewSnapshot } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanReviewArtifact, KanbanReviewCommentAnchor, KanbanReviewDecision, KanbanReviewFeedbackSource, KanbanReviewSnapshot } from "@a5c-ai/comm-adapter/kanban";
 export declare function ReviewPanel(props: {
     title: string;
     description: string;

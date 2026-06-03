@@ -103,7 +103,7 @@ function copyPath(src: string, dst: string): void {
   }
 }
 
-// Only expose harnesses with explicit on-disk sub-agent conventions that match `amux agent`.
+// Only expose harnesses with explicit on-disk sub-agent conventions that match `adapters agent`.
 const AGENT_NAMES = ['claude', 'codex', 'cursor', 'opencode', 'gemini', 'copilot'] as const;
 
 function AgentsView({ active }: TuiViewProps) {
@@ -215,8 +215,8 @@ function AgentsView({ active }: TuiViewProps) {
   return (
     <Box flexDirection="column">
       <Text bold>Sub-agents</Text>
-      <Text dimColor>j/k or arrows: move · d: delete · r: refresh · (amux agent &lt;list|add|remove|where&gt;)</Text>
-      {rows.length === 0 ? <Text dimColor>No sub-agents installed. Use `amux agent add` to install.</Text> : null}
+      <Text dimColor>j/k or arrows: move · d: delete · r: refresh · (adapters agent &lt;list|add|remove|where&gt;)</Text>
+      {rows.length === 0 ? <Text dimColor>No sub-agents installed. Use `adapters agent add` to install.</Text> : null}
       {rows.slice(0, 40).map((r, i) => {
         const sel = i === cursor;
         return (

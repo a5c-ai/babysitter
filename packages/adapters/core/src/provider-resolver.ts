@@ -96,7 +96,7 @@ export function resolveProvider(input: ResolveProviderInput): ProviderConfig {
   const rawModel = input.model ?? process.env['AGENT_MUX_MODEL'] ?? profile?.model ?? fileDefaults?.model ?? defaults.defaultModel;
   const model = translateModelId(rawModel, providerId);
   if (process.env['AGENT_MUX_LOG_LEVEL'] === 'debug') {
-    process.stderr.write(`[amux] resolved model=${model} from ${modelSource} (provider=${providerId})\n`);
+    process.stderr.write(`[adapters] resolved model=${model} from ${modelSource} (provider=${providerId})\n`);
   }
 
   // Auth: merge profile auth with input auth
@@ -126,7 +126,7 @@ export function resolveProvider(input: ResolveProviderInput): ProviderConfig {
   if (apiBase) params['apiBase'] = apiBase;
 
   if (providerId === 'google' && (project || /^true$/i.test(process.env['GOOGLE_GENAI_USE_VERTEXAI'] ?? ''))) {
-    process.stderr.write(`[amux] upgrading google → vertex (project=${project ?? 'n/a'}, GOOGLE_GENAI_USE_VERTEXAI=${process.env['GOOGLE_GENAI_USE_VERTEXAI'] ?? 'unset'})\n`);
+    process.stderr.write(`[adapters] upgrading google → vertex (project=${project ?? 'n/a'}, GOOGLE_GENAI_USE_VERTEXAI=${process.env['GOOGLE_GENAI_USE_VERTEXAI'] ?? 'unset'})\n`);
     params['useVertexAi'] = true;
   }
   if (input.resourceGroup) params['resourceGroup'] = input.resourceGroup;

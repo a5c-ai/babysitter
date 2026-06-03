@@ -20,7 +20,7 @@ vi.mock('node-pty', () => {
   throw new Error('node-pty mocked out for tests');
 });
 
-vi.mock('@a5c-ai/adapters-transport', () => ({
+vi.mock('@a5c-ai/transport-adapter', () => ({
   startTransportMuxRuntime: startTransportMuxRuntimeMock,
 }));
 
@@ -52,7 +52,7 @@ vi.mock('@a5c-ai/atlas/catalog', () => ({
   getSessionConfig: vi.fn(() => ({})),
 }));
 
-vi.mock('@a5c-ai/adapters-comm', () => ({
+vi.mock('@a5c-ai/comm-adapter', () => ({
   PROVIDER_DEFAULTS: {
     bedrock: { envKey: undefined },
   },
@@ -170,7 +170,7 @@ describe('launchCommand transport-mux integration', () => {
   it('passes non-interactive Pi prompts through stdin injection', async () => {
     const runtimeStop = vi.fn(async () => {});
     const originalHome = process.env['HOME'];
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-pi-home-'));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-pi-home-'));
     process.env['HOME'] = tempHome;
     startTransportMuxRuntimeMock.mockResolvedValue({
       url: 'http://127.0.0.1:4011',

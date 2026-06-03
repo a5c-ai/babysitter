@@ -3,8 +3,8 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { spawn } from 'node:child_process';
-import { StreamAssembler } from '@a5c-ai/adapters-comm';
-import type { ParseContext } from '@a5c-ai/adapters-comm';
+import { StreamAssembler } from '@a5c-ai/comm-adapter';
+import type { ParseContext } from '@a5c-ai/comm-adapter';
 import { RuntimeHookDispatcher } from '../../core/src/runtime-hook-dispatcher.js';
 import { ClaudeAdapter } from '../src/claude-adapter.js';
 
@@ -328,7 +328,7 @@ describe('ClaudeAdapter', () => {
         dispatcher,
       );
 
-      expect(setup?.env?.CLAUDE_CONFIG_DIR).toContain('amux-run-run-claude-runtime');
+      expect(setup?.env?.CLAUDE_CONFIG_DIR).toContain('adapters-run-run-claude-runtime');
       const configDir = setup!.env!.CLAUDE_CONFIG_DIR!;
       const settingsPath = path.join(configDir, 'settings.json');
       const shimPath = path.join(configDir, 'hook-shim.mjs');

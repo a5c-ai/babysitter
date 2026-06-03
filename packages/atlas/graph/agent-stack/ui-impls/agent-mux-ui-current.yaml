@@ -240,13 +240,13 @@ edges:
       attributes: { mechanism: ui-control }
     - target: interaction-primitive:agent-mux-tui-model-picker
       attributes: { mechanism: ui-control }
-    - target: interaction-primitive:transport-mux-amux-proxy
+    - target: interaction-primitive:transport-mux-adapters-proxy
       attributes: { mechanism: cli-subcommand }
-    - target: interaction-primitive:amux-triggers-enrich
+    - target: interaction-primitive:adapters-triggers-enrich
       attributes: { mechanism: cli-subcommand }
-    - target: interaction-primitive:amux-triggers-evaluate
+    - target: interaction-primitive:adapters-triggers-evaluate
       attributes: { mechanism: cli-subcommand }
-    - target: interaction-primitive:amux-triggers-help
+    - target: interaction-primitive:adapters-triggers-help
       attributes: { mechanism: cli-subcommand }
     - target: interaction-primitive:voice-dictation
       attributes: { mechanism: ui-control }

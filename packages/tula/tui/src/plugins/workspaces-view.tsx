@@ -5,7 +5,7 @@ import type {
   KanbanWorkspaceInventory,
   KanbanWorkspaceSessionSummary,
   KanbanWorkspaceSummary,
-} from '@a5c-ai/adapters-comm/kanban';
+} from '@a5c-ai/comm-adapter/kanban';
 import { definePlugin, type TuiViewProps } from '../plugin.js';
 import { truncateEnd, truncateMiddle, visibleWindow } from '../layout.js';
 

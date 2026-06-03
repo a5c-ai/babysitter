@@ -6,7 +6,7 @@ import type {
   AutomationRule,
   TimerAutomationRule,
   WebhookAutomationRule,
-} from "@a5c-ai/adapters-comm";
+} from "@a5c-ai/comm-adapter";
 
 // ── Config types ────────────────────────────────────────────────────────────
 

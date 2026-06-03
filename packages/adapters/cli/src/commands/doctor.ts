@@ -1,5 +1,5 @@
 /**
- * `amux doctor` — aggregated environment health check.
+ * `adapters doctor` — aggregated environment health check.
  *
  * Reports Node.js version, per-adapter install + auth + config-file status,
  * and hook registry paths. Designed for copy/paste into bug reports.
@@ -7,7 +7,7 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import type { AgentMuxClient, DetectInstallationResult, AuthState } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient, DetectInstallationResult, AuthState } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from '../parse-args.js';
 import { flagBool } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';
@@ -65,7 +65,7 @@ async function buildReport(client: AgentMuxClient): Promise<DoctorReport> {
       auth = await adapter.detectAuth();
     } catch (e) {
       auth = { status: 'unauthenticated' };
-      process.stderr.write(`[amux] auth detection failed for ${adapter.agent}: ${e instanceof Error ? e.message : String(e)}\n`);
+      process.stderr.write(`[adapters] auth detection failed for ${adapter.agent}: ${e instanceof Error ? e.message : String(e)}\n`);
     }
 
     const configFiles: AgentReport['configFiles'] = [];
@@ -77,8 +77,8 @@ async function buildReport(client: AgentMuxClient): Promise<DoctorReport> {
     agents.push({ agent: info.agent, install, auth, configFiles });
   }
 
-  const globalHookPath = path.join(os.homedir(), '.amux', 'hooks.json');
-  const projectHookPath = path.join(process.cwd(), '.amux', 'hooks.json');
+  const globalHookPath = path.join(os.homedir(), '.adapters', 'hooks.json');
+  const projectHookPath = path.join(process.cwd(), '.adapters', 'hooks.json');
 
   const installedAgents = agents.filter((a) => a.install.installed).length;
   const authenticatedAgents = agents.filter((a) => a.auth.status === 'authenticated').length;
@@ -107,7 +107,7 @@ async function buildReport(client: AgentMuxClient): Promise<DoctorReport> {
 
 function formatReport(r: DoctorReport): string {
   const lines: string[] = [];
-  lines.push('amux doctor');
+  lines.push('adapters doctor');
   lines.push('───────────');
   lines.push(
     `Node:   ${r.node.version} on ${r.node.platform}/${r.node.arch} ${r.node.meetsMinimum ? 'OK' : '— below minimum (needs >= 20.9.0)'}`,

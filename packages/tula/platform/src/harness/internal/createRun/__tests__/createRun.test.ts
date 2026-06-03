@@ -50,7 +50,7 @@ vi.mock("../../../../interaction", async () => {
   };
 });
 
-vi.mock("@a5c-ai/adapters-comm", () => {
+vi.mock("@a5c-ai/comm-adapter", () => {
   const workspaces: Array<{
     workspaceDefaultCwd: string;
     workspaceRootPath: string;
@@ -71,13 +71,13 @@ vi.mock("@a5c-ai/adapters-comm", () => {
         id: "workspace-1",
         name: args.name,
         mode: args.mode,
-        cwd: path.join(repoPath, ".amux-workspace"),
-        workspaceDefaultCwd: path.join(repoPath, ".amux-workspace"),
-        workspaceRootPath: path.join(repoPath, ".amux-workspace"),
+        cwd: path.join(repoPath, ".adapters-workspace"),
+        workspaceDefaultCwd: path.join(repoPath, ".adapters-workspace"),
+        workspaceRootPath: path.join(repoPath, ".adapters-workspace"),
         repos: args.repos,
         repo: {
           sourcePath: repoPath,
-          targetPath: path.join(repoPath, ".amux-workspace"),
+          targetPath: path.join(repoPath, ".adapters-workspace"),
           mode: args.mode,
           alias: path.basename(repoPath),
           branch: null,
@@ -256,7 +256,7 @@ import {
   orchestrateIteration,
   commitEffectResult,
 } from "@a5c-ai/babysitter-sdk";
-import { WorkspaceService, resolveWorkspaceDefaultCwd } from "@a5c-ai/adapters-comm";
+import { WorkspaceService, resolveWorkspaceDefaultCwd } from "@a5c-ai/comm-adapter";
 import { invokeHarness } from "../../../invoker";
 import { createAgentCoreSession } from "@a5c-ai/tula-core";
 import { getSessionContext } from "../../../../session/context";

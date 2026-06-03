@@ -1,11 +1,11 @@
-# @a5c-ai/adapters-hooks-oh-my-pi
+# @a5c-ai/hooks-adapter-oh-my-pi
 
 oh-my-pi harness adapter for hooks-mux.
 
 ## Install
 
 ```bash
-npm install @a5c-ai/adapters-hooks-oh-my-pi @a5c-ai/adapters-hooks-core
+npm install @a5c-ai/hooks-adapter-oh-my-pi @a5c-ai/hooks-adapter-core
 ```
 
 This package ships the built adapter runtime in `dist/` and this package README for npm publish-surface auditing.
@@ -17,7 +17,7 @@ import {
   createAdapter,
   createConfiguredEngine,
   normalizeOhMyPiEvent,
-} from "@a5c-ai/adapters-hooks-oh-my-pi";
+} from "@a5c-ai/hooks-adapter-oh-my-pi";
 ```
 
 The package exposes oh-my-pi-specific normalization, phase mappings, session helpers, and an in-process configured engine for hooks-mux integrations.

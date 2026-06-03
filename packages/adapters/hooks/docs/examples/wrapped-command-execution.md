@@ -54,7 +54,7 @@ In your Gemini extension config:
 ```json
 {
   "hooks": {
-    "onSessionStart": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter gemini"
+    "onSessionStart": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter gemini"
   }
 }
 ```
@@ -111,7 +111,7 @@ exports.handler = async function(event) {
     toolMutation: {
       mode: 'replace',
       value: {
-        command: `npx -y @a5c-ai/adapters-hooks-cli exec --session-id "${sessionId}" -- ${originalCommand}`,
+        command: `npx -y @a5c-ai/hooks-adapter-cli exec --session-id "${sessionId}" -- ${originalCommand}`,
       },
     },
   };

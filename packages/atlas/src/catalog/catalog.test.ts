@@ -580,7 +580,7 @@ describe("agent-catalog graph-backed ontology", () => {
       const transportMuxClaim = catalog.listOntologyClaims().find((claim) => claim.claimId === "repo-transport-mux-readme");
       const agentMuxProxyAssertions = catalog
         .getCapabilitySupportAssertions()
-        .filter((assertion) => assertion.subjectId === "transportRuntime:amux-proxy");
+        .filter((assertion) => assertion.subjectId === "transportRuntime:adapters-proxy");
 
       expect(transportMuxClaim?.status).toBe("provisional");
       expect(transportMuxClaim?.unresolvedGaps).toContain(

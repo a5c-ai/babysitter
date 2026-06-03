@@ -1,7 +1,7 @@
 /**
  * Emits agent-mux compatible JSONL events to stdout during harness execution.
  *
- * Used when `--output-format amux-events` is passed to `invoke` or
+ * Used when `--output-format adapters-events` is passed to `invoke` or
  * `call`. Each event is a single JSON line matching the
  * {@link AmuxAgentEvent} shape so the agent-mux babysitter adapter's
  * `parseEvent()` can consume it directly.

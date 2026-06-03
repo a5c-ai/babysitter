@@ -1,5 +1,5 @@
 /**
- * `amux help` and `--help` support.
+ * `adapters help` and `--help` support.
  *
  * @see docs/10-cli-reference.md Section 26
  */
@@ -18,9 +18,9 @@ function readVersion(): string {
 const VERSION = readVersion();
 
 /** Top-level help text. */
-const MAIN_HELP = `amux - Agent Multiplexer CLI (v${VERSION})
+const MAIN_HELP = `adapters - Agent Multiplexer CLI (v${VERSION})
 
-Usage: amux [command] [subcommand] [args] [flags]
+Usage: adapters [command] [subcommand] [args] [flags]
 
 Commands:
   run [agent] [prompt]    Run an agent with a prompt
@@ -42,7 +42,7 @@ Commands:
   workspaces              Manage temp workspaces and git worktrees
   launch                  Launch a harness with provider config and stdin/stdout passthrough
   detect-host             Detect which agent harness we are running under
-  remote                  Install / update amux on a remote host
+  remote                  Install / update adapters on a remote host
   hooks                   Manage and dispatch unified agent hooks
   gateway                 Run the browser/mobile gateway service
   doctor                  Run environment health check
@@ -61,20 +61,20 @@ Global Flags:
   --help, -h              Show help
 
 Examples:
-  amux run claude "explain this code"
-  amux run --agent gemini --json "list all files"
-  amux adapters list
-  amux models list claude
-  amux sessions list claude
-  amux config get claude model
-  amux workspaces list
+  adapters run claude "explain this code"
+  adapters run --agent gemini --json "list all files"
+  adapters adapters list
+  adapters models list claude
+  adapters sessions list claude
+  adapters config get claude model
+  adapters workspaces list
 `;
 
 /** Command-specific help texts. */
 const COMMAND_HELP: Record<string, string> = {
-  run: `amux run - Run an agent with a prompt
+  run: `adapters run - Run an agent with a prompt
 
-Usage: amux run [<agent>] [<prompt>] [flags]
+Usage: adapters run [<agent>] [<prompt>] [flags]
 
 Flags:
   --model, -m <model>          Model ID
@@ -103,47 +103,47 @@ Flags:
   --json                       Emit JSONL event stream
 
 Examples:
-  amux run claude "explain this codebase"
-  amux run codex --yolo --no-session "add tests"
-  amux run --profile fast "review this PR"
+  adapters run claude "explain this codebase"
+  adapters run codex --yolo --no-session "add tests"
+  adapters run --profile fast "review this PR"
 `,
-  adapters: `amux adapters - Adapter discovery
+  adapters: `adapters adapters - Adapter discovery
 
 Usage:
-  amux adapters list [flags]
-  amux adapters detect <agent> [flags]
-  amux adapters info <agent> [flags]
+  adapters adapters list [flags]
+  adapters adapters detect <agent> [flags]
+  adapters adapters info <agent> [flags]
 
 Flags:
   --json    Output as JSON
 
 Examples:
-  amux adapters list
-  amux adapters detect claude
-  amux adapters info gemini
+  adapters adapters list
+  adapters adapters detect claude
+  adapters adapters info gemini
 `,
-  models: `amux models - Model registry
+  models: `adapters models - Model registry
 
 Usage:
-  amux models list <agent> [flags]
-  amux models info <agent> <model> [flags]
-  amux models refresh <agent>
+  adapters models list <agent> [flags]
+  adapters models info <agent> <model> [flags]
+  adapters models refresh <agent>
 
 Flags:
   --json    Output as JSON
 
 Examples:
-  amux models list claude
-  amux models info claude claude-sonnet-4-20250514
+  adapters models list claude
+  adapters models info claude claude-sonnet-4-20250514
 `,
-  sessions: `amux sessions - Session management
+  sessions: `adapters sessions - Session management
 
 Usage:
-  amux sessions list <agent> [flags]
-  amux sessions show <agent> <session-id>
-  amux sessions search <query> [flags]
-  amux sessions export <agent> <session-id> [flags]
-  amux sessions cost
+  adapters sessions list <agent> [flags]
+  adapters sessions show <agent> <session-id>
+  adapters sessions search <query> [flags]
+  adapters sessions export <agent> <session-id> [flags]
+  adapters sessions cost
 
 Flags:
   --since <date>     Filter sessions after this date
@@ -155,15 +155,15 @@ Flags:
   --format <fmt>     Output format: json, jsonl, markdown
   --json             Output as JSON
 `,
-  workspaces: `amux workspaces - Workspace lifecycle
+  workspaces: `adapters workspaces - Workspace lifecycle
 
 Usage:
-  amux workspaces list [--json]
-  amux workspaces create <name> --repo <path> [--repo <path>...] [--mode worktree|symlink]
-  amux workspaces archive <workspace>
-  amux workspaces cleanup <workspace>
-  amux workspaces recover <workspace>
-  amux workspaces delete <workspace> [--force]
+  adapters workspaces list [--json]
+  adapters workspaces create <name> --repo <path> [--repo <path>...] [--mode worktree|symlink]
+  adapters workspaces archive <workspace>
+  adapters workspaces cleanup <workspace>
+  adapters workspaces recover <workspace>
+  adapters workspaces delete <workspace> [--force]
 
 Flags:
   --repo <path>      Local cloned repository path (repeatable)
@@ -173,64 +173,64 @@ Flags:
   --force            Allow delete to clean up on disk first
   --json             Output as JSON
 `,
-  config: `amux config - Configuration management
+  config: `adapters config - Configuration management
 
 Usage:
-  amux config get <agent> [field]
-  amux config set <agent> <field> <value>
-  amux config schema <agent>
-  amux config validate <agent>
-  amux config reload [agent]
+  adapters config get <agent> [field]
+  adapters config set <agent> <field> <value>
+  adapters config schema <agent>
+  adapters config validate <agent>
+  adapters config reload [agent]
 
 Flags:
   --scope <scope>    global or project
   --json             Output as JSON
 
 Examples:
-  amux config get claude
-  amux config get claude model
-  amux config set claude model claude-sonnet-4-20250514
-  amux config schema codex
+  adapters config get claude
+  adapters config get claude model
+  adapters config set claude model claude-sonnet-4-20250514
+  adapters config schema codex
 `,
-  profiles: `amux profiles - Profile management
+  profiles: `adapters profiles - Profile management
 
 Usage:
-  amux profiles list [flags]
-  amux profiles show <name>
-  amux profiles set <name> [run-flags]
-  amux profiles delete <name> [flags]
-  amux profiles apply <name>
+  adapters profiles list [flags]
+  adapters profiles show <name>
+  adapters profiles set <name> [run-flags]
+  adapters profiles delete <name> [flags]
+  adapters profiles apply <name>
 
 Flags:
   --scope <scope>    global or project
   --json             Output as JSON
 
 Examples:
-  amux profiles list
-  amux profiles set fast --agent claude --yolo --max-turns 5
-  amux profiles show fast
-  amux profiles delete fast
+  adapters profiles list
+  adapters profiles set fast --agent claude --yolo --max-turns 5
+  adapters profiles show fast
+  adapters profiles delete fast
 `,
-  auth: `amux auth - Authentication
+  auth: `adapters auth - Authentication
 
 Usage:
-  amux auth check [agent]
-  amux auth setup <agent>
+  adapters auth check [agent]
+  adapters auth setup <agent>
 
 Flags:
   --json    Output as JSON
 
 Examples:
-  amux auth check
-  amux auth check claude
-  amux auth setup gemini
+  adapters auth check
+  adapters auth check claude
+  adapters auth setup gemini
 `,
-  install: `amux install - Install agent CLI binaries
+  install: `adapters install - Install agent CLI binaries
 
 Usage:
-  amux install <agent> [--force] [--dry-run] [--version <v>] [--json]
-  amux install --all [--force] [--dry-run] [--json]
-  amux uninstall <agent> [--json]
+  adapters install <agent> [--force] [--dry-run] [--version <v>] [--json]
+  adapters install --all [--force] [--dry-run] [--json]
+  adapters uninstall <agent> [--json]
 
 Flags:
   --all             Install every registered agent
@@ -240,15 +240,15 @@ Flags:
   --json            Output as JSON
 
 Examples:
-  amux install claude
-  amux install --all --dry-run
-  amux uninstall codex
+  adapters install claude
+  adapters install --all --dry-run
+  adapters uninstall codex
 `,
-  update: `amux update - Update an installed agent CLI
+  update: `adapters update - Update an installed agent CLI
 
 Usage:
-  amux update <agent> [--dry-run] [--json]
-  amux update --all [--dry-run] [--json]
+  adapters update <agent> [--dry-run] [--json]
+  adapters update --all [--dry-run] [--json]
 
 Flags:
   --all       Update every registered agent
@@ -256,114 +256,114 @@ Flags:
   --json      Output as JSON
 
 Examples:
-  amux update claude
-  amux update --all
+  adapters update claude
+  adapters update --all
 `,
-  detect: `amux detect - Report installed version, path, and status per agent
+  detect: `adapters detect - Report installed version, path, and status per agent
 
 Usage:
-  amux detect <agent> [--json]
-  amux detect --all [--json]
+  adapters detect <agent> [--json]
+  adapters detect --all [--json]
 
 Flags:
   --all     Detect every registered agent
   --json    Output as JSON
 
 Examples:
-  amux detect claude
-  amux detect --all --json
+  adapters detect claude
+  adapters detect --all --json
 `,
-  uninstall: `amux uninstall - Uninstall an agent CLI binary
+  uninstall: `adapters uninstall - Uninstall an agent CLI binary
 
 Usage:
-  amux uninstall <agent> [--json]
+  adapters uninstall <agent> [--json]
 `,
-  'detect-host': `amux detect-host - Detect the current agent harness
+  'detect-host': `adapters detect-host - Detect the current agent harness
 
 Usage:
-  amux detect-host [--json]
+  adapters detect-host [--json]
 
 Inspects env vars, parent process, and TTY signals to report which
 coding-agent harness (claude, codex, gemini, ...) this CLI is running
 inside, if any.
 `,
-  remote: `amux remote - Install / update amux on a remote host
+  remote: `adapters remote - Install / update adapters on a remote host
 
 Usage:
-  amux remote install <host> --mode <ssh|docker|k8s|local> [flags]
-  amux remote update  <host> --mode <ssh|docker|k8s|local> [flags]
+  adapters remote install <host> --mode <ssh|docker|k8s|local> [flags]
+  adapters remote update  <host> --mode <ssh|docker|k8s|local> [flags]
 
 Flags:
   --mode <mode>            ssh | docker | k8s | local (required)
-  --harness <agent>        Agent to install after amux (default: claude)
+  --harness <agent>        Agent to install after adapters (default: claude)
   --image <img>            Docker image (docker mode)
   --identity-file <path>   SSH key path (ssh mode)
   --port <n>               SSH port (ssh mode)
   --namespace <ns>         Kubernetes namespace (k8s mode)
   --context <ctx>          Kubernetes context (k8s mode)
-  --force                  Reinstall even if amux is already present
+  --force                  Reinstall even if adapters is already present
   --dry-run                Print the planned commands without executing
   --json                   Output as JSON
 
 Examples:
-  amux remote install host.example.com --mode ssh --dry-run
-  amux remote install my-pod --mode k8s --namespace dev --harness codex
+  adapters remote install host.example.com --mode ssh --dry-run
+  adapters remote install my-pod --mode k8s --namespace dev --harness codex
 `,
-  plugins: `amux plugins - Plugin management
+  plugins: `adapters plugins - Plugin management
 
 Usage:
-  amux plugins list <agent> [flags]
-  amux plugins install <agent> <plugin> [flags]
-  amux plugins uninstall <agent> <plugin>
+  adapters plugins list <agent> [flags]
+  adapters plugins install <agent> <plugin> [flags]
+  adapters plugins uninstall <agent> <plugin>
 
 Flags:
   --version <ver>    Pin to specific version
   --global           Install globally
   --json             Output as JSON
 `,
-  plugin: `amux plugin - Native agent plugin management
+  plugin: `adapters plugin - Native agent plugin management
 
 Usage:
-  amux plugin list <agent>
-  amux plugin install <agent> <plugin>
-  amux plugin enable <agent> <plugin>
-  amux plugin disable <agent> <plugin>
-  amux plugin marketplace <agent> [cmd]
+  adapters plugin list <agent>
+  adapters plugin install <agent> <plugin>
+  adapters plugin enable <agent> <plugin>
+  adapters plugin disable <agent> <plugin>
+  adapters plugin marketplace <agent> [cmd]
 
 Flags:
   --help    Show help
 
 Examples:
-  amux plugin list claude
-  amux plugin install claude filesystem-watcher
-  amux plugin marketplace claude
+  adapters plugin list claude
+  adapters plugin install claude filesystem-watcher
+  adapters plugin marketplace claude
 
 Note: This command delegates to native agent plugin systems.
-      For MCP server management, use "amux mcp" instead.
+      For MCP server management, use "adapters mcp" instead.
 `,
-  mcp: `amux mcp - MCP (Model Context Protocol) server management
+  mcp: `adapters mcp - MCP (Model Context Protocol) server management
 
 Usage:
-  amux mcp list <agent>
-  amux mcp install <agent> <server>
-  amux mcp enable <agent> <server>
-  amux mcp disable <agent> <server>
+  adapters mcp list <agent>
+  adapters mcp install <agent> <server>
+  adapters mcp enable <agent> <server>
+  adapters mcp disable <agent> <server>
 
 Examples:
-  amux mcp list claude
-  amux mcp install claude filesystem
-  amux mcp enable claude memory
+  adapters mcp list claude
+  adapters mcp install claude filesystem
+  adapters mcp enable claude memory
 `,
-  hooks: `amux hooks - Unified hook management and dispatch
+  hooks: `adapters hooks - Unified hook management and dispatch
 
 Usage:
-  amux hooks discover [--json]              List supported hook types per harness
-  amux hooks list [--agent <a>] [--json]    List registered hooks
-  amux hooks add --id <id> --agent <a> --hook-type <t> --handler <builtin|command|script> --target <t>
-  amux hooks remove <id>
-  amux hooks set <id> [--priority N] [--enabled true|false]
-  amux hooks handle <agent> <hookType>      Dispatch a hook (reads payload JSON from stdin)
-  amux hooks install <agent> <hookType> <command>   Write native hook entry into harness config
+  adapters hooks discover [--json]              List supported hook types per harness
+  adapters hooks list [--agent <a>] [--json]    List registered hooks
+  adapters hooks add --id <id> --agent <a> --hook-type <t> --handler <builtin|command|script> --target <t>
+  adapters hooks remove <id>
+  adapters hooks set <id> [--priority N] [--enabled true|false]
+  adapters hooks handle <agent> <hookType>      Dispatch a hook (reads payload JSON from stdin)
+  adapters hooks install <agent> <hookType> <command>   Write native hook entry into harness config
 
 Flags:
   --global / --project     Target scope (default: project)
@@ -372,13 +372,13 @@ Flags:
   --json                   Output as JSON
 
 Examples:
-  amux hooks discover
-  amux hooks add --id trace-all --agent '*' --hook-type '*' --handler builtin --target trace
-  amux hooks install claude PreToolUse "amux hooks handle claude PreToolUse"
+  adapters hooks discover
+  adapters hooks add --id trace-all --agent '*' --hook-type '*' --handler builtin --target trace
+  adapters hooks install claude PreToolUse "adapters hooks handle claude PreToolUse"
 `,
-  launch: `amux launch - Launch a harness with provider/model config
+  launch: `adapters launch - Launch a harness with provider/model config
 
-Usage: amux launch <harness> [provider] [flags...]
+Usage: adapters launch <harness> [provider] [flags...]
 
 Provider Flags:
   --model, -m <model>          Model identifier
@@ -390,7 +390,7 @@ Provider Flags:
   --auth-command <cmd>         External command that emits a bearer token
 
 Proxy Flags:
-  --with-proxy-if-needed       Auto-launch amux-proxy if harness can't speak provider natively
+  --with-proxy-if-needed       Auto-launch adapters-proxy if harness can't speak provider natively
   --with-proxy                 Force proxy even if not needed
   --no-proxy                   Disable proxy (error if needed)
   --proxy-port <port>          Proxy listen port (0=auto)
@@ -404,43 +404,43 @@ Session Flags:
   --dry-run                    Print resolved plan as JSON, don't execute
 
 Examples:
-  amux launch claude bedrock --region us-east-1
-  amux launch codex bedrock --with-proxy-if-needed -p "fix the bug"
-  amux launch gemini vertex --project my-proj --region us-central1
-  amux launch claude ollama --model qwen3:32b --with-proxy-if-needed
-  amux launch claude anthropic --dry-run
+  adapters launch claude bedrock --region us-east-1
+  adapters launch codex bedrock --with-proxy-if-needed -p "fix the bug"
+  adapters launch gemini vertex --project my-proj --region us-central1
+  adapters launch claude ollama --model qwen3:32b --with-proxy-if-needed
+  adapters launch claude anthropic --dry-run
 `,
-  gateway: `amux gateway - Gateway service and token management
+  gateway: `adapters gateway - Gateway service and token management
 
 Usage:
-  amux gateway serve [--config <path>] [--host <host>] [--port <port>] [--webui <path>] [--no-webui]
-  amux gateway tokens list [--config <path>]
-  amux gateway tokens create [--config <path>] [--name <name>] [--ttl-ms <ms>] [--qr] [--url <url>]
-  amux gateway tokens revoke <id> [--config <path>]
-  amux gateway status [--url <url>]
+  adapters gateway serve [--config <path>] [--host <host>] [--port <port>] [--webui <path>] [--no-webui]
+  adapters gateway tokens list [--config <path>]
+  adapters gateway tokens create [--config <path>] [--name <name>] [--ttl-ms <ms>] [--qr] [--url <url>]
+  adapters gateway tokens revoke <id> [--config <path>]
+  adapters gateway status [--url <url>]
 
 Examples:
-  amux gateway serve
-  amux gateway tokens create --name phone --qr
-  amux gateway status --url http://127.0.0.1:7878
+  adapters gateway serve
+  adapters gateway tokens create --name phone --qr
+  adapters gateway status --url http://127.0.0.1:7878
 `,
-  doctor: `amux doctor - Health check for amux environment
+  doctor: `adapters doctor - Health check for adapters environment
 
 Usage:
-  amux doctor [--json]
+  adapters doctor [--json]
 
 Aggregates:
   - Node.js version (>= 20.9.0)
   - Installed harness CLIs and versions (per adapter detectInstallation)
   - Auth status per adapter (detectAuth)
   - Config file presence per adapter
-  - Hook registry + .amux paths
+  - Hook registry + .adapters paths
 
 Use this first when filing a bug. The text report is stable for copy/paste.
 `,
-  skill: `amux skill - Manage skill folders for agents
+  skill: `adapters skill - Manage skill folders for agents
 
-Usage: amux skill <subcommand> <agent> [args] [--global|--project]
+Usage: adapters skill <subcommand> <agent> [args] [--global|--project]
 
 Manage skill folders for an agent (file-convention based, no native command).
 
@@ -457,13 +457,13 @@ Scope flags (default: --project):
   --project                          Use the project-level skills dir
 
 Examples:
-  amux skill list claude
-  amux skill add claude ./skills/my-skill --global
-  amux skill remove claude my-skill --project
+  adapters skill list claude
+  adapters skill add claude ./skills/my-skill --global
+  adapters skill remove claude my-skill --project
 `,
-  agent: `amux agent - Manage custom sub-agents for harnesses
+  agent: `adapters agent - Manage custom sub-agents for harnesses
 
-Usage: amux agent <subcommand> <agent> [args] [--global|--project]
+Usage: adapters agent <subcommand> <agent> [args] [--global|--project]
 
 Manage custom sub-agents for a harness (file-convention based, no native command).
 
@@ -480,9 +480,9 @@ Scope flags (default: --project):
   --project                          Use the project-level agents dir
 
 Examples:
-  amux agent list claude
-  amux agent add claude ./my-agent.md --global
-  amux agent remove claude my-agent.md --project
+  adapters agent list claude
+  adapters agent add claude ./my-agent.md --global
+  adapters agent remove claude my-agent.md --project
 `,
 };
 
@@ -501,5 +501,5 @@ export function printHelp(command?: string): void {
  * Print version.
  */
 export function printVersion(): void {
-  process.stdout.write(`amux v${VERSION}\n`);
+  process.stdout.write(`adapters v${VERSION}\n`);
 }

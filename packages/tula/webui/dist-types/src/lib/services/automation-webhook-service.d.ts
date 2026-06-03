@@ -1,4 +1,4 @@
-import type { AutomationExecutionRecord, AutomationExecutionStatus, AutomationRule } from "@a5c-ai/adapters-comm/automation";
+import type { AutomationExecutionRecord, AutomationExecutionStatus, AutomationRule } from "@a5c-ai/comm-adapter/automation";
 import { type KanbanStorageDeps, type StoredKanbanIssue } from "./kanban-storage";
 type WebhookHeaders = Pick<Headers, "get">;
 export type AutomationWebhookDeliveryOutcome = AutomationExecutionStatus;

@@ -1,13 +1,13 @@
 /**
  * Unified hooks system — types + HookConfigManager.
  *
- * Provides a harness-agnostic format for hook payloads and results so amux
+ * Provides a harness-agnostic format for hook payloads and results so adapters
  * can dispatch to user-registered hooks and programmatic built-ins regardless
  * of which harness emitted the event.
  *
  * Configs are stored at:
- *   - `~/.amux/hooks.json` (global)
- *   - `<cwd>/.amux/hooks.json` (project — overrides global by id)
+ *   - `~/.adapters/hooks.json` (global)
+ *   - `<cwd>/.adapters/hooks.json` (project — overrides global by id)
  */
 
 import * as path from 'node:path';
@@ -59,11 +59,11 @@ interface HooksFile {
 }
 
 function defaultGlobalPath(): string {
-  return path.join(os.homedir(), '.amux', 'hooks.json');
+  return path.join(os.homedir(), '.adapters', 'hooks.json');
 }
 
 function defaultProjectPath(cwd: string = process.cwd()): string {
-  return path.join(cwd, '.amux', 'hooks.json');
+  return path.join(cwd, '.adapters', 'hooks.json');
 }
 
 async function readFile(p: string): Promise<HooksFile> {

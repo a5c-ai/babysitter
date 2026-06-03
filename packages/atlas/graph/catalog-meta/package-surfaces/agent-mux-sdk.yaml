@@ -12,7 +12,7 @@ attributes:
   sourceOfTruthRole: wrapper-over-graph
   publishedTo: npm
   versionPolicy: semver
-  # Source: packages/adapters/sdk/package.json (name @a5c-ai/adapters, version 0.4.9, bin.amux)
+  # Source: packages/adapters/sdk/package.json (name @a5c-ai/adapters, version 0.4.9, bin.adapters)
 edges:
   references_path:
     - target: path:agent-mux-sdk

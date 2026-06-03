@@ -581,7 +581,7 @@ describe('persistSessionEvent — budget enforcement', () => {
     const attempt = createResource('AgentDispatchAttempt', { name: `${runName}-attempt-1` }, {
       organizationRef: 'default', agentDispatchRun: runName, attemptReason: 'initial', agentStackSnapshot: {},
     });
-    attempt.status = { agentMuxSessionId: 'sess-1', agentMuxRunId: 'amux-1' };
+    attempt.status = { agentMuxSessionId: 'sess-1', agentMuxRunId: 'adapters-1' };
     return attempt;
   }
 

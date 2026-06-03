@@ -3,8 +3,8 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { StreamAssembler } from '@a5c-ai/adapters-comm';
-import type { ParseContext } from '@a5c-ai/adapters-comm';
+import { StreamAssembler } from '@a5c-ai/comm-adapter';
+import type { ParseContext } from '@a5c-ai/comm-adapter';
 import { CodexAdapter } from '../src/codex-adapter.js';
 
 function makeContext(overrides?: Partial<ParseContext>): ParseContext {

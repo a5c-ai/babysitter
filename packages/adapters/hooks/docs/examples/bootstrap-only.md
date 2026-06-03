@@ -24,7 +24,7 @@ In `.claude/settings.json`:
     "SessionStart": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event SessionStart --bootstrap-only"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event SessionStart --bootstrap-only"
       }
     ]
   }
@@ -39,7 +39,7 @@ Or use the dedicated bootstrap command:
     "SessionStart": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli bootstrap --adapter claude"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli bootstrap --adapter claude"
       }
     ]
   }
@@ -56,7 +56,7 @@ same way `invoke --bootstrap-only` does.
 ## Codex Setup
 
 ```bash
-npx -y @a5c-ai/adapters-hooks-cli invoke --adapter codex --bootstrap-only
+npx -y @a5c-ai/hooks-adapter-cli invoke --adapter codex --bootstrap-only
 ```
 
 ---
@@ -105,7 +105,7 @@ Once bootstrap is working, add handlers by switching to a registry:
     "SessionStart": [
       {
         "type": "command",
-        "command": "npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude --native-event SessionStart"
+        "command": "npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude --native-event SessionStart"
       }
     ]
   }

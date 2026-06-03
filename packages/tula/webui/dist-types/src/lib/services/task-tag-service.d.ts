@@ -1,4 +1,4 @@
-import { type KanbanTaskTag } from "@a5c-ai/adapters-comm/kanban";
+import { type KanbanTaskTag } from "@a5c-ai/comm-adapter/kanban";
 import { type KanbanStorageDeps } from "./kanban-storage";
 export interface CreateTaskTagInput {
     readonly key: string;

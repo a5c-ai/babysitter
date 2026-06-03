@@ -55,9 +55,9 @@ afterEach(() => {
 });
 
 describe("discoverExternalAgents", () => {
-  it("returns unavailable when neither agent-mux nor amux doctor is available", async () => {
+  it("returns unavailable when neither agent-mux nor adapters doctor is available", async () => {
     _setExternalAgentDiscoveryModuleForTesting(null);
-    stubExecFile(new Error("amux not found"));
+    stubExecFile(new Error("adapters not found"));
 
     await expect(discoverExternalAgents({ force: true })).resolves.toEqual({
       available: false,
@@ -148,7 +148,7 @@ describe("discoverExternalAgents", () => {
     expect(mockedExecFile).not.toHaveBeenCalled();
   });
 
-  it("falls back to amux doctor --json when the module is unavailable", async () => {
+  it("falls back to adapters doctor --json when the module is unavailable", async () => {
     _setExternalAgentDiscoveryModuleForTesting(null);
     process.env.AGENT_MUX_PROVIDER = "claude";
 
@@ -175,7 +175,7 @@ describe("discoverExternalAgents", () => {
     const result = await discoverExternalAgents({ cwd: "/tmp/project", timeout: 1234, force: true });
 
     expect(mockedExecFile).toHaveBeenCalledWith(
-      "amux",
+      "adapters",
       ["doctor", "--json"],
       expect.objectContaining({ cwd: "/tmp/project", timeout: 1234 }),
       expect.any(Function),

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { StreamAssembler, buildInvocationCommand } from '@a5c-ai/adapters-comm';
-import type { ParseContext, RunOptions } from '@a5c-ai/adapters-comm';
+import { StreamAssembler, buildInvocationCommand } from '@a5c-ai/comm-adapter';
+import type { ParseContext, RunOptions } from '@a5c-ai/comm-adapter';
 import { AgentMuxRemoteAdapter } from '../src/agent-mux-remote-adapter.js';
 
 function makeContext(overrides?: Partial<ParseContext>): ParseContext {
@@ -32,19 +32,19 @@ describe('AgentMuxRemoteAdapter (transport-agnostic)', () => {
     process.env = { ...prevEnv };
   });
 
-  it('has identity agent-mux-remote and cliCommand=amux', () => {
+  it('has identity agent-mux-remote and cliCommand=adapters', () => {
     expect(adapter.agent).toBe('agent-mux-remote');
-    expect(adapter.cliCommand).toBe('amux');
+    expect(adapter.cliCommand).toBe('adapters');
   });
 
-  it('buildSpawnArgs produces plain `amux run ...` (no ssh in adapter)', () => {
+  it('buildSpawnArgs produces plain `adapters run ...` (no ssh in adapter)', () => {
     const opts: RunOptions = {
       agent: 'agent-mux-remote',
       prompt: 'Hello remote',
       env: { AGENT_MUX_REMOTE_AGENT: 'codex' },
     };
     const sa = adapter.buildSpawnArgs(opts);
-    expect(sa.command).toBe('amux');
+    expect(sa.command).toBe('adapters');
     expect(sa.args[0]).toBe('run');
     expect(sa.args).toContain('--agent');
     expect(sa.args).toContain('codex');
@@ -105,7 +105,7 @@ describe('AgentMuxRemoteAdapter × invocation modes', () => {
     env: { AGENT_MUX_REMOTE_AGENT: 'claude' },
   };
 
-  it('ssh invocation wraps the plain amux command with ssh', () => {
+  it('ssh invocation wraps the plain adapters command with ssh', () => {
     const sa = adapter.buildSpawnArgs(opts);
     const inv = buildInvocationCommand(
       { mode: 'ssh', host: 'user@example.com', identityFile: '/tmp/key' },
@@ -115,12 +115,12 @@ describe('AgentMuxRemoteAdapter × invocation modes', () => {
     expect(inv.command).toBe('ssh');
     expect(inv.args).toContain('user@example.com');
     const remote = inv.args[inv.args.length - 1] as string;
-    expect(remote).toContain('amux');
+    expect(remote).toContain('adapters');
     expect(remote).toContain('run');
     expect(remote).toContain('claude');
   });
 
-  it('docker invocation wraps the plain amux command with docker run', () => {
+  it('docker invocation wraps the plain adapters command with docker run', () => {
     const sa = adapter.buildSpawnArgs(opts);
     const inv = buildInvocationCommand(
       { mode: 'docker', image: 'ghcr.io/a5c-ai/agent-mux:latest' },
@@ -130,13 +130,13 @@ describe('AgentMuxRemoteAdapter × invocation modes', () => {
     expect(inv.command).toBe('docker');
     expect(inv.args[0]).toBe('run');
     expect(inv.args).toContain('ghcr.io/a5c-ai/agent-mux:latest');
-    expect(inv.args).toContain('amux');
+    expect(inv.args).toContain('adapters');
   });
 
-  it('local invocation returns amux unchanged', () => {
+  it('local invocation returns adapters unchanged', () => {
     const sa = adapter.buildSpawnArgs(opts);
     const inv = buildInvocationCommand({ mode: 'local' }, sa, adapter.agent);
-    expect(inv.command).toBe('amux');
+    expect(inv.command).toBe('adapters');
     expect(inv.args[0]).toBe('run');
   });
 });

@@ -1,4 +1,4 @@
-// Public API for @a5c-ai/adapters-extensions
+// Public API for @a5c-ai/extensions-adapter
 
 export * from './types.js';
 export { A5C_PLUGIN_SCHEMA, validate as validateSchema } from './schema.js';

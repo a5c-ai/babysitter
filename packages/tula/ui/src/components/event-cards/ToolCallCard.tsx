@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 
-import { classifyTool, type AgentName } from '@a5c-ai/adapters-comm/browser';
+import { classifyTool, type AgentName } from '@a5c-ai/comm-adapter/browser';
 
 import { Card } from '../primitives/Card.js';
 import { Text } from '../primitives/Text.js';

@@ -64,7 +64,7 @@ Agent orchestration implications:
   - Important files:
     - `packages/adapters/core/src/types.ts`
     - `packages/adapters/core/src/session-manager.ts`
-    - `packages/adapters/core/src/workspace-service.ts` if present in this branch; otherwise follow imports from `@a5c-ai/adapters-comm`.
+    - `packages/adapters/core/src/workspace-service.ts` if present in this branch; otherwise follow imports from `@a5c-ai/comm-adapter`.
 - `packages/adapters/gateway/`
   - HTTP/WebSocket gateway and server-side run/session orchestration.
   - Important files:

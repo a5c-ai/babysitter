@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-agent-comm-mux
 attributes:
-  packageId: "@a5c-ai/adapters-comm"
-  packageName: "@a5c-ai/adapters-comm"
+  packageId: "@a5c-ai/comm-adapter"
+  packageName: "@a5c-ai/comm-adapter"
   workspacePath: packages/adapters/core
   moduleType: typescript
   surfaceKinds:
@@ -13,4 +13,4 @@ attributes:
   versionPolicy: semver
 edges:
   references_path:
-    - target: path:amux-hooks-global
+    - target: path:adapters-hooks-global

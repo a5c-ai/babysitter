@@ -1,7 +1,7 @@
 /**
  * Read agent-mux interaction responses from stdin.
  *
- * When agent-platform runs under agent-mux with `--output-format amux-events`,
+ * When agent-platform runs under agent-mux with `--output-format adapters-events`,
  * the mux adapter may write JSONL interaction events to stdin (e.g.
  * `approval_response`, `input_response`). This module provides an
  * async-iterable reader that parses those events.
@@ -62,7 +62,7 @@ export function createAmuxStdinReader(): AsyncIterable<AmuxInteractionEvent> {
       try {
         parsed = JSON.parse(trimmed) as Record<string, unknown>;
       } catch (e) {
-        process.stderr.write(`[babysitter] amux stdin: invalid JSON line, skipping\n`);
+        process.stderr.write(`[babysitter] adapters stdin: invalid JSON line, skipping\n`);
         continue;
       }
 

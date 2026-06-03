@@ -89,7 +89,7 @@
       "packages/hooks-mux/core/src/normalizer/__tests__/normalizer.test.ts",
       "packages/hooks-mux/core/src/__tests__/handler-timeout.test.ts",
       "packages/hooks-mux/core/src/__tests__/integration/invoke-fanout.test.ts",
-      "packages/tula/platform/src/harness/amux/amuxBridge.ts",
+      "packages/tula/platform/src/harness/adapters/amuxBridge.ts",
       "packages/tula/platform/src/mcp/client/toolRegistry.ts",
       "packages/tula/platform/src/mcp/client/executor.ts",
       "docs/agent-stack/hooks/missing-capabilities.md"
@@ -103,7 +103,7 @@
     "HTTP handlers POST normalized hook events, parse UnifiedHookResult JSON, enforce timeout/cancellation, validate URLs, and interpolate only explicitly allowed environment variables into headers.",
     "MCP tool handlers use the existing tool-mux/MCP registry direction or a narrow injectable executor seam and do not create a second registry.",
     "Prompt and agent handlers use bounded executor seams with timeout/depth/max-turn controls and deterministic unavailable behavior when no executor is configured.",
-    "Agent-platform AMUX bridge preserves typed handler config when it currently narrows or drops fields.",
+    "Agent-platform ADAPTERS bridge preserves typed handler config when it currently narrows or drops fields.",
     "Docs in docs/agent-stack/hooks/missing-capabilities.md accurately reflect implemented core support and any deferred live platform integration.",
     "Contract tests cover legacy command behavior, each new handler type, unsupported types, timeouts, fail-open/fail-closed behavior, HTTP safety, MCP registry reuse assumptions, prompt/agent bounds, and bridge pass-through where changed."
   ],
@@ -131,8 +131,8 @@
     "packages/hooks-mux/core/src/normalizer/__tests__/normalizer.test.ts",
     "packages/hooks-mux/core/src/__tests__/handler-timeout.test.ts",
     "packages/hooks-mux/core/src/__tests__/integration/invoke-fanout.test.ts",
-    "packages/tula/platform/src/harness/amux/amuxBridge.ts",
-    "packages/tula/platform/src/harness/amux/__tests__/amuxBridge.test.ts"
+    "packages/tula/platform/src/harness/adapters/amuxBridge.ts",
+    "packages/tula/platform/src/harness/adapters/__tests__/amuxBridge.test.ts"
   ],
   "verificationCommands": [
     "npm run build:hooks-mux",
@@ -141,7 +141,7 @@
     "npm run build:sdk",
     "npm run test:sdk",
     "npm run verify:metadata",
-    "npm --workspace @a5c-ai/tula-platform test -- src/harness/amux/__tests__/amuxBridge.test.ts",
+    "npm --workspace @a5c-ai/tula-platform test -- src/harness/adapters/__tests__/amuxBridge.test.ts",
     "git diff --check"
   ],
   "qualityGates": [

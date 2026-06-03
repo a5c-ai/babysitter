@@ -70,8 +70,8 @@ export const FLAG_PARSERS: Record<string, FlagParser> = {
   },
   "--output-format": (parsed, args, index) => {
     const value = expectFlagValue(args, index + 1, "--output-format");
-    if (value !== "json" && value !== "text" && value !== "amux-events") {
-      throw new Error(`--output-format must be one of: json, text, amux-events (got "${value}")`);
+    if (value !== "json" && value !== "text" && value !== "adapters-events") {
+      throw new Error(`--output-format must be one of: json, text, adapters-events (got "${value}")`);
     }
     parsed.outputFormat = value;
     return index + 1;

@@ -38,13 +38,13 @@ The SDK installer path may delegate harness CLI install to agent-mux adapter ins
 
 ## Path B: Agent-Mux Plugin And Session E2E
 
-This path tests a real or mocked agent session controlled by `agent-mux`. It should use `amux run <agent>` or `createClient().run({ agent })`, not `agent-platform call`.
+This path tests a real or mocked agent session controlled by `agent-mux`. It should use `adapters run <agent>` or `createClient().run({ agent })`, not `agent-platform call`.
 
 | Phase | Required action | Required assertions |
 | --- | --- | --- |
 | Capability gate | Read adapter capabilities for the target agent | Plugin-manager tests run only when `supportsPlugins` is true; otherwise the job records a skip/capability error |
 | Plugin precondition | Install or verify the Babysitter harness plugin with the correct native or SDK installer for that harness | Manifest or registry has the Babysitter plugin exactly once |
-| Start agent-mux session | Run `amux run <agent> --prompt <fixture>` or equivalent SDK call | Event stream has `session_start`, content/tool/hook events as applicable, and `session_end` |
+| Start agent-mux session | Run `adapters run <agent> --prompt <fixture>` or equivalent SDK call | Event stream has `session_start`, content/tool/hook events as applicable, and `session_end` |
 | Invoke Babysitter plugin command | Prompt issues `/babysitter:call` or the harness-equivalent Babysitter command inside the agent session | A Babysitter run ID is produced and can be inspected with SDK run commands |
 | Verify process lifecycle | Inspect run status/events after the session returns | Process was created, ran, posted at least one result, and reached `completed` |
 | Verify hook behavior | Inspect normalized hook logs or agent-mux runtime-hook events | Stop hook fired, continuation/stop decision was honored, and no plugin bypass path was used |
@@ -85,7 +85,7 @@ Required assertions:
 - Missing credentials should skip model-backed jobs before any provider call begins.
 - A selected setup job should fail if installer preconditions are unavailable.
 - A selected agent-platform runtime job should fail if it tries to run installer commands.
-- Use of the deprecated `babysitter harness:call` alias in new runtime tests should fail review; use `agent-platform call` for agent-platform runtime or `amux run` for agent-mux session E2E.
+- Use of the deprecated `babysitter harness:call` alias in new runtime tests should fail review; use `agent-platform call` for agent-platform runtime or `adapters run` for agent-mux session E2E.
 - Any log containing a raw secret must fail the job and block artifact upload until redaction is fixed.
 
 ## `install-plugins` Wrapper Acceptance Criteria

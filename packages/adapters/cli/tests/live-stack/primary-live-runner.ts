@@ -74,7 +74,7 @@ export function buildPrimaryLiveStackCommands(
   const prompt = buildPrompt(scenario, traceId, options.env);
 
   // Tula in BP mode: uses native babysitter support (tula call --process).
-  // Tula in vanilla mode: falls through to the standard amux launch path below.
+  // Tula in vanilla mode: falls through to the standard adapters launch path below.
   if (scenario.agent.agent === 'tula' && scenario.agent.installMode === 'babysitter-plugin') {
     commandEnv['BABYSITTER_RUNS_DIR'] = commandEnv['BABYSITTER_RUNS_DIR'] ?? path.join(options.cwd, '.a5c', 'runs');
     commandEnv['BABYSITTER_RUNS_SCOPE'] = commandEnv['BABYSITTER_RUNS_SCOPE'] ?? 'repo';
@@ -126,7 +126,7 @@ fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.
     const runCommand = commandExecution(
       { ...commandEnv, AGENT_MUX_PROVIDER: scenario.model.agentMuxProvider },
       'LIVE_STACK_AGENT_MUX_BIN',
-      'amux',
+      'adapters',
       [
         'run',
         'babysitter',
@@ -151,14 +151,14 @@ fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.
 
     if (scenario.agent.installMode === 'vanilla') {
       return [
-        commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'amux', ['install', 'babysitter', '--json'], options.cwd, SETUP_TIMEOUT_MS),
+        commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'adapters', ['install', 'babysitter', '--json'], options.cwd, SETUP_TIMEOUT_MS),
         runCommand,
       ];
     }
 
     return [
       commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['run', 'generate:plugins'], options.cwd, SETUP_TIMEOUT_MS),
-      commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'amux', ['install', 'babysitter', '--json'], options.cwd, SETUP_TIMEOUT_MS),
+      commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'adapters', ['install', 'babysitter', '--json'], options.cwd, SETUP_TIMEOUT_MS),
       commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/sdk'], options.cwd, SETUP_TIMEOUT_MS),
       generatedPluginInstallCommand(commandEnv, scenario, options.cwd, SETUP_TIMEOUT_MS),
       runCommand,
@@ -168,14 +168,14 @@ fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.
   const installTarget = scenario.agent.agentMuxAgent;
   const isBabysitterPlugin = scenario.agent.installMode === 'babysitter-plugin';
 
-  // All scenarios use `amux launch` which handles provider resolution, proxy
+  // All scenarios use `adapters launch` which handles provider resolution, proxy
   // setup, and harness-specific args. babysitter-plugin hooks fire from INSIDE
   // the harness (hooks-mux is installed into harness settings) — they don't
-  // need amux run's RuntimeHooks system.
+  // need adapters run's RuntimeHooks system.
   const executionCommand = commandExecution(
     commandEnv,
     'LIVE_STACK_AGENT_MUX_BIN',
-    'amux',
+    'adapters',
     [
       'launch',
       installTarget,
@@ -209,10 +209,10 @@ fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.
 
   if (scenario.agent.installMode === 'vanilla') {
     // Tula is a monorepo agent — already linked to PATH by the CI workflow.
-    // Other agents need amux install to fetch their CLI from npm.
+    // Other agents need adapters install to fetch their CLI from npm.
     const installCommands = installTarget === 'tula'
       ? []
-      : [commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'amux', ['install', installTarget, '--json'], options.cwd, SETUP_TIMEOUT_MS)];
+      : [commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'adapters', ['install', installTarget, '--json'], options.cwd, SETUP_TIMEOUT_MS)];
     return [
       ...installCommands,
       ensureLiveArtifactDirCommand(commandEnv, options.cwd),
@@ -223,7 +223,7 @@ fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.
   const processMode = options.env['LIVE_STACK_PROCESS_MODE'] ?? 'predefined';
   const setupCommands = [
     commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['run', 'generate:plugins'], options.cwd, SETUP_TIMEOUT_MS),
-    commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'amux', ['install', installTarget, '--json'], options.cwd, SETUP_TIMEOUT_MS),
+    commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'adapters', ['install', installTarget, '--json'], options.cwd, SETUP_TIMEOUT_MS),
     commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/sdk'], options.cwd, SETUP_TIMEOUT_MS),
     commandExecution(commandEnv, 'LIVE_STACK_NPM_BIN', 'npm', ['install', '--global', './packages/adapters/hooks/cli'], options.cwd, SETUP_TIMEOUT_MS),
     generatedPluginInstallCommand(commandEnv, scenario, options.cwd, SETUP_TIMEOUT_MS),
@@ -450,7 +450,7 @@ export async function runPrimaryLiveStackScenario(options: PrimaryLiveRunOptions
 }
 
 export async function executeChildProcessCommand(execution: CommandExecution): Promise<CommandResult> {
-  // amux launch handles PTY internally via node-pty when interactive.
+  // adapters launch handles PTY internally via node-pty when interactive.
   // The test runner always uses pipe mode to collect output.
   const { spawn } = await import('node:child_process');
   return await new Promise<CommandResult>((resolve) => {
@@ -542,7 +542,7 @@ function commandExecution(env: Record<string, string>, overrideKey: string, defa
     return { command: process.execPath, args: [overrideBin, ...args], env, cwd, timeoutMs };
   }
   // On Windows, .cmd scripts (npm, npx) require shell: true to execute.
-  // amux is resolved via resolveSpawnCommand and uses shell: false.
+  // adapters is resolved via resolveSpawnCommand and uses shell: false.
   if (process.platform === 'win32' && ['npm', 'npx', 'babysitter'].includes(defaultCommand)) {
     return { command: defaultCommand, args, env, cwd, timeoutMs, shell: true };
   }
@@ -863,7 +863,7 @@ async function validateAgentBehavior(
   const proxyErrors = (output.match(/\[transport-mux\] (?:SSE stream error|AUTH REJECT)/g) || []).length;
   if (proxyRequests > 0) {
     entries.push({ name: 'proxy-communication', status: 'passed', detail: `proxy handled ${proxyRequests} request(s)${proxyErrors > 0 ? ` (${proxyErrors} error(s))` : ''}` });
-  } else if (output.includes('[amux launch]') && output.includes('proxy:')) {
+  } else if (output.includes('[adapters launch]') && output.includes('proxy:')) {
     entries.push({ name: 'proxy-communication', status: 'passed', detail: 'proxy started — request count not detected in logs (non-blocking diagnostic)' });
   }
 

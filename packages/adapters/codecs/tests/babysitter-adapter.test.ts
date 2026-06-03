@@ -3,8 +3,8 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { StreamAssembler } from '@a5c-ai/adapters-comm';
-import type { ParseContext } from '@a5c-ai/adapters-comm';
+import { StreamAssembler } from '@a5c-ai/comm-adapter';
+import type { ParseContext } from '@a5c-ai/comm-adapter';
 import { BabysitterAdapter } from '../src/babysitter-adapter.js';
 
 function makeContext(overrides?: Partial<ParseContext>): ParseContext {
@@ -114,7 +114,7 @@ describe('BabysitterAdapter', () => {
       expect(result.args).toContain('invoke');
       expect(result.args).toContain('claude-code');
       expect(result.args).toContain('--output-format');
-      expect(result.args).toContain('amux-events');
+      expect(result.args).toContain('adapters-events');
       expect(result.args).toContain('--prompt');
       expect(result.args).toContain('Fix the bug');
     });
@@ -379,7 +379,7 @@ describe('BabysitterAdapter', () => {
       expect(event.turnIndex).toBe(1);
     });
 
-    it('parses passthrough amux-format events with type and runId', () => {
+    it('parses passthrough adapters-format events with type and runId', () => {
       const agentMuxEvent = {
         type: 'text_delta',
         runId: 'run-abc',

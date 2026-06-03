@@ -19,7 +19,7 @@ import type {
   InstalledPlugin,
   PluginInstallOptions,
   AgentConfig,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import { BaseAgentAdapter } from './base-adapter.js';
 import { createVirtualRuntimeHookCapabilities } from './shared/runtime-hooks-virtual.js';

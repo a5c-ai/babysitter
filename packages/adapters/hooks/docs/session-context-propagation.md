@@ -236,7 +236,7 @@ When multiple handlers execute during fan-out, their context outputs are merged:
 The proxy injects `AGENT_CAPABILITIES_JSON` into handler subprocess environments and materialized exec contexts. This contains the full `AdapterCapabilities` object serialized as JSON, allowing downstream consumers to inspect what the originating harness supports:
 
 ```typescript
-import { readExecutionContext } from '@a5c-ai/adapters-hooks-core';
+import { readExecutionContext } from '@a5c-ai/hooks-adapter-core';
 
 const ctx = readExecutionContext();
 if (ctx.capabilities) {

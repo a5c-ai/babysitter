@@ -15,7 +15,7 @@ Portable hooks receive a `UnifiedHookEvent` and return a `UnifiedHookResult`. Th
 A hook handler is a function that receives a normalized event and returns a result:
 
 ```typescript
-import type { UnifiedHookEvent, UnifiedHookResult } from '@a5c-ai/adapters-hooks-core';
+import type { UnifiedHookEvent, UnifiedHookResult } from '@a5c-ai/hooks-adapter-core';
 
 export async function handler(event: UnifiedHookEvent): Promise<UnifiedHookResult> {
   // Your hook logic here
@@ -231,7 +231,7 @@ Create `.a5c/hooks-registry.json`:
 ### Via Programmatic API
 
 ```typescript
-import { registerHandler } from '@a5c-ai/adapters-hooks-core';
+import { registerHandler } from '@a5c-ai/hooks-adapter-core';
 
 registerHandler({
   id: 'my-handler',
@@ -254,26 +254,26 @@ Each programmatic adapter exports a `createConfiguredEngine()` factory that pre-
 
 ```typescript
 // Pi
-import { createConfiguredEngine } from '@a5c-ai/adapters-hooks-pi';
+import { createConfiguredEngine } from '@a5c-ai/hooks-adapter-pi';
 const engine = createConfiguredEngine();
 
 // Oh-My-Pi
-import { createConfiguredEngine } from '@a5c-ai/adapters-hooks-oh-my-pi';
+import { createConfiguredEngine } from '@a5c-ai/hooks-adapter-oh-my-pi';
 const engine = createConfiguredEngine();
 
 // OpenCode
-import { createConfiguredEngine } from '@a5c-ai/adapters-hooks-opencode';
+import { createConfiguredEngine } from '@a5c-ai/hooks-adapter-opencode';
 const engine = createConfiguredEngine();
 
 // OpenClaw
-import { createConfiguredEngine } from '@a5c-ai/adapters-hooks-openclaw';
+import { createConfiguredEngine } from '@a5c-ai/hooks-adapter-openclaw';
 const engine = createConfiguredEngine();
 ```
 
 Or create an engine directly from core:
 
 ```typescript
-import { createHooksEngine } from '@a5c-ai/adapters-hooks-core';
+import { createHooksEngine } from '@a5c-ai/hooks-adapter-core';
 
 const engine = createHooksEngine({
   adapter: 'my-adapter',
@@ -334,7 +334,7 @@ const result = await engine.processNormalizedEvent(normalizedEvent);
 Middleware wraps the handler execution pipeline (Express/Koa-style):
 
 ```typescript
-import type { HookMiddleware } from '@a5c-ai/adapters-hooks-core';
+import type { HookMiddleware } from '@a5c-ai/hooks-adapter-core';
 
 const loggingMiddleware: HookMiddleware = async (event, next) => {
   console.log(`[${event.phase}] Processing...`);

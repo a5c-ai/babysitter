@@ -1,4 +1,4 @@
-# @a5c-ai/adapters-hooks-cli
+# @a5c-ai/hooks-adapter-cli
 
 A universal hooks proxy system that normalizes lifecycle hooks across multiple AI coding harnesses (Claude Code, Codex, Gemini CLI, Cursor, GitHub Copilot, Pi, oh-my-pi, OpenCode, OpenClaw) into a single canonical event model.
 
@@ -12,23 +12,23 @@ A universal hooks proxy system that normalizes lifecycle hooks across multiple A
 
 | Package | Description |
 |---------|-------------|
-| `@a5c-ai/adapters-hooks-core` | Canonical schemas, types, session store, and merge engine |
-| `@a5c-ai/adapters-hooks-cli` | CLI entrypoint (`a5c-hooks-mux`) |
-| `@a5c-ai/adapters-hooks-claude` | Claude Code harness adapter |
-| `@a5c-ai/adapters-hooks-codex` | Codex harness adapter |
-| `@a5c-ai/adapters-hooks-gemini` | Gemini CLI harness adapter |
-| `@a5c-ai/adapters-hooks-copilot` | GitHub Copilot harness adapter |
-| `@a5c-ai/adapters-hooks-cursor` | Cursor harness adapter |
-| `@a5c-ai/adapters-hooks-pi` | Pi harness adapter |
-| `@a5c-ai/adapters-hooks-oh-my-pi` | oh-my-pi harness adapter |
-| `@a5c-ai/adapters-hooks-opencode` | OpenCode harness adapter |
-| `@a5c-ai/adapters-hooks-openclaw` | OpenClaw harness adapter |
+| `@a5c-ai/hooks-adapter-core` | Canonical schemas, types, session store, and merge engine |
+| `@a5c-ai/hooks-adapter-cli` | CLI entrypoint (`a5c-hooks-mux`) |
+| `@a5c-ai/hooks-adapter-claude` | Claude Code harness adapter |
+| `@a5c-ai/hooks-adapter-codex` | Codex harness adapter |
+| `@a5c-ai/hooks-adapter-gemini` | Gemini CLI harness adapter |
+| `@a5c-ai/hooks-adapter-copilot` | GitHub Copilot harness adapter |
+| `@a5c-ai/hooks-adapter-cursor` | Cursor harness adapter |
+| `@a5c-ai/hooks-adapter-pi` | Pi harness adapter |
+| `@a5c-ai/hooks-adapter-oh-my-pi` | oh-my-pi harness adapter |
+| `@a5c-ai/hooks-adapter-opencode` | OpenCode harness adapter |
+| `@a5c-ai/hooks-adapter-openclaw` | OpenClaw harness adapter |
 
 ## Quick Start
 
 ```bash
 # Install the CLI
-npm install -g @a5c-ai/adapters-hooks-cli
+npm install -g @a5c-ai/hooks-adapter-cli
 
 # Run diagnostics
 a5c-hooks-mux doctor

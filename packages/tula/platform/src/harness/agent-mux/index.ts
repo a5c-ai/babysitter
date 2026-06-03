@@ -5,7 +5,7 @@
  * an AgentMuxClient rather than spawning harness CLIs directly. The existing
  * invoker.ts is preserved as a fallback.
  *
- * @module harness/amux
+ * @module harness/adapters
  */
 
 export type {

@@ -1,8 +1,8 @@
 /**
  * Backward-compatibility re-exports.
  *
- * The completion engine implementations now live in @a5c-ai/adapters-transport.
+ * The completion engine implementations now live in @a5c-ai/transport-adapter.
  * This module re-exports them so existing import paths continue to work.
  */
 
-export { createOpenAICompletionEngine, createGoogleCompletionEngine, createAnthropicCompletionEngine } from '@a5c-ai/adapters-transport';
+export { createOpenAICompletionEngine, createGoogleCompletionEngine, createAnthropicCompletionEngine } from '@a5c-ai/transport-adapter';

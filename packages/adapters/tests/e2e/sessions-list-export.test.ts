@@ -1,5 +1,5 @@
 /**
- * E2E: `amux sessions list` + `amux sessions export` against a mock
+ * E2E: `adapters sessions list` + `adapters sessions export` against a mock
  * adapter whose session files live in a temp directory.
  */
 
@@ -16,7 +16,7 @@ describe('E2E: sessions list + export', () => {
 
   beforeEach(() => {
     setColorEnabled(false);
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-e2e-sessions-'));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-e2e-sessions-'));
   });
 
   afterEach(() => {

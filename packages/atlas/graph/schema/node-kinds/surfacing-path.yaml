@@ -276,7 +276,7 @@ nodeKinds:
   - name: kind
     type: enum<slash-command,at-mention,fork,resume,thread,reaction,voice,telemetry,multimodal-input,collaborative,prompt-ui,keybinding,editor-ui,cli,deep-link,cli-subcommand,tui-command,mock-scenario>
     required: false
-    notes: Primitive kind. Existing surface stub examples use `surface` (slash-command|prompt-ui|keybinding|editor-ui|cli); kind is the canonical taxonomy. When both are present, `kind` wins. `deep-link` (catalog pass 83) covers URL-scheme handlers like `claude-cli://open` and `vscode://anthropic.claude-code/open` — folded in from the demoted DeepLinkHandler NodeKind. `cli-subcommand` (catalog pass 95) covers CLI subcommand verbs exposed under a single bin (e.g. `amux-triggers enrich|evaluate|--help`); reuses the existing `flags` / `argSchema` attribute slots. `tui-command` (catalog pass 97c) covers in-process TUI command primitives (command-palette, prompt-input, model-picker) that have distinct interactive behaviors beyond pure presentation. `mock-scenario` (catalog pass 97c) covers behavioral mock scenarios in @a5c-ai/adapters-harness-mock that drive deterministic mock-process / http-mock / websocket-mock fixtures.
+    notes: Primitive kind. Existing surface stub examples use `surface` (slash-command|prompt-ui|keybinding|editor-ui|cli); kind is the canonical taxonomy. When both are present, `kind` wins. `deep-link` (catalog pass 83) covers URL-scheme handlers like `claude-cli://open` and `vscode://anthropic.claude-code/open` — folded in from the demoted DeepLinkHandler NodeKind. `cli-subcommand` (catalog pass 95) covers CLI subcommand verbs exposed under a single bin (e.g. `adapters-triggers enrich|evaluate|--help`); reuses the existing `flags` / `argSchema` attribute slots. `tui-command` (catalog pass 97c) covers in-process TUI command primitives (command-palette, prompt-input, model-picker) that have distinct interactive behaviors beyond pure presentation. `mock-scenario` (catalog pass 97c) covers behavioral mock scenarios in @a5c-ai/adapters-harness-mock that drive deterministic mock-process / http-mock / websocket-mock fixtures.
   - name: urlScheme
     type: string
     required: false
@@ -330,7 +330,7 @@ nodeKinds:
   - name: parentBin
     type: string
     required: false
-    notes: For kind=cli-subcommand — the parent CLI bin the verb is invoked under (e.g. `amux-triggers`).
+    notes: For kind=cli-subcommand — the parent CLI bin the verb is invoked under (e.g. `adapters-triggers`).
   - name: subcommandVerb
     type: string
     required: false

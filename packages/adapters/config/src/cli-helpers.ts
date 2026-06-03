@@ -6,7 +6,7 @@
  * dependency back to the CLI package.
  */
 
-import type { ErrorCode } from '@a5c-ai/adapters-comm';
+import type { ErrorCode } from '@a5c-ai/comm-adapter';
 
 // ---------------------------------------------------------------------------
 // Types

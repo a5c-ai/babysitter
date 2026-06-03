@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from '../../src/parse-args.js';
 import { mcpCommand } from '../../src/commands/mcp.js';
 import { ExitCode } from '../../src/exit-codes.js';
@@ -45,6 +45,6 @@ describe('mcp command', () => {
     const exitCode = await mcpCommand(mockClient, mockArgs);
 
     expect(exitCode).toBe(ExitCode.SUCCESS);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Usage: amux mcp'));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Usage: adapters mcp'));
   });
 });

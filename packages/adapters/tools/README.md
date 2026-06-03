@@ -1,4 +1,4 @@
-# @a5c-ai/adapters-tools
+# @a5c-ai/tools-adapter
 
 Tool lifecycle layer for the babysitter monorepo. Provides:
 
@@ -10,7 +10,7 @@ Tool lifecycle layer for the babysitter monorepo. Provides:
 ## Installation
 
 ```bash
-npm install @a5c-ai/adapters-tools
+npm install @a5c-ai/tools-adapter
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ import {
   NoopToolHookBridge,
   toToolDescriptor,
   translateTools,
-} from '@a5c-ai/adapters-tools';
+} from '@a5c-ai/tools-adapter';
 
 // 1. Build a registry
 const registry = new ToolRegistry();

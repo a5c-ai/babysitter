@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { type KanbanCiGate, type KanbanIntegrationProvider, type KanbanMergeStatus, type KanbanPublishStatus, type KanbanPullRequestStatus, type KanbanReviewArtifact, type KanbanReviewCommentAnchor, type KanbanReviewFeedbackSource, type KanbanReviewDecision, type KanbanReviewStatus, type KanbanReviewSnapshot } from "@a5c-ai/adapters-comm/kanban";
+import { type KanbanCiGate, type KanbanIntegrationProvider, type KanbanMergeStatus, type KanbanPublishStatus, type KanbanPullRequestStatus, type KanbanReviewArtifact, type KanbanReviewCommentAnchor, type KanbanReviewFeedbackSource, type KanbanReviewDecision, type KanbanReviewStatus, type KanbanReviewSnapshot } from "@a5c-ai/comm-adapter/kanban";
 export interface ReviewServiceDeps {
     readFile: typeof fs.readFile;
     writeFile: typeof fs.writeFile;

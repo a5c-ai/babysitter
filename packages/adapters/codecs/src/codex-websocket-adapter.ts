@@ -15,7 +15,7 @@ import type {
   ServerHealth,
   ServerInfo,
   Session,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import { readAuthConfigIdentity } from './auth-config.js';
 import { BaseRemoteAdapter } from './remote-adapter-base.js';

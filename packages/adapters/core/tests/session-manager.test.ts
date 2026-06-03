@@ -205,7 +205,7 @@ describe('SessionManagerImpl', () => {
     });
 
     it('avoids parsing the full session tree for recent date-sorted lists', async () => {
-      const tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'amux-sessions-'));
+      const tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'adapters-sessions-'));
       const sessions = Array.from({ length: 20 }, (_, i) => ({
         sessionId: `s${i + 1}`,
         turnCount: i + 1,

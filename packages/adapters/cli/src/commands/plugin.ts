@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import type { AgentMuxClient } from '@a5c-ai/adapters-comm';
+import type { AgentMuxClient } from '@a5c-ai/comm-adapter';
 import type { ParsedArgs } from '../parse-args.js';
 import { ExitCode } from '../exit-codes.js';
 import { printError, printJsonError } from '../output.js';
@@ -17,7 +17,7 @@ export async function pluginCommand(
 
   if (args.flags.help) {
     process.stdout.write([
-      'Usage: amux plugin <subcommand> <agent> [args] [flags]',
+      'Usage: adapters plugin <subcommand> <agent> [args] [flags]',
       '',
       'Manage plugins through agent-native plugin systems.',
       '',
@@ -32,11 +32,11 @@ export async function pluginCommand(
       '  --json                          Emit JSON envelopes on stdout/stderr',
       '',
       'Examples:',
-      '  amux plugin list claude',
-      '  amux plugin install claude filesystem-watcher',
-      '  amux plugin marketplace claude',
+      '  adapters plugin list claude',
+      '  adapters plugin install claude filesystem-watcher',
+      '  adapters plugin marketplace claude',
       '',
-      'Note: Plugin support varies by agent. Use "amux mcp" for MCP servers.',
+      'Note: Plugin support varies by agent. Use "adapters mcp" for MCP servers.',
     ].join('\n') + '\n');
     return ExitCode.SUCCESS;
   }
@@ -61,7 +61,7 @@ export async function pluginCommand(
   const capabilities = await detectAgentCapabilities(agentName);
 
   if (!capabilities.supportsPlugins) {
-    const msg = `Plugin management not supported for ${agentName}. Use 'amux mcp' for MCP servers.`;
+    const msg = `Plugin management not supported for ${agentName}. Use 'adapters mcp' for MCP servers.`;
     if (json) printJsonError('CAPABILITY_ERROR', msg);
     else printError(msg);
     return ExitCode.GENERAL_ERROR;

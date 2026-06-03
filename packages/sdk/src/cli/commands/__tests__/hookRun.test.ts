@@ -23,7 +23,7 @@ import {
 import type { SessionState } from "../../../session";
 import { appendEvent, loadJournal } from "../../../storage/journal";
 
-vi.mock("@a5c-ai/adapters-tasks", () => {
+vi.mock("@a5c-ai/tasks-adapter", () => {
   class AgentMuxResponderBackend {
     constructor(readonly config: Record<string, unknown> = {}) {}
 
@@ -37,7 +37,7 @@ vi.mock("@a5c-ai/adapters-tasks", () => {
         context: {
           metadata: {
             agentMux: {
-              runId: "amux-run-1",
+              runId: "adapters-run-1",
               agent: this.config.adapter ?? "codex",
               model: this.config.model ?? "gpt-test",
               durationMs: 123,

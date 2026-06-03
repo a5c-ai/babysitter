@@ -20,7 +20,7 @@ Its responsibilities:
 
 ```
 packages/adapters/hooks/
-├── core/          @a5c-ai/adapters-hooks-core     — types, session, merge, normalizer, propagation, diagnostics, API
+├── core/          @a5c-ai/hooks-adapter-core     — types, session, merge, normalizer, propagation, diagnostics, API
 ├── adapter-claude/                          — shell-hook family
 ├── adapter-codex/                           — shell-hook family
 ├── adapter-copilot/                         — shell-hook family

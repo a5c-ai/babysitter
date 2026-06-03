@@ -3,7 +3,7 @@
  *
  * Detects whether the current process is itself running *under* one of the
  * supported harnesses (as a child of that harness process). Useful for tools
- * like `amux` to distinguish "invoked from a shell" vs "invoked from Claude
+ * like `adapters` to distinguish "invoked from a shell" vs "invoked from Claude
  * Code / Codex / ... as a subprocess".
  *
  * Detection is synchronous and purely environmental — it does not spawn

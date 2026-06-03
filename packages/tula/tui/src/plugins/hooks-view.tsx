@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import { Box, Text, useInput } from 'ink';
-import { HookConfigManager } from '@a5c-ai/adapters-comm';
+import { HookConfigManager } from '@a5c-ai/comm-adapter';
 import { definePlugin, type TuiViewProps } from '../plugin.js';
 
 interface Row {
@@ -13,7 +13,7 @@ interface Row {
   target?: string;
   enabled?: boolean;
   priority?: number;
-  source?: 'amux' | 'claude' | 'codex' | 'cursor' | 'opencode' | 'gemini';
+  source?: 'adapters' | 'claude' | 'codex' | 'cursor' | 'opencode' | 'gemini';
 }
 
 function readJson(p: string): unknown {
@@ -66,7 +66,7 @@ function HooksView({ active }: TuiViewProps) {
         target: h.target,
         enabled: h.enabled,
         priority: h.priority,
-        source: 'amux' as const,
+        source: 'adapters' as const,
       }));
       const all = [...mapped, ...discoverNativeHooks()];
       setRows(all);
@@ -157,14 +157,14 @@ function HooksView({ active }: TuiViewProps) {
   return (
     <Box flexDirection="column">
       <Text bold>Hooks</Text>
-      <Text dimColor>j/k: move · a: add · d: remove · r: refresh · (amux hooks &lt;agent&gt; &lt;discover|list|add|remove|set&gt;)</Text>
+      <Text dimColor>j/k: move · a: add · d: remove · r: refresh · (adapters hooks &lt;agent&gt; &lt;discover|list|add|remove|set&gt;)</Text>
       {rows.length === 0 && !addField ? <Text dimColor>No hooks registered.</Text> : null}
       {rows.slice(0, 40).map((r, i) => {
         const sel = i === cursor;
         return (
           <Text key={r.id + ':' + i} color={sel ? 'green' : undefined}>
             {sel ? '> ' : '  '}
-            <Text color={r.source === 'amux' ? 'magenta' : 'blue'}>[{(r.source ?? 'amux').padEnd(6)}]</Text>{' '}
+            <Text color={r.source === 'adapters' ? 'magenta' : 'blue'}>[{(r.source ?? 'adapters').padEnd(6)}]</Text>{' '}
             <Text color="cyan">{r.id.padEnd(20)}</Text>{' '}
             <Text>{r.hookType.padEnd(18)}</Text>{' '}
             <Text color="gray">{r.handler.padEnd(8)}</Text>{' '}

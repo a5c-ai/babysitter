@@ -4,7 +4,7 @@
  * @see docs/10-cli-reference.md Section 4
  */
 
-import type { ErrorCode } from '@a5c-ai/adapters-comm';
+import type { ErrorCode } from '@a5c-ai/comm-adapter';
 
 /** CLI exit code constants. */
 export const ExitCode = {

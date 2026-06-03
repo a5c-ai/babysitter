@@ -207,7 +207,7 @@ function SkillsView({ active }: TuiViewProps) {
   return (
     <Box flexDirection="column">
       <Text bold>Skills</Text>
-      <Text dimColor>j/k: move · a: add · d: delete · r: refresh · (amux skill &lt;list|add|remove|where&gt;)</Text>
+      <Text dimColor>j/k: move · a: add · d: delete · r: refresh · (adapters skill &lt;list|add|remove|where&gt;)</Text>
       {rows.length === 0 ? <Text dimColor>No skills installed.</Text> : null}
       {rows.slice(0, 40).map((r, i) => {
         const sel = i === cursor;

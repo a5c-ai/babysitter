@@ -74,7 +74,7 @@ The environment in which an agent run executes, such as local, docker, ssh, or k
 
 ### Metaplugin
 
-A higher-order capability abstraction that extends an agent by composing one or more plugin and hook surfaces into a single concern. A metaplugin is not the same thing as a concrete per-harness plugin bundle, and it is not the same thing as `@a5c-ai/adapters-extensions`, which only compiles and distributes concrete plugin outputs. Typical metaplugin categories include memory systems, governance or policy engines, and discipline-enforcement layers. On legacy non-Babysitter agents, a metaplugin is delivered through the underlying plugin and hook bundles emitted by `extension-mux`.
+A higher-order capability abstraction that extends an agent by composing one or more plugin and hook surfaces into a single concern. A metaplugin is not the same thing as a concrete per-harness plugin bundle, and it is not the same thing as `@a5c-ai/extensions-adapter`, which only compiles and distributes concrete plugin outputs. Typical metaplugin categories include memory systems, governance or policy engines, and discipline-enforcement layers. On legacy non-Babysitter agents, a metaplugin is delivered through the underlying plugin and hook bundles emitted by `extension-mux`.
 
 ### Per-Harness Plugin Bundle
 

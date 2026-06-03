@@ -31,7 +31,7 @@ import {
   type PolicyName,
 } from "../../selectionPolicies";
 
-export type OutputMode = "cli" | "json" | "tui" | "amux-events";
+export type OutputMode = "cli" | "json" | "tui" | "adapters-events";
 
 export interface HarnessCreateRunArgs {
   invocationCommand?: string;

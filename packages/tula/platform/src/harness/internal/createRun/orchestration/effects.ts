@@ -145,7 +145,7 @@ interface EffectResolverOptions {
   sessionId?: string;
   maxIterations?: number;
   verbose?: boolean;
-  outputMode?: "cli" | "json" | "tui" | "amux-events";
+  outputMode?: "cli" | "json" | "tui" | "adapters-events";
   mcp?: McpRoutingOptions;
 }
 
@@ -660,7 +660,7 @@ async function resolveViaTasksMuxIfRoutable(
     };
   };
   try {
-    mux = await importOptionalModule("@a5c-ai/adapters-tasks") as typeof mux;
+    mux = await importOptionalModule("@a5c-ai/tasks-adapter") as typeof mux;
   } catch {
     return undefined;
   }

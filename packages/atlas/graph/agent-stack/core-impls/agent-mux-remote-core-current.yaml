@@ -6,7 +6,7 @@ attributes:
   packageRef: source-ref:agent-mux-github
   loopIteratorPolicy: delegated-to-remote
   loopIteratorNotes: |
-    No local loop. agent-mux-remote opens a transport (`amux run --json` over local
+    No local loop. agent-mux-remote opens a transport (`adapters run --json` over local
     process / ssh / docker / kubectl) and proxies the remote agent's normalized
     event stream verbatim. Whatever loop semantics the remote agent has are what
     the host observes.

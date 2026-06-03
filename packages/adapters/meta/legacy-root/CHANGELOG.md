@@ -10,12 +10,12 @@ All notable changes to `@a5c-ai/adapters` are recorded here. Dates are ISO-8601.
 - **Invocation modes** — `LocalInvocation | DockerInvocation | SshInvocation | K8sInvocation` discriminated union on `RunOptions.invocation`. A pure `buildInvocationCommand()` in `packages/core/src/spawn-invocation.ts` translates a `SpawnArgs` into the host command for each mode. See [docs/13-invocation-modes.md](docs/13-invocation-modes.md).
 - **Harness image catalog** (`HARNESS_IMAGE_CATALOG`, `lookupHarnessImage()`) giving default Docker images for the 11 built-in harnesses plus aider/goose.
 - **`install()` / `update()` / `detectInstallation()`** optional methods on `AgentAdapter`, with `AdapterInstallOptions`, `AdapterUpdateOptions`, `InstallResult`, `DetectInstallationResult`, and a pluggable `Spawner`.
-- **CLI commands**: `amux install`, `amux update`, `amux detect`, `amux detect-host`, `amux remote install|update`. `amux remote` drives a four-step bootstrap (probe -> amux install -> harness install -> verify) through any invocation mode.
+- **CLI commands**: `adapters install`, `adapters update`, `adapters detect`, `adapters detect-host`, `adapters remote install|update`. `adapters remote` drives a four-step bootstrap (probe -> adapters install -> harness install -> verify) through any invocation mode.
 - **Host detection** — `AgentMuxClient.detectHost()` and `detectHostHarness()` aggregate per-adapter `hostEnvSignals` with default env-var catalog to report when the current process is running under a known harness.
-- **`agent-mux-remote` adapter** — a transport-agnostic adapter that emits plain `amux run ...` spawn args to be wrapped with any `InvocationMode`, enabling nested amux execution over docker/ssh/k8s.
+- **`agent-mux-remote` adapter** — a transport-agnostic adapter that emits plain `adapters run ...` spawn args to be wrapped with any `InvocationMode`, enabling nested adapters execution over docker/ssh/k8s.
 - **Session manager I/O** — full-text `search()`, `export(format = 'json' | 'jsonl' | 'markdown')`, and structural `diff()`. Each adapter owns its session directory (see README table). The placeholder `watch()` API was removed instead of shipping synthetic deltas.
 - **`@a5c-ai/adapters-harness-mock`** package — `MockProcess`, `WorkspaceSandbox`, pre-built `HarnessScenario` library, and a `probe` utility for capturing behavior profiles from real harnesses. See [docs/14-harness-mock.md](docs/14-harness-mock.md).
-- **Dockerfile** at repo root using `amux install` with an overridable `HARNESSES` build-arg.
+- **Dockerfile** at repo root using `adapters install` with an overridable `HARNESSES` build-arg.
 - **ESLint flat config** with local `max-file-lines` rule (400 effective, non-blank/non-comment lines).
 - **Git pre-commit hook** at `.githooks/pre-commit`; installed via `npm run hooks:install`.
 - New spec docs `docs/13-invocation-modes.md` and `docs/14-harness-mock.md`.

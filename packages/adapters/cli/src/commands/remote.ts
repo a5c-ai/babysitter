@@ -1,15 +1,15 @@
 /**
- * `amux remote install <host>` / `amux remote update <host>`.
+ * `adapters remote install <host>` / `adapters remote update <host>`.
  *
  * Self-install pipeline — uses `buildInvocationCommand()` to build each step
  * so the transport (ssh/docker/k8s) is selectable via `--mode` and works
  * uniformly across environments.
  *
  * Steps:
- *   1. Probe:    `amux --version`            — check if amux is on the remote.
+ *   1. Probe:    `adapters --version`            — check if adapters is on the remote.
  *   2. Install:  `npm install -g @a5c-ai/adapters-cli` if missing (or --force).
- *   3. Harness:  `amux install <harness>`    — deploy the desired harness.
- *   4. Verify:   `amux detect --all --json`  — confirm the harness is active.
+ *   3. Harness:  `adapters install <harness>`    — deploy the desired harness.
+ *   4. Verify:   `adapters detect --all --json`  — confirm the harness is active.
  */
 
 import { spawn } from 'node:child_process';
@@ -18,8 +18,8 @@ import type {
   AgentMuxClient,
   InvocationMode,
   SpawnArgs,
-} from '@a5c-ai/adapters-comm';
-import { buildInvocationCommand } from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
+import { buildInvocationCommand } from '@a5c-ai/comm-adapter';
 
 import type { ParsedArgs, FlagDef } from '../parse-args.js';
 import { flagBool, flagStr } from '../parse-args.js';
@@ -65,13 +65,13 @@ export interface RemoteCommandDeps {
   spawner?: RemoteSpawner;
 }
 
-/** Build a SpawnArgs shell for a given amux (or npm) command. */
+/** Build a SpawnArgs shell for a given adapters (or npm) command. */
 function makeSpawnArgs(command: string, args: string[], cwd: string): SpawnArgs {
   return { command, args, env: {}, cwd, usePty: false };
 }
 
 /**
- * Resolve the InvocationMode for a given CLI invocation of `amux remote`.
+ * Resolve the InvocationMode for a given CLI invocation of `adapters remote`.
  * The first positional after the subcommand is typically the host (for ssh)
  * or is ignored for docker/k8s/local (which read image/namespace from flags).
  */
@@ -115,8 +115,8 @@ function buildMode(
 }
 
 /**
- * `amux remote install <host> [--mode ssh|docker|k8s|local] [--harness <agent>]`
- * `amux remote update <host> ...`
+ * `adapters remote install <host> [--mode ssh|docker|k8s|local] [--harness <agent>]`
+ * `adapters remote update <host> ...`
  */
 export async function remoteCommand(
   _client: AgentMuxClient,
@@ -128,7 +128,7 @@ export async function remoteCommand(
 
   const sub = args.subcommand ?? args.positionals[0];
   if (sub !== 'install' && sub !== 'update') {
-    const msg = 'Usage: amux remote install <host> [--mode ssh|docker|k8s] [--harness <agent>]';
+    const msg = 'Usage: adapters remote install <host> [--mode ssh|docker|k8s] [--harness <agent>]';
     if (jsonMode) printJsonError('VALIDATION_ERROR', msg);
     else printError(msg);
     return ExitCode.USAGE_ERROR;
@@ -174,14 +174,14 @@ export async function remoteCommand(
     return r;
   };
 
-  // Step 1: probe amux
-  const probe = await runStep('probe', 'amux', ['--version']);
+  // Step 1: probe adapters
+  const probe = await runStep('probe', 'adapters', ['--version']);
   const needsInstall = sub === 'update' || probe.code !== 0 || force;
 
-  // Step 2: install amux itself if missing (or forced / update)
+  // Step 2: install adapters itself if missing (or forced / update)
   if (needsInstall) {
     const npmVerb = sub === 'update' ? 'update' : 'install';
-    const npm = await runStep('amux-self', 'npm', [npmVerb, '-g', '@a5c-ai/adapters-cli']);
+    const npm = await runStep('adapters-self', 'npm', [npmVerb, '-g', '@a5c-ai/adapters-cli']);
     if (!dryRun && npm.code !== 0) {
       const msg = `npm ${npmVerb} failed on remote (code ${npm.code})`;
       if (jsonMode) printJsonError('INTERNAL', msg);
@@ -195,9 +195,9 @@ export async function remoteCommand(
   const harnessVerb = sub === 'update' ? 'update' : 'install';
   const installArgs = [harnessVerb, harness];
   if (force && sub === 'install') installArgs.push('--force');
-  const hres = await runStep('harness', 'amux', installArgs);
+  const hres = await runStep('harness', 'adapters', installArgs);
   if (!dryRun && hres.code !== 0) {
-    const msg = `amux ${harnessVerb} ${harness} failed on remote (code ${hres.code})`;
+    const msg = `adapters ${harnessVerb} ${harness} failed on remote (code ${hres.code})`;
     if (jsonMode) printJsonError('INTERNAL', msg);
     else printError(msg);
     if (!jsonMode && hres.stderr) process.stderr.write(hres.stderr);
@@ -205,7 +205,7 @@ export async function remoteCommand(
   }
 
   // Step 4: verify
-  const verify = await runStep('verify', 'amux', ['detect', '--all', '--json']);
+  const verify = await runStep('verify', 'adapters', ['detect', '--all', '--json']);
 
   if (jsonMode) {
     printJsonOk({

@@ -1,4 +1,4 @@
-import type { Attachment, WorkspaceRuntimeSurface } from "@a5c-ai/adapters-comm";
+import type { Attachment, WorkspaceRuntimeSurface } from "@a5c-ai/comm-adapter";
 import type { SessionCost, SessionFlowModel } from "@a5c-ai/tula-ui/session-flow";
 type EventBuffer = {
     events: Array<Record<string, unknown>>;

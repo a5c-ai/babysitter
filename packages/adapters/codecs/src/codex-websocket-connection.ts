@@ -7,7 +7,7 @@ import type {
   ModelCapabilities,
   WebSocketConnection,
   WebSocketMessage,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 type ApprovalMode = 'yolo' | 'prompt' | 'deny';
 

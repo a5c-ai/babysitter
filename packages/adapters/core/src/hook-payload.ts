@@ -1,5 +1,5 @@
 /**
- * Generic payload parser/formatter used by `amux hooks handle <agent> <hookType>`.
+ * Generic payload parser/formatter used by `adapters hooks handle <agent> <hookType>`.
  *
  * Each harness emits a hook payload as JSON on stdin. The default
  * implementation accepts any JSON object and normalizes a few commonly

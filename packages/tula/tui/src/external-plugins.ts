@@ -12,7 +12,7 @@ function resolveHomeDir(): string {
 export function defaultExternalPluginsDir(): string {
   if (process.env.AGENT_MUX_TUI_PLUGINS_DIR) return process.env.AGENT_MUX_TUI_PLUGINS_DIR;
   const home = resolveHomeDir();
-  return path.join(home, '.amux', 'tui-plugins');
+  return path.join(home, '.adapters', 'tui-plugins');
 }
 
 export interface LoadResult {

@@ -1,4 +1,4 @@
-import type { CostRecord, SessionMessage, SessionToolCall } from '@a5c-ai/adapters-comm';
+import type { CostRecord, SessionMessage, SessionToolCall } from '@a5c-ai/comm-adapter';
 
 import type { EventBuffer, RunRecord } from '../store/index.js';
 

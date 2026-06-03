@@ -1,4 +1,4 @@
-import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanCollaboratorRole, KanbanDispatchContextLabelDefinition, KanbanPermissionGrant, KanbanProjectSettings, KanbanTaskTag, KanbanWorkflowState } from "@a5c-ai/adapters-comm/kanban";
+import type { KanbanBacklogSnapshot, KanbanBoardSnapshot, KanbanCollaboratorRole, KanbanDispatchContextLabelDefinition, KanbanPermissionGrant, KanbanProjectSettings, KanbanTaskTag, KanbanWorkflowState } from "@a5c-ai/comm-adapter/kanban";
 export interface BacklogOverviewSummary {
     projectCount: number;
     issueCount: number;

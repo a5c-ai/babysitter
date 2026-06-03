@@ -45,7 +45,7 @@ function resolveHooksMuxBin(env: Record<string, string>): string {
   return env['HOOKS_MUX_BIN'] || 'a5c-hooks-mux';
 }
 
-/** Map amux agent name to the babysitter SDK harness name. */
+/** Map adapters agent name to the babysitter SDK harness name. */
 function harnessToSdkHarness(harness: string): string {
   const map: Record<string, string> = {
     'gemini': 'gemini-cli',

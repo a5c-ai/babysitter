@@ -36,7 +36,7 @@ describe('loadProfile', () => {
   it('loads profile from global file', () => {
     mockFs.readFileSync.mockImplementation((filePath: unknown) => {
       const p = String(filePath);
-      if (p.includes('.amux')) {
+      if (p.includes('.adapters')) {
         if (p.includes('testuser')) {
           return JSON.stringify({
             version: 1,
@@ -166,8 +166,8 @@ describe('loadProviderDefaults', () => {
 
 describe('providers file persistence helpers', () => {
   it('resolves the expected scope paths', () => {
-    expect(resolveProvidersFilePath()).toBe(path.join(process.cwd(), '.amux', 'providers.json'));
-    expect(resolveProvidersFilePath({ scope: 'global' })).toBe(path.join('/home/testuser', '.amux', 'providers.json'));
+    expect(resolveProvidersFilePath()).toBe(path.join(process.cwd(), '.adapters', 'providers.json'));
+    expect(resolveProvidersFilePath({ scope: 'global' })).toBe(path.join('/home/testuser', '.adapters', 'providers.json'));
   });
 
   it('loads the scoped providers file directly', () => {

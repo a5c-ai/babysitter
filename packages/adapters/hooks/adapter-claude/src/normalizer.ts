@@ -1,4 +1,4 @@
-import type { UnifiedHookEvent, UnifiedExecutionContext } from '@a5c-ai/adapters-hooks-core';
+import type { UnifiedHookEvent, UnifiedExecutionContext } from '@a5c-ai/hooks-adapter-core';
 import { getClaudePhaseMapping } from './mappings';
 
 let _adapterName: string;

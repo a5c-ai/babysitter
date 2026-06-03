@@ -64,7 +64,7 @@ vi.mock('node-pty', () => ({
   spawn: ptySpawnMock,
 }));
 
-vi.mock('@a5c-ai/adapters-transport', () => ({
+vi.mock('@a5c-ai/transport-adapter', () => ({
   startTransportMuxRuntime: vi.fn(),
 }));
 
@@ -80,7 +80,7 @@ vi.mock('@a5c-ai/adapters-codecs', () => ({
   })),
 }));
 
-vi.mock('@a5c-ai/adapters-comm', () => ({
+vi.mock('@a5c-ai/comm-adapter', () => ({
   PROVIDER_DEFAULTS: {},
   StreamAssembler: class {
     feed(line: string) { return line; }

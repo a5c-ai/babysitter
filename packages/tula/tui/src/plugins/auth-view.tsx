@@ -74,7 +74,7 @@ function AuthView({ client, active }: TuiViewProps) {
           </Text>
         ))
       )}
-      <Text dimColor>R: refresh · run `amux auth setup &lt;agent&gt;` to configure</Text>
+      <Text dimColor>R: refresh · run `adapters auth setup &lt;agent&gt;` to configure</Text>
     </Box>
   );
 }

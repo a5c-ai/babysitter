@@ -39,10 +39,10 @@ export function resolveOutputMode(json: boolean, outputMode?: OutputMode): Outpu
 }
 
 /**
- * Check whether the given output mode is the amux-events JSONL protocol.
+ * Check whether the given output mode is the adapters-events JSONL protocol.
  */
 export function isAmuxEventsMode(outputMode?: OutputMode): boolean {
-  return outputMode === "amux-events";
+  return outputMode === "adapters-events";
 }
 
 export function truncateForVerboseLog(text: string, maxChars: number = VERBOSE_LOG_LIMIT): string {
@@ -95,8 +95,8 @@ export function emitProgress(
   const mode = resolveOutputMode(json, outputMode);
   if (mode === "tui") return;
 
-  // amux-events mode: translate progress payloads to agent-mux JSONL events
-  if (mode === "amux-events") {
+  // adapters-events mode: translate progress payloads to agent-mux JSONL events
+  if (mode === "adapters-events") {
     emitProgressAsAmuxEvent(payload);
     return;
   }
@@ -177,7 +177,7 @@ export function emitAmuxEvent(
   outputMode?: OutputMode,
 ): void {
   const mode = resolveOutputMode(json, outputMode);
-  if (mode !== "amux-events") {
+  if (mode !== "adapters-events") {
     return;
   }
   process.stdout.write(JSON.stringify(event) + "\n");
@@ -368,7 +368,7 @@ export function selectHarness(
 }
 
 // ---------------------------------------------------------------------------
-// amux-events progress translation
+// adapters-events progress translation
 // ---------------------------------------------------------------------------
 
 /**
@@ -461,7 +461,7 @@ function emitProgressAsAmuxEvent(payload: ProgressPayload): void {
           maxAttempts: payload.maxAttempts,
         });
         break;
-      // bound, iteration, skipped-plan-only -- no direct amux equivalent
+      // bound, iteration, skipped-plan-only -- no direct adapters equivalent
       default:
         break;
     }

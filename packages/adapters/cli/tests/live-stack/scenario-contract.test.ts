@@ -24,13 +24,13 @@ describe('live stack scenario contract primitives', () => {
     expect(scenario.agent.agentMuxAgent).toBe('claude');
     expect(scenario.agent.setupCommands).toEqual([
       'npm run generate:plugins',
-      'amux install claude',
+      'adapters install claude',
       'npm install --global ./packages/sdk',
       'npm install --global ./packages/adapters/hooks/cli',
       'babysitter harness:install-plugin claude-code',
       'mkdir -p .a5c-live-test',
       'cp fixtures/summarize-translate-test.mjs .a5c/processes/',
-      'amux launch claude',
+      'adapters launch claude',
     ]);
     expect(scenario.layers).toContain('transport-mux route');
     expect(scenario.layers).toContain('hooks-mux normalization');
@@ -83,7 +83,7 @@ describe('live stack scenario contract primitives', () => {
 
     expect(scenario.agent.installMode).toBe('vanilla');
     expect(scenario.agent.agentMuxAgent).toBe('gemini');
-    expect(scenario.agent.setupCommands).toEqual(['amux install gemini', 'amux launch gemini']);
+    expect(scenario.agent.setupCommands).toEqual(['adapters install gemini', 'adapters launch gemini']);
     expect(scenario.requiredTraceIds).toEqual(['agentMuxRunId', 'agentMuxSessionId', 'transportTraceId']);
   });
 
@@ -111,7 +111,7 @@ describe('live stack scenario contract primitives', () => {
     expect(scenario.agent.agentMuxAgent).toBe('babysitter');
     expect(scenario.agent.installMode).toBe('vanilla');
     expect(scenario.agent.babysitterHarness).toBe('agent-core');
-    expect(scenario.agent.setupCommands).toEqual(['amux install babysitter', 'amux run babysitter']);
+    expect(scenario.agent.setupCommands).toEqual(['adapters install babysitter', 'adapters run babysitter']);
   });
 
   it('accepts pipeline-selected Google Gemini scenarios', () => {
@@ -170,8 +170,8 @@ describe('live stack scenario contract primitives', () => {
     const scenario = primaryLiveStackScenario();
     const incompleteBundle = createEvidenceBundle(
       scenario,
-      { agentMuxRunId: 'amux-run-1', agentMuxSessionId: 'amux-session-1' },
-      { 'agent-mux-events': 'artifacts/live-stack/agent-mux-events-amux-run-1.ndjson' },
+      { agentMuxRunId: 'adapters-run-1', agentMuxSessionId: 'adapters-session-1' },
+      { 'agent-mux-events': 'artifacts/live-stack/agent-mux-events-adapters-run-1.ndjson' },
     );
 
     expect(assertEvidenceBundleComplete(scenario, incompleteBundle)).toEqual([

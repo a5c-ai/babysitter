@@ -27,7 +27,7 @@ import {
   type SessionState,
   type MergedExecutionResult,
   type UnifiedHookEvent,
-} from '@a5c-ai/adapters-hooks-core';
+} from '@a5c-ai/hooks-adapter-core';
 import { loadAdapter } from '../adapter-loader';
 import {
   prepareBootstrapSession,

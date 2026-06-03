@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-hooks-mux-core
 attributes:
-  packageId: "@a5c-ai/adapters-hooks-core"
-  packageName: "@a5c-ai/adapters-hooks-core"
+  packageId: "@a5c-ai/hooks-adapter-core"
+  packageName: "@a5c-ai/hooks-adapter-core"
   workspacePath: packages/adapters/hooks/core
   moduleType: typescript
   surfaceKinds:
@@ -12,7 +12,7 @@ attributes:
   versionPolicy: semver
 edges:
   references_path:
-    - target: path:amux-hooks-global
+    - target: path:adapters-hooks-global
   has_payload_schema:
     - target: shared-context-spec:hooks-mux-unified-hook-event
     - target: shared-context-spec:hooks-mux-unified-execution-context

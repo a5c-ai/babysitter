@@ -1,5 +1,5 @@
 /**
- * Lightweight argument parser for the amux CLI.
+ * Lightweight argument parser for the adapters CLI.
  *
  * Zero external dependencies. Handles:
  * - Long flags (--flag, --flag=value, --no-flag for booleans)

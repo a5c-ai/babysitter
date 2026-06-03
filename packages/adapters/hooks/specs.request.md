@@ -14,7 +14,7 @@ Build a small, focused product that unifies hook execution across agent harnesse
 
 The product has two forms:
 
-1. `@a5c-ai/adapters-hooks-cli` — npm library
+1. `@a5c-ai/hooks-adapter-cli` — npm library
 2. `a5c-hooks-mux` — CLI entrypoint
 
 The system must:
@@ -178,7 +178,7 @@ For programmatic environments:
 
 ```text
 runtime event callback
-    -> @a5c-ai/adapters-hooks-cli library
+    -> @a5c-ai/hooks-adapter-cli library
         -> normalize event
         -> run portable handlers
         -> return adapter-ready result object
@@ -990,7 +990,7 @@ Harness config registers one command hook only.
 That command invokes:
 
 ```bash
-npx -y @a5c-ai/adapters-hooks-cli invoke --adapter claude
+npx -y @a5c-ai/hooks-adapter-cli invoke --adapter claude
 ```
 
 The registry contains multiple logical `session.start` handlers.
@@ -1010,7 +1010,7 @@ The proxy:
 Harness config registers one command hook:
 
 ```bash
-npx -y @a5c-ai/adapters-hooks-cli invoke --adapter codex --bootstrap-only
+npx -y @a5c-ai/hooks-adapter-cli invoke --adapter codex --bootstrap-only
 ```
 
 The proxy:
@@ -1025,7 +1025,7 @@ The proxy:
 A tool command can be wrapped as:
 
 ```bash
-npx -y @a5c-ai/adapters-hooks-cli exec --session-id "$AGENT_SESSION_ID" -- npm test
+npx -y @a5c-ai/hooks-adapter-cli exec --session-id "$AGENT_SESSION_ID" -- npm test
 ```
 
 This restores proxy-managed env/context even on harnesses without native persistent shell env.

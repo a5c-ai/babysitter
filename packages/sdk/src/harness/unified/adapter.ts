@@ -1,7 +1,7 @@
 /**
  * Unified harness adapter.
  *
- * Delegates hook plumbing to @a5c-ai/adapters-hooks-cli via subprocess while
+ * Delegates hook plumbing to @a5c-ai/hooks-adapter-cli via subprocess while
  * keeping babysitter-specific orchestration logic (iteration tracking,
  * journal inspection, continuation building) in the SDK.
  *

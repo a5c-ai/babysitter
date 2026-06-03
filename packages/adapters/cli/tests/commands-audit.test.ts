@@ -22,8 +22,8 @@ const distExists = existsSync(distEntry);
 const suite = distExists ? describe : describe.skip;
 
 /** Isolated config/project dirs so tests never touch the user's state. */
-const CONFIG_DIR = mkdtempSync(join(tmpdir(), 'amux-cli-audit-cfg-'));
-const PROJECT_DIR = mkdtempSync(join(tmpdir(), 'amux-cli-audit-proj-'));
+const CONFIG_DIR = mkdtempSync(join(tmpdir(), 'adapters-cli-audit-cfg-'));
+const PROJECT_DIR = mkdtempSync(join(tmpdir(), 'adapters-cli-audit-proj-'));
 
 function run(...args: string[]): SpawnSyncReturns<string> {
   return spawnSync(
@@ -54,7 +54,7 @@ suite('built CLI — functional audit', () => {
   it('--help prints usage + lists adapters + remote + detect-host', () => {
     const res = run('--help');
     expect(res.status).toBe(0);
-    expect(res.stdout).toContain('amux');
+    expect(res.stdout).toContain('adapters');
     expect(res.stdout).toContain('adapters');
     expect(res.stdout).toContain('remote');
     expect(res.stdout).toContain('detect-host');
@@ -63,7 +63,7 @@ suite('built CLI — functional audit', () => {
   it('--version prints semver', () => {
     const res = run('--version');
     expect(res.status).toBe(0);
-    expect(res.stdout).toMatch(/amux\s+v\d+\.\d+\.\d+/);
+    expect(res.stdout).toMatch(/adapters\s+v\d+\.\d+\.\d+/);
   });
 
   it('help <cmd> prints per-command help', () => {

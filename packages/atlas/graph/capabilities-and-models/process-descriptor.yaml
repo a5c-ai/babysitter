@@ -42,7 +42,7 @@ attributes:
     - "packages/adapters/processes/model-catalog.js"
   inputs: []
   outputs: []
-  ownerPackage: "@a5c-ai/adapters-comm"
+  ownerPackage: "@a5c-ai/comm-adapter"
   executionKinds:
     - "babysitter-process"
   evidenceRefs:

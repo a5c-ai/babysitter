@@ -6,8 +6,8 @@
  */
 
 import type { CommandModule } from 'yargs';
-import type { AdapterCapabilities, PhaseMapping } from '@a5c-ai/adapters-hooks-core';
-import { CANONICAL_PHASES, getDefaultSessionDir } from '@a5c-ai/adapters-hooks-core';
+import type { AdapterCapabilities, PhaseMapping } from '@a5c-ai/hooks-adapter-core';
+import { CANONICAL_PHASES, getDefaultSessionDir } from '@a5c-ai/hooks-adapter-core';
 import { loadAdapter, KNOWN_ADAPTERS } from '../adapter-loader';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -102,7 +102,7 @@ function buildCapabilityProfile(mappings: PhaseMapping[]): CapabilityProfile {
 
 function analyzeAdapter(name: string): AdapterReport {
   const warnings: string[] = [];
-  const packageName = `@a5c-ai/adapters-hooks-${name}`;
+  const packageName = `@a5c-ai/hooks-adapter-${name}`;
 
   try {
     const loaded = loadAdapter(name);

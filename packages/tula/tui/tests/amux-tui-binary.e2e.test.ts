@@ -8,7 +8,7 @@ import * as pty from 'node-pty';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const binaryPath = path.resolve(__dirname, '../dist/bin/agent-mux-tui.js');
 const fixturePluginPath = path.resolve(__dirname, 'fixtures/agent-mux-tui-e2e-plugin.mjs');
-const agentMuxCoreDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/adapters-comm/dist/index.js');
+const agentMuxCoreDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/comm-adapter/dist/index.js');
 const agentMuxCliBootstrapDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/adapters-cli/dist/bootstrap.js');
 const observabilityDistPath = path.resolve(__dirname, '../../../../node_modules/@a5c-ai/adapters-observability/dist/index.js');
 const describeBuiltBinary =
@@ -230,7 +230,7 @@ describeBuiltBinary('real agent-mux-tui binary e2e', () => {
       env: {
         AGENT_MUX_TUI_PLUGINS_DIR: pluginDir,
         AGENT_MUX_TUI_INITIAL_VIEW: 'sessions',
-        AGENT_MUX_LOG_FILE: path.join(stateDir, 'amux.log'),
+        AGENT_MUX_LOG_FILE: path.join(stateDir, 'adapters.log'),
         AGENT_MUX_LOG_LEVEL: 'error',
       },
     });
@@ -282,12 +282,12 @@ describeBuiltBinary('real agent-mux-tui binary e2e', () => {
     await harness.close();
   }, 30_000);
 
-  it('discovers user plugins from ~/.amux/tui-plugins by default', async () => {
+  it('discovers user plugins from ~/.adapters/tui-plugins by default', async () => {
     const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-home-'));
     const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-mux-tui-state-'));
     tempDirs.push(homeDir, stateDir);
 
-    installFixturePlugin(path.join(homeDir, '.amux', 'tui-plugins'));
+    installFixturePlugin(path.join(homeDir, '.adapters', 'tui-plugins'));
     const eventsPath = path.join(stateDir, 'events.jsonl');
     const sessionFixturePath = path.join(stateDir, 'sess-beta.json');
 

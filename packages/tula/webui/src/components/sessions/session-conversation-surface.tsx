@@ -3,7 +3,7 @@
 import { Link, useNavigate } from "react-router-dom-v6";
 import { useEffect, useMemo, useRef, useState, type UIEvent } from "react";
 import { useStore } from "zustand";
-import type { Attachment, WorkspaceRuntimeSurface } from "@a5c-ai/adapters-comm";
+import type { Attachment, WorkspaceRuntimeSurface } from "@a5c-ai/comm-adapter";
 import type {
   AgentFlowLane,
   AgentFlowSegment,

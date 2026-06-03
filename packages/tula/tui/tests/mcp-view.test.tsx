@@ -64,6 +64,6 @@ describe('mcp-view', () => {
     );
     await flush();
     rerender(<View client={client} active={true} eventStream={stream} emit={() => {}} />);
-    expect(lastFrame()).toContain('amux mcp install');
+    expect(lastFrame()).toContain('adapters mcp install');
   });
 });

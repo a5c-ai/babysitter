@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  adapters-proxy:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      AGENT_MUX_PROXY_TARGET_PROVIDER: bedrock
+      AGENT_MUX_PROXY_TARGET_MODEL: "bedrock/anthropic.claude-sonnet-4-20250514-v1:0"
+      AGENT_MUX_PROXY_EXPOSED_TRANSPORT: anthropic
+      AGENT_MUX_PROXY_PORT: "8080"
+      AGENT_MUX_PROXY_HOST: "0.0.0.0"
+      AGENT_MUX_PROXY_AUTH_TOKEN: "${AGENT_MUX_PROXY_AUTH_TOKEN:-changeme}"
+      AWS_REGION_NAME: "${AWS_REGION_NAME:-us-east-1}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

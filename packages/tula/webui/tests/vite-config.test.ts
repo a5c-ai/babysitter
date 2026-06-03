@@ -14,7 +14,7 @@ describe('agent-mux webui vite config', () => {
     const aliases = config.resolve?.alias;
     expect(aliases).toBeTruthy();
     expect(aliases && typeof aliases === 'object' ? aliases['@a5c-ai/atlas/catalog'] : undefined).toBe(expectedCatalogAlias);
-    expect(aliases && typeof aliases === 'object' ? aliases['@a5c-ai/adapters-comm'] : undefined).toBe(expectedCoreAlias);
-    expect(aliases && typeof aliases === 'object' ? aliases['@a5c-ai/adapters-comm/browser'] : undefined).toBe(expectedCoreBrowserAlias);
+    expect(aliases && typeof aliases === 'object' ? aliases['@a5c-ai/comm-adapter'] : undefined).toBe(expectedCoreAlias);
+    expect(aliases && typeof aliases === 'object' ? aliases['@a5c-ai/comm-adapter/browser'] : undefined).toBe(expectedCoreBrowserAlias);
   });
 });

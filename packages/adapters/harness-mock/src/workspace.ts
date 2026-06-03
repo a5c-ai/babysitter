@@ -28,7 +28,7 @@ export class WorkspaceSandbox {
   private _initialSnapshot: Map<string, string>;
 
   constructor(options?: WorkspaceOptions) {
-    this.root = fs.mkdtempSync(path.join(os.tmpdir(), 'amux-workspace-'));
+    this.root = fs.mkdtempSync(path.join(os.tmpdir(), 'adapters-workspace-'));
     this._preserve = options?.preserve ?? false;
     this._initialSnapshot = new Map();
 

@@ -67,7 +67,7 @@ The command surfaces involved are split by responsibility:
 | `babysitter run:create`, `run:iterate`, `task:list`, `task:post` | Create and replay the run, inspect pending effects, and post resolved task results. |
 | `babysitter process-library:active`, `skill:discover`, `profile:*` | Gather process-authoring context, available skills, and user/project preferences before deciding whether an external responder is appropriate. |
 | `tula discover`, `tula list`, `tula invoke` | Human-facing discovery and invocation surface for available runtime agents and services. |
-| `amux doctor`, `amux launch`, `amux auth`, `amux install` | agent-mux checks and adapter operations. See the agent-mux reference for the exact CLI flags. |
+| `adapters doctor`, `adapters launch`, `adapters auth`, `adapters install` | agent-mux checks and adapter operations. See the agent-mux reference for the exact CLI flags. |
 
 Troubleshooting common external agent failures:
 

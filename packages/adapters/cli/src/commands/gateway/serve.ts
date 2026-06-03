@@ -10,7 +10,7 @@ import { flagBool, flagNum, flagStr } from '../../parse-args.js';
 import { ExitCode } from '../../exit-codes.js';
 import { printError, printInfo, printJsonOk } from '../../output.js';
 
-export const DEFAULT_GATEWAY_CONFIG_PATH = path.join(os.homedir(), '.amux', 'gateway', 'config.yml');
+export const DEFAULT_GATEWAY_CONFIG_PATH = path.join(os.homedir(), '.adapters', 'gateway', 'config.yml');
 
 export async function loadGatewayConfig(configPath: string): Promise<Partial<GatewayConfig>> {
   try {

@@ -186,14 +186,14 @@ export function getAmuxAdapterMetadata(harnessName: string): AmuxAdapterMetadata
     return fallback;
   }
 
-  let amux: Record<string, unknown>;
+  let adapters: Record<string, unknown>;
   let createClient: (() => AgentMuxClient) | undefined;
   let registerBuiltInAdapters: ((client: AgentMuxClient) => void) | undefined;
 
   try {
-    amux = requireAmux();
-    createClient = amux.createClient as (() => AgentMuxClient) | undefined;
-    registerBuiltInAdapters = amux.registerBuiltInAdapters as ((client: AgentMuxClient) => void) | undefined;
+    adapters = requireAmux();
+    createClient = adapters.createClient as (() => AgentMuxClient) | undefined;
+    registerBuiltInAdapters = adapters.registerBuiltInAdapters as ((client: AgentMuxClient) => void) | undefined;
   } catch (error) {
     if (shouldUseFallbackMetadata(error)) {
       const fallback = getFallbackAdapterMetadata(harnessName, agentMuxName);

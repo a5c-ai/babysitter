@@ -5,7 +5,7 @@ import path from 'node:path';
 import type {
   AutomationExecutionRecord,
   AutomationRule,
-} from '@a5c-ai/adapters-comm';
+} from '@a5c-ai/comm-adapter';
 
 import type {
   KanbanActivityEntry,
@@ -18,7 +18,7 @@ import type {
   KanbanProjectSettings,
   KanbanTaskTag,
   KanbanTeam,
-} from '@a5c-ai/adapters-comm/kanban';
+} from '@a5c-ai/comm-adapter/kanban';
 
 export const KANBAN_BACKLOG_FILE_PATH =
   process.env.KANBAN_BACKLOG_FILE ?? path.join(os.homedir(), '.a5c', 'kanban-backlog.json');

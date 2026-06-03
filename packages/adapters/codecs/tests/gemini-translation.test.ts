@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { ProviderConfig } from '@a5c-ai/adapters-comm';
+import type { ProviderConfig } from '@a5c-ai/comm-adapter';
 import { translateForGemini } from '../src/translations/gemini-translation.js';
 
 function makeConfig(overrides: Partial<ProviderConfig> & { provider: ProviderConfig['provider'] }): ProviderConfig {

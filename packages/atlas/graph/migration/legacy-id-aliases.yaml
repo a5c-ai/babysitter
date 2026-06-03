@@ -221,7 +221,7 @@ aliases:
   - { legacyId: transportProtocol:shell-hook-runtime,  v6Id: transport-protocol:shell-hook-runtime,  nodeKind: TransportProtocol }
   - { legacyId: transportProtocol:terminal-cli,        v6Id: transport-protocol:terminal-cli,        nodeKind: TransportProtocol }
   - { legacyId: transportProtocol:vertex-native,       v6Id: transport-protocol:vertex-native,       nodeKind: TransportProtocol }
-  - { legacyId: transportRuntime:amux-proxy,           v6Id: transport-runtime:amux-proxy,           nodeKind: TransportRuntime }
+  - { legacyId: transportRuntime:adapters-proxy,           v6Id: transport-runtime:adapters-proxy,           nodeKind: TransportRuntime }
   - { legacyId: transportRuntime:shell-hook-runtime,   v6Id: transport-runtime:shell-hook-runtime,   nodeKind: TransportRuntime }
   - { legacyId: transportRuntime:terminal-cli,         v6Id: transport-runtime:terminal-cli,         nodeKind: TransportRuntime }
 
@@ -240,12 +240,12 @@ aliases:
   # NodeKind: PackageSurface
   # ─────────────────────────────────────────────────────────────────
   - { legacyId: "package:@a5c-ai/atlas/catalog",     v6Id: "package-surface:a5c-ai-agent-catalog",     nodeKind: PackageSurface }
-  - { legacyId: "package:@a5c-ai/adapters-comm",    v6Id: "package-surface:a5c-ai-agent-comm-mux",    nodeKind: PackageSurface }
-  - { legacyId: "package:@a5c-ai/adapters-extensions", v6Id: "package-surface:a5c-ai-extension-mux", nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/comm-adapter",    v6Id: "package-surface:a5c-ai-agent-comm-mux",    nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/extensions-adapter", v6Id: "package-surface:a5c-ai-extension-mux", nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/babysitter-sdk",    v6Id: "package-surface:a5c-ai-babysitter-sdk",    nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/catalog",           v6Id: "package-surface:a5c-ai-catalog",           nodeKind: PackageSurface }
-  - { legacyId: "package:@a5c-ai/adapters-hooks-core",    v6Id: "package-surface:a5c-ai-hooks-mux-core",    nodeKind: PackageSurface }
-  - { legacyId: "package:@a5c-ai/adapters-transport",     v6Id: "package-surface:a5c-ai-transport-mux",     nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/hooks-adapter-core",    v6Id: "package-surface:a5c-ai-hooks-mux-core",    nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/transport-adapter",     v6Id: "package-surface:a5c-ai-transport-mux",     nodeKind: PackageSurface }
 
   # ─────────────────────────────────────────────────────────────────
   # NodeKind: ProcessDescriptor

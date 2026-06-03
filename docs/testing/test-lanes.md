@@ -18,7 +18,7 @@ No-model tests must run without provider secrets, paid model calls, or installed
 | Contract tests | Vitest + fixtures | Stable boundaries between SDK, hooks-mux, agent-mux, transport-mux, agent-core, and agent-platform, including transport-mux route matrix and runtime env injection contracts | Every PR and push |
 | Mock harness tests | Vitest + existing mock adapters | Session lifecycle, adapter dispatch, tool-call translation, stop-hook semantics, plugin discovery, fallback metadata | Every PR and push |
 | Browser/UI E2E | Playwright + mock gateway | Agent-mux WebUI session flows, transcript rendering, model picker behavior, approvals, reconnect behavior | PRs touching WebUI/gateway/session code; staging before publish |
-| CLI smoke tests | Node subprocess tests | `babysitter`, `amux`, hooks-mux CLI, package entrypoints, help output, dry-run paths | Every PR for touched packages; staging before publish |
+| CLI smoke tests | Node subprocess tests | `babysitter`, `adapters`, hooks-mux CLI, package entrypoints, help output, dry-run paths | Every PR for touched packages; staging before publish |
 | Docs and generated assets | Existing docs QA and generator checks | Documentation links, snippets, generated plugin bundles, command templates | Every PR and push |
 
 No-model tests should prefer deterministic fixture transcripts and mock harness implementations. They should never skip because an API key is missing; if a test cannot run without a provider key, it belongs in the model-backed lane.
@@ -29,13 +29,13 @@ No-model tests should prefer deterministic fixture transcripts and mock harness 
 
 | Dimension | Values | Required proof |
 | --- | --- | --- |
-| Agent runtime | `agent-mux-mocks`, `real-agent` | The lane installs/verifies the target through `amux install --dry-run`, then launches the agent path selected by the runtime dimension |
+| Agent runtime | `agent-mux-mocks`, `real-agent` | The lane installs/verifies the target through `adapters install --dry-run`, then launches the agent path selected by the runtime dimension |
 | Agent | `claude`, `codex`, `pi`, `gemini` | The target CLI path is selected by agent-mux and produces per-agent evidence |
-| Hook mode | `none`, `hooks-mux` | `hooks-mux` lanes register an `amux hooks` command bridge and assert the normalized hooks-mux phase evidence |
+| Hook mode | `none`, `hooks-mux` | `hooks-mux` lanes register an `adapters hooks` command bridge and assert the normalized hooks-mux phase evidence |
 
 Every no-model stack lane starts a local transport-mux runtime with a fixture completion engine. The launched agent, including the local CI shim for real-agent lanes and the mock-harness path for `agent-mux-mocks`, must send a request through that transport-mux runtime and attach the request count plus redacted evidence under `publish-no-model-stack-*`.
 
-`Publish` also has an `agent_mux_hooks_mux_e2e` no-model/no-SDK job. It is intentionally separate from the live Babysitter plugin matrix: the GitHub matrix chooses `claude-code`, `codex`, and `pi`; the test only consumes that one selected lane, registers an `amux hooks` command hook, bridges the native payload into `a5c-hooks-mux invoke`, and asserts the hooks-mux normalized phase evidence.
+`Publish` also has an `agent_mux_hooks_mux_e2e` no-model/no-SDK job. It is intentionally separate from the live Babysitter plugin matrix: the GitHub matrix chooses `claude-code`, `codex`, and `pi`; the test only consumes that one selected lane, registers an `adapters hooks` command hook, bridges the native payload into `a5c-hooks-mux invoke`, and asserts the hooks-mux normalized phase evidence.
 
 ## Lane 2: Model-Backed Tests
 
@@ -44,7 +44,7 @@ Model-backed tests exercise real provider integrations, real installed harnesses
 | Scope | Required setup | What it covers | CI timing |
 | --- | --- | --- | --- |
 | SDK harness/plugin setup smoke | `babysitter harness:install <name>` and `babysitter harness:install-plugin <name>` | Installer delegation, plugin target resolution, idempotent manifests; not agent-platform runtime | Scheduled, manual, staging gate |
-| Agent-mux plugin/session E2E | Provider secrets, installed external CLI, and plugin precondition where supported | `amux run` or `createClient().run` starts a session, plugin command creates a Babysitter run, and hooks/process lifecycle are asserted | Scheduled, manual, staging gate |
+| Agent-mux plugin/session E2E | Provider secrets, installed external CLI, and plugin precondition where supported | `adapters run` or `createClient().run` starts a session, plugin command creates a Babysitter run, and hooks/process lifecycle are asserted | Scheduled, manual, staging gate |
 | Babysitter-agent live orchestration | Preinstalled/mocked backend plus `OPENAI_API_KEY`, configured Foundry/OpenAI credentials, or configured cloud equivalents where needed | `@a5c-ai/tula-platform` can plan, execute, post task results, and close a run without executing harness installer commands | `publish.yml` staging/main preflight, manual |
 | Agent-mux live adapters | Provider-specific credentials | Claude Code and Codex adapters produce protocol events that match the mux contracts | Scheduled/manual first, then `publish.yml` release preflight after quarantine |
 | Transport-mux live transport | Local process ports plus provider/harness credentials | Transport-mux carries real agent-core streams and agent-mux-launched external harness traffic through proxy routes with redacted launch/env/metrics artifacts | Scheduled/manual first, then `publish.yml` after quarantine |

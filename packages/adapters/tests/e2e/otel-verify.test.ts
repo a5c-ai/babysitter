@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createClient } from '@a5c-ai/adapters-comm';
+import { createClient } from '@a5c-ai/comm-adapter';
 
 // Mock the whole module at the top level to ensure all imports get the same mock
 vi.mock('@a5c-ai/adapters-observability', () => {

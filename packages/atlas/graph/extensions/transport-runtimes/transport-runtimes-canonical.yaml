@@ -53,11 +53,11 @@ edges:
       notes: "Runtime hook execution surface."
 ---
 nodeKind: TransportRuntime
-id: transport-runtime:amux-proxy
+id: transport-runtime:adapters-proxy
 attributes:
-  displayName: "amux-proxy runtime"
+  displayName: "adapters-proxy runtime"
   description: |
-    amux-proxy protocol/provider bridge — runs as a local proxy that
+    adapters-proxy protocol/provider bridge — runs as a local proxy that
     translates between agent-facing transport protocols (e.g.
     Anthropic Messages, OpenAI Responses) and upstream provider
     contracts. Provides observability, model discovery, and token
@@ -70,20 +70,20 @@ edges:
     - target: capability:streaming
       versionRange: ">=0.0.0"
       level: full
-      notes: "amux-proxy protocol/provider bridge."
+      notes: "adapters-proxy protocol/provider bridge."
     - target: capability:proxy-transport-emulation
       versionRange: ">=0.0.0"
       level: full
-      notes: "amux-proxy protocol/provider bridge."
+      notes: "adapters-proxy protocol/provider bridge."
     - target: capability:model-discovery
       versionRange: ">=0.0.0"
       level: full
-      notes: "amux-proxy protocol/provider bridge."
+      notes: "adapters-proxy protocol/provider bridge."
     - target: capability:token-counting
       versionRange: ">=0.0.0"
       level: full
-      notes: "amux-proxy protocol/provider bridge."
+      notes: "adapters-proxy protocol/provider bridge."
     - target: capability:supports-tool-use
       versionRange: ">=0.0.0"
       level: full
-      notes: "amux-proxy protocol/provider bridge."
+      notes: "adapters-proxy protocol/provider bridge."

@@ -10,7 +10,7 @@ import {
 } from '../src/index.js';
 
 async function tmpDir(label: string): Promise<string> {
-  const d = await fs.mkdtemp(path.join(os.tmpdir(), `amux-hooks-${label}-`));
+  const d = await fs.mkdtemp(path.join(os.tmpdir(), `adapters-hooks-${label}-`));
   return d;
 }
 

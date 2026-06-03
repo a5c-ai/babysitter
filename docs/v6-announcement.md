@@ -35,7 +35,7 @@ It ships over 20 sub-packages: `core`, `adapters`, `cli`, `gateway`, `sdk`, `web
 - **Native platform apps**: React Native mobile (iOS and Android), TV apps (AndroidTV and AppleTV), watch apps (WatchOS SwiftUI and WearOS Compose).
 - **WebUI**: Kanban boards, workspace shells, and session chat, migrated from Radix/Tailwind to the new Compendium design system.
 - **Core entry points**: Separate exports for `browser`, `kanban`, and `automation` let consumers tree-shake to exactly the surface they need.
-- **amux-proxy**: A standalone CLI binary for proxying agent-mux sessions through transport layers.
+- **adapters-proxy**: A standalone CLI binary for proxying agent-mux sessions through transport layers.
 
 ### Atlas
 
@@ -50,7 +50,7 @@ The WebUI received a full Compendium redesign with first-class dark mode and tab
 
 ### Hooks Mux
 
-Hooks Mux (248 files, 30K lines) provides a unified hook system with adapters for all 9 supported harnesses. The core package (`@a5c-ai/adapters-hooks-core`) defines canonical schemas, types, a session store, and a merge engine that reconciles hook state across concurrent agent invocations.
+Hooks Mux (248 files, 30K lines) provides a unified hook system with adapters for all 9 supported harnesses. The core package (`@a5c-ai/hooks-adapter-core`) defines canonical schemas, types, a session store, and a merge engine that reconciles hook state across concurrent agent invocations.
 
 Three documentation guides are referenced across the adapter READMEs: `adapter-integration-guide.md`, `portable-hook-authoring.md`, and `session-context-propagation.md`.
 
@@ -129,7 +129,7 @@ npx babysitter-observer-dashboard
 Transport Mux (28 files, 4K lines) is a lightweight transport and proxy runtime built on Hono. It bridges agent-mux sessions to provider backends and handles provider-backed token counting.
 
 - Built on Hono for minimal footprint.
-- `amux-proxy` CLI binary for standalone operation.
+- `adapters-proxy` CLI binary for standalone operation.
 - Provider-backed token counting.
 
 ### Triggers
@@ -144,7 +144,7 @@ Triggers (26 files, 1.3K lines) normalize webhook events from GitHub Actions, Gi
 ```
 
 - GitHub Actions, GitLab, Bitbucket webhooks unified into a single schema.
-- `amux-triggers` CLI binary.
+- `adapters-triggers` CLI binary.
 - GitHub Action (`action.yml`) for direct workflow integration.
 
 ### Cloud

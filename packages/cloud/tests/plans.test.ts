@@ -286,7 +286,7 @@ describe("cloud deployment plan", () => {
     };
 
     const providers = configureProviders(config);
-    expect(providers.automation.filePath).toBe(".amux/providers.json");
+    expect(providers.automation.filePath).toBe(".adapters/providers.json");
     expect(providers.automation.providersFile.defaults).toEqual({
       provider: "openai",
       model: "gpt-5.4",

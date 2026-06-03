@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-import type { CostRecord, Spawner } from '@a5c-ai/adapters-comm';
+import type { CostRecord, Spawner } from '@a5c-ai/comm-adapter';
 
 /**
  * Default Spawner that runs the command via `child_process.spawn`, capturing

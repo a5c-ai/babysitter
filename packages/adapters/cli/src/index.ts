@@ -3,13 +3,13 @@
 /**
  * @a5c-ai/adapters-cli
  *
- * CLI binary entry point for the `amux` command.
+ * CLI binary entry point for the `adapters` command.
  *
  * Parses arguments, creates a client, and dispatches to the appropriate
  * command handler. Exports core functionality for programmatic use.
  */
 
-export { createClient } from '@a5c-ai/adapters-comm';
+export { createClient } from '@a5c-ai/comm-adapter';
 export { ExitCode, errorCodeToExitCode } from './exit-codes.js';
 export { parseArgs } from './parse-args.js';
 export { registerBuiltInAdapters } from './bootstrap.js';
@@ -18,7 +18,7 @@ export type { ParsedArgs, FlagDef } from './parse-args.js';
 // Re-exported so the meta-package shim (`@a5c-ai/adapters`) can drive the CLI.
 export { main as runCli };
 
-import { createClient, AgentMuxError } from '@a5c-ai/adapters-comm';
+import { createClient, AgentMuxError } from '@a5c-ai/comm-adapter';
 import { parseArgs } from './parse-args.js';
 import { flagBool, flagStr } from './parse-args.js';
 import { RUN_FLAGS } from './commands/run.js';
@@ -73,7 +73,7 @@ export async function main(argv?: string[]): Promise<number> {
     return ExitCode.SUCCESS;
   }
 
-  // Handle `amux version` command
+  // Handle `adapters version` command
   if (args.command === 'version') {
     printVersion();
     return ExitCode.SUCCESS;
@@ -85,7 +85,7 @@ export async function main(argv?: string[]): Promise<number> {
     return ExitCode.SUCCESS;
   }
 
-  // Handle `amux help [command]`
+  // Handle `adapters help [command]`
   if (args.command === 'help') {
     printHelp(args.positionals[0] ?? args.subcommand);
     return ExitCode.SUCCESS;
@@ -101,7 +101,7 @@ export async function main(argv?: string[]): Promise<number> {
       if (jsonModeEarly) {
         printJsonError('VALIDATION_ERROR', `Unknown command: ${unknown}`);
       } else {
-        printError(`Unknown command: ${unknown}. Run "amux help" for usage.`);
+        printError(`Unknown command: ${unknown}. Run "adapters help" for usage.`);
       }
       return ExitCode.USAGE_ERROR;
     }
@@ -204,7 +204,7 @@ export async function main(argv?: string[]): Promise<number> {
         if (jsonMode) {
           printJsonError('VALIDATION_ERROR', `Unknown command: ${args.command}`);
         } else {
-          printError(`Unknown command: ${args.command}. Run "amux help" for usage.`);
+          printError(`Unknown command: ${args.command}. Run "adapters help" for usage.`);
         }
         return ExitCode.USAGE_ERROR;
     }
@@ -235,8 +235,8 @@ const isDirectRun =
   process.argv[1] &&
   (process.argv[1].endsWith('/index.js') ||
    process.argv[1].endsWith('\\index.js') ||
-   process.argv[1].endsWith('/amux') ||
-   process.argv[1].endsWith('\\amux'));
+   process.argv[1].endsWith('/adapters') ||
+   process.argv[1].endsWith('\\adapters'));
 
 if (isDirectRun) {
   main().then((code) => {

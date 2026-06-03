@@ -110,8 +110,8 @@ function buildUnknownCommandError(command: string, program: CliProgram): Babysit
     if (command === "harness:install") {
       return new BabysitterRuntimeError("DeprecatedCommand", `"${command}" is deprecated. Use the agent-mux installer instead.`, {
         category: ErrorCategory.Validation,
-        suggestions: [`amux install <agent>`, `npx @a5c-ai/adapters-cli install <agent>`],
-        nextSteps: [`Run amux install --help for agent installation options.`],
+        suggestions: [`adapters install <agent>`, `npx @a5c-ai/adapters-cli install <agent>`],
+        nextSteps: [`Run adapters install --help for agent installation options.`],
         details: { command, deprecated: true },
       });
     }
