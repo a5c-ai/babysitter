@@ -1095,7 +1095,7 @@ jobs:
               npm run build --workspace=@a5c-ai/agent-mux-observability
               npm run build --workspace=@a5c-ai/agent-mux-comm
               npm run build --workspace=@a5c-ai/agent-mux-transport
-              npx tsc --build packages/tool-mux/tsconfig.json
+              npx tsc --build packages/agent-mux/tools/tsconfig.json
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v8
