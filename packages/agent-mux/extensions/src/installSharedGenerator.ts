@@ -178,7 +178,7 @@ function runPostInstall(pluginRoot) {
   if (fs.existsSync(postInstall)) {
     spawnSync(process.execPath, [postInstall], {
       cwd: pluginRoot, stdio: 'inherit',
-      env: { ...process.env, PLUGIN_ROOT: pluginRoot },
+      env: { ...process.env, PLUGIN_ROOT: pluginRoot, CLAUDE_PLUGIN_ROOT: pluginRoot },
     });
   }
 }

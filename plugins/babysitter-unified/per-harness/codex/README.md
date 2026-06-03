@@ -11,9 +11,15 @@ This package ships a real Codex plugin bundle:
 
 It still uses the Babysitter SDK CLI and the shared `~/.a5c` process-library
 state. Global install writes the plugin bundle to `~/.agents/plugins/babysitter`
-and updates `~/.agents/plugins/marketplace.json` so Codex can load the plugin
-through its marketplace surface. Workspace install continues to materialize a
-workspace-local Codex surface for team setup.
+and updates `.agents/plugins/marketplace.json` (primary) so Codex can load the
+plugin through its marketplace surface. Codex also recognizes
+`.claude-plugin/marketplace.json` as a legacy marketplace path. Workspace
+install continues to materialize a workspace-local Codex surface for team setup.
+
+Codex now ships an official marketplace CLI (`codex plugin marketplace`) that
+supports `add`, `list`, `upgrade`, and `remove` subcommands. Plugin bundles
+installed through the marketplace are cached under
+`~/.codex/plugins/cache/$MARKETPLACE/$PLUGIN/$VERSION/`.
 
 ## Installation
 
@@ -40,6 +46,34 @@ npx --yes @a5c-ai/babysitter-codex install --global
 npx --yes @a5c-ai/babysitter-codex install --workspace /path/to/repo
 ```
 
+Alternatively, use the official Codex marketplace CLI to add the babysitter
+marketplace directly from GitHub:
+
+```bash
+codex plugin marketplace add a5c-ai/babysitter --ref staging --sparse .agents/plugins
+```
+
+Or from a local clone:
+
+```bash
+codex plugin marketplace add ./path/to/babysitter
+```
+
+Then browse and install:
+
+```bash
+codex plugin list --source babysitter
+codex plugin install babysitter --source babysitter
+```
+
+Other marketplace commands:
+
+```bash
+codex plugin marketplace list
+codex plugin marketplace upgrade babysitter
+codex plugin marketplace remove babysitter
+```
+
 Then open Codex and finish enabling the plugin from the plugin UI:
 
 ```text
@@ -63,6 +97,25 @@ The plugin provides:
 
 The process library is fetched and bound through the SDK CLI in
 `~/.a5c/active/process-library.json`.
+
+## Hook Environment Variables
+
+Codex exposes the following environment variables to hook scripts:
+
+| Variable | Description |
+|---|---|
+| `PLUGIN_ROOT` | Absolute path to the plugin root directory (native) |
+| `PLUGIN_DATA` | Persistent data directory for the plugin (native) |
+| `CLAUDE_PLUGIN_ROOT` | Compatibility alias for `PLUGIN_ROOT` |
+| `CLAUDE_PLUGIN_DATA` | Compatibility alias for `PLUGIN_DATA` |
+
+Hook scripts should prefer `PLUGIN_ROOT` / `PLUGIN_DATA` but can read the
+`CLAUDE_PLUGIN_ROOT` / `CLAUDE_PLUGIN_DATA` aliases for cross-harness
+compatibility with Claude Code plugins.
+
+Codex auto-detects hooks via `./hooks/hooks.json`. The `hooks` field in
+`.codex-plugin/plugin.json` accepts a path, an array of paths, an inline
+object, or an array of objects.
 
 ## Workspace Output
 

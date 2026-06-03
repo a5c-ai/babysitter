@@ -197,6 +197,24 @@ attributes:
     installedVersions: true
     visibleMarketplaceRoots: true
     remoteCollections: true
+    marketplaceCli: "codex plugin marketplace"
+    marketplaceCliCommands: [add, list, upgrade, remove]
+    pluginManifestPath: ".codex-plugin/plugin.json"
+    marketplacePaths:
+      primary: ".agents/plugins/marketplace.json"
+      legacy: ".claude-plugin/marketplace.json"
+    pluginCacheDir: "~/.codex/plugins/cache/$MARKETPLACE/$PLUGIN/$VERSION/"
+    hookDiscovery:
+      autoDetect: "./hooks/hooks.json"
+      manifestField: hooks
+      manifestFieldFormats:
+        - path
+        - array-of-paths
+        - inline-object
+        - array-of-objects
+    hookEnvVars:
+      native: [PLUGIN_ROOT, PLUGIN_DATA]
+      compatAliases: [CLAUDE_PLUGIN_ROOT, CLAUDE_PLUGIN_DATA]
   extensionEvents:
     observesSubagentLifecycle: true
     observesToolExecution: true
@@ -217,6 +235,11 @@ attributes:
     nonInteractiveMode: "exec"
     interactiveMode: ""
   adapterMetadata:
+    installCommands:
+      - type: npm
+        command: "npm install -g @openai/codex"
+      - type: marketplace
+        command: "codex plugin marketplace add <plugin-name>"
     authMethods:
       - type: api_key
         name: "API Key"
@@ -262,6 +285,7 @@ attributes:
       supportsImageOutput: false
       supportsFileAttachments: false
       supportsPlugins: true
+      supportsPluginMarketplace: true
       supportedPlatforms: [darwin, linux, win32]
       thinkingEffortLevels: []
       requiresGitRepo: false
@@ -285,6 +309,24 @@ attributes:
       installedVersions: true
       visibleMarketplaceRoots: true
       remoteCollections: true
+      marketplaceCli: "codex plugin marketplace"
+      marketplaceCliCommands: [add, list, upgrade, remove]
+      pluginManifestPath: ".codex-plugin/plugin.json"
+      marketplacePaths:
+        primary: ".agents/plugins/marketplace.json"
+        legacy: ".claude-plugin/marketplace.json"
+      pluginCacheDir: "~/.codex/plugins/cache/$MARKETPLACE/$PLUGIN/$VERSION/"
+      hookDiscovery:
+        autoDetect: "./hooks/hooks.json"
+        manifestField: hooks
+        manifestFieldFormats:
+          - path
+          - array-of-paths
+          - inline-object
+          - array-of-objects
+      hookEnvVars:
+        native: [PLUGIN_ROOT, PLUGIN_DATA]
+        compatAliases: [CLAUDE_PLUGIN_ROOT, CLAUDE_PLUGIN_DATA]
     extensionEvents:
       observesSubagentLifecycle: true
       observesToolExecution: true

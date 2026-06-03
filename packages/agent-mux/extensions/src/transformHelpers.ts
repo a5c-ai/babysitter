@@ -83,6 +83,7 @@ export function generatePs1Wrapper(
 $env:HOOK_TYPE = '${hookSlug}'
 $env:ADAPTER_NAME = '${adapterName}'
 $env:PLUGIN_ROOT = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$env:CLAUDE_PLUGIN_ROOT = $env:PLUGIN_ROOT
 
 $input_data = [Console]::In.ReadToEnd()
 $result = $input_data | & bash "$PSScriptRoot/../$($MyInvocation.MyCommand.Name -replace '\\.ps1$','.sh')" 2>$null
@@ -118,7 +119,8 @@ try {
     env: Object.assign({}, process.env, {
       HOOK_TYPE: process.env.HOOK_TYPE || "",
       ADAPTER_NAME: process.env.ADAPTER_NAME || "${defaultAdapterName}",
-      PLUGIN_ROOT: PLUGIN_ROOT
+      PLUGIN_ROOT: PLUGIN_ROOT,
+      CLAUDE_PLUGIN_ROOT: PLUGIN_ROOT
     })
   });
   process.stdout.write(result);
@@ -253,7 +255,7 @@ export async function ${handlerName}(context: Record<string, unknown>): Promise<
       input: JSON.stringify(context),
       stdio: ["pipe", "pipe", "pipe"],
       timeout: 30000,
-      env: { ...process.env, ADAPTER_NAME: "${targetProfile.adapterName}", PLUGIN_ROOT },
+      env: { ...process.env, ADAPTER_NAME: "${targetProfile.adapterName}", PLUGIN_ROOT, CLAUDE_PLUGIN_ROOT: PLUGIN_ROOT },
     });
   } catch { /* best-effort */ }
 }

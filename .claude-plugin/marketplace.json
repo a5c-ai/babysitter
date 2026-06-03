@@ -1,23 +1,22 @@
 {
-  "name": "a5c.ai",
-  "owner": {
-    "name": "a5c.ai",
-    "email": "support@a5c.ai"
+  "name": "babysitter",
+  "interface": {
+    "displayName": "Babysitter"
   },
   "plugins": [
     {
       "name": "babysitter",
       "source": {
-        "source": "url",
-        "url": "https://github.com/a5c-ai/babysitter-claude.git",
-        "branch": "main"
+        "source": "git-subdir",
+        "url": "https://github.com/a5c-ai/babysitter.git",
+        "path": "plugins/babysitter-unified",
+        "ref": "staging"
       },
-      "description": "Babysitter",
-      "version": "5.0.1-staging.28347f861706",
-      "author": {
-        "name": "a5c.ai"
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
       },
-      "repository": "https://github.com/a5c-ai/babysitter-claude"
+      "category": "Coding"
     }
   ]
 }

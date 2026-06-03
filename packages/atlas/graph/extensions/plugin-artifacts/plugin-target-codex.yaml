@@ -54,6 +54,17 @@ attributes:
   marketplaceSpecs:
     - from: ".agents/plugins/marketplace.json"
       kind: "codex"
+      primary: true
+    - from: ".claude-plugin/marketplace.json"
+      kind: "codex"
+      legacy: true
+  marketplaceCli:
+    command: "codex plugin marketplace"
+    subcommands: [add, list, upgrade, remove]
+  pluginCacheDir: "~/.codex/plugins/cache/$MARKETPLACE/$PLUGIN/$VERSION/"
+  hookEnvVars:
+    native: [PLUGIN_ROOT, PLUGIN_DATA]
+    compatAliases: [CLAUDE_PLUGIN_ROOT, CLAUDE_PLUGIN_DATA]
   requiredSurfaceFile: null
   promptCapabilities:
     - hooks

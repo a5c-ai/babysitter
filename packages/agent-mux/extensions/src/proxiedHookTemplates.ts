@@ -130,6 +130,7 @@ function generateRunProxiedHookFunction(pluginRootEnvVar: string): string {
       env: {
         ...process.env,
         ${pluginRootEnvVar}: PLUGIN_ROOT,
+        CLAUDE_PLUGIN_ROOT: PLUGIN_ROOT,
       },
     });
     return JSON.parse(result.toString("utf8").trim());
