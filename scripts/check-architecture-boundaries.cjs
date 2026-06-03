@@ -114,9 +114,9 @@ const familyRules = {
       "atlas packages form a self-contained graph SDK family; may depend on support systems but not orchestration core",
   },
   "kradle-family": {
-    allow: new Set(["support-systems", "kradle-family"]),
+    allow: new Set(["support-systems", "kradle-family", "dispatch-surfaces"]),
     rationale:
-      "kradle packages form a self-contained Kubernetes forge family; may depend on support systems but not orchestration core",
+      "kradle packages form a self-contained Kubernetes forge family; may depend on support systems and shared UI surfaces (tula-ui) but not orchestration core",
   },
 };
 
