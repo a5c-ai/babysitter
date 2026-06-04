@@ -209,8 +209,10 @@ fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.
 
   if (scenario.agent.installMode === 'vanilla') {
     // Genty is a monorepo agent — already linked to PATH by the CI workflow.
+    // Antigravity is catalog-only (no codecs adapter yet) — installed externally.
     // Other agents need adapters install to fetch their CLI from npm.
-    const installCommands = installTarget === 'genty'
+    const skipInstallAgents = new Set(['genty', 'antigravity']);
+    const installCommands = skipInstallAgents.has(installTarget)
       ? []
       : [commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'adapters', ['install', installTarget, '--json'], options.cwd, SETUP_TIMEOUT_MS)];
     return [
