@@ -1,9 +1,9 @@
 export const dynamic = 'force-dynamic';
 
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner } from '../../../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner } from '../../../lib/kradle-ui.jsx';
 import { PageFrame } from '../../../lib/page-frame.jsx';
 
-export const metadata = { title: 'Getting Started | Krate' };
+export const metadata = { title: 'Getting Started | Kradle' };
 
 function StepCard({ number, title, description, href, done, org }) {
   return (
@@ -29,7 +29,7 @@ function StepCard({ number, title, description, href, done, org }) {
 
 export default async function GettingStartedPage({ params }) {
   const { org } = await params;
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model?.org?.slug || org || 'default';
   const model = ui.model || {};
   const agents = model.agents || {};
@@ -44,7 +44,7 @@ export default async function GettingStartedPage({ params }) {
   const hasSecrets = (model.resources?.find?.(r => r.kind === 'AgentSecretGrant')?.items?.length || 0) > 0;
 
   const steps = [
-    { number: 1, title: 'Create a repository', description: 'Start hosting code with Krate-managed repositories.', href: '/repositories', done: hasRepos },
+    { number: 1, title: 'Create a repository', description: 'Start hosting code with Kradle-managed repositories.', href: '/repositories', done: hasRepos },
     { number: 2, title: 'Connect an external provider', description: 'Link GitHub, GitLab, Vercel, or other platforms.', href: '/external/providers/new', done: hasProviders },
     { number: 3, title: 'Configure secrets', description: 'Add API keys and credentials for agent access.', href: '/settings/secrets', done: hasSecrets },
     { number: 4, title: 'Create an agent stack', description: 'Define a reusable agent with model, tools, and identity.', href: '/agents/stacks/new', done: hasStacks },
@@ -61,9 +61,9 @@ export default async function GettingStartedPage({ params }) {
       orgs={ui.model?.orgs || []}
       eyebrow="onboarding"
       title="Getting Started"
-      text={allDone ? 'Your workspace is fully configured. Explore the platform or check the docs.' : `Complete these ${steps.length} steps to set up your Krate workspace.`}
+      text={allDone ? 'Your workspace is fully configured. Explore the platform or check the docs.' : `Complete these ${steps.length} steps to set up your Kradle workspace.`}
       currentPath="/getting-started"
-      breadcrumbs={[['/', 'Krate'], ['/getting-started', 'Getting Started']]}
+      breadcrumbs={[['/', 'Kradle'], ['/getting-started', 'Getting Started']]}
       actions={[['/for-agents', 'For Agents'], ['/api-docs', 'API Docs']]}
     >
       <DegradedBanner model={ui.model} />

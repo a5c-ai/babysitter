@@ -1,11 +1,11 @@
 // Routes: /orgs/[org]/assistant — AI assistant chat and structured generation.
-import { loadKrateUi, DegradedBanner } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, DegradedBanner } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { AssistantChat } from '../components/assistant/assistant-chat.jsx';
 import { AssistantGenerate } from '../components/assistant/assistant-generate.jsx';
 
 export async function AssistantPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
 
   // Gather available stack names from the model
@@ -21,9 +21,9 @@ export async function AssistantPage({ org = null } = {}) {
       currentPath="/assistant"
       eyebrow="AI assistant"
       title="Assistant"
-      text="Chat with the Krate assistant or generate structured content using your agent stacks."
+      text="Chat with the Kradle assistant or generate structured content using your agent stacks."
       actions={[['/', 'Home'], ['/agents/stacks', 'Stacks']]}
-      breadcrumbs={[['/', 'Krate'], ['/assistant', 'Assistant']]}
+      breadcrumbs={[['/', 'Kradle'], ['/assistant', 'Assistant']]}
     >
       <DegradedBanner model={ui.model} />
       <AssistantShell org={activeOrg} stacks={stacks} />

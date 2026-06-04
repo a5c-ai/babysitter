@@ -63,7 +63,7 @@ export function LiveWatchPanel({ org = 'default', resource = 'pullrequests', ini
       setState((current) => ({ status: 'streaming', error: '', events: [payload, ...current.events].slice(0, 6) }));
     });
     source.onerror = () => {
-      setState((current) => ({ ...current, status: 'reconnecting', error: 'Live updates paused. Krate will resume from the current list state.' }));
+      setState((current) => ({ ...current, status: 'reconnecting', error: 'Live updates paused. Kradle will resume from the current list state.' }));
       source.close();
     };
     return () => source.close();

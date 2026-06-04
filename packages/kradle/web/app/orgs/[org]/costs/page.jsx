@@ -1,10 +1,10 @@
 export const dynamic = 'force-dynamic';
 
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner } from '../../../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner } from '../../../lib/kradle-ui.jsx';
 import { PageFrame } from '../../../lib/page-frame.jsx';
 import { loadPersistedEvents } from '@a5c-ai/kradle-sdk';
 
-export const metadata = { title: 'Costs | Krate' };
+export const metadata = { title: 'Costs | Kradle' };
 
 function formatUsd(amount) {
   if (amount == null || !Number.isFinite(amount)) return '—';
@@ -20,7 +20,7 @@ function formatTokens(count) {
 
 export default async function CostsPage({ params }) {
   const { org } = await params;
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model?.org?.slug || org || 'default';
 
   // Load persisted events and extract cost data
@@ -71,7 +71,7 @@ export default async function CostsPage({ params }) {
       title="Cost & Usage"
       text="Token usage, estimated costs, and request volume across models and agent stacks."
       currentPath="/costs"
-      breadcrumbs={[['/', 'Krate'], ['/costs', 'Costs']]}
+      breadcrumbs={[['/', 'Kradle'], ['/costs', 'Costs']]}
       actions={[['/insights', 'Health'], ['/agents/runs', 'Runs']]}
     >
       <DegradedBanner model={ui.model} />

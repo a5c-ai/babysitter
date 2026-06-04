@@ -23,7 +23,7 @@ function StatusMsg({ status, message }) {
 function ServiceAccountRow({ org, sa, onDeleted }) {
   const name = sa.metadata?.name;
   const roleRef = sa.spec?.roleRef || 'edit';
-  const ns = sa.spec?.namespace || `krate-org-${org}`;
+  const ns = sa.spec?.namespace || `kradle-org-${org}`;
   const [delStatus, setDelStatus] = useState('idle');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [delError, setDelError] = useState('');
@@ -37,7 +37,7 @@ function ServiceAccountRow({ org, sa, onDeleted }) {
       const rbName = `${name}-binding`;
       fetch(`/api/orgs/${encodeURIComponent(org)}/resources/AgentRoleBinding/${encodeURIComponent(rbName)}`, {
         method: 'DELETE',
-      }).catch((err) => console.warn('[krate] RBAC role binding deletion failed:', err.message ?? err));
+      }).catch((err) => console.warn('[kradle] RBAC role binding deletion failed:', err.message ?? err));
       const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/AgentServiceAccount/${encodeURIComponent(name)}`, {
         method: 'DELETE',
       });
@@ -105,7 +105,7 @@ function AddServiceAccountForm({ org, onCreated }) {
   const [name, setName] = useState('');
   const [roleRef, setRoleRef] = useState('edit');
   const [customRole, setCustomRole] = useState('');
-  const [namespace, setNamespace] = useState(`krate-org-${org}`);
+  const [namespace, setNamespace] = useState(`kradle-org-${org}`);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
 
@@ -128,7 +128,7 @@ function AddServiceAccountForm({ org, onCreated }) {
       metadata: { name: name.trim() },
       spec: {
         organizationRef: org,
-        namespace: namespace.trim() || `krate-org-${org}`,
+        namespace: namespace.trim() || `kradle-org-${org}`,
         serviceAccountName: name.trim(),
       },
     };
@@ -141,8 +141,8 @@ function AddServiceAccountForm({ org, onCreated }) {
         organizationRef: org,
         subject: name.trim(),
         roleRef: effectiveRole,
-        scope: namespace.trim() || `krate-org-${org}`,
-        namespace: namespace.trim() || `krate-org-${org}`,
+        scope: namespace.trim() || `kradle-org-${org}`,
+        namespace: namespace.trim() || `kradle-org-${org}`,
       },
     };
 
@@ -180,7 +180,7 @@ function AddServiceAccountForm({ org, onCreated }) {
       setName('');
       setRoleRef('edit');
       setCustomRole('');
-      setNamespace(`krate-org-${org}`);
+      setNamespace(`kradle-org-${org}`);
     } catch (err) {
       setStatus('error');
       setMessage(err.message || 'Network error');
@@ -217,7 +217,7 @@ function AddServiceAccountForm({ org, onCreated }) {
             </div>
             <div>
               <label style={labelStyle}>Namespace</label>
-              <input type="text" value={namespace} onChange={(e) => setNamespace(e.target.value)} placeholder={`krate-org-${org}`} style={inputStyle} />
+              <input type="text" value={namespace} onChange={(e) => setNamespace(e.target.value)} placeholder={`kradle-org-${org}`} style={inputStyle} />
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

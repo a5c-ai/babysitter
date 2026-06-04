@@ -1,4 +1,4 @@
-export const metadata = { title: 'Inbox | Krate' };
+export const metadata = { title: 'Inbox | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { InboxPage } from '../../../ui-shell.jsx';

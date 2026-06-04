@@ -1,4 +1,4 @@
-export const metadata = { title: 'External Sync | Krate' };
+export const metadata = { title: 'External Sync | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { ExternalSyncPage } from '../../../../ui-shell.jsx';

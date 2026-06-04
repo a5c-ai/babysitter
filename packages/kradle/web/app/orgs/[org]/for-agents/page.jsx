@@ -1,9 +1,9 @@
 export const dynamic = 'force-dynamic';
 
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner } from '../../../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner } from '../../../lib/kradle-ui.jsx';
 import { PageFrame } from '../../../lib/page-frame.jsx';
 
-export const metadata = { title: 'For Agents | Krate' };
+export const metadata = { title: 'For Agents | Kradle' };
 
 const MCP_TOOLS = [
   { name: 'krate_snapshot', description: 'Get full organization runtime snapshot', params: '—' },
@@ -56,7 +56,7 @@ function Section({ title, children }) {
 export default async function ForAgentsPage({ params }) {
   const routeParams = await params;
   const org = routeParams.org;
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model?.org?.slug || org || 'default';
   return (
     <PageFrame
@@ -64,30 +64,30 @@ export default async function ForAgentsPage({ params }) {
       orgs={ui.model?.orgs || []}
       eyebrow="integration"
       title="For Agents"
-      text="Connect AI agents and developer tools to the Krate platform via MCP (Model Context Protocol), HTTP API, or CLI."
+      text="Connect AI agents and developer tools to the Kradle platform via MCP (Model Context Protocol), HTTP API, or CLI."
       currentPath="/for-agents"
-      breadcrumbs={[['/', 'Krate'], ['/for-agents', 'For Agents']]}
+      breadcrumbs={[['/', 'Kradle'], ['/for-agents', 'For Agents']]}
       actions={[['/api-docs', 'HTTP API Docs']]}
     >
       <DegradedBanner model={ui.model} />
 
       <Section title="Quick start">
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>Install the Krate CLI, then start the MCP server. Any MCP-compatible agent (Claude Code, Cursor, Windsurf, etc.) can connect over stdio.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>Install the Kradle CLI, then start the MCP server. Any MCP-compatible agent (Claude Code, Cursor, Windsurf, etc.) can connect over stdio.</p>
         <CodeBlock title="Install">npm install -g @a5c-ai/kradle-cli</CodeBlock>
         <CodeBlock title="Start MCP server">krate mcp</CodeBlock>
         <CodeBlock title="Start HTTP API server">krate serve</CodeBlock>
       </Section>
 
       <Section title="Claude Code integration">
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>Add the Krate MCP server to your Claude Code configuration:</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>Add the Kradle MCP server to your Claude Code configuration:</p>
         <CodeBlock title=".claude/settings.json">{`{
   "mcpServers": {
     "krate": {
       "command": "krate",
       "args": ["mcp"],
       "env": {
-        "KRATE_NAMESPACE": "krate-system",
-        "KRATE_ORG": "${activeOrg}"
+        "KRADLE_NAMESPACE": "kradle-system",
+        "KRADLE_ORG": "${activeOrg}"
       }
     }
   }
@@ -103,7 +103,7 @@ export default async function ForAgentsPage({ params }) {
       "command": "krate",
       "args": ["mcp"],
       "env": {
-        "KRATE_NAMESPACE": "krate-system"
+        "KRADLE_NAMESPACE": "kradle-system"
       }
     }
   }
@@ -113,9 +113,9 @@ export default async function ForAgentsPage({ params }) {
       <Section title="Environment variables">
         <div className="resourceTable">
           {[
-            ['KRATE_NAMESPACE', 'krate-system', 'Kubernetes namespace for CRD operations'],
-            ['KRATE_ORG', activeOrg, 'Default organization slug'],
-            ['KRATE_CONTROLLER_URL', 'http://localhost:3080', 'URL of the Krate API server (optional — falls back to kubectl)'],
+            ['KRADLE_NAMESPACE', 'kradle-system', 'Kubernetes namespace for CRD operations'],
+            ['KRADLE_ORG', activeOrg, 'Default organization slug'],
+            ['KRADLE_CONTROLLER_URL', 'http://localhost:3080', 'URL of the Kradle API server (optional — falls back to kubectl)'],
             ['KUBECONFIG', '~/.kube/config', 'Path to kubeconfig (used when no controller URL is set)'],
           ].map(([name, defaultVal, desc]) => <div key={name} className="resourceRow" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '0.75rem', alignItems: 'center' }}>
             <code style={{ fontSize: '0.8rem', fontWeight: 600 }}>{name}</code>
@@ -156,10 +156,10 @@ export default async function ForAgentsPage({ params }) {
       </Section>
 
       <Section title="Model Gateway">
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>The Krate Model Gateway provides unified model routing through Envoy AI Gateway. Agents request models by logical name and the gateway routes to the correct backend — either an internal KServe InferenceService or an external cloud LLM.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>The Kradle Model Gateway provides unified model routing through Envoy AI Gateway. Agents request models by logical name and the gateway routes to the correct backend — either an internal KServe InferenceService or an external cloud LLM.</p>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>The <a href={orgHref(activeOrg, '/inference')} style={{ color: 'var(--accent)', fontWeight: 600 }}>Inference page</a> includes a curated model catalog with 15+ popular open models (Llama 3.1, Mistral, Phi-3, Code Llama, BGE, Whisper, and more) that you can deploy to your cluster with one click. Browse by category, review resource requirements, and deploy directly from the UI.</p>
         <CodeBlock title="Install Envoy AI Gateway (prerequisite)">{`kubectl apply -k "github.com/envoyproxy/ai-gateway/manifests?ref=main"`}</CodeBlock>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '1rem' }}>Krate manages KrateModelRoute resources that generate AIGatewayRoute configs automatically.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '1rem' }}>Kradle manages KradleModelRoute resources that generate AIGatewayRoute configs automatically.</p>
         <div className="resourceTable">
           {[
             ['Internal route', 'Routes to a KServe InferenceService on the cluster (sklearn, pytorch, huggingface, etc.)'],
@@ -217,7 +217,7 @@ export default async function ForAgentsPage({ params }) {
       </Section>
 
       <Section title="HTTP API">
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>For direct API integration without MCP, the Krate HTTP API is available at <code>KRATE_CONTROLLER_URL</code> or via <code>krate serve</code>.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>For direct API integration without MCP, the Kradle HTTP API is available at <code>KRADLE_CONTROLLER_URL</code> or via <code>krate serve</code>.</p>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <a href={orgHref(activeOrg, '/api-docs')} className="actionButton" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', padding: '0.375rem 0.75rem', background: 'var(--accent)', color: '#fff', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 600 }}>
             Open API Explorer

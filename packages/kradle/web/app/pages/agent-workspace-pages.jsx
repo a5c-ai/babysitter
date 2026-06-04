@@ -1,5 +1,5 @@
 // Routes: /orgs/[org]/agents/workspaces, /agents/workspaces/[name] — agent workspace list and detail.
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { WorkspacePanel } from '../components/workspace/workspace-panel.jsx';
 import { WorkspaceEditForm } from '../components/workspace/workspace-edit-form.jsx';
@@ -7,7 +7,7 @@ import { ResourceActions, InlineCreateForm } from '../components/resource-crud-a
 import { phaseTone } from './agent-helpers.jsx';
 
 export async function AgentWorkspacesPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { workspaces: { count: 0, items: [] } };
   const workspaces = agentView.workspaces?.items || [];
@@ -16,7 +16,7 @@ export async function AgentWorkspacesPage({ org = null } = {}) {
     { name: 'description', label: 'Description', placeholder: 'What is this workspace for?', required: false },
     { name: 'repositoryRef', label: 'Repository', placeholder: 'https://github.com/org/repo', required: false }
   ];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent workspaces" title="Agent workspaces" text="Volume-backed git workspaces with PVC lifecycle, repo binding, and runner mount specs. Workspaces are reusable across runs." actions={[['/agents', 'Overview'], ['/agents/sessions', 'Sessions']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/workspaces', 'Workspaces']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent workspaces" title="Agent workspaces" text="Volume-backed git workspaces with PVC lifecycle, repo binding, and runner mount specs. Workspaces are reusable across runs." actions={[['/agents', 'Overview'], ['/agents/sessions', 'Sessions']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/workspaces', 'Workspaces']]}>
     <DegradedBanner model={ui.model} />
     <section className="routeGrid two" style={{ alignItems: 'start' }}>
       <div className="card">
@@ -31,12 +31,12 @@ export async function AgentWorkspacesPage({ org = null } = {}) {
             <small>{ws.spec?.branch || 'main'}</small>
             {ws.status?.runRef ? <small style={{ color: '#2563eb' }}>mounted: {ws.status.runRef}</small> : null}
           </a>
-          <ResourceActions org={activeOrg} apiPath={`resources/KrateWorkspace/${ws.metadata?.name}`} actions={ws.status?.phase === 'Archived' ? ['delete'] : ws.status?.phase === 'InUse' ? ['archive', 'delete'] : ['archive', 'delete']} />
+          <ResourceActions org={activeOrg} apiPath={`resources/KradleWorkspace/${ws.metadata?.name}`} actions={ws.status?.phase === 'Archived' ? ['delete'] : ws.status?.phase === 'InUse' ? ['archive', 'delete'] : ['archive', 'delete']} />
         </div>)}</div> : <EmptyState title="No agent workspaces" text="Workspaces are provisioned when runs start, or create one manually using the form." info />}
       </div>
       <InlineCreateForm
         org={activeOrg}
-        kind="KrateWorkspace"
+        kind="KradleWorkspace"
         title="Create workspace"
         fields={workspaceFields}
         successText="Workspace created"
@@ -46,11 +46,11 @@ export async function AgentWorkspacesPage({ org = null } = {}) {
 }
 
 export async function AgentWorkspaceDetailPage({ org = null, workspaceId } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { workspaces: { items: [] }, sessions: { items: [] } };
   const workspace = (agentView.workspaces?.items || []).find((w) => w.metadata?.name === workspaceId) || null;
-  const runtimes = (ui.model.resources || []).find((r) => r.kind === 'KrateWorkspaceRuntime');
+  const runtimes = (ui.model.resources || []).find((r) => r.kind === 'KradleWorkspaceRuntime');
   const runtimeItems = runtimes?.items || [];
   const runtime = runtimeItems.find((r) => r.spec?.workspaceRef === workspaceId) || null;
   const boundSessions = workspace?.status?.boundSessions || [];
@@ -62,7 +62,7 @@ export async function AgentWorkspaceDetailPage({ org = null, workspaceId } = {})
   };
   const firstSessionRef = boundSessions.length ? (boundSessions[0]?.sessionRef || boundSessions[0]) : null;
   const firstSession = firstSessionRef ? (agentView.sessions?.items || []).find((s) => s.metadata?.name === firstSessionRef) || null : null;
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`workspace / ${workspaceId}`} title={workspaceId || 'Workspace detail'} text={workspace ? `Agent workspace for ${workspace.spec?.repository || 'unknown repository'} with phase ${workspace.status?.phase || 'Pending'}.` : 'This agent workspace was not found in the current workspace.'} actions={[['/agents/workspaces', 'All workspaces'], ['/agents/sessions', 'Sessions']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/workspaces', 'Workspaces'], [`/agents/workspaces/${workspaceId}`, workspaceId || 'Detail']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`workspace / ${workspaceId}`} title={workspaceId || 'Workspace detail'} text={workspace ? `Agent workspace for ${workspace.spec?.repository || 'unknown repository'} with phase ${workspace.status?.phase || 'Pending'}.` : 'This agent workspace was not found in the current workspace.'} actions={[['/agents/workspaces', 'All workspaces'], ['/agents/sessions', 'Sessions']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/workspaces', 'Workspaces'], [`/agents/workspaces/${workspaceId}`, workspaceId || 'Detail']]}>
     <DegradedBanner model={ui.model} />
     {workspace ? <>
       <WorkspacePanel workspace={workspace} runtime={runtime} session={firstSession} org={activeOrg} />

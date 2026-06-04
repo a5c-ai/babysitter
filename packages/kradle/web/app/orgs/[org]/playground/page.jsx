@@ -1,4 +1,4 @@
-export const metadata = { title: 'Playground | Krate' };
+export const metadata = { title: 'Playground | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { PlaygroundPage } from '../../../pages/playground-pages.jsx';

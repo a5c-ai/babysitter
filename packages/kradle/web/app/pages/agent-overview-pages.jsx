@@ -1,5 +1,5 @@
 // Routes: /orgs/[org]/agents, /agents/stacks, /agents/stacks/[name], /agents/stacks/new — agent dashboard and stack management.
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner, EmptyState, InfoList } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner, EmptyState, InfoList } from '../lib/kradle-ui.jsx';
 import { resourceToYaml } from '@a5c-ai/kradle-sdk';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { DispatchButton } from '../components/agent/dispatch-button.jsx';
@@ -12,12 +12,12 @@ import { phaseTone } from './agent-helpers.jsx';
 import { buildAgentIdentityProfiles, resolveRunAgentIdentity, agentIdentityLabel } from '../lib/agent-identity.js';
 
 export async function AgentsDashboardPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { stacks: { count: 0 }, runs: { count: 0, active: [] }, rules: { count: 0 }, approvals: { count: 0, pending: [] } };
   const agentProfiles = buildAgentIdentityProfiles(ui.model);
   const meetings = agentView.meetings?.active || (ui.model.resources || []).find((resource) => resource.kind === 'JitsiMeeting')?.items || [];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent orchestration" title="Agent stacks, runs, and rules" text="View agent stacks, dispatch runs, trigger rules, and pending approvals from one place." actions={[['/agents/stacks', 'View stacks'], ['/agents/runs', 'View runs']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent orchestration" title="Agent stacks, runs, and rules" text="View agent stacks, dispatch runs, trigger rules, and pending approvals from one place." actions={[['/agents/stacks', 'View stacks'], ['/agents/runs', 'View runs']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
       <DispatchButton org={activeOrg} stacks={agentView.stacks?.items || []} agents={agentProfiles} meetings={meetings} />
@@ -46,11 +46,11 @@ export async function AgentsDashboardPage({ org = null } = {}) {
 }
 
 export async function AgentStacksPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { stacks: { count: 0, items: [] } };
   const stacks = agentView.stacks.items || [];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent stacks" title="Agent stack configurations" text="Each agent stack defines a base agent, adapter, runtime identity, and capability gates." actions={[['/agents', 'Overview'], ['/agents/runs', 'Dispatch runs'], [orgHref(activeOrg, '/agents/stacks/new'), 'Create Stack']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/stacks', 'Stacks']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent stacks" title="Agent stack configurations" text="Each agent stack defines a base agent, adapter, runtime identity, and capability gates." actions={[['/agents', 'Overview'], ['/agents/runs', 'Dispatch runs'], [orgHref(activeOrg, '/agents/stacks/new'), 'Create Stack']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/stacks', 'Stacks']]}>
     <DegradedBanner model={ui.model} />
     <div className="card">
       <div className="cardTitle"><h2>Stacks</h2><StatusPill tone={stacks.length ? 'good' : 'neutral'}>{stacks.length} stacks</StatusPill></div>
@@ -68,13 +68,13 @@ export async function AgentStacksPage({ org = null } = {}) {
 }
 
 export async function AgentStackDetailPage({ org = null, name } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { stacks: { items: [] }, rules: { items: [] } };
   const stack = (agentView.stacks.items || []).find((s) => s.metadata?.name === name) || null;
   const relatedRules = (agentView.rules.items || []).filter((rule) => rule.spec?.stackRef === name || rule.spec?.targetStack === name);
   const conditions = stack?.status?.conditions || [];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`agent stack / ${name}`} title={name || 'Stack detail'} text={stack ? `Agent stack using ${stack.spec?.adapter || 'default'} adapter with ${typeof stack.spec?.runtimeIdentity === 'object' ? (stack.spec.runtimeIdentity.serviceAccountRef || 'sa') : (stack.spec?.runtimeIdentity || 'workspace')} identity.` : 'This agent stack was not found in the current workspace.'} actions={[[orgHref(activeOrg, '/agents/stacks'), 'All stacks'], ['/agents/runs', 'Dispatch runs']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/stacks', 'Stacks'], [`/agents/stacks/${name}`, name || 'Detail']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`agent stack / ${name}`} title={name || 'Stack detail'} text={stack ? `Agent stack using ${stack.spec?.adapter || 'default'} adapter with ${typeof stack.spec?.runtimeIdentity === 'object' ? (stack.spec.runtimeIdentity.serviceAccountRef || 'sa') : (stack.spec?.runtimeIdentity || 'workspace')} identity.` : 'This agent stack was not found in the current workspace.'} actions={[[orgHref(activeOrg, '/agents/stacks'), 'All stacks'], ['/agents/runs', 'Dispatch runs']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/stacks', 'Stacks'], [`/agents/stacks/${name}`, name || 'Detail']]}>
     <DegradedBanner model={ui.model} />
     <section className="routeGrid two">
       <div className="card">
@@ -92,7 +92,7 @@ export async function AgentStackDetailPage({ org = null, name } = {}) {
           {stack.spec?.model ? <><dt>Model</dt><dd>{stack.spec.model}</dd></> : null}
           {stack.spec?.maxTokens ? <><dt>Max tokens</dt><dd>{stack.spec.maxTokens}</dd></> : null}
           {stack.spec?.budgetLimitUsd ? <><dt>Budget limit</dt><dd>${stack.spec.budgetLimitUsd}</dd></> : null}
-        </dl><StackEditForm org={activeOrg} stack={stack} /><div style={{ marginTop: 12, display: 'flex', gap: '0.5rem', alignItems: 'center' }}><StackActions org={activeOrg} stackName={name} /><CopyButton text={resourceToYaml(stack)} label="Copy as YAML" /></div></> : <EmptyState title={`Stack ${name} not found`} text="This agent stack does not exist in the current workspace. Create it through Krate resource definitions." cta={orgHref(activeOrg, '/agents/stacks')} ctaLabel="View all stacks" />}
+        </dl><StackEditForm org={activeOrg} stack={stack} /><div style={{ marginTop: 12, display: 'flex', gap: '0.5rem', alignItems: 'center' }}><StackActions org={activeOrg} stackName={name} /><CopyButton text={resourceToYaml(stack)} label="Copy as YAML" /></div></> : <EmptyState title={`Stack ${name} not found`} text="This agent stack does not exist in the current workspace. Create it through Kradle resource definitions." cta={orgHref(activeOrg, '/agents/stacks')} ctaLabel="View all stacks" />}
       </div>
       <div className="stack">
         <div className="card">
@@ -109,10 +109,10 @@ export async function AgentStackDetailPage({ org = null, name } = {}) {
 }
 
 export async function AgentStackBuilderPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const atlasBaseUrl = process.env.ATLAS_BASE_URL || 'https://atlas.a5c.ai';
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent stack" title="New agent stack" text="Build an agent stack from Atlas knowledge-graph layers. Select models, providers, runtimes, tools, and more from the live catalog." actions={[['/agents/stacks', 'All stacks'], ['/agents', 'Overview']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/stacks', 'Stacks'], ['/agents/stacks/new', 'New']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent stack" title="New agent stack" text="Build an agent stack from Atlas knowledge-graph layers. Select models, providers, runtimes, tools, and more from the live catalog." actions={[['/agents/stacks', 'All stacks'], ['/agents', 'Overview']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/stacks', 'Stacks'], ['/agents/stacks/new', 'New']]}>
     <DegradedBanner model={ui.model} />
     <GraphStackBuilder org={activeOrg} atlasBaseUrl={atlasBaseUrl} />
   </PageFrame>;

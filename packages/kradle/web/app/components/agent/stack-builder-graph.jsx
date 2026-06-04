@@ -28,7 +28,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
   // RBAC fields
   const [serviceAccount, setServiceAccount] = useState(spec.runtimeIdentity?.serviceAccountRef || 'default');
   const [role, setRole] = useState(spec.runtimeIdentity?.roleRef || 'edit');
-  const [rbacNamespace, setRbacNamespace] = useState(spec.runtimeIdentity?.namespace || `krate-org-${org}`);
+  const [rbacNamespace, setRbacNamespace] = useState(spec.runtimeIdentity?.namespace || `kradle-org-${org}`);
 
   // Per-layer selections: { 'layer:1-model': [{ id, nodeKind, displayName, ... }], ... }
   const [selections, setSelections] = useState(() => {
@@ -272,7 +272,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
                     type="text"
                     value={rbacNamespace}
                     onChange={(e) => setRbacNamespace(e.target.value)}
-                    placeholder={`krate-org-${org}`}
+                    placeholder={`kradle-org-${org}`}
                     aria-label="RBAC namespace"
                     style={inputStyle}
                   />

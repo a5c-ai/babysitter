@@ -1,4 +1,4 @@
-export const metadata = { title: 'Repository Runs | Krate' };
+export const metadata = { title: 'Repository Runs | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { RepositoryRunsPage } from '../../../../../ui-shell.jsx';

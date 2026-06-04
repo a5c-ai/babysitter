@@ -1,5 +1,5 @@
 // Routes: /orgs/[org]/agents/memory — agent memory repositories, ontology, and imports.
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { MemorySearchForm } from '../components/workspace/memory-search-form.jsx';
 import { MemoryOntologyEditor } from '../components/workspace/memory-ontology-editor.jsx';
@@ -17,7 +17,7 @@ function buildMemoryRepoSpec(formData) {
 }
 
 export async function AgentMemoryPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const memoryView = ui.model.agents?.memory || { repositories: { count: 0, items: [] }, snapshots: { count: 0 }, imports: { pending: 0, items: [] }, ontologies: { count: 0, items: [] } };
   const repoCount = memoryView.repositories?.count ?? (memoryView.repositories?.items?.length || 0);
@@ -30,7 +30,7 @@ export async function AgentMemoryPage({ org = null } = {}) {
     { name: 'repoUrl', label: 'Repository URL', type: 'url', placeholder: 'https://github.com/acme/memory', required: true },
     { name: 'description', label: 'Description', placeholder: 'What knowledge does this repo store?', required: false }
   ];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent memory" title="Memory repositories and imports" text="Manage agent memory repositories, search stored knowledge, review pending imports, and configure ontologies." actions={[['/agents/memory/search', 'Search'], ['/agents/memory/imports', 'Imports'], ['/agents/memory/ontology', 'Ontology']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/memory', 'Memory']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent memory" title="Memory repositories and imports" text="Manage agent memory repositories, search stored knowledge, review pending imports, and configure ontologies." actions={[['/agents/memory/search', 'Search'], ['/agents/memory/imports', 'Imports'], ['/agents/memory/ontology', 'Ontology']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/memory', 'Memory']]}>
     <DegradedBanner model={ui.model} />
     {hasRepos ? <>
       <section className="routeGrid four">
@@ -104,7 +104,7 @@ export async function AgentMemoryPage({ org = null } = {}) {
 }
 
 export async function AgentMemorySearchPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const memoryView = ui.model.agents?.memory || { repositories: { count: 0 } };
   const hasRepos = (memoryView.repositories?.count ?? 0) > 0;
@@ -124,7 +124,7 @@ spec:
     pattern: "deployment pipeline"
     fileGlob: "*.md"
   limit: 25`;
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="memory search" title="Search agent memory" text="Query structured graph records or full-text search across markdown documents stored in memory repositories." actions={[['/agents/memory', 'Overview'], ['/agents/memory/imports', 'Imports']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/memory', 'Memory'], ['/agents/memory/search', 'Search']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="memory search" title="Search agent memory" text="Query structured graph records or full-text search across markdown documents stored in memory repositories." actions={[['/agents/memory', 'Overview'], ['/agents/memory/imports', 'Imports']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/memory', 'Memory'], ['/agents/memory/search', 'Search']]}>
     <DegradedBanner model={ui.model} />
     <div className="card">
       <div className="cardTitle"><h2>Search</h2><StatusPill tone="good">live</StatusPill></div>
@@ -152,12 +152,12 @@ spec:
 }
 
 export async function AgentMemoryImportsPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const memoryView = ui.model.agents?.memory || { imports: { items: [] } };
   const imports = memoryView.imports?.items || [];
   const awaitingReview = imports.filter((imp) => imp.status?.phase === 'AwaitingReview');
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="memory imports" title="Memory imports" text="Review agent run memory imports as they progress through collection, redaction, normalization, and review phases." actions={[['/agents/memory', 'Overview'], ['/agents/memory/search', 'Search']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/memory', 'Memory'], ['/agents/memory/imports', 'Imports']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="memory imports" title="Memory imports" text="Review agent run memory imports as they progress through collection, redaction, normalization, and review phases." actions={[['/agents/memory', 'Overview'], ['/agents/memory/search', 'Search']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/memory', 'Memory'], ['/agents/memory/imports', 'Imports']]}>
     <DegradedBanner model={ui.model} />
     {awaitingReview.length > 0 && (
       <div className="card">
@@ -184,7 +184,7 @@ export async function AgentMemoryImportsPage({ org = null } = {}) {
 }
 
 export async function AgentMemoryImportDetailPage({ org = null, importId } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const memoryView = ui.model.agents?.memory || { imports: { items: [] } };
   const imp = (memoryView.imports?.items || []).find((i) => i.metadata?.name === importId) || null;
@@ -201,7 +201,7 @@ export async function AgentMemoryImportDetailPage({ org = null, importId } = {})
   const phaseTransitions = imp?.status?.phaseTransitions || imp?.status?.history || [];
   const allPhases = ['Pending', 'Collecting', 'Redacting', 'Normalizing', 'Validating', 'AwaitingReview', 'Merged'];
   const currentPhaseIndex = allPhases.indexOf(imp?.status?.phase);
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`memory import / ${importId}`} title={importId || 'Import detail'} text={imp ? `Memory import from ${source.kind || 'unknown source'} with phase ${imp.status?.phase || 'Pending'}.` : 'This memory import was not found in the current workspace.'} actions={[['/agents/memory/imports', 'All imports'], ['/agents/memory', 'Memory overview']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/memory', 'Memory'], ['/agents/memory/imports', 'Imports'], [`/agents/memory/imports/${importId}`, importId || 'Detail']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`memory import / ${importId}`} title={importId || 'Import detail'} text={imp ? `Memory import from ${source.kind || 'unknown source'} with phase ${imp.status?.phase || 'Pending'}.` : 'This memory import was not found in the current workspace.'} actions={[['/agents/memory/imports', 'All imports'], ['/agents/memory', 'Memory overview']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/memory', 'Memory'], ['/agents/memory/imports', 'Imports'], [`/agents/memory/imports/${importId}`, importId || 'Detail']]}>
     <DegradedBanner model={ui.model} />
     {imp ? <>
       <section className="routeGrid two">
@@ -249,12 +249,12 @@ export async function AgentMemoryImportDetailPage({ org = null, importId } = {})
 }
 
 export async function AgentMemoryOntologyPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const memoryView = ui.model.agents?.memory || { ontologies: { count: 0, items: [] } };
   const ontologies = memoryView.ontologies?.items || [];
   const primaryOntology = ontologies[0] || null;
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="memory ontology" title="Memory ontology" text="Define graph schema for memory repositories, including supported node kinds and edge relationship types." actions={[['/agents/memory', 'Overview'], ['/agents/memory/search', 'Search']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/memory', 'Memory'], ['/agents/memory/ontology', 'Ontology']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="memory ontology" title="Memory ontology" text="Define graph schema for memory repositories, including supported node kinds and edge relationship types." actions={[['/agents/memory', 'Overview'], ['/agents/memory/search', 'Search']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/memory', 'Memory'], ['/agents/memory/ontology', 'Ontology']]}>
     <DegradedBanner model={ui.model} />
     {!primaryOntology && (
       <div className="card" style={{ borderLeft: '3px solid var(--color-info, #3b82f6)', marginBottom: '0.5rem' }}>

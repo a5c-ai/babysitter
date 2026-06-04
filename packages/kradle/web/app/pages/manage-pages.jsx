@@ -1,6 +1,6 @@
 // Routes: /orgs/[org]/people, /access/*, /hooks-events, /runners-ci, /settings/*, /profile — org management.
 import { createAuthProviderConfig, listEnabledAuthProviders } from '@a5c-ai/kradle-sdk';
-import { loadKrateUi, orgHref, publicResource, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, publicResource, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { SectionPage } from './repo-pages.jsx';
 import { SecretManager } from '../components/settings/secret-manager.jsx';
@@ -18,10 +18,10 @@ export function LoginPage({ error = null } = {}) {
   if (config.delegatedIdentity.enabled) methods.push({ id: 'workspace-identity', href: '/api/auth/delegated', label: 'Use workspace identity' });
   const errorMessage = error ? (AUTH_ERROR_MESSAGES[error] || 'An authentication error occurred. Please try again.') : null;
   return <main id="main-content" className="loginMain" aria-labelledby="login-title">
-    <section className="loginCard" aria-label="Krate sign in">
-      <a className="loginBrand" href="/login" aria-label="a5c.ai Krate sign in"><span className="brandSigil">K</span><span className="brandWordmark"><strong>Kr<span>ate</span></strong><em>a5c.ai</em></span></a>
+    <section className="loginCard" aria-label="Kradle sign in">
+      <a className="loginBrand" href="/login" aria-label="a5c.ai Kradle sign in"><span className="brandSigil">K</span><span className="brandWordmark"><strong>Kr<span>ate</span></strong><em>a5c.ai</em></span></a>
       <span className="eyebrow">account</span>
-      <h1 id="login-title">Sign in to Krate</h1>
+      <h1 id="login-title">Sign in to Kradle</h1>
       <p className="lede">Use an administrator-configured sign-in method to continue.</p>
       {errorMessage ? <p className="loginNotice" role="alert">{errorMessage}</p> : null}
       {methods.length ? <div className="heroActions verticalActions" aria-label="Sign-in methods">{methods.map((method) => <a key={method.id} href={method.href}>{method.label}</a>)}</div> : <p className="loginNotice">No browser sign-in method is configured for this endpoint.</p>}
@@ -29,7 +29,7 @@ export function LoginPage({ error = null } = {}) {
   </main>;
 }
 
-export async function LogoutPage({ org = process.env.KRATE_ORG || 'default' } = {}) {
+export async function LogoutPage({ org = process.env.KRADLE_ORG || 'default' } = {}) {
   return <PageFrame org={org} eyebrow="account" title="Sign out" text="End your browser session and return to the sign-in page." actions={[["/api/auth/logout", "Sign out now"], ["/", "Back to dashboard"]]} />;
 }
 
@@ -42,16 +42,16 @@ export async function RunsPage({ org = null } = {}) { return <SectionPage org={o
 export async function RunnersCiPage({ org = null } = {}) { return <SectionPage org={org} section="runners-ci" />; }
 export async function HooksEventsPage({ org = null } = {}) { return <SectionPage org={org} section="hooks-events" />; }
 export async function InsightsPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/insights" eyebrow="observability" title="System Health & Insights" text="Real-time connectivity status, agent activity, and system health." breadcrumbs={[['/', 'Krate'], ['/insights', 'Insights']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/insights" eyebrow="observability" title="System Health & Insights" text="Real-time connectivity status, agent activity, and system health." breadcrumbs={[['/', 'Kradle'], ['/insights', 'Insights']]}>
     <HealthMonitor org={activeOrg} />
   </PageFrame>;
 }
 export async function ApiDocsPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/api-docs" eyebrow="developer" title="API Reference" text="Interactive documentation for the Krate HTTP API. Try endpoints directly against your organization." breadcrumbs={[['/', 'Krate'], ['/api-docs', 'API Docs']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/api-docs" eyebrow="developer" title="API Reference" text="Interactive documentation for the Kradle HTTP API. Try endpoints directly against your organization." breadcrumbs={[['/', 'Kradle'], ['/api-docs', 'API Docs']]}>
     <p className="lede">Use the route at <a href={orgHref(activeOrg, '/api-docs')}>/orgs/{activeOrg}/api-docs</a> for the full interactive API explorer.</p>
   </PageFrame>;
 }
@@ -59,7 +59,7 @@ export async function OperationsInstallPage({ org = null } = {}) { return <Secti
 export async function AdvancedPlansPage({ org = null } = {}) { return <SectionPage org={org} section="advanced-plans" />; }
 
 export async function SecretManagerPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const allResources = ui.model.resources || [];
   const secretGrants = allResources.filter((r) => r.kind === 'AgentSecretGrant');
@@ -79,14 +79,14 @@ export async function SecretManagerPage({ org = null } = {}) {
     }
     return acc;
   }, []);
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/settings/secrets" eyebrow="secrets & config management" title="Secrets & ConfigMaps" text="Manage Kubernetes Secrets and ConfigMaps. Use grants to control which agent stacks can access each resource." actions={[['/settings/secrets', 'Refresh']]} breadcrumbs={[['/', 'Krate'], ['/settings/secrets', 'Secrets & ConfigMaps']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/settings/secrets" eyebrow="secrets & config management" title="Secrets & ConfigMaps" text="Manage Kubernetes Secrets and ConfigMaps. Use grants to control which agent stacks can access each resource." actions={[['/settings/secrets', 'Refresh']]} breadcrumbs={[['/', 'Kradle'], ['/settings/secrets', 'Secrets & ConfigMaps']]}>
     <DegradedBanner model={ui.model} />
     <SecretManager org={activeOrg} secrets={secrets} configMaps={configMaps} grants={allGrants} />
   </PageFrame>;
 }
 
 export async function SSHKeysPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const sshKeys = (ui.model.resources || []).filter((r) => r.kind === 'SSHKey');
   const items = sshKeys.flatMap((r) => r.items || []);
@@ -95,7 +95,7 @@ export async function SSHKeysPage({ org = null } = {}) {
     { name: 'scope', label: 'Scope', placeholder: 'deploy | user | automation', required: true },
     { name: 'key', label: 'Public key', placeholder: 'ssh-ed25519 AAAA...', required: true, type: 'textarea' }
   ];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/access/ssh-keys" eyebrow="access management" title="SSH keys" text="Manage deploy keys, user SSH keys, and automation keys. Keys are reconciled into repository key APIs." actions={[['/people', 'People'], ['/access/permissions', 'Permissions']]} breadcrumbs={[['/', 'Krate'], ['/access/ssh-keys', 'SSH keys']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/access/ssh-keys" eyebrow="access management" title="SSH keys" text="Manage deploy keys, user SSH keys, and automation keys. Keys are reconciled into repository key APIs." actions={[['/people', 'People'], ['/access/permissions', 'Permissions']]} breadcrumbs={[['/', 'Kradle'], ['/access/ssh-keys', 'SSH keys']]}>
     <DegradedBanner model={ui.model} />
     <section className="routeGrid two" style={{ alignItems: 'start' }}>
       <div className="card">
@@ -127,7 +127,7 @@ export async function SSHKeysPage({ org = null } = {}) {
 }
 
 export async function RepositoryPermissionsPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const permResources = (ui.model.resources || []).filter((r) => r.kind === 'RepositoryPermission');
   const items = permResources.flatMap((r) => r.items || []);
@@ -138,7 +138,7 @@ export async function RepositoryPermissionsPage({ org = null } = {}) {
     { name: 'subject', label: 'Subject', placeholder: 'username or team name', required: true },
     { name: 'permission', label: 'Permission', placeholder: 'read | write | admin', required: true }
   ];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/access/permissions" eyebrow="access management" title="Repository permissions" text="Manage repository collaborators and team access grants. Permissions are synced with the underlying repository hosting." actions={[['/people', 'People'], ['/access/ssh-keys', 'SSH keys']]} breadcrumbs={[['/', 'Krate'], ['/access/permissions', 'Permissions']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/access/permissions" eyebrow="access management" title="Repository permissions" text="Manage repository collaborators and team access grants. Permissions are synced with the underlying repository hosting." actions={[['/people', 'People'], ['/access/ssh-keys', 'SSH keys']]} breadcrumbs={[['/', 'Kradle'], ['/access/permissions', 'Permissions']]}>
     <DegradedBanner model={ui.model} />
     <section className="routeGrid two" style={{ alignItems: 'start' }}>
       <div className="card">
@@ -177,7 +177,7 @@ export async function RepositoryPermissionsPage({ org = null } = {}) {
 }
 
 export async function BranchProtectionPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const bpResources = (ui.model.resources || []).filter((r) => r.kind === 'BranchProtection');
   const items = bpResources.flatMap((r) => r.items || []);
@@ -189,7 +189,7 @@ export async function BranchProtectionPage({ org = null } = {}) {
     { name: 'requiredReviews', label: 'Required reviews', placeholder: '1', required: false },
     { name: 'requireStatusChecks', label: 'Require status checks', placeholder: 'true', required: false }
   ];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/access/branch-protection" eyebrow="access management" title="Branch protection" text="Define protected branch rules and ref policies. Control force-push, signing requirements, and merge gates." actions={[['/people', 'People'], ['/access/permissions', 'Permissions']]} breadcrumbs={[['/', 'Krate'], ['/access/branch-protection', 'Branch protection']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/access/branch-protection" eyebrow="access management" title="Branch protection" text="Define protected branch rules and ref policies. Control force-push, signing requirements, and merge gates." actions={[['/people', 'People'], ['/access/permissions', 'Permissions']]} breadcrumbs={[['/', 'Kradle'], ['/access/branch-protection', 'Branch protection']]}>
     <DegradedBanner model={ui.model} />
     <section className="routeGrid two" style={{ alignItems: 'start' }}>
       <div className="stack">

@@ -1,4 +1,4 @@
-export const metadata = { title: 'Memory Import Detail | Krate' };
+export const metadata = { title: 'Memory Import Detail | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { AgentMemoryImportDetailPage } from '../../../../../../ui-shell.jsx';

@@ -1,10 +1,10 @@
 // Routes: /orgs/[org]/artifacts — artifact registries and feed management.
-import { loadKrateUi, DegradedBanner } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, DegradedBanner } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { ArtifactRegistryManager } from '../components/artifact-registry.jsx';
 
 export async function ArtifactRegistriesPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const allResources = ui.model.resources || [];
   const registries = allResources.filter((r) => r.kind === 'ArtifactRegistry').flatMap((r) => r.items || []);
@@ -19,7 +19,7 @@ export async function ArtifactRegistriesPage({ org = null } = {}) {
       title="Artifact Registries"
       text="Manage package registries, artifact feeds, and published versions. Supports npm, pip, Docker, and generic artifact types."
       actions={[['/artifacts', 'Refresh']]}
-      breadcrumbs={[['/', 'Krate'], ['/artifacts', 'Artifacts']]}
+      breadcrumbs={[['/', 'Kradle'], ['/artifacts', 'Artifacts']]}
     >
       <DegradedBanner model={ui.model} />
       <ArtifactRegistryManager org={activeOrg} registries={registries} feeds={feeds} externalProviders={externalProviders} />
@@ -28,7 +28,7 @@ export async function ArtifactRegistriesPage({ org = null } = {}) {
 }
 
 export async function ArtifactRegistryDetailPage({ org = null, registryName = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const allResources = ui.model.resources || [];
   const registries = allResources.filter((r) => r.kind === 'ArtifactRegistry').flatMap((r) => r.items || []);
@@ -45,7 +45,7 @@ export async function ArtifactRegistryDetailPage({ org = null, registryName = nu
       title={registry ? `Registry: ${registryName}` : 'Artifact Registries'}
       text={registry ? `${registry.spec?.registryType || 'generic'} registry with ${registry.spec?.storageBackend || 'internal'} storage. Browse feeds and published versions.` : 'Browse artifact feeds and published versions across all registries.'}
       actions={[['/artifacts', 'All registries']]}
-      breadcrumbs={[['/', 'Krate'], ['/artifacts', 'Artifacts'], ...(registryName ? [[`/artifacts/${registryName}`, registryName]] : [])]}
+      breadcrumbs={[['/', 'Kradle'], ['/artifacts', 'Artifacts'], ...(registryName ? [[`/artifacts/${registryName}`, registryName]] : [])]}
     >
       <DegradedBanner model={ui.model} />
       <ArtifactRegistryManager org={activeOrg} registries={registry ? [registry] : registries} feeds={registryFeeds} externalProviders={externalProviders} />

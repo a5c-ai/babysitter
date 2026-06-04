@@ -18,7 +18,7 @@ function mergeParticipants(baseParticipants, liveParticipants) {
   return [...byId.values()];
 }
 
-export function JitsiMeetingExperience({ org = 'default', meeting, recordings = [], displayName = 'Krate user' }) {
+export function JitsiMeetingExperience({ org = 'default', meeting, recordings = [], displayName = 'Kradle user' }) {
   const meetingRef = meeting?.metadata?.name || meeting?.spec?.roomId || '';
   const [joinPayload, setJoinPayload] = useState(null);
   const [joinState, setJoinState] = useState('idle');

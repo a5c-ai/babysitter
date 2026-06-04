@@ -34,7 +34,7 @@ export function ProjectEditForm({ org, project }) {
     const columns = fields.workflow ? fields.workflow.split(',').map((s) => s.trim()).filter(Boolean) : [];
     if (columns.length) spec.workflow = columns;
     try {
-      const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/KrateProject/${encodeURIComponent(project.metadata.name)}`, {
+      const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/KradleProject/${encodeURIComponent(project.metadata.name)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ spec }),

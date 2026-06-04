@@ -83,7 +83,7 @@ export const panelStyles = {
   spinner: {
     display: 'inline-block', width: 18, height: 18, border: '2px solid var(--border)',
     borderTopColor: 'var(--accent)', borderRadius: '50%',
-    animation: 'krate-pg-spin 0.8s linear infinite',
+    animation: 'kradle-pg-spin 0.8s linear infinite',
   },
   emptyResponse: {
     display: 'flex', alignItems: 'center', justifyContent: 'center',

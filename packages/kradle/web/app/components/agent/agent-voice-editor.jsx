@@ -12,7 +12,7 @@ export function AgentVoiceEditor({ org, name, value = {}, onChange = () => {} })
       const response = await fetch(`/api/orgs/${encodeURIComponent(org)}/agents/voices/${encodeURIComponent(name || 'new-agent-voice')}/preview`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: preview || 'This is a Krate agent voice preview.', voice: ttsConfig.voice }),
+        body: JSON.stringify({ text: preview || 'This is a Kradle agent voice preview.', voice: ttsConfig.voice }),
       });
       const data = await response.json();
       setPreview(data.preview?.text || data.message || 'Preview requested');

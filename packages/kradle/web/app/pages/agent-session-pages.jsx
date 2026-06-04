@@ -1,5 +1,5 @@
 // Routes: /orgs/[org]/agents/sessions, /agents/sessions/[name] — agent session list and live detail.
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { LiveUpdates } from '../components/agent/live-updates.jsx';
 import { ApprovalModeToggle } from '../components/agent/approval-mode-toggle.jsx';
@@ -10,14 +10,14 @@ import { phaseTone } from './agent-helpers.jsx';
 import { resolveSessionAgentIdentity, agentIdentityLabel } from '../lib/agent-identity.js';
 
 export async function AgentSessionsPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { sessions: { count: 0, items: [] } };
   const allSessions = agentView.sessions?.items || [];
   const PAGE_SIZE = 25;
   const sessions = allSessions.slice(0, PAGE_SIZE);
   const hasMore = allSessions.length > PAGE_SIZE;
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent sessions" title="Agent chat sessions" text="Each session represents an Agent Mux chat with lifecycle state, transcript, and cost tracking." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks'], ['/agents/runs', 'Dispatch runs']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/sessions', 'Sessions']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent sessions" title="Agent chat sessions" text="Each session represents an Agent Mux chat with lifecycle state, transcript, and cost tracking." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks'], ['/agents/runs', 'Dispatch runs']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/sessions', 'Sessions']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}><LiveUpdates org={activeOrg} /></div>
     <div className="card">
@@ -50,7 +50,7 @@ export async function AgentSessionsPage({ org = null } = {}) {
 }
 
 export async function AgentSessionDetailPage({ org = null, sessionId } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { sessions: { items: [] }, transcripts: { items: [] }, runs: { items: [] }, stacks: { items: [] } };
   const session = (agentView.sessions?.items || []).find((s) => s.metadata?.name === sessionId) || null;
@@ -62,7 +62,7 @@ export async function AgentSessionDetailPage({ org = null, sessionId } = {}) {
   const allRuns = agentView.runs?.items || [];
   const allTranscripts = agentView.transcripts?.items || [];
   const sessionRuns = allRuns.filter((r) => r.status?.sessionRef === sessionId || r.spec?.sessionRef === sessionId || r.metadata?.name === dispatchRunName);
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`agent session / ${sessionId}`} title={sessionId || 'Session detail'} text={session ? `Agent session on ${stackName || 'unknown stack'} with phase ${session.status?.phase || 'Pending'}.` : 'This agent session was not found in the current workspace.'} actions={[['/agents/sessions', 'All sessions'], ['/agents/runs', 'Dispatch runs']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/sessions', 'Sessions'], [`/agents/sessions/${sessionId}`, sessionId || 'Detail']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`agent session / ${sessionId}`} title={sessionId || 'Session detail'} text={session ? `Agent session on ${stackName || 'unknown stack'} with phase ${session.status?.phase || 'Pending'}.` : 'This agent session was not found in the current workspace.'} actions={[['/agents/sessions', 'All sessions'], ['/agents/runs', 'Dispatch runs']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/sessions', 'Sessions'], [`/agents/sessions/${sessionId}`, sessionId || 'Detail']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
       <ApprovalModeToggle initialMode={session?.spec?.approvalMode || 'prompt'} />

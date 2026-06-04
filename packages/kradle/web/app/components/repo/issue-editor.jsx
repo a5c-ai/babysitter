@@ -74,7 +74,7 @@ export function IssueEditor({ org, issue, repo = null, project = null }) {
     event.preventDefault();
     const body = commentBody.trim();
     if (!body) return;
-    const comment = { id: `comment-${Date.now()}`, author: 'Krate user', body, createdAt: new Date().toISOString() };
+    const comment = { id: `comment-${Date.now()}`, author: 'Kradle user', body, createdAt: new Date().toISOString() };
     const previousComments = comments;
     const nextComments = [...comments, comment];
     // Optimistic update: show comment immediately

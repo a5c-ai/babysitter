@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
-export const metadata = { title: 'Krate' };
+export const metadata = { title: 'Kradle' };
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
@@ -20,7 +20,7 @@ export default async function Page() {
 
   // Fall back to env vars, then 'default'
   if (!org) {
-    org = process.env.KRATE_ADMIN_ORG || process.env.KRATE_ORG || 'default';
+    org = process.env.KRATE_ADMIN_ORG || process.env.KRADLE_ORG || 'default';
   }
 
   redirect('/orgs/' + org);

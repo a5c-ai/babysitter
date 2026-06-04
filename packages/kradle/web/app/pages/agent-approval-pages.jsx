@@ -1,12 +1,12 @@
 // Routes: /orgs/[org]/agents/approvals — pending and resolved agent approval views.
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { ApprovalDecisionButtons } from '../components/agent/approval-actions.jsx';
 import { LiveUpdates } from '../components/agent/live-updates.jsx';
 import { relativeTime, ResolvedApprovalsSection } from './agent-helpers.jsx';
 
 export async function AgentApprovalsPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { approvals: { count: 0, items: [], pending: [] } };
   const allApprovals = agentView.approvals?.items || [];
@@ -14,7 +14,7 @@ export async function AgentApprovalsPage({ org = null } = {}) {
   const resolved = allApprovals.filter(a => a.status?.phase && a.status.phase !== 'Pending');
   const approvedCount = resolved.filter(a => a.status?.phase === 'Approved').length;
   const deniedCount = resolved.filter(a => a.status?.phase === 'Denied').length;
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent approvals" title="Approval inbox" text="Review and act on pending agent approval requests. Agents pause here when they need human authorization for tools, secrets, write-back, or release actions." actions={[['/agents', 'Overview'], ['/agents/runs', 'Dispatch runs']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/approvals', 'Approvals']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent approvals" title="Approval inbox" text="Review and act on pending agent approval requests. Agents pause here when they need human authorization for tools, secrets, write-back, or release actions." actions={[['/agents', 'Overview'], ['/agents/runs', 'Dispatch runs']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/approvals', 'Approvals']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}><LiveUpdates org={activeOrg} /></div>
     <section className="routeGrid three">

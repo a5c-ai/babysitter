@@ -1,4 +1,4 @@
-export const metadata = { title: 'Agent Approvals | Krate' };
+export const metadata = { title: 'Agent Approvals | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { AgentApprovalsPage } from '../../../../ui-shell.jsx';

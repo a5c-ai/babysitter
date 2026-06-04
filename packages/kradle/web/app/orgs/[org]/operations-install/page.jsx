@@ -1,4 +1,4 @@
-export const metadata = { title: 'Operations Install | Krate' };
+export const metadata = { title: 'Operations Install | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { OperationsInstallPage } from '../../../ui-shell.jsx';

@@ -69,7 +69,7 @@ function WebhookRow({ webhook, org, onPingResult, onDeleted }) {
           'X-GitHub-Event': 'ping',
           'X-GitHub-Delivery': `test-${Date.now()}`,
         },
-        body: JSON.stringify({ zen: 'Test ping from Krate', hook_id: 0 }),
+        body: JSON.stringify({ zen: 'Test ping from Kradle', hook_id: 0 }),
       });
       const data = await res.json();
       if (res.ok) {

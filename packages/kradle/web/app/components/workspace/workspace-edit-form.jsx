@@ -35,7 +35,7 @@ export function WorkspaceEditForm({ org, workspace }) {
     if (fields.branch) spec.branch = fields.branch;
     if (fields.capacity) spec.volumeSpec = { capacity: fields.capacity };
     try {
-      const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/KrateWorkspace/${encodeURIComponent(workspace.metadata.name)}`, {
+      const res = await fetch(`/api/orgs/${encodeURIComponent(org)}/resources/KradleWorkspace/${encodeURIComponent(workspace.metadata.name)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ spec }),

@@ -69,7 +69,7 @@ function parseRoom(roomUrl) {
 export function JitsiEmbeddedMeeting({
   roomUrl,
   jwt,
-  displayName = 'Krate user',
+  displayName = 'Kradle user',
   onApiReady,
   onParticipantJoined,
   onParticipantLeft,
@@ -151,7 +151,7 @@ export function JitsiEmbeddedMeeting({
       {state !== 'ready' ? (
         <div className="jitsiEmbedState" role={state === 'error' ? 'alert' : 'status'}>
           <strong>{state === 'error' ? 'Meeting unavailable' : state === 'waiting' ? 'Preparing meeting' : 'Loading Jitsi'}</strong>
-          <span>{state === 'error' ? error : 'Krate is opening the authenticated embedded room.'}</span>
+          <span>{state === 'error' ? error : 'Kradle is opening the authenticated embedded room.'}</span>
         </div>
       ) : null}
     </section>

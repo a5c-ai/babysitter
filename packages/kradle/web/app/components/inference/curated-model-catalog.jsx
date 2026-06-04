@@ -21,7 +21,7 @@ export function UnifiedModelCatalogSection({ org }) {
     fetch(`/api/orgs/${org}/inference/catalog`)
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (!cancelled) setCatalog(data); })
-      .catch((e) => { console.warn('[krate] unified catalog fetch failed:', e.message ?? e); if (!cancelled) setCatalog(null); })
+      .catch((e) => { console.warn('[kradle] unified catalog fetch failed:', e.message ?? e); if (!cancelled) setCatalog(null); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [org]);

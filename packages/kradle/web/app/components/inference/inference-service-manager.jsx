@@ -101,8 +101,8 @@ export function InferenceServiceManager({ org, initialServiceName }) {
     try {
       const urls = {
         service: `/api/orgs/${org}/inference/services/${encodeURIComponent(name)}`,
-        route: `/api/orgs/${org}/resources/KrateModelRoute/${encodeURIComponent(name)}`,
-        'virtual-model': `/api/orgs/${org}/resources/KrateVirtualModel/${encodeURIComponent(name)}`,
+        route: `/api/orgs/${org}/resources/KradleModelRoute/${encodeURIComponent(name)}`,
+        'virtual-model': `/api/orgs/${org}/resources/KradleVirtualModel/${encodeURIComponent(name)}`,
       };
       const res = await fetch(urls[type], { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');

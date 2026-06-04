@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { SecretManagerPage } from '../../../../ui-shell.jsx';
 
-export const metadata = { title: 'Secrets | Krate' };
+export const metadata = { title: 'Secrets | Kradle' };
 
 export default async function Page({ params }) {
   const routeParams = await params;

@@ -32,7 +32,7 @@ export function LayerSection({ layer, atlasProxyUrl, selected, onToggle }) {
         const data = await res.json();
         setResults(data.hits || data.instances || []);
       }
-    } catch (err) { console.warn('[krate] atlas layer browse failed:', err.message ?? err); }
+    } catch (err) { console.warn('[kradle] atlas layer browse failed:', err.message ?? err); }
     setLoading(false);
     setInitialLoaded(true);
   }, [atlasProxyUrl, kindsParam, initialLoaded]);
@@ -54,7 +54,7 @@ export function LayerSection({ layer, atlasProxyUrl, selected, onToggle }) {
           const data = await res.json();
           setResults(data.hits || []);
         }
-      } catch (err) { console.warn('[krate] atlas layer search failed:', err.message ?? err); }
+      } catch (err) { console.warn('[kradle] atlas layer search failed:', err.message ?? err); }
       setLoading(false);
     }, 300);
     return () => clearTimeout(debounceRef.current);
@@ -246,7 +246,7 @@ function ToolSubSection({ label, kinds, layerKey, atlasProxyUrl, selected, onTog
         const data = await res.json();
         setResults(data.hits || data.instances || []);
       }
-    } catch (err) { console.warn('[krate] atlas tool browse failed:', err.message ?? err); }
+    } catch (err) { console.warn('[kradle] atlas tool browse failed:', err.message ?? err); }
     setLoading(false);
     setInitialLoaded(true);
   }, [atlasProxyUrl, kindsParam, initialLoaded]);
@@ -264,7 +264,7 @@ function ToolSubSection({ label, kinds, layerKey, atlasProxyUrl, selected, onTog
           const data = await res.json();
           setResults(data.hits || []);
         }
-      } catch (err) { console.warn('[krate] atlas tool search failed:', err.message ?? err); }
+      } catch (err) { console.warn('[kradle] atlas tool search failed:', err.message ?? err); }
       setLoading(false);
     }, 300);
     return () => clearTimeout(debounceRef.current);

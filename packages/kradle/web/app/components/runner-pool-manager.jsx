@@ -46,7 +46,7 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
       kind: 'RunnerPool',
       metadata: {
         name: form.name,
-        namespace: `krate-org-${org}`,
+        namespace: `kradle-org-${org}`,
         labels: { 'krate.a5c.ai/trust-tier': form.trustTier }
       },
       spec: {

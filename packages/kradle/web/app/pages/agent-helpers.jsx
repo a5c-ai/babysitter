@@ -1,5 +1,5 @@
 // Shared helpers, components, and constants used across all agent page modules.
-import { loadKrateUi, orgHref, modelHref, publicResource, resourceJson, sanitizeCopy, StatusPill, DegradedBanner, EmptyState, InfoList, PlanCard, ResourceTable } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, modelHref, publicResource, resourceJson, sanitizeCopy, StatusPill, DegradedBanner, EmptyState, InfoList, PlanCard, ResourceTable } from '../lib/kradle-ui.jsx';
 import { ToolCallInspector } from '../components/observability/tool-inspector.jsx';
 import { IssueCreateForm, IssueEditor } from '../components/repo/issue-editor.jsx';
 import { ResourceApplyPanel } from '../components/resource-actions.jsx';

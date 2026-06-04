@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { DashboardPage } from '../../ui-shell.jsx';
 
-export const metadata = { title: 'Dashboard | Krate' };
+export const metadata = { title: 'Dashboard | Kradle' };
 
 export default async function Page({ params }) {
   const routeParams = await params;

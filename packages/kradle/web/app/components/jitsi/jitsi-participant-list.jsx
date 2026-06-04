@@ -53,7 +53,7 @@ export function JitsiParticipantList({
   ].filter(([, value]) => value);
 
   return (
-    <aside className="card jitsiContextPanel" aria-label="Krate meeting context">
+    <aside className="card jitsiContextPanel" aria-label="Kradle meeting context">
       <div className="cardTitle">
         <h3>Context</h3>
         <span>{recordingActive ? 'Recording active' : ended ? 'Ended' : 'Live'}</span>

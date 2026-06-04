@@ -19,7 +19,7 @@ export function CopyButton({ text, style: extraStyle }) {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
-    }).catch((err) => console.warn('[krate]', err.message || err));
+    }).catch((err) => console.warn('[kradle]', err.message || err));
   }, [text]);
 
   return (
@@ -190,10 +190,10 @@ export function ApiKeyMessage() {
         The assistant needs an Anthropic API key to generate responses. Set one of:
       </div>
       <pre style={{ ...styles.codeBlock, marginTop: 8, padding: '10px 14px', fontSize: 12 }}>
-        {`# Option 1: Environment variable\nexport ANTHROPIC_API_KEY=sk-ant-...\n\n# Option 2: Krate-specific key\nexport KRATE_ASSISTANT_API_KEY=sk-ant-...`}
+        {`# Option 1: Environment variable\nexport ANTHROPIC_API_KEY=sk-ant-...\n\n# Option 2: Kradle-specific key\nexport KRADLE_ASSISTANT_API_KEY=sk-ant-...`}
       </pre>
       <div style={{ fontSize: 12, marginTop: 6, color: 'var(--text-muted)' }}>
-        Then restart the Krate web server.
+        Then restart the Kradle web server.
       </div>
     </div>
   );

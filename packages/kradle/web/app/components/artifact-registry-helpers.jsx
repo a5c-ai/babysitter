@@ -4,14 +4,14 @@ import { useState, useCallback } from 'react';
 
 // ── Install command templates ────────────────────────────────────────
 export function installCommand(registryType, org, feed, name, version) {
-  const base = 'https://krate.example.com/api/v1/registry';
+  const base = 'https://kradle.example.com/api/v1/registry';
   switch (registryType) {
     case 'npm':
       return `npm install @${org}/${name}@${version} --registry ${base}/npm/${feed}`;
     case 'pip':
       return `pip install ${name}==${version} --index-url ${base}/pip/${feed}/simple`;
     case 'docker':
-      return `docker pull krate.example.com/${feed}/${name}:${version}`;
+      return `docker pull kradle.example.com/${feed}/${name}:${version}`;
     case 'generic':
     default:
       return `curl -O ${base}/generic/${feed}/${name}/${version}`;

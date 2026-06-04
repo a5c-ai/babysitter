@@ -1,4 +1,4 @@
-export const metadata = { title: 'Inference | Krate' };
+export const metadata = { title: 'Inference | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { InferenceServicesPage } from '../../../ui-shell.jsx';

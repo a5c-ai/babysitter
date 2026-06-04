@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { AgentStacksPage } from '../../../../ui-shell.jsx';
 
-export const metadata = { title: 'Agent Stacks | Krate' };
+export const metadata = { title: 'Agent Stacks | Kradle' };
 
 export default async function Page({ params }) {
   const routeParams = await params;

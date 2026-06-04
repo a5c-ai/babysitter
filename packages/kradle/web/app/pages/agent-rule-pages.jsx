@@ -1,16 +1,16 @@
 // Routes: /orgs/[org]/agents/rules, /agents/rules/[name], /agents/rules/new — trigger rule management.
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { TriggerRuleForm } from '../components/agent/trigger-rule-form.jsx';
 import { TriggerRuleEditForm } from '../components/agent/trigger-rule-edit-form.jsx';
 import { EnableDisableToggle, DeleteRuleButton } from '../components/agent/rule-actions.jsx';
 
 export async function AgentRulesPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { rules: { count: 0, items: [] } };
   const rules = agentView.rules.items || [];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent trigger rules" title="Trigger rules" text="Trigger rules define which events dispatch agent runs and which stack handles them." actions={[['/agents/rules/new', 'Create rule'], ['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/rules', 'Trigger rules']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent trigger rules" title="Trigger rules" text="Trigger rules define which events dispatch agent runs and which stack handles them." actions={[['/agents/rules/new', 'Create rule'], ['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/rules', 'Trigger rules']]}>
     <DegradedBanner model={ui.model} />
     <div className="card">
       <div className="cardTitle"><h2>Trigger rules</h2><StatusPill tone={rules.length ? 'good' : 'neutral'}>{rules.length} rules</StatusPill></div>
@@ -32,7 +32,7 @@ export async function AgentRulesPage({ org = null } = {}) {
 }
 
 export async function AgentRuleDetailPage({ org = null, ruleName } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { rules: { items: [] }, triggerExecutions: { items: [] }, stacks: { items: [] } };
   const rule = (agentView.rules.items || []).find((r) => r.metadata?.name === ruleName) || null;
@@ -51,7 +51,7 @@ export async function AgentRuleDetailPage({ org = null, ruleName } = {}) {
     if (d === 'failed') return 'danger';
     return 'neutral';
   };
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`trigger rule / ${ruleName}`} title={ruleName || 'Rule detail'} text={rule ? `Trigger rule targeting ${agentStack || 'unknown stack'} with ${sources.length ? sources.join(', ') : 'all'} sources.` : 'This trigger rule was not found in the current workspace.'} actions={[['/agents/rules', 'All rules'], ['/agents/rules/new', 'New rule'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/rules', 'Trigger rules'], [`/agents/rules/${ruleName}`, ruleName || 'Detail']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`trigger rule / ${ruleName}`} title={ruleName || 'Rule detail'} text={rule ? `Trigger rule targeting ${agentStack || 'unknown stack'} with ${sources.length ? sources.join(', ') : 'all'} sources.` : 'This trigger rule was not found in the current workspace.'} actions={[['/agents/rules', 'All rules'], ['/agents/rules/new', 'New rule'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/rules', 'Trigger rules'], [`/agents/rules/${ruleName}`, ruleName || 'Detail']]}>
     <DegradedBanner model={ui.model} />
     {rule ? <>
       <section className="routeGrid two">
@@ -90,7 +90,7 @@ export async function AgentRuleDetailPage({ org = null, ruleName } = {}) {
 }
 
 export async function AgentRuleBuilderPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { stacks: { items: [] } };
   const stacks = (agentView.stacks?.items || []).map(s => s.metadata?.name).filter(Boolean);
@@ -98,14 +98,14 @@ export async function AgentRuleBuilderPage({ org = null } = {}) {
 kind: AgentTriggerRule
 metadata:
   name: my-trigger-rule
-  namespace: krate-system
+  namespace: kradle-system
 spec:
   organizationRef: ${activeOrg}
   sources:
     - push
   agentStack: my-diagnostic-stack
   taskKind: diagnostic`;
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="new trigger rule" title="Create trigger rule" text="Define which events dispatch agent runs and which stack handles them." actions={[['/agents/rules', 'All rules'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/rules', 'Trigger rules'], ['/agents/rules/new', 'New rule']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="new trigger rule" title="Create trigger rule" text="Define which events dispatch agent runs and which stack handles them." actions={[['/agents/rules', 'All rules'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/rules', 'Trigger rules'], ['/agents/rules/new', 'New rule']]}>
     <DegradedBanner model={ui.model} />
     <section className="routeGrid two">
       <TriggerRuleForm org={activeOrg} stacks={stacks} />

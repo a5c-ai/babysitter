@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { ArtifactRegistriesPage } from '../../../ui-shell.jsx';
 
-export const metadata = { title: 'Artifact Registries | Krate' };
+export const metadata = { title: 'Artifact Registries | Kradle' };
 
 export default async function Page({ params }) {
   const routeParams = await params;

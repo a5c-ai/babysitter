@@ -10,7 +10,7 @@ function ensureKeyframes() {
   const style = document.createElement('style');
   style.id = KEYFRAMES_ID;
   style.textContent = `
-    @keyframes krate-pg-spin {
+    @keyframes kradle-pg-spin {
       to { transform: rotate(360deg); }
     }
     @media (max-width: 768px) {

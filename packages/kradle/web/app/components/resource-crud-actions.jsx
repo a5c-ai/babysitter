@@ -102,7 +102,7 @@ export function ResourceActions({ org, apiPath, actions = [], onMutated }) {
  * Props:
  *   org         {string}  — organization slug
  *   namespace   {string}  — resource namespace
- *   kind        {string}  — resource kind e.g. "KrateProject"
+ *   kind        {string}  — resource kind e.g. "KradleProject"
  *   apiVersion  {string}  — default "krate.a5c.ai/v1alpha1"
  *   title       {string}  — card heading
  *   fields      {Array}   — [{ name, label, type?, placeholder?, required?, defaultValue?, options? }]
@@ -110,7 +110,7 @@ export function ResourceActions({ org, apiPath, actions = [], onMutated }) {
  *   buildSpec   {fn}      — (formData) => spec object
  *   successText {fn|str}  — (body) => string, or fixed string
  */
-export function InlineCreateForm({ org, namespace = 'krate-system', kind, apiVersion = 'krate.a5c.ai/v1alpha1', title, fields = [], successText, buildSpec }) {
+export function InlineCreateForm({ org, namespace = 'kradle-system', kind, apiVersion = 'krate.a5c.ai/v1alpha1', title, fields = [], successText, buildSpec }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');

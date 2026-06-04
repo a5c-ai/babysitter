@@ -105,7 +105,7 @@ export function GatewaySection({ org, gateway }) {
               style={inputStyle}
             />
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-              The base URL of your Agent Mux gateway. Must be reachable from the Krate server.
+              The base URL of your Agent Mux gateway. Must be reachable from the Kradle server.
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '0.25rem' }}>

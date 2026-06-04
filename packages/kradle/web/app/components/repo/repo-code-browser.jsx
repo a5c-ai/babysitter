@@ -200,7 +200,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
               }}
             >
               <strong style={{ display: 'block', marginBottom: '0.25rem' }}>Repository browser requires Gitea</strong>
-              <span>Set <code style={{ background: '#fde68a', padding: '0.0625rem 0.25rem', borderRadius: '0.125rem', fontSize: '0.6875rem' }}>KRATE_GITEA_HTTP_URL</code> to enable.</span>
+              <span>Set <code style={{ background: '#fde68a', padding: '0.0625rem 0.25rem', borderRadius: '0.125rem', fontSize: '0.6875rem' }}>KRADLE_GITEA_HTTP_URL</code> to enable.</span>
             </div>
           ) : !tree || tree.length === 0 ? (
             <p style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -249,7 +249,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
               <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.5 }}>
                 Repository browser requires Gitea. Set{' '}
                 <code style={{ background: '#fde68a', padding: '0.125rem 0.375rem', borderRadius: '0.25rem', fontSize: '0.75rem' }}>
-                  KRATE_GITEA_HTTP_URL
+                  KRADLE_GITEA_HTTP_URL
                 </code>{' '}
                 to enable.
               </p>

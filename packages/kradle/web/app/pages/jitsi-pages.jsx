@@ -1,4 +1,4 @@
-import { loadKrateUi, DegradedBanner } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, DegradedBanner } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { JitsiCreateMeetingForm, JitsiMeetingExperience, JitsiMeetingManager, JitsiProviderConfig, JitsiRecordingList, JitsiTemplateForm } from '../components/index.js';
 
@@ -11,10 +11,10 @@ function findItem(ui, kind, name) {
 }
 
 async function jitsiFrame(org, currentPath, title, text, children) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   return (
-    <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath={currentPath} eyebrow="meetings" title={title} text={text} actions={[['/meetings/new', 'New meeting'], ['/meetings/templates', 'Templates'], ['/meetings/recordings', 'Recordings']]} breadcrumbs={[['/', 'Krate'], ['/meetings', 'Meetings']]}>
+    <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath={currentPath} eyebrow="meetings" title={title} text={text} actions={[['/meetings/new', 'New meeting'], ['/meetings/templates', 'Templates'], ['/meetings/recordings', 'Recordings']]} breadcrumbs={[['/', 'Kradle'], ['/meetings', 'Meetings']]}>
       <DegradedBanner model={ui.model} />
       {children(ui, activeOrg)}
     </PageFrame>
@@ -28,7 +28,7 @@ export async function MeetingsPage({ org = 'default' } = {}) {
 }
 
 export async function MeetingDetailPage({ org = 'default', id } = {}) {
-  return jitsiFrame(org, `/meetings/${id}`, 'Meeting detail', 'Join the room and inspect Krate meeting context.', (ui) => {
+  return jitsiFrame(org, `/meetings/${id}`, 'Meeting detail', 'Join the room and inspect Kradle meeting context.', (ui) => {
     const meeting = findItem(ui, 'JitsiMeeting', id) || { metadata: { name: id }, spec: { roomId: id, displayName: id }, status: { phase: 'Scheduled', participants: { current: [] } } };
     const recordings = items(ui, 'JitsiRecording');
     return <JitsiMeetingExperience org={meeting.spec?.organizationRef || org} meeting={meeting} recordings={recordings} />;

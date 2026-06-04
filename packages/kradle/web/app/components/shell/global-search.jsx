@@ -5,7 +5,7 @@ import { useDebounce } from '../../hooks/use-debounce.js';
 
 const KIND_COLORS = {
   AgentStack: '#3b82f6',
-  KrateProject: '#7c3aed',
+  KradleProject: '#7c3aed',
   Repository: '#059669',
   AgentDispatchRun: '#d97706',
   AgentChatSession: '#0891b2',
@@ -15,7 +15,7 @@ const KIND_COLORS = {
 
 const KIND_LABELS = {
   AgentStack: 'Stack',
-  KrateProject: 'Project',
+  KradleProject: 'Project',
   Repository: 'Repo',
   AgentDispatchRun: 'Run',
   AgentChatSession: 'Session',

@@ -1,5 +1,5 @@
 // Routes: /orgs/[org]/agents/runs, /agents/runs/[name] — dispatch run list and detail.
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner, EmptyState } from '../lib/kradle-ui.jsx';
 import { resourceToYaml } from '@a5c-ai/kradle-sdk';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { DispatchButton } from '../components/agent/dispatch-button.jsx';
@@ -10,7 +10,7 @@ import { phaseTone, FlowVisualization } from './agent-helpers.jsx';
 import { buildAgentIdentityProfiles, resolveRunAgentIdentity, agentIdentityLabel } from '../lib/agent-identity.js';
 
 export async function AgentRunsPage({ org = null, linkToDetail = false } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { runs: { count: 0, items: [] }, stacks: { count: 0, items: [] } };
   const allRuns = agentView.runs.items || [];
@@ -20,7 +20,7 @@ export async function AgentRunsPage({ org = null, linkToDetail = false } = {}) {
   const availableStacks = agentView.stacks?.items || [];
   const agentProfiles = buildAgentIdentityProfiles(ui.model);
   const meetings = agentView.meetings?.active || (ui.model.resources || []).find((resource) => resource.kind === 'JitsiMeeting')?.items || [];
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent dispatch runs" title="Dispatch runs" text="Track agent dispatch runs across stacks, repositories, and phases. Each run represents a dispatched agent task." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/runs', 'Dispatch runs']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent dispatch runs" title="Dispatch runs" text="Track agent dispatch runs across stacks, repositories, and phases. Each run represents a dispatched agent task." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/runs', 'Dispatch runs']]}>
     <DegradedBanner model={ui.model} />
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
       <ManualDispatchButton org={activeOrg} stacks={availableStacks.map(s => s.metadata?.name).filter(Boolean)} agents={agentProfiles} />
@@ -44,7 +44,7 @@ export async function AgentRunsPage({ org = null, linkToDetail = false } = {}) {
 }
 
 export async function AgentRunDetailPage({ org = null, runId } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { runs: { items: [] }, stacks: { items: [] }, sessions: { items: [] } };
   const run = (agentView.runs.items || []).find((r) => r.metadata?.name === runId) || null;
@@ -76,7 +76,7 @@ export async function AgentRunDetailPage({ org = null, runId } = {}) {
     if (status === 'Failed' || status === 'Errored') return 'danger';
     return 'neutral';
   };
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`dispatch run / ${runId}`} title={runId || 'Run detail'} text={run ? `Dispatch run on ${stackName || 'unknown stack'} with phase ${run.status?.phase || 'Pending'}.` : 'This dispatch run was not found in the current workspace.'} actions={[['/agents/runs', 'All runs'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/runs', 'Dispatch runs'], [`/agents/runs/${runId}`, runId || 'Detail']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow={`dispatch run / ${runId}`} title={runId || 'Run detail'} text={run ? `Dispatch run on ${stackName || 'unknown stack'} with phase ${run.status?.phase || 'Pending'}.` : 'This dispatch run was not found in the current workspace.'} actions={[['/agents/runs', 'All runs'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/runs', 'Dispatch runs'], [`/agents/runs/${runId}`, runId || 'Detail']]}>
     <DegradedBanner model={ui.model} />
     {run ? <>
       <section className="routeGrid two">

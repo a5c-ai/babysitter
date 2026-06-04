@@ -187,7 +187,7 @@ export function EnhancedKanbanBoard({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             apiVersion: 'krate.a5c.ai/v1alpha1',
-            kind: 'KrateWorkspace',
+            kind: 'KradleWorkspace',
             metadata: {
               name: workspaceName,
               labels: { 'krate.a5c.ai/board-item': itemId },

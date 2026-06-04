@@ -1,4 +1,4 @@
-export const metadata = { title: 'Memory Ontology | Krate' };
+export const metadata = { title: 'Memory Ontology | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { AgentMemoryOntologyPage } from '../../../../../ui-shell.jsx';

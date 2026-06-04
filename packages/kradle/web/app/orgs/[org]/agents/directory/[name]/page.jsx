@@ -1,6 +1,6 @@
 import { AgentProfileRoutePage } from '../../../../../ui-shell.jsx';
 
-export const metadata = { title: 'Agent Profile - Krate' };
+export const metadata = { title: 'Agent Profile - Kradle' };
 export const dynamic = 'force-dynamic';
 
 export default async function Page({ params }) {

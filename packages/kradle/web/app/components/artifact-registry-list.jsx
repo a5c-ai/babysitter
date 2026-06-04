@@ -26,7 +26,7 @@ export function RegistryCard({ registry, feeds, onSelect }) {
   const phase = status.phase || 'Pending';
   const tone = statusTone(phase);
   const feedCount = feeds.filter((f) => f.spec?.registryRef === name).length;
-  const endpoint = spec.endpoint || status.endpoint || `https://krate.example.com/api/v1/registry/${regType}/${name}`;
+  const endpoint = spec.endpoint || status.endpoint || `https://kradle.example.com/api/v1/registry/${regType}/${name}`;
 
   return (
     <div style={cardStyle}>
@@ -68,7 +68,7 @@ export function CreateRegistryForm({ org, onCreated, externalProviders }) {
   const set = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const autoEndpoint = form.storageBackend !== 'external'
-    ? `https://krate.example.com/api/v1/registry/${form.registryType}/${form.name || '<name>'}`
+    ? `https://kradle.example.com/api/v1/registry/${form.registryType}/${form.name || '<name>'}`
     : '';
 
   async function handleSubmit(e) {

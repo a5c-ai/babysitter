@@ -1,4 +1,4 @@
-export const metadata = { title: 'Controller API | Krate' };
+export const metadata = { title: 'Controller API | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { ControllerApiPage } from '../../../ui-shell.jsx';

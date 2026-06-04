@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { createAuthProviderConfig, listEnabledAuthProviders, parseSessionCookie, fetchControllerUiModel, createKradleApiController, orgNamespaceName, resourceToYaml } from '@a5c-ai/kradle-sdk';
 import { KradleControllerRecovery } from '../components/shell/kradle-loading.jsx';
 
-const ORG_HYDRATED_RESOURCE_KINDS = ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KrateProject', 'Issue', 'AgentPersona', 'AgentSoul', 'AgentAppearance', 'AgentVoiceProfile', 'AgentDefinition', 'AgentSkill', 'AgentStack'];
+const ORG_HYDRATED_RESOURCE_KINDS = ['Repository', 'RunnerPool', 'Pipeline', 'Job', 'KradleProject', 'Issue', 'AgentPersona', 'AgentSoul', 'AgentAppearance', 'AgentVoiceProfile', 'AgentDefinition', 'AgentSkill', 'AgentStack'];
 
 export const orgNavigationGroups = [
   {
@@ -66,7 +66,7 @@ export const orgNavigationGroups = [
   {
     title: 'Assistant',
     items: [
-      ['/assistant', 'Assistant', 'AI assistant with krate tools']
+      ['/assistant', 'Assistant', 'AI assistant with kradle tools']
     ]
   },
   {
@@ -106,22 +106,22 @@ export function deploymentKind(suffix) {
 
 export function sanitizeCopy(value) {
   return String(value || '')
-    .replace(new RegExp(deploymentKind(''), 'g'), 'Krate')
+    .replace(new RegExp(deploymentKind(''), 'g'), 'Kradle')
     .replace(/OAM/g, 'Kradle deployment')
-    .replace(/Gitea/g, 'Krate repositories')
-    .replace(/gitea/g, 'Krate repositories')
-    .replace(/Argo CD/g, 'Krate release sync')
+    .replace(/Gitea/g, 'Kradle repositories')
+    .replace(/gitea/g, 'Kradle repositories')
+    .replace(/Argo CD/g, 'Kradle release sync')
     .replace(/GitOps/g, 'release sync')
-    .replace(/Kubernetes/g, 'Krate')
-    .replace(/kubernetes/g, 'Krate')
-    .replace(/kubectl/g, 'Krate action')
+    .replace(/Kubernetes/g, 'Kradle')
+    .replace(/kubernetes/g, 'Kradle')
+    .replace(/kubectl/g, 'Kradle action')
     .replace(/SubjectAccessReview/g, 'access check')
     .replace(/RBAC/g, 'access policy')
     .replace(/smart-HTTP/g, 'repository streaming')
-    .replace(/KRATE_GITEA_HTTP_URL/g, 'Krate repositories')
-    .replace(/core\.oam\.dev/g, 'krate.delivery')
-    .replace(/app\.oam\.dev/g, 'app.krate.delivery')
-    .replace(/policy\.oam\.dev/g, 'policy.krate.delivery')
+    .replace(/KRADLE_GITEA_HTTP_URL/g, 'Kradle repositories')
+    .replace(/core\.oam\.dev/g, 'kradle.delivery')
+    .replace(/app\.oam\.dev/g, 'app.kradle.delivery')
+    .replace(/policy\.oam\.dev/g, 'policy.kradle.delivery')
     .replace(/ApplicationRevision/g, 'Release')
     .replace(/ResourceTracker/g, 'ManagedResource')
     .replace(/YAML/g, 'advanced details')
@@ -152,11 +152,11 @@ export function displayKind(kind) {
 }
 
 export function displayRole(role) {
-  return sanitizeCopy(String(role || '').replace(/kubernetes/g, 'delivery').replace(/gitea/g, 'Krate repositories'));
+  return sanitizeCopy(String(role || '').replace(/kubernetes/g, 'delivery').replace(/gitea/g, 'Kradle repositories'));
 }
 
 export function displayCommand(resource, action) {
-  if (!resource) return 'Open Krate';
+  if (!resource) return 'Open Kradle';
   const label = displayKind(resource.kind).toLowerCase();
   return action === 'apply' ? `Review ${label} details` : `Open ${label} records`;
 }
@@ -166,14 +166,14 @@ export function sanitizeAction(value) {
 }
 
 // ---------------------------------------------------------------------------
-// In-memory cache for loadKrateUi — prevents 30+ server pages from each
+// In-memory cache for loadKradleUi — prevents 30+ server pages from each
 // hitting kubectl independently during a single render pass.
 // ---------------------------------------------------------------------------
 let _cachedModel = null;
 let _cacheExpiry = 0;
 const CACHE_TTL_MS = 5000;
 
-export async function loadKrateUi(org = null) {
+export async function loadKradleUi(org = null) {
   const cacheKey = org || 'default';
   const now = Date.now();
   if (_cachedModel && _cachedModel._cacheKey === cacheKey && now < _cacheExpiry) {
@@ -197,7 +197,7 @@ export async function loadKrateUi(org = null) {
     repositories,
     repository: repositories[0] || null,
     repositoryResource,
-    projectResource: resourceByKind.get('KrateProject'),
+    projectResource: resourceByKind.get('KradleProject'),
     deploymentResource: resourceByKind.get(deploymentKind('Application')),
     releaseResource: resourceByKind.get(deploymentKind('ApplicationRevision')),
     deploymentPolicyResource: resourceByKind.get(deploymentKind('Policy')),
@@ -228,7 +228,7 @@ function syncHydratedModel(model, resourceByKind) {
     else resources.push(summary);
   }
   model.resources = resources;
-  const projects = resourceByKind.get('KrateProject')?.items || [];
+  const projects = resourceByKind.get('KradleProject')?.items || [];
   const issues = resourceByKind.get('Issue')?.items || [];
   if (projects.length) {
     model.agents = {
@@ -306,7 +306,7 @@ export function EmptyState({ title, text, cta, ctaLabel, children, info = false 
 export function shouldShowControllerRecovery(model) {
   if (!model || model.status === 'ready') return false;
   const errors = model.controller?.connection?.errors || [];
-  const hasFetchFailure = errors.some((error) => /fetch failed|controller API|ECONN|ENOTFOUND|ETIMEDOUT|Krate workspace unavailable|KRATE_CONTROLLER_URL is not configured/i.test(String(error || '')));
+  const hasFetchFailure = errors.some((error) => /fetch failed|controller API|ECONN|ENOTFOUND|ETIMEDOUT|Kradle workspace unavailable|KRADLE_CONTROLLER_URL is not configured/i.test(String(error || '')));
   const hasLiveControllerData = Boolean(model.controller?.connection?.available || model.controller?.apiService);
   return hasFetchFailure && !hasLiveControllerData;
 }
@@ -325,7 +325,7 @@ export function PlanCard({ title, plan, compact = false, initiallyOpen = false }
 }
 
 export function ResourceTable({ resource }) {
-  if (!resource) return <EmptyState title="Resource unavailable" text="The Krate model did not include this resource definition." cta="/" ctaLabel="Go to dashboard" />;
+  if (!resource) return <EmptyState title="Resource unavailable" text="The Kradle model did not include this resource definition." cta="/" ctaLabel="Go to dashboard" />;
   const label = displayKind(resource.kind);
-  return <details className="card"><summary><span><h3>{label}</h3><p>{resource.count} records available. Expand for advanced details.</p></span><StatusPill tone={resource.count ? 'good' : 'neutral'}>{resource.count} returned</StatusPill></summary><code>{displayCommand(resource, 'list')}</code>{resource.names?.length ? <ul className="compactList">{resource.names.map((name) => <li key={name}>{name}</li>)}</ul> : <p className="emptyText">No {label} records returned by Krate.</p>}<PlanCard title={`${label} details`} plan={resource.yaml} command={displayCommand(resource, 'apply')} /></details>;
+  return <details className="card"><summary><span><h3>{label}</h3><p>{resource.count} records available. Expand for advanced details.</p></span><StatusPill tone={resource.count ? 'good' : 'neutral'}>{resource.count} returned</StatusPill></summary><code>{displayCommand(resource, 'list')}</code>{resource.names?.length ? <ul className="compactList">{resource.names.map((name) => <li key={name}>{name}</li>)}</ul> : <p className="emptyText">No {label} records returned by Kradle.</p>}<PlanCard title={`${label} details`} plan={resource.yaml} command={displayCommand(resource, 'apply')} /></details>;
 }

@@ -18,7 +18,7 @@ export function AgentProfileCard({ profile, href }) {
           <p className="muted" style={{ margin: 0 }}>{profile?.roleTitle || 'Agent persona'}</p>
         </div>
       </div>
-      <p style={{ margin: 0, color: 'var(--text-muted)' }}>{profile?.tagline || profile?.roleDomain || 'Reusable identity for Krate dispatch and meetings.'}</p>
+      <p style={{ margin: 0, color: 'var(--text-muted)' }}>{profile?.tagline || profile?.roleDomain || 'Reusable identity for Kradle dispatch and meetings.'}</p>
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: 'auto' }}>
         <span className="pill neutral">{runCount} runs</span>
         {rating ? <span className="pill good">{rating} avg</span> : null}

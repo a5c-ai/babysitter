@@ -117,7 +117,7 @@ export function buildStackResource({ name, displayName, systemPrompt, developerP
       runtimeIdentity: {
         serviceAccountRef: serviceAccount || 'default',
         roleRef: role || 'edit',
-        namespace: rbacNamespace || `krate-org-${org}`,
+        namespace: rbacNamespace || `kradle-org-${org}`,
       },
       // Model from model layer
       ...(modelSelections.length ? { model: modelSelections[0].id } : {}),

@@ -46,7 +46,7 @@ function mapEventToNotification(event) {
   } else if (evType.includes('ExternalSyncConflict') || evType.includes('Conflict')) {
     type = 'conflict-detected';
     title = 'Sync conflict detected';
-  } else if (evType.includes('KrateWorkspace') || evType.includes('Workspace')) {
+  } else if (evType.includes('KradleWorkspace') || evType.includes('Workspace')) {
     type = 'workspace-ready';
     title = 'Workspace update: ' + (event?.name || event?.metadata?.name || 'workspace');
   }

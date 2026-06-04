@@ -229,7 +229,7 @@ export function UserProfileForm({ org, user }) {
             ))}
           </div>
         ) : (
-          <p style={{ color: 'var(--ink-fade)', fontSize: '0.875rem' }}>No personal API keys. Generate one to use the Krate API programmatically.</p>
+          <p style={{ color: 'var(--ink-fade)', fontSize: '0.875rem' }}>No personal API keys. Generate one to use the Kradle API programmatically.</p>
         )}
         {generatedKey && (
           <div style={{ padding: '0.75rem', background: 'rgba(47, 111, 94, .1)', border: '1px solid rgba(47, 111, 94, .38)', borderRadius: '0.5rem', fontSize: '0.875rem' }}>

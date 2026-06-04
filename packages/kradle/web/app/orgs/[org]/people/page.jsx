@@ -1,4 +1,4 @@
-export const metadata = { title: 'People | Krate' };
+export const metadata = { title: 'People | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { PeoplePage } from '../../../ui-shell.jsx';

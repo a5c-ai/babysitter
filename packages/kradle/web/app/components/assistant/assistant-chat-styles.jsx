@@ -140,7 +140,7 @@ export const styles = {
   thinkingDot: (delay) => ({
     width: 7, height: 7, borderRadius: '50%',
     background: 'var(--accent, #2563eb)',
-    animation: `krate-dot-pulse 1.4s ease-in-out ${delay}s infinite`,
+    animation: `kradle-dot-pulse 1.4s ease-in-out ${delay}s infinite`,
   }),
   /* ── scroll-to-bottom ── */
   scrollBtn: {
@@ -165,14 +165,14 @@ export const styles = {
 };
 
 /* ───────────── keyframes (injected once) ───────────── */
-const KEYFRAMES_ID = '__krate-chat-keyframes';
+const KEYFRAMES_ID = '__kradle-chat-keyframes';
 export function ensureKeyframes() {
   if (typeof document === 'undefined') return;
   if (document.getElementById(KEYFRAMES_ID)) return;
   const style = document.createElement('style');
   style.id = KEYFRAMES_ID;
   style.textContent = `
-    @keyframes krate-dot-pulse {
+    @keyframes kradle-dot-pulse {
       0%, 80%, 100% { opacity: .25; transform: scale(.85); }
       40% { opacity: 1; transform: scale(1); }
     }

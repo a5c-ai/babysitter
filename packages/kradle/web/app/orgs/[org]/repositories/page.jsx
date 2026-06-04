@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { RepositoriesPage } from '../../../ui-shell.jsx';
 
-export const metadata = { title: 'Repositories | Krate' };
+export const metadata = { title: 'Repositories | Kradle' };
 
 export default async function Page({ params }) {
   const routeParams = await params;

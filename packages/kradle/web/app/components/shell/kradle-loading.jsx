@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export const KRADLE_LOADING_MESSAGES = [
-  'Connecting to the Krate workspace',
+  'Connecting to the Kradle workspace',
   'Checking controller health',
   'Refreshing organization resources',
   'Reconciling repository state',
@@ -14,7 +14,7 @@ export const KRADLE_LOADING_MESSAGES = [
   'Preparing the page refresh'
 ];
 
-function useKrateLoadingProgress() {
+function useKradleLoadingProgress() {
   const [tick, setTick] = useState(0);
   const [progress, setProgress] = useState(14);
   const [dots, setDots] = useState('');
@@ -36,12 +36,12 @@ function useKrateLoadingProgress() {
 }
 
 export function KradleLoadingView({
-  title = 'Loading Krate workspace',
+  title = 'Loading Kradle workspace',
   subtitle = 'Fetching the latest workspace state.',
-  detail = 'This page updates automatically while Krate reconnects.',
+  detail = 'This page updates automatically while Kradle reconnects.',
   fullPage = true
 }) {
-  const { dots, phase, shownProgress } = useKrateLoadingProgress();
+  const { dots, phase, shownProgress } = useKradleLoadingProgress();
 
   return (
     <section className={`krateLoadingView ${fullPage ? 'fullPage' : ''}`} aria-live="polite" aria-busy="true">
@@ -63,7 +63,7 @@ export function KradleLoadingView({
 function controllerModelIsReachable(body) {
   if (!body || body.error) return false;
   const errors = body.controller?.connection?.errors || [];
-  const hasUnavailableError = errors.some((error) => /fetch failed|controller API|ECONN|ENOTFOUND|ETIMEDOUT|Krate workspace unavailable|KRATE_CONTROLLER_URL is not configured/i.test(String(error || '')));
+  const hasUnavailableError = errors.some((error) => /fetch failed|controller API|ECONN|ENOTFOUND|ETIMEDOUT|Kradle workspace unavailable|KRADLE_CONTROLLER_URL is not configured/i.test(String(error || '')));
   if (hasUnavailableError) return false;
   const hasResourceMetric = Number.isFinite(body.metrics?.resources);
   const hasControllerEnvelope = Boolean(body.controller?.connection || body.metrics || body.views);
@@ -130,7 +130,7 @@ export function KradleControllerRecovery({ org = 'default', pollMs = 2500 }) {
   return (
     <div className="krateRecoveryOverlay">
       <KradleLoadingView
-        title="Reconnecting Krate workspace"
+        title="Reconnecting Kradle workspace"
         subtitle=""
         detail={detail}
         fullPage={false}

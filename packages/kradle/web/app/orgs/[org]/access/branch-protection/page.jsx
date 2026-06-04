@@ -1,4 +1,4 @@
-export const metadata = { title: 'Branch Protection | Krate' };
+export const metadata = { title: 'Branch Protection | Kradle' };
 export const dynamic = 'force-dynamic';
 
 import { BranchProtectionPage } from '../../../../ui-shell.jsx';

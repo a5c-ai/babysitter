@@ -1,10 +1,10 @@
 // Routes: /orgs/[org]/agents/settings — gateway, adapter, provider, and RBAC configuration.
-import { loadKrateUi, orgHref, StatusPill, DegradedBanner } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, orgHref, StatusPill, DegradedBanner } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { AgentSettingsForm } from '../components/agent/agent-settings-form.jsx';
 
 export async function AgentSettingsPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { stacks: { count: 0 }, runs: { count: 0 }, rules: { count: 0 }, sessions: { count: 0 }, workspaces: { count: 0 }, approvals: { count: 0 }, adapters: { count: 0, items: [] }, providers: { count: 0, items: [] }, gateway: null };
   const gateway = agentView.gateway;
@@ -13,7 +13,7 @@ export async function AgentSettingsPage({ org = null } = {}) {
   const gatewayReady = gateway?.status?.conditions?.find((c) => c.type === 'Ready');
   const agentsEnabled = (agentView.stacks?.count || 0) > 0 || gateway != null;
   const agentMuxConnected = gateway != null && gatewayReady?.status === 'True';
-  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent settings" title="Agent settings" text="Configure the gateway connection, adapter bindings, and provider credentials for this org." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Krate'], ['/agents', 'Agents'], ['/agents/settings', 'Settings']]}>
+  return <PageFrame org={activeOrg} orgs={ui.model.orgs} currentPath="/agents" eyebrow="agent settings" title="Agent settings" text="Configure the gateway connection, adapter bindings, and provider credentials for this org." actions={[['/agents', 'Overview'], ['/agents/stacks', 'Stacks']]} breadcrumbs={[['/', 'Kradle'], ['/agents', 'Agents'], ['/agents/settings', 'Settings']]}>
     <DegradedBanner model={ui.model} />
     <AgentSettingsForm org={activeOrg} gateway={gateway} adapters={adapters} providers={providers} />
     <div className="card">

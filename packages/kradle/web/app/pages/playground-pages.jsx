@@ -1,10 +1,10 @@
 // Routes: /orgs/[org]/playground — side-by-side model comparison playground.
-import { loadKrateUi, DegradedBanner } from '../lib/kradle-ui.jsx';
+import { loadKradleUi, DegradedBanner } from '../lib/kradle-ui.jsx';
 import { PageFrame } from '../lib/page-frame.jsx';
 import { InferencePlayground } from '../components/inference/inference-playground.jsx';
 
 export async function PlaygroundPage({ org = null } = {}) {
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model.org?.slug || org || 'default';
   return (
     <PageFrame
@@ -15,7 +15,7 @@ export async function PlaygroundPage({ org = null } = {}) {
       title="Playground"
       text="Compare model responses side-by-side with shared prompts and parameter controls."
       actions={[['/', 'Home'], ['/inference', 'Inference']]}
-      breadcrumbs={[['/', 'Krate'], ['/inference', 'Inference'], ['/playground', 'Playground']]}
+      breadcrumbs={[['/', 'Kradle'], ['/inference', 'Inference'], ['/playground', 'Playground']]}
     >
       <DegradedBanner model={ui.model} />
       <InferencePlayground org={activeOrg} />

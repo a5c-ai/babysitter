@@ -193,7 +193,7 @@ export function AssistantChat({ org, stacks = [] }) {
                 <div style={styles.emptyIcon}>
                   <span role="img" aria-hidden="true">K</span>
                 </div>
-                <p style={{ fontWeight: 700, marginBottom: 6, fontSize: 16 }}>Start a conversation with the Krate Assistant</p>
+                <p style={{ fontWeight: 700, marginBottom: 6, fontSize: 16 }}>Start a conversation with the Kradle Assistant</p>
                 <p style={{ fontSize: 13, maxWidth: 360, margin: '0 auto', lineHeight: 1.5 }}>
                   Ask questions about your repositories, agent stacks, workspaces, and infrastructure. The assistant can help manage resources and query the Atlas knowledge graph.
                 </p>

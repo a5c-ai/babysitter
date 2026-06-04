@@ -1,10 +1,10 @@
 export const dynamic = 'force-dynamic';
 
-import { loadKrateUi, DegradedBanner } from '../../../lib/kradle-ui.jsx';
+import { loadKradleUi, DegradedBanner } from '../../../lib/kradle-ui.jsx';
 import { PageFrame } from '../../../lib/page-frame.jsx';
 import { CURATED_MODELS, MODEL_CATEGORIES } from '../../../lib/model-catalog-data.js';
 
-export const metadata = { title: 'Model Catalog | Krate' };
+export const metadata = { title: 'Model Catalog | Kradle' };
 
 const CATEGORY_COLORS = {
   LLM: '#8b5cf6', Code: '#3b82f6', Embedding: '#06b6d4',
@@ -13,7 +13,7 @@ const CATEGORY_COLORS = {
 
 export default async function ModelsPage({ params }) {
   const { org } = await params;
-  const ui = await loadKrateUi(org);
+  const ui = await loadKradleUi(org);
   const activeOrg = ui.model?.org?.slug || org || 'default';
 
   const grouped = {};
@@ -28,7 +28,7 @@ export default async function ModelsPage({ params }) {
       title="Models"
       text="Browse available models and deploy them to the cluster. Each model comes pre-configured with the right runtime, format, and resource requirements."
       currentPath="/models"
-      breadcrumbs={[['/', 'Krate'], ['/models', 'Models']]}
+      breadcrumbs={[['/', 'Kradle'], ['/models', 'Models']]}
       actions={[['/inference', 'Manage Services'], ['/for-agents', 'For Agents']]}
     >
       <DegradedBanner model={ui.model} />
