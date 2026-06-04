@@ -162,7 +162,7 @@ const updateLockVersion = (path, version) => {
     "packages/adapters/tv-appletv-app": {
       version
     },
-    "packages/adapters/ui": {
+    "packages/genty/ui": {
       version,
       dependencies: { "@a5c-ai/comm-adapter": version }
     },
@@ -292,7 +292,7 @@ const agentMuxManifestPaths = [
   "packages/adapters/tui/package.json",
   "packages/adapters/tv-androidtv-app/package.json",
   "packages/adapters/tv-appletv-app/package.json",
-  "packages/adapters/ui/package.json",
+  "packages/genty/ui/package.json",
   "packages/adapters/watch-watchos-app/package.json",
   "packages/adapters/watch-wearos-app/package.json",
   "packages/adapters/webui/package.json",
@@ -381,7 +381,7 @@ for (const path of [
   "packages/adapters/sdk/package.json",
   "packages/adapters/tui/package.json",
   "packages/adapters/webui/package.json",
-  "packages/adapters/ui/package.json",
+  "packages/genty/ui/package.json",
   "packages/adapters/webui/package.json",
   "packages/adapters/transport/package.json",
   "packages/genty/runtime/package.json",

@@ -10,7 +10,7 @@ const packages = [
   'packages/adapters/core',
   'packages/adapters/codecs',
   'packages/adapters/harness-mock',
-  'packages/adapters/ui',
+  'packages/genty/ui',
   'packages/adapters/gateway',
   'packages/adapters/transport',
   'packages/adapters/cli',
