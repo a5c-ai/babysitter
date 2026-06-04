@@ -135,13 +135,7 @@ export { CommandPalette, CommandPaletteWrapper } from './shell/command-palette.j
 export { GlobalSearch } from './shell/global-search.jsx';
 export { ConfirmDialog } from './shell/confirm-dialog.jsx';
 
-// ── Re-exports from @a5c-ai/tula-ui shared components ───────────────────────
-// NOTE: These are additive — existing kradle exports above are preserved for
-// backward compatibility with pages that import from them directly.
-export { ConfirmDialog as TulaConfirmDialog, Pagination as TulaPagination } from '@a5c-ai/tula-ui/primitives';
-export { KanbanBoard, KanbanCard as TulaKanbanCard, KanbanColumn as TulaKanbanColumn, KanbanFilters as TulaKanbanFilters } from '@a5c-ai/tula-ui/kanban';
-export { SessionShell as TulaSessionShell, SessionCost as TulaSessionCost, SessionTabs } from '@a5c-ai/tula-ui/session';
-export { AgentDirectory as TulaAgentDirectory, AgentProfileCard as TulaAgentProfileCard, DispatchButton as TulaDispatchButton, ApprovalActions } from '@a5c-ai/tula-ui/agent';
-export { WorkspacePanel as TulaWorkspacePanel } from '@a5c-ai/tula-ui/workspace';
-export { ToolInspector, ActivityFeed as TulaActivityFeed } from '@a5c-ai/tula-ui/observability';
-export { MemorySearchForm as TulaMemorySearchForm, MemoryOntologyEditor as TulaMemoryOntologyEditor } from '@a5c-ai/tula-ui/memory';
+// tula-ui shared components are available via @a5c-ai/tula-ui subpath imports
+// (e.g. import { KanbanBoard } from '@a5c-ai/tula-ui/kanban').
+// They are NOT re-exported here because this barrel is loaded as a server
+// module by Next.js and tula-ui components use client-only React APIs.
