@@ -179,7 +179,7 @@ jobs:
         run: find packages -path '*/dist' -type d | tar czf /tmp/build-all-dist.tar.gz -T -
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v8
         with:
           name: build-all-dist
           path: /tmp/build-all-dist.tar.gz
@@ -252,7 +252,7 @@ jobs:
 
       - name: Upload core validation logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v8
         with:
           name: publish-core-logs
           path: artifacts/core-logs
@@ -340,7 +340,7 @@ jobs:
 
       - name: Upload mux validation logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v8
         with:
           name: publish-mux-logs
           path: artifacts/mux-logs
@@ -422,7 +422,7 @@ jobs:
 
       - name: Upload e2e logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v8
         with:
           name: publish-e2e-logs
           path: artifacts/e2e-logs
@@ -430,7 +430,7 @@ jobs:
 
       - name: Upload Playwright artifacts
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v8
         with:
           name: publish-mux-playwright-artifacts
           path: |
@@ -492,7 +492,7 @@ jobs:
 
       - name: Upload cloud validation logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v8
         with:
           name: publish-cloud-logs
           path: artifacts/cloud-logs
@@ -553,7 +553,7 @@ jobs:
 
       - name: Upload kradle validation logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v8
         with:
           name: publish-kradle-logs
           path: artifacts/kradle-logs
@@ -621,7 +621,7 @@ jobs:
 
       - name: Upload observer and compiler logs
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v8
         with:
           name: publish-observer-compiler-logs
           path: artifacts/observer-compiler-logs
@@ -734,7 +734,7 @@ jobs:
           tar --exclude=.git --exclude=node_modules --exclude=artifacts -czf artifacts/publish-source/publish-source.tgz .
 
       - name: Upload publish workspace
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v8
         with:
           name: publish-source
           path: artifacts/publish-source/publish-source.tgz
