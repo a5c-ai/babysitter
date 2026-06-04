@@ -2356,13 +2356,13 @@ jobs:
           done
           echo "::warning::Kradle not reachable after 2 minutes -- smoke test may fail"
 
-      - name: E2E smoke: login page returns HTML
+      - name: 'E2E smoke - login page returns HTML'
         run: |
           STATUS=$(curl -sf -o /dev/null -w '%{http_code}' "https://${APP_HOST}/login")
           echo "Login page status: $STATUS"
           [ "$STATUS" -lt 500 ] || { echo "::error::Login page returned $STATUS"; exit 1; }
 
-      - name: E2E smoke: snapshot health endpoint
+      - name: 'E2E smoke - snapshot health endpoint'
         run: |
           RESPONSE=$(curl -sf --max-time 15 "https://${APP_HOST}/api/orgs/default/snapshot" || true)
           if [ -n "$RESPONSE" ]; then
@@ -2371,19 +2371,19 @@ jobs:
             echo "::warning::Snapshot endpoint did not return data (may require auth)"
           fi
 
-      - name: E2E smoke: resource list endpoint
+      - name: 'E2E smoke - resource list endpoint'
         run: |
           STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 "https://${APP_HOST}/api/orgs/default/resources?kind=AgentStack" || echo "000")
           echo "Resource list status: $STATUS"
           [ "$STATUS" -lt 500 ] || { echo "::error::Resource list returned $STATUS"; exit 1; }
 
-      - name: E2E smoke: search endpoint
+      - name: 'E2E smoke - search endpoint'
         run: |
           STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 "https://${APP_HOST}/api/orgs/default/search?q=test" || echo "000")
           echo "Search endpoint status: $STATUS"
           [ "$STATUS" -lt 500 ] || { echo "::error::Search endpoint returned $STATUS"; exit 1; }
 
-      - name: E2E smoke: tools catalog
+      - name: 'E2E smoke - tools catalog'
         run: |
           STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 "https://${APP_HOST}/api/orgs/default/agents/tools/catalog" || echo "000")
           echo "Tools catalog status: $STATUS"
