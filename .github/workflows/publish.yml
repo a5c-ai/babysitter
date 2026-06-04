@@ -2215,6 +2215,14 @@ jobs:
           fi
           # Also remove any leftover krate release in the current namespace
           helm uninstall krate -n "$KUBE_NAMESPACE" 2>/dev/null || true
+          # Adopt orphaned resources still annotated with release-name=krate
+          for kind in ingress service deployment secret statefulset configmap serviceaccount; do
+            for name in $(kubectl -n "$KUBE_NAMESPACE" get "$kind" -o jsonpath='{range .items[?(@.metadata.annotations.meta\.helm\.sh/release-name=="krate")]}{.metadata.name}{"\n"}{end}' 2>/dev/null); do
+              echo "Adopting $kind/$name from krate → kradle"
+              kubectl -n "$KUBE_NAMESPACE" annotate "$kind" "$name" meta.helm.sh/release-name=kradle --overwrite
+              kubectl -n "$KUBE_NAMESPACE" annotate "$kind" "$name" meta.helm.sh/release-namespace="$KUBE_NAMESPACE" --overwrite
+            done
+          done
           # Clean up pre-Helm standalone resources
           kubectl -n "$KUBE_NAMESPACE" delete ingress kradle --ignore-not-found
           kubectl -n "$KUBE_NAMESPACE" delete service kradle --ignore-not-found
