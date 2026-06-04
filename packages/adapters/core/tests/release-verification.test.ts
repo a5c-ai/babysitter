@@ -62,7 +62,7 @@ const baseManifest = {
   },
   scripts: {
     build: 'tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json',
-    test: 'vitest run --root ../../.. --config vitest.config.ts packages/adapters/core',
+    test: 'vitest run src tests',
     'verify:release': 'node ./scripts/verify-release.mjs',
     prepublishOnly: 'npm run build && npm run test && npm run verify:release',
   },
