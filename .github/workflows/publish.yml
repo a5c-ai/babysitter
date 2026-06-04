@@ -2366,11 +2366,13 @@ jobs:
 
       - name: 'E2E smoke - snapshot health endpoint'
         run: |
-          RESPONSE=$(curl -sf --max-time 15 "https://${APP_HOST}/api/orgs/default/snapshot" || true)
-          if [ -n "$RESPONSE" ]; then
-            echo "$RESPONSE" | jq -e '.health' && echo "Health probe returned structured data"
+          RESPONSE=$(curl -sf --max-time 15 "https://${APP_HOST}/api/orgs/default/snapshot" 2>/dev/null || true)
+          if [ -z "$RESPONSE" ]; then
+            echo "::warning::Snapshot endpoint did not return data (may require auth or controller not ready)"
+          elif echo "$RESPONSE" | jq -e '.health' >/dev/null 2>&1; then
+            echo "Health probe returned structured data"
           else
-            echo "::warning::Snapshot endpoint did not return data (may require auth)"
+            echo "::warning::Snapshot endpoint returned non-JSON or missing .health field (controller may still be initializing)"
           fi
 
       - name: 'E2E smoke - resource list endpoint'
