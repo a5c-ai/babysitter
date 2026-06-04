@@ -153,26 +153,26 @@ function createCanonicalMetadata(surfacePath) {
   };
 }
 
-function verifyTulaCoreRename() {
+function verifyGentyCoreRename() {
   if (fs.existsSync(path.join(repoRoot, OLD_AGENT_CORE_SURFACE))) {
-    fail(`${OLD_AGENT_CORE_SURFACE} must be renamed to ${TULA_CORE_SURFACE}`);
+    fail(`${OLD_AGENT_CORE_SURFACE} must be renamed to ${GENTY_CORE_SURFACE}`);
   }
 
-  if (!fs.existsSync(path.join(repoRoot, TULA_CORE_SURFACE, 'package.json'))) {
-    fail(`${TULA_CORE_SURFACE}/package.json must exist`);
+  if (!fs.existsSync(path.join(repoRoot, GENTY_CORE_SURFACE, 'package.json'))) {
+    fail(`${GENTY_CORE_SURFACE}/package.json must exist`);
   }
 
-  const manifest = readJson(path.join(TULA_CORE_SURFACE, 'package.json'));
-  expectEqual(manifest.name, TULA_CORE_PACKAGE, `${TULA_CORE_SURFACE}/package.json name`);
-  expectDeepEqual(manifest.repository, createCanonicalMetadata(TULA_CORE_SURFACE).repository, `${TULA_CORE_SURFACE}/package.json repository`);
-  expectEqual(manifest.homepage, createCanonicalMetadata(TULA_CORE_SURFACE).homepage, `${TULA_CORE_SURFACE}/package.json homepage`);
+  const manifest = readJson(path.join(GENTY_CORE_SURFACE, 'package.json'));
+  expectEqual(manifest.name, GENTY_CORE_PACKAGE, `${GENTY_CORE_SURFACE}/package.json name`);
+  expectDeepEqual(manifest.repository, createCanonicalMetadata(GENTY_CORE_SURFACE).repository, `${GENTY_CORE_SURFACE}/package.json repository`);
+  expectEqual(manifest.homepage, createCanonicalMetadata(GENTY_CORE_SURFACE).homepage, `${GENTY_CORE_SURFACE}/package.json homepage`);
 
   const docsCoverage = readJson(DOCS_SURFACE_PATH);
-  const gentyCoreSurface = docsCoverage.surfaces.find((entry) => entry.surface === TULA_CORE_SURFACE);
+  const gentyCoreSurface = docsCoverage.surfaces.find((entry) => entry.surface === GENTY_CORE_SURFACE);
   if (!gentyCoreSurface) {
-    fail(`${DOCS_SURFACE_PATH} must list ${TULA_CORE_SURFACE}`);
+    fail(`${DOCS_SURFACE_PATH} must list ${GENTY_CORE_SURFACE}`);
   }
-  expectEqual(gentyCoreSurface.packageName, TULA_CORE_PACKAGE, `${DOCS_SURFACE_PATH} ${TULA_CORE_SURFACE} packageName`);
+  expectEqual(gentyCoreSurface.packageName, GENTY_CORE_PACKAGE, `${DOCS_SURFACE_PATH} ${GENTY_CORE_SURFACE} packageName`);
 
   const oldSurface = docsCoverage.surfaces.find((entry) => entry.surface === OLD_AGENT_CORE_SURFACE);
   if (oldSurface) {
@@ -180,7 +180,7 @@ function verifyTulaCoreRename() {
   }
 }
 
-function verifyTulaCoreDependents() {
+function verifyGentyCoreDependents() {
   const packageJsonPaths = [
     'packages/genty/platform/package.json',
     'packages/genty/cli/package.json',
@@ -188,7 +188,7 @@ function verifyTulaCoreDependents() {
   for (const packageJsonPath of packageJsonPaths) {
     const manifest = readJson(packageJsonPath);
     if (manifest.dependencies && Object.prototype.hasOwnProperty.call(manifest.dependencies, OLD_AGENT_CORE_PACKAGE)) {
-      fail(`${packageJsonPath} must depend on ${TULA_CORE_PACKAGE}, not ${OLD_AGENT_CORE_PACKAGE}`);
+      fail(`${packageJsonPath} must depend on ${GENTY_CORE_PACKAGE}, not ${OLD_AGENT_CORE_PACKAGE}`);
     }
   }
 
@@ -222,12 +222,12 @@ function verifyTulaCoreDependents() {
     }
     const contents = fs.readFileSync(fullPath, 'utf8');
     if (contents.includes(OLD_AGENT_CORE_PACKAGE)) {
-      fail(`${filePath} must import ${TULA_CORE_PACKAGE}, not ${OLD_AGENT_CORE_PACKAGE}`);
+      fail(`${filePath} must import ${GENTY_CORE_PACKAGE}, not ${OLD_AGENT_CORE_PACKAGE}`);
     }
   }
 }
 
-function verifyTulaCoreExternalSurfaces() {
+function verifyGentyCoreExternalSurfaces() {
   const stalePatterns = [OLD_AGENT_CORE_PACKAGE, OLD_AGENT_CORE_SURFACE, 'packages/agent-core/', '../agent-core'];
   const files = [
     'package-lock.json',
@@ -258,26 +258,26 @@ function verifyTulaCoreExternalSurfaces() {
   }
 }
 
-function verifyTulaRuntimeRename() {
+function verifyGentyRuntimeRename() {
   if (fs.existsSync(path.join(repoRoot, OLD_AGENT_RUNTIME_SURFACE))) {
-    fail(`${OLD_AGENT_RUNTIME_SURFACE} must be renamed to ${TULA_RUNTIME_SURFACE}`);
+    fail(`${OLD_AGENT_RUNTIME_SURFACE} must be renamed to ${GENTY_RUNTIME_SURFACE}`);
   }
 
-  if (!fs.existsSync(path.join(repoRoot, TULA_RUNTIME_SURFACE, 'package.json'))) {
-    fail(`${TULA_RUNTIME_SURFACE}/package.json must exist`);
+  if (!fs.existsSync(path.join(repoRoot, GENTY_RUNTIME_SURFACE, 'package.json'))) {
+    fail(`${GENTY_RUNTIME_SURFACE}/package.json must exist`);
   }
 
-  const manifest = readJson(path.join(TULA_RUNTIME_SURFACE, 'package.json'));
-  expectEqual(manifest.name, TULA_RUNTIME_PACKAGE, `${TULA_RUNTIME_SURFACE}/package.json name`);
-  expectDeepEqual(manifest.repository, createCanonicalMetadata(TULA_RUNTIME_SURFACE).repository, `${TULA_RUNTIME_SURFACE}/package.json repository`);
-  expectEqual(manifest.homepage, createCanonicalMetadata(TULA_RUNTIME_SURFACE).homepage, `${TULA_RUNTIME_SURFACE}/package.json homepage`);
+  const manifest = readJson(path.join(GENTY_RUNTIME_SURFACE, 'package.json'));
+  expectEqual(manifest.name, GENTY_RUNTIME_PACKAGE, `${GENTY_RUNTIME_SURFACE}/package.json name`);
+  expectDeepEqual(manifest.repository, createCanonicalMetadata(GENTY_RUNTIME_SURFACE).repository, `${GENTY_RUNTIME_SURFACE}/package.json repository`);
+  expectEqual(manifest.homepage, createCanonicalMetadata(GENTY_RUNTIME_SURFACE).homepage, `${GENTY_RUNTIME_SURFACE}/package.json homepage`);
 
   const docsCoverage = readJson(DOCS_SURFACE_PATH);
-  const gentyRuntimeSurface = docsCoverage.surfaces.find((entry) => entry.surface === TULA_RUNTIME_SURFACE);
+  const gentyRuntimeSurface = docsCoverage.surfaces.find((entry) => entry.surface === GENTY_RUNTIME_SURFACE);
   if (!gentyRuntimeSurface) {
-    fail(`${DOCS_SURFACE_PATH} must list ${TULA_RUNTIME_SURFACE}`);
+    fail(`${DOCS_SURFACE_PATH} must list ${GENTY_RUNTIME_SURFACE}`);
   }
-  expectEqual(gentyRuntimeSurface.packageName, TULA_RUNTIME_PACKAGE, `${DOCS_SURFACE_PATH} ${TULA_RUNTIME_SURFACE} packageName`);
+  expectEqual(gentyRuntimeSurface.packageName, GENTY_RUNTIME_PACKAGE, `${DOCS_SURFACE_PATH} ${GENTY_RUNTIME_SURFACE} packageName`);
 
   const oldSurface = docsCoverage.surfaces.find((entry) => entry.surface === OLD_AGENT_RUNTIME_SURFACE);
   if (oldSurface) {
@@ -285,7 +285,7 @@ function verifyTulaRuntimeRename() {
   }
 }
 
-function verifyTulaRuntimeDependents() {
+function verifyGentyRuntimeDependents() {
   const packageJsonPaths = [
     'packages/genty/platform/package.json',
     'packages/genty/core/package.json',
@@ -294,7 +294,7 @@ function verifyTulaRuntimeDependents() {
   for (const packageJsonPath of packageJsonPaths) {
     const manifest = readJson(packageJsonPath);
     if (manifest.dependencies && Object.prototype.hasOwnProperty.call(manifest.dependencies, OLD_AGENT_RUNTIME_PACKAGE)) {
-      fail(`${packageJsonPath} must depend on ${TULA_RUNTIME_PACKAGE}, not ${OLD_AGENT_RUNTIME_PACKAGE}`);
+      fail(`${packageJsonPath} must depend on ${GENTY_RUNTIME_PACKAGE}, not ${OLD_AGENT_RUNTIME_PACKAGE}`);
     }
   }
 
@@ -455,11 +455,11 @@ function verifyTopLevelAgentMuxPackageMoves() {
 const rootManifest = readJson('package.json');
 expectEqual(rootManifest.private, true, 'package.json private');
 expectEqual(rootManifest.license, 'MIT', 'package.json license');
-verifyTulaCoreRename();
-verifyTulaCoreDependents();
-verifyTulaCoreExternalSurfaces();
-verifyTulaRuntimeRename();
-verifyTulaRuntimeDependents();
+verifyGentyCoreRename();
+verifyGentyCoreDependents();
+verifyGentyCoreExternalSurfaces();
+verifyGentyRuntimeRename();
+verifyGentyRuntimeDependents();
 verifyTopLevelAgentMuxPackageMoves();
 verifyBabysitterPluginVersionSync();
 

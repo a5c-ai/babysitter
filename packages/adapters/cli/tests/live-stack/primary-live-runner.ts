@@ -73,20 +73,20 @@ export function buildPrimaryLiveStackCommands(
   const traceId = commandEnv['LIVE_STACK_TRACE_ID'];
   const prompt = buildPrompt(scenario, traceId, options.env);
 
-  // Tula in BP mode: uses native babysitter support (tula call --process).
-  // Tula in vanilla mode: falls through to the standard adapters launch path below.
-  if (scenario.agent.agent === 'tula' && scenario.agent.installMode === 'babysitter-plugin') {
+  // Genty in BP mode: uses native babysitter support (genty call --process).
+  // Genty in vanilla mode: falls through to the standard adapters launch path below.
+  if (scenario.agent.agent === 'genty' && scenario.agent.installMode === 'babysitter-plugin') {
     commandEnv['BABYSITTER_RUNS_DIR'] = commandEnv['BABYSITTER_RUNS_DIR'] ?? path.join(options.cwd, '.a5c', 'runs');
     commandEnv['BABYSITTER_RUNS_SCOPE'] = commandEnv['BABYSITTER_RUNS_SCOPE'] ?? 'repo';
     const fixturesDir = path.join(options.cwd, 'packages', 'adapters', 'cli', 'tests', 'live-stack', 'fixtures');
     const processesDir = path.join(options.cwd, '.a5c', 'processes');
     const processMode = options.env['LIVE_STACK_PROCESS_MODE'] ?? 'predefined';
     const setupCommands: CommandExecution[] = [ensureLiveArtifactDirCommand(commandEnv, options.cwd)];
-    const tulaArgs = ['call', '--model', scenario.model.model, '--workspace', options.cwd, '--prompt', prompt, '--json'];
+    const gentyArgs = ['call', '--model', scenario.model.model, '--workspace', options.cwd, '--prompt', prompt, '--json'];
     if (processMode === 'predefined') {
-      const copyFixture = { command: process.execPath, args: ['-e', `const fs=require("fs"),p=require("path");fs.mkdirSync(${JSON.stringify(processesDir)},{recursive:true});fs.copyFileSync(${JSON.stringify(path.join(fixturesDir, 'tula-simple-test.mjs'))},${JSON.stringify(path.join(processesDir, 'tula-simple-test.mjs'))})`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS };
+      const copyFixture = { command: process.execPath, args: ['-e', `const fs=require("fs"),p=require("path");fs.mkdirSync(${JSON.stringify(processesDir)},{recursive:true});fs.copyFileSync(${JSON.stringify(path.join(fixturesDir, 'genty-simple-test.mjs'))},${JSON.stringify(path.join(processesDir, 'genty-simple-test.mjs'))})`], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS };
       setupCommands.push(copyFixture);
-      tulaArgs.push('--process', '.a5c/processes/tula-simple-test.mjs');
+      gentyArgs.push('--process', '.a5c/processes/genty-simple-test.mjs');
     } else if (processMode === 'resume') {
       const resumeRunId = `resume-${traceId}`;
       const resumeRunDir = path.join(options.cwd, '.a5c', 'runs', resumeRunId);
@@ -106,17 +106,17 @@ for(const f of fs.readdirSync(dest)){if(f.endsWith(".json")){const fp=p.join(des
 fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.join(${JSON.stringify(options.cwd)},".a5c-live-test")}));
 `.replace(/\n/g, '')], env: commandEnv, cwd: options.cwd, timeoutMs: SETUP_TIMEOUT_MS },
       );
-      tulaArgs.length = 0;
-      tulaArgs.push('resume', '--run-id', resumeRunId, '--model', scenario.model.model, '--workspace', options.cwd, '--process', '.a5c/processes/summarize-translate-test.mjs', '--json');
+      gentyArgs.length = 0;
+      gentyArgs.push('resume', '--run-id', resumeRunId, '--model', scenario.model.model, '--workspace', options.cwd, '--process', '.a5c/processes/summarize-translate-test.mjs', '--json');
       commandEnv['LIVE_STACK_RESUME_RUN_ID'] = resumeRunId;
     }
     return [
       ...setupCommands,
-      commandExecution(commandEnv, 'LIVE_STACK_TULA_BIN', 'tula', tulaArgs, options.cwd, timeoutMs),
+      commandExecution(commandEnv, 'LIVE_STACK_GENTY_BIN', 'genty', gentyArgs, options.cwd, timeoutMs),
     ];
   }
 
-  if (scenario.agent.integrationType === 'runtime-cli' && scenario.agent.agent !== 'tula') {
+  if (scenario.agent.integrationType === 'runtime-cli' && scenario.agent.agent !== 'genty') {
     return [
       commandExecution(commandEnv, 'LIVE_STACK_AGENT_PLATFORM_BIN', 'agent-platform', ['create-run', '--harness', 'internal', '--workspace', options.cwd, '--model', scenario.model.model, '--prompt', prompt, '--json'], options.cwd, timeoutMs),
     ];
@@ -208,9 +208,9 @@ fs.writeFileSync(p.join(dest,"inputs.json"),JSON.stringify({traceId,outputDir:p.
   );
 
   if (scenario.agent.installMode === 'vanilla') {
-    // Tula is a monorepo agent — already linked to PATH by the CI workflow.
+    // Genty is a monorepo agent — already linked to PATH by the CI workflow.
     // Other agents need adapters install to fetch their CLI from npm.
-    const installCommands = installTarget === 'tula'
+    const installCommands = installTarget === 'genty'
       ? []
       : [commandExecution(commandEnv, 'LIVE_STACK_AGENT_MUX_BIN', 'adapters', ['install', installTarget, '--json'], options.cwd, SETUP_TIMEOUT_MS)];
     return [
@@ -582,7 +582,7 @@ function buildPrompt(scenario: LiveStackScenario, traceId: string, env: Record<s
     return `Write a 12-paragraph summary of Homer's Odyssey, then translate each paragraph to Greek.`;
   }
 
-  if (scenario.agent.agent === 'tula') {
+  if (scenario.agent.agent === 'genty') {
     return coreTask;
   }
 
@@ -831,7 +831,7 @@ async function validateAgentBehavior(
   env: Record<string, string | undefined>,
 ): Promise<VerificationEntry[]> {
   const entries: VerificationEntry[] = [];
-  const isBabysitterAgent = scenario.agent.agent === 'agent-platform' || scenario.agent.agent === 'tula';
+  const isBabysitterAgent = scenario.agent.agent === 'agent-platform' || scenario.agent.agent === 'genty';
   const isBabysitterPlugin = scenario.agent.installMode === 'babysitter-plugin';
 
   // --- agent-platform: verify model responded with content ---
@@ -898,8 +898,8 @@ async function validateAgentBehavior(
     if (fileExists) {
       try { fileContent = await fs.readFile(expectedFile, 'utf8'); } catch { /* */ }
     }
-    const isTula = scenario.agent.agent === 'tula';
-    const hasRealContent = isTula
+    const isGenty = scenario.agent.agent === 'genty';
+    const hasRealContent = isGenty
       ? isValidOmniArtifactContent(fileContent)
       : isValidOdysseyArtifactContent(fileContent);
     if (fileExists && hasRealContent) {
@@ -932,12 +932,12 @@ async function validateAgentBehavior(
     }
   }
 
-  // --- babysitter-plugin/tula: stop hooks, hooks-mux session, run completion, completion proof ---
+  // --- babysitter-plugin/genty: stop hooks, hooks-mux session, run completion, completion proof ---
   // All checks run in both TTY-backed and non-TTY modes.
   // stop-hooks is a warning (not failure) only when no TTY-backed invocation is used.
   const isInteractiveInvocation = env['LIVE_STACK_INTERACTIVE'] === 'true' || env['LIVE_STACK_BRIDGE_INTERACTIVE'] === 'true';
   const isBridgeHooksMode = env['LIVE_STACK_BRIDGE_HOOKS'] === 'true';
-  if (isBabysitterPlugin || scenario.agent.agent === 'tula') {
+  if (isBabysitterPlugin || scenario.agent.agent === 'genty') {
     // stop-hooks: check for hooks-mux log files in all possible locations
     const homeDir = process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp';
     const hooksLogCandidates = [
@@ -1036,8 +1036,8 @@ async function validateAgentBehavior(
         runCompletionDetail = 'no runs created in .a5c/runs/';
       } else {
         const processMode = env['LIVE_STACK_PROCESS_MODE'] ?? 'predefined';
-        const isTulaAgent = scenario.agent.agent === 'tula';
-        const MIN_JOURNAL_EVENTS = processMode === 'create' ? 3 : isTulaAgent ? 5 : 7;
+        const isGentyAgent = scenario.agent.agent === 'genty';
+        const MIN_JOURNAL_EVENTS = processMode === 'create' ? 3 : isGentyAgent ? 5 : 7;
         for (const entry of runEntries.slice(-5)) {
           const journalDir = path.join(runsDir, entry, 'journal');
           try {

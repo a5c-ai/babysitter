@@ -6,9 +6,9 @@
 
 - feat: Atlas catalog unification (#850) (6c9c72239, a5c-ai[bot], 5 minutes ago)
 - feat: TDD blueprints rename convergence (#853) (c1c743c3a, a5c-ai[bot], 45 minutes ago)
-- feat: agent-core to tula-core TDD rename (#852) (2dc9dcfb2, a5c-ai[bot], 2 hours ago)
+- feat: agent-core to genty-core TDD rename (#852) (2dc9dcfb2, a5c-ai[bot], 2 hours ago)
 - feat: preflight orphan-file grep prompts (#849) (ba6e2d8f5, a5c-ai[bot], 7 hours ago)
-- feat(live-stack): add tula to vanilla and BP matrix sections (0e867fd48, Tal Muskal, 11 hours ago)
+- feat(live-stack): add genty to vanilla and BP matrix sections (0e867fd48, Tal Muskal, 11 hours ago)
 - feat(kradle): add OpenAI-compatible provider support for assistant (0fd0f82ba, Tal Muskal, 23 hours ago)
 - feat(graph): add OpenClaw 2026.5.28 issue 810 records (#829) (80c787ffe, a5c-ai[bot], 23 hours ago)
 - feat(graph): track Copilot CLI 1.0.57-3 (#826) (6bf2b63b2, a5c-ai[bot], 23 hours ago)
@@ -37,11 +37,11 @@
 - fix(launch): skip ConPTY for hermes Windows in bridge-hooks mode (4c0d11358, Tal Muskal, 6 hours ago)
 - fix(live-stack): resume completion-proof doesn't require file-creation (7289b3999, Tal Muskal, 7 hours ago)
 - fix(live-stack): add resume-mode rescue for non-zero exit (dd276d92a, Tal Muskal, 7 hours ago)
-- fix(ci): update architecture boundary check for omni→tula rename (8d5266cc3, Tal Muskal, 7 hours ago)
+- fix(ci): update architecture boundary check for omni→genty rename (8d5266cc3, Tal Muskal, 7 hours ago)
 - fix(ci): plan agent creates draft PRs with feat: title, not Plan: (0c43046a1, Tal Muskal, 7 hours ago)
 - fix(live-stack): increase test timeout to 48 min (> 45 min command + setup) (6e5a99476, Tal Muskal, 8 hours ago)
 - fix(live-stack): increase all timeouts to 45 min for hermes Windows (28021fc45, Tal Muskal, 9 hours ago)
-- fix(live-stack): relax tula validation thresholds (97e67a911, Tal Muskal, 9 hours ago)
+- fix(live-stack): relax genty validation thresholds (97e67a911, Tal Muskal, 9 hours ago)
 - fix(agent-platform): auto-execute ALL effect kinds, check taskDef paths (e19b732b7, Tal Muskal, 10 hours ago)
 - fix(agent-platform,live-stack): autonomous host loop + 35 min timeout (923c44d4e, Tal Muskal, 10 hours ago)
 - fix(live-stack): increase command timeout from 15 to 25 min (6820e2c2d, Tal Muskal, 11 hours ago)
@@ -72,7 +72,7 @@
 
 ### Refactors
 
-- rename: omni → tula across entire repo (da7723a66, Tal Muskal, 12 hours ago)
+- rename: omni → genty across entire repo (da7723a66, Tal Muskal, 12 hours ago)
 - refactor(unified-plugin): remove per-harness babysit-SKILL overrides (b19518bc5, Tal Muskal, 22 hours ago)
 
 ### Documentation
@@ -83,7 +83,7 @@
 ### Maintenance
 
 - revert(launch): re-enable ConPTY for hermes Windows (stdin needs it) (6c4ed3a27, Tal Muskal, 5 hours ago)
-- chore: regenerate package-lock.json after omni→tula rename (adf0d61aa, Tal Muskal, 12 hours ago)
+- chore: regenerate package-lock.json after omni→genty rename (adf0d61aa, Tal Muskal, 12 hours ago)
 - debug(live-stack): add logging to create-mode upgrade path (4406ef6be, Tal Muskal, 21 hours ago)
 - chore(graph): track Hermes Agent 0.15.2 (#828) (534cd171f, a5c-ai[bot], 23 hours ago)
 - chore(atlas): track Codex CLI 0.135.0 (#820) (fc2a667fa, a5c-ai[bot], 23 hours ago)

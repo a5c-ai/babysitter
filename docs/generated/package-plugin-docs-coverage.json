@@ -45,7 +45,7 @@
     {
       "surface": "packages/genty/core",
       "packageName": "@a5c-ai/genty-core",
-      "description": "Tula core runtime and tool surface for Babysitter.",
+      "description": "Genty core runtime and tool surface for Babysitter.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
       "canonicalHome": "../packages/genty/core/README.md",
@@ -333,7 +333,7 @@
     {
       "surface": "packages/genty/cli",
       "packageName": "@a5c-ai/genty",
-      "description": "Tula — unified agent product integrating core, runtime, platform, and TUI.",
+      "description": "Genty — unified agent product integrating core, runtime, platform, and TUI.",
       "hasReadme": true,
       "status": "Public package",
       "canonicalHome": "../packages/genty/README.md",
@@ -679,7 +679,7 @@
     {
       "surface": "packages/genty/tui",
       "packageName": "@a5c-ai/genty-tui",
-      "description": "Tula tui surface.",
+      "description": "Genty tui surface.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
       "canonicalHome": "../packages/genty/tui/README.md",
@@ -689,7 +689,7 @@
     {
       "surface": "packages/genty/webui",
       "packageName": "@a5c-ai/genty-webui",
-      "description": "Tula webui surface.",
+      "description": "Genty webui surface.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
       "canonicalHome": "../packages/genty/webui/README.md",
@@ -699,7 +699,7 @@
     {
       "surface": "packages/genty/ui",
       "packageName": "@a5c-ai/genty-ui",
-      "description": "Tula ui surface.",
+      "description": "Genty ui surface.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
       "canonicalHome": "../packages/genty/ui/README.md",

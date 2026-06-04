@@ -35,7 +35,7 @@ The formalized skill schema (`schema/skill.schema.json`) is the closest thing to
   - Source evidence: The repo's production security scanner with 25+ dangerous patterns and credential detection
 
 - **skill-registry-browser**: A babysitter plugin that enables browsing and installing skills from public registries
-  - What install.md would do: Configure registry endpoints (claude-skill-registry, awesome-tula-skill), set up local skill cache in `.a5c/skill-cache/`, create `/browse-skills` and `/install-skill` slash commands, integrate with babysitter catalog for search
+  - What install.md would do: Configure registry endpoints (claude-skill-registry, awesome-agents-skill), set up local skill cache in `.a5c/skill-cache/`, create `/browse-skills` and `/install-skill` slash commands, integrate with babysitter catalog for search
   - Processes it would copy: metadata validation, registry search
   - Configs/hooks it would create: `.a5c/commands/browse-skills.md`, `.a5c/commands/install-skill.md`, registry config in `.a5c/registries.json`
   - Source evidence: The repo's search index schema and category taxonomy with 78+ categories

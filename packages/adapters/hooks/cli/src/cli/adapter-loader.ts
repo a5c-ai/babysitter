@@ -175,7 +175,7 @@ function buildKnownAdapters(): string[] {
     const { listPluginTargetDescriptors } = require('@a5c-ai/atlas/catalog') as {
       listPluginTargetDescriptors: () => Array<{ adapterName: string }>;
     };
-    const excludes = new Set(['tula', 'babysitter', 'adapters', 'adapters-remote', 'agent-platform']);
+    const excludes = new Set(['genty', 'babysitter', 'adapters', 'adapters-remote', 'agent-platform']);
     const adapters = new Set(
       listPluginTargetDescriptors()
         .map(t => normalizeAdapterName(t.adapterName))

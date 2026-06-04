@@ -1519,7 +1519,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --workspace=@a5c-ai/genty-platform --access public --tag "$NPM_TAG"
 
-  publish_staging_tula_runtime:
+  publish_staging_genty_runtime:
     name: Publish genty Runtime
     needs: publish_staging_agent_core
     runs-on: ubuntu-latest-l
@@ -1568,7 +1568,7 @@ jobs:
 
   publish_staging_omni:
     name: Publish genty
-    needs: [publish_staging_babysitter_agent, publish_staging_tula_runtime]
+    needs: [publish_staging_babysitter_agent, publish_staging_genty_runtime]
     runs-on: ubuntu-latest-l
     permissions:
       contents: read

@@ -120,7 +120,7 @@ export const PROMPT_ARTIFACT_MONITOR_TIMEOUT_MS = process.platform === 'win32' ?
 const CLI_COMMAND_MAP: Record<string, string> = {
   'copilot': 'gh copilot',
   'cursor': 'cursor-agent',
-  'tula': 'tula yolo',
+  'genty': 'genty yolo',
 };
 
 function resolveCliCommand(harness: string): { command: string; prefixArgs: string[] } {
@@ -1025,10 +1025,10 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         console.error(`[adapters launch] Gemini proxy: GOOGLE_API_KEY=${(plan.env['GOOGLE_API_KEY'] ?? '').slice(0, 8)}..., endpoint=${proxyOrigin}`);
       }
 
-      // Tula (agent-core): set AGENT_MUX_* env vars to route through the proxy.
+      // Genty (agent-core): set AGENT_MUX_* env vars to route through the proxy.
       // Use AGENT_MUX_API_BASE (non-Azure mode) so agent-core sends Authorization: Bearer
       // instead of api-key header. The proxy validates Bearer tokens.
-      if (plan.harness === 'tula') {
+      if (plan.harness === 'genty') {
         plan.env['AGENT_MUX_API_BASE'] = `${proxyRuntime.url}/v1`;
         plan.env['AGENT_MUX_API_KEY'] = proxyRuntime.authToken ?? 'proxy-token';
         plan.env['AGENT_MUX_MODEL'] = plan.proxy?.targetModel ?? plan.model ?? '';
@@ -1036,7 +1036,7 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         delete plan.env['AZURE_API_KEY'];
         delete plan.env['AZURE_OPENAI_API_KEY'];
         delete plan.env['AZURE_OPENAI_PROJECT_NAME'];
-        console.error(`[adapters launch] Tula proxy: AGENT_MUX_API_BASE=${plan.env['AGENT_MUX_API_BASE']}, AGENT_MUX_MODEL=${plan.env['AGENT_MUX_MODEL']}`);
+        console.error(`[adapters launch] Genty proxy: AGENT_MUX_API_BASE=${plan.env['AGENT_MUX_API_BASE']}, AGENT_MUX_MODEL=${plan.env['AGENT_MUX_MODEL']}`);
       }
 
       // Generic OpenAI-compatible harnesses: set OPENAI_API_KEY + OPENAI_BASE_URL
@@ -1104,9 +1104,9 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
     }
   }
 
-  // Tula: ensure $HOME/.a5c/ exists — tula's SDK writes package.json there
+  // Genty: ensure $HOME/.a5c/ exists — genty's SDK writes package.json there
   // on first run, and the atomic write fails on Windows if the dir is missing.
-  if (plan.harness === 'tula') {
+  if (plan.harness === 'genty') {
     const { mkdirSync } = await import('node:fs');
     const { join } = await import('node:path');
     const homeA5c = join(process.env['HOME'] ?? process.env['USERPROFILE'] ?? '/tmp', '.a5c');
