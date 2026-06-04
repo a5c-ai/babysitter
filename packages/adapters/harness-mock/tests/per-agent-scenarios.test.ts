@@ -1,19 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { StreamAssembler } from '@a5c-ai/comm-adapter';
 import type { AgentEvent, ParseContext } from '@a5c-ai/comm-adapter';
-import { ClaudeAdapter } from '../../adapters/src/claude-adapter.js';
-import { CodexAdapter } from '../../adapters/src/codex-adapter.js';
-import { GeminiAdapter } from '../../adapters/src/gemini-adapter.js';
-import { CopilotAdapter } from '../../adapters/src/copilot-adapter.js';
-import { CursorAdapter } from '../../adapters/src/cursor-adapter.js';
-import { OpenCodeAdapter } from '../../adapters/src/opencode-adapter.js';
-import { PiAdapter } from '../../adapters/src/pi-adapter.js';
-import { OmpAdapter } from '../../adapters/src/omp-adapter.js';
-import { OpenClawAdapter } from '../../adapters/src/openclaw-adapter.js';
-import { HermesAdapter } from '../../adapters/src/hermes-adapter.js';
-import { AmpAdapter } from '../../adapters/src/amp-adapter.js';
-import { DroidAdapter } from '../../adapters/src/droid-adapter.js';
-import { QwenAdapter } from '../../adapters/src/qwen-adapter.js';
+import { ClaudeAdapter } from '../../codecs/src/claude-adapter.js';
+import { CodexAdapter } from '../../codecs/src/codex-adapter.js';
+import { GeminiAdapter } from '../../codecs/src/gemini-adapter.js';
+import { CopilotAdapter } from '../../codecs/src/copilot-adapter.js';
+import { CursorAdapter } from '../../codecs/src/cursor-adapter.js';
+import { OpenCodeAdapter } from '../../codecs/src/opencode-adapter.js';
+import { PiAdapter } from '../../codecs/src/pi-adapter.js';
+import { OmpAdapter } from '../../codecs/src/omp-adapter.js';
+import { OpenClawAdapter } from '../../codecs/src/openclaw-adapter.js';
+import { HermesAdapter } from '../../codecs/src/hermes-adapter.js';
+import { AmpAdapter } from '../../codecs/src/amp-adapter.js';
+import { DroidAdapter } from '../../codecs/src/droid-adapter.js';
+import { QwenAdapter } from '../../codecs/src/qwen-adapter.js';
 import {
   MockProcess,
   AGENT_SCENARIOS,
