@@ -6,5 +6,5 @@
   "scripts": {
     "androidtv": "echo Open the Android TV module in Android Studio or Gradle"
   },
-  "version": "5.0.0"
+  "version": "5.1.0"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/tools-adapter",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Tool lifecycle layer: registry, dispatch, schema translation, and hook bridging on top of transport-mux codecs.",
   "type": "module",
   "main": "dist/index.js",
@@ -40,7 +40,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@a5c-ai/transport-adapter": "5.0.0"
+    "@a5c-ai/transport-adapter": "5.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

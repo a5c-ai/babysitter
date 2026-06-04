@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/genty-tui-plugins",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Babysitter TUI plugins for adapters",
   "private": true,
   "type": "module",
@@ -24,14 +24,14 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@a5c-ai/genty-tui": "5.0.0"
+    "@a5c-ai/genty-tui": "5.1.0"
   },
   "dependencies": {
-    "@a5c-ai/babysitter-sdk": "5.0.0"
+    "@a5c-ai/babysitter-sdk": "5.1.0"
   },
   "devDependencies": {
-    "@a5c-ai/adapters": "5.0.0",
-    "@a5c-ai/genty-tui": "5.0.0",
+    "@a5c-ai/adapters": "5.1.0",
+    "@a5c-ai/genty-tui": "5.1.0",
     "@types/react": "^19.2.14",
     "ink": "^5.0.1",
     "react": "^18.3.1",

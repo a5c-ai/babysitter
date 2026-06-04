@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/genty-runtime",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Agent runtime layer (L5) — daemon, session, resource management, telemetry",
   "license": "MIT",
   "type": "commonjs",
@@ -71,8 +71,8 @@
     "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
-    "@a5c-ai/comm-adapter": "5.0.0",
-    "@a5c-ai/babysitter-sdk": "5.0.0"
+    "@a5c-ai/comm-adapter": "5.1.0",
+    "@a5c-ai/babysitter-sdk": "5.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

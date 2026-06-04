@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/adapters-gateway",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Gateway package for remote and browser-facing adapters surfaces",
@@ -49,8 +49,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/adapters-codecs": "5.0.0",
-    "@a5c-ai/comm-adapter": "5.0.0",
+    "@a5c-ai/adapters-codecs": "5.1.0",
+    "@a5c-ai/comm-adapter": "5.1.0",
     "@hono/node-server": "^1.19.14",
     "argon2": "^0.44.0",
     "hono": "^4.12.14",

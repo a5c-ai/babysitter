@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/adapters-harness-mock",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Mock harness simulator for testing adapters adapters — simulates claude-code, codex, and other CLI harnesses",
@@ -54,7 +54,7 @@
     "test": "vitest run --root ../../.. --config vitest.config.ts \"packages/adapters/harness-mock/tests/**/*.test.ts\" \"packages/adapters/harness-mock/tests/**/*.test.tsx\" \"packages/adapters/harness-mock/src/**/*.test.ts\" \"packages/adapters/harness-mock/src/**/*.test.tsx\""
   },
   "dependencies": {
-    "@a5c-ai/comm-adapter": "5.0.0",
+    "@a5c-ai/comm-adapter": "5.1.0",
     "ws": "^8.20.0"
   },
   "devDependencies": {

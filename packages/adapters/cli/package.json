@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/adapters-cli",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "type": "module",
   "license": "MIT",
   "description": "CLI runtime for adapters",
@@ -55,13 +55,13 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/config-adapter": "5.0.0",
-    "@a5c-ai/launch-adapter": "5.0.0",
-    "@a5c-ai/adapters-gateway": "5.0.0",
-    "@a5c-ai/comm-adapter": "5.0.0",
-    "@a5c-ai/adapters-codecs": "5.0.0",
-    "@a5c-ai/adapters-observability": "5.0.0",
-    "@a5c-ai/transport-adapter": "5.0.0",
+    "@a5c-ai/config-adapter": "5.1.0",
+    "@a5c-ai/launch-adapter": "5.1.0",
+    "@a5c-ai/adapters-gateway": "5.1.0",
+    "@a5c-ai/comm-adapter": "5.1.0",
+    "@a5c-ai/adapters-codecs": "5.1.0",
+    "@a5c-ai/adapters-observability": "5.1.0",
+    "@a5c-ai/transport-adapter": "5.1.0",
     "qrcode-terminal": "^0.12.0",
     "yaml": "^2.8.3"
   },

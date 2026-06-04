@@ -6,5 +6,5 @@
   "scripts": {
     "gradle": "echo Run ./gradlew assembleDebug inside packages/adapters/watch-wearos-app"
   },
-  "version": "5.0.0"
+  "version": "5.1.0"
 }

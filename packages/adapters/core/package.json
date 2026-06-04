@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/comm-adapter",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Agent communication mux — event streaming, hooks, sessions",
@@ -91,8 +91,8 @@
     "prepublishOnly": "npm run build && npm run test && npm run verify:release"
   },
   "dependencies": {
-    "@a5c-ai/atlas": "5.0.0",
-    "@a5c-ai/adapters-observability": "5.0.0",
+    "@a5c-ai/atlas": "5.1.0",
+    "@a5c-ai/adapters-observability": "5.1.0",
     "@sinclair/typebox": "^0.34.48"
   },
   "atlas": {

@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/adapters",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Unified dispatch layer for local CLI-based AI coding agents",
@@ -55,9 +55,9 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/comm-adapter": "5.0.0",
-    "@a5c-ai/adapters-codecs": "5.0.0",
-    "@a5c-ai/adapters-cli": "5.0.0"
+    "@a5c-ai/comm-adapter": "5.1.0",
+    "@a5c-ai/adapters-codecs": "5.1.0",
+    "@a5c-ai/adapters-cli": "5.1.0"
   },
   "atlas": {
     "layers": [

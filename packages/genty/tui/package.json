@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/genty-tui",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Extensible Ink-based TUI for adapters, with a plugin-first architecture",
@@ -64,10 +64,10 @@
     "prepublishOnly": "npm run build && npm run verify:release"
   },
   "dependencies": {
-    "@a5c-ai/adapters": "5.0.0",
-    "@a5c-ai/adapters-cli": "5.0.0",
-    "@a5c-ai/comm-adapter": "5.0.0",
-    "@a5c-ai/adapters-observability": "5.0.0",
+    "@a5c-ai/adapters": "5.1.0",
+    "@a5c-ai/adapters-cli": "5.1.0",
+    "@a5c-ai/comm-adapter": "5.1.0",
+    "@a5c-ai/adapters-observability": "5.1.0",
     "ink": "^5.0.1",
     "react": "^18.3.1"
   },

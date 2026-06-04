@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/config-adapter",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Install, config, auth, and host-detection logic for adapters",
@@ -50,7 +50,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/comm-adapter": "5.0.0"
+    "@a5c-ai/comm-adapter": "5.1.0"
   },
   "atlas": {
     "layers": [

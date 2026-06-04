@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-sdk",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Storage and run-registry primitives for event-sourced babysitter workflows.",
   "license": "MIT",
   "type": "commonjs",
@@ -40,7 +40,7 @@
     "verify:package-health": "node scripts/verify-package-health.cjs"
   },
   "dependencies": {
-    "@a5c-ai/atlas": "5.0.0",
+    "@a5c-ai/atlas": "5.1.0",
     "@a5c-ai/adapters": "^5.0.0",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@sinclair/typebox": "^0.34.48",
@@ -62,7 +62,7 @@
     }
   },
   "devDependencies": {
-    "@a5c-ai/tasks-adapter": "5.0.0",
+    "@a5c-ai/tasks-adapter": "5.1.0",
     "@eslint/js": "^9.39.4",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.11.30",

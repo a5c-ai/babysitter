@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/genty-desktop-app",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "private": true,
   "type": "module",
   "description": "genty desktop application — Electron-based agent control and monitoring",

@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/extensions-adapter",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
   "type": "module",
   "main": "dist/index.js",
@@ -48,7 +48,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@a5c-ai/atlas": "5.0.0"
+    "@a5c-ai/atlas": "5.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

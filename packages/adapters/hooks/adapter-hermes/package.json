@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/hooks-adapter-hermes",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Hermes harness adapter for the hooks-mux system",
   "license": "MIT",
   "type": "commonjs",
@@ -30,7 +30,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@a5c-ai/hooks-adapter-core": "5.0.0"
+    "@a5c-ai/hooks-adapter-core": "5.1.0"
   },
   "devDependencies": {
     "rimraf": "^6.0.0",

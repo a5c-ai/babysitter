@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/genty-mobile-android-app",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -12,7 +12,7 @@
     "start": "expo start"
   },
   "dependencies": {
-    "@a5c-ai/genty-ui": "5.0.0",
+    "@a5c-ai/genty-ui": "5.1.0",
     "expo": "^55.0.24",
     "expo-camera": "^55.0.18",
     "expo-haptics": "^55.0.14",

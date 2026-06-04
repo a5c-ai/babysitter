@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/launch-adapter",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Launch orchestration for adapters: plan resolution, proxy setup, harness spawning",
@@ -49,10 +49,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@a5c-ai/comm-adapter": "5.0.0",
-    "@a5c-ai/adapters-codecs": "5.0.0",
-    "@a5c-ai/atlas": "5.0.0",
-    "@a5c-ai/transport-adapter": "5.0.0"
+    "@a5c-ai/comm-adapter": "5.1.0",
+    "@a5c-ai/adapters-codecs": "5.1.0",
+    "@a5c-ai/atlas": "5.1.0",
+    "@a5c-ai/transport-adapter": "5.1.0"
   },
   "optionalDependencies": {
     "node-pty": "^1.0.0"

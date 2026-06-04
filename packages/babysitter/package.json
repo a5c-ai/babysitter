@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Metapackage for installing all babysitter npm packages",
   "license": "MIT",
   "type": "commonjs",
@@ -19,11 +19,11 @@
     "test": "node --test bin/__tests__/*.test.js"
   },
   "dependencies": {
-    "@a5c-ai/babysitter-sdk": "5.0.0",
-    "@a5c-ai/genty-core": "5.0.0",
-    "@a5c-ai/genty-runtime": "5.0.0",
-    "@a5c-ai/genty-platform": "5.0.0",
-    "@a5c-ai/genty": "5.0.0"
+    "@a5c-ai/babysitter-sdk": "5.1.0",
+    "@a5c-ai/genty-core": "5.1.0",
+    "@a5c-ai/genty-runtime": "5.1.0",
+    "@a5c-ai/genty-platform": "5.1.0",
+    "@a5c-ai/genty": "5.1.0"
   },
   "repository": {
     "type": "git",
