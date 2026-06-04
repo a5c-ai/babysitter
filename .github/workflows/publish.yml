@@ -179,7 +179,7 @@ jobs:
         run: find packages -path '*/dist' -type d | tar czf /tmp/build-all-dist.tar.gz -T -
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v4
         with:
           name: build-all-dist
           path: /tmp/build-all-dist.tar.gz
@@ -217,7 +217,7 @@ jobs:
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: build-all-dist
           path: /tmp
@@ -252,7 +252,7 @@ jobs:
 
       - name: Upload core validation logs
         if: always()
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v4
         with:
           name: publish-core-logs
           path: artifacts/core-logs
@@ -290,7 +290,7 @@ jobs:
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: build-all-dist
           path: /tmp
@@ -340,7 +340,7 @@ jobs:
 
       - name: Upload mux validation logs
         if: always()
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v4
         with:
           name: publish-mux-logs
           path: artifacts/mux-logs
@@ -383,7 +383,7 @@ jobs:
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: build-all-dist
           path: /tmp
@@ -422,7 +422,7 @@ jobs:
 
       - name: Upload e2e logs
         if: always()
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v4
         with:
           name: publish-e2e-logs
           path: artifacts/e2e-logs
@@ -430,7 +430,7 @@ jobs:
 
       - name: Upload Playwright artifacts
         if: always()
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v4
         with:
           name: publish-mux-playwright-artifacts
           path: |
@@ -470,7 +470,7 @@ jobs:
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: build-all-dist
           path: /tmp
@@ -492,7 +492,7 @@ jobs:
 
       - name: Upload cloud validation logs
         if: always()
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v4
         with:
           name: publish-cloud-logs
           path: artifacts/cloud-logs
@@ -530,7 +530,7 @@ jobs:
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: build-all-dist
           path: /tmp
@@ -553,7 +553,7 @@ jobs:
 
       - name: Upload kradle validation logs
         if: always()
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v4
         with:
           name: publish-kradle-logs
           path: artifacts/kradle-logs
@@ -591,7 +591,7 @@ jobs:
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: build-all-dist
           path: /tmp
@@ -621,7 +621,7 @@ jobs:
 
       - name: Upload observer and compiler logs
         if: always()
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v4
         with:
           name: publish-observer-compiler-logs
           path: artifacts/observer-compiler-logs
@@ -734,7 +734,7 @@ jobs:
           tar --exclude=.git --exclude=node_modules --exclude=artifacts -czf artifacts/publish-source/publish-source.tgz .
 
       - name: Upload publish workspace
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source/publish-source.tgz
@@ -748,7 +748,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -822,7 +822,7 @@ jobs:
             publish: npm publish --workspace=@a5c-ai/kradle --access public --tag "$NPM_TAG"
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -882,7 +882,7 @@ jobs:
             publish: npm publish --workspace=@a5c-ai/extensions-adapter --access public --tag "$NPM_TAG"
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -953,7 +953,7 @@ jobs:
             workspace: '@a5c-ai/hooks-adapter-hermes'
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1004,7 +1004,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1106,7 +1106,7 @@ jobs:
               npx tsc --build packages/adapters/tools/tsconfig.json
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1153,7 +1153,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1206,7 +1206,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1251,7 +1251,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1307,7 +1307,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1364,7 +1364,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1420,7 +1420,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1473,7 +1473,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1527,7 +1527,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -1574,7 +1574,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -2122,7 +2122,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: build-all-dist
@@ -2318,7 +2318,7 @@ jobs:
     runs-on: ubuntu-latest-l
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
@@ -2403,7 +2403,7 @@ jobs:
       contents: read
     steps:
       - name: Download publish workspace
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: publish-source
           path: artifacts/publish-source
