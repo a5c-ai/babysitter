@@ -22,7 +22,7 @@ const packageDirs = [
   'packages/sdk', 'packages/babysitter', 'packages/tula/platform',
   'packages/tula/core', 'packages/atlas',
   'packages/adapters/transport', 'packages/adapters/extensions', 'packages/adapters/tasks',
-  'packages/adapters/triggers', 'packages/cloud', 'packages/observer-dashboard',
+  'packages/adapters/triggers', 'packages/kradle/installer', 'packages/observer-dashboard',
   'packages/tula/tui-plugins',
   'packages/adapters/core', 'packages/adapters/cli', 'packages/adapters/adapters',
   'packages/adapters/gateway', 'packages/adapters/tui', 'packages/adapters/ui',

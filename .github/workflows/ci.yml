@@ -280,7 +280,7 @@ jobs:
           - @a5c-ai/tasks-adapter -> test + release/staging publish
           - @a5c-ai/extensions-adapter -> test + release/staging publish
           - @a5c-ai/babysitter-observer-dashboard -> observer-dashboard + release/staging publish
-          - @a5c-ai/cloud -> workspace-coverage + release/staging publish + deploy-hook paths
+          - @a5c-ai/kradle-installer -> workspace-coverage + release/staging publish + deploy-hook paths
           - @a5c-ai/hooks-adapter-* -> test + release/staging publish
           - @a5c-ai/adapters-* -> test + release/staging publish
           - @a5c-ai/babysitter + unified plugin compiler/bundles -> test + release/staging publish paths

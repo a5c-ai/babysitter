@@ -225,7 +225,7 @@ const updateLockVersion = (path, version) => {
         "@a5c-ai/adapters": version
       }
     },
-    "packages/cloud": {
+    "packages/kradle/installer": {
       version
     },
     "packages/observer-dashboard": {
@@ -262,7 +262,7 @@ const workspaceManifestPaths = [
   "packages/adapters/extensions/package.json",
   "packages/adapters/tasks/package.json",
   "packages/tula/tui-plugins/package.json",
-  "packages/cloud/package.json",
+  "packages/kradle/installer/package.json",
   "packages/observer-dashboard/package.json",
   "packages/adapters/hooks/core/package.json",
   "packages/adapters/hooks/cli/package.json",

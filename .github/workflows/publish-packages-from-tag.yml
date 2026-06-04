@@ -98,7 +98,7 @@ jobs:
 
           run_many "Build foundation packages" \
             @a5c-ai/tasks-adapter \
-            @a5c-ai/cloud \
+            @a5c-ai/kradle-installer \
             @a5c-ai/adapters-observability \
             @a5c-ai/triggers-adapter \
             @a5c-ai/babysitter-observer-dashboard
@@ -195,7 +195,7 @@ jobs:
           publish_many "Publish foundation packages" \
             @a5c-ai/atlas \
             @a5c-ai/tasks-adapter \
-            @a5c-ai/cloud \
+            @a5c-ai/kradle-installer \
             @a5c-ai/adapters-observability \
             @a5c-ai/triggers-adapter \
             @a5c-ai/babysitter-observer-dashboard
