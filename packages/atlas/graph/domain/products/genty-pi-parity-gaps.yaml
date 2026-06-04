@@ -1,0 +1,175 @@
+# Gap analysis: genty stack vs Pi (pi.dev) feature parity
+# Pi capabilities mapped to where they belong in our stack,
+# with status: implemented | partial | gap
+#
+# Abstract layers (agent-core, agent-runtime, agent-platform) define
+# the capability categories. Genty packages are our concrete implementations.
+
+nodeKind: FeatureParityMap
+id: feature-parity:genty-vs-pi
+attributes:
+  displayName: "Genty vs Pi Feature Parity"
+  description: "Maps Pi (pi.dev) capabilities to the genty stack, identifying gaps"
+  lastUpdated: "2026-06-04"
+
+  modes:
+    interactive:
+      status: implemented
+      layer: agent-platform
+      package: "@a5c-ai/genty-platform"
+      notes: "Full TUI via genty-tui (Ink). Harness orchestration via platform."
+
+    printJson:
+      status: partial
+      layer: agent-platform
+      package: "@a5c-ai/genty"
+      notes: "genty tui --json exists as non-interactive fallback. Missing: dedicated -p 'query' one-shot print mode and --mode json event stream."
+      gap: "Add `genty -p 'query'` print mode and `--mode json` structured event stream to genty CLI."
+
+    rpc:
+      status: gap
+      layer: agent-runtime
+      package: "@a5c-ai/genty-runtime"
+      notes: "No JSON-over-stdin/stdout RPC protocol for non-Node integrations."
+      gap: "Implement RPC mode: JSON protocol over stdin/stdout. Document in docs/rpc.md. Enable non-Node clients to drive genty programmatically."
+
+    sdk:
+      status: implemented
+      layer: agent-core
+      package: "@a5c-ai/babysitter-sdk"
+      notes: "SDK is the foundation — defineTask, runs, sessions, hooks. Programmatic embedding works."
+
+  contextEngineering:
+    agentsMd:
+      status: partial
+      layer: agent-platform
+      package: "@a5c-ai/genty-platform"
+      notes: "CLAUDE.md / AGENTS.md loaded by harness wrappers. Pi loads from ~/.pi/agent/, parent dirs, and CWD."
+      gap: "Genty should natively load AGENTS.md from ~/.genty/agent/, parent directories, and CWD — independent of which harness is underneath."
+
+    systemMd:
+      status: gap
+      layer: agent-platform
+      package: "@a5c-ai/genty-platform"
+      notes: "No SYSTEM.md per-project system prompt replacement."
+      gap: "Add SYSTEM.md support: per-project files that replace or append to the default system prompt."
+
+    compaction:
+      status: implemented
+      layer: agent-platform
+      package: "@a5c-ai/genty-platform"
+      notes: "4-layer compression subsystem in SDK. Auto-summarizes at context limit. Customizable per-layer."
+
+    skills:
+      status: implemented
+      layer: agent-core
+      package: "@a5c-ai/babysitter-sdk"
+      notes: "Skills with SKILL.md, progressive disclosure, on-demand loading. Unified plugin system."
+
+    promptTemplates:
+      status: implemented
+      layer: agent-core
+      package: "@a5c-ai/babysitter-sdk"
+      notes: "Commands as markdown files, /name expansion. Unified plugin commands/ directory."
+
+    dynamicContext:
+      status: partial
+      layer: agent-platform
+      package: "@a5c-ai/genty-platform"
+      notes: "Hooks can inject context (sessionStart, userPromptSubmit). Missing: extension-based message injection, history filtering, and built-in RAG."
+      gap: "Add extension points for pre-turn message injection, history filtering/transformation, and built-in RAG pipeline."
+
+  extensibility:
+    extensions:
+      status: gap
+      layer: agent-core
+      package: "@a5c-ai/genty-core"
+      notes: "No Pi-style TypeScript extension API with access to tools, commands, keyboard shortcuts, events, and TUI components."
+      gap: "Implement Extension API: TypeScript modules that can register tools, commands, keyboard shortcuts, event listeners, and TUI components. Extensions should be installable via npm/git. This is the biggest architectural gap."
+
+    plugins:
+      status: implemented
+      layer: agent-core
+      package: "@a5c-ai/babysitter-sdk"
+      notes: "Full plugin system with skills, MCP servers, hooks, commands. Marketplace support."
+
+    hooks:
+      status: implemented
+      layer: agent-platform
+      package: "@a5c-ai/hooks-adapter-core"
+      notes: "Lifecycle hooks (sessionStart, stop, preToolUse, postToolUse, etc.) with per-harness adapters."
+
+    mcpSupport:
+      status: implemented
+      layer: agent-core
+      package: "@a5c-ai/babysitter-sdk"
+      notes: "MCP server mode (babysitter-mcp-server). MCP client for plugin tool servers."
+
+    packages:
+      status: partial
+      layer: agent-platform
+      package: "@a5c-ai/extensions-adapter"
+      notes: "Plugin compiler bundles skills+hooks+commands per-harness. Missing: npm-installable extension packages like Pi's `pi install npm:@foo/pi-tools`."
+      gap: "Add `genty install npm:@foo/genty-extension` for installing extension packages from npm/git."
+
+  sessionManagement:
+    treeStructuredHistory:
+      status: gap
+      layer: agent-runtime
+      package: "@a5c-ai/genty-runtime"
+      notes: "Sessions are linear, not tree-structured. No branch/fork/navigate."
+      gap: "Implement tree-structured session storage. Enable /tree navigation, branching from any point, single-file multi-branch storage. Enable /export (HTML) and /share (gist URL)."
+
+    sessionExport:
+      status: gap
+      layer: agent-runtime
+      package: "@a5c-ai/genty-runtime"
+      notes: "No session export to HTML or shareable URLs."
+      gap: "Add /export (HTML) and /share (GitHub gist with rendered view)."
+
+    sessionResume:
+      status: implemented
+      layer: agent-platform
+      package: "@a5c-ai/genty-platform"
+      notes: "Event-sourced journal with full resume. babysitter resume command."
+
+  modelSupport:
+    multiProvider:
+      status: implemented
+      layer: adapters
+      package: "@a5c-ai/adapters"
+      notes: "15+ harnesses (Claude, Codex, Pi, Gemini, Copilot, etc.) with provider routing via transport-adapter proxy."
+
+    midSessionSwitch:
+      status: partial
+      layer: adapters
+      package: "@a5c-ai/adapters-cli"
+      notes: "Model selection at launch. Missing: mid-session /model switch and Ctrl+P favorite cycling."
+      gap: "Add /model command for mid-session model switching and keyboard shortcut for cycling favorites."
+
+  agentInteraction:
+    steering:
+      status: gap
+      layer: agent-platform
+      package: "@a5c-ai/genty-platform"
+      notes: "No mid-execution steering (sending messages while tool is running)."
+      gap: "Implement steering: allow submitting messages during execution. Enter = steer (interrupts after current tool), Alt+Enter = queue follow-up."
+
+    approvalModes:
+      status: implemented
+      layer: agent-platform
+      package: "@a5c-ai/genty-platform"
+      notes: "Interactive (breakpoints) and yolo (auto-approve) modes. Configurable per-process."
+
+  summary:
+    implemented: 12
+    partial: 5
+    gap: 7
+    criticalGaps:
+      - "Extension API (Pi's core differentiator — TypeScript modules for tools, commands, TUI)"
+      - "Tree-structured session history with branching"
+      - "RPC mode (JSON over stdin/stdout)"
+      - "SYSTEM.md per-project system prompt"
+      - "Mid-execution steering"
+      - "Session export/share"
+      - "npm-installable extension packages"
