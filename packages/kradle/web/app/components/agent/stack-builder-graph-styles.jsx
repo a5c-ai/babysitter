@@ -102,12 +102,12 @@ export function buildStackResource({ name, displayName, systemPrompt, developerP
   const skillSelections = selections['facet:skills-and-capabilities'] || [];
 
   return {
-    apiVersion: 'krate.a5c.ai/v1alpha1',
+    apiVersion: 'kradle.a5c.ai/v1alpha1',
     kind: 'AgentStack',
     metadata: {
       name,
       labels: {
-        ...(displayName ? { 'krate.a5c.ai/display-name': displayName } : {}),
+        ...(displayName ? { 'kradle.a5c.ai/display-name': displayName } : {}),
       },
     },
     spec: {

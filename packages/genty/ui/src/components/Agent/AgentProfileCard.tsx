@@ -85,7 +85,7 @@ export function AgentProfileCard({ profile, href }: AgentProfileCardProps) {
         </div>
       </div>
       <p style={{ margin: 0, color: 'var(--text-muted)' }}>
-        {profile?.tagline || profile?.roleDomain || 'Reusable identity for Krate dispatch and meetings.'}
+        {profile?.tagline || profile?.roleDomain || 'Reusable identity for Kradle dispatch and meetings.'}
       </p>
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: 'auto' }}>
         <span className="pill neutral">{runCount} runs</span>

@@ -108,7 +108,7 @@ export async function AgentMemorySearchPage({ org = null } = {}) {
   const activeOrg = ui.model.org?.slug || org || 'default';
   const memoryView = ui.model.agents?.memory || { repositories: { count: 0 } };
   const hasRepos = (memoryView.repositories?.count ?? 0) > 0;
-  const exampleYaml = `apiVersion: krate.a5c.ai/v1alpha1
+  const exampleYaml = `apiVersion: kradle.a5c.ai/v1alpha1
 kind: AgentMemoryQuery
 metadata:
   name: example-search

@@ -250,7 +250,7 @@ function Step5Review({ platform, hosting, baseUrl, scopes, secretRef, org }) {
   const resources = scopes.map((scope) => {
     const def = SCOPE_DEFS[scope];
     return {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: def.kind,
       metadata: { name: `${platform}-${scope}` },
       spec: { organizationRef: org, platform, endpoint, secretRef },
@@ -310,7 +310,7 @@ export function ExternalProviderWizard({ org, onCancel, onSuccess }) {
     const resources = scopes.map((scope) => {
       const def = SCOPE_DEFS[scope];
       return {
-        apiVersion: 'krate.a5c.ai/v1alpha1',
+        apiVersion: 'kradle.a5c.ai/v1alpha1',
         kind: def.kind,
         metadata: { name: `${platform}-${scope}` },
         spec: { organizationRef: org, platform, endpoint, secretRef },

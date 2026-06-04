@@ -94,7 +94,7 @@ export async function AgentRuleBuilderPage({ org = null } = {}) {
   const activeOrg = ui.model.org?.slug || org || 'default';
   const agentView = ui.model.agents || { stacks: { items: [] } };
   const stacks = (agentView.stacks?.items || []).map(s => s.metadata?.name).filter(Boolean);
-  const exampleYaml = `apiVersion: krate.a5c.ai/v1alpha1
+  const exampleYaml = `apiVersion: kradle.a5c.ai/v1alpha1
 kind: AgentTriggerRule
 metadata:
   name: my-trigger-rule

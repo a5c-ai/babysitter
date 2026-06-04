@@ -97,7 +97,7 @@ export function MemoryOntologyEditor({
   const [ontologyName, setOntologyName] = useState(existingName || 'default');
   const [memRepo, setMemRepo] = useState(existing?.spec?.memoryRepository || memoryRepository || '');
   const [ontologyPath, setOntologyPath] = useState(
-    existing?.spec?.ontologyPath || '.krate/ontology.yaml'
+    existing?.spec?.ontologyPath || '.kradle/ontology.yaml'
   );
   const [nodeKinds, setNodeKinds] = useState<NodeKindDef[]>(
     (existing?.spec?.nodeKinds || []).map((k) =>
@@ -165,12 +165,12 @@ export function MemoryOntologyEditor({
     setSaveStatus('saving');
     setSaveError('');
     const resource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'AgentMemoryOntology',
       metadata: { name: ontologyName },
       spec: {
         memoryRepository: memRepo || 'default',
-        ontologyPath: ontologyPath || '.krate/ontology.yaml',
+        ontologyPath: ontologyPath || '.kradle/ontology.yaml',
         nodeKinds: nodeKinds.map((k) => ({ name: k.name, description: k.description, color: k.color })),
         edgeKinds: edgeKinds.map((k) => ({
           name: k.name,
@@ -277,7 +277,7 @@ export function MemoryOntologyEditor({
               type="text"
               value={ontologyPath}
               onChange={(e) => setOntologyPath(e.target.value)}
-              placeholder=".krate/ontology.yaml"
+              placeholder=".kradle/ontology.yaml"
               style={inputStyle}
             />
           </div>

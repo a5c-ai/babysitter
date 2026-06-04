@@ -38,7 +38,7 @@ export function IssueList({ org, repo, issues = [] }) {
     try {
       const labelArr = form.labels.split(',').map(l => l.trim()).filter(Boolean);
       const resource = {
-        apiVersion: 'krate.a5c.ai/v1alpha1',
+        apiVersion: 'kradle.a5c.ai/v1alpha1',
         kind: 'Issue',
         metadata: { name: form.name },
         spec: {

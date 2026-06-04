@@ -123,7 +123,7 @@ export function DeploymentPipeline({ org = 'default', repository = null, kubeVel
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apiVersion: 'krate.a5c.ai/v1alpha1',
+          apiVersion: 'kradle.a5c.ai/v1alpha1',
           kind: 'Pipeline',
           metadata: {
             name: `deploy-${repository || 'app'}-${Date.now()}`,
@@ -179,7 +179,7 @@ export function DeploymentPipeline({ org = 'default', repository = null, kubeVel
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apiVersion: 'krate.a5c.ai/v1alpha1',
+          apiVersion: 'kradle.a5c.ai/v1alpha1',
           kind: 'Pipeline',
           metadata: { name: `deploy-${pipelineId || 'manual'}-${Date.now()}` },
           spec: {
@@ -221,7 +221,7 @@ export function DeploymentPipeline({ org = 'default', repository = null, kubeVel
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apiVersion: 'krate.a5c.ai/v1alpha1',
+          apiVersion: 'kradle.a5c.ai/v1alpha1',
           kind: 'Pipeline',
           metadata: { name: `rollback-${pipelineId || 'last'}-${Date.now()}` },
           spec: {

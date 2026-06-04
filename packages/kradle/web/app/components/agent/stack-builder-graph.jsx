@@ -20,7 +20,7 @@ export function GraphStackBuilder({ org, atlasBaseUrl, existingStack = null }) {
 
   // Basic fields (same as original StackBuilder)
   const [name, setName] = useState(meta.name || '');
-  const [displayName, setDisplayName] = useState(meta.labels?.['krate.a5c.ai/display-name'] || spec.displayName || '');
+  const [displayName, setDisplayName] = useState(meta.labels?.['kradle.a5c.ai/display-name'] || spec.displayName || '');
   const [systemPrompt, setSystemPrompt] = useState(spec.systemPrompt || '');
   const [developerPrompt, setDeveloperPrompt] = useState(spec.developerPrompt || '');
   const [taskPrompt, setTaskPrompt] = useState(spec.taskPrompt || '');

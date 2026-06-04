@@ -43,7 +43,7 @@ export function TriggerRuleForm({ org, stacks = [], agents = [] }) {
     setMessage('');
 
     const resource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'AgentTriggerRule',
       metadata: { name },
       spec: {

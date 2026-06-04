@@ -142,7 +142,7 @@ export function KanbanBoard({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            apiVersion: 'krate.a5c.ai/v1alpha1',
+            apiVersion: 'kradle.a5c.ai/v1alpha1',
             kind: 'AgentBoardItem',
             metadata: { name: id },
             status: { column: targetColId },
@@ -192,11 +192,11 @@ export function KanbanBoard({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            apiVersion: 'krate.a5c.ai/v1alpha1',
-            kind: 'KrateWorkspace',
+            apiVersion: 'kradle.a5c.ai/v1alpha1',
+            kind: 'KradleWorkspace',
             metadata: {
               name: workspaceName,
-              labels: { 'krate.a5c.ai/board-item': itemId },
+              labels: { 'kradle.a5c.ai/board-item': itemId },
             },
             spec: {
               boardItemRef: itemId,

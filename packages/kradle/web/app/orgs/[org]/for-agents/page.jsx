@@ -28,15 +28,15 @@ const MCP_TOOLS = [
 ];
 
 const MCP_PROMPTS = [
-  { name: 'krate_workspace_setup', description: 'Guide for setting up a new krate workspace' },
+  { name: 'krate_workspace_setup', description: 'Guide for setting up a new kradle workspace' },
   { name: 'krate_stack_config', description: 'Help configuring an agent stack' },
-  { name: 'krate_troubleshoot', description: 'Diagnose common krate issues' },
+  { name: 'krate_troubleshoot', description: 'Diagnose common kradle issues' },
 ];
 
 const MCP_RESOURCES = [
-  { uri: 'krate://snapshot', name: 'Workspace Snapshot', mimeType: 'application/json' },
-  { uri: 'krate://stacks', name: 'Agent Stacks', mimeType: 'application/json' },
-  { uri: 'krate://models', name: 'Model Catalog', mimeType: 'application/json' },
+  { uri: 'kradle://snapshot', name: 'Workspace Snapshot', mimeType: 'application/json' },
+  { uri: 'kradle://stacks', name: 'Agent Stacks', mimeType: 'application/json' },
+  { uri: 'kradle://models', name: 'Model Catalog', mimeType: 'application/json' },
 ];
 
 function CodeBlock({ children, title }) {
@@ -74,16 +74,16 @@ export default async function ForAgentsPage({ params }) {
       <Section title="Quick start">
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>Install the Kradle CLI, then start the MCP server. Any MCP-compatible agent (Claude Code, Cursor, Windsurf, etc.) can connect over stdio.</p>
         <CodeBlock title="Install">npm install -g @a5c-ai/kradle-cli</CodeBlock>
-        <CodeBlock title="Start MCP server">krate mcp</CodeBlock>
-        <CodeBlock title="Start HTTP API server">krate serve</CodeBlock>
+        <CodeBlock title="Start MCP server">kradle mcp</CodeBlock>
+        <CodeBlock title="Start HTTP API server">kradle serve</CodeBlock>
       </Section>
 
       <Section title="Claude Code integration">
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>Add the Kradle MCP server to your Claude Code configuration:</p>
         <CodeBlock title=".claude/settings.json">{`{
   "mcpServers": {
-    "krate": {
-      "command": "krate",
+    "kradle": {
+      "command": "kradle",
       "args": ["mcp"],
       "env": {
         "KRADLE_NAMESPACE": "kradle-system",
@@ -99,8 +99,8 @@ export default async function ForAgentsPage({ params }) {
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>For editors that support MCP via <code>.mcp.json</code>:</p>
         <CodeBlock title=".mcp.json">{`{
   "mcpServers": {
-    "krate": {
-      "command": "krate",
+    "kradle": {
+      "command": "kradle",
       "args": ["mcp"],
       "env": {
         "KRADLE_NAMESPACE": "kradle-system"
@@ -126,7 +126,7 @@ export default async function ForAgentsPage({ params }) {
       </Section>
 
       <Section title="MCP tools (19)">
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>These tools are available to any MCP-connected agent after running <code>krate mcp</code>.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>These tools are available to any MCP-connected agent after running <code>kradle mcp</code>.</p>
         <div className="resourceTable">
           {MCP_TOOLS.map((tool) => <div key={tool.name} className="resourceRow" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '0.75rem', alignItems: 'center' }}>
             <code style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent)' }}>{tool.name}</code>
@@ -217,7 +217,7 @@ export default async function ForAgentsPage({ params }) {
       </Section>
 
       <Section title="HTTP API">
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>For direct API integration without MCP, the Kradle HTTP API is available at <code>KRADLE_CONTROLLER_URL</code> or via <code>krate serve</code>.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1rem' }}>For direct API integration without MCP, the Kradle HTTP API is available at <code>KRADLE_CONTROLLER_URL</code> or via <code>kradle serve</code>.</p>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <a href={orgHref(activeOrg, '/api-docs')} className="actionButton" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', padding: '0.375rem 0.75rem', background: 'var(--accent)', color: '#fff', borderRadius: 'var(--radius-sm)', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 600 }}>
             Open API Explorer
@@ -227,19 +227,19 @@ export default async function ForAgentsPage({ params }) {
       </Section>
 
       <Section title="CLI commands">
-        <CodeBlock>{`krate serve              # Start HTTP API server on port 3080
-krate mcp                # Start MCP server over stdio
-krate status             # Show workspace status
-krate models             # List model catalog (internal + external)
-krate routes             # List model routes
-krate virtual-models     # List virtual models
-krate stacks             # List agent stacks
-krate dispatch <stack>   # Dispatch an agent run
-krate apply <file>       # Apply a resource from YAML/JSON
-krate get <kind> <name>  # Get a specific resource
-krate list <kind>        # List resources by kind
-krate delete <kind> <name>  # Delete a resource
-krate version            # Show CLI version`}</CodeBlock>
+        <CodeBlock>{`kradle serve              # Start HTTP API server on port 3080
+kradle mcp                # Start MCP server over stdio
+kradle status             # Show workspace status
+kradle models             # List model catalog (internal + external)
+kradle routes             # List model routes
+kradle virtual-models     # List virtual models
+kradle stacks             # List agent stacks
+kradle dispatch <stack>   # Dispatch an agent run
+kradle apply <file>       # Apply a resource from YAML/JSON
+kradle get <kind> <name>  # Get a specific resource
+kradle list <kind>        # List resources by kind
+kradle delete <kind> <name>  # Delete a resource
+kradle version            # Show CLI version`}</CodeBlock>
       </Section>
     </PageFrame>
   );

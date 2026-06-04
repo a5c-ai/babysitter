@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from '../../hooks/use-debounce.js';
 
-const RECENT_COMMANDS_KEY = 'krate:recentCommands';
+const RECENT_COMMANDS_KEY = 'kradle:recentCommands';
 const MAX_RECENT = 5;
 
 function getRecentCommands() {

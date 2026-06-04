@@ -51,21 +51,21 @@ export function AppSettingsForm() {
 
   useEffect(() => {
     setTheme(readStoredTheme('light'));
-    setLocale(getStoredValue('krate-locale', 'en'));
-    setSseEnabled(getStoredValue('krate-sse-enabled', 'true') === 'true');
-    setCacheTtl(getStoredValue('krate-cache-ttl', '300'));
-    setDensity(getStoredValue('krate-density', 'default'));
-    setJitsiProvider(getStoredValue('krate-jitsi-provider', 'default'));
-    setDefaultRoomTTL(getStoredValue('krate-jitsi-default-room-ttl', '120'));
-    setAutoRecord(getStoredValue('krate-jitsi-auto-record', 'false') === 'true');
-    setLobbyEnabled(getStoredValue('krate-jitsi-lobby-enabled', 'true') === 'true');
-    setMaxAgentsPerRoom(getStoredValue('krate-jitsi-max-agents-per-room', '4'));
-    setAgentAutoJoin(getStoredValue('krate-jitsi-agent-auto-join', 'false') === 'true');
-    setNotifyRuns(getStoredValue('krate-notify-runs', 'true') === 'true');
-    setNotifyApprovals(getStoredValue('krate-notify-approvals', 'true') === 'true');
-    setNotifyConflicts(getStoredValue('krate-notify-conflicts', 'true') === 'true');
-    setNotifyWorkspaces(getStoredValue('krate-notify-workspaces', 'true') === 'true');
-    setNotifySound(getStoredValue('krate-notify-sound', 'false') === 'true');
+    setLocale(getStoredValue('kradle-locale', 'en'));
+    setSseEnabled(getStoredValue('kradle-sse-enabled', 'true') === 'true');
+    setCacheTtl(getStoredValue('kradle-cache-ttl', '300'));
+    setDensity(getStoredValue('kradle-density', 'default'));
+    setJitsiProvider(getStoredValue('kradle-jitsi-provider', 'default'));
+    setDefaultRoomTTL(getStoredValue('kradle-jitsi-default-room-ttl', '120'));
+    setAutoRecord(getStoredValue('kradle-jitsi-auto-record', 'false') === 'true');
+    setLobbyEnabled(getStoredValue('kradle-jitsi-lobby-enabled', 'true') === 'true');
+    setMaxAgentsPerRoom(getStoredValue('kradle-jitsi-max-agents-per-room', '4'));
+    setAgentAutoJoin(getStoredValue('kradle-jitsi-agent-auto-join', 'false') === 'true');
+    setNotifyRuns(getStoredValue('kradle-notify-runs', 'true') === 'true');
+    setNotifyApprovals(getStoredValue('kradle-notify-approvals', 'true') === 'true');
+    setNotifyConflicts(getStoredValue('kradle-notify-conflicts', 'true') === 'true');
+    setNotifyWorkspaces(getStoredValue('kradle-notify-workspaces', 'true') === 'true');
+    setNotifySound(getStoredValue('kradle-notify-sound', 'false') === 'true');
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setDesktopPermission(Notification.permission);
     }
@@ -81,26 +81,26 @@ export function AppSettingsForm() {
 
   function handleLocaleChange(newLocale) {
     setLocale(newLocale);
-    localStorage.setItem('krate-locale', newLocale);
+    localStorage.setItem('kradle-locale', newLocale);
     flashSaved();
   }
 
   function handleSseToggle() {
     const next = !sseEnabled;
     setSseEnabled(next);
-    localStorage.setItem('krate-sse-enabled', String(next));
+    localStorage.setItem('kradle-sse-enabled', String(next));
     flashSaved();
   }
 
   function handleCacheTtlChange(value) {
     setCacheTtl(value);
-    localStorage.setItem('krate-cache-ttl', value);
+    localStorage.setItem('kradle-cache-ttl', value);
     flashSaved();
   }
 
   function handleDensityChange(newDensity) {
     setDensity(newDensity);
-    localStorage.setItem('krate-density', newDensity);
+    localStorage.setItem('kradle-density', newDensity);
     flashSaved();
   }
 
@@ -212,7 +212,7 @@ export function AppSettingsForm() {
         <div className="cardTitle"><h2>Meetings (Jitsi)</h2></div>
         <div>
           <label style={labelStyle}>Jitsi Provider</label>
-          <select value={jitsiProvider} onChange={e => handleStoredValue('krate-jitsi-provider', setJitsiProvider, e.target.value)} style={{ ...selectStyle, maxWidth: '320px' }}>
+          <select value={jitsiProvider} onChange={e => handleStoredValue('kradle-jitsi-provider', setJitsiProvider, e.target.value)} style={{ ...selectStyle, maxWidth: '320px' }}>
             <option value="default">Default</option>
             <option value="jitsi-prod">jitsi-prod</option>
           </select>
@@ -220,22 +220,22 @@ export function AppSettingsForm() {
         </div>
         <div>
           <label style={labelStyle}>Default room TTL (minutes)</label>
-          <input name="defaultRoomTTL" type="number" min="1" max="1440" value={defaultRoomTTL} onChange={e => handleStoredValue('krate-jitsi-default-room-ttl', setDefaultRoomTTL, e.target.value)} style={{ ...inputStyle, maxWidth: '200px' }} />
+          <input name="defaultRoomTTL" type="number" min="1" max="1440" value={defaultRoomTTL} onChange={e => handleStoredValue('kradle-jitsi-default-room-ttl', setDefaultRoomTTL, e.target.value)} style={{ ...inputStyle, maxWidth: '200px' }} />
         </div>
         <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
-          <input name="autoRecord" type="checkbox" checked={autoRecord} onChange={() => handleStoredValue('krate-jitsi-auto-record', setAutoRecord, !autoRecord)} />
+          <input name="autoRecord" type="checkbox" checked={autoRecord} onChange={() => handleStoredValue('kradle-jitsi-auto-record', setAutoRecord, !autoRecord)} />
           Auto-record meetings
         </label>
         <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
-          <input name="lobbyEnabled" type="checkbox" checked={lobbyEnabled} onChange={() => handleStoredValue('krate-jitsi-lobby-enabled', setLobbyEnabled, !lobbyEnabled)} />
+          <input name="lobbyEnabled" type="checkbox" checked={lobbyEnabled} onChange={() => handleStoredValue('kradle-jitsi-lobby-enabled', setLobbyEnabled, !lobbyEnabled)} />
           Enable lobby for all rooms
         </label>
         <div>
           <label style={labelStyle}>Max agents per room</label>
-          <input name="maxAgentsPerRoom" type="number" min="0" max="25" value={maxAgentsPerRoom} onChange={e => handleStoredValue('krate-jitsi-max-agents-per-room', setMaxAgentsPerRoom, e.target.value)} style={{ ...inputStyle, maxWidth: '200px' }} />
+          <input name="maxAgentsPerRoom" type="number" min="0" max="25" value={maxAgentsPerRoom} onChange={e => handleStoredValue('kradle-jitsi-max-agents-per-room', setMaxAgentsPerRoom, e.target.value)} style={{ ...inputStyle, maxWidth: '200px' }} />
         </div>
         <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
-          <input name="agentAutoJoin" type="checkbox" checked={agentAutoJoin} onChange={() => handleStoredValue('krate-jitsi-agent-auto-join', setAgentAutoJoin, !agentAutoJoin)} />
+          <input name="agentAutoJoin" type="checkbox" checked={agentAutoJoin} onChange={() => handleStoredValue('kradle-jitsi-agent-auto-join', setAgentAutoJoin, !agentAutoJoin)} />
           Agents auto-join meetings
         </label>
       </div>
@@ -244,35 +244,35 @@ export function AppSettingsForm() {
         <div className="cardTitle"><h2>Notifications</h2></div>
         <div>
           <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
-            <input type="checkbox" checked={notifyRuns} onChange={() => handleNotifyToggle('krate-notify-runs', setNotifyRuns, notifyRuns)} />
+            <input type="checkbox" checked={notifyRuns} onChange={() => handleNotifyToggle('kradle-notify-runs', setNotifyRuns, notifyRuns)} />
             Run completions
           </label>
           <p style={descStyle}>Notify when agent dispatch runs complete or fail.</p>
         </div>
         <div>
           <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
-            <input type="checkbox" checked={notifyApprovals} onChange={() => handleNotifyToggle('krate-notify-approvals', setNotifyApprovals, notifyApprovals)} />
+            <input type="checkbox" checked={notifyApprovals} onChange={() => handleNotifyToggle('kradle-notify-approvals', setNotifyApprovals, notifyApprovals)} />
             Approval requests
           </label>
           <p style={descStyle}>Notify when an agent requests approval for an action.</p>
         </div>
         <div>
           <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
-            <input type="checkbox" checked={notifyConflicts} onChange={() => handleNotifyToggle('krate-notify-conflicts', setNotifyConflicts, notifyConflicts)} />
+            <input type="checkbox" checked={notifyConflicts} onChange={() => handleNotifyToggle('kradle-notify-conflicts', setNotifyConflicts, notifyConflicts)} />
             Sync conflicts
           </label>
           <p style={descStyle}>Notify when external sync conflicts are detected.</p>
         </div>
         <div>
           <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
-            <input type="checkbox" checked={notifyWorkspaces} onChange={() => handleNotifyToggle('krate-notify-workspaces', setNotifyWorkspaces, notifyWorkspaces)} />
+            <input type="checkbox" checked={notifyWorkspaces} onChange={() => handleNotifyToggle('kradle-notify-workspaces', setNotifyWorkspaces, notifyWorkspaces)} />
             Workspace updates
           </label>
           <p style={descStyle}>Notify when workspaces are claimed or released.</p>
         </div>
         <div>
           <label style={{ ...radioLabelStyle, fontWeight: 600 }}>
-            <input type="checkbox" checked={notifySound} onChange={() => handleNotifyToggle('krate-notify-sound', setNotifySound, notifySound)} />
+            <input type="checkbox" checked={notifySound} onChange={() => handleNotifyToggle('kradle-notify-sound', setNotifySound, notifySound)} />
             Sound
           </label>
           <p style={descStyle}>Play a sound when notifications arrive.</p>

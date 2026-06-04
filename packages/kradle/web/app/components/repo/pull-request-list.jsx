@@ -29,7 +29,7 @@ export function PullRequestList({ org, repo, pullRequests = [] }) {
     setMessage('');
     try {
       const resource = {
-        apiVersion: 'krate.a5c.ai/v1alpha1',
+        apiVersion: 'kradle.a5c.ai/v1alpha1',
         kind: 'PullRequest',
         metadata: { name: form.name },
         spec: {

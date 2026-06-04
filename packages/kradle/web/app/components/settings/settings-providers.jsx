@@ -77,7 +77,7 @@ function AddProviderForm({ org, onCreated, secrets }) {
     }
 
     const resource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'AgentProviderConfig',
       metadata: { name: name.trim() },
       spec,

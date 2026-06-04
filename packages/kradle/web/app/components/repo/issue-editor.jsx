@@ -116,11 +116,11 @@ function buildIssueResource(form, scope = {}) {
   const projects = unique([scope.project, ...csv(form.projects)]);
   const labels = csv(form.labels);
   return {
-    apiVersion: 'krate.a5c.ai/v1alpha1',
+    apiVersion: 'kradle.a5c.ai/v1alpha1',
     kind: 'Issue',
     metadata: {
       name: resourceName(form.name),
-      annotations: { 'krate.a5c.ai/repositories': repositories.join(', '), 'krate.a5c.ai/projects': projects.join(', ') }
+      annotations: { 'kradle.a5c.ai/repositories': repositories.join(', '), 'kradle.a5c.ai/projects': projects.join(', ') }
     },
     spec: {
       title: form.title.trim(),
@@ -133,7 +133,7 @@ function buildIssueResource(form, scope = {}) {
       projects,
       projectRefs: projects.map((name) => ({ name })),
       comments: [],
-      sync: { backend: 'krate', mode: 'metadata' }
+      sync: { backend: 'kradle', mode: 'metadata' }
     },
     status: { phase: 'Open' }
   };
@@ -144,7 +144,7 @@ function buildIssuePatch(form) {
   const projects = csv(form.projects);
   const labels = csv(form.labels);
   return {
-    metadata: { annotations: { 'krate.a5c.ai/repositories': repositories.join(', '), 'krate.a5c.ai/projects': projects.join(', ') } },
+    metadata: { annotations: { 'kradle.a5c.ai/repositories': repositories.join(', '), 'kradle.a5c.ai/projects': projects.join(', ') } },
     spec: {
       title: form.title.trim(),
       description: form.description,
@@ -155,7 +155,7 @@ function buildIssuePatch(form) {
       repositoryRefs: repositories.map((name) => ({ name })),
       projects,
       projectRefs: projects.map((name) => ({ name })),
-      sync: { backend: 'krate', mode: 'metadata' }
+      sync: { backend: 'kradle', mode: 'metadata' }
     },
     status: { phase: form.status }
   };
@@ -170,7 +170,7 @@ function issueHref(org, name, { repo = null, project = null } = {}) {
 function refsFrom(issue, scope, fallback) {
   const singular = scope === 'repository' ? ['repository', 'repoRef', 'repositoryRef'] : ['project', 'projectRef', 'krateProject', 'krateProjectRef'];
   const plural = scope === 'repository' ? ['repositories', 'repositoryRefs'] : ['projects', 'projectRefs'];
-  return unique([fallback, ...singular.map((key) => issue.spec?.[key]), ...plural.flatMap((key) => issue.spec?.[key] || []), issue.metadata?.annotations?.[`krate.a5c.ai/${plural[0]}`], issue.metadata?.labels?.[`krate.a5c.ai/${scope}`]]);
+  return unique([fallback, ...singular.map((key) => issue.spec?.[key]), ...plural.flatMap((key) => issue.spec?.[key] || []), issue.metadata?.annotations?.[`kradle.a5c.ai/${plural[0]}`], issue.metadata?.labels?.[`kradle.a5c.ai/${scope}`]]);
 }
 
 function normalizeComments(issue) {

@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 
-export const THEME_STORAGE_KEY = 'krate-theme';
-export const THEME_CHANGED_EVENT = 'krate-theme-changed';
+export const THEME_STORAGE_KEY = 'kradle-theme';
+export const THEME_CHANGED_EVENT = 'kradle-theme-changed';
 
 export function readStoredTheme(fallback = 'light') {
   if (typeof window === 'undefined') return fallback;

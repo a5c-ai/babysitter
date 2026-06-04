@@ -42,12 +42,12 @@ export function RunnerPoolManager({ org = 'default', pools = [], onPoolChange = 
     setMessage('');
 
     const resource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'RunnerPool',
       metadata: {
         name: form.name,
         namespace: `kradle-org-${org}`,
-        labels: { 'krate.a5c.ai/trust-tier': form.trustTier }
+        labels: { 'kradle.a5c.ai/trust-tier': form.trustTier }
       },
       spec: {
         organizationRef: org,

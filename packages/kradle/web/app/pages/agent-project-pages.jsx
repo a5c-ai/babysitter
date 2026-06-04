@@ -63,10 +63,10 @@ export async function AgentProjectBoardPage({ org = null, projectId } = {}) {
   const enrichedItems = boardItems.map((item) => {
     const itemName = item.metadata?.name || item.spec?.title;
     const ws = workspaces.find(
-      (w) => w.spec?.boardItemRef === itemName || w.metadata?.labels?.['krate.a5c.ai/board-item'] === itemName
+      (w) => w.spec?.boardItemRef === itemName || w.metadata?.labels?.['kradle.a5c.ai/board-item'] === itemName
     );
     const sess = sessions.find(
-      (s) => s.spec?.boardItemRef === itemName || s.metadata?.labels?.['krate.a5c.ai/board-item'] === itemName
+      (s) => s.spec?.boardItemRef === itemName || s.metadata?.labels?.['kradle.a5c.ai/board-item'] === itemName
     );
     return {
       ...item,

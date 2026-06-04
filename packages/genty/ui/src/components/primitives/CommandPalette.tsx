@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 
-const RECENT_COMMANDS_KEY = 'krate:recentCommands';
+const RECENT_COMMANDS_KEY = 'kradle:recentCommands';
 const MAX_RECENT = 5;
 
 function useDebounce<T>(value: T, delay: number = 300): T {

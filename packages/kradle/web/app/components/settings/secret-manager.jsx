@@ -95,7 +95,7 @@ export function SecretManager({ org = 'default', secrets = [], configMaps = [], 
       if (grantedTo.trim()) {
         const grantKind = isSecret ? 'AgentSecretGrant' : 'AgentConfigGrant';
         const grantResource = {
-          apiVersion: 'krate.a5c.ai/v1alpha1',
+          apiVersion: 'kradle.a5c.ai/v1alpha1',
           kind: grantKind,
           metadata: { name: `${newName.trim()}-grant-${grantedTo.trim()}` },
           spec: {

@@ -26,7 +26,7 @@ export function StackBuilder({ org, existingStack = null }) {
   const meta = existingStack?.metadata || {};
 
   const [name, setName] = useState(meta.name || '');
-  const [displayName, setDisplayName] = useState(meta.labels?.['krate.a5c.ai/display-name'] || spec.displayName || '');
+  const [displayName, setDisplayName] = useState(meta.labels?.['kradle.a5c.ai/display-name'] || spec.displayName || '');
   const [baseAgent, setBaseAgent] = useState(spec.baseAgent || spec.agent || 'claude-code');
   const [adapter, setAdapter] = useState(spec.adapter || '');
   const [model, setModel] = useState(spec.model || '');
@@ -49,12 +49,12 @@ export function StackBuilder({ org, existingStack = null }) {
     setMessage('');
 
     const resource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'AgentStack',
       metadata: {
         name,
         labels: {
-          ...(displayName ? { 'krate.a5c.ai/display-name': displayName } : {}),
+          ...(displayName ? { 'kradle.a5c.ai/display-name': displayName } : {}),
         },
       },
       spec: {

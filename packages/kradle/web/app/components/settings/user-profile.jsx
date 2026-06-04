@@ -86,7 +86,7 @@ export function UserProfileForm({ org, user }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apiVersion: 'krate.a5c.ai/v1alpha1',
+          apiVersion: 'kradle.a5c.ai/v1alpha1',
           kind: 'AgentSecretGrant',
           metadata: { name: `user-apikey-${keyName.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-')}` },
           spec: {

@@ -27,7 +27,7 @@ function orgPrefixedHref(org, href) {
   return '/orgs/' + org + (href === '/' ? '' : href);
 }
 
-const RECENT_KEY = 'krate:recentSearches';
+const RECENT_KEY = 'kradle:recentSearches';
 const MAX_RECENT = 5;
 
 function getRecentSearches() {

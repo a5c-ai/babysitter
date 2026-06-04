@@ -42,7 +42,7 @@ export function CodeEditor({ value, language = 'yaml', label = 'CodeMirror resou
   return <div className={`codeEditorShell ${compact ? 'compactEditor' : ''}`} aria-label={label}>
     <div className="editorToolbar"><span>CodeMirror</span><span>{language}</span></div>
     <CodeMirror
-      value={value || 'apiVersion: krate.a5c.ai/v1alpha1\nkind: Resource'}
+      value={value || 'apiVersion: kradle.a5c.ai/v1alpha1\nkind: Resource'}
       extensions={extensions}
       editable={false}
       basicSetup={{ foldGutter: false, highlightActiveLine: false, highlightActiveLineGutter: false }}
@@ -58,7 +58,7 @@ export function LiveWatchPanel({ org = 'default', resource = 'pullrequests', ini
 
   useEffect(() => {
     const source = new EventSource(streamPath);
-    source.addEventListener('krate', (event) => {
+    source.addEventListener('kradle', (event) => {
       const payload = JSON.parse(event.data);
       setState((current) => ({ status: 'streaming', error: '', events: [payload, ...current.events].slice(0, 6) }));
     });

@@ -89,7 +89,7 @@ export function KradleControllerRecovery({ org = 'default', pollMs = 2500 }) {
     let disposed = false;
 
     function refreshPageOnce() {
-      refreshCurrentRoute(router, `krate-recovery-refresh:${org}:${pathname || '/'}`, 60000);
+      refreshCurrentRoute(router, `kradle-recovery-refresh:${org}:${pathname || '/'}`, 60000);
     }
 
     async function checkController() {

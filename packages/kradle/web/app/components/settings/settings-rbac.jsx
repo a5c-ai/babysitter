@@ -123,7 +123,7 @@ function AddServiceAccountForm({ org, onCreated }) {
     }
 
     const saResource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'AgentServiceAccount',
       metadata: { name: name.trim() },
       spec: {
@@ -134,7 +134,7 @@ function AddServiceAccountForm({ org, onCreated }) {
     };
 
     const roleBindingResource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'AgentRoleBinding',
       metadata: { name: `${name.trim()}-binding` },
       spec: {

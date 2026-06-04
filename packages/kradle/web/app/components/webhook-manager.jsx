@@ -167,7 +167,7 @@ function AddWebhookForm({ org, onCreated }) {
     setMessage('');
 
     const resource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'ExternalWebhookConfig',
       metadata: { name: name.trim() },
       spec: {

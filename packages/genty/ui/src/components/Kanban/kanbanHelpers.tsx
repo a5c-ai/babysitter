@@ -369,7 +369,7 @@ export function StartWorkDialog({ item, onConfirm, onCancel, org }: StartWorkDia
           Start work on &quot;{name}&quot;?
         </h3>
         <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-          This will create or claim a KrateWorkspace for{' '}
+          This will create or claim a KradleWorkspace for{' '}
           {repoRef ? `repository ${repoRef}` : 'this item'} and link it to the board card.
         </p>
         {repoRef ? (

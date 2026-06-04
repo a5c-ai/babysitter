@@ -30,7 +30,7 @@ export function GatewaySection({ org, gateway }) {
     setMessage('');
 
     const resource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'AgentGatewayConfig',
       metadata: { name: existingName },
       spec: { organizationRef: org, gatewayUrl: url.trim() },

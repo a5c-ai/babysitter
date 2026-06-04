@@ -112,7 +112,7 @@ export function DeploymentManager({ namespace, org, repositories = [], delivery 
         body: JSON.stringify({
           apiVersion: 'core.oam.dev/v1beta1',
           kind: 'Application',
-          metadata: { name, namespace, labels: { 'krate.a5c.ai/org': org, 'krate.a5c.ai/namespace': namespace, 'krate.a5c.ai/repository': repository, 'krate.a5c.ai/environment': environment } },
+          metadata: { name, namespace, labels: { 'kradle.a5c.ai/org': org, 'kradle.a5c.ai/namespace': namespace, 'kradle.a5c.ai/repository': repository, 'kradle.a5c.ai/environment': environment } },
           spec: {
             organizationRef: org,
             components: [{ name: componentName, type: 'webservice', properties: { image, ports: [{ port, expose: true }] } }],
@@ -243,7 +243,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
     const email = String(formData.get('email') || '').trim();
     const name = resourceName(email) || 'invite';
     await applyKradleResource({
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'Invite',
       metadata: { name, namespace },
       spec: { organizationRef: org, email, role: formData.get('role'), teams: splitList(formData.get('teams')), invitedBy: 'current-admin' },
@@ -253,7 +253,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
 
   async function transitionInvite(invite, phase) {
     await applyKradleResource({
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'Invite',
       metadata: { name: invite.name || resourceName(invite.email), namespace },
       spec: { organizationRef: org, email: invite.email, role: invite.role, teams: invite.teams || [], expiresAt: invite.expiresAt },
@@ -264,7 +264,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
   async function saveTeam(formData) {
     const name = String(formData.get('name') || '').trim();
     await applyKradleResource({
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'Team',
       metadata: { name, namespace },
       spec: { organizationRef: org, displayName: formData.get('displayName') || name, members: splitList(formData.get('members')), maintainers: splitList(formData.get('maintainers')), repositoryGrants: [] },
@@ -274,7 +274,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
 
   async function setUserDisabled(user, disabled) {
     await applyKradleResource({
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'User',
       metadata: { name: user.name, namespace, labels: { role: user.admin ? 'admin' : 'member' } },
       spec: { organizationRef: org, displayName: user.displayName, email: user.email, username: user.name, teams: user.teams || [], admin: user.admin, disabled },
@@ -286,7 +286,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
     const user = String(formData.get('user') || '').trim();
     const provider = String(formData.get('provider') || 'sso').trim();
     await applyKradleResource({
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'IdentityMapping',
       metadata: { name: `${provider}-${user}`, namespace },
       spec: {
@@ -306,7 +306,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
     const repository = String(formData.get('repository') || '').trim();
     const subject = String(formData.get('subject') || '').trim();
     await applyKradleResource({
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'RepositoryPermission',
       metadata: { name: `${repository}-${subject}`.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), namespace },
       spec: { organizationRef: org, repository, subject, subjectKind: formData.get('subjectKind'), permission: formData.get('permission'), revoked: false },
@@ -316,7 +316,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
 
   async function revokePermission(grant) {
     await applyKradleResource({
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'RepositoryPermission',
       metadata: { name: grant.name || `${grant.repository}-${grant.subject}`.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), namespace },
       spec: { organizationRef: org, repository: grant.repository, subject: grant.subject, subjectKind: grant.subjectKind || 'user', permission: grant.permission || 'read', revoked: true },
@@ -328,7 +328,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
     const owner = String(formData.get('owner') || '').trim();
     const title = String(formData.get('title') || owner || 'ssh-key').trim();
     await applyKradleResource({
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'SSHKey',
       metadata: { name: `${owner}-${title}`.toLowerCase().replace(/[^a-z0-9-]+/g, '-'), namespace },
       spec: { organizationRef: org, owner, title, scope: formData.get('scope'), repository: formData.get('repository'), key: formData.get('key'), revoked: false },
@@ -338,7 +338,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
 
   async function revokeSshKey(key) {
     await applyKradleResource({
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'SSHKey',
       metadata: { name: key.name, namespace },
       spec: { organizationRef: org, owner: key.owner, title: key.title, scope: key.scope, repository: key.repository, revoked: true },
@@ -353,7 +353,7 @@ export function UserManagementPanel({ namespace, org, identity = {}, repositorie
       <InviteReviewList invites={invites} busy={busy} onAccept={(invite) => transitionInvite(invite, 'Accepted')} onRevoke={(invite) => transitionInvite(invite, 'Revoked')} />
     </div>
     <div className="card managementCard"><div className="cardTitle"><h3>Teams</h3><span className="pill neutral">groups</span></div><form action={saveTeam} className="formGrid"><label><span>Name</span><input name="name" required placeholder="maintainers" /></label><label><span>Display name</span><input name="displayName" placeholder="Maintainers" /></label><label><span>Members</span><input name="members" placeholder="alice, bob" /></label><label><span>Maintainers</span><input name="maintainers" placeholder="alice" /></label><button type="submit" disabled={busy}>Save team membership</button></form><IdentityList title="Active teams" items={teams.map((team) => `${team.displayName} - ${team.members.length} members - ${team.maintainers.length} maintainers`)} /></div>
-    <div className="card managementCard"><div className="cardTitle"><h3>Identity links</h3><span className="pill neutral">linked</span></div><form action={saveMapping} className="formGrid"><label><span>User</span><input name="user" required placeholder="alice" /></label><label><span>Provider</span><select name="provider" defaultValue="sso"><option value="sso">SSO</option><option value="github">GitHub</option><option value="delegated">Delegated</option></select></label><label><span>Email</span><input name="email" type="email" required /></label><label><span>Provider account</span><input name="subject" required /></label><label><span>Workspace identity</span><input name="workspaceIdentity" /></label><label><span>Workspace groups</span><input name="workspaceGroups" placeholder="krate:developers" /></label><label><span>Kradle repository username</span><input name="repositoryUsername" /></label><button type="submit" disabled={busy}>Save identity link</button></form><IdentityList title="Linked users" items={mappings.map((mapping) => `${mapping.user} - ${mapping.provider} - ${mapping.phase}`)} /></div>
+    <div className="card managementCard"><div className="cardTitle"><h3>Identity links</h3><span className="pill neutral">linked</span></div><form action={saveMapping} className="formGrid"><label><span>User</span><input name="user" required placeholder="alice" /></label><label><span>Provider</span><select name="provider" defaultValue="sso"><option value="sso">SSO</option><option value="github">GitHub</option><option value="delegated">Delegated</option></select></label><label><span>Email</span><input name="email" type="email" required /></label><label><span>Provider account</span><input name="subject" required /></label><label><span>Workspace identity</span><input name="workspaceIdentity" /></label><label><span>Workspace groups</span><input name="workspaceGroups" placeholder="kradle:developers" /></label><label><span>Kradle repository username</span><input name="repositoryUsername" /></label><button type="submit" disabled={busy}>Save identity link</button></form><IdentityList title="Linked users" items={mappings.map((mapping) => `${mapping.user} - ${mapping.provider} - ${mapping.phase}`)} /></div>
     <div className="card managementCard">
       <div className="cardTitle"><h3>Repository permissions</h3><span className="pill neutral">permissions</span></div>
       <form action={savePermission} className="formGrid"><label><span>Repository</span><select name="repository" required>{repositories.map((repo) => <option key={repo.metadata?.name} value={repo.metadata?.name}>{repo.metadata?.name}</option>)}</select></label><label><span>User or team</span><input name="subject" required placeholder="alice or maintainers" /></label><label><span>Subject type</span><select name="subjectKind" defaultValue="user"><option value="user">user</option><option value="team">team</option></select></label><label><span>Permission</span><select name="permission" defaultValue="read"><option value="read">read</option><option value="write">write</option><option value="admin">admin</option></select></label><button type="submit" disabled={busy}>Grant permission</button></form>

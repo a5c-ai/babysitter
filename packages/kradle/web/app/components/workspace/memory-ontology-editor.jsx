@@ -64,7 +64,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
   const existingName = existing?.metadata?.name || '';
   const [ontologyName, setOntologyName] = useState(existingName || 'default');
   const [memRepo, setMemRepo] = useState(existing?.spec?.memoryRepository || memoryRepository || '');
-  const [ontologyPath, setOntologyPath] = useState(existing?.spec?.ontologyPath || '.krate/ontology.yaml');
+  const [ontologyPath, setOntologyPath] = useState(existing?.spec?.ontologyPath || '.kradle/ontology.yaml');
   const [nodeKinds, setNodeKinds] = useState(
     (existing?.spec?.nodeKinds || []).map((k) =>
       typeof k === 'string' ? { name: k, description: '', color: '#3b82f6' } : k
@@ -128,12 +128,12 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
     setSaveStatus('saving');
     setSaveError('');
     const resource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'AgentMemoryOntology',
       metadata: { name: ontologyName },
       spec: {
         memoryRepository: memRepo || 'default',
-        ontologyPath: ontologyPath || '.krate/ontology.yaml',
+        ontologyPath: ontologyPath || '.kradle/ontology.yaml',
         nodeKinds: nodeKinds.map((k) => ({ name: k.name, description: k.description, color: k.color })),
         edgeKinds: edgeKinds.map((k) => ({ name: k.name, sourceKinds: k.sourceKinds, targetKinds: k.targetKinds })),
       },
@@ -212,7 +212,7 @@ export function MemoryOntologyEditor({ org, initialOntology = null, memoryReposi
           </div>
           <div>
             <label style={{ display: 'block', fontWeight: 600, fontSize: '0.8125rem', marginBottom: '0.25rem' }}>Ontology path</label>
-            <input type="text" value={ontologyPath} onChange={(e) => setOntologyPath(e.target.value)} placeholder=".krate/ontology.yaml" style={inputStyle} />
+            <input type="text" value={ontologyPath} onChange={(e) => setOntologyPath(e.target.value)} placeholder=".kradle/ontology.yaml" style={inputStyle} />
           </div>
         </div>
       </div>

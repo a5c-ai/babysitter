@@ -2221,20 +2221,20 @@ jobs:
             --docker-password="$ACR_TOKEN" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Clean up legacy krate release and pre-Helm resources
+      - name: Clean up legacy kradle release and pre-Helm resources
         run: |
-          # Remove old krate Helm release from the legacy namespace
-          OLD_NS="${KUBE_NAMESPACE/kradle/krate}"
+          # Remove old kradle Helm release from the legacy namespace
+          OLD_NS="${KUBE_NAMESPACE/kradle/kradle}"
           if [ "$OLD_NS" != "$KUBE_NAMESPACE" ]; then
-            helm uninstall krate -n "$OLD_NS" 2>/dev/null || true
+            helm uninstall kradle -n "$OLD_NS" 2>/dev/null || true
             kubectl delete namespace "$OLD_NS" --ignore-not-found 2>/dev/null || true
           fi
-          # Also remove any leftover krate release in the current namespace
-          helm uninstall krate -n "$KUBE_NAMESPACE" 2>/dev/null || true
-          # Adopt orphaned resources still annotated with release-name=krate
+          # Also remove any leftover kradle release in the current namespace
+          helm uninstall kradle -n "$KUBE_NAMESPACE" 2>/dev/null || true
+          # Adopt orphaned resources still annotated with release-name=kradle
           for kind in ingress service deployment secret statefulset configmap serviceaccount; do
-            for name in $(kubectl -n "$KUBE_NAMESPACE" get "$kind" -o jsonpath='{range .items[?(@.metadata.annotations.meta\.helm\.sh/release-name=="krate")]}{.metadata.name}{"\n"}{end}' 2>/dev/null); do
-              echo "Adopting $kind/$name from krate → kradle"
+            for name in $(kubectl -n "$KUBE_NAMESPACE" get "$kind" -o jsonpath='{range .items[?(@.metadata.annotations.meta\.helm\.sh/release-name=="kradle")]}{.metadata.name}{"\n"}{end}' 2>/dev/null); do
+              echo "Adopting $kind/$name from kradle → kradle"
               kubectl -n "$KUBE_NAMESPACE" annotate "$kind" "$name" meta.helm.sh/release-name=kradle --overwrite
               kubectl -n "$KUBE_NAMESPACE" annotate "$kind" "$name" meta.helm.sh/release-namespace="$KUBE_NAMESPACE" --overwrite
             done

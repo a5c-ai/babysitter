@@ -169,6 +169,7 @@ jobs:
                 'droid': {agent:'droid', adapters_agent:'droid'},
                 'amp': {agent:'amp', adapters_agent:'amp'},
                 'genty': {agent:'genty', adapters_agent:'genty', agent_path:'genty'},
+                'antigravity': {agent:'antigravity', adapters_agent:'antigravity'},
               };
               const models = {
                 'foundry-gpt55': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},

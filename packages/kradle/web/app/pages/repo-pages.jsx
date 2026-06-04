@@ -20,7 +20,7 @@ function RepositoryHeader({ repo, repository, model }) {
   const visibility = repository?.spec?.visibility || 'private';
   const branch = repository?.spec?.defaultBranch || 'main';
   return <section className="repoHeader" aria-label="Repository header">
-    <div className="repoTitleLine"><span className="repoOwner">krate</span><span>/</span><strong>{repo}</strong><StatusPill tone="neutral">{visibility}</StatusPill></div>
+    <div className="repoTitleLine"><span className="repoOwner">kradle</span><span>/</span><strong>{repo}</strong><StatusPill tone="neutral">{visibility}</StatusPill></div>
     <div className="repoMetaLine"><span>{branch}</span><span>{model.namespace}</span><span>{repository?.status?.phase || 'not connected'}</span></div>
   </section>;
 }
@@ -350,7 +350,7 @@ function CodeBrowser({ org = 'default', repo, plan, exists, repository }) {
     ['dir', 'tests', 'lifecycle and policy coverage', 'yesterday'],
     ['file', 'README.md', 'document repository bootstrap and local flow', '6 hours ago'],
     ['file', 'package.json', 'wire UI and service scripts', '6 hours ago'],
-    ['file', 'examples/deployment.krate', 'add deployment example', '4 hours ago']
+    ['file', 'examples/deployment.kradle', 'add deployment example', '4 hours ago']
   ];
   const code = exists ? `git clone ${cloneUrl}
 cd ${repo}
@@ -359,7 +359,7 @@ Open a review
 Use repository settings when ready`;
   return <section className="repoFileBrowser" aria-label="Repository code browser">
     <div className="repoBrowserToolbar"><span className="branchLabel">{branch}</span><nav className="repoPath" aria-label="Repository path"><a href={orgHref(org, `/repositories/${repo}/code`)}>{repo}</a><span>/</span></nav><div className="repoToolbarActions"><a href={orgHref(org, '/advanced-plans')}>Advanced details</a></div></div>
-    <div className="commitBanner"><strong>{exists ? 'krate-service' : 'repository setup'}</strong><span>{exists ? 'Update forge resources and repository metadata' : 'Repository resource is not connected yet'}</span><small>{exists ? 'latest commit - status projected by Kradle' : 'create this repository to browse code'}</small></div>
+    <div className="commitBanner"><strong>{exists ? 'kradle-service' : 'repository setup'}</strong><span>{exists ? 'Update forge resources and repository metadata' : 'Repository resource is not connected yet'}</span><small>{exists ? 'latest commit - status projected by Kradle' : 'create this repository to browse code'}</small></div>
     <div className="fileList" role="table" aria-label="Files">{files.map(([type, name, message, time]) => <a role="row" key={name} href={name.endsWith('.md') ? '#readme' : orgHref(org, `/repositories/${repo}/code`)} className="fileRow"><span className={`fileIcon ${type}`}>{type === 'dir' ? 'folder' : 'file'}</span><strong>{name}</strong><span>{message}</span><time>{time}</time></a>)}</div>
     <article id="readme" className="readmePanel"><div className="readmeHeader"><strong>README.md</strong><span>Rendered repository overview</span></div><h2>{repo}</h2><p>This repository is managed by Kradle as a workspace repository. This page behaves like a forge home: browse files, choose a branch, copy clone commands, inspect status, and open advanced details only when needed.</p><CodeEditor language="javascript" label="Repository file viewer" value={code} /><PlanCard title="Repository details" plan={plan} command="Save repository changes" /></article>
   </section>;

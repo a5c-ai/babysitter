@@ -120,7 +120,7 @@ function AddAdapterForm({ org, onCreated }) {
     setMessage('');
 
     const resource = {
-      apiVersion: 'krate.a5c.ai/v1alpha1',
+      apiVersion: 'kradle.a5c.ai/v1alpha1',
       kind: 'AgentAdapter',
       metadata: { name: name.trim() },
       spec: {

@@ -28,7 +28,7 @@ export function RepoRuns({ org, repo, runs = [] }) {
     const runName = `${repo || 'run'}-${Date.now().toString(36)}`;
     try {
       const resource = {
-        apiVersion: 'krate.a5c.ai/v1alpha1',
+        apiVersion: 'kradle.a5c.ai/v1alpha1',
         kind: 'Pipeline',
         metadata: { name: runName },
         spec: {

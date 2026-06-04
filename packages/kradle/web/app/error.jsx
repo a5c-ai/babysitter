@@ -6,13 +6,13 @@ export default function Error({ error, reset }) {
 
   useEffect(() => {
     if (isChunkError) {
-      const reloaded = sessionStorage.getItem('krate-chunk-reload');
+      const reloaded = sessionStorage.getItem('kradle-chunk-reload');
       if (!reloaded) {
-        sessionStorage.setItem('krate-chunk-reload', '1');
+        sessionStorage.setItem('kradle-chunk-reload', '1');
         window.location.reload();
       }
     }
-    return () => sessionStorage.removeItem('krate-chunk-reload');
+    return () => sessionStorage.removeItem('kradle-chunk-reload');
   }, [isChunkError]);
 
   if (isChunkError) {

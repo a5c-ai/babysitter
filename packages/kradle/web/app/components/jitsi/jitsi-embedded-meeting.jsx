@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export const JITSI_EXTERNAL_API_SRC = 'https://meet.krate.local/external_api.js';
+export const JITSI_EXTERNAL_API_SRC = 'https://meet.kradle.local/external_api.js';
 export const JITSI_TOOLBAR_BUTTONS = [
   'microphone',
   'camera',

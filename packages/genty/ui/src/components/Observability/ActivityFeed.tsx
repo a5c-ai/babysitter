@@ -4,7 +4,7 @@ const EVENT_TYPE_MAP: Record<string, { type: string; icon: string; label: string
   AgentDispatchRun: { type: 'dispatch', icon: '⚡', label: 'Agent dispatch' },
   AgentApproval: { type: 'approval', icon: '✋', label: 'Approval request' },
   ExternalSyncConflict: { type: 'conflict', icon: '⚠', label: 'Sync conflict' },
-  KrateWorkspace: { type: 'workspace', icon: '🔑', label: 'Workspace event' },
+  KradleWorkspace: { type: 'workspace', icon: '🔑', label: 'Workspace event' },
 };
 
 const FILTER_LABELS = [

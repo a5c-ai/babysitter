@@ -8,7 +8,7 @@ export function MobileNavToggle() {
   const toggle = useCallback(() => {
     setOpen((prev) => {
       const next = !prev;
-      const sidebar = document.getElementById('krate-sidebar');
+      const sidebar = document.getElementById('kradle-sidebar');
       if (sidebar) {
         sidebar.classList.toggle('mobileOpen', next);
       }
@@ -18,7 +18,7 @@ export function MobileNavToggle() {
 
   const close = useCallback(() => {
     setOpen(false);
-    const sidebar = document.getElementById('krate-sidebar');
+    const sidebar = document.getElementById('kradle-sidebar');
     if (sidebar) sidebar.classList.remove('mobileOpen');
   }, []);
 
@@ -32,7 +32,7 @@ export function MobileNavToggle() {
   useEffect(() => {
     if (!open) return;
     function handleClick(e) {
-      const sidebar = document.getElementById('krate-sidebar');
+      const sidebar = document.getElementById('kradle-sidebar');
       if (sidebar && !sidebar.contains(e.target) && !e.target.closest('.mobileNavToggle')) {
         close();
       }
