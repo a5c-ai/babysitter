@@ -105,6 +105,7 @@ jobs:
           npm run build:adapters-extensions || true
           npm run build:adapters || true
           npm run build:runtime || true
+          npm run build --workspace=@a5c-ai/genty || true
           if [[ "$RUNNER_OS" != "Windows" ]]; then
             npm run build:observer || true
             npm run build:cloud || true
@@ -382,8 +383,8 @@ jobs:
           mkdir -p "$HOME/.local/bin"
           for pair in \
             "adapters:packages/adapters/sdk/dist/bin/adapters.js" \
-            "agent-platform:packages/genty/dist/cli/main.js" \
-            "genty:packages/genty/dist/cli/main.js" \
+            "agent-platform:packages/genty/cli/dist/cli/main.js" \
+            "genty:packages/genty/cli/dist/cli/main.js" \
             "babysitter:packages/sdk/dist/cli/main.js" \
             "adapters-hooks:packages/adapters/hooks/cli/dist/cli/main.js"
           do
@@ -437,8 +438,8 @@ jobs:
           LIVE_STACK_COMMAND_TIMEOUT_MS: '4800000'
           LIVE_STACK_BABYSITTER_BIN: ${{ github.workspace }}/packages/sdk/dist/cli/main.js
           LIVE_STACK_AGENT_MUX_BIN: ${{ github.workspace }}/packages/adapters/cli/dist/index.js
-          LIVE_STACK_AGENT_PLATFORM_BIN: ${{ github.workspace }}/packages/genty/dist/cli/main.js
-          LIVE_STACK_GENTY_BIN: ${{ github.workspace }}/packages/genty/dist/cli/main.js
+          LIVE_STACK_AGENT_PLATFORM_BIN: ${{ github.workspace }}/packages/genty/cli/dist/cli/main.js
+          LIVE_STACK_GENTY_BIN: ${{ github.workspace }}/packages/genty/cli/dist/cli/main.js
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
           AGENT_MUX_PROVIDER: foundry
@@ -490,7 +491,7 @@ jobs:
           mkdir -p "$HOME/.a5c" .a5c 2>/dev/null || true
           # Verify genty can start — capture and echo output for debugging
           echo "::group::Genty startup check"
-          OMNI_CHECK=$(node packages/genty/dist/cli/main.js version 2>&1) && echo "genty ok: $OMNI_CHECK" || echo "OMNI STARTUP FAILED: $OMNI_CHECK"
+          OMNI_CHECK=$(node packages/genty/cli/dist/cli/main.js version 2>&1) && echo "genty ok: $OMNI_CHECK" || echo "OMNI STARTUP FAILED: $OMNI_CHECK"
           echo "::endgroup::"
           START_TS=$(date +%s)
           npm run test:e2e:live-stack:pipeline
