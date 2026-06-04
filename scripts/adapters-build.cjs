@@ -15,7 +15,7 @@ const packages = [
   'packages/adapters/transport',
   'packages/adapters/cli',
   'packages/adapters/sdk',
-  'packages/adapters/tui',
+  'packages/genty/tui',
   'packages/adapters/webui',
 ];
 

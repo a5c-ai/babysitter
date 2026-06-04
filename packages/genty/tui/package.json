@@ -55,11 +55,11 @@
     "access": "public"
   },
   "scripts": {
-    "build": "cd ../../.. && node scripts/adapters-build.cjs build packages/adapters/tui",
+    "build": "cd ../../.. && node scripts/adapters-build.cjs build packages/genty/tui",
     "build:local": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
     "start": "node ./dist/bin/adapters-tui.js",
     "dev": "npm run build && npm start",
-    "test": "cd ../../.. && node scripts/adapters-build.cjs test packages/adapters/tui",
+    "test": "cd ../../.. && node scripts/adapters-build.cjs test packages/genty/tui",
     "verify:release": "node ./scripts/verify-release.mjs",
     "prepublishOnly": "npm run build && npm run verify:release"
   },

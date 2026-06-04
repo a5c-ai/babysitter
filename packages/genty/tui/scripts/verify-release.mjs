@@ -53,44 +53,44 @@ export function verifyAgentMuxTuiRelease({ packageRoot, manifest, packEntries })
 
   expect(
     manifest.name === '@a5c-ai/genty-tui',
-    'packages/adapters/tui/package.json name must stay @a5c-ai/genty-tui'
+    'packages/genty/tui/package.json name must stay @a5c-ai/genty-tui'
   );
   expect(
     manifest.publishConfig?.access === 'public',
-    'packages/adapters/tui/package.json publishConfig.access must stay public'
+    'packages/genty/tui/package.json publishConfig.access must stay public'
   );
   expect(
     Array.isArray(manifest.files) && manifest.files.includes('specs'),
-    'packages/adapters/tui/package.json files must keep shipping specs/'
+    'packages/genty/tui/package.json files must keep shipping specs/'
   );
   expect(
-    scripts.build === 'cd ../../.. && node scripts/adapters-build.cjs build packages/adapters/tui',
-    'packages/adapters/tui/package.json build must stay routed through scripts/adapters-build.cjs'
+    scripts.build === 'cd ../../.. && node scripts/adapters-build.cjs build packages/genty/tui',
+    'packages/genty/tui/package.json build must stay routed through scripts/adapters-build.cjs'
   );
   expect(
-    scripts.test === 'cd ../../.. && node scripts/adapters-build.cjs test packages/adapters/tui',
-    'packages/adapters/tui/package.json test must stay routed through scripts/adapters-build.cjs'
+    scripts.test === 'cd ../../.. && node scripts/adapters-build.cjs test packages/genty/tui',
+    'packages/genty/tui/package.json test must stay routed through scripts/adapters-build.cjs'
   );
   expect(
     scripts['verify:release'] === 'node ./scripts/verify-release.mjs',
-    'packages/adapters/tui/package.json verify:release must point at the package-local release verifier'
+    'packages/genty/tui/package.json verify:release must point at the package-local release verifier'
   );
   expect(
     scripts.prepublishOnly === 'npm run build && npm run verify:release',
-    'packages/adapters/tui/package.json prepublishOnly must build the package and run verify:release'
+    'packages/genty/tui/package.json prepublishOnly must build the package and run verify:release'
   );
   expect(
     manifest.bin?.['adapters-tui'] === './dist/bin/adapters-tui.js',
-    'packages/adapters/tui/package.json bin.adapters-tui must point to ./dist/bin/adapters-tui.js'
+    'packages/genty/tui/package.json bin.adapters-tui must point to ./dist/bin/adapters-tui.js'
   );
   expect(
     manifest.bin?.['adapters-tui'] === './dist/bin/adapters-tui.js',
-    'packages/adapters/tui/package.json bin.adapters-tui must point to ./dist/bin/adapters-tui.js'
+    'packages/genty/tui/package.json bin.adapters-tui must point to ./dist/bin/adapters-tui.js'
   );
   expect(
     pluginExport.types === './dist/plugin.d.ts' &&
       pluginExport.default === './dist/plugin.js',
-    'packages/adapters/tui/package.json must keep exporting ./plugin from dist/plugin.*'
+    'packages/genty/tui/package.json must keep exporting ./plugin from dist/plugin.*'
   );
 
   for (const relativePath of REQUIRED_BUILD_PATHS) {
@@ -107,7 +107,7 @@ export function verifyAgentMuxTuiRelease({ packageRoot, manifest, packEntries })
   for (const readmeLink of REQUIRED_README_SPEC_LINKS) {
     expect(
       readme.includes(readmeLink),
-      `packages/adapters/tui/README.md must keep linking ${readmeLink}`
+      `packages/genty/tui/README.md must keep linking ${readmeLink}`
     );
   }
 }

@@ -149,7 +149,7 @@ const updateLockVersion = (path, version) => {
         "@a5c-ai/comm-adapter": version
       }
     },
-    "packages/adapters/tui": {
+    "packages/genty/tui": {
       version,
       dependencies: {
         "@a5c-ai/adapters": version,
@@ -289,7 +289,7 @@ const agentMuxManifestPaths = [
   "packages/adapters/mobile-ios-app/package.json",
   "packages/adapters/observability/package.json",
   "packages/adapters/sdk/package.json",
-  "packages/adapters/tui/package.json",
+  "packages/genty/tui/package.json",
   "packages/adapters/tv-androidtv-app/package.json",
   "packages/adapters/tv-appletv-app/package.json",
   "packages/genty/ui/package.json",
@@ -379,7 +379,7 @@ for (const path of [
   "packages/adapters/mobile-android-app/package.json",
   "packages/adapters/mobile-ios-app/package.json",
   "packages/adapters/sdk/package.json",
-  "packages/adapters/tui/package.json",
+  "packages/genty/tui/package.json",
   "packages/adapters/webui/package.json",
   "packages/genty/ui/package.json",
   "packages/adapters/webui/package.json",

@@ -35,13 +35,13 @@ const binaryRenames = [
   },
   {
     packageName: "@a5c-ai/genty-tui",
-    manifestPath: "packages/adapters/tui/package.json",
+    manifestPath: "packages/genty/tui/package.json",
     canonicalBin: "adapters-tui",
     canonicalTarget: "./dist/bin/adapters-tui.js",
-    canonicalSource: "packages/adapters/tui/src/bin/adapters-tui.tsx",
+    canonicalSource: "packages/genty/tui/src/bin/adapters-tui.tsx",
     legacyBin: "adapters-tui",
     legacyTarget: "./dist/bin/adapters-tui.js",
-    legacySource: "packages/adapters/tui/src/bin/adapters-tui.tsx",
+    legacySource: "packages/genty/tui/src/bin/adapters-tui.tsx",
   },
   {
     packageName: "@a5c-ai/hooks-adapter-cli",
