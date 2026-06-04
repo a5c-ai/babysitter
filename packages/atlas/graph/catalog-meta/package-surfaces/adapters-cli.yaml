@@ -3,6 +3,10 @@ id: package:a5c-ai-adapters-cli
 attributes:
   packageId: "@a5c-ai/adapters-cli"
   packageName: "@a5c-ai/adapters-cli"
+  displayName: "Adapters CLI"
+  description: "CLI runtime for the adapters system. Provides the `adapters` command with subcommands for running, installing, detecting, and managing AI coding harnesses, models, sessions, plugins, and gateway operations."
+  role: "adapter-cli"
+  whenToUse: "Use this when building or extending the adapters command-line interface, or when you need programmatic access to CLI commands like run, install, detect, launch, or gateway management."
   workspacePath: packages/adapters/cli
   moduleType: typescript
   surfaceKinds:

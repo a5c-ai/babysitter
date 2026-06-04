@@ -3,6 +3,10 @@ id: package:a5c-ai-adapters-ui
 attributes:
   packageId: "@a5c-ai/genty-ui"
   packageName: "@a5c-ai/genty-ui"
+  displayName: "Genty UI"
+  description: "Shared UI foundation and session-flow projection surface for browser and React Native adapters apps. Contains React components, hooks, and layout primitives used by web, desktop, and mobile surfaces."
+  role: "shared-ui-library"
+  whenToUse: "Depend on this when building any visual surface (web, desktop, mobile) that renders adapters sessions, agent state, or shared UI components."
   workspacePath: packages/adapters/ui
   moduleType: typescript
   surfaceKinds:

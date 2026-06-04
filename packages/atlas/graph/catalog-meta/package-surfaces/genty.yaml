@@ -3,6 +3,10 @@ id: package:a5c-ai-genty
 attributes:
   packageId: "@a5c-ai/genty"
   packageName: "@a5c-ai/genty"
+  displayName: "Genty"
+  description: "Unified agent product integrating core, runtime, platform, and TUI into a single installable CLI. Composes genty-core, genty-runtime, genty-platform, adapters, and babysitter-sdk into the `genty` binary."
+  role: "agent-product-cli"
+  whenToUse: "Install this when you need the full genty agent stack as a single dependency, including the CLI, LLM client, provider facade, and all subsystem integrations."
   workspacePath: packages/genty
   moduleType: typescript
   surfaceKinds:

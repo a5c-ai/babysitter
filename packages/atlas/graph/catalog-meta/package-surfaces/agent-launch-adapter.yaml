@@ -3,6 +3,10 @@ id: package:a5c-ai-agent-launch-adapter
 attributes:
   packageId: "@a5c-ai/launch-adapter"
   packageName: "@a5c-ai/launch-adapter"
+  displayName: "Launch Adapter"
+  description: "Launch orchestration for adapters: plan resolution, proxy setup, and harness spawning. Coordinates the full lifecycle from selecting a harness to starting a session."
+  role: "harness-launcher"
+  whenToUse: "Depend on this when you need to programmatically launch an AI coding harness session with resolved configuration and proxy setup."
   workspacePath: packages/adapters/launch
   moduleType: typescript
   surfaceKinds:

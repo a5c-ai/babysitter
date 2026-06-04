@@ -3,6 +3,10 @@ id: package:a5c-ai-adapters
 attributes:
   packageId: "@a5c-ai/adapters"
   packageName: "@a5c-ai/adapters"
+  displayName: "Adapters SDK"
+  description: "Unified dispatch layer for local CLI-based AI coding agents. Re-exports codec, config, launch, and observability subsystems as a single installable surface."
+  role: "adapter-sdk-root"
+  whenToUse: "Install this package when you need a single dependency that bundles all adapter subsystems for dispatching work to any supported AI coding harness."
   workspacePath: packages/adapters/sdk
   moduleType: typescript
   surfaceKinds:

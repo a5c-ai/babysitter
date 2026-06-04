@@ -3,5 +3,8 @@ id: package-surface:hooks-adapter-oh-my-pi
 attributes:
   packageId: "@a5c-ai/hooks-adapter-oh-my-pi"
   packageName: "@a5c-ai/hooks-adapter-oh-my-pi"
-  displayName: "hooks-adapter-oh-my-pi"
+  displayName: "Hooks Adapter - oh-my-pi"
+  description: "oh-my-pi harness adapter for the hooks-adapter system. Translates oh-my-pi-specific hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects oh-my-pi as the active harness. Extend this to customize hook behavior specific to oh-my-pi."
   status: active

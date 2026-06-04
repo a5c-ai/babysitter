@@ -3,5 +3,8 @@ id: package-surface:genty-watch-watchos-app
 attributes:
   packageId: "@a5c-ai/genty-watch-watchos-app"
   packageName: "@a5c-ai/genty-watch-watchos-app"
-  displayName: "genty-watch-watchos-app"
+  displayName: "Genty watchOS App"
+  description: "watchOS companion surface for adapters. Provides glanceable agent status and breakpoint notifications on Apple Watch."
+  role: "watch-companion-app"
+  whenToUse: "Build this when you want wrist-based notifications and quick agent status checks on Apple Watch."
   status: active

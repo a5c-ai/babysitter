@@ -3,6 +3,10 @@ id: package:a5c-ai-babysitter
 attributes:
   packageId: "@a5c-ai/babysitter"
   packageName: "@a5c-ai/babysitter"
+  displayName: "Babysitter"
+  description: "User-facing metapackage for installing all babysitter npm packages. Provides the `babysitter` CLI binary that delegates to babysitter-sdk, adapters, and genty."
+  role: "cli-metapackage"
+  whenToUse: "Install this as the single entry point when you want the complete babysitter toolchain (SDK, adapters, genty) available via one npm install."
   workspacePath: packages/babysitter
   moduleType: typescript
   surfaceKinds:

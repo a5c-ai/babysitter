@@ -3,5 +3,8 @@ id: package-surface:genty-core
 attributes:
   packageId: "@a5c-ai/genty-core"
   packageName: "@a5c-ai/genty-core"
-  displayName: "genty-core"
+  displayName: "Genty Core"
+  description: "Core runtime and tool surface for the genty agent stack. Defines the foundational agent primitives, tool interfaces, and execution context that all higher-level genty layers build upon."
+  role: "agent-core-runtime"
+  whenToUse: "Depend on this when building genty agent extensions or tools that need access to core agent primitives without pulling in the full platform or runtime layers."
   status: active

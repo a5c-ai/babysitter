@@ -3,6 +3,10 @@ id: package:a5c-ai-babysitter-sdk
 attributes:
   packageId: "@a5c-ai/babysitter-sdk"
   packageName: "@a5c-ai/babysitter-sdk"
+  displayName: "Babysitter SDK"
+  description: "Core SDK providing storage and run-registry primitives for event-sourced babysitter workflows. Includes the babysitter CLI, MCP server, and programmatic API for defining tasks, managing runs, sessions, plugins, skills, and process libraries."
+  role: "core-sdk"
+  whenToUse: "Depend on this when building babysitter processes, defining tasks via defineTask, or programmatically managing runs, sessions, breakpoints, and hooks."
   workspacePath: packages/sdk
   moduleType: typescript
   surfaceKinds:

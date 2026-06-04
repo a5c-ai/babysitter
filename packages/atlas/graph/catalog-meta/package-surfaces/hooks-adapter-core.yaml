@@ -3,6 +3,10 @@ id: package:a5c-ai-hooks-adapter-core
 attributes:
   packageId: "@a5c-ai/hooks-adapter-core"
   packageName: "@a5c-ai/hooks-adapter-core"
+  displayName: "Hooks Adapter Core"
+  description: "Canonical schemas, types, session store, and merge engine for the hooks-adapter system. Defines unified hook events, execution contexts, result merging, phase mapping, and harness detection contracts."
+  role: "hooks-core-engine"
+  whenToUse: "Depend on this when building a new per-harness hook adapter or when you need the shared types and merge logic that all hook adapters consume."
   workspacePath: packages/adapters/hooks/core
   moduleType: typescript
   surfaceKinds:

@@ -3,5 +3,8 @@ id: package-surface:hooks-adapter-gemini
 attributes:
   packageId: "@a5c-ai/hooks-adapter-gemini"
   packageName: "@a5c-ai/hooks-adapter-gemini"
-  displayName: "hooks-adapter-gemini"
+  displayName: "Hooks Adapter - Gemini CLI"
+  description: "Gemini CLI harness adapter for the hooks-adapter system. Translates Gemini CLI hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects Gemini CLI as the active harness. Extend this to customize hook behavior specific to Gemini CLI."
   status: active

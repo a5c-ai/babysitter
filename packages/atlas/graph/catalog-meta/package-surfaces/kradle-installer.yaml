@@ -3,6 +3,10 @@ id: package:a5c-ai-kradle-installer
 attributes:
   packageId: "@a5c-ai/kradle-installer"
   packageName: "@a5c-ai/kradle-installer"
+  displayName: "Kradle Installer"
+  description: "Kradle Kubernetes deployment installer providing Helm, Terraform, and environment management tooling. Orchestrates the full deployment lifecycle including infrastructure provisioning and chart installation."
+  role: "forge-deployment-tooling"
+  whenToUse: "Use this when setting up a new Kradle deployment, managing Terraform infrastructure, or automating Helm-based upgrades of the forge platform."
   workspacePath: packages/kradle/installer
   moduleType: nextjs
   surfaceKinds:

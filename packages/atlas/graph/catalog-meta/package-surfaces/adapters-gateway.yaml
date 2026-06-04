@@ -3,6 +3,10 @@ id: package:a5c-ai-adapters-gateway
 attributes:
   packageId: "@a5c-ai/adapters-gateway"
   packageName: "@a5c-ai/adapters-gateway"
+  displayName: "Adapters Gateway"
+  description: "Gateway server exposing REST and WebSocket APIs for remote and browser-facing adapters surfaces. Handles sessions, dispatches, runs, hooks, pairing, automations, and real-time streaming."
+  role: "gateway-server"
+  whenToUse: "Deploy this when you need a centralized server for remote agent management, browser-based UIs, or WebSocket-driven real-time event fanout from adapters."
   workspacePath: packages/adapters/gateway
   moduleType: typescript
   surfaceKinds:

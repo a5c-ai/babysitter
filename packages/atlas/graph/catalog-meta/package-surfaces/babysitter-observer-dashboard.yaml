@@ -3,5 +3,8 @@ id: package-surface:babysitter-observer-dashboard
 attributes:
   packageId: "@a5c-ai/babysitter-observer-dashboard"
   packageName: "@a5c-ai/babysitter-observer-dashboard"
-  displayName: "babysitter-observer-dashboard"
+  displayName: "Observer Dashboard"
+  description: "Real-time observability dashboard for babysitter orchestration runs. Displays task progress, journal events, and orchestration state in a browser-based UI that watches live runs."
+  role: "run-observer-ui"
+  whenToUse: "Launch this during or after babysitter runs to monitor task progress, inspect journal events, and debug orchestration state in real time."
   status: active

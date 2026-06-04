@@ -4,6 +4,10 @@ id: package:a5c-ai-kradle
 attributes:
   packageId: "@a5c-ai/kradle"
   packageName: "@a5c-ai/kradle"
+  displayName: "Kradle Core"
+  description: "Kubernetes-native forge runtime with Argo CD GitOps and Gitea-backed Git hosting. Provides the resource model, controllers, and a local dev server for the Kradle platform."
+  role: "k8s-forge-runtime"
+  whenToUse: "Depend on this when building Kradle controllers, extending the resource model, or running the local development server for the Kubernetes forge."
   workspacePath: packages/kradle/core
   moduleType: esm
   surfaceKinds:
@@ -26,6 +30,10 @@ id: package:a5c-ai-kradle-sdk
 attributes:
   packageId: "@a5c-ai/kradle-sdk"
   packageName: "@a5c-ai/kradle-sdk"
+  displayName: "Kradle SDK"
+  description: "Client SDK for the Kradle Kubernetes-native forge. Re-exports resource types and provides an Atlas graph client for querying forge state programmatically."
+  role: "forge-client-sdk"
+  whenToUse: "Depend on this when building tooling or UIs that need to query Kradle resources, read forge state, or interact with the Kradle API from TypeScript."
   workspacePath: packages/kradle/sdk
   moduleType: esm
   surfaceKinds:
@@ -47,6 +55,10 @@ id: package:a5c-ai-kradle-cli
 attributes:
   packageId: "@a5c-ai/kradle-cli"
   packageName: "@a5c-ai/kradle-cli"
+  displayName: "Kradle CLI"
+  description: "CLI and MCP server for the Kradle Kubernetes-native forge. Provides the `kradle` and `kradle-server` binaries for managing forge resources, deployments, and serving the MCP protocol."
+  role: "forge-cli"
+  whenToUse: "Use this to manage Kradle forge resources from the command line, start the MCP server, or integrate Kradle operations into scripts and CI/CD pipelines."
   workspacePath: packages/kradle/cli
   moduleType: esm
   surfaceKinds:
@@ -68,6 +80,10 @@ id: package:a5c-ai-kradle-web
 attributes:
   packageId: "@a5c-ai/kradle-web"
   packageName: "@a5c-ai/kradle-web"
+  displayName: "Kradle Web Console"
+  description: "Next.js management UI for the Kradle forge platform. Provides a browser-based console for managing Kubernetes resources, monitoring deployments, and configuring forge settings."
+  role: "forge-web-console"
+  whenToUse: "Deploy this when you need a browser-accessible management console for the Kradle Kubernetes forge."
   workspacePath: packages/kradle/web
   moduleType: nextjs
   surfaceKinds:
@@ -89,6 +105,10 @@ id: package:kradle-helm-chart
 attributes:
   packageId: kradle
   packageName: kradle
+  displayName: "Kradle Helm Chart"
+  description: "Helm chart for deploying the Kradle forge platform to Kubernetes. Packages CRDs, controllers, and supporting services into a single installable chart with release gate annotations."
+  role: "k8s-deployment-chart"
+  whenToUse: "Use this to deploy or upgrade the Kradle forge on a Kubernetes cluster via Helm."
   workspacePath: packages/kradle/charts
   moduleType: other
   surfaceKinds:

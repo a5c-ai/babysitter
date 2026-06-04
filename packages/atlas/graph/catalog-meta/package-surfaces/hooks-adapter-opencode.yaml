@@ -3,5 +3,8 @@ id: package-surface:hooks-adapter-opencode
 attributes:
   packageId: "@a5c-ai/hooks-adapter-opencode"
   packageName: "@a5c-ai/hooks-adapter-opencode"
-  displayName: "hooks-adapter-opencode"
+  displayName: "Hooks Adapter - OpenCode"
+  description: "OpenCode harness adapter for the hooks-adapter system. Translates OpenCode-specific hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects OpenCode as the active harness. Extend this to customize hook behavior specific to OpenCode."
   status: active

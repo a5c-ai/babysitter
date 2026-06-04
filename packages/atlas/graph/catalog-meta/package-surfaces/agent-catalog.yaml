@@ -3,6 +3,10 @@ id: package:a5c-ai-agent-catalog
 attributes:
   packageId: "@a5c-ai/atlas/catalog"
   packageName: "@a5c-ai/atlas/catalog"
+  displayName: "Atlas Catalog Graph"
+  description: "Source-of-truth graph package for the Atlas catalog. Contains the canonical YAML records for all package surfaces, interaction primitives, shared context specs, and edges. Provides SDK, CLI, and UI subpath exports for querying and validating the graph."
+  role: "graph-source-of-truth"
+  whenToUse: "Depend on this when you need to read, validate, or extend the canonical catalog graph that maps the entire monorepo architecture."
   workspacePath: packages/atlas
   moduleType: commonjs
   surfaceKinds:

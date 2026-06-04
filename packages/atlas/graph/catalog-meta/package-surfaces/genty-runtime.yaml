@@ -3,6 +3,10 @@ id: package:a5c-ai-genty-runtime
 attributes:
   packageId: "@a5c-ai/genty-runtime"
   packageName: "@a5c-ai/genty-runtime"
+  displayName: "Genty Runtime"
+  description: "Agent runtime layer (L5) providing daemon lifecycle, session management, resource management, and telemetry. Exposes subpath modules for daemon, session, resources, and telemetry."
+  role: "agent-runtime"
+  whenToUse: "Depend on this when building agent daemon processes, managing agent sessions, or adding resource/telemetry instrumentation to the genty runtime."
   workspacePath: packages/genty/runtime
   moduleType: typescript
   surfaceKinds:

@@ -3,5 +3,8 @@ id: package-surface:hooks-adapter-copilot
 attributes:
   packageId: "@a5c-ai/hooks-adapter-copilot"
   packageName: "@a5c-ai/hooks-adapter-copilot"
-  displayName: "hooks-adapter-copilot"
+  displayName: "Hooks Adapter - GitHub Copilot"
+  description: "GitHub Copilot harness adapter for the hooks-adapter system. Translates Copilot-specific hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects GitHub Copilot as the active harness. Extend this to customize hook behavior specific to Copilot."
   status: active

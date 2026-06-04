@@ -3,5 +3,8 @@ id: package-surface:hooks-adapter-pi
 attributes:
   packageId: "@a5c-ai/hooks-adapter-pi"
   packageName: "@a5c-ai/hooks-adapter-pi"
-  displayName: "hooks-adapter-pi"
+  displayName: "Hooks Adapter - Pi"
+  description: "Pi harness adapter for the hooks-adapter system. Translates Pi-specific hook events into the unified hook event format."
+  role: "hook-adapter"
+  whenToUse: "Automatically loaded when the hooks system detects Pi as the active harness. Extend this to customize hook behavior specific to Pi."
   status: active

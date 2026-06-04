@@ -3,6 +3,10 @@ id: package:a5c-ai-adapters-tui
 attributes:
   packageId: "@a5c-ai/genty-tui"
   packageName: "@a5c-ai/genty-tui"
+  displayName: "Genty TUI"
+  description: "Extensible Ink-based terminal UI for adapters with a plugin-first architecture. Provides command palette, prompt input, model picker, and session management in the terminal."
+  role: "terminal-ui"
+  whenToUse: "Use this when building or extending the in-terminal interactive experience for managing agent sessions, selecting models, and issuing commands."
   workspacePath: packages/adapters/tui
   moduleType: typescript
   surfaceKinds:
