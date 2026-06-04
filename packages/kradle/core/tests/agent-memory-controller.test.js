@@ -402,6 +402,27 @@ test('api-controller createMemoryUpdate applies returned AgentMemoryUpdate in or
   assert.equal(result.update?.metadata?.name || result.metadata?.name, appliedUpdate.metadata.name);
 });
 
+test('api-controller queryAgentMemory applies returned AgentMemoryQuery in org namespace', async () => {
+  const gateway = createRecordingGateway();
+  const controller = createKradleApiController({ resourceGateway: gateway });
+
+  const result = await controller.queryAgentMemory({
+    snapshotRef: 'memsnapshot-abc123',
+    requester: 'agent-dispatch-1',
+    query: { text: 'auth', modes: ['graph-and-grep'] },
+    records: makeRecords(),
+    documents: makeDocuments(),
+    organizationRef: 'acme',
+  });
+
+  const appliedQuery = gateway.applied.find((resource) => resource.kind === 'AgentMemoryQuery');
+  assert.ok(appliedQuery, 'AgentMemoryQuery must be applied durably');
+  assert.equal(appliedQuery.metadata.namespace, 'kradle-org-acme');
+  assert.equal(appliedQuery.spec.organizationRef, 'acme');
+  assert.equal(result.queryResource?.metadata?.name, appliedQuery.metadata.name);
+  assert.ok(result.applyResult, 'result should expose the apply result');
+});
+
 test('api-controller dispatchAgent applies returned AgentMemorySnapshot in org namespace', async () => {
   const gateway = createRecordingGateway({ snapshotResources: makeDispatchResources() });
   const controller = createKradleApiController({ resourceGateway: gateway });

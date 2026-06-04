@@ -297,11 +297,18 @@ export function createKradleApiController(options = {}) {
     },
     async queryAgentMemory(input) {
       const memoryController = createAgentMemoryController();
-      return memoryController.queryMemory({
+      const result = memoryController.queryMemory({
         ...input,
         namespace: input.namespace || namespace,
         organizationRef: input.organizationRef || 'default'
       });
+      if (result.queryResource) {
+        result.applyResult = await this.applyResourceForOrg(
+          result.queryResource.spec?.organizationRef || input.organizationRef || 'default',
+          result.queryResource
+        );
+      }
+      return result;
     },
     async createMemoryImport(input) {
       const memoryController = createAgentMemoryController();
