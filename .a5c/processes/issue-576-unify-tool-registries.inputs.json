@@ -7,8 +7,8 @@
     "packages/tool-mux/src/mcp-bridge.ts",
     "packages/agent-core/src/agenticTools/discovery/tools.ts",
     "packages/agent-core/src/agenticTools/tools/programmaticToolCalling.ts",
-    "packages/tula/platform/src/mcp/client/toolRegistry.ts",
-    "packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts"
+    "packages/genty/platform/src/mcp/client/toolRegistry.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts"
   ],
   "verification": [
     "npm run test --workspace=@a5c-ai/tool-mux",

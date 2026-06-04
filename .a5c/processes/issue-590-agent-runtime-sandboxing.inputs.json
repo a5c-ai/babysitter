@@ -78,7 +78,7 @@
     "packages/agent-runtime/src/resources/__tests__/manager.test.ts",
     "docs/agent-layer-gaps.md",
     "packages/agent-core/src/backgroundProcessRegistry.ts",
-    "packages/tula/platform/src/harness/backgroundProcessRegistry.ts"
+    "packages/genty/platform/src/harness/backgroundProcessRegistry.ts"
   ],
   "testTargets": [
     "packages/agent-runtime/src/execution/__tests__/provider.test.ts",

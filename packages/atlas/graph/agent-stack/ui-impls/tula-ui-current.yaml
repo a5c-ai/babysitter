@@ -1,41 +1,41 @@
 nodeKind: AgentUIImpl
-id: agent-ui-impl:tula.ui@current
+id: agent-ui-impl:genty.ui@current
 attributes:
-  displayName: "tula UI (current) — CLI binary"
-  agentVersionId: agent-version:tula@current
-  packageRef: source-ref:packages-tula
+  displayName: "genty UI (current) — CLI binary"
+  agentVersionId: agent-version:genty@current
+  packageRef: source-ref:packages-genty
   uiKind: cli-only
   presentationsBundled:
-    - presentation:tula-cli
+    - presentation:genty-cli
   themeSupport: none
   accessibilitySupport: basic
   notes: |
-    tula's user-facing surface is its CLI binary (`tula`). The CLI wraps
+    genty's user-facing surface is its CLI binary (`genty`). The CLI wraps
     agent-platform and adapters surfaces. Operator UIs (TUI, web, mobile)
     are delivered via the adapters package family.
 edges:
   realizes:
     - target: layer:11-presentation
   bundled_with:
-    - target: presentation:tula-cli
+    - target: presentation:genty-cli
   supports_interaction_primitive:
     - target: interaction-primitive:babysitter-run-create
       attributes:
         mechanism: native-api
-        invocationToken: "tula run:create"
+        invocationToken: "genty run:create"
     - target: interaction-primitive:babysitter-run-iterate
       attributes:
         mechanism: native-api
-        invocationToken: "tula run:iterate"
+        invocationToken: "genty run:iterate"
     - target: interaction-primitive:babysitter-task-post
       attributes:
         mechanism: native-api
-        invocationToken: "tula task:post"
+        invocationToken: "genty task:post"
     - target: interaction-primitive:babysitter-doctor
       attributes:
         mechanism: native-api
-        invocationToken: "tula doctor"
+        invocationToken: "genty doctor"
     - target: interaction-primitive:babysitter-mcp-server
       attributes:
         mechanism: native-api
-        invocationToken: "tula mcp"
+        invocationToken: "genty mcp"

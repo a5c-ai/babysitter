@@ -11,7 +11,7 @@ This document explains how the already-unified Babysitter and adapters stack fit
 The current stack has one strong center and several supporting seams:
 
 - `@a5c-ai/babysitter-sdk` remains the orchestration core.
-- `@a5c-ai/babysitter` and `@a5c-ai/tula-platform` provide the operational CLI and runtime surfaces.
+- `@a5c-ai/babysitter` and `@a5c-ai/genty-platform` provide the operational CLI and runtime surfaces.
 - `packages/adapters/*` provide the dispatch layer for harness-facing agent execution.
 - `@a5c-ai/hooks-adapter-cli`, `@a5c-ai/extensions-adapter`, and `@a5c-ai/tasks-adapter` are focused support subsystems that normalize hooks, compile plugins, and route human approvals.
 - `plugins/babysitter-unified/` is the canonical plugin source, while per-harness plugin bundles remain the user-installable outputs.
@@ -26,7 +26,7 @@ flowchart TD
   U[Unified plugin source<br/>plugins/babysitter-unified]
   P[Per-harness plugin bundles<br/>plugins/babysitter-*]
   HM[hooks-mux<br/>canonical hook model]
-  CLI[babysitter CLI and runtime<br/>@a5c-ai/babysitter<br/>@a5c-ai/tula-platform]
+  CLI[babysitter CLI and runtime<br/>@a5c-ai/babysitter<br/>@a5c-ai/genty-platform]
   SDK[babysitter-sdk<br/>runs, replay, storage, tasks]
   LIB[Process library and project processes<br/>library/, .a5c/processes, ~/.a5c]
   BP[tasks-mux<br/>human approval routing]
@@ -57,7 +57,7 @@ Owned primarily by:
 
 - `packages/sdk`
 - `packages/babysitter`
-- `packages/tula/platform`
+- `packages/genty/platform`
 
 This layer owns runs, replay, task definitions, journal/state handling, hooks dispatch, profiles, process-library bindings, and the CLI commands that operate on those concepts.
 
@@ -121,7 +121,7 @@ These packages are consumers of the orchestration and dispatch layers. They are 
 
 | Family | Primary paths | What it owns now | What it does not imply |
 |---|---|---|---|
-| Orchestration core | `packages/sdk`, `packages/babysitter`, `packages/tula/platform` | Run lifecycle, replay, storage, task dispatch, CLI/runtime surfaces | A future forced split into many more top-level runtime packages |
+| Orchestration core | `packages/sdk`, `packages/babysitter`, `packages/genty/platform` | Run lifecycle, replay, storage, task dispatch, CLI/runtime surfaces | A future forced split into many more top-level runtime packages |
 | Dispatch family | `packages/adapters/*` | Harness invocation, adapter normalization, gateway, shared interaction contracts | Replacement of Babysitter orchestration |
 | Support mux family | `packages/adapters/hooks/*`, `packages/extension-mux`, `packages/tasks-mux` | Hook normalization, bundle compilation, human approval routing | A formal "platform layer" that already has independent product boundaries |
 | Distribution surfaces | `plugins/babysitter-unified`, `plugins/babysitter-*` | Canonical plugin authoring plus harness-specific installable outputs | One single bundle format with no compatibility constraints |
@@ -133,7 +133,7 @@ The end-to-end diagram above is the shape. The live execution narrative is:
 
 1. A concrete harness installs or loads a plugin bundle under `plugins/babysitter-*`.
 2. Those bundles are compiled from `plugins/babysitter-unified/` by `packages/extension-mux`, with `packages/adapters/hooks/*` normalizing hook behavior where the harness model requires it.
-3. The installed bundle reaches the operational runtime in `packages/babysitter` and `packages/tula/platform`.
+3. The installed bundle reaches the operational runtime in `packages/babysitter` and `packages/genty/platform`.
 4. That runtime delegates the core orchestration work to `packages/sdk`, which owns run directories, journal/state replay, effect requests, process-library binding, and workflow execution.
 5. When a workflow requires a reusable process, the runtime reaches into `library/` or project-local `.a5c/processes/`.
 6. When a workflow requires human approval routing, `packages/tasks-mux` handles that concern as a distinct subsystem instead of burying it inside generic hook language.

@@ -34,7 +34,7 @@ Work mainly in:
 
 - `packages/sdk`
 - `packages/babysitter`
-- `packages/tula/platform`
+- `packages/genty/platform`
 - `library/`
 - project-local `.a5c/processes/`
 
@@ -120,7 +120,7 @@ Use this rule of thumb:
 | Concern | Primary source of truth | Supporting references |
 |---|---|---|
 | V6 architecture scope | `docs/v6-spec-and-roadmap/` | package READMEs, adversarial analyses |
-| Orchestration runtime behavior | `packages/sdk`, `packages/babysitter`, `packages/tula/platform` | V6 docs, CLI docs |
+| Orchestration runtime behavior | `packages/sdk`, `packages/babysitter`, `packages/genty/platform` | V6 docs, CLI docs |
 | Harness dispatch behavior | `packages/adapters/*` and `docs/adapters/` | V6 integration docs |
 | Hook normalization | `packages/adapters/hooks/*` | per-harness plugin docs |
 | Unified plugin packaging | `packages/extension-mux`, `plugins/babysitter-unified/` | install READMEs for concrete bundles |

@@ -1,4 +1,4 @@
-# fajarhide/tula
+# fajarhide/genty
 
 - **Archetype**: clawhub-plugin
 - **Stars**: 49
@@ -14,7 +14,7 @@ OMNI is a Rust-based terminal output filter that intercepts command output befor
 
 Core architecture: Registry (TOML filter definitions per tool) -> Scorer (context boost) -> Distiller (semantic filtering). Persistence via SQLite for session state and a "RewindStore" that archives raw output for on-demand retrieval. Ships with 35+ tool-specific filter definitions (vitest, jest, eslint, tsc, cargo, docker, kubectl, terraform, etc.) in TOML format.
 
-Key features: DSL-based filter configuration (capture/action/output templates), session intelligence (tracks active files to avoid redundant context), RewindStore for lossless raw output access, `tula stats` / `tula diff` for token savings visualization.
+Key features: DSL-based filter configuration (capture/action/output templates), session intelligence (tracks active files to avoid redundant context), RewindStore for lossless raw output access, `genty stats` / `genty diff` for token savings visualization.
 
 ## Assessment
 
@@ -22,7 +22,7 @@ HIGH extractable value. OMNI's approach to token compression via tool-specific o
 
 **Extraction priority**: HIGH
 
-# Extractable Value: fajarhide/tula
+# Extractable Value: fajarhide/genty
 
 ## Processes
 

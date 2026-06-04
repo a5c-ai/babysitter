@@ -40,9 +40,9 @@ const readIssueContextTask = defineTask('issue-601.read-context', (args, taskCtx
       'for path in \\',
       '  packages/agent-core/src/agenticTools/index.ts \\',
       '  packages/agent-core/src/agenticTools/tools/execution.ts \\',
-      '  packages/tula/platform/src/harness/piWrapper.ts \\',
-      '  packages/tula/platform/src/harness/piWrapper/moduleSupport.ts \\',
-      '  packages/tula/platform/src/harness/agenticTools/config/state.ts \\',
+      '  packages/genty/platform/src/harness/piWrapper.ts \\',
+      '  packages/genty/platform/src/harness/piWrapper/moduleSupport.ts \\',
+      '  packages/genty/platform/src/harness/agenticTools/config/state.ts \\',
       '  packages/adapters/cli/src/index.ts \\',
       '  packages/adapters/ui/src/screens/SessionDetailScreen.test.tsx \\',
       '  tsconfig.json; do',
@@ -250,7 +250,7 @@ const readArtifactsTask = defineTask('issue-601.read-artifacts', (args, taskCtx)
     command: [
       'set -euo pipefail',
       'git status --short --branch',
-      'git diff -- docs/here-be-dragons.md tsconfig.json packages/agent-core packages/tula/platform packages/adapters .a5c/processes/issue-601-remaining-dragons-plan.mjs .a5c/processes/issue-601-remaining-dragons-plan.inputs.json',
+      'git diff -- docs/here-be-dragons.md tsconfig.json packages/agent-core packages/genty/platform packages/adapters .a5c/processes/issue-601-remaining-dragons-plan.mjs .a5c/processes/issue-601-remaining-dragons-plan.inputs.json',
     ].join('\n'),
     expectedExitCode: 0,
     timeout: 120000,
@@ -301,8 +301,8 @@ export async function process(inputs, ctx) {
   const maxImplementationLoops = inputs?.maxImplementationLoops ?? 2;
   const verificationCommands = inputs?.verificationCommands ?? [
     'npm run test --workspace=@a5c-ai/agent-core',
-    'npm run test --workspace=@a5c-ai/tula-platform',
-    'npm run test:realtime --workspace=@a5c-ai/tula-ui',
+    'npm run test --workspace=@a5c-ai/genty-platform',
+    'npm run test:realtime --workspace=@a5c-ai/genty-ui',
     'npm run build:runtime',
     'npm run test:adapters',
     'npm run verify:metadata',

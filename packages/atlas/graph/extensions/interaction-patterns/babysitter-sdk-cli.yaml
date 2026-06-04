@@ -162,7 +162,7 @@ attributes:
   subcommandVerb: "(top-level)"
   flags: []
   description: |
-    Harness runtime command set exposed by @a5c-ai/tula-platform's
+    Harness runtime command set exposed by @a5c-ai/genty-platform's
     `babysitter-harness` bin. Includes the run-orchestration verbs
     (create-run, call, yolo, plan, forever, resume), retrospection,
     daemon control, and TUI/observer entry points.

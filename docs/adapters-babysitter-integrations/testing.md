@@ -24,7 +24,7 @@ unit tests only validate task definition shape, validation, and serialization.
 
 ### 2. Agent-Platform Unit Tests
 
-**Effect resolution tests** (`packages/tula/platform/src/harness/internal/createRun/orchestration/__tests__/externalAgentEffect.test.ts`):
+**Effect resolution tests** (`packages/genty/platform/src/harness/internal/createRun/orchestration/__tests__/externalAgentEffect.test.ts`):
 - External agent effect routes to amuxBridge
 - Returns error when adapters not available and `fallbackType` is not set
 - Falls back to internal when adapters not available and `fallbackType: "internal"` is set
@@ -34,31 +34,31 @@ unit tests only validate task definition shape, validation, and serialization.
 - Cost events journaled on successful dispatch
 - Result value is the agent's text output
 
-**CLI orchestration tests** (`packages/tula/platform/src/harness/internal/createRun/orchestration/__tests__/index.test.ts`):
+**CLI orchestration tests** (`packages/genty/platform/src/harness/internal/createRun/orchestration/__tests__/index.test.ts`):
 - `resolveAndPostEffect` routes external agent tasks correctly
 - adapters CLI fallback when module not importable
 - Timeout handling for slow external agents
 
-**Validation tests** (`packages/tula/platform/src/harness/internal/createRun/planProcess/__tests__/validation.test.ts`):
+**Validation tests** (`packages/genty/platform/src/harness/internal/createRun/planProcess/__tests__/validation.test.ts`):
 - Processes with external agent tasks pass validation
 - Warning (not error) when adapters not detected but process uses external tasks
 - Conformance repair includes external agent task format
 
-**Prompt tests** (`packages/tula/platform/src/harness/internal/createRun/planProcess/__tests__/phase.test.ts`):
+**Prompt tests** (`packages/genty/platform/src/harness/internal/createRun/planProcess/__tests__/phase.test.ts`):
 - External agents section included in prompt when discovery returns agents
 - External agents section absent when discovery returns empty
 - Raw text session template includes external agent instructions
 
 ### 3. Integration Tests
 
-**E2E with mock adapters** (`packages/tula/platform/src/harness/__tests__/e2e-external-agent.test.ts`):
+**E2E with mock adapters** (`packages/genty/platform/src/harness/__tests__/e2e-external-agent.test.ts`):
 - Process defines external agent task → dispatches → mock agent returns → process completes
 - Process with `fallbackType: "internal"` → mock adapters unavailable → falls back to agent-core
 - Cost tracking flows through journal
 
 **Live-stack addition** (`.github/workflows/live-stack.yml`):
-- Add tula scenario with external agent dispatch (tula calls claude-code for a subtask)
-- Requires both tula and claude-code to be available in CI
+- Add genty scenario with external agent dispatch (genty calls claude-code for a subtask)
+- Requires both genty and claude-code to be available in CI
 - Validates journal has COST event from external dispatch
 
 ### 4. Process Library Tests
@@ -97,7 +97,7 @@ const mockAmuxClient = {
 
 - Unit tests: run on every PR (no external dependencies needed)
 - Integration tests: run with `LIVE_STACK_EXTERNAL_AGENT=1` env var
-- Live-stack: add external agent scenario to dispatch matrix when both tula and claude-code are available
+- Live-stack: add external agent scenario to dispatch matrix when both genty and claude-code are available
 
 ## Coverage Targets
 

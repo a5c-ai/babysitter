@@ -33,11 +33,11 @@ The `babysitter` binary is shipped by [`@a5c-ai/babysitter`](../../packages/baby
 - `breakpoint:*`
 - `health`, `configure`, `version`
 
-## Product CLI: `tula`
+## Product CLI: `genty`
 
-The product CLI implementation lives in [`@a5c-ai/tula`](../../packages/tula/package.json) and is exposed as `tula`.
+The product CLI implementation lives in [`@a5c-ai/genty`](../../packages/genty/package.json) and is exposed as `genty`.
 
-Use `tula call` for new runtime orchestration examples. The legacy `babysitter harness:call` alias has been removed and must not appear in new tests or docs.
+Use `genty call` for new runtime orchestration examples. The legacy `babysitter harness:call` alias has been removed and must not appear in new tests or docs.
 
 Setup remains on the core CLI through `babysitter harness:install` and `babysitter harness:install-plugin`.
 
@@ -66,7 +66,7 @@ The command surfaces involved are split by responsibility:
 | --- | --- |
 | `babysitter run:create`, `run:iterate`, `task:list`, `task:post` | Create and replay the run, inspect pending effects, and post resolved task results. |
 | `babysitter process-library:active`, `skill:discover`, `profile:*` | Gather process-authoring context, available skills, and user/project preferences before deciding whether an external responder is appropriate. |
-| `tula discover`, `tula list`, `tula invoke` | Human-facing discovery and invocation surface for available runtime agents and services. |
+| `genty discover`, `genty list`, `genty invoke` | Human-facing discovery and invocation surface for available runtime agents and services. |
 | `adapters doctor`, `adapters launch`, `adapters auth`, `adapters install` | adapters checks and adapter operations. See the adapters reference for the exact CLI flags. |
 
 Troubleshooting common external agent failures:

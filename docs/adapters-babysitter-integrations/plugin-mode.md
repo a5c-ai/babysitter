@@ -30,7 +30,7 @@ SDK journals resolution → next iteration
 
 **Current:** When babysitter runs as a plugin inside claude-code, it can only delegate effects to claude-code itself. It cannot ask codex or gemini-cli to do something.
 
-**Needed:** Process definitions running in plugin mode should be able to create `external: true` agent tasks that dispatch through adapters, just like the standalone tula path.
+**Needed:** Process definitions running in plugin mode should be able to create `external: true` agent tasks that dispatch through adapters, just like the standalone genty path.
 
 **Implementation:**
 - The stop-hook handler must distinguish between "host-resolvable" effects and "external agent" effects
@@ -41,7 +41,7 @@ SDK journals resolution → next iteration
 **Files affected:**
 - `packages/sdk/src/harness/hooks/stopHookHandler.ts:152-186` — detect external effects
 - `packages/sdk/src/harness/hooks/stopHookContinuation.ts` — include external dispatch results
-- `packages/tula/platform/src/harness/internal/createRun/orchestration/externalAgentEffect.ts` — shared resolution logic
+- `packages/genty/platform/src/harness/internal/createRun/orchestration/externalAgentEffect.ts` — shared resolution logic
 
 ### 2. No host tool discovery
 
@@ -98,8 +98,8 @@ SDK journals resolution → next iteration
 **Needed:** The process definition prompt should explicitly say what agent it's running inside, what that agent can do, and what it can't do. This helps the LLM choose between host delegation and external dispatch.
 
 **Files affected:**
-- `packages/tula/platform/src/harness/internal/createRun/planProcess/phase.ts` — inject host identity
-- `packages/tula/platform/src/harness/internal/createRun/prompts.ts` — host-aware prompt section
+- `packages/genty/platform/src/harness/internal/createRun/planProcess/phase.ts` — inject host identity
+- `packages/genty/platform/src/harness/internal/createRun/prompts.ts` — host-aware prompt section
 
 ## Integration with External Agent Tasks
 

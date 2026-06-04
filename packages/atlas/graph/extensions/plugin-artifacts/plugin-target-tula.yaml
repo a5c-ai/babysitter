@@ -1,12 +1,12 @@
 nodeKind: PluginTarget
-id: plugin-target:tula
+id: plugin-target:genty
 attributes:
-  displayName: "Tula"
-  hostAgent: agent:tula
+  displayName: "genty"
+  hostAgent: agent:genty
   adapterFamily: internal
   manifestFormat: "none"
   commandFormat: "none"
-  adapterName: tula
+  adapterName: genty
   skillHandling: none
   hookRegistrationFormat: none
   hookRegistrationOutputPath: null
@@ -32,19 +32,19 @@ attributes:
   componentSupport:
     agents: unsupported
     context: unsupported
-  cliCommand: "tula"
+  cliCommand: "genty"
   callerEnvVars:
     - "AGENT_SESSION_ID"
   configPaths: []
   processNames:
-    - "tula"
+    - "genty"
     - "agent-platform"
   capabilities:
     - SessionBinding
     - HeadlessPrompt
   adapterModule: null
   externalRepo: null
-  externalPackageName: "@a5c-ai/tula"
+  externalPackageName: "@a5c-ai/genty"
   generatedSourceDir: null
   marketplaceSpecs: []
   requiredSurfaceFile: null
@@ -89,4 +89,4 @@ attributes:
 
 edges:
   hosted_by:
-    - target: agent:tula
+    - target: agent:genty

@@ -114,7 +114,7 @@ The orchestration framework for Claude Code that enables deterministic, event-so
 **Components:**
 - Main CLI (`@a5c-ai/babysitter`) - Recommended end-user install for `babysitter`
 - SDK (`@a5c-ai/babysitter-sdk`) - Public SDK/library and core CLI implementation
-- Runtime CLI (`@a5c-ai/tula-platform`) - Optional runtime/orchestration commands
+- Runtime CLI (`@a5c-ai/genty-platform`) - Optional runtime/orchestration commands
 - Plugin (`babysitter@a5c.ai`) - Claude Code integration
 
 **Related:** [SDK](#sdk), [Plugin](#plugin)

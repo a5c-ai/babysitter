@@ -67,9 +67,9 @@
   "targetEvidenceFiles": [
     "docs/here-be-dragons.md",
     "packages/agent-core/src/agenticTools/index.ts",
-    "packages/tula/platform/src/harness/piWrapper.ts",
+    "packages/genty/platform/src/harness/piWrapper.ts",
     "packages/agent-core/src/agenticTools/tools/execution.ts",
-    "packages/tula/platform/src/harness/agenticTools/tools/execution.ts",
+    "packages/genty/platform/src/harness/agenticTools/tools/execution.ts",
     "packages/adapters/ui/src/screens/SessionDetailScreen.test.tsx",
     "tsconfig.json",
     ".a5c/processes/issue-601-remaining-dragons-plan.mjs",
@@ -77,8 +77,8 @@
   ],
   "verificationCommands": [
     "npm run test --workspace=@a5c-ai/agent-core",
-    "npm run test --workspace=@a5c-ai/tula-platform",
-    "npm run test:realtime --workspace=@a5c-ai/tula-ui",
+    "npm run test --workspace=@a5c-ai/genty-platform",
+    "npm run test:realtime --workspace=@a5c-ai/genty-ui",
     "npm run build:runtime",
     "npm run test:adapters",
     "npm run verify:metadata",

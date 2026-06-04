@@ -11,7 +11,7 @@ The graph uses clean layer names (Model, Provider, Transport, Agent-Core, Agent-
 | Graph Concept | Package Name | Mismatch |
 |---------------|-------------|----------|
 | Orchestration layer | `@a5c-ai/babysitter-sdk` | "babysitter" is brand, not architecture |
-| Agent-Runtime layer | `@a5c-ai/tula-platform` | Conflates runtime with brand |
+| Agent-Runtime layer | `@a5c-ai/genty-platform` | Conflates runtime with brand |
 | Observer (Presentation) | `@a5c-ai/babysitter-observer-dashboard` | Long; could be `@a5c-ai/observer` |
 | Metapackage | `@a5c-ai/babysitter` | OK — intentional brand entry point |
 

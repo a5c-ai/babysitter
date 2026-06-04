@@ -114,8 +114,8 @@ runs:
         npm install --no-save @rollup/rollup-linux-x64-gnu 2>/dev/null || true
         npm run build:sdk
         npm run build:adapters
-        npm run build --workspace=@a5c-ai/tula-core
-        npm run build --workspace=@a5c-ai/tula-platform
+        npm run build --workspace=@a5c-ai/genty-core
+        npm run build --workspace=@a5c-ai/genty-platform
 
     - name: Run Babysitter
       id: babysitter
@@ -188,7 +188,7 @@ runs:
 
         # Always use JSON output for CI parsing
         ARGS+=(--json)
-        CLI=(node "$ACTION_ROOT/packages/tula/platform/dist/cli/main.js" yolo)
+        CLI=(node "$ACTION_ROOT/packages/genty/platform/dist/cli/main.js" yolo)
 
         echo "::group::Babysitter Command"
         echo "${CLI[*]} ${ARGS[*]}"

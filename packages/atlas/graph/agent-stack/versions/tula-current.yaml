@@ -1,48 +1,48 @@
 nodeKind: AgentVersion
-id: agent-version:tula@current
+id: agent-version:genty@current
 attributes:
-  agentProductId: agent:tula
+  agentProductId: agent:genty
   versionRange: ">=5.0.0"
   releasedAt: "2026-05-01"
-  cliCommand: "tula"
-  sourcePackage: "@a5c-ai/tula"
+  cliCommand: "genty"
+  sourcePackage: "@a5c-ai/genty"
   installMethods:
     - install:npm
   minSchemaVersion: "6.0.0"
 edges:
   version_of:
-    - agent:tula
+    - agent:genty
   composed_of:
-    - target: agent-core-impl:tula.core@current
+    - target: agent-core-impl:genty.core@current
       role: core
-    - target: agent-runtime-impl:tula.runtime@current
+    - target: agent-runtime-impl:genty.runtime@current
       role: runtime
-    - target: agent-platform-impl:tula.platform@current
+    - target: agent-platform-impl:genty.platform@current
       role: platform
-    - target: agent-ui-impl:tula.ui@current
+    - target: agent-ui-impl:genty.ui@current
       role: ui
   sourced_from: []
   supports:
     - target: capability:can-multi-turn
       versionRange: '>=5.0.0'
       level: full
-      notes: tula orchestrates multi-turn agent sessions via the composed agent-platform and babysitter-sdk.
+      notes: genty orchestrates multi-turn agent sessions via the composed agent-platform and babysitter-sdk.
     - target: capability:supports-text-streaming
       versionRange: '>=5.0.0'
       level: full
-      notes: tula streams agent output in real time through the composed runtime.
+      notes: genty streams agent output in real time through the composed runtime.
     - target: capability:supports-mcp
       versionRange: '>=5.0.0'
       level: full
-      notes: tula integrates with MCP servers via agent-platform and adapters.
+      notes: genty integrates with MCP servers via agent-platform and adapters.
     - target: capability:supports-subagent-dispatch
       versionRange: '>=5.0.0'
       level: full
-      notes: tula dispatches tasks to subagent processes via the composed agent-platform runtime.
+      notes: genty dispatches tasks to subagent processes via the composed agent-platform runtime.
     - target: capability:can-resume
       versionRange: '>=5.0.0'
       level: full
-      notes: tula supports run resume and session recovery through babysitter-sdk journaling.
+      notes: genty supports run resume and session recovery through babysitter-sdk journaling.
   uses_memory_system:
     - target: memory-system:instruction-file-hierarchy
     - target: memory-system:claude-code-auto-memory

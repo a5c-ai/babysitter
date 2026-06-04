@@ -1862,7 +1862,7 @@ Quick reference of all commands and their SDK method mappings.
 | `adapters agent` | `list` / `add` / `remove` / `where` / `agents` | File-convention (copy into `.{agent}/agents/`) |
 | `adapters hooks` | `discover` / `list` / `add` / `remove` / `set` / `handle` | `HookConfigManager` (core) |
 | `adapters doctor` | -- | Capability / auth / runtime diagnostics |
-| `adapters tui` | -- | Launch interactive Ink UI (`@a5c-ai/tula-tui`) |
+| `adapters tui` | -- | Launch interactive Ink UI (`@a5c-ai/genty-tui`) |
 | `adapters init` | -- | `createClient()` + directory creation |
 
 ---

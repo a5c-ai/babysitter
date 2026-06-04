@@ -1,22 +1,22 @@
 {
   "issueNumber": 836,
   "baseBranch": "staging",
-  "targetBranch": "issue/836-agent-core-to-tula-core",
+  "targetBranch": "issue/836-agent-core-to-genty-core",
   "targetScore": 90,
   "maxIterationsPerPhase": 4,
   "referencedDocs": [
-    "docs/tula-stack-renames/README.md"
+    "docs/genty-stack-renames/README.md"
   ],
   "scope": {
     "rename": {
       "fromPackage": "@a5c-ai/agent-core",
-      "toPackage": "@a5c-ai/tula-core",
+      "toPackage": "@a5c-ai/genty-core",
       "fromDirectory": "packages/agent-core",
-      "toDirectory": "packages/tula/core"
+      "toDirectory": "packages/genty/core"
     },
     "nonGoals": [
       "Do not rename @a5c-ai/agent-runtime or packages/agent-runtime in issue #836.",
-      "Do not rename @a5c-ai/tula-platform or packages/tula/platform in issue #836.",
+      "Do not rename @a5c-ai/genty-platform or packages/genty/platform in issue #836.",
       "Do not rename the agent-core runtime harness terminology unless it is specifically package/workspace identity.",
       "Do not change behavior of the agent runtime or harness invocation paths beyond references needed for the package rename."
     ]
@@ -36,10 +36,10 @@
     }
   ],
   "verificationCommands": [
-    "npm run build --workspace=@a5c-ai/tula-core",
-    "npm run test --workspace=@a5c-ai/tula-core",
-    "npm run build --workspace=@a5c-ai/tula-platform",
-    "npm run build --workspace=@a5c-ai/tula",
+    "npm run build --workspace=@a5c-ai/genty-core",
+    "npm run test --workspace=@a5c-ai/genty-core",
+    "npm run build --workspace=@a5c-ai/genty-platform",
+    "npm run build --workspace=@a5c-ai/genty",
     "npm run verify:metadata",
     "git diff --check"
   ],

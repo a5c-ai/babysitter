@@ -11,8 +11,8 @@ last_updated: 2026-05-01
 - `.github/workflows/staging-publish.yml` owns prerelease npm publishing from `staging`, guarded by the `staging-publish` concurrency group.
 - `@a5c-ai/babysitter-observer-dashboard` is part of those central workflows. The former standalone `.github/workflows/observer-dashboard-publish.yml` path is retired, so observer-dashboard no longer has a separate `main` release workflow.
 - `@a5c-ai/atlas/catalog` ships from the atlas package as the public catalog dependency surface for SDK, hooks-mux, adapters, and extension-mux consumers.
-- `@a5c-ai/tula-core` and `@a5c-ai/tula-platform` are part of those central publish workflows. `tula-core` publishes before `agent-platform` so the runtime CLI can be installed from npm without workspace-only dependencies.
-- `@a5c-ai/transport-adapter` is part of the public adapters runtime chain. It must publish before the downstream adapters CLI/root packages so `@a5c-ai/tula-platform` remains globally installable through its adapters dependency chain.
+- `@a5c-ai/genty-core` and `@a5c-ai/genty-platform` are part of those central publish workflows. `genty-core` publishes before `agent-platform` so the runtime CLI can be installed from npm without workspace-only dependencies.
+- `@a5c-ai/transport-adapter` is part of the public adapters runtime chain. It must publish before the downstream adapters CLI/root packages so `@a5c-ai/genty-platform` remains globally installable through its adapters dependency chain.
 - Both central workflows validate, build, and publish observer-dashboard alongside the other public workspaces they own.
 
 ## Ownership Matrix

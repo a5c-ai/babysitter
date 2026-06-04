@@ -60,7 +60,7 @@ This path tests a real or mocked agent session controlled by `adapters`. It shou
 
 ## Path C: Babysitter-Agent Runtime E2E
 
-This path validates `@a5c-ai/tula-platform` runtime behavior. It starts from preconditions, not installers.
+This path validates `@a5c-ai/genty-platform` runtime behavior. It starts from preconditions, not installers.
 
 Valid commands include:
 

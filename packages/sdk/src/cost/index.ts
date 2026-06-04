@@ -57,4 +57,4 @@ export {
   resolveClaudeCodeSessionDir,
 } from "./collector";
 
-// effectCost moved to @a5c-ai/tula-platform (GAP-SUBOBS-003)
+// effectCost moved to @a5c-ai/genty-platform (GAP-SUBOBS-003)

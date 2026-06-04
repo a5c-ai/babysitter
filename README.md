@@ -62,7 +62,7 @@ Babysitter has a small package split:
 
 - `@a5c-ai/babysitter` is the recommended end-user install for the main `babysitter` CLI.
 - `@a5c-ai/babysitter-sdk` is the public SDK/library package and the underlying implementation behind the core CLI.
-- `@a5c-ai/tula-platform` is the optional runtime CLI for `tula call`, `resume`, `start-server`, `tui`, and other orchestration/runtime commands.
+- `@a5c-ai/genty-platform` is the optional runtime CLI for `genty call`, `resume`, `start-server`, `tui`, and other orchestration/runtime commands.
 - Harness plugins such as `@a5c-ai/babysitter-codex` or `@a5c-ai/babysitter-cursor` integrate Babysitter into a specific host tool. They do not replace the core CLI packages.
 
 For most users, install the main CLI first:
@@ -74,7 +74,7 @@ npm install -g @a5c-ai/babysitter
 Install the optional runtime CLI if you need headless orchestration, the internal harness, daemon utilities, MCP serving, or the TUI:
 
 ```bash
-npm install -g @a5c-ai/tula-platform
+npm install -g @a5c-ai/genty-platform
 ```
 
 If you are authoring processes or embedding Babysitter in your own code, add the SDK package to your project:
@@ -194,13 +194,13 @@ Use `--workspace /path/to/repo` to install into a project-local OpenCode plugin 
 Babysitter ships with a built-in **internal harness** that runs processes programmatically without any external AI coding agent. This is useful for CI/CD pipelines, scripts, automated testing, and headless orchestration:
 
 ```bash
-npm install -g @a5c-ai/tula-platform
+npm install -g @a5c-ai/genty-platform
 
 # Run a process definition using the internal harness
-tula call --harness internal --process .a5c/processes/my-process.js#process --workspace .
+genty call --harness internal --process .a5c/processes/my-process.js#process --workspace .
 
 # Or run a free-form prompt
-tula call --harness internal --prompt "run lint and tests" --workspace .
+genty call --harness internal --prompt "run lint and tests" --workspace .
 ```
 
 The internal harness uses the SDK's built-in Pi execution engine directly. It supports all capabilities (Programmatic, SessionBinding, StopHook, HeadlessPrompt) and requires no external AI harness CLI.
@@ -211,20 +211,20 @@ During process execution, the internal harness can **delegate tasks to any disco
 
 ## Runtime Package Builds
 
-For the core runtime chain (`@a5c-ai/babysitter-sdk`, `@a5c-ai/adapters`, `@a5c-ai/tula-core`, `@a5c-ai/tula-platform`), use the shared workspace entrypoint from a fresh checkout:
+For the core runtime chain (`@a5c-ai/babysitter-sdk`, `@a5c-ai/adapters`, `@a5c-ai/genty-core`, `@a5c-ai/genty-platform`), use the shared workspace entrypoint from a fresh checkout:
 
 ```bash
 npm ci
 npm run build:runtime
 ```
 
-`build:runtime` is the supported root entrypoint for release and CI validation. It builds the runtime graph in workspace order: SDK -> adapters SDK surface -> tula-core -> tula-platform.
+`build:runtime` is the supported root entrypoint for release and CI validation. It builds the runtime graph in workspace order: SDK -> adapters SDK surface -> genty-core -> genty-platform.
 
 Package-local validation is also supported:
 
 ```bash
-npm run build --workspace=@a5c-ai/tula-core
-npm run build --workspace=@a5c-ai/tula-platform
+npm run build --workspace=@a5c-ai/genty-core
+npm run build --workspace=@a5c-ai/genty-platform
 ```
 
 Those package-local builds now use `tsc --build` project references where the runtime packages are owned in this workspace, and they explicitly bootstrap the `@a5c-ai/adapters` SDK chain through the root runtime scripts. Fresh-checkout validation no longer assumes prebuilt upstream `dist/` artifacts.
@@ -319,50 +319,50 @@ Claude will create an orchestration run, execute tasks step-by-step, handle qual
 
 ## Agent Runtime CLI
 
-Beyond the in-session skill commands (`/babysitter:call`, etc.), Babysitter provides an optional agent runtime CLI package, `@a5c-ai/tula-platform`, for orchestration, session management, MCP serving, daemon utilities, and the TUI. The main `babysitter` CLI comes from `@a5c-ai/babysitter` and is backed by `@a5c-ai/babysitter-sdk`; it keeps the core run/task/session/plugin surfaces plus `harness:install` and `harness:install-plugin`.
+Beyond the in-session skill commands (`/babysitter:call`, etc.), Babysitter provides an optional agent runtime CLI package, `@a5c-ai/genty-platform`, for orchestration, session management, MCP serving, daemon utilities, and the TUI. The main `babysitter` CLI comes from `@a5c-ai/babysitter` and is backed by `@a5c-ai/babysitter-sdk`; it keeps the core run/task/session/plugin surfaces plus `harness:install` and `harness:install-plugin`.
 
 ```bash
 npm install -g @a5c-ai/babysitter
-npm install -g @a5c-ai/tula-platform
+npm install -g @a5c-ai/genty-platform
 ```
 
 ### Running Processes via a Harness
 
 ```bash
 # Run a process interactively via Claude Code (pauses at breakpoints)
-tula call --harness claude-code --prompt "implement user authentication with TDD" --workspace .
+genty call --harness claude-code --prompt "implement user authentication with TDD" --workspace .
 
 # Run fully autonomous (no breakpoints)
-tula yolo --harness claude-code --prompt "add pagination to the API" --workspace .
+genty yolo --harness claude-code --prompt "add pagination to the API" --workspace .
 
 # Plan only (stops after Phase 1)
-tula plan --harness claude-code --prompt "implement feature X"
+genty plan --harness claude-code --prompt "implement feature X"
 
 # Run with the internal harness (no external AI agent needed)
-tula call --harness internal --prompt "run lint and tests" --workspace .
+genty call --harness internal --prompt "run lint and tests" --workspace .
 ```
 
 ### Managing Runs
 
 ```bash
 # Resume an interrupted run
-tula resume --run-id <runId> --harness claude-code --workspace .
+genty resume --run-id <runId> --harness claude-code --workspace .
 
 # Initialize or inspect orchestration session state
 babysitter session:init --session-id demo --state-dir .a5c --run-id <runId>
 babysitter session:state --session-id demo --state-dir .a5c
 
 # Start the MCP server owned by the agent runtime CLI
-tula start-server --transport stdio
+genty start-server --transport stdio
 
 # Diagnose run health
-tula doctor --run-id <runId>
+genty doctor --run-id <runId>
 
 # Analyze past runs for insights
-tula retrospect --all --harness claude-code --workspace .
+genty retrospect --all --harness claude-code --workspace .
 
 # Clean up old runs
-tula cleanup --keep-days 7 --harness claude-code --workspace .
+genty cleanup --keep-days 7 --harness claude-code --workspace .
 ```
 
 ### Harness Discovery
@@ -378,7 +378,7 @@ babysitter harness:install-plugin claude-code
 babysitter harness:install-plugin codex --workspace /path/to/repo
 ```
 
-> **Note:** `babysitter harness:install` and `babysitter harness:discover` are deprecated. Use `adapters install <agent>` for agent installation and `tula` for runtime commands.
+> **Note:** `babysitter harness:install` and `babysitter harness:discover` are deprecated. Use `adapters install <agent>` for agent installation and `genty` for runtime commands.
 
 `harness:install-plugin` is the canonical scriptable install path for Babysitter plugins. For non-Claude harnesses it resolves to the published package installer shape tested in the SDK, for example `npx --yes @a5c-ai/babysitter-codex install --workspace /path/to/repo`.
 
@@ -388,7 +388,7 @@ The `internal` harness is particularly useful for CI/CD and scripting because it
 
 ```bash
 # In a CI pipeline or script
-tula call \
+genty call \
   --harness internal \
   --process .a5c/processes/lint-and-test.js#process \
   --workspace . \
@@ -404,7 +404,7 @@ It executes processes using the SDK's built-in engine, supports all effect types
 |---------|----------|------------|
 | `@a5c-ai/babysitter` | `babysitter` | Recommended human-facing install for the main CLI |
 | `@a5c-ai/babysitter-sdk` | `babysitter`, `babysitter-sdk`, `babysitter-mcp-server` | SDK/library usage and direct access to the core CLI implementation |
-| `@a5c-ai/tula-platform` | `tula` | Optional runtime/orchestration commands (`call`, `resume`, `plan`, `start-server`, `tui`, `doctor`) |
+| `@a5c-ai/genty-platform` | `genty` | Optional runtime/orchestration commands (`call`, `resume`, `plan`, `start-server`, `tui`, `doctor`) |
 | `@a5c-ai/babysitter-<harness>` | Harness-specific installer or plugin binary | Integrating Babysitter into a specific host tool such as Codex, Cursor, Gemini CLI, Pi, or GitHub Copilot |
 
 The repository root `package.json` is workspace metadata for this monorepo. The public packages users install are the scoped packages above.
@@ -413,11 +413,11 @@ The repository root `package.json` is workspace metadata for this monorepo. The 
 
 ```
 packages/
-  tula/                   # Tula agent stack
-    cli/                  #   @a5c-ai/tula — CLI binary "tula"
-    core/                 #   @a5c-ai/tula-core — agent-core runtime
-    platform/             #   @a5c-ai/tula-platform — orchestration platform
-    runtime/              #   @a5c-ai/tula-runtime — agent runtime
+  genty/                   # genty agent stack
+    cli/                  #   @a5c-ai/genty — CLI binary "genty"
+    core/                 #   @a5c-ai/genty-core — agent-core runtime
+    platform/             #   @a5c-ai/genty-platform — orchestration platform
+    runtime/              #   @a5c-ai/genty-runtime — agent runtime
     ui/ webui/ tui/       #   UI surfaces (web console, terminal UI)
   adapters/               # Adapter family
     sdk/                  #   @a5c-ai/adapters — root SDK + CLI "adapters"

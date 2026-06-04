@@ -115,11 +115,11 @@ function buildUnknownCommandError(command: string, program: CliProgram): Babysit
         details: { command, deprecated: true },
       });
     }
-    return new BabysitterRuntimeError("DeprecatedCommand", `"${command}" is deprecated. Install tula (the babysitter native agent) for runtime commands.`, {
+    return new BabysitterRuntimeError("DeprecatedCommand", `"${command}" is deprecated. Install genty (the babysitter native agent) for runtime commands.`, {
       category: ErrorCategory.Validation,
-      suggestions: [`npm install -g @a5c-ai/tula`, `tula --help`],
-      nextSteps: [`tula replaces babysitter harness commands. Run tula --help to see available commands.`],
-      details: { command, deprecated: true, replacement: "tula" },
+      suggestions: [`npm install -g @a5c-ai/genty`, `genty --help`],
+      nextSteps: [`genty replaces babysitter harness commands. Run genty --help to see available commands.`],
+      details: { command, deprecated: true, replacement: "genty" },
     });
   }
 

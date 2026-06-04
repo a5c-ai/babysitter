@@ -21,9 +21,9 @@ npm run lint:hooks-mux
 | --- | --- | --- |
 | `packages/sdk` | `@a5c-ai/babysitter-sdk` | Core runtime, storage, tasks, CLI, hooks, profiles, plugins, compression |
 | `packages/babysitter` | `@a5c-ai/babysitter` | Metapackage and `babysitter` binary |
-| `packages/tula/platform` | `@a5c-ai/tula-platform` | Platform API for harness integration, governance, interaction, and storage |
-| `packages/tula` | `@a5c-ai/tula` | Unified product package and owner of the `tula` CLI implementation |
-| `packages/tula/tui-plugins` | `@a5c-ai/tula-tui-plugins` | TUI panels for status, cost, and governance |
+| `packages/genty/platform` | `@a5c-ai/genty-platform` | Platform API for harness integration, governance, interaction, and storage |
+| `packages/genty` | `@a5c-ai/genty` | Unified product package and owner of the `genty` CLI implementation |
+| `packages/genty/tui-plugins` | `@a5c-ai/genty-tui-plugins` | TUI panels for status, cost, and governance |
 | `packages/atlas` | `@a5c-ai/atlas` | Atlas catalog graph SDK, CLI, and data |
 | `packages/atlas/webui` | `@a5c-ai/atlas-webui` | Atlas graph explorer (Next.js) |
 | `packages/adapters/hooks/*` | `hooks-mux workspace packages` | Hook normalization, CLI, and harness adapters |
@@ -33,7 +33,7 @@ npm run lint:hooks-mux
 - SDK CLI: [`packages/sdk/src/cli/main.ts`](../../packages/sdk/src/cli/main.ts)
 - SDK command registry: [`packages/sdk/src/cli/main/program.ts`](../../packages/sdk/src/cli/main/program.ts)
 - SDK config and runs resolution: [`packages/sdk/src/config/`](../../packages/sdk/src/config)
-- Tula product CLI: [`packages/tula/src/cli/main.ts`](../../packages/tula/src/cli/main.ts)
+- genty product CLI: [`packages/genty/src/cli/main.ts`](../../packages/genty/src/cli/main.ts)
 - Metapackage shim: `packages/babysitter/bin/babysitter.js`
 - Atlas graph explorer: [`packages/atlas/webui/app/page.tsx`](../../packages/atlas/webui/app/page.tsx)
 

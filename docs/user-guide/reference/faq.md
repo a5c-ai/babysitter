@@ -132,7 +132,7 @@ Babysitter exposes a few public packages with different roles:
 
 1. **@a5c-ai/babysitter** - Recommended end-user install for the `babysitter` CLI
 2. **@a5c-ai/babysitter-sdk** - SDK/library package and the implementation behind the core CLI
-3. **@a5c-ai/tula-platform** - Optional runtime CLI for `call`, `resume`, `plan`, `doctor`, `start-server`, and `tui`
+3. **@a5c-ai/genty-platform** - Optional runtime CLI for `call`, `resume`, `plan`, `doctor`, `start-server`, and `tui`
 
 Most users install:
 ```bash
@@ -141,7 +141,7 @@ npm install -g @a5c-ai/babysitter@latest
 
 Add the optional runtime CLI only if you need those agent runtime commands:
 ```bash
-npm install -g @a5c-ai/tula-platform@latest
+npm install -g @a5c-ai/genty-platform@latest
 ```
 
 ---
@@ -170,7 +170,7 @@ rm -rf .a5c/runs/<old-run-id>
 
 **Update SDK packages:**
 ```bash
-npm update -g @a5c-ai/babysitter @a5c-ai/tula-platform
+npm update -g @a5c-ai/babysitter @a5c-ai/genty-platform
 ```
 
 **Update Claude Code plugin:**

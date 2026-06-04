@@ -48,9 +48,9 @@
     "packages/agent-core/src/session.test.ts",
     "packages/agent-core/src/index.ts",
     "packages/agent-core/README.md",
-    "packages/tula/platform/src/harness/types.ts",
-    "packages/tula/platform/src/harness/internal/createRun/agent-core-loop.ts",
-    "packages/tula/platform/src/harness/invoker.ts",
+    "packages/genty/platform/src/harness/types.ts",
+    "packages/genty/platform/src/harness/internal/createRun/agent-core-loop.ts",
+    "packages/genty/platform/src/harness/invoker.ts",
     "docs/agent-layer-gaps.md"
   ],
   "runtimeCallPathSeeds": [
@@ -74,7 +74,7 @@
   "verificationCommands": [
     "npm run test --workspace=@a5c-ai/agent-core",
     "npm run build --workspace=@a5c-ai/agent-core",
-    "npm run test --workspace=@a5c-ai/tula-platform"
+    "npm run test --workspace=@a5c-ai/genty-platform"
   ],
   "githubHandoff": {
     "targetPrTitle": "Implement agent-core structured output and vision input",

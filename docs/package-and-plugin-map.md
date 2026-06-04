@@ -38,9 +38,9 @@ Use it to answer three questions quickly:
 | Surface | Status | Canonical docs home | Supporting entrypoints | Coverage note |
 | --- | --- | --- | --- | --- |
 | `packages/extension-mux` | Public package | [packages/extension-mux/README.md](../packages/extension-mux/README.md) | — | README is the canonical package-level contract. |
-| `packages/tula/core` | Public advanced/runtime package | [packages/tula/core/README.md](../packages/tula/core/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public runtime dependency package for advanced orchestration surfaces; README is the canonical package contract. |
+| `packages/genty/core` | Public advanced/runtime package | [packages/genty/core/README.md](../packages/genty/core/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public runtime dependency package for advanced orchestration surfaces; README is the canonical package contract. |
 | `packages/babysitter` | Public package | [packages/babysitter/README.md](../packages/babysitter/README.md) | — | README is the canonical package-level contract. |
-| `packages/tula/platform` | Public advanced/runtime package | [packages/tula/platform/README.md](../packages/tula/platform/README.md) | [README.md](../README.md) | Public npm package, but it is an advanced/operator-facing runtime CLI rather than the default entrypoint for new users. |
+| `packages/genty/platform` | Public advanced/runtime package | [packages/genty/platform/README.md](../packages/genty/platform/README.md) | [README.md](../README.md) | Public npm package, but it is an advanced/operator-facing runtime CLI rather than the default entrypoint for new users. |
 | `packages/atlas` (`./catalog` export) | Public advanced/runtime package surface | [packages/atlas/README.md](../packages/atlas/README.md) | [docs/release-pipeline.md](./release-pipeline.md) | Public package surface for shared ontology/discovery/evidence assets used by other published runtimes; atlas README is the canonical package contract. |
 | `packages/tasks-mux` | Public package | [packages/tasks-mux/README.md](../packages/tasks-mux/README.md) | — | README is the canonical package-level contract. |
 | `packages/cloud` | Public package | [packages/cloud/README.md](../packages/cloud/README.md) | — | README is the canonical public docs home today; the validation matrix does not currently expose a separate central docs entrypoint for this package. |
@@ -105,7 +105,7 @@ Use it to answer three questions quickly:
 | `packages/adapters/tv-appletv-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
 | `packages/adapters/watch-watchos-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
 | `packages/adapters/watch-wearos-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
-| `packages/tula/tui-plugins` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Internal-only support package for the TUI surface. This map is the explicit documentation home until the workspace gets a README. |
+| `packages/genty/tui-plugins` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Internal-only support package for the TUI surface. This map is the explicit documentation home until the workspace gets a README. |
 | `packages/kradle/web` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Kradle web console. Internal-only; this map is the documentation home until the surface is promoted. |
 
 ## Coverage rules for future changes

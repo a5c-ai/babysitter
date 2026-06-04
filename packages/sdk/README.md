@@ -33,7 +33,7 @@ npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter-mcp-server 
 - `process-library:*`, `profile:*`, and `instructions:*` for library/profile management and generated guidance
 - `tokens:*`, `compression:*`, `log`, `hook:*`, `health`, `configure`, and `version` for operator workflows
 
-The optional interactive runtime commands such as `create-run`, `resume-run`, `plan`, `yolo`, `observe`, and `tui` live in the separate `@a5c-ai/tula-platform` package.
+The optional interactive runtime commands such as `create-run`, `resume-run`, `plan`, `yolo`, `observe`, and `tui` live in the separate `@a5c-ai/genty-platform` package.
 
 ## API Surface
 

@@ -23,7 +23,7 @@
  *   packages/agent-runtime/src/backgroundProcessRegistry.ts, and
  *   packages/agent-runtime/src/resources/*.
  * - Related duplicate shell/background invocation surfaces exist in
- *   packages/agent-core and packages/tula/platform; this issue should avoid
+ *   packages/agent-core and packages/genty/platform; this issue should avoid
  *   source drift by keeping the canonical policy types/helpers in
  *   agent-runtime and only touching downstream packages if compile contracts
  *   require it.

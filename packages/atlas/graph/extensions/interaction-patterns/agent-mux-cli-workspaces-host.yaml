@@ -215,7 +215,7 @@ attributes:
     - "--no-user-plugins:0:skip discovering external user plugins"
   subcommandExitCodes:
     - "0:success:TUI exited normally"
-    - "1:general-error:@a5c-ai/tula-tui not installed"
+    - "1:general-error:@a5c-ai/genty-tui not installed"
   description: |
     Launch the Ink-based adapters TUI with built-in plus user plugins.
     Source: packages/adapters/cli/src/commands/tui.ts:6-77.

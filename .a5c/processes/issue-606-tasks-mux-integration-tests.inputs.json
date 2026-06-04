@@ -16,7 +16,7 @@
   "sourceGlobs": [
     "^packages/tasks-mux/src/",
     "^packages/sdk/src/",
-    "^packages/tula/platform/src/",
+    "^packages/genty/platform/src/",
     "^packages/adapters/cli/tests/live-stack/",
     "^.github/workflows/live-stack"
   ],
@@ -46,11 +46,11 @@
     "packages/sdk/src/tasks/defineTask.ts",
     "packages/sdk/src/harness/discovery.ts",
     "packages/sdk/src/harness/hooks/stopHookHandler.ts",
-    "packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts",
-    "packages/tula/platform/src/harness/internal/createRun/orchestration/index.ts",
-    "packages/tula/platform/src/harness/internal/createRun/planProcess/phase.ts",
-    "packages/tula/platform/src/harness/internal/createRun/planProcess/validation.ts",
-    "packages/tula/platform/src/harness/adapters/amuxBridge.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/index.ts",
+    "packages/genty/platform/src/harness/internal/createRun/planProcess/phase.ts",
+    "packages/genty/platform/src/harness/internal/createRun/planProcess/validation.ts",
+    "packages/genty/platform/src/harness/adapters/amuxBridge.ts",
     ".github/workflows/live-stack.yml"
   ],
   "targetTestFiles": [
@@ -62,9 +62,9 @@
     "packages/sdk/src/tasks/__tests__/externalAgent.test.ts",
     "packages/sdk/src/runtime/intrinsics/__tests__/task.test.ts",
     "packages/sdk/src/harness/hooks/__tests__/pluginExternalRouting.test.ts",
-    "packages/tula/platform/src/harness/internal/createRun/orchestration/__tests__/tasksMuxRouting.test.ts",
-    "packages/tula/platform/src/harness/internal/createRun/planProcess/__tests__/externalTaskValidation.test.ts",
-    "packages/tula/platform/src/harness/__tests__/e2e-tasks-mux-external-agent.test.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/__tests__/tasksMuxRouting.test.ts",
+    "packages/genty/platform/src/harness/internal/createRun/planProcess/__tests__/externalTaskValidation.test.ts",
+    "packages/genty/platform/src/harness/__tests__/e2e-tasks-mux-external-agent.test.ts",
     "packages/adapters/cli/tests/live-stack/tasks-mux-external-agent-scenario.test.ts",
     ".github/workflows/live-stack.yml"
   ],
@@ -75,16 +75,16 @@
     "packages/sdk/src/tasks/__tests__/**",
     "packages/sdk/src/runtime/intrinsics/__tests__/**",
     "packages/sdk/src/harness/hooks/__tests__/**",
-    "packages/tula/platform/src/harness/internal/createRun/orchestration/__tests__/**",
-    "packages/tula/platform/src/harness/internal/createRun/planProcess/__tests__/**",
-    "packages/tula/platform/src/harness/__tests__/**",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/__tests__/**",
+    "packages/genty/platform/src/harness/internal/createRun/planProcess/__tests__/**",
+    "packages/genty/platform/src/harness/__tests__/**",
     "packages/adapters/cli/tests/live-stack/**",
     ".github/workflows/live-stack.yml",
     "artifacts/issue-606/**"
   ],
   "targetedTestCommand": {
     "title": "Run issue #606 targeted tests",
-    "command": "npm run test --workspace=@a5c-ai/tasks-mux -- src/__tests__/responder-routing.test.ts src/__tests__/adapters-responder-backend.test.ts src/__tests__/external-tracker-backend.test.ts src/__tests__/harness-integration.test.ts && npm run test --workspace=@a5c-ai/babysitter-sdk -- src/harness/__tests__/externalAgentDiscovery.test.ts src/tasks/__tests__/externalAgent.test.ts src/runtime/intrinsics/__tests__/task.test.ts src/harness/hooks/__tests__/pluginExternalRouting.test.ts && npm run test --workspace=@a5c-ai/tula-platform -- src/harness/internal/createRun/orchestration/__tests__/tasksMuxRouting.test.ts src/harness/internal/createRun/planProcess/__tests__/externalTaskValidation.test.ts src/harness/__tests__/e2e-tasks-mux-external-agent.test.ts",
+    "command": "npm run test --workspace=@a5c-ai/tasks-mux -- src/__tests__/responder-routing.test.ts src/__tests__/adapters-responder-backend.test.ts src/__tests__/external-tracker-backend.test.ts src/__tests__/harness-integration.test.ts && npm run test --workspace=@a5c-ai/babysitter-sdk -- src/harness/__tests__/externalAgentDiscovery.test.ts src/tasks/__tests__/externalAgent.test.ts src/runtime/intrinsics/__tests__/task.test.ts src/harness/hooks/__tests__/pluginExternalRouting.test.ts && npm run test --workspace=@a5c-ai/genty-platform -- src/harness/internal/createRun/orchestration/__tests__/tasksMuxRouting.test.ts src/harness/internal/createRun/planProcess/__tests__/externalTaskValidation.test.ts src/harness/__tests__/e2e-tasks-mux-external-agent.test.ts",
     "timeoutMs": 600000,
     "expectedExitCode": 0
   },
@@ -115,13 +115,13 @@
     },
     {
       "title": "Build agent-platform",
-      "command": "npm run build --workspace=@a5c-ai/tula-platform",
+      "command": "npm run build --workspace=@a5c-ai/genty-platform",
       "timeoutMs": 600000,
       "expectedExitCode": 0
     },
     {
       "title": "Test agent-platform",
-      "command": "npm run test --workspace=@a5c-ai/tula-platform",
+      "command": "npm run test --workspace=@a5c-ai/genty-platform",
       "timeoutMs": 600000,
       "expectedExitCode": 0
     },
@@ -138,7 +138,7 @@
       "expectedExitCode": 0
     }
   ],
-  "artifactReadCommand": "git diff -- .github/workflows/live-stack.yml packages/tasks-mux packages/sdk packages/tula/platform packages/adapters/cli/tests/live-stack && printf '\\n===== issue-606 artifacts =====\\n' && find artifacts/issue-606 -maxdepth 2 -type f -print -exec sed -n '1,220p' {} \\; 2>/dev/null || true",
+  "artifactReadCommand": "git diff -- .github/workflows/live-stack.yml packages/tasks-mux packages/sdk packages/genty/platform packages/adapters/cli/tests/live-stack && printf '\\n===== issue-606 artifacts =====\\n' && find artifacts/issue-606 -maxdepth 2 -type f -print -exec sed -n '1,220p' {} \\; 2>/dev/null || true",
   "maxRepairIterations": 2,
   "liveStackPolicy": {
     "envGate": "LIVE_STACK_EXTERNAL_AGENT=1",

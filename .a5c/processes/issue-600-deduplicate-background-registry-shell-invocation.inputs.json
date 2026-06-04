@@ -29,14 +29,14 @@
     "packages/agent-core/src/session.ts",
     "packages/agent-core/src/tools.test.ts",
     "packages/agent-core/src/session.test.ts",
-    "packages/tula/platform/src/harness/backgroundProcessRegistry.ts",
-    "packages/tula/platform/src/harness/agenticTools/background/state.ts",
-    "packages/tula/platform/src/harness/agenticTools/background/tools.ts",
-    "packages/tula/platform/src/harness/agenticTools/tools/execution.ts",
-    "packages/tula/platform/src/harness/agenticTools/types.ts",
-    "packages/tula/platform/src/harness/index.ts",
-    "packages/tula/platform/src/harness/piWrapper.test.ts",
-    "packages/tula/platform/package.json",
+    "packages/genty/platform/src/harness/backgroundProcessRegistry.ts",
+    "packages/genty/platform/src/harness/agenticTools/background/state.ts",
+    "packages/genty/platform/src/harness/agenticTools/background/tools.ts",
+    "packages/genty/platform/src/harness/agenticTools/tools/execution.ts",
+    "packages/genty/platform/src/harness/agenticTools/types.ts",
+    "packages/genty/platform/src/harness/index.ts",
+    "packages/genty/platform/src/harness/piWrapper.test.ts",
+    "packages/genty/platform/package.json",
     "packages/agent-runtime/package.json",
     "docs/agent-layer-gaps.md",
     "docs/here-be-dragons.md"
@@ -45,7 +45,7 @@
     "agentRuntimeCanonicalRegistry": "packages/agent-runtime/src/backgroundProcessRegistry.ts owns the full BackgroundProcessRegistry implementation and accepts an injectable spawnFn for tests.",
     "agentRuntimeCanonicalState": "packages/agent-runtime/src/background/state.ts supports both WeakMap ownership and registryId reuse to avoid orphaning registries when options objects are recreated.",
     "agentCoreCompatibility": "packages/agent-core/src/backgroundProcessRegistry.ts and packages/agent-core/src/agenticTools/background/state.ts already re-export from @a5c-ai/agent-runtime.",
-    "agentPlatformDuplication": "packages/tula/platform/src/harness/backgroundProcessRegistry.ts still carries a near copy of the runtime registry without spawnFn injection, and packages/tula/platform/src/harness/agenticTools/background/state.ts lacks runtime registryId behavior.",
+    "agentPlatformDuplication": "packages/genty/platform/src/harness/backgroundProcessRegistry.ts still carries a near copy of the runtime registry without spawnFn injection, and packages/genty/platform/src/harness/agenticTools/background/state.ts lacks runtime registryId behavior.",
     "shellDuplication": "Shell selection and argv construction are repeated in agent-core session command execution, agent-core foreground bash tool execution, agent-platform foreground bash tool execution, and background process spawning."
   },
   "reuseAuditSeed": {
@@ -150,10 +150,10 @@
   "verificationCommands": [
     "npm exec --yes --package=vitest -- vitest run --config packages/agent-runtime/vitest.config.ts",
     "npm exec --yes --package=vitest -- vitest run --config packages/agent-core/vitest.config.ts packages/agent-core/src/tools.test.ts packages/agent-core/src/session.test.ts",
-    "npm exec --yes --package=vitest -- vitest run --config packages/tula/platform/vitest.config.ts packages/tula/platform/src/harness/piWrapper.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config packages/genty/platform/vitest.config.ts packages/genty/platform/src/harness/piWrapper.test.ts",
     "npm run build --workspace=@a5c-ai/agent-runtime",
     "npm run build --workspace=@a5c-ai/agent-core",
-    "npm run build --workspace=@a5c-ai/tula-platform",
+    "npm run build --workspace=@a5c-ai/genty-platform",
     "npm run verify:metadata"
   ],
   "processLibraryResearch": {

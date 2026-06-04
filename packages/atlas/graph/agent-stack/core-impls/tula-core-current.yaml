@@ -1,15 +1,15 @@
 nodeKind: AgentCoreImpl
-id: agent-core-impl:tula.core@current
+id: agent-core-impl:genty.core@current
 attributes:
-  displayName: "tula Core (current) — composed tula-core + babysitter-sdk loop"
-  agentVersionId: agent-version:tula@current
-  packageRef: source-ref:packages-tula
+  displayName: "genty Core (current) — composed genty-core + babysitter-sdk loop"
+  agentVersionId: agent-version:genty@current
+  packageRef: source-ref:packages-genty
   loopIteratorPolicy: process-function-driven
   loopIteratorNotes: |
-    tula composes @a5c-ai/tula-core and @a5c-ai/babysitter-sdk; the loop
+    genty composes @a5c-ai/genty-core and @a5c-ai/babysitter-sdk; the loop
     semantics are inherited from babysitter-sdk (user-authored async
     `process(inputs, ctx)` with journaled effects) exposed through the
-    tula-core contract.
+    genty-core contract.
   contextManagementStrategy: user-managed
   compactionTriggerNotes: |
     Inherited from the SDK; the wrapped process function owns context.
@@ -27,17 +27,17 @@ attributes:
   streamingFidelity: full
   thinkingChannelHandling: delegated-to-remote
   notes: |
-    tula's core layer composes tula-core and babysitter-sdk to provide the
+    genty's core layer composes genty-core and babysitter-sdk to provide the
     loop, context, and transport primitives. The binary adds CLI entrypoints,
     barrel exports, and adapters bridging on top.
 edges:
   realizes:
     - target: layer:4-agent-core
   composes:
-    - target: agent:tula
+    - target: agent:genty
       role: core
   depends_on:
-    - target: source-ref:packages-tula
+    - target: source-ref:packages-genty
     - target: source-ref:babysitter-sdk
   speaks: []
   supports_orchestration_primitive:

@@ -34,7 +34,7 @@ const binaryRenames = [
     legacySource: "packages/adapters/transport/src/bin/adapters-proxy.ts",
   },
   {
-    packageName: "@a5c-ai/tula-tui",
+    packageName: "@a5c-ai/genty-tui",
     manifestPath: "packages/adapters/tui/package.json",
     canonicalBin: "adapters-tui",
     canonicalTarget: "./dist/bin/adapters-tui.js",

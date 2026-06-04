@@ -20,18 +20,18 @@ The integrated `adapters` package family includes:
 
 ### User Interfaces
 
-- **`@a5c-ai/tula-ui`** - Shared UI foundation
-- **`@a5c-ai/tula-webui`** - Browser interface
-- **`@a5c-ai/tula-tui`** - Terminal interface
+- **`@a5c-ai/genty-ui`** - Shared UI foundation
+- **`@a5c-ai/genty-web-app`** - Browser interface
+- **`@a5c-ai/genty-tui`** - Terminal interface
 
 ### Platform-Specific Applications
 
-- **`@a5c-ai/tula-mobile-ios-app`**
-- **`@a5c-ai/tula-mobile-android-app`**
-- **`@a5c-ai/tula-tv-androidtv-app`**
-- **`@a5c-ai/tula-tv-appletv-app`**
-- **`@a5c-ai/tula-watch-watchos-app`**
-- **`@a5c-ai/tula-watch-wearos-app`**
+- **`@a5c-ai/genty-mobile-ios-app`**
+- **`@a5c-ai/genty-mobile-android-app`**
+- **`@a5c-ai/genty-tv-androidtv-app`**
+- **`@a5c-ai/genty-tv-appletv-app`**
+- **`@a5c-ai/genty-watch-watchos-app`**
+- **`@a5c-ai/genty-watch-wearos-app`**
 
 ### Supporting Services
 

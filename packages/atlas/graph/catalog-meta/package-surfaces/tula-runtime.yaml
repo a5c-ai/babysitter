@@ -1,9 +1,9 @@
 nodeKind: PackageSurface
-id: package:a5c-ai-tula-runtime
+id: package:a5c-ai-genty-runtime
 attributes:
-  packageId: "@a5c-ai/tula-runtime"
-  packageName: "@a5c-ai/tula-runtime"
-  workspacePath: packages/tula/runtime
+  packageId: "@a5c-ai/genty-runtime"
+  packageName: "@a5c-ai/genty-runtime"
+  workspacePath: packages/genty/runtime
   moduleType: typescript
   surfaceKinds:
     - agent-runtime

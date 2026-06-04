@@ -71,7 +71,7 @@ describe("CLI main entry", () => {
     expect(helpText).toContain("babysitter harness:install");
     expect(helpText).toContain("babysitter session:whoami");
     expect(helpText).toContain("babysitter session:cleanup");
-    expect(helpText).toContain("@a5c-ai/tula-platform");
+    expect(helpText).toContain("@a5c-ai/genty-platform");
     expect(helpText).not.toContain("babysitter-harness session:init");
     expect(helpText).not.toContain("babysitter run:create");
   });
@@ -558,7 +558,7 @@ describe("CLI main entry", () => {
 
     expect(exitCode).toBe(1);
     expect(errorSpy).toHaveBeenCalled();
-    expect(String(errorSpy.mock.calls[0]?.[0] ?? "")).toContain("@a5c-ai/tula-platform");
+    expect(String(errorSpy.mock.calls[0]?.[0] ?? "")).toContain("@a5c-ai/genty-platform");
   });
 });
 

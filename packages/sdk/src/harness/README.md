@@ -6,7 +6,7 @@ Copilot, oh-my-pi, Pi, and custom) with the Babysitter runtime.
 
 See `types.ts` for the `HarnessAdapter` interface and `registry.ts` for adapter
 registration. SDK-owned discovery lives in `discovery.ts`; harness-only
-invocation and TUI orchestration now live in `@a5c-ai/tula-platform`.
+invocation and TUI orchestration now live in `@a5c-ai/genty-platform`.
 
 ## Session ID Resolution Contract
 

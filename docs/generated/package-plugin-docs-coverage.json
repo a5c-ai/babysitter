@@ -43,22 +43,22 @@
       "note": "Public npm package for the Atlas catalog graph index and query SDK."
     },
     {
-      "surface": "packages/tula/core",
-      "packageName": "@a5c-ai/tula-core",
+      "surface": "packages/genty/core",
+      "packageName": "@a5c-ai/genty-core",
       "description": "Tula core runtime and tool surface for Babysitter.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/tula/core/README.md",
+      "canonicalHome": "../packages/genty/core/README.md",
       "supporting": [],
       "note": "Public runtime dependency package for advanced orchestration surfaces."
     },
     {
-      "surface": "packages/tula/runtime",
-      "packageName": "@a5c-ai/tula-runtime",
+      "surface": "packages/genty/runtime",
+      "packageName": "@a5c-ai/genty-runtime",
       "description": "Agent runtime layer (L5) — daemon, session, resource management, telemetry.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/tula/runtime/README.md",
+      "canonicalHome": "../packages/genty/runtime/README.md",
       "supporting": [],
       "note": "Public runtime dependency for L5 agent runtime concerns."
     },
@@ -148,7 +148,7 @@
     },
     {
       "surface": "packages/adapters/mobile-android-app",
-      "packageName": "@a5c-ai/tula-mobile-android-app",
+      "packageName": "@a5c-ai/genty-mobile-android-app",
       "description": "Expo-based Android companion app for adapters",
       "hasReadme": false,
       "status": "Internal-only companion app",
@@ -160,7 +160,7 @@
     },
     {
       "surface": "packages/adapters/mobile-ios-app",
-      "packageName": "@a5c-ai/tula-mobile-ios-app",
+      "packageName": "@a5c-ai/genty-mobile-ios-app",
       "description": "Expo-based iOS companion app for adapters",
       "hasReadme": false,
       "status": "Internal-only companion app",
@@ -196,7 +196,7 @@
     },
     {
       "surface": "packages/adapters/tui",
-      "packageName": "@a5c-ai/tula-tui",
+      "packageName": "@a5c-ai/genty-tui",
       "description": "Extensible Ink-based TUI for adapters, with a plugin-first architecture",
       "hasReadme": true,
       "status": "Public family package",
@@ -208,7 +208,7 @@
     },
     {
       "surface": "packages/adapters/tv-androidtv-app",
-      "packageName": "@a5c-ai/tula-tv-androidtv-app",
+      "packageName": "@a5c-ai/genty-tv-androidtv-app",
       "description": "Android TV companion surfaces for adapters",
       "hasReadme": false,
       "status": "Internal-only companion app",
@@ -220,7 +220,7 @@
     },
     {
       "surface": "packages/adapters/tv-appletv-app",
-      "packageName": "@a5c-ai/tula-tv-appletv-app",
+      "packageName": "@a5c-ai/genty-tv-appletv-app",
       "description": "Apple TV companion surfaces for adapters",
       "hasReadme": false,
       "status": "Internal-only companion app",
@@ -232,7 +232,7 @@
     },
     {
       "surface": "packages/adapters/ui",
-      "packageName": "@a5c-ai/tula-ui",
+      "packageName": "@a5c-ai/genty-ui",
       "description": "Shared UI foundation and session-flow projection surface for browser and React Native adapters apps",
       "hasReadme": true,
       "status": "Public family package",
@@ -244,7 +244,7 @@
     },
     {
       "surface": "packages/adapters/watch-watchos-app",
-      "packageName": "@a5c-ai/tula-watch-watchos-app",
+      "packageName": "@a5c-ai/genty-watch-watchos-app",
       "description": "watchOS companion surfaces for adapters",
       "hasReadme": false,
       "status": "Internal-only companion app",
@@ -256,7 +256,7 @@
     },
     {
       "surface": "packages/adapters/watch-wearos-app",
-      "packageName": "@a5c-ai/tula-watch-wearos-app",
+      "packageName": "@a5c-ai/genty-watch-wearos-app",
       "description": "Wear OS companion surfaces for adapters",
       "hasReadme": false,
       "status": "Internal-only companion app",
@@ -268,7 +268,7 @@
     },
     {
       "surface": "packages/adapters/webui",
-      "packageName": "@a5c-ai/tula-webui",
+      "packageName": "@a5c-ai/genty-webui",
       "description": "Browser app for adapters gateway control, monitoring, and realtime session-detail flow inspection",
       "hasReadme": true,
       "status": "Public family package",
@@ -319,30 +319,30 @@
       "note": "README is the canonical package-level contract."
     },
     {
-      "surface": "packages/tula/platform",
-      "packageName": "@a5c-ai/tula-platform",
+      "surface": "packages/genty/platform",
+      "packageName": "@a5c-ai/genty-platform",
       "description": "Agent Platform layer — harness integration, governance, CLI hosting, interaction, storage.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/tula/platform/README.md",
+      "canonicalHome": "../packages/genty/platform/README.md",
       "supporting": [
         "../README.md"
       ],
       "note": "Public npm package, platform layer for agent orchestration."
     },
     {
-      "surface": "packages/tula/cli",
-      "packageName": "@a5c-ai/tula",
+      "surface": "packages/genty/cli",
+      "packageName": "@a5c-ai/genty",
       "description": "Tula — unified agent product integrating core, runtime, platform, and TUI.",
       "hasReadme": true,
       "status": "Public package",
-      "canonicalHome": "../packages/tula/README.md",
+      "canonicalHome": "../packages/genty/README.md",
       "supporting": [],
       "note": "Top-level integrated agent product."
     },
     {
-      "surface": "packages/tula/tui-plugins",
-      "packageName": "@a5c-ai/tula-tui-plugins",
+      "surface": "packages/genty/tui-plugins",
+      "packageName": "@a5c-ai/genty-tui-plugins",
       "description": "Babysitter TUI plugins for adapters",
       "hasReadme": false,
       "status": "Internal-only workspace",
@@ -677,32 +677,32 @@
       "note": "README is the canonical package-level contract."
     },
     {
-      "surface": "packages/tula/tui",
-      "packageName": "@a5c-ai/tula-tui",
+      "surface": "packages/genty/tui",
+      "packageName": "@a5c-ai/genty-tui",
       "description": "Tula tui surface.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/tula/tui/README.md",
+      "canonicalHome": "../packages/genty/tui/README.md",
       "supporting": [],
       "note": ""
     },
     {
-      "surface": "packages/tula/webui",
-      "packageName": "@a5c-ai/tula-webui",
+      "surface": "packages/genty/webui",
+      "packageName": "@a5c-ai/genty-webui",
       "description": "Tula webui surface.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/tula/webui/README.md",
+      "canonicalHome": "../packages/genty/webui/README.md",
       "supporting": [],
       "note": ""
     },
     {
-      "surface": "packages/tula/ui",
-      "packageName": "@a5c-ai/tula-ui",
+      "surface": "packages/genty/ui",
+      "packageName": "@a5c-ai/genty-ui",
       "description": "Tula ui surface.",
       "hasReadme": true,
       "status": "Public advanced/runtime package",
-      "canonicalHome": "../packages/tula/ui/README.md",
+      "canonicalHome": "../packages/genty/ui/README.md",
       "supporting": [],
       "note": ""
     },

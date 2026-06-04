@@ -2,7 +2,7 @@
  * mcp:serve command - Launch the babysitter MCP server on stdio transport.
  *
  * stdout is reserved for MCP protocol messages; all logging goes to stderr.
- * WebSocket transport is available via @a5c-ai/tula-platform.
+ * WebSocket transport is available via @a5c-ai/genty-platform.
  */
 
 import { createBabysitterMcpServer } from "../../mcp";
@@ -21,7 +21,7 @@ export async function handleMcpServe(args: {
 
   if (transportType === "ws" || transportType === "websocket") {
     process.stderr.write(
-      "WebSocket transport has moved to @a5c-ai/tula-platform.\n" +
+      "WebSocket transport has moved to @a5c-ai/genty-platform.\n" +
       "Use agent-platform mcp:serve --transport websocket instead.\n",
     );
     return 1;

@@ -183,7 +183,7 @@ babysitter --version
 
 ```bash
 # Update CLI packages
-npm update -g @a5c-ai/babysitter @a5c-ai/tula-platform
+npm update -g @a5c-ai/babysitter @a5c-ai/genty-platform
 
 # Update Claude Code plugin
 claude plugin marketplace update a5c.ai

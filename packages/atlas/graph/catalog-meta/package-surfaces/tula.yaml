@@ -1,9 +1,9 @@
 nodeKind: PackageSurface
-id: package:a5c-ai-tula
+id: package:a5c-ai-genty
 attributes:
-  packageId: "@a5c-ai/tula"
-  packageName: "@a5c-ai/tula"
-  workspacePath: packages/tula
+  packageId: "@a5c-ai/genty"
+  packageName: "@a5c-ai/genty"
+  workspacePath: packages/genty
   moduleType: typescript
   surfaceKinds:
     - agent-runtime
@@ -14,8 +14,8 @@ attributes:
   sourceOfTruthRole: application
   publishedTo: npm
   versionPolicy: semver
-  # Source: packages/tula/package.json (exports ./cli barrel + root barrel).
-  # Bin: tula. Composes agent-core, agent-runtime, agent-platform, adapters,
+  # Source: packages/genty/package.json (exports ./cli barrel + root barrel).
+  # Bin: genty. Composes agent-core, agent-runtime, agent-platform, adapters,
   # and babysitter-sdk into a single installable product.
 edges:
   references_path:

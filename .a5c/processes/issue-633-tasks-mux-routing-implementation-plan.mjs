@@ -26,7 +26,7 @@
  * - Design docs already exist under docs/adapters-babysitter-integrations/, including tasks-mux-routing.md, effect-resolution.md, and testing.md.
  * - tasks-mux already exposes ResponderType, routeTask, AgentMuxResponderBackend, ExternalTrackerBackend, and BreakpointBackend seams on the current checkout.
  * - Current staging has routeTask in packages/tasks-mux/src/router.ts, AgentMuxResponderBackend in packages/tasks-mux/src/backends/adapters.ts, and ExternalTrackerBackend in packages/tasks-mux/src/backends/external-tracker.ts.
- * - Current staging has agent-platform resolveEffect delegating routable agent effects through tasks-mux in packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts.
+ * - Current staging has agent-platform resolveEffect delegating routable agent effects through tasks-mux in packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts.
  * - agent-platform already imports/mocks routeTask and AgentMuxResponderBackend in createRun orchestration tests, so implementation must audit current behavior before adding duplicate routing layers.
  * - SDK stop-hook continuation already references routeTask/isHostDelegableRoute, so plugin-mode work should be verified against that live path rather than recreating a separate decision path.
  * - Current staging has SDK task responderType serialization/validation in packages/sdk/src/tasks/types.ts, packages/sdk/src/tasks/defineTask.ts, and packages/sdk/src/tasks/kinds/index.ts.
@@ -219,7 +219,7 @@ export const reuseAndCompletionAuditTask = defineTask("issue-633.reuse-and-compl
         "Start the report with exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).",
         "Do not edit files in this phase.",
         "Extract keywords: tasks-mux, routeTask, ResponderType, AgentMuxResponderBackend, BreakpointBackend, ExternalTrackerBackend, orchestrateIteration, resolveAndPostEffect, stop-hook, agent-core, adapters, tracker, human, internal.",
-        "Scan package dependencies and imports in packages/tasks-mux, packages/sdk, packages/tula/platform, plugins/babysitter, and plugins/babysitter-unified.",
+        "Scan package dependencies and imports in packages/tasks-mux, packages/sdk, packages/genty/platform, plugins/babysitter, and plugins/babysitter-unified.",
         "Scan environment variables relevant to ADAPTERS, BMUX, AGENT_SESSION_ID, AGENT_PLUGIN_ROOT, and AGENT_CAPABILITIES_JSON.",
         "Scan docs and tests for existing tasks-mux routing coverage.",
         "Classify every matching seam as reusable, implemented-but-needs-verification, missing, stale, or off-path.",

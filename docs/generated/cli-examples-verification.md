@@ -38,7 +38,7 @@ Published surfaces: `docs/cli-examples.md`, `packages/sdk/src/testing/README.md`
 
 | Script | Command |
 | --- | --- |
-| build:runtime | `npm run build:runtime:agent-platform-deps && npm run build --workspace=@a5c-ai/tula-platform` |
+| build:runtime | `npm run build:runtime:agent-platform-deps && npm run build --workspace=@a5c-ai/genty-platform` |
 | docs:prepare | `node ./scripts/generate-process-library-doc-artifacts.cjs && node ./scripts/generate-cli-examples-artifacts.cjs && node ./scripts/ensure-webpackbar-patch.cjs` |
 | docs:examples:generate | `node ./scripts/generate-cli-examples-artifacts.cjs` |
 | docs:examples:smoke | `npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk` |

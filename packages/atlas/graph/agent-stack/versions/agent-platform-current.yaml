@@ -7,7 +7,7 @@ attributes:
   releaseChannel: "stable"
   displayName: "agent-platform"
   summary: "agent-platform CLI binary — long-running agent service"
-  sourcePackage: "@a5c-ai/tula-platform"
+  sourcePackage: "@a5c-ai/genty-platform"
   osSupport:
     - "linux"
     - "macos"

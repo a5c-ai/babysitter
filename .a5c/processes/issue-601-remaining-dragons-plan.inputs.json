@@ -7,8 +7,8 @@
   "maxImplementationLoops": 2,
   "verificationCommands": [
     "npm run test --workspace=@a5c-ai/agent-core",
-    "npm run test --workspace=@a5c-ai/tula-platform",
-    "npm run test:realtime --workspace=@a5c-ai/tula-ui",
+    "npm run test --workspace=@a5c-ai/genty-platform",
+    "npm run test:realtime --workspace=@a5c-ai/genty-ui",
     "npm run build:runtime",
     "npm run test:adapters",
     "npm run verify:metadata",

@@ -1,0 +1,38 @@
+{
+  "name": "@a5c-ai/genty-desktop-app",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "description": "genty desktop application — Electron-based agent control and monitoring",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "tsc && electron-builder",
+    "build:renderer": "vite build",
+    "package": "electron-builder --dir"
+  },
+  "dependencies": {
+    "@a5c-ai/genty-ui": "*",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^6.30.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.5.2",
+    "electron": "^36.0.0",
+    "electron-builder": "^26.0.0",
+    "typescript": "^5.4.2",
+    "vite": "^6.3.0"
+  },
+  "build": {
+    "appId": "ai.a5c.genty",
+    "productName": "genty",
+    "directories": { "output": "release" },
+    "files": ["dist/**/*", "package.json"],
+    "mac": { "target": ["dmg", "zip"], "category": "public.app-category.developer-tools" },
+    "win": { "target": ["nsis", "portable"] },
+    "linux": { "target": ["AppImage", "deb"] }
+  }
+}

@@ -46,9 +46,9 @@ These are already under `packages/adapters/` but have inconsistent package names
 | `@a5c-ai/adapters-gateway` | `@a5c-ai/adapters-gateway` (keep) | `packages/adapters/gateway/` |
 | `@a5c-ai/adapters-harness-mock` | `@a5c-ai/adapters-harness-mock` (keep) | `packages/adapters/harness-mock/` |
 | `@a5c-ai/adapters-observability` | `@a5c-ai/adapters-observability` (keep) | `packages/adapters/observability/` |
-| `@a5c-ai/tula-tui` | `@a5c-ai/tula-tui` (keep) | `packages/adapters/tui/` |
-| `@a5c-ai/tula-ui` | `@a5c-ai/tula-ui` (keep) | `packages/adapters/ui/` |
-| `@a5c-ai/tula-webui` | `@a5c-ai/tula-webui` (keep) | `packages/adapters/webui/` |
+| `@a5c-ai/genty-tui` | `@a5c-ai/genty-tui` (keep) | `packages/adapters/tui/` |
+| `@a5c-ai/genty-ui` | `@a5c-ai/genty-ui` (keep) | `packages/adapters/ui/` |
+| `@a5c-ai/genty-web-app` | `@a5c-ai/genty-web-app` (keep) | `packages/adapters/webui/` |
 
 ## Summary
 

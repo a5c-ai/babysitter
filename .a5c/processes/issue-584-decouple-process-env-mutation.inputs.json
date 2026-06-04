@@ -5,28 +5,28 @@
   "maxIterations": 3,
   "targetFiles": [
     "docs/here-be-dragons.md",
-    "packages/tula/platform/src/harness/piWrapper/moduleSupport.ts",
-    "packages/tula/platform/src/harness/piWrapper.ts",
+    "packages/genty/platform/src/harness/piWrapper/moduleSupport.ts",
+    "packages/genty/platform/src/harness/piWrapper.ts",
     "packages/agent-core/src/session.ts",
     "packages/agent-core/src/agenticTools/config/state.ts",
-    "packages/tula/platform/src/harness/agenticTools/config/state.ts",
+    "packages/genty/platform/src/harness/agenticTools/config/state.ts",
     "packages/adapters/cli/src/index.ts",
     "packages/adapters/observability/src/logger.ts"
   ],
   "mutationFiles": [
-    "packages/tula/platform/src/harness/piWrapper/moduleSupport.ts",
+    "packages/genty/platform/src/harness/piWrapper/moduleSupport.ts",
     "packages/agent-core/src/agenticTools/config/state.ts",
-    "packages/tula/platform/src/harness/agenticTools/config/state.ts",
+    "packages/genty/platform/src/harness/agenticTools/config/state.ts",
     "packages/adapters/cli/src/index.ts"
   ],
   "regressionTestFiles": [
-    "packages/tula/platform/src/harness/piWrapper/moduleSupport.test.ts",
+    "packages/genty/platform/src/harness/piWrapper/moduleSupport.test.ts",
     "packages/agent-core/src/agenticTools/config/state.test.ts",
-    "packages/tula/platform/src/harness/agenticTools/config/state.test.ts",
+    "packages/genty/platform/src/harness/agenticTools/config/state.test.ts",
     "packages/adapters/cli/tests/logging-config.test.ts"
   ],
   "verificationCommands": [
-    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/tula/platform/src/harness/piWrapper/moduleSupport.test.ts packages/tula/platform/src/harness/piWrapper.test.ts packages/agent-core/src/session.test.ts packages/agent-core/src/agenticTools/config/state.test.ts packages/tula/platform/src/harness/agenticTools/config/state.test.ts packages/adapters/cli/tests/logging-config.test.ts",
+    "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/genty/platform/src/harness/piWrapper/moduleSupport.test.ts packages/genty/platform/src/harness/piWrapper.test.ts packages/agent-core/src/session.test.ts packages/agent-core/src/agenticTools/config/state.test.ts packages/genty/platform/src/harness/agenticTools/config/state.test.ts packages/adapters/cli/tests/logging-config.test.ts",
     "npm run build:runtime",
     "npm run build:adapters:non-realtime",
     "npm run verify:metadata"

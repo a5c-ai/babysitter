@@ -38,7 +38,7 @@ function defaultWebuiRoot(): string | null {
   const candidates: string[] = [];
 
   try {
-    const resolved = require.resolve('@a5c-ai/tula-webui/package.json');
+    const resolved = require.resolve('@a5c-ai/genty-webui/package.json');
     candidates.push(path.join(path.dirname(resolved), 'dist'));
   } catch {
     // Fall back to local workspace paths.
@@ -79,7 +79,7 @@ export async function serveWebuiRequest(
 ): Promise<Response | null> {
   if (!webuiRoot) {
     return new Response(
-      'adapters webui is not installed. Install @a5c-ai/tula-webui or pass --webui /path/to/dist.',
+      'adapters webui is not installed. Install @a5c-ai/genty-webui or pass --webui /path/to/dist.',
       { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } },
     );
   }

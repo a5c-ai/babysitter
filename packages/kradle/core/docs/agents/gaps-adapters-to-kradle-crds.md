@@ -256,7 +256,7 @@ Stack builder should let users pick adapter type, configure transport, test conn
 
 ### Gaps → UI Infrastructure
 
-The kradle web console will need a tool rendering system when session detail views are built. This can import from `@a5c-ai/tula-ui` or replicate the registry pattern.
+The kradle web console will need a tool rendering system when session detail views are built. This can import from `@a5c-ai/genty-ui` or replicate the registry pattern.
 
 ---
 

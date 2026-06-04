@@ -1,9 +1,9 @@
 nodeKind: AgentRuntimeImpl
-id: agent-runtime-impl:tula.runtime@current
+id: agent-runtime-impl:genty.runtime@current
 attributes:
-  displayName: "tula Runtime (current) — composed agent-runtime + SDK runtime"
-  agentVersionId: agent-version:tula@current
-  packageRef: source-ref:packages-tula
+  displayName: "genty Runtime (current) — composed agent-runtime + SDK runtime"
+  agentVersionId: agent-version:genty@current
+  packageRef: source-ref:packages-genty
   subagentDispatchMechanism: agent-as-tool
   subagentChildSessionPolicy: persistent-child-session
   subagentToolScopePolicy: explicit-allowlist
@@ -28,14 +28,14 @@ attributes:
     - mcp-transport:http-sse
   supportsStreaming: true
   notes: |
-    tula runtime composes agent-runtime and babysitter-sdk runtime (journal-
+    genty runtime composes agent-runtime and babysitter-sdk runtime (journal-
     replay, breakpoint policy engine, harness adapters) into a unified
     runtime surface. Adds adapters bridging for multi-harness dispatch.
 edges:
   realizes:
     - target: layer:5-agent-runtime
   composes:
-    - target: agent:tula
+    - target: agent:genty
       role: runtime
   bundles:
     - target: tool-descriptor:bash

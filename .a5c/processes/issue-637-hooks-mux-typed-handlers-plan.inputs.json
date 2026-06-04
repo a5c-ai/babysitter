@@ -89,9 +89,9 @@
       "packages/hooks-mux/core/src/normalizer/__tests__/normalizer.test.ts",
       "packages/hooks-mux/core/src/__tests__/handler-timeout.test.ts",
       "packages/hooks-mux/core/src/__tests__/integration/invoke-fanout.test.ts",
-      "packages/tula/platform/src/harness/adapters/amuxBridge.ts",
-      "packages/tula/platform/src/mcp/client/toolRegistry.ts",
-      "packages/tula/platform/src/mcp/client/executor.ts",
+      "packages/genty/platform/src/harness/adapters/amuxBridge.ts",
+      "packages/genty/platform/src/mcp/client/toolRegistry.ts",
+      "packages/genty/platform/src/mcp/client/executor.ts",
       "docs/agent-stack/hooks/missing-capabilities.md"
     ],
     "planningConstraint": "Reuse hooks-mux runner, result, merge, timeout, diagnostics, API export, bridge, and MCP/tool registry surfaces. Do not create a parallel registry or broaden into unrelated hook capability issues."
@@ -131,8 +131,8 @@
     "packages/hooks-mux/core/src/normalizer/__tests__/normalizer.test.ts",
     "packages/hooks-mux/core/src/__tests__/handler-timeout.test.ts",
     "packages/hooks-mux/core/src/__tests__/integration/invoke-fanout.test.ts",
-    "packages/tula/platform/src/harness/adapters/amuxBridge.ts",
-    "packages/tula/platform/src/harness/adapters/__tests__/amuxBridge.test.ts"
+    "packages/genty/platform/src/harness/adapters/amuxBridge.ts",
+    "packages/genty/platform/src/harness/adapters/__tests__/amuxBridge.test.ts"
   ],
   "verificationCommands": [
     "npm run build:hooks-mux",
@@ -141,7 +141,7 @@
     "npm run build:sdk",
     "npm run test:sdk",
     "npm run verify:metadata",
-    "npm --workspace @a5c-ai/tula-platform test -- src/harness/adapters/__tests__/amuxBridge.test.ts",
+    "npm --workspace @a5c-ai/genty-platform test -- src/harness/adapters/__tests__/amuxBridge.test.ts",
     "git diff --check"
   ],
   "qualityGates": [

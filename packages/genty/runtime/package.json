@@ -1,0 +1,98 @@
+{
+  "name": "@a5c-ai/genty-runtime",
+  "version": "5.0.0",
+  "description": "Agent runtime layer (L5) — daemon, session, resource management, telemetry",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./daemon": {
+      "types": "./dist/daemon/index.d.ts",
+      "require": "./dist/daemon/index.js",
+      "default": "./dist/daemon/index.js"
+    },
+    "./session": {
+      "types": "./dist/session/index.d.ts",
+      "require": "./dist/session/index.js",
+      "default": "./dist/session/index.js"
+    },
+    "./cost": {
+      "types": "./dist/cost/index.d.ts",
+      "require": "./dist/cost/index.js",
+      "default": "./dist/cost/index.js"
+    },
+    "./observability": {
+      "types": "./dist/observability/index.d.ts",
+      "require": "./dist/observability/index.js",
+      "default": "./dist/observability/index.js"
+    },
+    "./telemetry": {
+      "types": "./dist/telemetry/index.d.ts",
+      "require": "./dist/telemetry/index.js",
+      "default": "./dist/telemetry/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "daemon": [
+        "dist/daemon/index.d.ts"
+      ],
+      "session": [
+        "dist/session/index.d.ts"
+      ],
+      "cost": [
+        "dist/cost/index.d.ts"
+      ],
+      "observability": [
+        "dist/observability/index.d.ts"
+      ],
+      "telemetry": [
+        "dist/telemetry/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "npm run build:sdk --prefix ../../.. && tsc --build --force tsconfig.json",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@a5c-ai/comm-adapter": "5.0.0",
+    "@a5c-ai/babysitter-sdk": "5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "rimraf": "^6.1.3",
+    "typescript": "^5.4.2",
+    "vitest": "^4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/genty/runtime"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/genty/runtime#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "atlas": {
+    "layers": [
+      "L5"
+    ],
+    "muxes": []
+  }
+}

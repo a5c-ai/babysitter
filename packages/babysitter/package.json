@@ -20,10 +20,10 @@
   },
   "dependencies": {
     "@a5c-ai/babysitter-sdk": "5.0.0",
-    "@a5c-ai/tula-core": "5.0.0",
-    "@a5c-ai/tula-runtime": "5.0.0",
-    "@a5c-ai/tula-platform": "5.0.0",
-    "@a5c-ai/tula": "5.0.0"
+    "@a5c-ai/genty-core": "5.0.0",
+    "@a5c-ai/genty-runtime": "5.0.0",
+    "@a5c-ai/genty-platform": "5.0.0",
+    "@a5c-ai/genty": "5.0.0"
   },
   "repository": {
     "type": "git",

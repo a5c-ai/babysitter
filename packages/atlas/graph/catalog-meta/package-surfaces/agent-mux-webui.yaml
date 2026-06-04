@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-adapters-webui
 attributes:
-  packageId: "@a5c-ai/tula-webui"
-  packageName: "@a5c-ai/tula-webui"
+  packageId: "@a5c-ai/genty-web-app"
+  packageName: "@a5c-ai/genty-web-app"
   workspacePath: packages/adapters/webui
   moduleType: nextjs
   surfaceKinds:

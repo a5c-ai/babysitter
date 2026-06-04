@@ -284,7 +284,7 @@ export async function process(inputs, ctx) {
     'npm run verify:metadata',
     'npm --workspace packages/agent-core test',
     'npm --workspace packages/tool-mux test',
-    'npm --workspace packages/tula/platform test',
+    'npm --workspace packages/genty/platform test',
   ];
   const maxVerificationAttempts = inputs?.maxVerificationAttempts ?? 2;
 

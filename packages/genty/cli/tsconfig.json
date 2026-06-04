@@ -1,0 +1,66 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "moduleResolution": "node",
+    "types": [
+      "node"
+    ],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@a5c-ai/genty-platform": [
+        "../platform/src/index.ts"
+      ],
+      "@a5c-ai/genty-platform/api": [
+        "../platform/src/api/index.ts"
+      ],
+      "@a5c-ai/genty-platform/daemon": [
+        "../platform/src/daemon/index.ts"
+      ],
+      "@a5c-ai/genty-platform/harness": [
+        "../platform/src/harness/index.ts"
+      ],
+      "@a5c-ai/genty-platform/mcp/transport": [
+        "../platform/src/mcp/transport/index.ts"
+      ],
+      "@a5c-ai/genty-platform/session": [
+        "../platform/src/session/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/__tests__"
+  ],
+  "references": [
+    {
+      "path": "../../sdk"
+    },
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../runtime"
+    },
+    {
+      "path": "../platform"
+    }
+  ]
+}

@@ -23,13 +23,13 @@
 
 | Current Path | Target Path |
 |-------------|------------|
-| `packages/tula/platform/src/harness/adapters/` | `packages/tula/platform/src/harness/adapters/` |
-| `packages/tula/platform/src/harness/adapters/amuxBridge.ts` | `packages/tula/platform/src/harness/adapters/bridge.ts` |
-| `packages/tula/platform/src/harness/adapters/amuxClientFactory.ts` | `packages/tula/platform/src/harness/adapters/clientFactory.ts` |
-| `packages/tula/platform/src/harness/adapters/amuxEventMapper.ts` | `packages/tula/platform/src/harness/adapters/eventMapper.ts` |
-| `packages/tula/platform/src/harness/adapters/amuxHarnessMap.ts` | `packages/tula/platform/src/harness/adapters/harnessMap.ts` |
-| `packages/tula/platform/src/harness/adapters/amuxStdinReader.ts` | `packages/tula/platform/src/harness/adapters/stdinReader.ts` |
-| `packages/tula/platform/src/harness/adapters/amuxTypes.ts` | `packages/tula/platform/src/harness/adapters/types.ts` |
+| `packages/genty/platform/src/harness/adapters/` | `packages/genty/platform/src/harness/adapters/` |
+| `packages/genty/platform/src/harness/adapters/amuxBridge.ts` | `packages/genty/platform/src/harness/adapters/bridge.ts` |
+| `packages/genty/platform/src/harness/adapters/amuxClientFactory.ts` | `packages/genty/platform/src/harness/adapters/clientFactory.ts` |
+| `packages/genty/platform/src/harness/adapters/amuxEventMapper.ts` | `packages/genty/platform/src/harness/adapters/eventMapper.ts` |
+| `packages/genty/platform/src/harness/adapters/amuxHarnessMap.ts` | `packages/genty/platform/src/harness/adapters/harnessMap.ts` |
+| `packages/genty/platform/src/harness/adapters/amuxStdinReader.ts` | `packages/genty/platform/src/harness/adapters/stdinReader.ts` |
+| `packages/genty/platform/src/harness/adapters/amuxTypes.ts` | `packages/genty/platform/src/harness/adapters/types.ts` |
 | `packages/adapters/adapters-proxy/` | `packages/adapters/transport-proxy/` |
 | `packages/adapters/meta/config/adapters/` | `packages/adapters/meta/config/adapters/` |
 

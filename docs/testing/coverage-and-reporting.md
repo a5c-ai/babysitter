@@ -23,8 +23,8 @@ Coverage reporting should make the repository-wide test story visible without tu
 The long-term target is one repository coverage artifact with package-level sections:
 
 - `@a5c-ai/babysitter-sdk`,
-- `@a5c-ai/tula-platform`,
-- `@a5c-ai/tula-core`,
+- `@a5c-ai/genty-platform`,
+- `@a5c-ai/genty-core`,
 - `@a5c-ai/transport-adapter`,
 - the `@a5c-ai/adapters` package family,
 - the hooks-mux package family,
@@ -93,7 +93,7 @@ Transport-mux scenario coverage should be reported as separate checklist rows, n
 - adapters launch proxy decision matrix,
 - fixture stream cancellation/timeout/reconnect behavior,
 - passthrough path/query/upstream failure behavior,
-- live tula-core stream bridge,
+- live genty-core stream bridge,
 - live external harness bridge through `adapters launch --with-proxy*`.
 
 A coverage summary should show scenario coverage as a checklist, not as a percentage that hides missing live evidence.

@@ -134,7 +134,7 @@ graph TB
 | `packages/triggers-mux` | GitHub Action: trigger evaluation + agent dispatch |
 | `packages/kradle` | Kubernetes operator + web UI for cloud deployment |
 | `packages/extension-mux` | Plugin generator: unified source → per-harness distributions |
-| `packages/tula/platform` | Standalone babysitter agent (internal harness) |
+| `packages/genty/platform` | Standalone babysitter agent (internal harness) |
 
 ## Development Workflow
 

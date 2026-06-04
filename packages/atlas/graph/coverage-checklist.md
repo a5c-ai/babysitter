@@ -463,16 +463,16 @@ A `Mux` is treated as `ExtensionInterface` (a5c-flavored contract) plus implemen
 |---|---|---|---|---|
 | `@a5c-ai/atlas/catalog` | a5c/01-component-map.md | `PackageSurface` + `CiSurface` (both populated; example: graph/catalog-meta/package-surfaces/agent-catalog.yaml) | ✅ | promoted from stub |
 | `@a5c-ai/catalog` (UI) | a5c/01-component-map.md | `PackageSurface` + `CiSurface` | ✅ | |
-| `@a5c-ai/tula-core` | a5c/01-component-map.md | `PackageSurface` | ✅ | |
+| `@a5c-ai/genty-core` | a5c/01-component-map.md | `PackageSurface` | ✅ | |
 | `@a5c-ai/comm-adapter/adapters/cli/sdk/gateway/harness-mock/observability/tui/webui` | a5c/01-component-map.md | one `PackageSurface` each | ✅ | |
-| `@a5c-ai/tula-platform` | a5c/01-component-map.md, ADR-001 | covered above as AgentProduct | ✅ | |
+| `@a5c-ai/genty-platform` | a5c/01-component-map.md, ADR-001 | covered above as AgentProduct | ✅ | |
 | `@a5c-ai/transport-adapter` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/hooks-adapter-cli` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/extensions-adapter` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/tasks-adapter` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/babysitter-sdk` | a5c/01-component-map.md, 05-sdk.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/babysitter` (top-level npm) | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
-| `@a5c-ai/tula-tui-plugins` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
+| `@a5c-ai/genty-tui-plugins` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/cloud` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/observer-dashboard` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |
 | `@a5c-ai/kanban` | a5c/01-component-map.md | `ProcessDescriptor` | ✅ | |

@@ -85,7 +85,7 @@
       "packages/tasks-mux/routing.json shows existing github-issues routing config examples.",
       "packages/tasks-mux/src/mcp/backend-resolver.ts and packages/tasks-mux/src/harness/interaction-provider.ts are routing integration surfaces.",
       "packages/tasks-mux/src/auth/types.ts includes webhookSecret patterns for GitHub app auth.",
-      "packages/tula/platform/src/daemon/webhookListener.ts has a simple HTTP webhook listener pattern, but package boundaries must be evaluated before reuse."
+      "packages/genty/platform/src/daemon/webhookListener.ts has a simple HTTP webhook listener pattern, but package boundaries must be evaluated before reuse."
     ],
     "absentInfrastructure": [
       "No ExternalTrackerBackend implementation exists.",

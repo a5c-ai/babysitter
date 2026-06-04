@@ -37,7 +37,7 @@
     "packages/adapters/adapters/src",
     "packages/hooks-mux/adapter-*",
     "packages/hooks-mux/cli/src",
-    "packages/tula/platform/vitest.config.ts",
+    "packages/genty/platform/vitest.config.ts",
     "packages/adapters/webui/vite.config.ts",
     "packages/adapters/webui/vitest.config.ts",
     "packages/adapters/webui/tests/vite-config.test.ts",

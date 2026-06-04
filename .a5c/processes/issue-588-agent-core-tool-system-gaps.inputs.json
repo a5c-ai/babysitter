@@ -65,15 +65,15 @@
     "packages/tool-mux/src/__tests__/dispatch.test.ts",
     "packages/tool-mux/src/__tests__/hooks.test.ts",
     "packages/tool-mux/src/__tests__/schema-translation.test.ts",
-    "packages/tula/platform/src/governance/builtins.ts",
-    "packages/tula/platform/src/governance/categories.ts",
-    "packages/tula/platform/src/governance/postureBridge.ts",
-    "packages/tula/platform/src/harness/types.ts",
-    "packages/tula/platform/src/harness/agenticTools/types.ts",
-    "packages/tula/platform/src/harness/agenticTools/discovery/tools.ts",
-    "packages/tula/platform/src/harness/agenticTools/tools/execution.ts",
-    "packages/tula/platform/src/mcp/client/toolRegistry.ts",
-    "packages/tula/platform/src/mcp/client/executor.ts"
+    "packages/genty/platform/src/governance/builtins.ts",
+    "packages/genty/platform/src/governance/categories.ts",
+    "packages/genty/platform/src/governance/postureBridge.ts",
+    "packages/genty/platform/src/harness/types.ts",
+    "packages/genty/platform/src/harness/agenticTools/types.ts",
+    "packages/genty/platform/src/harness/agenticTools/discovery/tools.ts",
+    "packages/genty/platform/src/harness/agenticTools/tools/execution.ts",
+    "packages/genty/platform/src/mcp/client/toolRegistry.ts",
+    "packages/genty/platform/src/mcp/client/executor.ts"
   ],
   "testTargets": [
     "packages/agent-core/src/deferredToolRegistry.test.ts",
@@ -82,10 +82,10 @@
     "packages/tool-mux/src/__tests__/dispatch.test.ts",
     "packages/tool-mux/src/__tests__/hooks.test.ts",
     "packages/tool-mux/src/__tests__/schema-translation.test.ts",
-    "packages/tula/platform/src/governance/__tests__/policy.test.ts",
-    "packages/tula/platform/src/governance/__tests__/postureBridge.test.ts",
-    "packages/tula/platform/src/harness/**/__tests__/*.test.ts",
-    "packages/tula/platform/src/mcp/client/**/*.test.ts"
+    "packages/genty/platform/src/governance/__tests__/policy.test.ts",
+    "packages/genty/platform/src/governance/__tests__/postureBridge.test.ts",
+    "packages/genty/platform/src/harness/**/__tests__/*.test.ts",
+    "packages/genty/platform/src/mcp/client/**/*.test.ts"
   ],
   "implementationSlices": [
     {
@@ -137,7 +137,7 @@
     "npm run verify:metadata",
     "npm --workspace packages/agent-core test",
     "npm --workspace packages/tool-mux test",
-    "npm --workspace packages/tula/platform test"
+    "npm --workspace packages/genty/platform test"
   ],
   "maxVerificationAttempts": 2
 }

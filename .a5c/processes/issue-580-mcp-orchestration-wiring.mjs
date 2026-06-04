@@ -7,13 +7,13 @@
  * References searched before authoring:
  * - docs/agent-reference/process-authoring.md
  * - docs/agent-layer-gaps.md
- * - packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts
- * - packages/tula/platform/src/harness/internal/createRun/orchestration/externalPhase.ts
- * - packages/tula/platform/src/mcp/client/{manager,executor,toolRegistry}.ts
- * - packages/tula/platform/src/breakpoints/approvalChains.ts
- * - packages/tula/platform/src/cost/effectCost.ts
- * - packages/tula/platform/src/session/cost.ts
- * - packages/tula/platform/src/compression/compaction.ts
+ * - packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts
+ * - packages/genty/platform/src/harness/internal/createRun/orchestration/externalPhase.ts
+ * - packages/genty/platform/src/mcp/client/{manager,executor,toolRegistry}.ts
+ * - packages/genty/platform/src/breakpoints/approvalChains.ts
+ * - packages/genty/platform/src/cost/effectCost.ts
+ * - packages/genty/platform/src/session/cost.ts
+ * - packages/genty/platform/src/compression/compaction.ts
  * - methodologies/shared/root-cause-diagnosis.js
  * - methodologies/superpowers/test-driven-development.js
  * - methodologies/superpowers/verification-before-completion.js
@@ -45,12 +45,12 @@ const collectContextTask = defineTask('issue-580.collect-context-and-reuse-audit
       'printf "%s\\n" "=== Reuse-audit findings (REVIEW BEFORE PROCEEDING) ==="',
       'printf "%s\\n" "Keywords: MCP client, transport, executor, effect resolution, breakpoint approval chains, governance, per-effect cost tracking, session budget, compaction, streaming output."',
       'printf "%s\\n" "--- Existing infrastructure matches ---"',
-      'rg -n "McpToolExecutor|McpToolRegistry|McpClientManager|evaluateApprovalChain|computeEffectCosts|updateSessionCost|checkBudget|shouldAutoCompact|compactSession|StreamingOutputOptions|resolveEffectWithRetry|createStreamingProgressCallbacks" packages/tula/platform/src docs/agent-layer-gaps.md -S',
+      'rg -n "McpToolExecutor|McpToolRegistry|McpClientManager|evaluateApprovalChain|computeEffectCosts|updateSessionCost|checkBudget|shouldAutoCompact|compactSession|StreamingOutputOptions|resolveEffectWithRetry|createStreamingProgressCallbacks" packages/genty/platform/src docs/agent-layer-gaps.md -S',
       'printf "%s\\n" "--- Live orchestration entrypoints ---"',
-      'sed -n "1,240p" packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts',
-      'sed -n "320,410p" packages/tula/platform/src/harness/internal/createRun/orchestration/externalPhase.ts',
+      'sed -n "1,240p" packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts',
+      'sed -n "320,410p" packages/genty/platform/src/harness/internal/createRun/orchestration/externalPhase.ts',
       'printf "%s\\n" "--- Existing MCP/client and adjacent module tests ---"',
-      'find packages/tula/platform/src -path "*__tests__*" -type f | sort | sed -n "1,220p"',
+      'find packages/genty/platform/src -path "*__tests__*" -type f | sort | sed -n "1,220p"',
       'printf "%s\\n" "--- Process-library methodology references searched ---"',
       'printf "%s\\n" "methodologies/shared/root-cause-diagnosis.js"',
       'printf "%s\\n" "methodologies/superpowers/test-driven-development.js"',
@@ -139,7 +139,7 @@ const authorTestsTask = defineTask('issue-580.author-failing-tests', (args, task
         JSON.stringify(args.architecture ?? {}, null, 2),
         '---',
         'Edit tests only. Do not change production source files in this task.',
-        'Add or extend Vitest coverage for the live orchestration path under packages/tula/platform/src/harness/internal/createRun/__tests__/.',
+        'Add or extend Vitest coverage for the live orchestration path under packages/genty/platform/src/harness/internal/createRun/__tests__/.',
         'Freeze existing resolver behavior for node/orchestrator_task, shell, breakpoint, agent, and subprocess where practical.',
         'Add acceptance tests proving: MCP-resolvable effects call McpToolExecutor with session/run context; approval-chain metadata is evaluated before breakpoint auto-approval; per-effect cost data is aggregated into session budget checks after resolution; compaction is triggered as an overlay when thresholds are exceeded; streaming callbacks receive effect output without changing existing CLI/json/tui behavior.',
         'Use fakes and injected factories. Do not require live MCP servers, provider credentials, or network access.',
@@ -161,7 +161,7 @@ const verifyRedTask = defineTask('issue-580.verify-red', (args, taskCtx) => ({
     command: [
       'set -euo pipefail',
       'set +e',
-      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/tula/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/tula/platform/src/harness/internal/createRun/__tests__/effects.test.ts packages/tula/platform/src/harness/internal/createRun/__tests__/progress.test.ts packages/tula/platform/src/cost/__tests__/effectCost.test.ts packages/tula/platform/src/session/__tests__/cost.test.ts > /tmp/issue-580-red.log 2>&1',
+      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/genty/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/genty/platform/src/harness/internal/createRun/__tests__/effects.test.ts packages/genty/platform/src/harness/internal/createRun/__tests__/progress.test.ts packages/genty/platform/src/cost/__tests__/effectCost.test.ts packages/genty/platform/src/session/__tests__/cost.test.ts > /tmp/issue-580-red.log 2>&1',
       'status=$?',
       'set -e',
       'cat /tmp/issue-580-red.log',
@@ -221,9 +221,9 @@ const verifyMcpSliceTask = defineTask('issue-580.verify-mcp-slice', (args, taskC
   shell: {
     command: [
       'set -euo pipefail',
-      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/tula/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/tula/platform/src/harness/internal/createRun/__tests__/effects.test.ts',
-      'rg -n "McpToolExecutor|McpToolRegistry|McpClientManager|mcp" packages/tula/platform/src/harness/internal/createRun packages/tula/platform/src/mcp/client -S',
-      'git diff --check -- packages/tula/platform/src',
+      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/genty/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/genty/platform/src/harness/internal/createRun/__tests__/effects.test.ts',
+      'rg -n "McpToolExecutor|McpToolRegistry|McpClientManager|mcp" packages/genty/platform/src/harness/internal/createRun packages/genty/platform/src/mcp/client -S',
+      'git diff --check -- packages/genty/platform/src',
     ].join('\n'),
     expectedExitCode: 0,
     timeout: 600000,
@@ -260,7 +260,7 @@ const implementGovernanceCostCompactionTask = defineTask('issue-580.implement-go
         'After each resolved effect is committed or immediately before/after commit in the live orchestration loop, aggregate effect costs using computeEffectCosts and update session cost state with updateSessionCost/checkBudget.',
         'Treat missing cost data as missing, not zero-cost evidence; do not pause unless explicit budget config says autoPause.',
         'Trigger shouldAutoCompact/compactSession based on state size thresholds, writing overlays only and never mutating journal/task artifacts.',
-        'Keep changes scoped to packages/tula/platform unless the runtime trace proves a narrow SDK type change is required.',
+        'Keep changes scoped to packages/genty/platform unless the runtime trace proves a narrow SDK type change is required.',
         'Return JSON: { changedFiles: string[], approvalSummary: string, costSummary: string, compactionSummary: string, compatibilityNotes: string[] }.',
       ],
     },
@@ -278,9 +278,9 @@ const verifyGovernanceCostCompactionTask = defineTask('issue-580.verify-governan
   shell: {
     command: [
       'set -euo pipefail',
-      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/tula/platform/src/harness/internal/createRun/__tests__/effects.test.ts packages/tula/platform/src/cost/__tests__/effectCost.test.ts packages/tula/platform/src/session/__tests__/cost.test.ts packages/tula/platform/src/session/__tests__/sessionHistory.test.ts',
-      'rg -n "evaluateApprovalChain|computeEffectCosts|updateSessionCost|checkBudget|shouldAutoCompact|compactSession" packages/tula/platform/src/harness/internal/createRun packages/tula/platform/src/breakpoints packages/tula/platform/src/cost packages/tula/platform/src/session packages/tula/platform/src/compression -S',
-      'git diff --check -- packages/tula/platform/src',
+      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/genty/platform/src/harness/internal/createRun/__tests__/effects.test.ts packages/genty/platform/src/cost/__tests__/effectCost.test.ts packages/genty/platform/src/session/__tests__/cost.test.ts packages/genty/platform/src/session/__tests__/sessionHistory.test.ts',
+      'rg -n "evaluateApprovalChain|computeEffectCosts|updateSessionCost|checkBudget|shouldAutoCompact|compactSession" packages/genty/platform/src/harness/internal/createRun packages/genty/platform/src/breakpoints packages/genty/platform/src/cost packages/genty/platform/src/session packages/genty/platform/src/compression -S',
+      'git diff --check -- packages/genty/platform/src',
     ].join('\n'),
     expectedExitCode: 0,
     timeout: 600000,
@@ -333,10 +333,10 @@ const finalVerificationTask = defineTask('issue-580.final-verification', (args, 
   shell: {
     command: [
       'set -euo pipefail',
-      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/tula/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/tula/platform/src/harness/internal/createRun/__tests__/effects.test.ts packages/tula/platform/src/harness/internal/createRun/__tests__/progress.test.ts packages/tula/platform/src/cost/__tests__/effectCost.test.ts packages/tula/platform/src/session/__tests__/cost.test.ts packages/tula/platform/src/storage/__tests__/journalWatcher.test.ts',
-      'npm run build --workspace=@a5c-ai/tula-platform',
-      'rg -n "McpToolExecutor|McpToolRegistry|McpClientManager|evaluateApprovalChain|computeEffectCosts|updateSessionCost|checkBudget|shouldAutoCompact|compactSession|StreamingOutputOptions" packages/tula/platform/src/harness/internal/createRun packages/tula/platform/src/mcp packages/tula/platform/src/breakpoints packages/tula/platform/src/cost packages/tula/platform/src/session packages/tula/platform/src/compression -S',
-      '! rg -n "Status: NOT INTEGRATED YET" packages/tula/platform/src/mcp packages/tula/platform/src/breakpoints packages/tula/platform/src/cost packages/tula/platform/src/session packages/tula/platform/src/compression -S',
+      'npm exec --yes --package=vitest -- vitest run --config vitest.config.ts packages/genty/platform/src/harness/internal/createRun/__tests__/orchestration.test.ts packages/genty/platform/src/harness/internal/createRun/__tests__/effects.test.ts packages/genty/platform/src/harness/internal/createRun/__tests__/progress.test.ts packages/genty/platform/src/cost/__tests__/effectCost.test.ts packages/genty/platform/src/session/__tests__/cost.test.ts packages/genty/platform/src/storage/__tests__/journalWatcher.test.ts',
+      'npm run build --workspace=@a5c-ai/genty-platform',
+      'rg -n "McpToolExecutor|McpToolRegistry|McpClientManager|evaluateApprovalChain|computeEffectCosts|updateSessionCost|checkBudget|shouldAutoCompact|compactSession|StreamingOutputOptions" packages/genty/platform/src/harness/internal/createRun packages/genty/platform/src/mcp packages/genty/platform/src/breakpoints packages/genty/platform/src/cost packages/genty/platform/src/session packages/genty/platform/src/compression -S',
+      '! rg -n "Status: NOT INTEGRATED YET" packages/genty/platform/src/mcp packages/genty/platform/src/breakpoints packages/genty/platform/src/cost packages/genty/platform/src/session packages/genty/platform/src/compression -S',
       'git diff --check',
     ].join('\n'),
     expectedExitCode: 0,
@@ -356,7 +356,7 @@ const readArtifactsTask = defineTask('issue-580.read-artifacts', (args, taskCtx)
     command: [
       'set -euo pipefail',
       'git status --short --branch',
-      'git diff -- packages/tula/platform/src packages/sdk/src packages/tasks-mux/src packages/tool-mux/src packages/transport-mux/src docs/agent-layer-gaps.md',
+      'git diff -- packages/genty/platform/src packages/sdk/src packages/tasks-mux/src packages/tool-mux/src packages/transport-mux/src docs/agent-layer-gaps.md',
     ].join('\n'),
     expectedExitCode: 0,
     timeout: 120000,
@@ -409,12 +409,12 @@ const publishTask = defineTask('issue-580.publish', (args, taskCtx) => ({
     command: [
       'set -euo pipefail',
       'git status --short --branch',
-      'git add packages/tula/platform/src packages/sdk/src packages/tasks-mux/src packages/tool-mux/src packages/transport-mux/src docs/agent-layer-gaps.md',
+      'git add packages/genty/platform/src packages/sdk/src packages/tasks-mux/src packages/tool-mux/src packages/transport-mux/src docs/agent-layer-gaps.md',
       'git diff --cached --check',
       'git diff --cached --quiet && { echo "No staged implementation changes to commit" >&2; exit 1; }',
       'git commit -m "feat(agent-platform): wire MCP into orchestration"',
       `git push -u origin ${args.branchName}`,
-      `PR_URL="$(gh pr create --base ${args.baseBranch} --head ${args.branchName} --title "Wire MCP client into agent-platform orchestration" --body "Fixes #${args.issueNumber}"$'\\n\\n## Summary\\n- add a typed effect routing boundary around the existing resolver\\n- wire MCP discovery/execution into orchestration with deterministic fakes in tests\\n- integrate configured approval chains, per-effect/session cost checks, compaction overlay triggers, and streaming propagation\\n\\n## Quality gates\\n- targeted agent-platform Vitest coverage for resolver/MCP/governance/cost/compaction/streaming\\n- npm run build --workspace=@a5c-ai/tula-platform\\n- static wiring checks for previously disconnected modules\\n- git diff --check')"`,
+      `PR_URL="$(gh pr create --base ${args.baseBranch} --head ${args.branchName} --title "Wire MCP client into agent-platform orchestration" --body "Fixes #${args.issueNumber}"$'\\n\\n## Summary\\n- add a typed effect routing boundary around the existing resolver\\n- wire MCP discovery/execution into orchestration with deterministic fakes in tests\\n- integrate configured approval chains, per-effect/session cost checks, compaction overlay triggers, and streaming propagation\\n\\n## Quality gates\\n- targeted agent-platform Vitest coverage for resolver/MCP/governance/cost/compaction/streaming\\n- npm run build --workspace=@a5c-ai/genty-platform\\n- static wiring checks for previously disconnected modules\\n- git diff --check')"`,
       `gh issue comment ${args.issueNumber} --body "$(printf 'Implementation PR for #580 is ready: %s\\n\\nPlan executed:\\n- preserved existing effect resolver behavior behind a typed routing boundary\\n- wired MCP client/registry/executor through the live orchestration path\\n- integrated approval chains, cost budget checks, compaction overlay triggers, and streaming propagation\\n- verified with targeted Vitest coverage, agent-platform build, static wiring checks, and whitespace checks' "$PR_URL")"`,
       'printf "%s\\n" "$PR_URL"',
     ].join('\n'),

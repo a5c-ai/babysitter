@@ -5,7 +5,7 @@ attributes:
   displayName: "a5c CLI"
   repoUrl: https://github.com/a5c-ai/babysitter
   ref: main
-  path: packages/tula/platform
+  path: packages/genty/platform
   packageManager: npm
   kind: npm-package
   notes: |

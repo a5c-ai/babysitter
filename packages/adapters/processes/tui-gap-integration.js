@@ -1,6 +1,6 @@
 /**
  * @process tui-gap-integration
- * @description Iteratively close the gaps between @a5c-ai/tula-tui and the full adapters SDK surface.
+ * @description Iteratively close the gaps between @a5c-ai/genty-tui and the full adapters SDK surface.
  *   TDD, spec-docs-synced, with adversarial reviews per gap.
  */
 

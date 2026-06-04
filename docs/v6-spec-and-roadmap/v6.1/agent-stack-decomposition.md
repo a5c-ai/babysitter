@@ -38,12 +38,12 @@ The graph has `agent:adapters` and `agent:adapters-remote`:
 | Package | npm name | What it actually does |
 |---------|----------|----------------------|
 | `packages/sdk/` | `@a5c-ai/babysitter-sdk` | Orchestration engine: runs, replay, storage, tasks, hooks, plugins, profiles, session, compression, MCP, CLI commands |
-| `packages/tula/core/` | `@a5c-ai/tula-core` | Thin: agentic tools, background process registry, session binding, deferred tool registry |
-| `packages/tula/platform/` | `@a5c-ai/tula-platform` | Fat CLI: wraps SDK + agent-core, adds daemon, observer, governance, harness bridge, cost, interaction |
+| `packages/genty/core/` | `@a5c-ai/genty-core` | Thin: agentic tools, background process registry, session binding, deferred tool registry |
+| `packages/genty/platform/` | `@a5c-ai/genty-platform` | Fat CLI: wraps SDK + agent-core, adds daemon, observer, governance, harness bridge, cost, interaction |
 
 ### The confusion:
 
-1. **`tula-core` is tiny** — 6 source files. It's NOT the "core" of anything in the graph sense. The graph's `AgentCoreImpl` (SDK-backed CLI loop) lives in `babysitter-sdk`, not `tula-core`.
+1. **`genty-core` is tiny** — 6 source files. It's NOT the "core" of anything in the graph sense. The graph's `AgentCoreImpl` (SDK-backed CLI loop) lives in `babysitter-sdk`, not `genty-core`.
 
 2. **`babysitter-sdk` is the real core** — runtime, replay, storage, tasks, hooks, process context, effect model. This is what the graph calls `agent-core-impl:agent-platform.core`.
 
@@ -60,13 +60,13 @@ The graph says agent-platform has Core, Runtime, Platform, and UI. The code shou
 | Graph Layer | Target Package | Current Location | What Moves |
 |-------------|---------------|------------------|------------|
 | L4 AgentCoreImpl | `@a5c-ai/babysitter-sdk` (stays) | `packages/sdk/` | Nothing — SDK IS the core. agent-core package contents fold into SDK or agent-platform. |
-| L5 AgentRuntimeImpl | `@a5c-ai/tula-platform` (stays, slimmed) | `packages/tula/platform/` | Keep: daemon, session, harness bridge, runtime. Remove: things that belong in other layers. |
+| L5 AgentRuntimeImpl | `@a5c-ai/genty-platform` (stays, slimmed) | `packages/genty/platform/` | Keep: daemon, session, harness bridge, runtime. Remove: things that belong in other layers. |
 | L6 AgentPlatformImpl | `@a5c-ai/extensions-adapter` (renamed from extension-mux) + `@a5c-ai/agent-catalog` | `packages/extension-mux/`, `packages/agent-catalog/` | Plugin compilation, skill discovery, marketplace |
-| L11 AgentUIImpl | `@a5c-ai/tula-platform` CLI entry | `packages/tula/platform/src/cli/` | CLI stays in agent-platform — it's the binary |
+| L11 AgentUIImpl | `@a5c-ai/genty-platform` CLI entry | `packages/genty/platform/src/cli/` | CLI stays in agent-platform — it's the binary |
 
 ### agent-core package fate
 
-`@a5c-ai/tula-core` is confusingly named — it's not the agent core, it's a small utility package. Options:
+`@a5c-ai/genty-core` is confusingly named — it's not the agent core, it's a small utility package. Options:
 
 **Option A: Fold into agent-platform** (recommended)
 - Move agentic tools, background process registry, session binding into agent-platform
@@ -108,8 +108,8 @@ The tasks-mux scope is broader than breakpoints — it's the trust chain for ALL
 | Move `deferredToolRegistry.ts` from agent-core to tool-mux | Small |
 | Move `backgroundProcessRegistry.ts` to agent-platform (runtime concern) | Small |
 | Move `session.ts` to agent-platform (runtime concern) | Small |
-| Update all imports from `@a5c-ai/tula-core` across monorepo | Medium |
-| Deprecate `@a5c-ai/tula-core` on npm | Small |
+| Update all imports from `@a5c-ai/genty-core` across monorepo | Medium |
+| Deprecate `@a5c-ai/genty-core` on npm | Small |
 | Update graph: remove agent-core SourceRef, add tool-mux SourceRef | Small |
 
 ### T2: Slim agent-platform to match graph Runtime+UI scope
@@ -203,16 +203,16 @@ As described in graph-alignment-tasks.md Phase 1.3, split into graph-aligned sub
 | Package | Graph Alignment | Layer(s) |
 |---------|----------------|----------|
 | `@a5c-ai/babysitter-sdk` | Orchestration engine (annotated, not renamed) | L4, L7, L8, L13 |
-| `@a5c-ai/tula-platform` | AgentRuntimeImpl + AgentUIImpl | L5, L11 |
+| `@a5c-ai/genty-platform` | AgentRuntimeImpl + AgentUIImpl | L5, L11 |
 | `@a5c-ai/babysitter` | Metapackage (unchanged) | — |
 | `@a5c-ai/launch-adapter` | `mux:agent-launch-mux` | L8 |
 | `@a5c-ai/comm-adapter` | `mux:agent-comm-mux` | L4-L5 |
 | `@a5c-ai/config-adapter` | `mux:agent-config-mux` | L5-L6 |
 | `@a5c-ai/adapters-cli` | Composition CLI (`adapters`) | L10 |
 | `@a5c-ai/adapters-gateway` | Remote API | L6 |
-| `@a5c-ai/tula-tui` | Presentation | L11 |
-| `@a5c-ai/tula-ui` | Shared UI | L11 |
-| `@a5c-ai/tula-webui` | Web UI | L11 |
+| `@a5c-ai/genty-tui` | Presentation | L11 |
+| `@a5c-ai/genty-ui` | Shared UI | L11 |
+| `@a5c-ai/genty-web-app` | Web UI | L11 |
 | `@a5c-ai/adapters-observability` | Telemetry | Cross-cutting |
 | `@a5c-ai/hooks-adapter-*` | `mux:hooks-mux` | Cross-cutting |
 | `@a5c-ai/transport-adapter` | `mux:transport-mux` | L3 |
@@ -227,7 +227,7 @@ As described in graph-alignment-tasks.md Phase 1.3, split into graph-aligned sub
 | `@a5c-ai/kradle-*` | Project management | L6 |
 
 **Dissolved:**
-- `@a5c-ai/tula-core` → absorbed into `@a5c-ai/tools-adapter` (tools) + `@a5c-ai/tula-platform` (session/registry)
+- `@a5c-ai/genty-core` → absorbed into `@a5c-ai/tools-adapter` (tools) + `@a5c-ai/genty-platform` (session/registry)
 - `@a5c-ai/adapters-codecs` → absorbed into `@a5c-ai/config-adapter`
 - `@a5c-ai/extensions-adapter` → renamed to `@a5c-ai/extensions-adapter`
 - `@a5c-ai/tasks-adapter` → renamed to `@a5c-ai/tasks-adapter`

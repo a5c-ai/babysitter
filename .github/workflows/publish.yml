@@ -139,7 +139,7 @@ jobs:
             set -euo pipefail
             npm run build --workspace=@a5c-ai/kradle
             npm run build --workspace=@a5c-ai/comm-adapter
-            npm run build --workspace=@a5c-ai/tula-ui
+            npm run build --workspace=@a5c-ai/genty-ui
             npm run build --workspace=@a5c-ai/kradle-web
           '
 
@@ -160,18 +160,18 @@ jobs:
           npm run build --workspace=@a5c-ai/adapters-gateway
           npm run build --workspace=@a5c-ai/adapters-cli
           npm run build --workspace=@a5c-ai/adapters
-          npm run build:local --workspace=@a5c-ai/tula-tui
-          # tula-ui must be built before kradle-web (kradle imports tula-ui subpaths)
-          npm run build --workspace=@a5c-ai/tula-ui
+          npm run build:local --workspace=@a5c-ai/genty-tui
+          # genty-ui must be built before kradle-web (kradle imports genty-ui subpaths)
+          npm run build --workspace=@a5c-ai/genty-ui
           # webui depends on core + ui — must be after adapters chain
-          npm run build --workspace=@a5c-ai/tula-webui
+          npm run build --workspace=@a5c-ai/genty-web-app
 
           # SDK, agent-core, agent-platform: prerequisites (atlas,
           # adapters chain) are already built above — call tsc directly to avoid
           # redundant rebuilds through chained npm scripts.
           npm run build --workspace=@a5c-ai/babysitter-sdk
-          (cd packages/tula/core && npx tsc --build --force tsconfig.json)
-          (cd packages/tula/platform && npx tsc --build tsconfig.json)
+          (cd packages/genty/core && npx tsc --build --force tsconfig.json)
+          (cd packages/genty/platform && npx tsc --build tsconfig.json)
 
           wait_all
 
@@ -240,15 +240,15 @@ jobs:
           set -euo pipefail
           npm run test:sdk 2>&1 | tee artifacts/core-logs/sdk-tests.log
 
-      - name: tula-core tests
+      - name: genty-core tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/tula-core 2>&1 | tee artifacts/core-logs/core-tests.log
+          npm run test --workspace=@a5c-ai/genty-core 2>&1 | tee artifacts/core-logs/core-tests.log
 
       - name: babysitter-harness tests
         run: |
           set -euo pipefail
-          npm run test --workspace=@a5c-ai/tula-platform 2>&1 | tee artifacts/core-logs/babysitter-harness-tests.log
+          npm run test --workspace=@a5c-ai/genty-platform 2>&1 | tee artifacts/core-logs/babysitter-harness-tests.log
 
       - name: Upload core validation logs
         if: always()
@@ -330,7 +330,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run verify:release --workspace=@a5c-ai/comm-adapter 2>&1 | tee artifacts/mux-logs/agent-comm-mux-release.log
-          npm run verify:release --workspace=@a5c-ai/tula-tui 2>&1 | tee artifacts/mux-logs/adapters-tui-release.log
+          npm run verify:release --workspace=@a5c-ai/genty-tui 2>&1 | tee artifacts/mux-logs/adapters-tui-release.log
 
       - name: Validate transport-mux runtime owner
         run: |
@@ -418,7 +418,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: adapters webui browser e2e
-        run: npm run test:e2e --workspace=@a5c-ai/tula-webui
+        run: npm run test:e2e --workspace=@a5c-ai/genty-web-app
 
       - name: Upload e2e logs
         if: always()
@@ -1349,12 +1349,12 @@ jobs:
           npm run build --workspace=@a5c-ai/transport-adapter
           npm run build --workspace=@a5c-ai/adapters-cli
           npm run build --workspace=@a5c-ai/adapters
-          npm run build:local --workspace=@a5c-ai/tula-tui
+          npm run build:local --workspace=@a5c-ai/genty-tui
 
       - name: Publish adapters TUI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/tula-tui --access public --tag "$NPM_TAG"
+        run: npm publish --workspace=@a5c-ai/genty-tui --access public --tag "$NPM_TAG"
 
   publish_staging_sdk:
     name: Publish Babysitter SDK
@@ -1451,22 +1451,22 @@ jobs:
           npm ci
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Build tula-core workspace
+      - name: Build genty-core workspace
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/tasks-adapter
           node scripts/adapters-build.cjs build packages/adapters/sdk
           npm run build:sdk
-          npm run build --workspace=@a5c-ai/tula-core
+          npm run build --workspace=@a5c-ai/genty-core
 
-      - name: Publish tula-core
+      - name: Publish genty-core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/tula-core --access public --tag "$NPM_TAG"
+        run: npm publish --workspace=@a5c-ai/genty-core --access public --tag "$NPM_TAG"
 
   publish_staging_babysitter_agent:
-    name: Publish Tula Platform
+    name: Publish genty Platform
     needs: publish_staging_agent_core
     runs-on: ubuntu-latest-l
     permissions:
@@ -1511,16 +1511,16 @@ jobs:
           npm run build --workspace=@a5c-ai/tasks-adapter
           node scripts/adapters-build.cjs build packages/adapters/sdk
           npm run build:sdk
-          npm run build --workspace=@a5c-ai/tula-core
-          npm run build --workspace=@a5c-ai/tula-platform
+          npm run build --workspace=@a5c-ai/genty-core
+          npm run build --workspace=@a5c-ai/genty-platform
 
       - name: Publish agent-platform
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/tula-platform --access public --tag "$NPM_TAG"
+        run: npm publish --workspace=@a5c-ai/genty-platform --access public --tag "$NPM_TAG"
 
   publish_staging_tula_runtime:
-    name: Publish Tula Runtime
+    name: Publish genty Runtime
     needs: publish_staging_agent_core
     runs-on: ubuntu-latest-l
     permissions:
@@ -1551,23 +1551,23 @@ jobs:
           npm ci
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Build tula-runtime
+      - name: Build genty-runtime
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/tasks-adapter
           node scripts/adapters-build.cjs build packages/adapters/sdk
           npm run build:sdk
-          npm run build --workspace=@a5c-ai/tula-core
-          npm run build --workspace=@a5c-ai/tula-runtime
+          npm run build --workspace=@a5c-ai/genty-core
+          npm run build --workspace=@a5c-ai/genty-runtime
 
-      - name: Publish tula-runtime
+      - name: Publish genty-runtime
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=@a5c-ai/tula-runtime --access public --tag "$NPM_TAG"
+        run: npm publish --workspace=@a5c-ai/genty-runtime --access public --tag "$NPM_TAG"
 
   publish_staging_omni:
-    name: Publish Tula
+    name: Publish genty
     needs: [publish_staging_babysitter_agent, publish_staging_tula_runtime]
     runs-on: ubuntu-latest-l
     permissions:
@@ -1598,22 +1598,22 @@ jobs:
           npm ci
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Build tula
+      - name: Build genty
         run: |
           set -euo pipefail
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/tasks-adapter
           node scripts/adapters-build.cjs build packages/adapters/sdk
           npm run build:sdk
-          npm run build --workspace=@a5c-ai/tula-core
-          npm run build --workspace=@a5c-ai/tula-runtime
-          npm run build --workspace=@a5c-ai/tula-platform
-          npm run build --workspace=@a5c-ai/tula
+          npm run build --workspace=@a5c-ai/genty-core
+          npm run build --workspace=@a5c-ai/genty-runtime
+          npm run build --workspace=@a5c-ai/genty-platform
+          npm run build --workspace=@a5c-ai/genty
 
-      - name: Publish tula
+      - name: Publish genty
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tula --skip-build
+        run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty --skip-build
 
   deploy_docs_site:
     if: ${{ github.ref_name != 'develop' }}

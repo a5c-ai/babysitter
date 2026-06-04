@@ -43,7 +43,7 @@
     "packages/hooks-mux/core/src",
     "packages/hooks-mux/cli/src",
     "packages/hooks-mux/adapter-claude/src",
-    "packages/tula/platform/src",
+    "packages/genty/platform/src",
     "packages/adapters/launch/src",
     "packages/adapters/adapters/src",
     "packages/agent-catalog/src",
@@ -63,9 +63,9 @@
     "packages/hooks-mux/core/src/propagation/__tests__/propagation.test.ts",
     "packages/hooks-mux/cli/src/cli/commands/invoke.ts",
     "packages/hooks-mux/cli/src/__tests__/e2e/e2e-invoke.test.ts",
-    "packages/tula/platform/src/harness/backgroundTracker.ts",
-    "packages/tula/platform/src/harness/backgroundProcessRegistry.ts",
-    "packages/tula/platform/src/harness/agenticTools/background/state.ts"
+    "packages/genty/platform/src/harness/backgroundTracker.ts",
+    "packages/genty/platform/src/harness/backgroundProcessRegistry.ts",
+    "packages/genty/platform/src/harness/agenticTools/background/state.ts"
   ],
   "qualityCommands": [
     "npm run build:hooks-mux",

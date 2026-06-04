@@ -56,13 +56,13 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/tula-core`, `@a5c-ai/comm-adapter` |
+| Packages | `@a5c-ai/genty-core`, `@a5c-ai/comm-adapter` |
 | Node Kinds | AgentCoreImpl (agent-stack) |
 | Graph Cluster | agent-stack |
 | Maturity | **Mature** — Dual implementation path (unified + harness-neutral) |
 | Spec Coverage | v6.0 unified-stack-architecture.md, v6-architecture-specification.md |
 
-**Note:** Two packages implement this layer for different concerns: `tula-core` (unified babysitter loop) and `agent-comm-mux` (harness-neutral dispatch). This is intentional per v6.0 spec.
+**Note:** Two packages implement this layer for different concerns: `genty-core` (unified babysitter loop) and `agent-comm-mux` (harness-neutral dispatch). This is intentional per v6.0 spec.
 
 ---
 
@@ -71,7 +71,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/tula-platform`, `@a5c-ai/comm-adapter` |
+| Packages | `@a5c-ai/genty-platform`, `@a5c-ai/comm-adapter` |
 | Node Kinds | AgentRuntimeImpl (agent-stack) |
 | Graph Cluster | agent-stack |
 | Maturity | **Mature** — agent-platform hosts the unified runtime; agent-comm-mux hosts harness dispatch |
@@ -84,7 +84,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/extensions-adapter`, `@a5c-ai/agent-catalog`, `@a5c-ai/tula-platform` |
+| Packages | `@a5c-ai/extensions-adapter`, `@a5c-ai/agent-catalog`, `@a5c-ai/genty-platform` |
 | Node Kinds | AgentPlatformImpl, Plugin, PluginTarget, PluginMarketplace, PluginArtifact (agent-stack + extensions) |
 | Graph Cluster | agent-stack, extensions |
 | Maturity | Partial — plugin compiler mature; deeper platform (team agents, marketplace identity) deferred |
@@ -99,7 +99,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/babysitter-sdk` (run dirs), `@a5c-ai/tula-platform` (workspace management) |
+| Packages | `@a5c-ai/babysitter-sdk` (run dirs), `@a5c-ai/genty-platform` (workspace management) |
 | Node Kinds | Workspace, Worktree, WorktreeSession (lifecycle) |
 | Graph Cluster | lifecycle |
 | Maturity | Partial — SDK owns `.a5c/runs/` layout; workspace materialization policy not formalized |
@@ -114,7 +114,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/babysitter-sdk` (effects, tasks), `@a5c-ai/tula-platform` (tool dispatch) |
+| Packages | `@a5c-ai/babysitter-sdk` (effects, tasks), `@a5c-ai/genty-platform` (tool dispatch) |
 | Node Kinds | Execution, Effect, Invocation (lifecycle) |
 | Graph Cluster | lifecycle |
 | Maturity | **Mature** — Effect model, task dispatch, shell/agent/orchestrator task kinds |
@@ -142,7 +142,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/adapters-cli`, `@a5c-ai/tula-tui`, `@a5c-ai/babysitter-sdk` (interaction module) |
+| Packages | `@a5c-ai/adapters-cli`, `@a5c-ai/genty-tui`, `@a5c-ai/babysitter-sdk` (interaction module) |
 | Node Kinds | InteractionPrimitive, InteractionPattern, InteractionPrimitiveCategory (agent-stack + extensions) |
 | Graph Cluster | agent-stack, extensions |
 | Maturity | **Mature** — Rich interaction model across CLI, TUI, web surfaces |
@@ -155,7 +155,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/tula-ui`, `@a5c-ai/tula-tui`, `@a5c-ai/tula-webui`, `@a5c-ai/babysitter-observer-dashboard`, `@a5c-ai/tula-tui-plugins` |
+| Packages | `@a5c-ai/genty-ui`, `@a5c-ai/genty-tui`, `@a5c-ai/genty-web-app`, `@a5c-ai/babysitter-observer-dashboard`, `@a5c-ai/genty-tui-plugins` |
 | Node Kinds | Presentation, AgentUIImpl, Dashboard (agent-stack + extensions) |
 | Graph Cluster | agent-stack, extensions |
 | Maturity | **Mature** — Multi-surface: TUI, CLI, web, mobile (Android/iOS), TV (Android TV/Apple TV), watch (watchOS/Wear OS) |
@@ -183,7 +183,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/babysitter-sdk`, `@a5c-ai/tula-platform` |
+| Packages | `@a5c-ai/babysitter-sdk`, `@a5c-ai/genty-platform` |
 | Node Kinds | OrchestrationPrimitive, Run, Phase, PhaseMachine, PhaseTransition, OrchestratorState (lifecycle) |
 | Graph Cluster | lifecycle |
 | Maturity | **Mature** — SDK owns effect model, replay engine, deterministic execution, event sourcing |
@@ -198,7 +198,7 @@ The atlas graph defines 14 stack layers (`stack-layers` cluster). Each layer rep
 
 | Aspect | Value |
 |--------|-------|
-| Packages | `@a5c-ai/tula-platform` (governance module), `@a5c-ai/tasks-adapter` (approval routing), `@a5c-ai/atlas` (evidence/claims) |
+| Packages | `@a5c-ai/genty-platform` (governance module), `@a5c-ai/tasks-adapter` (approval routing), `@a5c-ai/atlas` (evidence/claims) |
 | Node Kinds | AgentGovernanceImpl, EvidencePolicy, Claim, TrustLevel (agent-stack + catalog-meta + trust) |
 | Graph Cluster | agent-stack, catalog-meta, trust |
 | Maturity | Partial — approval gates, evidence claims, trust levels defined; broader policy framework (NIST AI RMF, OWASP) aspirational |

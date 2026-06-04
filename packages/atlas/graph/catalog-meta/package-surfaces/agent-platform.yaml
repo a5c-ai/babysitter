@@ -1,9 +1,9 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-agent-platform
 attributes:
-  packageId: "@a5c-ai/tula-platform"
-  packageName: "@a5c-ai/tula-platform"
-  workspacePath: packages/tula/platform
+  packageId: "@a5c-ai/genty-platform"
+  packageName: "@a5c-ai/genty-platform"
+  workspacePath: packages/genty/platform
   moduleType: typescript
   surfaceKinds:
     - agent-runtime
@@ -12,7 +12,7 @@ attributes:
   sourceOfTruthRole: application
   publishedTo: npm
   versionPolicy: semver
-  # Source: packages/tula/platform/package.json (subpath exports for
+  # Source: packages/genty/platform/package.json (subpath exports for
   # ./anycli, ./api, ./cli, ./cost, ./daemon, ./governance, ./harness,
   # ./interaction, ./observability, ./runtime). Bin: babysitter-harness.
 edges:

@@ -13,13 +13,13 @@
  * - babysitter skill:discover --process-path /home/runner/.a5c/process-library/babysitter-repo/library/specializations/qa-testing-automation/quality-gates.js --json
  * - docs/agent-reference/process-authoring.md
  * - docs/agent-layer-gaps.md
- * - packages/tula/platform/src/harness/internal/createRun/planProcess/runState.ts
- * - packages/tula/platform/src/harness/internal/createRun/planProcess/prompts.ts
- * - packages/tula/platform/src/harness/internal/createRun/orchestration/{effects,dispatch,index,internalPhase}.ts
- * - packages/tula/platform/src/session/{context,history,cost}.ts
- * - packages/tula/platform/src/compression/compaction.ts
- * - packages/tula/platform/src/cost/effectCost.ts
- * - packages/tula/platform/src/harness/{capabilityRouter,modelSelection,fallbackChains,selectionPolicies}.ts
+ * - packages/genty/platform/src/harness/internal/createRun/planProcess/runState.ts
+ * - packages/genty/platform/src/harness/internal/createRun/planProcess/prompts.ts
+ * - packages/genty/platform/src/harness/internal/createRun/orchestration/{effects,dispatch,index,internalPhase}.ts
+ * - packages/genty/platform/src/session/{context,history,cost}.ts
+ * - packages/genty/platform/src/compression/compaction.ts
+ * - packages/genty/platform/src/cost/effectCost.ts
+ * - packages/genty/platform/src/harness/{capabilityRouter,modelSelection,fallbackChains,selectionPolicies}.ts
  * - /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/{spec-kit-brownfield,plan-and-execute}.js
  * - /home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/{test-driven-development,verification-before-completion}.js
  * - /home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/{sdk-testing-strategy,backward-compatibility-management,compatibility-testing}.js
@@ -269,7 +269,7 @@ export const reuseAuditTask = defineTask('issue-594.reuse-audit', (args, taskCtx
         'Extract keyword nouns and verbs from issue #594: session context, plan phase injection, session history, decision trail, run summary, context snapshot, compaction, cost budget, capability router, model selection, fallback chains, selection policies, task dispatch, orchestration loop, resolveTaskHarness.',
         'Honor .a5c/reuse-audit.json if it exists. If it does not exist, record that and use the target files and keywords in inputs.',
         'Scan for matching migrations, API routes, CLI/env variables, package scripts, SDK dependencies, imports, tests, and existing integration surfaces.',
-        'Specifically inspect packages/tula/platform/src/session, packages/tula/platform/src/compression, packages/tula/platform/src/cost, packages/tula/platform/src/harness/internal/createRun, packages/tula/platform/src/harness/{capabilityRouter,modelSelection,fallbackChains,selectionPolicies}.ts, and docs/agent-layer-gaps.md.',
+        'Specifically inspect packages/genty/platform/src/session, packages/genty/platform/src/compression, packages/genty/platform/src/cost, packages/genty/platform/src/harness/internal/createRun, packages/genty/platform/src/harness/{capabilityRouter,modelSelection,fallbackChains,selectionPolicies}.ts, and docs/agent-layer-gaps.md.',
         'Call out current wiring that already exists so implementation does not duplicate or regress it.',
         'Return JSON: { heading, keywords, existingInfrastructure, matchingFiles, existingTests, alreadyWiredSurfaces, suspectedRemainingGaps, conflictsOrDuplicates, reusablePatterns }.',
         'INPUTS JSON:',
@@ -324,8 +324,8 @@ export const reconcileCurrentStateTask = defineTask('issue-594.reconcile-current
       instructions: [
         'Do not edit files.',
         'Trace current code paths before proposing changes. The issue may be stale because adjacent work has already wired parts of the reported gaps.',
-        'Inspect planProcess session binding and prompt construction: packages/tula/platform/src/harness/internal/createRun/planProcess/runState.ts, prompts.ts, phase.ts, index.ts, and createRun tests.',
-        'Inspect live orchestration and effect dispatch: packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts, dispatch.ts, internalPhase.ts, externalPhase.ts, internalTools.ts, and related tests.',
+        'Inspect planProcess session binding and prompt construction: packages/genty/platform/src/harness/internal/createRun/planProcess/runState.ts, prompts.ts, phase.ts, index.ts, and createRun tests.',
+        'Inspect live orchestration and effect dispatch: packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts, dispatch.ts, internalPhase.ts, externalPhase.ts, internalTools.ts, and related tests.',
         'Inspect session persistence helpers and tests: session/context.ts, session/history.ts, session/cost.ts, session/types.ts, and session/__tests__.',
         'Inspect compaction and cost helpers: compression/compaction.ts, cost/effectCost.ts, and their tests.',
         'Inspect routing helpers and call sites: harness/capabilityRouter.ts, modelSelection.ts, fallbackChains.ts, selectionPolicies.ts, utils resolveTaskHarness, tasks-mux routing, and dispatch tests.',
@@ -427,7 +427,7 @@ export const implementRemainingGapsTask = defineTask('issue-594.implement-remain
         'Edit the repository directly.',
         'Preserve unrelated local changes and do not stage or revert them.',
         `This is implementation attempt ${args.attempt}.`,
-        'Keep changes scoped to packages/tula/platform source/tests and docs/agent-layer-gaps.md only if stale gap documentation must be corrected.',
+        'Keep changes scoped to packages/genty/platform source/tests and docs/agent-layer-gaps.md only if stale gap documentation must be corrected.',
         'Implement only gaps still live after the current-state reconciliation. If a gap is already wired, strengthen tests or docs instead of duplicating code.',
         'Session context: use the existing getSessionContext/updateSessionContext types and bind/resolution path. Inject context into planProcess prompt construction in a bounded, readable section. Missing/corrupt context must preserve existing behavior.',
         'Session history: wire addDecision/addRunSummary/saveContextSnapshot at live orchestration decision and terminal summary points. Avoid noisy per-effect spam; capture meaningful decisions, summaries, and context snapshots with run/session IDs.',
@@ -467,7 +467,7 @@ export const verificationTask = defineTask('issue-594.verify', (args, taskCtx) =
       instructions: [
         'Run the concrete commands supplied in inputs.verificationCommands plus any narrower focused checks required by changed files.',
         'At minimum, run focused agent-platform tests that cover createRun planProcess, orchestration/effects, dispatch, session context/history/cost, compaction, and harness routing helpers.',
-        'Also run git diff --check, npm run build --workspace=@a5c-ai/tula-platform when available, npm run test --workspace=@a5c-ai/tula-platform when available, npm run build:sdk, npm run test:sdk, npm run verify:v6:seams, and npm run verify:metadata unless the command is unavailable in this checkout. Record exact unavailable-command evidence.',
+        'Also run git diff --check, npm run build --workspace=@a5c-ai/genty-platform when available, npm run test --workspace=@a5c-ai/genty-platform when available, npm run build:sdk, npm run test:sdk, npm run verify:v6:seams, and npm run verify:metadata unless the command is unavailable in this checkout. Record exact unavailable-command evidence.',
         'Verify no-budget orchestration behavior remains compatible and explicit budget auto-pause behavior is gated by configuration.',
         'Verify compaction overlays never mutate original journals/tasks.',
         'Verify default task routing remains resolveTaskHarness-compatible when no routing policy metadata exists.',

@@ -324,7 +324,7 @@ In `src/shell/TopBar.tsx`, replace the class names:
 
 ```tsx
 import React from 'react';
-import { useConnection } from '@a5c-ai/tula-ui';
+import { useConnection } from '@a5c-ai/genty-ui';
 import { Button } from '@a5c-ai/compendium';
 import { titleForPath } from './navigation.js';
 
@@ -741,7 +741,7 @@ In `src/providers/NotificationProvider.tsx`, replace the custom notification log
 ```tsx
 import React from 'react';
 import { useGatewayAuth } from './GatewayProvider.js';
-import { useHookRequests } from '@a5c-ai/tula-ui';
+import { useHookRequests } from '@a5c-ai/genty-ui';
 import { useToasts } from '@a5c-ai/compendium';
 
 function NotificationBridge(): null {

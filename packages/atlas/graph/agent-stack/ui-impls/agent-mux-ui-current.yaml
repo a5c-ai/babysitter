@@ -21,7 +21,7 @@ attributes:
     adapters is a multi-surface UI suite. Each presentation is its own
     package (tui, cli, webui, mobile-{ios,android}, tv-{androidtv,appletv},
     watch-{watchos,wearos}). All surfaces share the adapters ui package
-    (`@a5c-ai/tula-ui`) for client + protocol + session-flow projection.
+    (`@a5c-ai/genty-ui`) for client + protocol + session-flow projection.
 edges:
   realizes:
     - target: layer:11-presentation

@@ -1,9 +1,9 @@
 nodeKind: AgentPlatformImpl
-id: agent-platform-impl:tula.platform@current
+id: agent-platform-impl:genty.platform@current
 attributes:
-  displayName: "tula Platform (current) — composed agent-platform + plugin/skill registry"
-  agentVersionId: agent-version:tula@current
-  packageRef: source-ref:packages-tula
+  displayName: "genty Platform (current) — composed agent-platform + plugin/skill registry"
+  agentVersionId: agent-version:genty@current
+  packageRef: source-ref:packages-genty
   subagentDefinitionFormat: js-module-export
   nativeExtensionFormat: babysitter-plugin
   nativeExtensionManifestPath: plugin.json
@@ -37,7 +37,7 @@ attributes:
   supportedChannelKinds:
     - mcp-channel
   notes: |
-    tula platform layer composes agent-platform's defineTask registry,
+    genty platform layer composes agent-platform's defineTask registry,
     plugin/skill/agent loader, and breakpoint policy engine. Inherits all
     agent-platform platform surfaces and adds barrel-export convenience for
     downstream consumers.
@@ -45,6 +45,6 @@ edges:
   realizes:
     - target: layer:6-agent-platform
   composes:
-    - target: agent:tula
+    - target: agent:genty
       role: platform
   bundles: []

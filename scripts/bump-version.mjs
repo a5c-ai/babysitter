@@ -132,11 +132,11 @@ const updateLockVersion = (path, version) => {
     },
     "packages/adapters/mobile-android-app": {
       version,
-      dependencies: { "@a5c-ai/tula-ui": version }
+      dependencies: { "@a5c-ai/genty-ui": version }
     },
     "packages/adapters/mobile-ios-app": {
       version,
-      dependencies: { "@a5c-ai/tula-ui": version }
+      dependencies: { "@a5c-ai/genty-ui": version }
     },
     "packages/adapters/observability": {
       version
@@ -174,7 +174,7 @@ const updateLockVersion = (path, version) => {
     },
     "packages/adapters/webui": {
       version,
-      dependencies: { "@a5c-ai/tula-ui": version }
+      dependencies: { "@a5c-ai/genty-ui": version }
     },
     "packages/adapters/transport": {
       version,
@@ -183,15 +183,15 @@ const updateLockVersion = (path, version) => {
     "packages/adapters/triggers": {
       version
     },
-    "packages/tula/core": {
+    "packages/genty/core": {
       version,
       dependencies: {
         "@a5c-ai/adapters": version,
-        "@a5c-ai/tula-runtime": version,
+        "@a5c-ai/genty-runtime": version,
         "@a5c-ai/babysitter-sdk": version
       }
     },
-    "packages/tula/runtime": {
+    "packages/genty/runtime": {
       version,
       dependencies: {
         "@a5c-ai/babysitter-sdk": version,
@@ -201,9 +201,9 @@ const updateLockVersion = (path, version) => {
     "packages/omni": {
       version,
       dependencies: {
-        "@a5c-ai/tula-core": version,
-        "@a5c-ai/tula-runtime": version,
-        "@a5c-ai/tula-platform": version,
+        "@a5c-ai/genty-core": version,
+        "@a5c-ai/genty-runtime": version,
+        "@a5c-ai/genty-platform": version,
         "@a5c-ai/adapters": version,
         "@a5c-ai/babysitter-sdk": version
       }
@@ -217,11 +217,11 @@ const updateLockVersion = (path, version) => {
     "packages/adapters/tasks": {
       version
     },
-    "packages/tula/tui-plugins": {
+    "packages/genty/tui-plugins": {
       version,
       dependencies: {
         "@a5c-ai/babysitter-sdk": version,
-        "@a5c-ai/tula-tui": version,
+        "@a5c-ai/genty-tui": version,
         "@a5c-ai/adapters": version
       }
     },
@@ -252,16 +252,16 @@ const updateLockVersion = (path, version) => {
 const workspaceManifestPaths = [
   "package.json",
   "packages/atlas/package.json",
-  "packages/tula/core/package.json",
-  "packages/tula/runtime/package.json",
+  "packages/genty/core/package.json",
+  "packages/genty/runtime/package.json",
   "packages/omni/package.json",
   "packages/adapters/tools/package.json",
   "packages/sdk/package.json",
   "packages/babysitter/package.json",
-  "packages/tula/platform/package.json",
+  "packages/genty/platform/package.json",
   "packages/adapters/extensions/package.json",
   "packages/adapters/tasks/package.json",
-  "packages/tula/tui-plugins/package.json",
+  "packages/genty/tui-plugins/package.json",
   "packages/kradle/installer/package.json",
   "packages/observer-dashboard/package.json",
   "packages/adapters/hooks/core/package.json",
@@ -358,19 +358,19 @@ for (const path of agentMuxManifestPaths) {
 for (const path of [
   "package.json",
   "packages/babysitter/package.json",
-  "packages/tula/platform/package.json",
-  "packages/tula/runtime/package.json",
+  "packages/genty/platform/package.json",
+  "packages/genty/runtime/package.json",
   "packages/omni/package.json",
-  "packages/tula/tui-plugins/package.json",
+  "packages/genty/tui-plugins/package.json",
 ]) {
   syncDependencyVersion(path, "@a5c-ai/babysitter-sdk", newVersion);
 }
 
 for (const path of [
   "package.json",
-  "packages/tula/core/package.json",
+  "packages/genty/core/package.json",
   "packages/sdk/package.json",
-  "packages/tula/platform/package.json",
+  "packages/genty/platform/package.json",
   "packages/adapters/adapters/package.json",
   "packages/adapters/cli/package.json",
   "packages/adapters/core/package.json",
@@ -384,25 +384,25 @@ for (const path of [
   "packages/adapters/ui/package.json",
   "packages/adapters/webui/package.json",
   "packages/adapters/transport/package.json",
-  "packages/tula/runtime/package.json",
+  "packages/genty/runtime/package.json",
   "packages/omni/package.json",
   "packages/adapters/tools/package.json",
   "packages/adapters/launch/package.json",
   "packages/adapters/config/package.json",
-  "packages/tula/tui-plugins/package.json",
+  "packages/genty/tui-plugins/package.json",
 ]) {
-  syncDependencyVersion(path, "@a5c-ai/tula-core", newVersion);
-  syncDependencyVersion(path, "@a5c-ai/tula-runtime", newVersion);
-  syncDependencyVersion(path, "@a5c-ai/tula-platform", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/genty-core", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/genty-runtime", newVersion);
+  syncDependencyVersion(path, "@a5c-ai/genty-platform", newVersion);
   syncDependencyVersion(path, "@a5c-ai/adapters", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/adapters-codecs", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/adapters-cli", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/comm-adapter", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/adapters-gateway", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/adapters-observability", newAgentMuxVersion);
-  syncDependencyVersion(path, "@a5c-ai/tula-tui", newAgentMuxVersion);
-  syncDependencyVersion(path, "@a5c-ai/tula-ui", newAgentMuxVersion);
-  syncDependencyVersion(path, "@a5c-ai/tula-webui", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/genty-tui", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/genty-ui", newAgentMuxVersion);
+  syncDependencyVersion(path, "@a5c-ai/genty-web-app", newAgentMuxVersion);
   syncDependencyVersion(path, "@a5c-ai/transport-adapter", newAgentMuxVersion);
 }
 

@@ -116,7 +116,7 @@ claude plugin enable --scope user babysitter@a5c.ai
 If you also want headless runtime commands such as `agent-platform call`, install the optional runtime CLI too:
 
 ```bash
-npm install -g @a5c-ai/tula-platform@latest
+npm install -g @a5c-ai/genty-platform@latest
 ```
 
 Then restart Claude Code and skip to [Verification](#verification).
@@ -158,7 +158,7 @@ babysitter --version
 Install this only if you need `agent-platform` commands for headless orchestration, the internal harness, daemon utilities, MCP serving, or the TUI:
 
 ```bash
-npm install -g @a5c-ai/tula-platform@latest
+npm install -g @a5c-ai/genty-platform@latest
 ```
 
 **Verify installation:**
@@ -427,7 +427,7 @@ babysitter --version
 
 #### 2. Optional Runtime CLI Installed
 
-If you installed `@a5c-ai/tula-platform`:
+If you installed `@a5c-ai/genty-platform`:
 
 ```bash
 agent-platform --version
@@ -469,7 +469,7 @@ Babysitter is actively developed. Keep your installation current for the latest 
 ### Update CLI Packages
 
 ```bash
-npm update -g @a5c-ai/babysitter @a5c-ai/tula-platform
+npm update -g @a5c-ai/babysitter @a5c-ai/genty-platform
 ```
 
 ### Update Claude Code Plugin
@@ -626,6 +626,6 @@ claude "/babysitter:call <your request>"
 claude "/babysitter:call resume the babysitter run"
 
 # Update everything
-npm update -g @a5c-ai/babysitter @a5c-ai/tula-platform
+npm update -g @a5c-ai/babysitter @a5c-ai/genty-platform
 claude plugin update babysitter@a5c.ai
 ```

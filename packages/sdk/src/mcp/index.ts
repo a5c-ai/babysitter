@@ -1,8 +1,8 @@
 export { createBabysitterMcpServer } from "./server";
 
-// MCP Client moved to @a5c-ai/tula-platform (GAP-REMOTE-006, GAP-TOOLS-025)
-// MCP WebSocket transport moved to @a5c-ai/tula-platform (GAP-REMOTE-003)
-// MCP Channels moved to @a5c-ai/tula-platform (interactive feature)
+// MCP Client moved to @a5c-ai/genty-platform (GAP-REMOTE-006, GAP-TOOLS-025)
+// MCP WebSocket transport moved to @a5c-ai/genty-platform (GAP-REMOTE-003)
+// MCP Channels moved to @a5c-ai/genty-platform (interactive feature)
 
 /**
  * Start the MCP server on stdio transport.

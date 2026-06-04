@@ -22,7 +22,7 @@ Process calls ctx.task(externalTask)
 
 ### 1. Effect Kind Detection
 
-In `packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts`:
+In `packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts`:
 
 ```typescript
 // In resolveEffect(), add external agent detection:
@@ -34,7 +34,7 @@ if (action.kind === "agent" && action.taskDef?.agent?.external) {
 ### 2. New: `resolveExternalAgentEffect()`
 
 ```typescript
-// packages/tula/platform/src/harness/internal/createRun/orchestration/externalAgentEffect.ts
+// packages/genty/platform/src/harness/internal/createRun/orchestration/externalAgentEffect.ts
 
 async function resolveExternalAgentEffect(
   action: EffectAction,
@@ -90,7 +90,7 @@ async function resolveExternalAgentEffect(
 
 ### 3. CLI Orchestration Path
 
-In `packages/tula/platform/src/harness/internal/createRun/orchestration/index.ts`, `resolveAndPostEffect()`:
+In `packages/genty/platform/src/harness/internal/createRun/orchestration/index.ts`, `resolveAndPostEffect()`:
 
 ```typescript
 if (action.kind === "agent" && action.taskDef?.agent?.external) {
@@ -116,13 +116,13 @@ if (action.kind === "agent" && action.taskDef?.agent?.external) {
 ## Files to Create/Modify
 
 ### New Files
-- `packages/tula/platform/src/harness/internal/createRun/orchestration/externalAgentEffect.ts`
-- `packages/tula/platform/src/harness/internal/createRun/orchestration/__tests__/externalAgentEffect.test.ts`
+- `packages/genty/platform/src/harness/internal/createRun/orchestration/externalAgentEffect.ts`
+- `packages/genty/platform/src/harness/internal/createRun/orchestration/__tests__/externalAgentEffect.test.ts`
 
 ### Modified Files
-- `packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts` — add external agent routing
-- `packages/tula/platform/src/harness/internal/createRun/orchestration/index.ts` — add external agent handling in CLI path
-- `packages/tula/platform/src/harness/adapters/amuxBridge.ts` — may need minor adjustments for SDK-driven dispatch
+- `packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts` — add external agent routing
+- `packages/genty/platform/src/harness/internal/createRun/orchestration/index.ts` — add external agent handling in CLI path
+- `packages/genty/platform/src/harness/adapters/amuxBridge.ts` — may need minor adjustments for SDK-driven dispatch
 
 ## Existing Infrastructure Reused
 

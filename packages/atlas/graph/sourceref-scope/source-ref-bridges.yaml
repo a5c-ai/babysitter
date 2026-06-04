@@ -130,16 +130,16 @@ nodes:
     edges:
       source_of:
         - target: agent:adapters
-  - id: source-ref:packages-tula-runtime
+  - id: source-ref:packages-genty-runtime
     kind: SourceRef
     edges:
       source_of:
         - target: agent:agent-platform
-  - id: source-ref:packages-tula
+  - id: source-ref:packages-genty
     kind: SourceRef
     edges:
       source_of:
-        - target: agent:tula
+        - target: agent:genty
   - id: source-ref:context7-mcp
     kind: SourceRef
     edges:

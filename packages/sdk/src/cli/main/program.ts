@@ -15,7 +15,7 @@ export const CORE_PROGRAM: CliProgram = {
 export const HARNESS_PROGRAM: CliProgram = {
   variant: "harness",
   commandName: "agent-platform",
-  packageName: "@a5c-ai/tula-platform",
+  packageName: "@a5c-ai/genty-platform",
 };
 
 export const HARNESS_RUNTIME_COMMANDS = [

@@ -4,7 +4,7 @@ attributes:
   subjectId: package:a5c-ai-adapters-tui
   subjectKind: PackageSurface
   attribute: surfaceKinds
-  value: '@a5c-ai/tula-tui is modeled as a TUI and bin-entrypoint package surface.'
+  value: '@a5c-ai/genty-tui is modeled as a TUI and bin-entrypoint package surface.'
   statement: The adapters TUI package surface is grounded in its package metadata and adapters-tui binary entrypoint.
   evidenceSourceIds:
     - evidence:adapters-tui-package-source

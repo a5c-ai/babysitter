@@ -40,8 +40,8 @@ These packages are publicly installable, but their canonical docs live primarily
 
 | Workspace | Role | Validation path |
 | --- | --- | --- |
-| `packages/tula/platform` | Public runtime CLI for headless/orchestrated/operator workflows; not the default first-stop end-user entrypoint | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` runtime build/test validation |
-| `packages/tula/core` | Public advanced/runtime dependency package consumed by `@a5c-ai/tula-platform` and runtime orchestration flows | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |
+| `packages/genty/platform` | Public runtime CLI for headless/orchestrated/operator workflows; not the default first-stop end-user entrypoint | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` runtime build/test validation |
+| `packages/genty/core` | Public advanced/runtime dependency package consumed by `@a5c-ai/genty-platform` and runtime orchestration flows | `.github/workflows/ci.yml` job `test`, plus `publish.yml` and `publish-packages-from-tag.yml` |
 | `packages/atlas` (`./catalog` export) | Public graph/evidence catalog surface consumed by SDK, adapters, hooks-mux, plugin compiler, and catalog-adjacent tooling | `.github/workflows/ci.yml` job `test` (`npm run build --workspace=@a5c-ai/atlas` and `npm run test:atlas-catalog-contracts`), plus `publish.yml` and `publish-packages-from-tag.yml` |
 
 ## Internal-only active workspaces
@@ -50,7 +50,7 @@ These workspaces are part of the active monorepo and ship code or operational be
 
 | Workspace | Role | Validation path |
 | --- | --- | --- |
-| `packages/tula/tui-plugins` | Internal TUI plugin package for babysitter observability | `.github/workflows/ci.yml` job `workspace-coverage` |
+| `packages/genty/tui-plugins` | Internal TUI plugin package for babysitter observability | `.github/workflows/ci.yml` job `workspace-coverage` |
 
 ## Explicit exclusions
 

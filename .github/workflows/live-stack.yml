@@ -168,7 +168,7 @@ jobs:
                 'omp': {agent:'omp', adapters_agent:'omp'},
                 'droid': {agent:'droid', adapters_agent:'droid'},
                 'amp': {agent:'amp', adapters_agent:'amp'},
-                'tula': {agent:'tula', adapters_agent:'tula', agent_path:'tula'},
+                'genty': {agent:'genty', adapters_agent:'genty', agent_path:'genty'},
               };
               const models = {
                 'foundry-gpt55': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
@@ -200,7 +200,7 @@ jobs:
                 return {
                   id: 'live.adapters.' + a.agent + '.' + m.provider + '.' + m.model,
                   agent_path: a.agent_path || 'adapters', agent: a.agent, adapters_agent: a.adapters_agent,
-                  integration_type: a.agent_path === 'tula' ? 'runtime-cli' : 'third-party-plugin',
+                  integration_type: a.agent_path === 'genty' ? 'runtime-cli' : 'third-party-plugin',
                   provider: m.provider, adapters_provider: m.adapters_provider, model: m.model,
                   required_env: m.required_env, live: entry.live !== false,
                   process_mode: entry.process_mode || 'predefined',
@@ -252,14 +252,14 @@ jobs:
               const codex = scenario('codex','codex',google);
               const pi = scenario('pi','pi',deepseek);
               // Tula is a runtime-cli agent with native babysitter support
-              const tulaScenario = {id:'live.adapters.tula.foundry-openai.gpt-5.5', agent_path:'tula', agent:'tula', adapters_agent:'tula', integration_type:'runtime-cli', provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE', live:true, process_mode:'predefined'};
+              const gentyScenario = {id:'live.adapters.genty.foundry-openai.gpt-5.5', agent_path:'genty', agent:'genty', adapters_agent:'genty', integration_type:'runtime-cli', provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE', live:true, process_mode:'predefined'};
 
-              // Vanilla NI: claude+codex+pi+tula NI
+              // Vanilla NI: claude+codex+pi+genty NI
               const vanillaNi = [
                 {scenario: claude, interaction_mode: ni, install_mode: vanillaInstall},
                 {scenario: codex, interaction_mode: ni, install_mode: vanillaInstall},
                 {scenario: pi, interaction_mode: ni, install_mode: vanillaInstall},
-                {scenario: tulaScenario, interaction_mode: ni, install_mode: vanillaInstall},
+                {scenario: gentyScenario, interaction_mode: ni, install_mode: vanillaInstall},
               ];
 
               // Vanilla Interactive: bridged-interactive
@@ -267,28 +267,28 @@ jobs:
                   {scenario: claude, interaction_mode: bridgedInt, install_mode: vanillaInstall},
                   {scenario: codex, interaction_mode: bridgedInt, install_mode: vanillaInstall},
                   {scenario: pi, interaction_mode: bridgedInt, install_mode: vanillaInstall},
-                  {scenario: tulaScenario, interaction_mode: bridgedInt, install_mode: vanillaInstall},
+                  {scenario: gentyScenario, interaction_mode: bridgedInt, install_mode: vanillaInstall},
               ];
 
               const claudeCreate = scenario('claude-code','claude',foundry,'create');
               const codexCreate = scenario('codex','codex',google,'create');
               const piCreate = scenario('pi','pi',deepseek,'create');
-              const tulaBp = {...tulaScenario};
+              const gentyBp = {...gentyScenario};
 
-              // BP Interactive: claude+codex+pi (create) + tula (predefined, native babysitter)
+              // BP Interactive: claude+codex+pi (create) + genty (predefined, native babysitter)
               const bpInt = [
                 {scenario: claudeCreate, interaction_mode: interactive, install_mode: bpInstall},
                 {scenario: codexCreate, interaction_mode: interactive, install_mode: bpInstall},
                 {scenario: piCreate, interaction_mode: interactive, install_mode: bpInstall},
-                {scenario: tulaBp, interaction_mode: interactive, install_mode: bpInstall},
+                {scenario: gentyBp, interaction_mode: interactive, install_mode: bpInstall},
               ];
 
-              // BP Bridged-hooks: claude+codex+pi (create) + tula (predefined, native babysitter)
+              // BP Bridged-hooks: claude+codex+pi (create) + genty (predefined, native babysitter)
               const bpBridged = [
                 {scenario: claudeCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
                 {scenario: codexCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
                 {scenario: piCreate, interaction_mode: bridgedHooks, install_mode: bpInstall},
-                {scenario: tulaBp, interaction_mode: bridgedHooks, install_mode: bpInstall},
+                {scenario: gentyBp, interaction_mode: bridgedHooks, install_mode: bpInstall},
               ];
 
               const wrap = (arr) => JSON.stringify({include: arr});
@@ -373,8 +373,8 @@ jobs:
           mkdir -p "$HOME/.local/bin"
           for pair in \
             "adapters:packages/adapters/sdk/dist/bin/adapters.js" \
-            "agent-platform:packages/tula/dist/cli/main.js" \
-            "tula:packages/tula/dist/cli/main.js" \
+            "agent-platform:packages/genty/dist/cli/main.js" \
+            "genty:packages/genty/dist/cli/main.js" \
             "babysitter:packages/sdk/dist/cli/main.js" \
             "adapters-hooks:packages/adapters/hooks/cli/dist/cli/main.js"
           do
@@ -428,8 +428,8 @@ jobs:
           LIVE_STACK_COMMAND_TIMEOUT_MS: '4800000'
           LIVE_STACK_BABYSITTER_BIN: ${{ github.workspace }}/packages/sdk/dist/cli/main.js
           LIVE_STACK_AGENT_MUX_BIN: ${{ github.workspace }}/packages/adapters/cli/dist/index.js
-          LIVE_STACK_AGENT_PLATFORM_BIN: ${{ github.workspace }}/packages/tula/dist/cli/main.js
-          LIVE_STACK_TULA_BIN: ${{ github.workspace }}/packages/tula/dist/cli/main.js
+          LIVE_STACK_AGENT_PLATFORM_BIN: ${{ github.workspace }}/packages/genty/dist/cli/main.js
+          LIVE_STACK_GENTY_BIN: ${{ github.workspace }}/packages/genty/dist/cli/main.js
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AGENT_MUX_API_BASE: https://${{ vars.AZURE_OPENAI_PROJECT_NAME }}.services.ai.azure.com
           AGENT_MUX_PROVIDER: foundry
@@ -477,11 +477,11 @@ jobs:
           fi
           # Ensure pip user-bin is on PATH for hermes and other pip agents (Linux + macOS paths)
           export PATH="$HOME/.local/bin:$HOME/Library/Python/3.12/bin:$HOME/Library/Python/3.11/bin:$PATH"
-          # Pre-create .a5c directory — tula atomic write needs it on Windows
+          # Pre-create .a5c directory — genty atomic write needs it on Windows
           mkdir -p "$HOME/.a5c" .a5c 2>/dev/null || true
-          # Verify tula can start — capture and echo output for debugging
+          # Verify genty can start — capture and echo output for debugging
           echo "::group::Tula startup check"
-          OMNI_CHECK=$(node packages/tula/dist/cli/main.js version 2>&1) && echo "tula ok: $OMNI_CHECK" || echo "OMNI STARTUP FAILED: $OMNI_CHECK"
+          OMNI_CHECK=$(node packages/genty/dist/cli/main.js version 2>&1) && echo "genty ok: $OMNI_CHECK" || echo "OMNI STARTUP FAILED: $OMNI_CHECK"
           echo "::endgroup::"
           START_TS=$(date +%s)
           npm run test:e2e:live-stack:pipeline

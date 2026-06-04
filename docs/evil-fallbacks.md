@@ -6,7 +6,7 @@ Silent fallback mechanisms that hide real problems, introduce unexpected degrade
 
 ---
 
-## SDK & Runtime (packages/sdk, packages/tula/runtime)
+## SDK & Runtime (packages/sdk, packages/genty/runtime)
 
 ### Critical
 
@@ -50,102 +50,102 @@ Stash errors now logged before force-checkout.
 **Session marker cleanup — ignore errors** — `packages/sdk/src/utils/sessionMarker.ts:79,101`
 Stale markers accumulate on disk over time.
 
-**Daemon lifecycle cleanup — `.catch(() => {})`** — `packages/tula/runtime/src/daemon/lifecycle.ts:68-70,174-178,243`
+**Daemon lifecycle cleanup — `.catch(() => {})`** — `packages/genty/runtime/src/daemon/lifecycle.ts:68-70,174-178,243`
 PID file deletion and log writes are best-effort. Stale PID files cause "daemon already running" false positives.
 
-**Webhook trigger setup — silent skip** — `packages/tula/runtime/src/daemon/loop.ts:132-142`
+**Webhook trigger setup — silent skip** — `packages/genty/runtime/src/daemon/loop.ts:132-142`
 Port in use or permission denied → trigger silently never fires. No indication to user.
 
-**Resource warning callbacks swallowed** — `packages/tula/runtime/src/resources/manager.ts:141-155`
+**Resource warning callbacks swallowed** — `packages/genty/runtime/src/resources/manager.ts:141-155`
 Subscriber errors silently discarded.
 
 ---
 
-## Tula Core (packages/tula/core)
+## genty Core (packages/genty/core)
 
 ### Critical
 
-**Endpoint resolution fallback chain** — `packages/tula/core/src/session.ts:38-89` **(logged)**
+**Endpoint resolution fallback chain** — `packages/genty/core/src/session.ts:38-89` **(logged)**
 9 env vars checked in priority order. Model defaults to "gpt-4o" now warns when no model specified. Anthropic path now logs model conversion.
 
 ### High
 
-**Tool error wrapping loses everything** — `packages/tula/core/src/agenticTools/shared/results.ts:37-58` **(logged)**
+**Tool error wrapping loses everything** — `packages/genty/core/src/agenticTools/shared/results.ts:37-58` **(logged)**
 Now logs full error including stack trace to stderr before converting to errorResult.
 
-**Subagent invocation — message only** — `packages/tula/core/src/subagent/invoker.ts:65-76,116-118` **(logged)**
+**Subagent invocation — message only** — `packages/genty/core/src/subagent/invoker.ts:65-76,116-118` **(logged)**
 Now logs full stack trace in `buildErrorResult` before returning message-only result.
 
 ### Medium
 
-**AST-grep → ripgrep silent fallback** — `packages/tula/core/src/agenticTools/tools/code.ts:100-130` **(logged)**
+**AST-grep → ripgrep silent fallback** — `packages/genty/core/src/agenticTools/tools/code.ts:100-130` **(logged)**
 Now logs exit code when falling back from `sg` to `rg`.
 
-**Mermaid rendering — "mmdc not available"** — `packages/tula/core/src/agenticTools/tools/code.ts:216-239` **(logged)**
+**Mermaid rendering — "mmdc not available"** — `packages/genty/core/src/agenticTools/tools/code.ts:216-239` **(logged)**
 Now logs the error reason. Temp file cleanup failures also logged.
 
-**Puppeteer import — misleading message** — `packages/tula/core/src/agenticTools/browser/tool.ts:42-49` **(hardened)**
+**Puppeteer import — misleading message** — `packages/genty/core/src/agenticTools/browser/tool.ts:42-49` **(hardened)**
 Error message now includes actual import error, not just "not installed."
 
-**JSON parse fallback changes types** — `packages/tula/core/src/agenticTools/tools/programmaticToolCalling.ts:137-142`
+**JSON parse fallback changes types** — `packages/genty/core/src/agenticTools/tools/programmaticToolCalling.ts:137-142`
 `JSON.parse()` fails → returns raw string instead. Callers expecting object get string. Type mismatch propagates.
 
-**Web search URL decode fallback** — `packages/tula/core/src/agenticTools/web/searchHelpers.ts:18-23`
+**Web search URL decode fallback** — `packages/genty/core/src/agenticTools/web/searchHelpers.ts:18-23`
 `decodeURIComponent` fails → uses raw DuckDuckGo-encoded URL. Broken URLs passed downstream.
 
-~~**Session abort is a no-op**~~ — `packages/tula/core/src/session.ts` **(hardened)**
+~~**Session abort is a no-op**~~ — `packages/genty/core/src/session.ts` **(hardened)**
 `abort()` now cancels the active provider request through the request `AbortController`; abort after completion is harmless and aborted prompts do not append partial history.
 
-**Directory walk silent failure** — `packages/tula/core/src/agenticTools/shared/paths.ts:61-65` **(logged)**
+**Directory walk silent failure** — `packages/genty/core/src/agenticTools/shared/paths.ts:61-65` **(logged)**
 Now logs the directory path and error before returning.
 
-**Spawn error — message only** — `packages/tula/core/src/agenticTools/shared/process.ts:94-99` **(hardened)**
+**Spawn error — message only** — `packages/genty/core/src/agenticTools/shared/process.ts:94-99` **(hardened)**
 Now includes `ErrnoException.code` (ENOENT, EACCES, etc.) in error message.
 
 ---
 
-## Agent Platform (packages/tula/platform)
+## Agent Platform (packages/genty/platform)
 
 ### Critical
 
-**Process module load retry — 3 silent attempts** — `packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts:632-678` **(logged)**
+**Process module load retry — 3 silent attempts** — `packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts:632-678` **(logged)**
 Now logs each retry attempt unconditionally, not just in verbose mode.
 
 ### High
 
-**Session recovery — 3-layer fallback chain** — `packages/tula/platform/src/harness/internal/createRun/planProcess/phase.ts:166-464`
+**Session recovery — 3-layer fallback chain** — `packages/genty/platform/src/harness/internal/createRun/planProcess/phase.ts:166-464`
 If agent fails → recover from outputs → recovery prompt → host-side recovery. Three levels of silent degradation before final error. Invisible without verbose mode.
 
-~~**Process definition extraction — wrong code blocks**~~ — `packages/tula/platform/src/harness/internal/createRun/planProcess/recovery.ts:33-106` **(hardened)**
+~~**Process definition extraction — wrong code blocks**~~ — `packages/genty/platform/src/harness/internal/createRun/planProcess/recovery.ts:33-106` **(hardened)**
 Non-process code blocks are now rejected (returns `null`) instead of being extracted and executed.
 
-**Journal scan silent stop** — `packages/tula/platform/src/storage/journalWatcher.ts:83-139` **(logged)**
+**Journal scan silent stop** — `packages/genty/platform/src/storage/journalWatcher.ts:83-139` **(logged)**
 readdir error now logged with directory path and error message.
 
-**MCP reconnection — error status not exception** — `packages/tula/platform/src/mcp/client/manager.ts:242-271` **(logged)**
+**MCP reconnection — error status not exception** — `packages/genty/platform/src/mcp/client/manager.ts:242-271` **(logged)**
 Connection failures now logged after exhausting retries.
 
 ### Medium
 
-**CLI orchestration fallback** — `packages/tula/platform/src/harness/internal/createRun/orchestration/index.ts:42-44`
+**CLI orchestration fallback** — `packages/genty/platform/src/harness/internal/createRun/orchestration/index.ts:42-44`
 No Pi backend → silently falls back to subprocess CLI mode. Undocumented user-facing behavior change.
 
-**Prompt retry — no history** — `packages/tula/platform/src/harness/internal/createRun/agent-core-loop.ts:118-164` **(logged)**
+**Prompt retry — no history** — `packages/genty/platform/src/harness/internal/createRun/agent-core-loop.ts:118-164` **(logged)**
 First retry now always logged to stderr.
 
-**Effect execution retry — count swallowed** — `packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts:521-630` **(logged)**
+**Effect execution retry — count swallowed** — `packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts:521-630` **(logged)**
 Now logs effect ID, attempt number, and error before each retry.
 
-**Harness name resolution — no validation** — `packages/tula/platform/src/harness/internal/createRun/agent-core-loop.ts:250-262`
+**Harness name resolution — no validation** — `packages/genty/platform/src/harness/internal/createRun/agent-core-loop.ts:250-262`
 Unknown harness names returned as-is. Typos only caught at runtime execution.
 
-**MCP config file — corrupt = empty** — `packages/tula/platform/src/mcp/client/config.ts:33-52` **(logged)**
+**MCP config file — corrupt = empty** — `packages/genty/platform/src/mcp/client/config.ts:33-52` **(logged)**
 Non-ENOENT read errors and JSON parse errors now logged distinctly.
 
-**Session state parsing — silent defaults** — `packages/tula/platform/src/session/parse.ts:78-120`
+**Session state parsing — silent defaults** — `packages/genty/platform/src/session/parse.ts:78-120`
 Malformed values silently revert to defaults. Invalid iteration counts become defaults without indication.
 
-**MCP tool execution — exception → result object** — `packages/tula/platform/src/mcp/client/executor.ts:38-59` **(logged)**
+**MCP tool execution — exception → result object** — `packages/genty/platform/src/mcp/client/executor.ts:38-59` **(logged)**
 Now logs tool name and error message before converting to result object.
 
 ---
@@ -239,8 +239,8 @@ Malformed artifacts silently produce empty strings. Report shows "—" with no e
 **Native package install — continue on failure** — `.github/workflows/live-stack.yml:81-83`
 `npm install --no-save $NATIVE_PKGS || echo "some native deps failed to install"`. Build continues with missing deps.
 
-**Tula startup check — non-fatal** — `.github/workflows/live-stack.yml:454-456`
-Tula binary can't start → test proceeds anyway. Later failures attributed to test logic.
+**genty startup check — non-fatal** — `.github/workflows/live-stack.yml:454-456`
+genty binary can't start → test proceeds anyway. Later failures attributed to test logic.
 
 **Run evidence files — silent skip** — `packages/adapters/cli/tests/live-stack/primary-live-runner.ts:630-635`
 Missing run metadata files silently skipped. Incomplete trace ID evidence.
@@ -293,28 +293,28 @@ If `hostSignalMap[name]` is undefined, silently falls back to empty array. Harne
 
 ---
 
-## Agent Platform Internals (packages/tula/platform — additional)
+## Agent Platform Internals (packages/genty/platform — additional)
 
 ### High
 
-**Azure OpenAI URL parse fallback** — `packages/tula/platform/src/harness/piWrapper/moduleSupport.ts:119-122`
+**Azure OpenAI URL parse fallback** — `packages/genty/platform/src/harness/piWrapper/moduleSupport.ts:119-122`
 `normalizeAzureOpenAiBaseUrl()` catches URL.parse errors and returns raw untrimmed value. Malformed URLs passed downstream without indication.
 
-**Azure model synthesis returns undefined silently** — `packages/tula/platform/src/harness/piWrapper/moduleSupport.ts:146-175`
+**Azure model synthesis returns undefined silently** — `packages/genty/platform/src/harness/piWrapper/moduleSupport.ts:146-175`
 `synthesizeAzureModelEntry()` returns `undefined` at multiple points without logging. Model resolution fails silently.
 
-**Non-JSON stdin lines silently discarded** — `packages/tula/platform/src/harness/adapters/amuxStdinReader.ts:64-66`
+**Non-JSON stdin lines silently discarded** — `packages/genty/platform/src/harness/adapters/amuxStdinReader.ts:64-66`
 `catch { continue; }` on JSON.parse. Invalid interaction events vanish. Downstream code may wait forever for a response that was malformed and discarded.
 
-**Pi module import — generic error hides real cause** — `packages/tula/platform/src/harness/piWrapper/moduleSupport.ts:86-96`
+**Pi module import — generic error hides real cause** — `packages/genty/platform/src/harness/piWrapper/moduleSupport.ts:86-96`
 Catch wraps error with "is the package installed?" but original error lost. Could be version mismatch, init error, or actual missing package.
 
 ### Medium
 
 **Inline `.catch(() => undefined)` pattern** — Multiple files:
-- `packages/tula/platform/src/api/breakpoints.ts` — task definition read
-- `packages/tula/platform/src/harness/piSecureSandbox.ts:245` — `void session.abort().catch(() => undefined)`
-- `packages/tula/platform/src/harness/piWrapper.ts:245` — same pattern
+- `packages/genty/platform/src/api/breakpoints.ts` — task definition read
+- `packages/genty/platform/src/harness/piSecureSandbox.ts:245` — `void session.abort().catch(() => undefined)`
+- `packages/genty/platform/src/harness/piWrapper.ts:245` — same pattern
 
 All errors from these operations are completely invisible.
 
@@ -442,7 +442,7 @@ Pod cleanup spawn error and catch block both silenced.
 
 ---
 
-## Kradle Web & Observer (packages/kradle/web, packages/observer-dashboard, packages/tula/tui-plugins)
+## Kradle Web & Observer (packages/kradle/web, packages/observer-dashboard, packages/genty/tui-plugins)
 
 ### Critical
 
@@ -460,7 +460,7 @@ Missing env var → `null`. Upstream error → `null`. Parse error → `null`. C
 ~~**Multiple component fetch `.catch(() => {})`**~~ **(logged)** — `curated-model-catalog.jsx:117`, `runner-pool-manager.jsx:278,292`, `kanban-enhanced.jsx:423`, `stack-builder-graph.jsx:436,533`
 Model deployments, runner scaling, status updates — all fire-and-forget. UI optimistically updates; backend silently fails.
 
-~~**Journal entry skipping**~~ **(logged)** — `packages/tula/tui-plugins/src/data.ts:69,128,277`, `status-plugin.tsx:104`
+~~**Journal entry skipping**~~ **(logged)** — `packages/genty/tui-plugins/src/data.ts:69,128,277`, `status-plugin.tsx:104`
 `catch { // skip malformed journal entries }`. Run data silently lost. Audit trail gaps.
 
 ### Medium

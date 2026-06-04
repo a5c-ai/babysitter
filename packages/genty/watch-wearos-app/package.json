@@ -1,0 +1,10 @@
+{
+  "name": "@a5c-ai/genty-watch-wearos-app",
+  "private": true,
+  "type": "module",
+  "description": "Wear OS companion surfaces for adapters",
+  "scripts": {
+    "gradle": "echo Run ./gradlew assembleDebug inside packages/adapters/watch-wearos-app"
+  },
+  "version": "5.0.0"
+}

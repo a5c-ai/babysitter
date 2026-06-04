@@ -2,7 +2,7 @@
 
 ## Goal
 
-Allow babysitter processes to discover what agents and models are available in the environment and dispatch work to them. When adapters is installed, processes gain access to external agents (claude-code, codex, gemini-cli, copilot, etc.) as first-class task targets alongside the internal tula-core session.
+Allow babysitter processes to discover what agents and models are available in the environment and dispatch work to them. When adapters is installed, processes gain access to external agents (claude-code, codex, gemini-cli, copilot, etc.) as first-class task targets alongside the internal genty-core session.
 
 ## Architecture
 
@@ -15,7 +15,7 @@ Process Definition (defineTask)
   │
   ↓ tasks-mux routes by responderType:
   │
-  ├─ responderType: "internal"  → tula-core session (direct API)
+  ├─ responderType: "internal"  → genty-core session (direct API)
   ├─ responderType: "human"     → breakpoint → human responder (existing)
   ├─ responderType: "agent"     → adapters adapter (claude-code, codex, etc.)
   ├─ responderType: "tracker"   → external issue tracker (Jira, Linear)
@@ -23,7 +23,7 @@ Process Definition (defineTask)
 ```
 
 This works identically in both modes:
-- **Standalone** (tula, agent-platform CLI): tasks-mux resolves directly
+- **Standalone** (genty, agent-platform CLI): tasks-mux resolves directly
 - **Plugin** (inside claude-code, codex): tasks-mux resolves agent/tracker tasks internally; host-resolvable tasks delegated via stop-hook
 
 ## Capability Layers
@@ -53,8 +53,8 @@ Agent-mux is **optional**. The SDK must work without it. Discovery returns empty
 |---------|---------|
 | `packages/tasks-mux` | Agent responder backend, task router, responder types, adapters integration |
 | `packages/sdk` | Discovery API, responderType on tasks, route through tasks-mux |
-| `packages/tula/platform` | Effect resolution delegates to tasks-mux, process prompt updates |
-| `packages/tula/core` | None (internal agent tasks unchanged) |
+| `packages/genty/platform` | Effect resolution delegates to tasks-mux, process prompt updates |
+| `packages/genty/core` | None (internal agent tasks unchanged) |
 | `packages/adapters` | None (existing run/launch API consumed by tasks-mux) |
 | `packages/adapters/hooks` | Host tool discovery, capability extensions |
 

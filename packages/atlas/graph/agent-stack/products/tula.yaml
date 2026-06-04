@@ -1,21 +1,21 @@
 nodeKind: AgentProduct
-id: agent:tula
+id: agent:genty
 attributes:
-  displayName: "tula"
+  displayName: "genty"
   vendor: "a5c-ai"
-  homepageUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/tula"
+  homepageUrl: "https://github.com/a5c-ai/babysitter/tree/main/packages/genty"
   primarySurface: cli
   supportTier: catalog-backed
   productKind: full-cli-agent
   stackScope: full
   description: |
-    tula — top-level integrated agent product. Composes agent-core (L4),
+    genty — top-level integrated agent product. Composes agent-core (L4),
     agent-runtime (L5), agent-platform (L6), adapters, and babysitter-sdk
     into a single CLI binary and barrel-export package. This is the package
-    end users install and interact with; it provides the `tula` CLI command
-    and re-exports the full agent stack through @a5c-ai/tula on npm.
-    Think of babysitter as the metapackage for installing, tula as the
+    end users install and interact with; it provides the `genty` CLI command
+    and re-exports the full agent stack through @a5c-ai/genty on npm.
+    Think of babysitter as the metapackage for installing, genty as the
     product for RUNNING.
 edges:
   has_version:
-    - agent-version:tula@current
+    - agent-version:genty@current

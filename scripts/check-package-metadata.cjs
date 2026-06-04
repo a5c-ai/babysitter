@@ -7,12 +7,12 @@ const repoRoot = path.resolve(__dirname, '..');
 const DOCS_SURFACE_PATH = 'docs/generated/package-plugin-docs-coverage.json';
 const BUGS_URL = 'https://github.com/a5c-ai/babysitter/issues';
 const REPOSITORY_URL = 'git+https://github.com/a5c-ai/babysitter.git';
-const TULA_CORE_SURFACE = 'packages/tula/core';
-const TULA_CORE_PACKAGE = '@a5c-ai/tula-core';
+const GENTY_CORE_SURFACE = 'packages/genty/core';
+const GENTY_CORE_PACKAGE = '@a5c-ai/genty-core';
 const OLD_AGENT_CORE_SURFACE = 'packages/agent-core';
 const OLD_AGENT_CORE_PACKAGE = '@a5c-ai/agent-core';
-const TULA_RUNTIME_SURFACE = 'packages/tula/runtime';
-const TULA_RUNTIME_PACKAGE = '@a5c-ai/tula-runtime';
+const GENTY_RUNTIME_SURFACE = 'packages/genty/runtime';
+const GENTY_RUNTIME_PACKAGE = '@a5c-ai/genty-runtime';
 const OLD_AGENT_RUNTIME_SURFACE = ['packages', 'agent-runtime'].join('/');
 const OLD_AGENT_RUNTIME_PACKAGE = ['@a5c-ai', 'agent-runtime'].join('/');
 const TOP_LEVEL_AGENT_MUX_PACKAGE_MOVES = [
@@ -168,11 +168,11 @@ function verifyTulaCoreRename() {
   expectEqual(manifest.homepage, createCanonicalMetadata(TULA_CORE_SURFACE).homepage, `${TULA_CORE_SURFACE}/package.json homepage`);
 
   const docsCoverage = readJson(DOCS_SURFACE_PATH);
-  const tulaCoreSurface = docsCoverage.surfaces.find((entry) => entry.surface === TULA_CORE_SURFACE);
-  if (!tulaCoreSurface) {
+  const gentyCoreSurface = docsCoverage.surfaces.find((entry) => entry.surface === TULA_CORE_SURFACE);
+  if (!gentyCoreSurface) {
     fail(`${DOCS_SURFACE_PATH} must list ${TULA_CORE_SURFACE}`);
   }
-  expectEqual(tulaCoreSurface.packageName, TULA_CORE_PACKAGE, `${DOCS_SURFACE_PATH} ${TULA_CORE_SURFACE} packageName`);
+  expectEqual(gentyCoreSurface.packageName, TULA_CORE_PACKAGE, `${DOCS_SURFACE_PATH} ${TULA_CORE_SURFACE} packageName`);
 
   const oldSurface = docsCoverage.surfaces.find((entry) => entry.surface === OLD_AGENT_CORE_SURFACE);
   if (oldSurface) {
@@ -182,8 +182,8 @@ function verifyTulaCoreRename() {
 
 function verifyTulaCoreDependents() {
   const packageJsonPaths = [
-    'packages/tula/platform/package.json',
-    'packages/tula/cli/package.json',
+    'packages/genty/platform/package.json',
+    'packages/genty/cli/package.json',
   ];
   for (const packageJsonPath of packageJsonPaths) {
     const manifest = readJson(packageJsonPath);
@@ -193,8 +193,8 @@ function verifyTulaCoreDependents() {
   }
 
   const tsconfigPaths = [
-    'packages/tula/platform/tsconfig.json',
-    'packages/tula/cli/tsconfig.json',
+    'packages/genty/platform/tsconfig.json',
+    'packages/genty/cli/tsconfig.json',
   ];
   for (const tsconfigPath of tsconfigPaths) {
     const config = readJson(tsconfigPath);
@@ -205,15 +205,15 @@ function verifyTulaCoreDependents() {
   }
 
   const staleImportFiles = [
-    'packages/tula/platform/src/harness/index.ts',
-    'packages/tula/platform/src/harness/internal/createRun/utils.ts',
-    'packages/tula/platform/src/harness/internal/createRun/planProcess/phaseHelpers.ts',
-    'packages/tula/platform/src/harness/internal/createRun/orchestration/internalTools.ts',
-    'packages/tula/platform/src/harness/internal/createRun/__tests__/createRun.test.ts',
-    'packages/tula/platform/src/harness/internal/createRun/__tests__/utils.test.ts',
-    'packages/tula/platform/src/harness/adapters/__tests__/amuxInvokerWiring.test.ts',
-    'packages/tula/cli/src/index.ts',
-    'packages/tula/cli/src/cli/commands/harness/resumeRun.ts',
+    'packages/genty/platform/src/harness/index.ts',
+    'packages/genty/platform/src/harness/internal/createRun/utils.ts',
+    'packages/genty/platform/src/harness/internal/createRun/planProcess/phaseHelpers.ts',
+    'packages/genty/platform/src/harness/internal/createRun/orchestration/internalTools.ts',
+    'packages/genty/platform/src/harness/internal/createRun/__tests__/createRun.test.ts',
+    'packages/genty/platform/src/harness/internal/createRun/__tests__/utils.test.ts',
+    'packages/genty/platform/src/harness/adapters/__tests__/amuxInvokerWiring.test.ts',
+    'packages/genty/cli/src/index.ts',
+    'packages/genty/cli/src/cli/commands/harness/resumeRun.ts',
   ];
   for (const filePath of staleImportFiles) {
     const fullPath = path.join(repoRoot, filePath);
@@ -240,7 +240,7 @@ function verifyTulaCoreExternalSurfaces() {
     'docs/testing/adapters-and-runtime-e2e.md',
     'docs/testing/current-test-command-inventory.md',
     'docs/testing/stack-permutations.md',
-    'packages/tula/cli/README.md',
+    'packages/genty/cli/README.md',
     'packages/atlas/graph/coverage-checklist.md',
     'packages/atlas/graph/agent-stack/core-imp../core-current.yaml',
   ];
@@ -253,7 +253,7 @@ function verifyTulaCoreExternalSurfaces() {
     const contents = fs.readFileSync(fullPath, 'utf8');
     const stalePattern = stalePatterns.find((pattern) => contents.includes(pattern));
     if (stalePattern) {
-      fail(`${filePath} must not contain stale tula-core package identity ${JSON.stringify(stalePattern)}`);
+      fail(`${filePath} must not contain stale genty-core package identity ${JSON.stringify(stalePattern)}`);
     }
   }
 }
@@ -273,11 +273,11 @@ function verifyTulaRuntimeRename() {
   expectEqual(manifest.homepage, createCanonicalMetadata(TULA_RUNTIME_SURFACE).homepage, `${TULA_RUNTIME_SURFACE}/package.json homepage`);
 
   const docsCoverage = readJson(DOCS_SURFACE_PATH);
-  const tulaRuntimeSurface = docsCoverage.surfaces.find((entry) => entry.surface === TULA_RUNTIME_SURFACE);
-  if (!tulaRuntimeSurface) {
+  const gentyRuntimeSurface = docsCoverage.surfaces.find((entry) => entry.surface === TULA_RUNTIME_SURFACE);
+  if (!gentyRuntimeSurface) {
     fail(`${DOCS_SURFACE_PATH} must list ${TULA_RUNTIME_SURFACE}`);
   }
-  expectEqual(tulaRuntimeSurface.packageName, TULA_RUNTIME_PACKAGE, `${DOCS_SURFACE_PATH} ${TULA_RUNTIME_SURFACE} packageName`);
+  expectEqual(gentyRuntimeSurface.packageName, TULA_RUNTIME_PACKAGE, `${DOCS_SURFACE_PATH} ${TULA_RUNTIME_SURFACE} packageName`);
 
   const oldSurface = docsCoverage.surfaces.find((entry) => entry.surface === OLD_AGENT_RUNTIME_SURFACE);
   if (oldSurface) {
@@ -287,9 +287,9 @@ function verifyTulaRuntimeRename() {
 
 function verifyTulaRuntimeDependents() {
   const packageJsonPaths = [
-    'packages/tula/platform/package.json',
-    'packages/tula/core/package.json',
-    'packages/tula/cli/package.json',
+    'packages/genty/platform/package.json',
+    'packages/genty/core/package.json',
+    'packages/genty/cli/package.json',
   ];
   for (const packageJsonPath of packageJsonPaths) {
     const manifest = readJson(packageJsonPath);
@@ -299,8 +299,8 @@ function verifyTulaRuntimeDependents() {
   }
 
   const tsconfigPaths = [
-    'packages/tula/platform/tsconfig.json',
-    'packages/tula/cli/tsconfig.json',
+    'packages/genty/platform/tsconfig.json',
+    'packages/genty/cli/tsconfig.json',
   ];
   for (const tsconfigPath of tsconfigPaths) {
     const config = readJson(tsconfigPath);

@@ -34,11 +34,11 @@ export async function tuiCommand(
   };
   try {
     const dynImport = new Function('m', 'return import(m)') as (m: string) => Promise<unknown>;
-    tui = (await dynImport('@a5c-ai/tula-tui')) as never;
+    tui = (await dynImport('@a5c-ai/genty-tui')) as never;
   } catch (err) {
     printError(
       'The TUI package is not installed. Install it with:\n' +
-        '  npm i -g @a5c-ai/tula-tui\n' +
+        '  npm i -g @a5c-ai/genty-tui\n' +
         `Underlying error: ${(err as Error).message}`,
     );
     return ExitCode.GENERAL_ERROR;

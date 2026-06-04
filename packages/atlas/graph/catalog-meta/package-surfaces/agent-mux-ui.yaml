@@ -1,8 +1,8 @@
 nodeKind: PackageSurface
 id: package:a5c-ai-adapters-ui
 attributes:
-  packageId: "@a5c-ai/tula-ui"
-  packageName: "@a5c-ai/tula-ui"
+  packageId: "@a5c-ai/genty-ui"
+  packageName: "@a5c-ai/genty-ui"
   workspacePath: packages/adapters/ui
   moduleType: typescript
   surfaceKinds:

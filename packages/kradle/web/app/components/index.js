@@ -135,7 +135,7 @@ export { CommandPalette, CommandPaletteWrapper } from './shell/command-palette.j
 export { GlobalSearch } from './shell/global-search.jsx';
 export { ConfirmDialog } from './shell/confirm-dialog.jsx';
 
-// tula-ui shared components are available via @a5c-ai/tula-ui subpath imports
-// (e.g. import { KanbanBoard } from '@a5c-ai/tula-ui/kanban').
+// genty-ui shared components are available via @a5c-ai/genty-ui subpath imports
+// (e.g. import { KanbanBoard } from '@a5c-ai/genty-ui/kanban').
 // They are NOT re-exported here because this barrel is loaded as a server
-// module by Next.js and tula-ui components use client-only React APIs.
+// module by Next.js and genty-ui components use client-only React APIs.

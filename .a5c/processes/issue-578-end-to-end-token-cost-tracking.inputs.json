@@ -23,8 +23,8 @@
     "packages/agent-core/src/types.ts",
     "packages/agent-core/src/session.ts",
     "packages/agent-core/src/session.test.ts",
-    "packages/tula/platform/src/harness/types.ts",
-    "packages/tula/platform/src/harness/internal/createRun/agent-core-loop.ts",
+    "packages/genty/platform/src/harness/types.ts",
+    "packages/genty/platform/src/harness/internal/createRun/agent-core-loop.ts",
     "packages/transport-mux/src/types.ts",
     "packages/transport-mux/src/codec.ts",
     "packages/transport-mux/src/server.ts",
@@ -42,11 +42,11 @@
     "packages/sdk/src/runtime/orchestrateIteration.ts",
     "packages/sdk/src/runtime/replay/effectIndex.ts",
     "packages/sdk/src/runtime/__tests__/effectCostTracking.test.ts",
-    "packages/tula/platform/src/session/cost.ts",
-    "packages/tula/platform/src/cost/effectCost.ts",
-    "packages/tula/platform/src/harness/adapters/amuxEventMapper.ts",
-    "packages/tula/platform/src/harness/internal/createRun/orchestration/effects.ts",
-    "packages/tula/platform/src/harness/internal/createRun/orchestration/index.ts"
+    "packages/genty/platform/src/session/cost.ts",
+    "packages/genty/platform/src/cost/effectCost.ts",
+    "packages/genty/platform/src/harness/adapters/amuxEventMapper.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/index.ts"
   ],
   "testTargets": [
     "packages/agent-core/src/session.test.ts",
@@ -54,8 +54,8 @@
     "packages/transport-mux/tests/server.test.ts",
     "packages/sdk/src/cost/__tests__/journal.test.ts",
     "packages/sdk/src/runtime/__tests__/effectCostTracking.test.ts",
-    "packages/tula/platform/src/session/cost.test.ts",
-    "packages/tula/platform/src/harness/internal/createRun/orchestration/__tests__/costBudgetEnforcement.test.ts"
+    "packages/genty/platform/src/session/cost.test.ts",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration/__tests__/costBudgetEnforcement.test.ts"
   ],
   "verificationCommands": [
     "npm run build:sdk",
@@ -63,7 +63,7 @@
     "npm run verify:metadata",
     "npm --workspace @a5c-ai/agent-core test",
     "npm --workspace @a5c-ai/transport-mux test",
-    "npm --workspace @a5c-ai/tula-platform test"
+    "npm --workspace @a5c-ai/genty-platform test"
   ],
   "processLibraryReferences": [
     "library/tdd-quality-convergence.js",
@@ -100,9 +100,9 @@
     "packages/transport-mux/**",
     "packages/sdk/src/cost/**",
     "packages/sdk/src/runtime/**",
-    "packages/tula/platform/src/session/**",
-    "packages/tula/platform/src/cost/**",
-    "packages/tula/platform/src/harness/**",
+    "packages/genty/platform/src/session/**",
+    "packages/genty/platform/src/cost/**",
+    "packages/genty/platform/src/harness/**",
     "docs/agent-layer-gaps.md",
     "docs/adapters/tutorials/cost-tracking.md",
     "docs/adapters-babysitter-integrations/effect-resolution.md"

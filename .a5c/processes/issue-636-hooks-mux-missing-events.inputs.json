@@ -55,7 +55,7 @@
       "packages/sdk/src/runtime/hooks/runtime.ts",
       "packages/sdk/src/runtime/intrinsics/task.ts",
       "packages/sdk/src/runtime/commitEffectResult.ts",
-      "packages/tula/platform/src/harness/internal/createRun/orchestration"
+      "packages/genty/platform/src/harness/internal/createRun/orchestration"
     ],
     "planningConstraint": "Reuse existing hook contract, catalog, adapter, SDK runtime, and orchestration surfaces before adding new infrastructure."
   },
@@ -253,7 +253,7 @@
     "packages/sdk/src/runtime/orchestrateIteration.ts",
     "packages/sdk/src/runtime/processContext.ts",
     "packages/sdk/src/prompts/babysitterMdDiscovery.ts",
-    "packages/tula/platform/src",
+    "packages/genty/platform/src",
     "packages/agent-core/src"
   ],
   "verificationCommands": [

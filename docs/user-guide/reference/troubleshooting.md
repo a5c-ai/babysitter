@@ -159,7 +159,7 @@ npm list -g @a5c-ai/babysitter-sdk
 
 Update all packages to the latest versions:
 ```bash
-npm install -g @a5c-ai/babysitter@latest @a5c-ai/tula-platform@latest
+npm install -g @a5c-ai/babysitter@latest @a5c-ai/genty-platform@latest
 ```
 
 **Prevention:** Update all packages together, not individually.
@@ -842,7 +842,7 @@ cat .a5c/runs/<runId>/tasks/<effectId>/result.json | jq .
 babysitter --version
 
 # Check installed packages
-npm list -g @a5c-ai/babysitter @a5c-ai/tula-platform
+npm list -g @a5c-ai/babysitter @a5c-ai/genty-platform
 
 # Check plugin status
 claude plugin list | grep babysitter

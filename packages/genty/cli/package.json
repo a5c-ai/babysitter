@@ -1,0 +1,76 @@
+{
+  "name": "@a5c-ai/genty",
+  "version": "5.0.0",
+  "description": "genty — unified agent product integrating core, runtime, platform, and TUI",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./cli": {
+      "types": "./dist/cli/main.d.ts",
+      "require": "./dist/cli/main.js",
+      "default": "./dist/cli/main.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "genty": "./dist/cli/main.js"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "npm run build:runtime --prefix ../../.. && tsc --build tsconfig.json",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@a5c-ai/genty-core": "5.0.0",
+    "@a5c-ai/genty-runtime": "5.0.0",
+    "@a5c-ai/genty-platform": "5.0.0",
+    "@a5c-ai/adapters": "^5.0.0",
+    "@a5c-ai/babysitter-sdk": "5.0.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@sinclair/typebox": "^0.34.48"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "rimraf": "^6.1.3",
+    "typescript": "^5.4.2",
+    "vitest": "^4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/genty/cli"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/genty/cli#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "keywords": [
+    "babysitter",
+    "genty",
+    "agent",
+    "orchestration",
+    "unified"
+  ],
+  "atlas": {
+    "layers": [
+      "L4",
+      "L5",
+      "L6"
+    ],
+    "muxes": []
+  }
+}

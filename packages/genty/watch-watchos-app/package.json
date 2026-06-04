@@ -1,0 +1,10 @@
+{
+  "name": "@a5c-ai/genty-watch-watchos-app",
+  "private": true,
+  "type": "module",
+  "description": "watchOS companion surfaces for adapters",
+  "scripts": {
+    "xcode": "echo Open packages/adapters/watch-watchos-app/AgentMuxWatch.xcodeproj in Xcode 15+"
+  },
+  "version": "5.0.0"
+}

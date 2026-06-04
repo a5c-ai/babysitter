@@ -1,12 +1,12 @@
 ---
 nodeKind: Presentation
-id: presentation:tula-cli
+id: presentation:genty-cli
 attributes:
-  displayName: "tula CLI"
+  displayName: "genty CLI"
   kind: cli
   description: |
-    CLI entry point for the tula agent. Wraps agent-platform and adapters
-    surfaces into a single `tula` binary. Supports both interactive and
+    CLI entry point for the genty agent. Wraps agent-platform and adapters
+    surfaces into a single `genty` binary. Supports both interactive and
     headless/CI modes; emits a normalized JSON event stream when invoked
     with `--json`.
   renderingTechnology: vte
@@ -17,4 +17,4 @@ attributes:
   updateChannel: npm
 edges:
   bundled_with:
-    - agent-platform-impl:tula.platform@current
+    - agent-platform-impl:genty.platform@current

@@ -536,7 +536,7 @@ Enable verbose mode for debugging:
 
 ### Babysitter
 - [Babysitter Repository](https://github.com/a5c-ai/babysitter)
-- [Babysitter Agent Runtime](https://github.com/a5c-ai/babysitter/tree/main/packages/tula/platform)
+- [Babysitter Agent Runtime](https://github.com/a5c-ai/babysitter/tree/main/packages/genty/platform)
 - [Babysitter SDK](https://www.npmjs.com/package/@a5c-ai/babysitter-sdk)
 
 ### Harness-Specific Actions

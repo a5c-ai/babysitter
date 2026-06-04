@@ -31,8 +31,8 @@
     "packages/tool-mux/src/mcp-bridge.ts",
     "packages/hooks-mux/core/src",
     "packages/agent-core/src/deferredToolRegistry.ts",
-    "packages/tula/platform/src/harness/internal/createRun/orchestration",
-    "packages/tula/platform/src/mcp/client",
+    "packages/genty/platform/src/harness/internal/createRun/orchestration",
+    "packages/genty/platform/src/mcp/client",
     "packages/adapters/core/src/plugin-manager.ts",
     "plugins/babysitter"
   ],
@@ -47,8 +47,8 @@
     "npm run test:hooks-mux",
     "npm run build --workspace=@a5c-ai/agent-core",
     "npm run test --workspace=@a5c-ai/agent-core",
-    "npm run build --workspace=@a5c-ai/tula-platform",
-    "npm run test --workspace=@a5c-ai/tula-platform",
+    "npm run build --workspace=@a5c-ai/genty-platform",
+    "npm run test --workspace=@a5c-ai/genty-platform",
     "npm run verify:metadata",
     "git diff --check"
   ],

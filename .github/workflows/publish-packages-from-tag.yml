@@ -73,8 +73,8 @@ jobs:
           }
 
           build_agent_mux_webui() {
-            echo "Building @a5c-ai/tula-webui without rebuilding @a5c-ai/tula-ui"
-            npm run clean --workspace=@a5c-ai/tula-webui
+            echo "Building @a5c-ai/genty-web-app without rebuilding @a5c-ai/genty-ui"
+            npm run clean --workspace=@a5c-ai/genty-web-app
             (
               cd packages/adapters/webui
               npx --no-install vite build
@@ -84,13 +84,13 @@ jobs:
           }
 
           build_agent_core() {
-            echo "Building @a5c-ai/tula-core without rebuilding runtime dependencies"
-            npx --no-install tsc --build packages/tula/core/tsconfig.json
+            echo "Building @a5c-ai/genty-core without rebuilding runtime dependencies"
+            npx --no-install tsc --build packages/genty/core/tsconfig.json
           }
 
           build_babysitter_agent() {
-            echo "Building @a5c-ai/tula-platform without rebuilding runtime dependencies"
-            npx --no-install tsc --build packages/tula/platform/tsconfig.json
+            echo "Building @a5c-ai/genty-platform without rebuilding runtime dependencies"
+            npx --no-install tsc --build packages/genty/platform/tsconfig.json
           }
 
           echo "Building @a5c-ai/atlas catalog foundation"
@@ -113,7 +113,7 @@ jobs:
             @a5c-ai/adapters-harness-mock \
             @a5c-ai/transport-adapter \
             @a5c-ai/config-adapter \
-            @a5c-ai/tula-ui \
+            @a5c-ai/genty-ui \
             @a5c-ai/hooks-adapter-claude \
             @a5c-ai/hooks-adapter-codex \
             @a5c-ai/hooks-adapter-gemini \
@@ -150,7 +150,7 @@ jobs:
           runtime_pids=()
           npm run build --workspace=@a5c-ai/babysitter-sdk &
           runtime_pids+=("$!")
-          npm run build:local --workspace=@a5c-ai/tula-tui &
+          npm run build:local --workspace=@a5c-ai/genty-tui &
           runtime_pids+=("$!")
           runtime_status=0
           wait_for_pids "${runtime_pids[@]}" || runtime_status="$?"
@@ -160,9 +160,9 @@ jobs:
           fi
 
           build_agent_core
-          npm run build --workspace=@a5c-ai/tula-runtime
+          npm run build --workspace=@a5c-ai/genty-runtime
           build_babysitter_agent
-          npm run build --workspace=@a5c-ai/tula
+          npm run build --workspace=@a5c-ai/genty
 
       - name: Verify SDK package health
         run: npm run verify:package-health --workspace=@a5c-ai/babysitter-sdk
@@ -212,7 +212,7 @@ jobs:
             @a5c-ai/config-adapter \
             @a5c-ai/launch-adapter \
             @a5c-ai/tools-adapter \
-            @a5c-ai/tula-ui \
+            @a5c-ai/genty-ui \
             @a5c-ai/hooks-adapter-claude \
             @a5c-ai/hooks-adapter-codex \
             @a5c-ai/hooks-adapter-gemini \
@@ -226,19 +226,19 @@ jobs:
           publish_many "Publish aggregate packages" \
             @a5c-ai/adapters-gateway \
             @a5c-ai/hooks-adapter-cli \
-            @a5c-ai/tula-webui
+            @a5c-ai/genty-web-app
 
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters-cli --skip-build
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters --skip-build
 
           publish_many "Publish runtime packages" \
             @a5c-ai/babysitter-sdk \
-            @a5c-ai/tula-tui
+            @a5c-ai/genty-tui
 
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tula-core --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tula-runtime --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tula-platform --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tula --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-core --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-runtime --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-platform --skip-build
+          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty --skip-build
           node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter --skip-build
 
   sync_external_plugins_develop:

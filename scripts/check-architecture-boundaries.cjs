@@ -10,10 +10,10 @@ const packageFamilies = {
   "orchestration-core": [
     "@a5c-ai/babysitter-sdk",
     "@a5c-ai/babysitter",
-    "@a5c-ai/tula-platform",
-    "@a5c-ai/tula-core",
-    "@a5c-ai/tula-runtime",
-    "@a5c-ai/tula",
+    "@a5c-ai/genty-platform",
+    "@a5c-ai/genty-core",
+    "@a5c-ai/genty-runtime",
+    "@a5c-ai/genty",
   ],
   "dispatch-core": [
     "@a5c-ai/adapters",
@@ -29,17 +29,16 @@ const packageFamilies = {
     "@a5c-ai/transport-adapter",
   ],
   "dispatch-surfaces": [
-    "@a5c-ai/tula-ui",
-    "@a5c-ai/tula-web-app",
-    "@a5c-ai/tula-webui",
-    "@a5c-ai/tula-tui",
-    "@a5c-ai/tula-mobile-android-app",
-    "@a5c-ai/tula-mobile-ios-app",
-    "@a5c-ai/tula-tv-androidtv-app",
-    "@a5c-ai/tula-tv-appletv-app",
-    "@a5c-ai/tula-watch-watchos-app",
-    "@a5c-ai/tula-watch-wearos-app",
-    "@a5c-ai/tula-desktop-app",
+    "@a5c-ai/genty-ui",
+    "@a5c-ai/genty-web-app",
+    "@a5c-ai/genty-tui",
+    "@a5c-ai/genty-mobile-android-app",
+    "@a5c-ai/genty-mobile-ios-app",
+    "@a5c-ai/genty-tv-androidtv-app",
+    "@a5c-ai/genty-tv-appletv-app",
+    "@a5c-ai/genty-watch-watchos-app",
+    "@a5c-ai/genty-watch-wearos-app",
+    "@a5c-ai/genty-desktop-app",
   ],
   "support-systems": [
     "@a5c-ai/extensions-adapter",
@@ -61,7 +60,7 @@ const packageFamilies = {
   ],
   "downstream-consumers": [
     "@a5c-ai/babysitter-observer-dashboard",
-    "@a5c-ai/tula-tui-plugins",
+    "@a5c-ai/genty-tui-plugins",
   ],
   "atlas-family": [
     "@a5c-ai/atlas-webui",
@@ -116,7 +115,7 @@ const familyRules = {
   "kradle-family": {
     allow: new Set(["support-systems", "kradle-family", "dispatch-surfaces"]),
     rationale:
-      "kradle packages form a self-contained Kubernetes forge family; may depend on support systems and shared UI surfaces (tula-ui) but not orchestration core",
+      "kradle packages form a self-contained Kubernetes forge family; may depend on support systems and shared UI surfaces (genty-ui) but not orchestration core",
   },
 };
 

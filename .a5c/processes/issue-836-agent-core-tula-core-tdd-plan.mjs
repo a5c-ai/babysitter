@@ -1,16 +1,16 @@
 /**
- * @process repo/issue-836-agent-core-tula-core-tdd-plan
- * @description TDD, spec-driven implementation process for issue #836: rename @a5c-ai/agent-core to @a5c-ai/tula-core.
+ * @process repo/issue-836-agent-core-genty-core-tdd-plan
+ * @description TDD, spec-driven implementation process for issue #836: rename @a5c-ai/agent-core to @a5c-ai/genty-core.
  * @inputs { issueNumber: number, baseBranch: string, targetBranch: string, targetScore: number, maxIterationsPerPhase: number, verificationCommands: string[] }
  * @outputs { success: boolean, phases: array, convergence: array, verification: object, finalReview: object }
  *
  * Reuse-audit findings (REVIEW BEFORE PROCEEDING):
  * - **Package**: `packages/agent-core/package.json` declares `@a5c-ai/agent-core`, `packages/agent-core` repository metadata, and the build script path assumptions. Rename this workspace instead of creating a new package.
- * - **Workspace links**: `package-lock.json` contains `node_modules/@a5c-ai/agent-core`, `packages/agent-core`, and downstream workspace references from `agent-platform`, `tula`, and other packages. Regenerate the lockfile after the rename rather than editing generated lock entries by hand.
- * - **Dependent imports**: `packages/tula/platform/src/**` and `packages/tula/src/**` import `@a5c-ai/agent-core`; update imports and preserve harness terminology where `agent-core` means the built-in harness rather than the npm package name.
- * - **Project references**: `packages/tula/platform/tsconfig.json` and `packages/tula/tsconfig.json` reference `../agent-core`; update to `../core`.
+ * - **Workspace links**: `package-lock.json` contains `node_modules/@a5c-ai/agent-core`, `packages/agent-core`, and downstream workspace references from `agent-platform`, `genty`, and other packages. Regenerate the lockfile after the rename rather than editing generated lock entries by hand.
+ * - **Dependent imports**: `packages/genty/platform/src/**` and `packages/genty/src/**` import `@a5c-ai/agent-core`; update imports and preserve harness terminology where `agent-core` means the built-in harness rather than the npm package name.
+ * - **Project references**: `packages/genty/platform/tsconfig.json` and `packages/genty/tsconfig.json` reference `../agent-core`; update to `../core`.
  * - **CI/release references**: `.github/workflows/ci.yml`, `.github/workflows/publish.yml`, `.github/workflows/publish-packages-from-tag.yml`, and `.github/workflows/live-stack.yml` build/test/publish `@a5c-ai/agent-core` or `packages/agent-core`; update only the issue #836 package/workspace references.
- * - **Docs/spec source**: `docs/tula-stack-renames/README.md` defines the broader stack rename convention, but issue #836 scopes this run to `agent-core -> tula-core`; do not rename `agent-runtime` or `agent-platform` in this process.
+ * - **Docs/spec source**: `docs/genty-stack-renames/README.md` defines the broader stack rename convention, but issue #836 scopes this run to `agent-core -> genty-core`; do not rename `agent-runtime` or `agent-platform` in this process.
  *
  * Process-library references used:
  * - `babysitter/tdd-quality-convergence`
@@ -154,7 +154,7 @@ export async function process(inputs, ctx) {
 
   const spec = await ctx.task(readAuthoritativeSpecTask, {
     issueNumber,
-    referencedDocs: inputs.referencedDocs ?? ['docs/tula-stack-renames/README.md'],
+    referencedDocs: inputs.referencedDocs ?? ['docs/genty-stack-renames/README.md'],
   }, {
     key: 'issue-836.read-authoritative-spec',
   });
@@ -199,16 +199,16 @@ export async function process(inputs, ctx) {
     {
       id: 'workspace-identity',
       name: 'Workspace identity and package directory rename',
-      objective: 'Move packages/agent-core to packages/tula/core, rename the package to @a5c-ai/tula-core, and preserve package metadata/build entrypoints.',
+      objective: 'Move packages/agent-core to packages/genty/core, rename the package to @a5c-ai/genty-core, and preserve package metadata/build entrypoints.',
       redFocus: 'Tests and guardrails should fail while packages/agent-core and @a5c-ai/agent-core remain canonical.',
       verificationFocus: 'package metadata, workspace discovery, package exports, TypeScript project reference compatibility.',
     },
     {
       id: 'dependents-and-imports',
       name: 'Dependent packages, imports, and TypeScript references',
-      objective: 'Update internal imports, workspace dependencies, and tsconfig references from @a5c-ai/agent-core/packages/agent-core to @a5c-ai/tula-core/packages/tula/core.',
-      redFocus: 'Tests should fail for stale imports and project references in agent-platform, tula, and direct dependents.',
-      verificationFocus: 'targeted builds/tests for tula-core, agent-platform, and tula plus stale import scanners.',
+      objective: 'Update internal imports, workspace dependencies, and tsconfig references from @a5c-ai/agent-core/packages/agent-core to @a5c-ai/genty-core/packages/genty/core.',
+      redFocus: 'Tests should fail for stale imports and project references in agent-platform, genty, and direct dependents.',
+      verificationFocus: 'targeted builds/tests for genty-core, agent-platform, and genty plus stale import scanners.',
     },
     {
       id: 'ci-docs-lockfile',
@@ -307,8 +307,8 @@ export const readAuthoritativeSpecTask = defineTask('issue-836.read-authoritativ
         `Run: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
         `Confirm #${args.issueNumber} is not a PR with: gh pr view ${args.issueNumber} --json files,title,body,comments`,
         `Read referenced docs: ${(args.referencedDocs ?? []).join(', ')}`,
-        'Treat issue #836 as the execution scope: rename @a5c-ai/agent-core to @a5c-ai/tula-core, move packages/agent-core to packages/tula/core, update references, tsconfig, CI, docs, and regenerate the lockfile.',
-        'Treat docs/tula-stack-renames/README.md as contextual convention. Do not rename agent-runtime or agent-platform unless issue #836 explicitly requires it.',
+        'Treat issue #836 as the execution scope: rename @a5c-ai/agent-core to @a5c-ai/genty-core, move packages/agent-core to packages/genty/core, update references, tsconfig, CI, docs, and regenerate the lockfile.',
+        'Treat docs/genty-stack-renames/README.md as contextual convention. Do not rename agent-runtime or agent-platform unless issue #836 explicitly requires it.',
         'Return JSON: { title, labels, issueSummary, commentsSummary, referencedDocsSummary, acceptanceCriteria, nonGoals, ambiguity, riskAreas }.',
       ],
     },
@@ -334,9 +334,9 @@ export const reuseAuditTask = defineTask('issue-836.reuse-audit', (args, taskCtx
       task: 'Run the repo-required reuse audit before planning the package rename implementation.',
       instructions: [
         'Render a section titled exactly: Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
-        'Extract keywords from the request: agent-core, tula-core, @a5c-ai/agent-core, @a5c-ai/tula-core, packages/agent-core, packages/tula/core, workspace, package-lock, tsconfig, CI, docs, atlas graph.',
+        'Extract keywords from the request: agent-core, genty-core, @a5c-ai/agent-core, @a5c-ai/genty-core, packages/agent-core, packages/genty/core, workspace, package-lock, tsconfig, CI, docs, atlas graph.',
         'If .a5c/reuse-audit.json exists, honor its scan globs and keyword rules.',
-        'Scan package.json, package-lock.json, packages/**/package.json, packages/**/tsconfig.json, packages/agent-core, packages/tula/platform, packages/tula, packages/atlas/graph, docs, and .github/workflows.',
+        'Scan package.json, package-lock.json, packages/**/package.json, packages/**/tsconfig.json, packages/agent-core, packages/genty/platform, packages/genty, packages/atlas/graph, docs, and .github/workflows.',
         'Separate references that are package/workspace identity from references where "agent-core" is a runtime harness name or historical prose that may intentionally remain.',
         'Do not edit files.',
         'Return JSON: { keywords, existingSurfaces, reusableTests, generatedFiles, staleReferenceClasses, intentionalTerminology, recommendedPhaseBoundaries, risks }.',
@@ -388,7 +388,7 @@ export const traceRenameSurfaceTask = defineTask('issue-836.trace-rename-surface
     name: 'architect',
     prompt: {
       role: 'senior TypeScript monorepo maintainer',
-      task: 'Trace all live surfaces affected by renaming agent-core to tula-core before tests or implementation.',
+      task: 'Trace all live surfaces affected by renaming agent-core to genty-core before tests or implementation.',
       instructions: [
         'Use issue context and reuse audit JSON as input.',
         'Trace workspace identity: package.json workspaces, root scripts, package-lock links, packages/agent-core/package.json, repository metadata, exports, README references.',
@@ -510,7 +510,7 @@ export const phaseVerificationTask = defineTask('issue-836.phase-verification', 
         `Verification focus: ${args.phase.verificationFocus}`,
         'Run the red command, targeted package tests, targeted builds, and any scanner needed to prove stale package identity references are handled for this phase.',
         'Run git diff --check.',
-        'For issue #836, include explicit checks that @a5c-ai/agent-runtime, @a5c-ai/tula-platform, packages/agent-runtime, and packages/tula/platform were not renamed.',
+        'For issue #836, include explicit checks that @a5c-ai/agent-runtime, @a5c-ai/genty-platform, packages/agent-runtime, and packages/genty/platform were not renamed.',
         'If a command fails, capture exact command, exit code, failure lines, and whether failure is caused by this phase.',
         'Return JSON: { passed, commands, failures, staleReferenceEvidence, nonGoalProtectionEvidence, lockfileEvidence, retryRecommendations }.',
       ],
@@ -589,12 +589,12 @@ export const finalVerificationTask = defineTask('issue-836.final-verification', 
     name: 'test-engineer',
     prompt: {
       role: 'senior release verification engineer',
-      task: 'Run final verification for the complete agent-core to tula-core rename.',
+      task: 'Run final verification for the complete agent-core to genty-core rename.',
       instructions: [
         'Run all commands from inputs.verificationCommands in order.',
-        'At minimum run: npm run build --workspace=@a5c-ai/tula-core, npm run test --workspace=@a5c-ai/tula-core, npm run build --workspace=@a5c-ai/tula-platform, npm run build --workspace=@a5c-ai/tula, npm run verify:metadata, and git diff --check when available.',
+        'At minimum run: npm run build --workspace=@a5c-ai/genty-core, npm run test --workspace=@a5c-ai/genty-core, npm run build --workspace=@a5c-ai/genty-platform, npm run build --workspace=@a5c-ai/genty, npm run verify:metadata, and git diff --check when available.',
         'Run stale-reference scans for @a5c-ai/agent-core and packages/agent-core. Classify each remaining hit as intentional harness/prose terminology or a blocking stale package identity reference.',
-        'Run non-goal scans proving @a5c-ai/agent-runtime and @a5c-ai/tula-platform package identities and directories remain unchanged.',
+        'Run non-goal scans proving @a5c-ai/agent-runtime and @a5c-ai/genty-platform package identities and directories remain unchanged.',
         'Confirm package-lock.json was regenerated from npm rather than hand-mutated when package/workspace metadata changed.',
         'Return JSON: { passed, commands, failures, staleReferenceReport, nonGoalProtectionReport, lockfileReport, changedFiles, residualRisks }.',
       ],
@@ -620,7 +620,7 @@ export const finalAdversarialAcceptanceTask = defineTask('issue-836.final-advers
       role: 'adversarial release reviewer',
       task: 'Decide whether the completed implementation is ready for PR review.',
       instructions: [
-        'Compare the issue #836 scope, docs/tula-stack-renames convention, convergence outputs, final verification evidence, and the current diff directly.',
+        'Compare the issue #836 scope, docs/genty-stack-renames convention, convergence outputs, final verification evidence, and the current diff directly.',
         'Reject if package identity, workspace directory, lockfile, CI, docs, tsconfig references, or dependent imports are inconsistent.',
         'Reject if the implementation renamed agent-runtime or agent-platform as part of this issue.',
         'Reject if tests were added after implementation without proving an initial red failure.',

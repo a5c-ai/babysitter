@@ -275,7 +275,7 @@ Unblocks: approvalPreview variants in T2.6, destructive-only gating in spec 25, 
 - `packages/gateway/src/static/webui-server.ts` (new)
 - `packages/gateway/src/server.ts` (modify — wire static)
 
-**Notes:** Static file server for `webuiRoot`. Defaults to `require.resolve('@a5c-ai/tula-webui/dist')`. If webui package not installed, `/` returns 404 with a helpful message pointing at install instructions. Flags: `--webui /path`, `--no-webui`.
+**Notes:** Static file server for `webuiRoot`. Defaults to `require.resolve('@a5c-ai/genty-webui/dist')`. If webui package not installed, `/` returns 404 with a helpful message pointing at install instructions. Flags: `--webui /path`, `--no-webui`.
 
 **Done when:** `adapters gateway serve` serves the webui at `/` when the package is present. Override and disable flags work.
 
@@ -283,14 +283,14 @@ Unblocks: approvalPreview variants in T2.6, destructive-only gating in spec 25, 
 
 ## 4. M2 — webui (TUI parity)
 
-Goal: `http://localhost:7878/` in a browser is a full-featured adapters client matching `@a5c-ai/tula-tui` feature-for-feature. This milestone also lands the `ui` package, which every React/RN surface downstream depends on.
+Goal: `http://localhost:7878/` in a browser is a full-featured adapters client matching `@a5c-ai/genty-tui` feature-for-feature. This milestone also lands the `ui` package, which every React/RN surface downstream depends on.
 
 ### T2.1 — `ui` package skeleton + protocol sync
 
 **Spec:** 23 · **Depends on:** T1.8
 
 **Files:**
-- `packages/ui/package.json` (new) — `@a5c-ai/tula-ui`
+- `packages/ui/package.json` (new) — `@a5c-ai/genty-ui`
 - `packages/ui/tsconfig.json` (new)
 - `packages/ui/src/index.ts` (new)
 - `packages/ui/src/protocol/v1.ts` (new — copy from gateway)
@@ -300,7 +300,7 @@ Goal: `http://localhost:7878/` in a browser is a full-featured adapters client m
 
 **Notes:** Protocol sharing strategy: **copy with drift detection**, not runtime dependency. Rationale: the ui package is consumed from React Native contexts where depending on a Node-side gateway package is awkward. `sync-protocol.ts` AST-compares and fails on drift.
 
-**Done when:** Package builds. `@a5c-ai/tula-ui/protocol` imports resolve. `npm run sync-protocol` exits 0 on match, nonzero on drift.
+**Done when:** Package builds. `@a5c-ai/genty-ui/protocol` imports resolve. `npm run sync-protocol` exits 0 on match, nonzero on drift.
 
 ---
 
@@ -481,7 +481,7 @@ Transports are thin — each exports `createWebSocket(url, token)` returning a u
 **Spec:** 24 · **Depends on:** T2.8
 
 **Files:**
-- `packages/webui/package.json` (new) — `@a5c-ai/tula-webui`
+- `packages/webui/package.json` (new) — `@a5c-ai/genty-webui`
 - `packages/webui/vite.config.ts`
 - `packages/webui/tsconfig.json`
 - `packages/webui/index.html`
