@@ -108,9 +108,9 @@ attributes:
     packages:
       status: partial
       layer: agent-platform
-      package: "@a5c-ai/extensions-adapter"
+      package: "@a5c-ai/genty-platform"
       notes: "Plugin compiler bundles skills+hooks+commands per-harness. Missing: npm-installable extension packages like Pi's `pi install npm:@foo/pi-tools`."
-      gap: "Add `genty install npm:@foo/genty-extension` for installing extension packages from npm/git."
+      gap: "Add `genty install npm:@foo/genty-extension` for installing extension packages from npm/git. Package discovery, installation, and lifecycle management belongs in genty-platform."
 
   sessionManagement:
     treeStructuredHistory:
