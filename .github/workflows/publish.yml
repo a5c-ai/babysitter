@@ -951,6 +951,8 @@ jobs:
             workspace: '@a5c-ai/hooks-adapter-openclaw'
           - name: hooks-mux-adapter-hermes
             workspace: '@a5c-ai/hooks-adapter-hermes'
+          - name: hooks-mux-adapter-antigravity
+            workspace: '@a5c-ai/hooks-adapter-antigravity'
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v4
