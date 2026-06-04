@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:openclaw.platform@current
+id: agent-platform-impl:openclaw.platform@current
 attributes:
   displayName: OpenClaw Platform (current)
   agentVersionId: agentVersion:openclaw:ge-2026-5-27
@@ -25,7 +25,7 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:openclaw
     role: platform

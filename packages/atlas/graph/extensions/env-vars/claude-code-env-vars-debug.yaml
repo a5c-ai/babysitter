@@ -8,7 +8,7 @@ attributes:
   valueType: path
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-debug-log-level
@@ -21,4 +21,4 @@ attributes:
   defaultValue: debug
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x

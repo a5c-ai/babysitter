@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:omp.platform@current
+id: agent-platform-impl:omp.platform@current
 attributes:
   displayName: OMP Platform (current)
   agentVersionId: agentVersion:omp:ge-15-5-9
@@ -25,7 +25,7 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:omp
     role: platform

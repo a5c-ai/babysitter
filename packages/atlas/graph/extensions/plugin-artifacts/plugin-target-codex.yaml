@@ -108,4 +108,4 @@ attributes:
 edges:
   hosted_by:
     - target: agent:codex
-    - target: genty-platform-impl:codex.platform@1.x
+    - target: agent-platform-impl:codex.platform@1.x

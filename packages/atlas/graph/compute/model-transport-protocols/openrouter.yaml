@@ -15,4 +15,4 @@ edges:
   realizes:
     - target: layer:3-transport
   spoken_by:
-    - target: genty-core-impl:hermes.core@current
+    - target: agent-core-impl:hermes.core@current

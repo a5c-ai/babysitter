@@ -40,4 +40,4 @@ attributes:
 edges:
   hosted_by:
     - target: agent:droid
-    - target: genty-platform-impl:droid.platform@current
+    - target: agent-platform-impl:droid.platform@current

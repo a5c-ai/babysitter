@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:babysitter.platform@current
+id: agent-platform-impl:babysitter.platform@current
 attributes:
   displayName: "babysitter Platform (current) — defineTask + skill/plugin registry"
   agentVersionId: agent-version:babysitter@current
@@ -46,7 +46,7 @@ attributes:
     plugins/a5c/marketplace/ inside the babysitter monorepo.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
     - target: agent:babysitter
       role: platform

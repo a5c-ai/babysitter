@@ -7,7 +7,7 @@ attributes:
   description: |
     Open-ended ProviderVersion entry pinning capability claims to the
     Anthropic Messages API across all observed versions. Used as the
-    initial import target for atlas-catalog provider-version
+    initial import target for agent-catalog provider-version
     capability-supports rows.
 edges:
   supports:

@@ -12,11 +12,11 @@ edges:
   version_of:
     - agent:a5c
   composed_of:
-    - target: genty-core-impl:a5c.core@current
+    - target: agent-core-impl:a5c.core@current
       role: core
-    - target: genty-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
       role: runtime
-    - target: genty-platform-impl:a5c.platform@current
+    - target: agent-platform-impl:a5c.platform@current
       role: platform
     - target: agent-ui-impl:a5c.ui@current
       role: ui

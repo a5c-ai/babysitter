@@ -95,4 +95,4 @@ attributes:
 edges:
   hosted_by:
     - target: agent:openclaw
-    - target: genty-platform-impl:openclaw.platform@current
+    - target: agent-platform-impl:openclaw.platform@current

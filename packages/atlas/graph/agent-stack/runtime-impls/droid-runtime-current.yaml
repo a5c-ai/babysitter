@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:droid.runtime@current
+id: agent-runtime-impl:droid.runtime@current
 attributes:
   displayName: Factory Droid Runtime (current)
   agentVersionId: agent-version:droid@current
@@ -23,7 +23,7 @@ attributes:
   supportsStreaming: true
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
   - target: agent:droid
     role: runtime

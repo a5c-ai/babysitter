@@ -46,8 +46,8 @@ attributes:
     request body). Standard JSON-RPC message-id discipline.
 edges:
   spoken_by:
-    - target: genty-runtime-impl:a5c.runtime@current
-    - target: genty-runtime-impl:genty-platform.runtime@current
-    - target: genty-runtime-impl:babysitter.runtime@current
-    - target: genty-runtime-impl:babysitter-sdk.runtime@current
-    - target: genty-runtime-impl:cursor.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:agent-platform.runtime@current
+    - target: agent-runtime-impl:babysitter.runtime@current
+    - target: agent-runtime-impl:babysitter-sdk.runtime@current
+    - target: agent-runtime-impl:cursor.runtime@current

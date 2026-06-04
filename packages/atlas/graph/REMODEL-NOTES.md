@@ -459,15 +459,15 @@ using the new edges (this pass updates a representative sample only — see
 Validator delta vs catalog pass 32 baseline: passing 1180, structural 0, dangling 0
 (no change). Trust Chain remains out of scope.
 
-## CapabilitySupport import from atlas-catalog (2026-05-02)
+## CapabilitySupport import from agent-catalog (2026-05-02)
 
 Imported the `CapabilitySupport`-shaped entries from
-`packages/atlas-catalog/graph/nodes/capabilities/supports/agents/*.yaml`
+`packages/agent-catalog/graph/nodes/capabilities/supports/agents/*.yaml`
 into atlas as `supports` edges on the corresponding AgentVersion nodes (the
 after catalog pass 9c remodel collapsed CapabilitySupport into a direct edge from
 version-bearing entities to Capability).
 
-Source files (10 total): genty-platform, claude, codex, copilot, cursor,
+Source files (10 total): agent-platform, claude, codex, copilot, cursor,
 gemini, omp, openclaw, opencode, pi.
 
 - Total source entries: 83
@@ -479,7 +479,7 @@ existing `extended-products-current.yaml` convention).
 
 ### Capability mapping
 
-| atlas-catalog `capabilityId` | atlas `Capability` id                    | confidence |
+| agent-catalog `capabilityId` | atlas `Capability` id                    | confidence |
 |------------------------------|---------------------------------------|------------|
 | skills                       | capability:skills                     | high       |
 | thinking                     | capability:supports-thinking          | high       |
@@ -495,13 +495,13 @@ existing `extended-products-current.yaml` convention).
 | session-resume               | capability:can-resume                 | high       |
 
 Mappings cross-checked against the leading comment in
-`graph/capabilities/capabilities/from-atlas-catalog.yaml` which
+`graph/capabilities/capabilities/from-agent-catalog.yaml` which
 records the same renaming convention applied during the original import of
 `Capability` nodes.
 
 ### Agent (subjectId) mapping
 
-| atlas-catalog `subjectId` prefix              | atlas AgentVersion id            |
+| agent-catalog `subjectId` prefix              | atlas AgentVersion id            |
 |-----------------------------------------------|-------------------------------|
 | agentVersion:claude                           | agent-version:claude-code@1.x |
 | agentVersion:codex (both sub-ranges)          | agent-version:codex@0.x *     |
@@ -512,15 +512,15 @@ records the same renaming convention applied during the original import of
 | agentVersion:openclaw                         | agent-version:openclaw@current |
 | agentVersion:opencode                         | agent-version:opencode@1.x    |
 | agentVersion:pi                               | agent-version:pi@current      |
-| agentVersion:genty-platform                 | agent-version:babysitter@current |
+| agentVersion:agent-platform                 | agent-version:babysitter@current |
 
-(*) The atlas-catalog splits codex at `0.119.0` (`>=0.0.0 <0.119.0` and
+(*) The agent-catalog splits codex at `0.119.0` (`>=0.0.0 <0.119.0` and
 `>=0.119.0`). atlas splits codex at the major version boundary
 (`agent-version:codex@0.x` = `>=0.0.0 <1.0.0`). All 16 source rows fall
 under atlas's `codex@0.x`; both sub-ranges were preserved verbatim as separate
 `supports` edge entries with their original `versionRange` attribute, so no
 information is lost. (No source rows target atlas `codex@1.x` yet — that
-remains a future-pass concern when atlas-catalog adds `>=1.0.0` rows.)
+remains a future-pass concern when agent-catalog adds `>=1.0.0` rows.)
 
 ### Files edited
 
@@ -552,9 +552,9 @@ Validator delta: passing 1180, structural 0, dangling 0 (no change vs
 pre-catalog pass 34 baseline).
 
 
-## catalog pass 35 — TransportRuntime + ProviderVersion + atlas-catalog supports/* import (2026-05-02)
+## catalog pass 35 — TransportRuntime + ProviderVersion + agent-catalog supports/* import (2026-05-02)
 
-Closes the atlas-catalog `supports/*` import by adding the two NodeKinds
+Closes the agent-catalog `supports/*` import by adding the two NodeKinds
 required to host the remaining 17 source rows (provider-versions.yaml and
 transport-runtimes.yaml). catalog pass 34 covered the 83 agent-version rows; this
 pass covers everything else.
@@ -589,15 +589,15 @@ shape).
 
 Source files:
 
-- `packages/atlas-catalog/graph/nodes/capabilities/supports/provider-versions.yaml` (6 rows)
-- `packages/atlas-catalog/graph/nodes/capabilities/supports/transport-runtimes.yaml` (11 rows)
+- `packages/agent-catalog/graph/nodes/capabilities/supports/provider-versions.yaml` (6 rows)
+- `packages/agent-catalog/graph/nodes/capabilities/supports/transport-runtimes.yaml` (11 rows)
 
 Imported: 17. Dropped: 0.
 
 Capability mapping (cross-checked against the catalog pass 34 table and
-`graph/capabilities/capabilities/from-atlas-catalog.yaml`):
+`graph/capabilities/capabilities/from-agent-catalog.yaml`):
 
-| atlas-catalog `capabilityId`  | atlas `Capability` id                  |
+| agent-catalog `capabilityId`  | atlas `Capability` id                  |
 |-------------------------------|-------------------------------------|
 | streaming                     | capability:streaming                |
 | tool-calling                  | capability:supports-tool-use        |
@@ -611,7 +611,7 @@ Capability mapping (cross-checked against the catalog pass 34 table and
 
 Subject mapping:
 
-| atlas-catalog `subjectId`              | atlas id                                  |
+| agent-catalog `subjectId`              | atlas id                                  |
 |----------------------------------------|----------------------------------------|
 | transportRuntime:terminal-cli          | transport-runtime:terminal-cli         |
 | transportRuntime:shell-hook-runtime    | transport-runtime:shell-hook-runtime   |
@@ -1112,7 +1112,7 @@ Three net new AgentProducts plus their AgentVersions and impls:
   `agent:codex` to `agent:codex-sdk`; the platform impl reference was
   removed from its `composed_of` (the SDK bypasses the Codex Rust runtime
   that owns extensibility). Authored a new
-  `genty-runtime-impl:codex-sdk.runtime@current` (didn't exist).
+  `agent-runtime-impl:codex-sdk.runtime@current` (didn't exist).
 - `agent:codex-app-server` — `codex app-server` JSON-RPC service over
   stdio/SSE/WebSocket (what Symphony talks to). `productKind: app-server`,
   `stackScope: core-runtime-platform`. Net-new AgentVersion + core,
@@ -1155,7 +1155,7 @@ partial-stack files; identical pattern to existing catalog pass 30 entries).
 
 Restructured `agent:babysitter` from a headless single-product into a
 multi-surface umbrella. Authored sibling products for the babysitter SDK,
-the genty-platform CLI binary, and the adapters multi-surface UI
+the agent-platform CLI binary, and the adapters multi-surface UI
 suite, plus a per-surface Presentation set for adapters.
 
 ### Schema additions
@@ -1180,7 +1180,7 @@ suite, plus a per-surface Presentation set for adapters.
 
 `graph/agent-stack/presentatio../platform-presentation.yaml`:
 
-- `presentation:genty-platform-cli` (kind: cli)
+- `presentation:agent-platform-cli` (kind: cli)
 
 ### New AgentProducts + AgentVersions + impls
 
@@ -1188,7 +1188,7 @@ suite, plus a per-surface Presentation set for adapters.
 |---|---|---|---|
 | agent:adapters | multi-surface-suite | full | core, runtime, platform, ui |
 | agent:babysitter-sdk | sdk | core-runtime | core, runtime |
-| agent:genty-platform | full-cli-agent | full | core, runtime, platform, ui |
+| agent:agent-platform | full-cli-agent | full | core, runtime, platform, ui |
 
 `agent:adapters` is distinct from the pre-existing `agent:adapters-remote`
 (transport-only adapter); the new product is the broader multi-surface UI
@@ -1202,10 +1202,10 @@ suite that uses the adapters transport to bridge to remote agents.
   carry per-surface detail.
 - `agent-ui-impl:babysitter.ui@current` rewritten from `headless` to
   `multi-surface` and now bundles all 9 adapters presentations plus
-  `presentation:genty-platform-cli`.
+  `presentation:agent-platform-cli`.
 - `agent-version:babysitter@current.composed_of` left untouched —
   babysitter's own core/runtime/platform/ui impls remain the canonical
-  composition; `agent:babysitter-sdk` / `agent:genty-platform` /
+  composition; `agent:babysitter-sdk` / `agent:agent-platform` /
   `agent:adapters` are sibling AgentProducts that complement (not
   replace) babysitter's stack.
 
@@ -1221,10 +1221,10 @@ identical pattern to catalog pass 43 partial-stack additions).
 ### Outstanding TODOs
 
 - `releasedAt` placeholders on `adapters@current`, `babysitter-sdk@current`,
-  `genty-platform@current` — confirm with vendor docs.
+  `agent-platform@current` — confirm with vendor docs.
 - `bundleSize` placeholders on all 10 new Presentations.
 - `interactionPrimitivesSupported: []` on `adapters.ui@current`,
-  `genty-platform.ui@current`, and the rewritten `babysitter.ui@current`
+  `agent-platform.ui@current`, and the rewritten `babysitter.ui@current`
   — to be enumerated (slash commands, model picker, prompt input,
   command palette, session list, run detail, kanban board, hook inbox,
   breakpoint approval, run-create, iterate, observer-dashboard,
@@ -1260,7 +1260,7 @@ The flat list attribute was scaffolding before edges existed (catalog pass 37 cl
 Removed from `AgentUIImpl` schema and from the meta-registry. Top-6 canonical UIs
 (claude-code, codex, gemini-cli, copilot-cli, cursor, opencode) migrated to edge form.
 Other UIs (omp, openclaw, hermes, pi, qwen, amp, droid, adapters, adapters-remote, a5c,
-babysitter, genty-platform) carry `# TODO: enumerate interaction primitives` comments
+babysitter, agent-platform) carry `# TODO: enumerate interaction primitives` comments
 in their `edges:` block — data not yet well-known.
 
 ### 45.3 — Canonical InteractionPrimitives authored
@@ -1292,14 +1292,14 @@ relates to the parent's. Two new optional attributes on `AgentRuntimeImpl`:
 - `subagentToolScopePolicy: enum<inherit-parent,explicit-allowlist,fresh-defaults,none>`
 
 Backfilled on canonical agents (claude-code, codex, gemini-cli, copilot-cli, cursor,
-opencode, adapters-remote, babysitter, genty-platform, a5c). Codex toolScopePolicy
+opencode, adapters-remote, babysitter, agent-platform, a5c). Codex toolScopePolicy
 is annotated with a `# TODO: verify` — could be `inherit-parent` or `fresh-defaults`.
 
 ### Open TODOs out of catalog pass 45
 
 - Enumerate interaction primitives for the 12 non-top-6 AgentUIImpls
   (omp, openclaw, hermes, pi, qwen, amp, droid, adapters, adapters-remote, a5c,
-  babysitter, genty-platform).
+  babysitter, agent-platform).
 - Verify codex `subagentToolScopePolicy` (inherit-parent vs fresh-defaults).
 - Decide whether to grow `InteractionPrimitiveCategory` enum to include
   `human-in-loop`, `lifecycle`, `configuration`, `observability`, `content-input`,
@@ -1371,8 +1371,8 @@ Replaced the `# TODO: enumerate interaction primitives` comment with concrete
 `supports_interaction_primitive` edge sets in:
 
 - `babysitter-ui-current.yaml` — 12 primitives (8 babysitter + 4 aggregated
-  adapters navigation primitives, since babysitter UI = adapters + genty-platform).
-- `genty-platform-ui-current.yaml` — 5 primitives, all `mechanism: native-api`
+  adapters navigation primitives, since babysitter UI = adapters + agent-platform).
+- `agent-platform-ui-current.yaml` — 5 primitives, all `mechanism: native-api`
   (CLI subcommands).
 - `adapters-ui-current.yaml` — 13 primitives (10 adapters + 3 canonical:
   command-palette, model-picker, prompt-input).
@@ -1921,7 +1921,7 @@ and output safety gate — and added the missing first-class NodeKinds.
   - `compaction/compaction.ts`, `compaction/utils.ts` — branch-summarization,
     `CompactionDetails.readFiles` / `modifiedFiles` tracking,
     `SUMMARIZATION_SYSTEM_PROMPT`. Drives the `CompactionPolicy` shape.
-  - `output-guard.ts` — genty-core runtime safety gate, distinct from
+  - `output-guard.ts` — agent-core runtime safety gate, distinct from
     compliance-side `ContentPolicy`.
 
 ### Concept dispositions
@@ -1947,7 +1947,7 @@ and output safety gate — and added the missing first-class NodeKinds.
 - `RetryPolicy` (cluster 6-lifecycle): declarative retry config consumed by `AgentRuntimeImpl` / `AgentCoreImpl` / `ToolDescriptor` / `ModelTransportProtocol`.
 - `TokenBudget` (cluster 6-lifecycle): per-call/per-run input+output+total token cap with overflow recovery.
 - `CompactionPolicy` (cluster 20-context-engineering): when/how to compact context.
-- `OutputGuard` (cluster 19-compliance-safety): genty-core runtime safety gate.
+- `OutputGuard` (cluster 19-compliance-safety): agent-core runtime safety gate.
 
 **5 new edges (10 with inverses)** —
 - `governs_retries_for` / `retries_governed_by` (RetryPolicy ↔ AgentRuntimeImpl|AgentCoreImpl|ToolDescriptor|ModelTransportProtocol).
@@ -2057,7 +2057,7 @@ V-rule (V-1.12) added to enforce `derived` evidence:
 
 Backfills (77 total):
 - 5 NodeKinds in `schema/node-kinds/agent-stack.yaml` (AgentProduct, AgentCoreImpl, AgentRuntimeImpl, AgentPlatformImpl, AgentUIImpl) given `originContext: catalog pass 3/catalog pass 22 — synthesized...`.
-- 72 EdgeKinds in `schema/edge-kinds.yaml` given a catalog pass 52/53/54 `originContext` line citing a5c-atlas-catalog (vibe-kanban / Linear / dispatch state machine), pi-mono coding-agent retry/budget/compaction patterns, and Claude Code (sourced from the reverse-engineered repo) services/api primitives.
+- 72 EdgeKinds in `schema/edge-kinds.yaml` given a catalog pass 52/53/54 `originContext` line citing a5c-agent-catalog (vibe-kanban / Linear / dispatch state machine), pi-mono coding-agent retry/budget/compaction patterns, and Claude Code (sourced from the reverse-engineered repo) services/api primitives.
 
 ### Validator delta
 Pre catalog pass 56: passing 1247, structural 0, dangling 0.
@@ -2400,9 +2400,9 @@ that the reference-data tail is expected.
 | Category | Wirings | Mechanism |
 | --- | --- | --- |
 | Benchmark → SkillArea (`covers`) | 15 | `covers` edges added on the 15 orphan benchmarks (knowledge / reasoning / safety / tool-use / leaderboards) |
-| Presentation ← AgentUIImpl (`bundled_with`) | 10 | 9 adapters surfaces wired from `agent-ui-impl:adapters.ui@current`; 1 `presentation:genty-platform-cli` wired from `agent-ui-impl:genty-platform.ui@current` |
+| Presentation ← AgentUIImpl (`bundled_with`) | 10 | 9 adapters surfaces wired from `agent-ui-impl:adapters.ui@current`; 1 `presentation:agent-platform-cli` wired from `agent-ui-impl:agent-platform.ui@current` |
 | HookSurface ← HookMapping (`maps_hook`) | 6 | New file `graph/channels-hooks/hook-mappings/babysitter-canonical.yaml` adds 6 HookMappings binding the canonical surfaces (start, done, wake, phase-change, phase-change-check, decision-point) to `agent-version:babysitter@current` |
-| ObservabilityBackend ← AgentRuntimeImpl (`emits_signals_to`) | 6 | `genty-runtime-impl:claude-code.runtime@1.x` now `emits_signals_to` the 6 orphan obs backends (datadog / grafana-cloud / splunk / new-relic / prometheus / jaeger). Speculative — backends are reference impls, not vendor commitments |
+| ObservabilityBackend ← AgentRuntimeImpl (`emits_signals_to`) | 6 | `agent-runtime-impl:claude-code.runtime@1.x` now `emits_signals_to` the 6 orphan obs backends (datadog / grafana-cloud / splunk / new-relic / prometheus / jaeger). Speculative — backends are reference impls, not vendor commitments |
 | ProcessDescriptor ← PackageSurface (`surfaces_process`) | 21 | `package:a5c-ai-babysitter` `surfaces_process` the 21 orphan a5c-marketplace process descriptors |
 | Tool → Language (`belongs_to_language`) | 17 | Orphan tools wired to their primary config language (terraform/opentofu→hcl, ansible/circleci/github-actions/gitlab-ci/kustomize/tekton→yaml, esbuild/rollup/webpack/vite/parcel/turbopack/nx→javascript, psql→sql, jupyter→python) |
 
@@ -2532,7 +2532,7 @@ Focused audit of `graph/agent-stack/`, `graph/capabilities/`, `graph/stack-layer
 
 | Area | Finding |
 | --- | --- |
-| `stack-layers/layers/` | Only 2 of 11 canonical Layer NodeKind instances existed (`layer:4-genty-core`, `layer:11-presentation`). The schema (`stack-layers.md`) declares the layer set as closed at 11; 9 were missing. |
+| `stack-layers/layers/` | Only 2 of 11 canonical Layer NodeKind instances existed (`layer:4-agent-core`, `layer:11-presentation`). The schema (`stack-layers.md`) declares the layer set as closed at 11; 9 were missing. |
 | `realizes` edge | 1 of 26 cores, 0 of 22 runtimes, 0 of 19 platforms, 0 of 18 ui-impls had `realizes` to their layer. The connectivity from agent-stack impls into the layer model was broken-by-omission. |
 | `edge:realizes` schema | `AgentUIImpl` was missing from the `source:` list (catalog pass 42 added the 4th layer to the agent stack but did not extend the realizes edge). Layer-1/2/3/7/8/9/10 backing NodeKinds (`ModelFamily`, `ModelVersion`, `Provider`, `ModelTransportProtocol`, `TransportProxy`, `Workspace`, `Execution`, `Sandbox`, `InteractionPrimitive`) were also absent, leaving those layers structurally un-realizable in the graph. |
 | Capabilities | 26 of 42 Capability nodes had no incoming `supports`/`requires_capability` edges. Deferred to a later pass (does not block layer/agent-stack correctness). |
@@ -2549,8 +2549,8 @@ New files in `graph/stack-layers/layers/`:
 - `layer-1-model.yaml` — Model layer (compute path, position 1)
 - `layer-2-provider.yaml` — Provider layer (compute, 2)
 - `layer-3-transport.yaml` — Transport layer (compute, 3)
-- `layer-5-genty-runtime.yaml` — Agent-Runtime (compute, 5)
-- `layer-6-genty-platform.yaml` — Agent-Platform (compute, 6)
+- `layer-5-agent-runtime.yaml` — Agent-Runtime (compute, 5)
+- `layer-6-agent-platform.yaml` — Agent-Platform (compute, 6)
 - `layer-7-workspace.yaml` — Workspace (surfacing, 7)
 - `layer-8-execution.yaml` — Execution (surfacing, 8)
 - `layer-9-sandbox.yaml` — Sandbox (surfacing, 9)
@@ -2562,9 +2562,9 @@ Summaries lifted from the canonical descriptions in `schema/node-kinds/stack-lay
 
 | Source NodeKind | Layer | Count |
 | --- | --- | --- |
-| AgentCoreImpl | layer:4-genty-core | 26 |
-| AgentRuntimeImpl | layer:5-genty-runtime | 22 |
-| AgentPlatformImpl | layer:6-genty-platform | 19 |
+| AgentCoreImpl | layer:4-agent-core | 26 |
+| AgentRuntimeImpl | layer:5-agent-runtime | 22 |
+| AgentPlatformImpl | layer:6-agent-platform | 19 |
 | AgentUIImpl | layer:11-presentation | 18 |
 | ModelFamily + ModelVersion | layer:1-model | 63 |
 | Provider | layer:2-provider | 13 |
@@ -2625,9 +2625,9 @@ Several capabilities were genuinely under-wired at the provider/impl layer where
 | `provider:google` | supports-prompt-caching, model-discovery | 2 caps. |
 | `provider:gcp-vertex` | supports-vertex-reasoning-engine, model-discovery | 2 caps. |
 | `provider:aws-bedrock` | supports-bedrock-guardrails, model-discovery | 2 caps. |
-| `genty-runtime-impl:claude-code.runtime@1.x` | can-fork, supports-text-streaming, supports-thinking-streaming, supports-tool-call-streaming | 4 truly-new caps. The 7 MCP caps I almost-duplicated were already in the existing `supports:` block lower in the file. |
-| `genty-platform-impl:claude-code.platform@1.x` | requires-tool-approval, supports-custom-subagents, supports-plugins | 3 caps (subagents/plugins/approval are platform-tier). |
-| `genty-platform-impl:codex.platform@1.x` | requires-tool-approval | 1 cap. |
+| `agent-runtime-impl:claude-code.runtime@1.x` | can-fork, supports-text-streaming, supports-thinking-streaming, supports-tool-call-streaming | 4 truly-new caps. The 7 MCP caps I almost-duplicated were already in the existing `supports:` block lower in the file. |
+| `agent-platform-impl:claude-code.platform@1.x` | requires-tool-approval, supports-custom-subagents, supports-plugins | 3 caps (subagents/plugins/approval are platform-tier). |
+| `agent-platform-impl:codex.platform@1.x` | requires-tool-approval | 1 cap. |
 
 Total: ~24 new capability supports edges, all with `versionRange` (V-3.1 satisfied).
 
@@ -2636,8 +2636,8 @@ Total: ~24 new capability supports edges, all with `versionRange` (V-3.1 satisfi
 A `git checkout HEAD --` operation during a mid-pass bug recovery wiped the catalog pass 63 `realizes:` edges from 15 files. Re-applied via Edit tool on:
 
 - 5 providers → `layer:2-provider`
-- 5 runtime impls → `layer:5-genty-runtime`
-- 3 platform impls → `layer:6-genty-platform`
+- 5 runtime impls → `layer:5-agent-runtime`
+- 3 platform impls → `layer:6-agent-platform`
 - 2 model versions → `layer:1-model`
 
 (Final `realizes` coverage: 26/26 cores, 22/22 runtimes, 19/19 platforms, 18/18 UIs — verified post-pass.)
@@ -2681,16 +2681,16 @@ catalog pass 63 authored the 11 top-level Layers but left `graph/stack-layers/la
 | Parent layer | Internal boxes | Count |
 | --- | --- | --- |
 | `layer:3-transport` | transport.protocol, transport.client, transport.proxy | 3 |
-| `layer:4-genty-core` | loop-iterator, context-manager, tool-dispatch, subagent-invoker, transport-client-binding, result-synthesis, stop-detection | 7 |
-| `layer:5-genty-runtime` | built-in-tools, internal-session-state, hook-socket-runtime, tool-registry, approval-gating-primitive, subprocess-sandbox, runtime-identity | 7 |
-| `layer:6-genty-platform` | capability-profile-registry, native-extension-loader, skill-loader, tool-server-bridge, channel-adapters, launch-config-registry, platform-identity, marketplace-client, plugin-manager, update-channel | 10 |
+| `layer:4-agent-core` | loop-iterator, context-manager, tool-dispatch, subagent-invoker, transport-client-binding, result-synthesis, stop-detection | 7 |
+| `layer:5-agent-runtime` | built-in-tools, internal-session-state, hook-socket-runtime, tool-registry, approval-gating-primitive, subprocess-sandbox, runtime-identity | 7 |
+| `layer:6-agent-platform` | capability-profile-registry, native-extension-loader, skill-loader, tool-server-bridge, channel-adapters, launch-config-registry, platform-identity, marketplace-client, plugin-manager, update-channel | 10 |
 | **Total** | | **27** |
 
 Each responsibility box has `Layer.responsibilities` set, `order` (1-based, unique within parent), `displayName`, and `summary`. `position`/`path` omitted per the schema invariant ("Layer.responsibilities set implies position is null").
 
 ### Schema-spec drift caught
 
-Schema md (`stack-layers.md`) prescribed `responsibility box:<parent-slug>.<own-slug>` id form; schema yaml NodeKind `Layer` declares prefix `layer`. V-1.5 enforced the yaml's `layer:` prefix. Renamed all 27 ids to `layer:<parent-slug>.<own-slug>` (e.g. `layer:transport.protocol`, `layer:genty-core.loop-iterator`). The md is stale on this point; not updated this pass (schema md → yaml parity is a tracked drift item).
+Schema md (`stack-layers.md`) prescribed `responsibility box:<parent-slug>.<own-slug>` id form; schema yaml NodeKind `Layer` declares prefix `layer`. V-1.5 enforced the yaml's `layer:` prefix. Renamed all 27 ids to `layer:<parent-slug>.<own-slug>` (e.g. `layer:transport.protocol`, `layer:agent-core.loop-iterator`). The md is stale on this point; not updated this pass (schema md → yaml parity is a tracked drift item).
 
 ### Wirings
 
@@ -2893,7 +2893,7 @@ Mass cluster-wiring across:
 | `tool-server:mcp-everything` | `exposes_root`, `exposes_sampling` | 3 MCPRoots, 2 MCPSamplings |
 | `claim:claude-opus-4-7-context-window` | `conforms_to` | 3 ComplianceFrameworks |
 | `agent-version:claude-code@1.x` | `uses_vector_store`, `versioned_via`, `has_memory`, `has_device_pair`, `governs_template` | 4 VectorStores, 3 VCSHosts, 5 MemoryStores, 3 DevicePairs, 1 PromptTemplate |
-| `genty-runtime-impl:claude-code.runtime@1.x` | `exposes`, `enforces_invariant` | 3 AgentHostTransports, 3 FilesystemSafetyInvariants |
+| `agent-runtime-impl:claude-code.runtime@1.x` | `exposes`, `enforces_invariant` | 3 AgentHostTransports, 3 FilesystemSafetyInvariants |
 | `context-bundle:symphony-default` | `embeds_with` | 4 EmbeddingModelProfiles |
 | `compliance:owasp-llm-top-10` | `regulated_by` | 2 Regulators |
 | `issue:linear-aca-390` | `tagged_with`, `labeled_with` | 3 TaskTags, 3 Labels |
@@ -2908,7 +2908,7 @@ Mass cluster-wiring across:
 | `agent-version:codex@1.x` | `has_launch_contract` | 1 LaunchContract |
 | `recovery-strategy:retry-backoff` | `handles_failure` | 1 FailureClass |
 | `mcp-transport:websocket` | `realizes` | layer:3-transport |
-| `definition:ontology-schema.canonical` | `defined_in_context_of` | layer:4-genty-core |
+| `definition:ontology-schema.canonical` | `defined_in_context_of` | layer:4-agent-core |
 | `skill-area:serverless-cold-start-optimization` | `applies_to` | 2 Domains |
 
 **29 DerivedArtifact stubs** authored in `all-generator-stubs.yaml` — one per Generator, each with `derived_by` to its parent Generator. Each stub uses placeholder `generatedAt: 1970-01-01T00:00:00Z` until the first generator run. Output paths and formats follow the Generator's declared `outputFormat`.
@@ -2959,7 +2959,7 @@ Orphans at zero; remaining quality work is reducing dead EdgeKinds (relations de
 | `benchmark:gpqa` | `targets` | model:claude-opus-4-7@current, model:claude-opus-4-6@current |
 | `eval-run:gaia.claude-code.2025` | `evaluated_by`, `produced_result` | benchmark:gaia, eval-result:mmlu.qwen-2-5-72b.001 |
 | `eval-result:mmlu.qwen-2-5-72b.001` | `scored_against` | benchmark:mmlu |
-| `term:genty-core-impl` | `subsumes` | term:agentic-loop, term:orchestration-loop |
+| `term:agent-core-impl` | `subsumes` | term:agentic-loop, term:orchestration-loop |
 | `term:agentic-loop` | `synonym_of` | term:orchestration-loop |
 | `domain:devops` | `contains` | specialization:devops-sre-platform |
 | `invocation:01kqex-invocation-001` | `executes_in` | sandbox:default-container |
@@ -3012,7 +3012,7 @@ User asked to continue until "no gaps and leftovers." catalog pass 74 attacked t
 | `run:01kqex-example-run-001` | `triggered_by`, `complies_with`, `records_usage` | issue:linear-aca-390/github-1234, compliance:soc-2, usage-record:01kqex-run-tokens |
 | `human-checkpoint:dangerous-tool-approval` | `escalates_to` | role:incident-commander, role:security-engineer |
 | `issue:linear-aca-390` | `belongs_to_project` | project:babysitter |
-| `term:genty-core-impl` | `references` | capability:supports-tool-use, capability:streaming |
+| `term:agent-core-impl` | `references` | capability:supports-tool-use, capability:streaming |
 | `tool-descriptor:bash` | `assesses_policy` | content-policy:default-acceptable-use |
 | `benchmark:harmbench` | `evaluates_policy` | content-policy:default-acceptable-use, content-policy:eu-ai-act-aligned |
 | `tool:terraform` | `used_for` | skill-area:terraform-infrastructure |
@@ -3097,13 +3097,13 @@ User reported `wiki/legacy/a5c` and parts of `wiki/legacy/universal` not fully r
 **Instances** (`graph/extensions/muxes/canonical-muxes.yaml`) — all 9 muxes wired to their Layer position:
 - transport-adapter (llm-wire) → layer:3-transport
 - agent-launch-adapter (spawn) → layer:8-execution
-- agent-comm-adapter (event-stream) → layer:6-genty-platform
-- session-storage-adapter (session-storage) → layer:6-genty-platform
-- agent-config-adapter (admin) → layer:6-genty-platform
-- hooks-adapter (hook) → layer:5-genty-runtime
-- extensions-adapter (extension-manifest) → layer:6-genty-platform
-- tools-adapter (tool) → layer:5-genty-runtime
-- tasks-adapter (task) → layer:6-genty-platform
+- agent-comm-adapter (event-stream) → layer:6-agent-platform
+- session-storage-adapter (session-storage) → layer:6-agent-platform
+- agent-config-adapter (admin) → layer:6-agent-platform
+- hooks-adapter (hook) → layer:5-agent-runtime
+- extensions-adapter (extension-manifest) → layer:6-agent-platform
+- tools-adapter (tool) → layer:5-agent-runtime
+- tasks-adapter (task) → layer:6-agent-platform
 
 Each carries the full bridging-concerns list, native-side enumeration, canonical-side description, and trustChainParticipation enum (live for tasks-adapter via ProvenBreakpointAnswer; planned for transport/launch/comm/hooks/tool; none for session-storage/config/extension).
 
@@ -3161,7 +3161,7 @@ Continued addressing the wiki/legacy/a5c + wiki/legacy/universal gap from catalo
 
 ### Addition 1 — 5 missing canonical HookSurfaces
 
-`wiki/legacy/universal/06-channels-sessions-hooks.md §3.0` declares the canonical 14-hook set: SessionStart · Stop · UserPromptSubmit · PreToolUse · PostToolUse · AfterAgent · SessionEnd · SessionIdle · ShellEnv · BeforePromptBuild · SubagentStop · Notification · PreCompact · BeforeProviderRequest. Catalog had 9; missing 5: AfterAgent, SessionIdle (canonical, distinct from per-product opencode/claude variants), ShellEnv (canonical), BeforePromptBuild, BeforeProviderRequest. Authored in `graph/channels-hooks/hook-surfaces/canonical/missing-canonical-hooks.yaml` with full payloadSchema, direction, blocking, and family attributes per existing canonical conventions. All 5 wired via `exposes` from `genty-runtime-impl:claude-code.runtime@1.x`.
+`wiki/legacy/universal/06-channels-sessions-hooks.md §3.0` declares the canonical 14-hook set: SessionStart · Stop · UserPromptSubmit · PreToolUse · PostToolUse · AfterAgent · SessionEnd · SessionIdle · ShellEnv · BeforePromptBuild · SubagentStop · Notification · PreCompact · BeforeProviderRequest. Catalog had 9; missing 5: AfterAgent, SessionIdle (canonical, distinct from per-product opencode/claude variants), ShellEnv (canonical), BeforePromptBuild, BeforeProviderRequest. Authored in `graph/channels-hooks/hook-surfaces/canonical/missing-canonical-hooks.yaml` with full payloadSchema, direction, blocking, and family attributes per existing canonical conventions. All 5 wired via `exposes` from `agent-runtime-impl:claude-code.runtime@1.x`.
 
 ### Addition 2 — `bridges_for` edge: Adapter ↔ AgentVersion / Provider / ModelVersion
 
@@ -3188,7 +3188,7 @@ While preparing catalog pass 76 a separate edit pass deleted 57 records:
 - 24 `ProcessDescriptor` records (`a5c-marketplace-*`, `packages-catalog-process-library-catalog`).
 - 15 `Generator` records.
 - 3 `DerivedArtifact` records.
-- 1 `CatalogVersion` (`atlas-catalog@1.0.0`).
+- 1 `CatalogVersion` (`agent-catalog@1.0.0`).
 - 1 `ProcessLibrary`.
 - 5 paired `Term` + 5 paired `Definition` (catalog-version, derived-artifact, generator, process-descriptor, process-library).
 - 2 NodeKind instance counts dropped to zero (Generator, DerivedArtifact).
@@ -3228,7 +3228,7 @@ The catalog pass 76 out-of-band deletion of ~57 records left 15 records orphaned
 
 | Source | Edge | Target |
 | --- | --- | --- |
-| 11 a5c-* PackageSurfaces | `references_path` | path:adapters-hooks-global / adapters-hooks-project / a5c-runs-dir / atlas-catalog-graph / catalog-api (matched by package responsibility) |
+| 11 a5c-* PackageSurfaces | `references_path` | path:adapters-hooks-global / adapters-hooks-project / a5c-runs-dir / agent-catalog-graph / catalog-api (matched by package responsibility) |
 | `package:a5c-ai-catalog` | `references_path` | path:catalog-api |
 | `project:graph` | `groups_workspace` | workspace:local-developer-default |
 | `ontology:v6-current` | `has_version` | agent-version:babysitter@current (schema-permitted target; semantically loose but recorded) |
@@ -3433,7 +3433,7 @@ Audit found 20 missing tools and 20 missing hook surfaces; both batches authored
 - **Compaction**: `claude.post-compact` (paired with existing PreCompact).
 - **MCP elicitation**: `claude.elicitation`, `claude.elicitation-result`.
 
-All wired via `exposes` from `genty-runtime-impl:claude-code.runtime@1.x`. Six canonicalize_to existing canonical surfaces.
+All wired via `exposes` from `agent-runtime-impl:claude-code.runtime@1.x`. Six canonicalize_to existing canonical surfaces.
 
 ### 20 missing claude-code tools
 
@@ -3441,7 +3441,7 @@ All wired via `exposes` from `genty-runtime-impl:claude-code.runtime@1.x`. Six c
 
 - `ask-user-question`, `cron-create`/`cron-delete`/`cron-list`, `exit-plan-mode`/`exit-worktree`, `list-mcp-resources-tool`/`read-mcp-resource-tool`, `lsp` (definition/refs/type-info/symbols/implementations/call-hierarchy/diagnostics — inactive until plugin), `monitor` (background line-streaming; not on Bedrock/Vertex/Foundry; v2.1.98+), `powershell` (Windows native; Linux/macOS/WSL opt-in via pwsh 7+), `send-message` (agent-team / subagent resume; CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1), `skill` (single tool entry covers every skill), `task-create`/`task-get`/`task-list`/`task-update` (interactive-mode task list — non-interactive uses TodoWrite), `team-create`/`team-delete` (experimental teams), `tool-search` (load deferred MCP tools).
 
-All wired via `bundles` from `genty-runtime-impl:claude-code.runtime@1.x`.
+All wired via `bundles` from `agent-runtime-impl:claude-code.runtime@1.x`.
 
 ### Env-vars (deferred)
 
@@ -3499,7 +3499,7 @@ User requested assimilation of six Anthropic Claude Code doc pages: agent-loop, 
 
 ### Wirings
 
-- `genty-runtime-impl:claude-code.runtime@1.x` gained `has_team` (3), `has_marketplace` (3), `registers_handler` (2).
+- `agent-runtime-impl:claude-code.runtime@1.x` gained `has_team` (3), `has_marketplace` (3), `registers_handler` (2).
 - `agent-version:claude-code@1.x` gained `supports` for the 6 new capabilities, with versionRange gates: `>=2.1.32 <3.0.0` for agent-teams, `>=2.1.91 <3.0.0` for deep-links, `>=1.0.0 <2.0.0` for the rest.
 - AgentTeams wired bidirectionally: each has `team_of` → runtime, `has_member` → 2 Subagents (claude-code.explore/plan, code-reviewer/vulnerability-scanner, doc-generator/typo-fixer), `requires_capability` → supports-agent-teams.
 - Marketplaces `catalogs` plugin instances (example-native-claude / example-portable-extension); team-internal-example reaches via inbound `has_marketplace` only.
@@ -3637,7 +3637,7 @@ remote-cloud, sdk, interactive, prompt, headers, git, subagents, other). Each
 record carries `name`, `category`, `description`, `valueType`, and `defaultValue`
 where the doc specifies one (and `featureGate: true` for experimental gates such
 as `CLAUDE_CODE_FORK_SUBAGENT`). `affects` edge wired from each EnvVar to
-`genty-runtime-impl:claude-code.runtime@1.x` — the inverse `has_env_var` is
+`agent-runtime-impl:claude-code.runtime@1.x` — the inverse `has_env_var` is
 auto-credited (validator's outgoingEdgeCoverage on EnvVar = 1.0). Combined with
 the 13 catalog pass 83-seeded vars, total = **150 EnvVar instances** (previously 13).
 
@@ -3735,15 +3735,15 @@ sub-agents, skills, discover-plugins, agent-teams, deep-links).
 
 ### Phase A — AgentCoreImpl (+8 attributes)
 
-`schema/node-kinds/agent-stack.yaml` — added on `node:genty-core-impl`:
+`schema/node-kinds/agent-stack.yaml` — added on `node:agent-core-impl`:
 `messageTypesEmitted`, `resultMessageSubtypes`, `loopBudgetKnobs`,
 `effortLevelsSupported`, `permissionModes`, `hooksFiredFromCore`,
 `compactionTrigger`, `streamingBlocks`. All catalog pass 85, all enum or list-of-enum,
 all optional.
 
 Instances populated:
-- `genty-core-impl:claude-code.core@1.x` (full population, all 8 attrs).
-- `genty-core-impl:claude-agent-sdk.core@current` (mirrors core-doc-grounded
+- `agent-core-impl:claude-code.core@1.x` (full population, all 8 attrs).
+- `agent-core-impl:claude-agent-sdk.core@current` (mirrors core-doc-grounded
   values; SDK's `permissionModes` excludes `dontAsk`/`auto` which are TUI-only,
   `hooksFiredFromCore` excludes `SubagentStart` per SDK doc, `compactionTrigger`
   is `auto-on-budget` rather than `both`).
@@ -3751,14 +3751,14 @@ Instances populated:
 
 ### Phase B — AgentRuntimeImpl (+11 attributes)
 
-`schema/node-kinds/agent-stack.yaml` — added on `node:genty-runtime-impl`:
+`schema/node-kinds/agent-stack.yaml` — added on `node:agent-runtime-impl`:
 `permissionModesAvailable`, `deepLinkSchemesRegistered`, `pluginDiscoverySource`,
 `pluginInstallScopes`, `subagentToolInheritance`, `skillDiscoveryScopes`,
 `skillScopePrecedence`, `liveChangeDetection`,
 `disableSkillShellExecutionSupported`, `mcpConfigScopes`,
 `urlHandlerRegistrationLocations`. All catalog pass 85, all optional.
 
-Instance `genty-runtime-impl:claude-code.runtime@1.x` populated with all 11.
+Instance `agent-runtime-impl:claude-code.runtime@1.x` populated with all 11.
 `urlHandlerRegistrationLocations` is a per-platform map mirroring the values
 already present on the deep-link InteractionPrimitives — the duplication is
 intentional (the runtime owns OS-level handler registration; the
@@ -3766,7 +3766,7 @@ InteractionPrimitive owns the user-facing surface).
 
 ### Phase C — AgentPlatformImpl (+11 attributes)
 
-`schema/node-kinds/agent-stack.yaml` — added on `node:genty-platform-impl`:
+`schema/node-kinds/agent-stack.yaml` — added on `node:agent-platform-impl`:
 `skillFrontmatterFieldsSupported`, `skillStringSubstitutions`,
 `skillDynamicContextInjection`, `pluginManifestPath`, `marketplaceCommands`,
 `pluginCommands`, `agentTeamSupport` (object), `subagentStorageLocations`,
@@ -3774,7 +3774,7 @@ InteractionPrimitive owns the user-facing surface).
 `pluginAutoUpdateControl` (object). Three new outgoingEdges declared on the
 NodeKind: `has_team`, `has_marketplace`, `supports_interaction_primitive`.
 
-Instance `genty-platform-impl:claude-code.platform@1.x` populated with all 11
+Instance `agent-platform-impl:claude-code.platform@1.x` populated with all 11
 attributes plus the three new outgoing edge blocks.
 
 ### Phase D — Cross-wiring
@@ -4081,8 +4081,8 @@ files):
 
 | Edge type | Count | Sources |
 | --- | --- | --- |
-| `fires_hook` | 11 | genty-core-impl:a5c.core@current → 11 canonical / native hook surfaces |
-| `depends_on` | 1 | genty-core-impl:a5c.core@current → source-ref:a5c-cli |
+| `fires_hook` | 11 | agent-core-impl:a5c.core@current → 11 canonical / native hook surfaces |
+| `depends_on` | 1 | agent-core-impl:a5c.core@current → source-ref:a5c-cli |
 | `supports` (newly added) | 2 | a5c.core: can-multi-turn, supports-thinking |
 | `operates_in_permission_mode` | 2 | a5c.runtime → a5c-interactive, a5c-non-interactive |
 | `applies_to_version` | 1 | capability-profile:a5c.default → agent-version:a5c@current |
@@ -4168,9 +4168,9 @@ Capability, and one new OutputGuard instance.
      STOP_HOOK_INVOKED (`harness/hooks/utils.ts:128`) +
      COMPRESSION_APPLIED (`cli/commands/tokensStats.ts:42`) +
      TASK_START / TASK_COMPLETE / STEP_DISPATCH (`cli/commands/hooks/log.ts`).
-   - Wired `emits_journal_event` from `genty-runtime-impl:a5c.runtime@current`
+   - Wired `emits_journal_event` from `agent-runtime-impl:a5c.runtime@current`
      (7 events: RUN_*, EFFECT_REQUESTED, TASK_*, STEP_DISPATCH) and from
-     `genty-platform-impl:a5c.platform@current` (6 events: EFFECT_*,
+     `agent-platform-impl:a5c.platform@current` (6 events: EFFECT_*,
      COST_TRACKED, STOP_HOOK_INVOKED, COMPRESSION_APPLIED).
 
 2. `deferred-work:a5c-effort-level-mapping` — RESOLVED
@@ -4257,11 +4257,11 @@ into `graph/lifecycle/lifecycle-stubs/a5c-deferred-spec.yaml`.
 | dangling refs | 0 | 0 | unchanged |
 
 
-## catalog pass 90 — Migration audit: legacy `atlas-catalog/graph/` vs atlas `graph/` (2026-05-04)
+## catalog pass 90 — Migration audit: legacy `agent-catalog/graph/` vs atlas `graph/` (2026-05-04)
 
 Goal: assess whether the atlas graph at `C:/work/v6/graph/` can
 **replace** the legacy graph at
-`C:/Users/tmusk/IdeaProjects/babysitter/packages/atlas-catalog/graph/` for the
+`C:/Users/tmusk/IdeaProjects/babysitter/packages/agent-catalog/graph/` for the
 babysitter monorepo's downstream codegen consumers (adapter generators), without
 breaking them.
 
@@ -4351,7 +4351,7 @@ and `--mode docker` invocations.
 - Edited only `C:/work/v6/graph/`.
 - Trust Chain remains OUT OF SCOPE.
 - No fabrication: every gap claim cites either a legacy YAML file path or a
-  legacy SDK accessor in `packages/atlas-catalog/src/sdk.ts` /
+  legacy SDK accessor in `packages/agent-catalog/src/sdk.ts` /
   `data.ts` / `models.ts` (see migration docs for exact paths).
 - No regressions: validator metrics unchanged.
 
@@ -4360,7 +4360,7 @@ and `--mode docker` invocations.
 ## catalog pass 91 — Migration-Readiness Closure (3 blockers from catalog pass 90)
 
 catalog pass 91 closes the three blockers catalog pass 90 identified as preventing atlas from
-replacing the legacy `packages/atlas-catalog/graph/` (consumed by
+replacing the legacy `packages/agent-catalog/graph/` (consumed by
 `adapters/core`, `extensions-adapter`, `hooks-adapter/core`).
 
 ### Blocker #1: PluginTarget codegen field-set — CLOSED
@@ -4375,7 +4375,7 @@ The 17 atlas `PluginTarget` records under
 adapter-internal lookup).
 
 - 9 records sourced verbatim from
-  `packages/atlas-catalog/graph/nodes/hooks-and-plugins/plugin-targets.yaml`
+  `packages/agent-catalog/graph/nodes/hooks-and-plugins/plugin-targets.yaml`
   (claude-code, codex, cursor, gemini-cli, copilot-cli, omp, openclaw,
   opencode, pi).
 - 8 atlas-only records (aider, amp, cline, continue, devin, droid, goose,
@@ -4441,7 +4441,7 @@ is intra-graph ergonomics only (e.g. `composes` ↔ `composes_to_implementation`
 and does not model cross-graph (legacy → atlas) id aliasing. Adding a new
 `legacy_id_alias` edge-kind would require schema work outside the catalog pass 91
 scope. The flat shim is consumable directly by
-`packages/atlas-catalog/src/sdk.ts` as a normalize-on-read map.
+`packages/agent-catalog/src/sdk.ts` as a normalize-on-read map.
 
 `capabilitySupport:` (100 records), `claim:` (73), `evidence:` (89), and
 `discovery:` (20) prefixes are intentionally not enumerated — none are
@@ -4479,7 +4479,7 @@ future passes):
   same scope note. Legacy `getFallbackHarnessMetadata()` still expects a
   per-harness rollup that atlas normalizes onto separate
   `AgentRuntimeImpl/CoreImpl/PlatformImpl`. Adapter logic owed in
-  `packages/atlas-catalog/src/sdk.ts`, not graph data.
+  `packages/agent-catalog/src/sdk.ts`, not graph data.
 
 Both residuals are projection-adapter work (catalog pass 92 candidate), not
 schema/data gaps in atlas.
@@ -4524,11 +4524,11 @@ migration verdict from GREEN → **COMPLETE**.
 - New optional attribute `absentSignals: list<string>` — drives the
   legacy `HooksMuxDetectionRule.absentSignals` consumer in
   `packages/adapters/hooks/core/src/discovery/detector.ts:46` and
-  `packages/atlas-catalog/src/models.ts:438`.
+  `packages/agent-catalog/src/models.ts:438`.
 
 **Data authored** — 10 `DiscoverySignal[scope=hooks-adapter]` rows under
 `graph/extensions/discovery-signals/`, **verbatim copy** from legacy
-`packages/atlas-catalog/graph/nodes/runtime-semantics/discovery-signals-hooks.yaml`
+`packages/agent-catalog/graph/nodes/runtime-semantics/discovery-signals-hooks.yaml`
 (preserved `signals`, `absentSignals`, `matchMode`, `confidence`):
 
 | File | adapter key | match | confidence |
@@ -4557,7 +4557,7 @@ node's `key`, not the edge target.
 
 Path **(b)** chosen. Rationale documented in
 `migration/projection-adapters.md` § 5: legacy `buildFallbackMetadata`
-in `packages/atlas-catalog/src/data.ts:440` is **already a projection**
+in `packages/agent-catalog/src/data.ts:440` is **already a projection**
 — it computes the per-harness bundle at SDK boot by joining
 `SessionNuance + AgentVersion + capability claims`. Legacy never stored
 a bundled record. Authoring duplicate atlas records would create a drift
@@ -4568,7 +4568,7 @@ without removing any work.
 The adapter spec is now frozen with a field-by-field source map:
 `adapterName`, `hostEnvSignals`, `sessionDir`, 11 `capabilities.*`
 booleans, `evidenceIds` — each tied to a specific atlas NodeKind +
-attribute. Adapter ownership: `packages/atlas-catalog/src/data.ts`
+attribute. Adapter ownership: `packages/agent-catalog/src/data.ts`
 (consumer side); ~30 LOC of reads against the atlas graph; pinning test
 already lives at `sdk/src/harness/adapterFallbackMetadata.contract.test.ts`.
 
@@ -4595,12 +4595,12 @@ already lives at `sdk/src/harness/adapterFallbackMetadata.contract.test.ts`.
 
 ### Migration-readiness verdict — **COMPLETE**
 
-All five legacy `atlas-catalog` SDK consumers (adapters,
+All five legacy `agent-catalog` SDK consumers (adapters,
 extensions-adapter, hooks-adapter, sdk/harness/*, catalog API) now resolve
 against the atlas graph: four directly via existing accessors with the atlas
 field-set in place, one (HarnessFallbackMetadata) via a thin frozen
 adapter spec. No graph data/schema gap remains; only the consumer-side
-shim work in `packages/atlas-catalog/src/data.ts` remains, and that is
+shim work in `packages/agent-catalog/src/data.ts` remains, and that is
 mechanical not design.
 
 ### Files touched (catalog pass 92)
@@ -4673,10 +4673,10 @@ Two doc-grounded OutputGuards authored:
 
 - `output-guard:openai-structured-output-strict` (Responses/Chat
   Completions `response_format.json_schema.strict=true`) — wired from
-  `genty-core-impl:codex-sdk.core@current` via `output_guard_applied_by`.
+  `agent-core-impl:codex-sdk.core@current` via `output_guard_applied_by`.
 - `output-guard:gemini-response-mime-type-json` (Gemini API
   `generationConfig.responseMimeType=application/json` + `responseSchema`)
-  — wired from `genty-core-impl:gemini-cli.core@current`.
+  — wired from `agent-core-impl:gemini-cli.core@current`.
 
 ### Phase B — `JournalEvent` / `ProtocolMessage` / `FrontmatterField` — DEFERRED
 
@@ -4814,7 +4814,7 @@ variants plus the reusable composite GitHub Action.
 
 ### Edges wired
 
-- `supports` × 8: `genty-platform-impl:babysitter.platform@current` →
+- `supports` × 8: `agent-platform-impl:babysitter.platform@current` →
   the 8 trigger Capability records (with versionRange, level, notes,
   per-capability source citations).
 - `implemented_by` / `supported_by` × 13 (linter-added) wiring
@@ -5005,7 +5005,7 @@ can be regenerated from the atlas graph.
 ### Packages discovered (full set)
 
 Top-level adapter + catalog packages:
-1. `atlas-catalog` — graph + SDK projection layer (already PackageSurface).
+1. `agent-catalog` — graph + SDK projection layer (already PackageSurface).
 2. `adapters` — multi-subpackage tree (9 subpackages with package.json):
    `core`, `cli`, `gateway`, `tui`, `ui`, `webui`, `harness-mock`,
    `observability`, `sdk` (umbrella @a5c-ai/adapters), `adapters`.
@@ -5020,7 +5020,7 @@ Top-level adapter + catalog packages:
 
 | Package | Internal gaps | Codegen-ready |
 | --- | --- | --- |
-| atlas-catalog | 0 | YES — types fully re-exported via existing models/sdk projection |
+| agent-catalog | 0 | YES — types fully re-exported via existing models/sdk projection |
 | adapters/core | 0 | YES — HookSurface×9, HookMapping×N, HostDetectionRule, HarnessImage all present |
 | adapters/cli | 1 (PackageSurface missing) | YES post-catalog pass 96 |
 | adapters/gateway | 1 (PackageSurface missing) | YES post-catalog pass 96 |
@@ -5236,8 +5236,8 @@ itself with n=0).
 | adapters/adapters per-harness dispatch (catalog pass 97 explicit list) | structured-deferral | deferred-work:adapters-adapters-per-harness-dispatch (status: abandoned, wrapper-over-graph per catalog pass 96) |
 | adapters/sdk umbrella (catalog pass 97 list) | confirmed wrapper | existing PackageSurface accurate |
 | adapters/ui + webui (catalog pass 97 list) | structured-deferral | deferred-work:adapters-ui-webui-react-components (status: abandoned, presentation-only) |
-| atlas-catalog package (catalog pass 97 list) | structured-deferral | deferred-work:atlas-catalog-library-functions (status: abandoned, projection-over-graph) |
-| babysitter platform packages (catalog pass 97 list) | partial-authored | PackageSurface enriched + 13 InteractionPrimitive command-group records (run / task / session / plugin / skill / process-library / profile / instructions / compression / breakpoint / hook / harness-runtime / mcp-server) wired to babysitter-sdk + genty-platform surfaces |
+| agent-catalog package (catalog pass 97 list) | structured-deferral | deferred-work:agent-catalog-library-functions (status: abandoned, projection-over-graph) |
+| babysitter platform packages (catalog pass 97 list) | partial-authored | PackageSurface enriched + 13 InteractionPrimitive command-group records (run / task / session / plugin / skill / process-library / profile / instructions / compression / breakpoint / hook / harness-runtime / mcp-server) wired to babysitter-sdk + agent-platform surfaces |
 | JournalEvent for LangGraph (catalog pass 93) | structured-deferral | deferred-work:journal-event-langgraph (status: open, needs vendor evidence) |
 | JournalEvent for OAI Agents SDK (catalog pass 93) | structured-deferral | deferred-work:journal-event-openai-agents-sdk (status: open) |
 | ProtocolMessage Gemini/Cohere/Mistral/Ollama (catalog pass 93) | structured-deferral | 4 deferred work items (status: open per vendor) |
@@ -5257,7 +5257,7 @@ itself with n=0).
 
 ### Edges wired
 
-- exposes_subcommand: 17 (tasks-adapter leaves) + 8 (harness-mock) + 12 (babysitter-sdk) + 1 (genty-platform) = 38 new
+- exposes_subcommand: 17 (tasks-adapter leaves) + 8 (harness-mock) + 12 (babysitter-sdk) + 1 (agent-platform) = 38 new
 - exposes_endpoint: 8 (tasks-adapter outbound-client)
 - exposed_by: 8 (APIEndpoint to PackageSurface)
 
@@ -5284,7 +5284,7 @@ evidence in the `reason` and `resolutionNotes` attributes):
 
 - deferred-work:frontmatter-codex-agents-md
 - deferred-work:adapters-adapters-per-harness-dispatch
-- deferred-work:atlas-catalog-library-functions
+- deferred-work:agent-catalog-library-functions
 - deferred-work:adapters-ui-webui-react-components
 - deferred-work:transport-adapter-runtime-programmatic-api
 - deferred-work:hooks-adapter-internals-helpers
@@ -5371,10 +5371,10 @@ small schema design call.
 | --- | --- |
 | `deferred-node:journal-event-langgraph` | **closed-with-records** — 7 JournalEvent records authored from canonical LangGraph stream-mode taxonomy (values, updates, messages, custom, checkpoints, tasks, debug) |
 | `deferred-node:journal-event-openai-agents-sdk` | **kept-open-structural** — vendor docs reachable; canonical event taxonomy captured in `reason`; blocker: no AgentRuntimeImpl record for openai-agents-python exists in graph/agent-stack/runtime-impls/ to wire emits_journal_event from |
-| `deferred-node:protocol-message-gemini` | **closed-with-records** — 7 ProtocolMessage records (Content, Part subtypes text/inlineData/functionCall/functionResponse, Candidate, GenerateContentResponse) wired from `genty-core-impl:gemini-cli.core@current` |
+| `deferred-node:protocol-message-gemini` | **closed-with-records** — 7 ProtocolMessage records (Content, Part subtypes text/inlineData/functionCall/functionResponse, Candidate, GenerateContentResponse) wired from `agent-core-impl:gemini-cli.core@current` |
 | `deferred-node:protocol-message-cohere`, `-mistral`, `-ollama` | **kept-open-structural** — vendor docs reachable; canonical taxonomies captured; blocker: no AgentCoreImpl record for these vendors exists; emits_message_type requires one |
-| `deferred-node:frontmatter-cursor-mdc` | **closed-with-decision** — appliesTo enum widened with `cursor-rule`; 3 FrontmatterField records (description, globs, alwaysApply) authored from cursor.com/docs/context/rules and wired from `genty-platform-impl:cursor.platform@current` |
-| `deferred-node:task-schema-field-define-task` | **closed-with-decision** — appliesTo enum widened with `task-schema` (no new NodeKind); 16 FrontmatterField records authored from packages/sdk/src/tasks/defineTask.ts + types.ts and wired from `genty-platform-impl:babysitter.platform@current` |
+| `deferred-node:frontmatter-cursor-mdc` | **closed-with-decision** — appliesTo enum widened with `cursor-rule`; 3 FrontmatterField records (description, globs, alwaysApply) authored from cursor.com/docs/context/rules and wired from `agent-platform-impl:cursor.platform@current` |
+| `deferred-node:task-schema-field-define-task` | **closed-with-decision** — appliesTo enum widened with `task-schema` (no new NodeKind); 16 FrontmatterField records authored from packages/sdk/src/tasks/defineTask.ts + types.ts and wired from `agent-platform-impl:babysitter.platform@current` |
 
 ### Records authored
 
@@ -5483,8 +5483,8 @@ events/messages, then wiring them.
 | --- | --- | --- |
 | AgentProduct | 1 (`agent:openai-agents-sdk`) | graph/agent-stack/products/extended-products.yaml |
 | AgentVersion | 1 (`agent-version:openai-agents-sdk@current`) | graph/agent-stack/versions/extended-products-current.yaml |
-| AgentCoreImpl | 1 (`genty-core-impl:openai-agents-sdk.core@current`) | graph/agent-stack/core-impls/openai-agents-sdk-core-current.yaml |
-| AgentRuntimeImpl | 1 (`genty-runtime-impl:openai-agents-sdk.runtime@current`) | graph/agent-stack/runtime-impls/openai-agents-sdk-runtime-current.yaml |
+| AgentCoreImpl | 1 (`agent-core-impl:openai-agents-sdk.core@current`) | graph/agent-stack/core-impls/openai-agents-sdk-core-current.yaml |
+| AgentRuntimeImpl | 1 (`agent-runtime-impl:openai-agents-sdk.runtime@current`) | graph/agent-stack/runtime-impls/openai-agents-sdk-runtime-current.yaml |
 | Provider | 3 (`provider:cohere`, `provider:mistral`, `provider:ollama`) | graph/compute/providers/{cohere,mistral,ollama}.yaml |
 | SourceRef | 2 (`source-ref:openai-agents-sdk-{github,docs}`) | graph/sourceref-scope/source-refs/openai-agents-sdk.yaml |
 
@@ -5559,7 +5559,7 @@ activated 20 times across 3 vendors — well above the ≥1 minimum.
 | deferred-node:frontmatter-codex-agents-md | abandoned | abandoned |
 | deferred-node:task-schema-field-define-task | resolved (W99) | resolved |
 | deferred-node:adapters-adapters-per-harness-dispatch | abandoned | abandoned |
-| deferred-node:atlas-catalog-library-functions | abandoned | abandoned |
+| deferred-node:agent-catalog-library-functions | abandoned | abandoned |
 | deferred-node:adapters-ui-webui-react-components | abandoned | abandoned |
 | deferred-node:transport-adapter-runtime-programmatic-api | abandoned | abandoned |
 | deferred-node:hooks-adapter-internals-helpers | abandoned | abandoned |

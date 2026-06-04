@@ -19,11 +19,11 @@ edges:
   version_of:
     - agent:amp
   composed_of:
-    - target: genty-core-impl:amp.core@current
+    - target: agent-core-impl:amp.core@current
       role: core
-    - target: genty-runtime-impl:amp.runtime@current
+    - target: agent-runtime-impl:amp.runtime@current
       role: runtime
-    - target: genty-platform-impl:amp.platform@current
+    - target: agent-platform-impl:amp.platform@current
       role: platform
     - target: agent-ui-impl:amp.ui@current
       role: ui

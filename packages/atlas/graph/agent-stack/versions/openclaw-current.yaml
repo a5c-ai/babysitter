@@ -209,11 +209,11 @@ edges:
   version_of:
     - agent:openclaw
   composed_of:
-    - target: genty-core-impl:openclaw.core@current
+    - target: agent-core-impl:openclaw.core@current
       role: core
-    - target: genty-runtime-impl:openclaw.runtime@current
+    - target: agent-runtime-impl:openclaw.runtime@current
       role: runtime
-    - target: genty-platform-impl:openclaw.platform@current
+    - target: agent-platform-impl:openclaw.platform@current
       role: platform
     - target: agent-ui-impl:openclaw.ui@current
       role: ui

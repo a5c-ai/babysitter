@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:pi-sdk.core@current
+id: agent-core-impl:pi-sdk.core@current
 attributes:
   displayName: Pi SDK Core (current)
   agentVersionId: agent-version:pi-sdk@current
@@ -28,7 +28,7 @@ attributes:
   thinkingChannelHandling: not-supported
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:pi
     role: core

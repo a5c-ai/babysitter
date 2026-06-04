@@ -14,9 +14,9 @@ edges:
   contains_meta_node_kind:
   - target: meta-node-kind:agent-product
   - target: meta-node-kind:agent-version
-  - target: meta-node-kind:genty-core-impl
-  - target: meta-node-kind:genty-runtime-impl
-  - target: meta-node-kind:genty-platform-impl
+  - target: meta-node-kind:agent-core-impl
+  - target: meta-node-kind:agent-runtime-impl
+  - target: meta-node-kind:agent-platform-impl
   - target: meta-node-kind:agent-ui-impl
   - target: meta-node-kind:agent-host-transport
   - target: meta-node-kind:tool-descriptor
@@ -88,12 +88,12 @@ edges:
   - target: meta-attribute:agent-version--version-range
 ---
 nodeKind: MetaNodeKind
-id: meta-node-kind:genty-core-impl
+id: meta-node-kind:agent-core-impl
 attributes:
   displayName: AgentCoreImpl (meta)
   name: AgentCoreImpl
   cluster: 3-agent-stack
-  prefix: genty-core-impl
+  prefix: agent-core-impl
   origin: derived
   purpose: concrete loop+transport-client impl
   exampleCount: 0
@@ -104,16 +104,16 @@ edges:
   in_cluster:
   - target: meta-cluster:agent-stack
   contains_meta_attribute:
-  - target: meta-attribute:genty-core-impl--id
-  - target: meta-attribute:genty-core-impl--display-name
+  - target: meta-attribute:agent-core-impl--id
+  - target: meta-attribute:agent-core-impl--display-name
 ---
 nodeKind: MetaNodeKind
-id: meta-node-kind:genty-runtime-impl
+id: meta-node-kind:agent-runtime-impl
 attributes:
   displayName: AgentRuntimeImpl (meta)
   name: AgentRuntimeImpl
   cluster: 3-agent-stack
-  prefix: genty-runtime-impl
+  prefix: agent-runtime-impl
   origin: derived
   purpose: concrete runtime+tools+hook-sockets impl
   exampleCount: 0
@@ -123,16 +123,16 @@ edges:
   in_cluster:
   - target: meta-cluster:agent-stack
   contains_meta_attribute:
-  - target: meta-attribute:genty-runtime-impl--id
-  - target: meta-attribute:genty-runtime-impl--display-name
+  - target: meta-attribute:agent-runtime-impl--id
+  - target: meta-attribute:agent-runtime-impl--display-name
 ---
 nodeKind: MetaNodeKind
-id: meta-node-kind:genty-platform-impl
+id: meta-node-kind:agent-platform-impl
 attributes:
   displayName: AgentPlatformImpl (meta)
   name: AgentPlatformImpl
   cluster: 3-agent-stack
-  prefix: genty-platform-impl
+  prefix: agent-platform-impl
   origin: derived
   purpose: concrete platform impl
   exampleCount: 0
@@ -142,8 +142,8 @@ edges:
   in_cluster:
   - target: meta-cluster:agent-stack
   contains_meta_attribute:
-  - target: meta-attribute:genty-platform-impl--id
-  - target: meta-attribute:genty-platform-impl--display-name
+  - target: meta-attribute:agent-platform-impl--id
+  - target: meta-attribute:agent-platform-impl--display-name
 ---
 nodeKind: MetaNodeKind
 id: meta-node-kind:agent-host-transport

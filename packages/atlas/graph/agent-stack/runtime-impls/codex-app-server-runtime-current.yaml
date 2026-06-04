@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:codex-app-server.runtime@current
+id: agent-runtime-impl:codex-app-server.runtime@current
 attributes:
   displayName: Codex App-Server Runtime (current)
   agentVersionId: agent-version:codex-app-server@current
@@ -32,7 +32,7 @@ attributes:
     `codex app-server --listen`.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
   - target: agent:codex-app-server
     role: runtime

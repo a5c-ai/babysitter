@@ -8,7 +8,7 @@ attributes:
   valueType: int
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-disable-attachments
@@ -20,7 +20,7 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-disable-file-checkpointing
@@ -32,7 +32,7 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-glob-hidden
@@ -44,7 +44,7 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-glob-no-ignore
@@ -56,7 +56,7 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-glob-timeout-seconds
@@ -69,7 +69,7 @@ attributes:
   defaultValue: "20"
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-perforce-mode
@@ -81,7 +81,7 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-tmpdir
@@ -93,4 +93,4 @@ attributes:
   valueType: path
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x

@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:antigravity-cli.runtime@current
+id: agent-runtime-impl:antigravity-cli.runtime@current
 attributes:
   displayName: Antigravity CLI Runtime (current)
   agentVersionId: agentVersion:antigravity:2-0-11
@@ -31,12 +31,12 @@ attributes:
   supportsStreaming: true
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
   - target: agent:antigravity-cli
     role: runtime
   succeeds:
-  - target: genty-runtime-impl:gemini-cli.runtime@current
+  - target: agent-runtime-impl:gemini-cli.runtime@current
     notes: 'Antigravity CLI runtime succeeds Gemini CLI runtime; adds workflow-driven hook dispatch and multi-model routing (Gemini 3.5 Flash, Claude, GPT).
       '
   exposes:

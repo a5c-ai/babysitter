@@ -19,7 +19,7 @@ attributes:
     - "Ctrl+D: exit"
 edges:
   bundled_with:
-    - genty-platform-impl:antigravity-cli.platform@current
+    - agent-platform-impl:antigravity-cli.platform@current
   succeeds:
     - target: presentation:gemini-cli-tui
       notes: 'Go-based TUI successor to Gemini CLI TUI; adds multi-model status display and workflow-driven hook indicators.

@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:codex-websocket.core@current
+id: agent-core-impl:codex-websocket.core@current
 attributes:
   displayName: Codex WebSocket Core (current)
   agentVersionId: agent-version:codex-websocket@current
@@ -30,7 +30,7 @@ attributes:
   thinkingChannelHandling: passthrough
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:codex
     role: core

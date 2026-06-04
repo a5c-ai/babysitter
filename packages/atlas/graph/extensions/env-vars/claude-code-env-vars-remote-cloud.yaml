@@ -8,7 +8,7 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-remote-session-id
@@ -20,7 +20,7 @@ attributes:
   valueType: string
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:ccr-force-bundle
@@ -32,4 +32,4 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x

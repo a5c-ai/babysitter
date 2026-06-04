@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:cursor.platform@current
+id: agent-platform-impl:cursor.platform@current
 attributes:
   displayName: Cursor Platform (current)
   agentVersionId: agentVersion:cursor:ge-0-0-0
@@ -28,7 +28,7 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:cursor
     role: platform

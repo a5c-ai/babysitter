@@ -19,4 +19,4 @@ attributes:
     - "Ctrl+L: clear screen"
 edges:
   bundled_with:
-    - genty-platform-impl:opencode.platform@1.x
+    - agent-platform-impl:opencode.platform@1.x

@@ -22,7 +22,7 @@ attributes:
     - "Ctrl+D: exit"
 edges:
   bundled_with:
-    - genty-platform-impl:a5c.platform@current
+    - agent-platform-impl:a5c.platform@current
 ---
 nodeKind: Presentation
 id: presentation:a5c-cli
@@ -44,4 +44,4 @@ attributes:
     - "Ctrl+C: interrupt current task"
 edges:
   bundled_with:
-    - genty-platform-impl:a5c.platform@current
+    - agent-platform-impl:a5c.platform@current

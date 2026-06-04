@@ -6,7 +6,7 @@ attributes:
   path: "~/.hermes/sessions/"
   pathKind: session-state-dir
   ownerKind: AgentPlatformImpl
-  ownerId: genty-platform-impl:hermes.platform@current
+  ownerId: agent-platform-impl:hermes.platform@current
   platform: cross-platform
   scope: user
   evaluationContext: user
@@ -14,4 +14,4 @@ attributes:
 
 edges:
   owned_by:
-    - target: genty-platform-impl:hermes.platform@current
+    - target: agent-platform-impl:hermes.platform@current

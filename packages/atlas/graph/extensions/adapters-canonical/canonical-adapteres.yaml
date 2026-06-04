@@ -134,7 +134,7 @@ attributes:
     a structured communication channel between two participants.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -177,7 +177,7 @@ attributes:
     (resumable) → terminated.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -214,7 +214,7 @@ attributes:
     operations callable from orchestrators and the operator UI.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -258,7 +258,7 @@ attributes:
     nativeRenderingLosses, mergedAt.
 edges:
   bridges_protocol_type:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -303,7 +303,7 @@ attributes:
     variants, etc.).
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -346,7 +346,7 @@ attributes:
     hooks layered on hooks-adapter PreToolUse / PostToolUse.
 edges:
   bridges_protocol_type:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -390,7 +390,7 @@ attributes:
     comment sync and the same pattern-matching auto-approval DSL.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agent-version:babysitter@current
@@ -528,7 +528,7 @@ attributes:
     a structured communication channel between two participants.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -571,7 +571,7 @@ attributes:
     (resumable) → terminated.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -608,7 +608,7 @@ attributes:
     operations callable from orchestrators and the operator UI.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -652,7 +652,7 @@ attributes:
     nativeRenderingLosses, mergedAt.
 edges:
   bridges_protocol_type:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -697,7 +697,7 @@ attributes:
     variants, etc.).
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -740,7 +740,7 @@ attributes:
     hooks layered on hooks-adapter PreToolUse / PostToolUse.
 edges:
   bridges_protocol_type:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -784,7 +784,7 @@ attributes:
     comment sync and the same pattern-matching auto-approval DSL.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agent-version:babysitter@current
@@ -922,7 +922,7 @@ attributes:
     a structured communication channel between two participants.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -965,7 +965,7 @@ attributes:
     (resumable) → terminated.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -1002,7 +1002,7 @@ attributes:
     operations callable from orchestrators and the operator UI.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -1046,7 +1046,7 @@ attributes:
     nativeRenderingLosses, mergedAt.
 edges:
   bridges_protocol_type:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -1091,7 +1091,7 @@ attributes:
     variants, etc.).
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -1134,7 +1134,7 @@ attributes:
     hooks layered on hooks-adapter PreToolUse / PostToolUse.
 edges:
   bridges_protocol_type:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agentVersion:codex:ge-0-119-0
@@ -1178,7 +1178,7 @@ attributes:
     comment sync and the same pattern-matching auto-approval DSL.
 edges:
   bridges_protocol_type:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   bridges_for:
     - target: agentVersion:claude:ge-0-0-0
     - target: agent-version:babysitter@current

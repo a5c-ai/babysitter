@@ -214,7 +214,7 @@ Edges introduced alongside the legacy NodeKinds backfill (`PathDescriptor`,
 | `path_for` | A `PathDescriptor` describes a path used by some entity | `PathDescriptor` | `ProcessDescriptor` \| `PackageSurface` \| `PluginArtifact` \| `SessionSemantics` \| `LifecycleSemantics` | N:N | — | `references_path` |
 | `emits_artifact` | A `PluginTarget` / `AgentVersion` emits a `PluginArtifact` (or a `PluginArtifact` references its emitting target — observed N:1 in examples) | `PluginTarget` \| `AgentVersion` \| `PluginArtifact` | `PluginArtifact` \| `PluginTarget` | N:N | — | — |
 | `maps_hook` | A `HookMapping` realizes a canonical `HookSurface` on a target | `HookMapping` | `HookSurface` | N:1 | — | — |
-| `wraps_graph` | A `PackageSurface` wraps a `GraphDocument` (the canonical atlas-catalog graph) | `PackageSurface` | `GraphDocument` | N:1 | — | — |
+| `wraps_graph` | A `PackageSurface` wraps a `GraphDocument` (the canonical agent-catalog graph) | `PackageSurface` | `GraphDocument` | N:1 | — | — |
 | `surfaces_process` | A `PackageSurface` surfaces a `ProcessDescriptor` | `PackageSurface` | `ProcessDescriptor` | N:N | — | — |
 | `validated_by_ci` | A `PackageSurface` is validated by a `CiSurface` | `PackageSurface` | `CiSurface` | N:1 | — | `validates_package` |
 | `validates_package` | A `CiSurface` validates a `PackageSurface` | `CiSurface` | `PackageSurface` | N:1 | — | `validated_by_ci` |

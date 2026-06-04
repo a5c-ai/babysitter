@@ -6,7 +6,7 @@ attributes:
   workspacePath: packages/genty
   moduleType: typescript
   surfaceKinds:
-    - genty-runtime
+    - agent-runtime
     - bin-entrypoint
     - cli
     - llm-client
@@ -15,7 +15,7 @@ attributes:
   publishedTo: npm
   versionPolicy: semver
   # Source: packages/genty/package.json (exports ./cli barrel + root barrel).
-  # Bin: genty. Composes genty-core, genty-runtime, genty-platform, adapters,
+  # Bin: genty. Composes agent-core, agent-runtime, agent-platform, adapters,
   # and babysitter-sdk into a single installable product.
 edges:
   references_path:

@@ -1,7 +1,7 @@
 nodeKind: Term
-id: term:genty-core-impl
+id: term:agent-core-impl
 attributes:
-  canonicalDefinitionId: definition:genty-core-impl.canonical
+  canonicalDefinitionId: definition:agent-core-impl.canonical
   displayName: "AgentCoreImpl"
   kind: concept
   references:

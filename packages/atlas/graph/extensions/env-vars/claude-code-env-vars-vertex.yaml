@@ -8,7 +8,7 @@ attributes:
   valueType: url
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:anthropic-vertex-project-id
@@ -20,7 +20,7 @@ attributes:
   valueType: string
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-skip-vertex-auth
@@ -32,4 +32,4 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x

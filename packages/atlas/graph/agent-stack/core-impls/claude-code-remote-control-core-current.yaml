@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:claude-code-remote-control.core@current
+id: agent-core-impl:claude-code-remote-control.core@current
 attributes:
   displayName: Claude Code Remote Control Core (current)
   agentVersionId: agent-version:claude-code-remote-control@current
@@ -32,7 +32,7 @@ attributes:
   thinkingChannelHandling: passthrough
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:claude-code
     role: core

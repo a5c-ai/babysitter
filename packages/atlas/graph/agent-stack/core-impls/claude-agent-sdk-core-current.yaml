@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:claude-agent-sdk.core@current
+id: agent-core-impl:claude-agent-sdk.core@current
 attributes:
   displayName: Claude Agent SDK Core (current)
   agentVersionId: agent-version:claude-agent-sdk@current
@@ -42,7 +42,7 @@ attributes:
   effortLevelDelegation: native
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:claude-agent-sdk
     role: core

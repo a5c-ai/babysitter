@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:pi.runtime@current
+id: agent-runtime-impl:pi.runtime@current
 attributes:
   displayName: Pi Runtime (current)
   agentVersionId: agentVersion:pi:ge-0-75-5
@@ -59,7 +59,7 @@ attributes:
       from context sent with the next model prompt.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
   - target: agent:pi
     role: runtime

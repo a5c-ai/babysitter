@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:openai-agents-sdk.core@current
+id: agent-core-impl:openai-agents-sdk.core@current
 attributes:
   displayName: "OpenAI Agents SDK Core (current)"
   agentVersionId: agent-version:openai-agents-sdk@current
@@ -37,7 +37,7 @@ attributes:
   effortLevelDelegation: native
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:openai-agents-sdk
       role: core

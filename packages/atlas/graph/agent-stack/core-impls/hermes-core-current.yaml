@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:hermes.core@current
+id: agent-core-impl:hermes.core@current
 attributes:
   displayName: Hermes Core (current)
   agentVersionId: agent-version:hermes@current
@@ -47,7 +47,7 @@ attributes:
   thinkingChannelHandling: not-supported
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:hermes
     role: core

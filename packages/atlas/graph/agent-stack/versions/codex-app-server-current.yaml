@@ -18,11 +18,11 @@ edges:
   version_of:
     - agent:codex-app-server
   composed_of:
-    - target: genty-core-impl:codex-app-server.core@current
+    - target: agent-core-impl:codex-app-server.core@current
       role: core
-    - target: genty-runtime-impl:codex-app-server.runtime@current
+    - target: agent-runtime-impl:codex-app-server.runtime@current
       role: runtime
-    - target: genty-platform-impl:codex-app-server.platform@current
+    - target: agent-platform-impl:codex-app-server.platform@current
       role: platform
   sourced_from:
     - evidence:codex-rust-v0-135-0-release

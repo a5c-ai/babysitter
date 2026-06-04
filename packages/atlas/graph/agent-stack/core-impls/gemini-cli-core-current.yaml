@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:gemini-cli.core@current
+id: agent-core-impl:gemini-cli.core@current
 attributes:
   displayName: Gemini CLI Core (current)
   agentVersionId: agentVersion:gemini:ge-0-43-0
@@ -36,7 +36,7 @@ attributes:
   thinkingChannelHandling: passthrough
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:gemini-cli
     role: core

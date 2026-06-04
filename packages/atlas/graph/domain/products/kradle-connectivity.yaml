@@ -475,7 +475,7 @@ edges:
       notes: "Kradle includes a native CI/CD pipeline engine"
 ---
 nodeKind: StackProfile
-id: stack-profile:coding-genty-platform
+id: stack-profile:coding-agent-platform
 edges:
   integrates_with:
     - target: platform:kradle

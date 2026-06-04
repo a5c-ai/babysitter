@@ -14,7 +14,7 @@ attributes:
   argvMatches: []
   metadataFields: []
   consumer: hooks-adapter-core
-  notes: 'Ordered adapter auto-detection rule used by hooks-adapter. Verbatim from legacy packages/atlas-catalog/graph/nodes/runtime-semantics/discovery-signals-hooks.yaml :: discovery:claude:hooks-adapter:1.'
+  notes: 'Ordered adapter auto-detection rule used by hooks-adapter. Verbatim from legacy packages/agent-catalog/graph/nodes/runtime-semantics/discovery-signals-hooks.yaml :: discovery:claude:hooks-adapter:1.'
 edges:
   applies_to:
     - target: agent:claude-code

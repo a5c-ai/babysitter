@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:droid.platform@current
+id: agent-platform-impl:droid.platform@current
 attributes:
   displayName: Factory Droid Platform (current)
   agentVersionId: agent-version:droid@current
@@ -30,7 +30,7 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:droid
     role: platform

@@ -1,8 +1,8 @@
-# Legacy `packages/atlas-catalog/graph/` id → v6 `graph/` id alias map.
+# Legacy `packages/agent-catalog/graph/` id → v6 `graph/` id alias map.
 #
 # Walks the legacy graph (496 ids across 23 prefixes) and produces alias rows
 # for every record the v6 graph carries a counterpart for. The babysitter
-# atlas-catalog SDK (packages/atlas-catalog/src/sdk.ts) should normalize
+# agent-catalog SDK (packages/agent-catalog/src/sdk.ts) should normalize
 # legacy ids through this map on read.
 #
 # Format: { legacyId, v6Id, nodeKind, source?, notes? }
@@ -21,7 +21,7 @@ aliases:
   # legacy: `agent:<slug>` → v6: `agent:<slug>` (same prefix)
   # Host renames: gemini→gemini-cli, copilot→copilot-cli (CLI disambiguation).
   # ─────────────────────────────────────────────────────────────────
-  - { legacyId: agent:genty-platform, v6Id: agent:genty-platform, nodeKind: AgentProduct }
+  - { legacyId: agent:agent-platform, v6Id: agent:agent-platform, nodeKind: AgentProduct }
   - { legacyId: agent:claude,           v6Id: agent:claude-code,      nodeKind: AgentProduct, notes: "host rename: claude → claude-code" }
   - { legacyId: agent:codex,            v6Id: agent:codex,            nodeKind: AgentProduct }
   - { legacyId: agent:copilot,          v6Id: agent:copilot-cli,      nodeKind: AgentProduct, notes: "host rename: copilot → copilot-cli" }
@@ -37,7 +37,7 @@ aliases:
   # legacy: `agent-version:<slug>@<range>` (kebab + @semver suffix)
   # v6:     `agentVersion:<slug>:ge-X-Y-Z[-lt-A-B-C]`
   # ─────────────────────────────────────────────────────────────────
-  - { legacyId: "agent-version:genty-platform@current",  v6Id: "agentVersion:genty-platform:ge-5-0-0",          nodeKind: AgentVersion }
+  - { legacyId: "agent-version:agent-platform@current",  v6Id: "agentVersion:agent-platform:ge-5-0-0",          nodeKind: AgentVersion }
   - { legacyId: "agent-version:claude-code@1.x",            v6Id: "agentVersion:claude:ge-0-0-0",                    nodeKind: AgentVersion, notes: "host rename + range collapse" }
   - { legacyId: "agent-version:codex@1.x",                  v6Id: "agentVersion:codex:ge-0-0-0-lt-0-119-0",          nodeKind: AgentVersion, notes: "v6 splits codex < 0.119; legacy collapsed to 1.x" }
   - { legacyId: "agent-version:codex@1.x",                  v6Id: "agentVersion:codex:ge-0-119-0",                   nodeKind: AgentVersion }
@@ -68,7 +68,7 @@ aliases:
   # NodeKind: PluginArtifact
   # legacy: `pluginArtifact:<target>:<artifactKind>` (colon-separated)
   # v6:     `plugin-artifact:<target>-<artifactKind>` (dash-separated)
-  # source: packages/atlas-catalog/graph/nodes/hooks-and-plugins/plugin-artifacts.yaml
+  # source: packages/agent-catalog/graph/nodes/hooks-and-plugins/plugin-artifacts.yaml
   # ─────────────────────────────────────────────────────────────────
   - { legacyId: "pluginArtifact:claude-code:container-image",    v6Id: "plugin-artifact:claude-code-container-image",    nodeKind: PluginArtifact }
   - { legacyId: "pluginArtifact:codex:container-image",          v6Id: "plugin-artifact:codex-container-image",          nodeKind: PluginArtifact }
@@ -83,7 +83,7 @@ aliases:
   # ─────────────────────────────────────────────────────────────────
   # NodeKind: HookSurface
   # legacy: `hook:<kebab>` → v6: `hook-surface:<kebab>` (prefix rewrite, kebab preserved)
-  # source: packages/atlas-catalog/graph/nodes/hooks-and-plugins/hook-mappings.yaml
+  # source: packages/agent-catalog/graph/nodes/hooks-and-plugins/hook-mappings.yaml
   # ─────────────────────────────────────────────────────────────────
   - { legacyId: hook:after-agent,             v6Id: hook-surface:after-agent,             nodeKind: HookSurface }
   - { legacyId: hook:before-prompt-build,     v6Id: hook-surface:before-prompt-build,     nodeKind: HookSurface }
@@ -105,7 +105,7 @@ aliases:
   # legacy: `hookMapping:<surface>:<host>` → v6: `hook-mapping:<surface>-<host>` (mostly)
   # 37 legacy mappings; v6 has 38 file-records. Aliasing the host-renamed entries
   # explicitly; the rest follow the prefix+slug pattern.
-  # source: packages/atlas-catalog/graph/nodes/hooks-and-plugins/hook-mappings.yaml
+  # source: packages/agent-catalog/graph/nodes/hooks-and-plugins/hook-mappings.yaml
   # ─────────────────────────────────────────────────────────────────
   - { legacyId: "hookMapping:after-agent:gemini",              v6Id: "hook-mapping:after-agent-gemini-cli",            nodeKind: HookMapping }
   - { legacyId: "hookMapping:after-agent:openclaw",            v6Id: "hook-mapping:after-agent-openclaw",              nodeKind: HookMapping }
@@ -133,7 +133,7 @@ aliases:
   # ─────────────────────────────────────────────────────────────────
   # NodeKind: Capability
   # legacy: `capability:<kebab>` → v6: `capability:<kebab>` (same prefix; some renames)
-  # source: packages/atlas-catalog/graph/nodes/capabilities/capabilities.yaml
+  # source: packages/agent-catalog/graph/nodes/capabilities/capabilities.yaml
   # ─────────────────────────────────────────────────────────────────
   - { legacyId: capability:image-input,               v6Id: capability:supports-file-attachments,     nodeKind: Capability, notes: "renamed: image-input → supports-file-attachments (v6 broadened)" }
   - { legacyId: capability:interactive-mode,          v6Id: capability:interactive-mode,              nodeKind: Capability }
@@ -159,7 +159,7 @@ aliases:
   # v6:     `path-descriptor:<slug>` under graph/catalog-meta/path-descriptors/
   # ─────────────────────────────────────────────────────────────────
   - { legacyId: path:.a5c-runs,             v6Id: path-descriptor:a5c-runs-dir,            nodeKind: PathDescriptor }
-  - { legacyId: path:atlas-catalog-graph,   v6Id: path-descriptor:atlas-catalog-graph,     nodeKind: PathDescriptor }
+  - { legacyId: path:agent-catalog-graph,   v6Id: path-descriptor:agent-catalog-graph,     nodeKind: PathDescriptor }
   - { legacyId: path:catalog-api,           v6Id: path-descriptor:catalog-app-api,         nodeKind: PathDescriptor }
   - { legacyId: "path:auto:ghcr-io-anthropics-claude-code",       v6Id: path-descriptor:claude-code-container-image,   nodeKind: PathDescriptor }
   - { legacyId: "path:auto:ghcr-io-openai-codex",                 v6Id: path-descriptor:codex-container-image,         nodeKind: PathDescriptor }
@@ -239,7 +239,7 @@ aliases:
   # ─────────────────────────────────────────────────────────────────
   # NodeKind: PackageSurface
   # ─────────────────────────────────────────────────────────────────
-  - { legacyId: "package:@a5c-ai/atlas/catalog",     v6Id: "package-surface:a5c-ai-atlas-catalog",     nodeKind: PackageSurface }
+  - { legacyId: "package:@a5c-ai/atlas/catalog",     v6Id: "package-surface:a5c-ai-agent-catalog",     nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/comm-adapter",    v6Id: "package-surface:a5c-ai-agent-comm-adapter",    nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/extensions-adapter", v6Id: "package-surface:a5c-ai-extensions-adapter", nodeKind: PackageSurface }
   - { legacyId: "package:@a5c-ai/babysitter-sdk",    v6Id: "package-surface:a5c-ai-babysitter-sdk",    nodeKind: PackageSurface }
@@ -256,7 +256,7 @@ aliases:
   # ─────────────────────────────────────────────────────────────────
   # NodeKind: CiSurface
   # ─────────────────────────────────────────────────────────────────
-  - { legacyId: "ci:@a5c-ai/atlas/catalog", v6Id: "ci-surface:a5c-ai-atlas-catalog", nodeKind: CiSurface }
+  - { legacyId: "ci:@a5c-ai/atlas/catalog", v6Id: "ci-surface:a5c-ai-agent-catalog", nodeKind: CiSurface }
   - { legacyId: "ci:@a5c-ai/catalog",       v6Id: "ci-surface:a5c-ai-catalog",       nodeKind: CiSurface }
 
   # ─────────────────────────────────────────────────────────────────

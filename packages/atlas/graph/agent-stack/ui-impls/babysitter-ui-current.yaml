@@ -1,7 +1,7 @@
 nodeKind: AgentUIImpl
 id: agent-ui-impl:babysitter.ui@current
 attributes:
-  displayName: "babysitter UI (current) — adapters + genty-platform CLI"
+  displayName: "babysitter UI (current) — adapters + agent-platform CLI"
   agentVersionId: agent-version:babysitter@current
   packageRef: source-ref:babysitter-github
   uiKind: multi-surface
@@ -15,16 +15,16 @@ attributes:
     - presentation:adapters-tv-appletv
     - presentation:adapters-watch-watchos
     - presentation:adapters-watch-wearos
-    - presentation:genty-platform-cli
+    - presentation:agent-platform-cli
   themeSupport: full-customizable
   accessibilitySupport: wcag-aa
   notes: |
     babysitter is a multi-surface suite. The user-facing UI is delivered by
     the adapters package family (TUI / web / mobile / TV / watch) and the
-    genty-platform CLI binary. Programmatic consumers use the babysitter
+    agent-platform CLI binary. Programmatic consumers use the babysitter
     SDK directly (no UI). This AgentUIImpl aggregates all UI surfaces
     available to babysitter operators. The constituent products
-    (`agent:babysitter-sdk`, `agent:genty-platform`, `agent:adapters`)
+    (`agent:babysitter-sdk`, `agent:agent-platform`, `agent:adapters`)
     are sibling AgentProducts that compose into the same babysitter
     umbrella narrative.
 edges:

@@ -125,9 +125,9 @@ n-ary record is needed.
 ## NodeKinds: `AgentCoreImpl`, `AgentRuntimeImpl`, `AgentPlatformImpl`
 
 Concrete implementations of the core/runtime/platform parts of an `AgentVersion`. Real agents are
-layered: an agent product has an *genty-core* (the loop and transport-client), an
-*genty-runtime* (built-in tools, hook sockets, session state, sandbox primitive), and an
-*genty-platform* (extensions, marketplaces, channels, profiles, presentations,
+layered: an agent product has an *agent-core* (the loop and transport-client), an
+*agent-runtime* (built-in tools, hook sockets, session state, sandbox primitive), and an
+*agent-platform* (extensions, marketplaces, channels, profiles, presentations,
 identity). Capabilities, nuances, specs, interactions, filesystem conventions, and
 format conventions live at *specific* sub-module levels — not on the umbrella
 `AgentVersion`. The attribute slots below reify that decomposition.
@@ -145,7 +145,7 @@ Concrete loop + context-management + transport-client implementation.
 
 | Attribute | Type | Required | Notes |
 |---|---|---|---|
-| `id` | id | yes | E.g., `genty-core-impl:claude-code.core@1.x`. |
+| `id` | id | yes | E.g., `agent-core-impl:claude-code.core@1.x`. |
 | `displayName` | string | yes | Human-readable. |
 | `agentVersionId` | ref<`AgentVersion`> | yes | The version this implementation belongs to. |
 | `packageRef` | ref<`SourceRef`\|`ProcessDescriptor`> | yes | Where the implementation lives. |
@@ -194,7 +194,7 @@ Concrete runtime: built-in tools, hook sockets, session-state, sandbox primitive
 
 | Attribute | Type | Required | Notes |
 |---|---|---|---|
-| `id` | id | yes | E.g., `genty-runtime-impl:claude-code.runtime@1.x`. |
+| `id` | id | yes | E.g., `agent-runtime-impl:claude-code.runtime@1.x`. |
 | `displayName` | string | yes | Human-readable. |
 | `agentVersionId` | ref<`AgentVersion`> | yes | The version this implementation belongs to. |
 | `packageRef` | ref<`SourceRef`\|`ProcessDescriptor`> | yes | Where the implementation lives. |
@@ -249,7 +249,7 @@ identity, presentations, interaction primitives.
 
 | Attribute | Type | Required | Notes |
 |---|---|---|---|
-| `id` | id | yes | E.g., `genty-platform-impl:claude-code.platform@1.x`. |
+| `id` | id | yes | E.g., `agent-platform-impl:claude-code.platform@1.x`. |
 | `displayName` | string | yes | Human-readable. |
 | `agentVersionId` | ref<`AgentVersion`> | yes | The version this implementation belongs to. |
 | `packageRef` | ref<`SourceRef`\|`ProcessDescriptor`> | yes | Where the implementation lives. |

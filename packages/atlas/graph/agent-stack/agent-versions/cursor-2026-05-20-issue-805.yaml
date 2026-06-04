@@ -1,7 +1,7 @@
 # Issue #805 additive records.  The AgentVersion node is NOT redeclared
 # here to avoid overwriting the canonical cursor-current.yaml attributes.
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:cursor.platform@current
+id: agent-platform-impl:cursor.platform@current
 attributes:
   issue805AutomationMetadata:
     releaseMarker: "2026-05-20"

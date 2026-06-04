@@ -8,9 +8,9 @@ documents:
   - "layer:1-model"
   - "layer:2-provider"
   - "layer:3-transport"
-  - "layer:4-genty-core"
-  - "layer:5-genty-runtime"
-  - "layer:6-genty-platform"
+  - "layer:4-agent-core"
+  - "layer:5-agent-runtime"
+  - "layer:6-agent-platform"
   - "layer:7-workspace"
   - "layer:8-execution"
   - "layer:9-sandbox"
@@ -193,7 +193,7 @@ Realized by `AgentPlatformImpl` instances.
 expose a platform without owning a model/provider, or may hide platform
 services inside an IDE or hosted control plane. a5c platform is modeled as
 a unified same-layer extension host, not a Pi wrapper.
-- Source: `graph/stack-layers/layers/layer-6-genty-platform.yaml`
+- Source: `graph/stack-layers/layers/layer-6-agent-platform.yaml`
 
 ## Layer 5: Agent-Runtime
 
@@ -220,11 +220,11 @@ identity. Realized by `AgentRuntimeImpl` instances.
 core and runtime in one binary. a5c runtime is modeled as a unified
 same-layer implementation that can map Pi, Claude, Codex, LangGraph, and
 adapters runtime profiles without depending on one of them.
-- Source: `graph/stack-layers/layers/layer-5-genty-runtime.yaml`
+- Source: `graph/stack-layers/layers/layer-5-agent-runtime.yaml`
 
 ## Layer 4: Agent-Core
 
-The genty-core layer drives an inference turn or graph step end-to-end:
+The agent-core layer drives an inference turn or graph step end-to-end:
 prompt/context assembly, state transition, tool dispatch, child-agent
 handoff, message materialization, result synthesis, and stop detection.
 Realized by `AgentCoreImpl` instances.
@@ -247,7 +247,7 @@ Realized by `AgentCoreImpl` instances.
 core library without owning runtime, platform, workspace, or presentation.
 a5c's core is modeled as a unified same-layer contract, not as built on top
 of Pi; Pi is a compatibility profile.
-- Source: `graph/stack-layers/layers/layer-4-genty-core.yaml`
+- Source: `graph/stack-layers/layers/layer-4-agent-core.yaml`
 
 ## Layer 3: Transport
 

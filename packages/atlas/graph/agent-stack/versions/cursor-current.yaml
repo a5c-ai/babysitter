@@ -115,11 +115,11 @@ edges:
   version_of:
     - agent:cursor
   composed_of:
-    - target: genty-core-impl:cursor.core@current
+    - target: agent-core-impl:cursor.core@current
       role: core
-    - target: genty-runtime-impl:cursor.runtime@current
+    - target: agent-runtime-impl:cursor.runtime@current
       role: runtime
-    - target: genty-platform-impl:cursor.platform@current
+    - target: agent-platform-impl:cursor.platform@current
       role: platform
     - target: agent-ui-impl:cursor.ui@current
       role: ui

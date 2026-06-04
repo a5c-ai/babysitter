@@ -4,7 +4,7 @@ What the schema must guarantee, and how we govern it.
 
 ## Why schema-first
 
-Prose docs drift. Two prose docs about the same concept end up disagreeing within a few iterations. Generators that consume prose hallucinate. The atlas-catalog already exists in the codebase (`packages/atlas-catalog/`) precisely because we need *one* authoritative description; atlas doubles down: the catalog *is* the spec, and prose is a derived view.
+Prose docs drift. Two prose docs about the same concept end up disagreeing within a few iterations. Generators that consume prose hallucinate. The agent-catalog already exists in the codebase (`packages/agent-catalog/`) precisely because we need *one* authoritative description; atlas doubles down: the catalog *is* the spec, and prose is a derived view.
 
 Implications:
 

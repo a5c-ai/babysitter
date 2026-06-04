@@ -6,7 +6,7 @@ attributes:
   path: "~/.local/share/opencode/"
   pathKind: session-state-dir
   ownerKind: AgentPlatformImpl
-  ownerId: genty-platform-impl:opencode.platform@1.x
+  ownerId: agent-platform-impl:opencode.platform@1.x
   platform: cross-platform
   scope: user
   evaluationContext: user
@@ -19,4 +19,4 @@ attributes:
 
 edges:
   owned_by:
-    - target: genty-platform-impl:opencode.platform@1.x
+    - target: agent-platform-impl:opencode.platform@1.x

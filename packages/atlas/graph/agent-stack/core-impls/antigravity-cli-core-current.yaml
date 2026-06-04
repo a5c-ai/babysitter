@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:antigravity-cli.core@current
+id: agent-core-impl:antigravity-cli.core@current
 attributes:
   displayName: Antigravity CLI Core (current)
   agentVersionId: agentVersion:antigravity:2-0-11
@@ -36,7 +36,7 @@ attributes:
   thinkingChannelHandling: passthrough
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:antigravity-cli
     role: core

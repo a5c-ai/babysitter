@@ -20,7 +20,7 @@ documents: []
 | owner | tbd |
 
 ## Current state
-`ModelVersion.versionRange: versionRange` semantically conflates "this version" with "a range of versions". Example `claude-opus-4-7.yaml` has `versionRange: ">=4.7.0 <5.0.0"` which is a range, but `model:claude-opus-4-7` is intended to be one specific snapshot (`claude-opus-4-7-20251201` or similar). The repo atlas-catalog distinguishes `ModelFamily` (range-bearing) from `ModelVersion` (concrete snapshot id).
+`ModelVersion.versionRange: versionRange` semantically conflates "this version" with "a range of versions". Example `claude-opus-4-7.yaml` has `versionRange: ">=4.7.0 <5.0.0"` which is a range, but `model:claude-opus-4-7` is intended to be one specific snapshot (`claude-opus-4-7-20251201` or similar). The repo agent-catalog distinguishes `ModelFamily` (range-bearing) from `ModelVersion` (concrete snapshot id).
 
 ## Desired state
 - Rename `ModelVersion.versionRange` → `ModelVersion.versionId` (string, e.g. snapshot id).
@@ -29,7 +29,7 @@ documents: []
 
 ## Evidence
 - C:/work/v6/graph/schema/ontology-schema.yaml (ModelVersion attributes)
-- packages/atlas-catalog/graph/nodes/models.yaml (uses `modelVersionId` shape)
+- packages/agent-catalog/graph/nodes/models.yaml (uses `modelVersionId` shape)
 - https://platform.claude.com/docs/en/docs/about-claude/models/overview (snapshot date discipline)
 
 ## Propagation status

@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:a5c.runtime@current
+id: agent-runtime-impl:a5c.runtime@current
 attributes:
   displayName: a5c Unified Runtime (current) — unified tool host
   agentVersionId: agent-version:a5c@current
@@ -73,7 +73,7 @@ attributes:
     Claude/Codex/Gemini/OpenCode/LangGraph-style runtime profiles.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
     - target: agent:a5c
       role: runtime

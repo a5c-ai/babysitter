@@ -91,4 +91,4 @@ attributes:
 edges:
   hosted_by:
     - target: agent:opencode
-    - target: genty-platform-impl:opencode.platform@1.x
+    - target: agent-platform-impl:opencode.platform@1.x

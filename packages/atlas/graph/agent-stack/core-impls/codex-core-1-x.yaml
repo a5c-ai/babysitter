@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:codex.core@1.x
+id: agent-core-impl:codex.core@1.x
 attributes:
   displayName: Codex CLI Core (1.x)
   agentVersionId: agentVersion:codex:ge-0-119-0
@@ -37,7 +37,7 @@ attributes:
   thinkingChannelHandling: model-dependent
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:codex
     role: core

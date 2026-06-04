@@ -13,7 +13,7 @@ attributes:
   versionPolicy: semver
 edges:
   references_path:
-    - target: path:atlas-catalog-graph
+    - target: path:agent-catalog-graph
   # `adapters-proxy` runtime CLI bin modeled as
   # InteractionPrimitive[kind=cli-subcommand]. The package's transport-
   # protocol handlers are already modeled as ModelTransportProtocol records

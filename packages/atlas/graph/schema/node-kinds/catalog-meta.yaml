@@ -1018,9 +1018,9 @@ nodeKinds:
 
     whether a particular agent harness is the active host (or installed on the
 
-    machine). Sourced from the legacy atlas-catalog ontology
+    machine). Sourced from the legacy agent-catalog ontology
 
-    (packages/atlas-catalog/graph/schema/ontology-schema.yaml :: DiscoverySignal)
+    (packages/agent-catalog/graph/schema/ontology-schema.yaml :: DiscoverySignal)
 
     and packages/adapters/core/src/host-detection.ts.
 
@@ -1081,7 +1081,7 @@ nodeKinds:
   - name: absentSignals
     type: list<string>
     required: false
-    notes: Env-var names whose ABSENCE is required for the rule to match. Used by hooks-adapter ordered-rule detector (e.g. codex-without-claude-env disambiguates from claude when OPENAI_API_KEY is set but CLAUDE_PLUGIN_ROOT/CLAUDE_ENV_FILE are not). Consumed by `HooksMuxDetectionRule.absentSignals` in packages/atlas-catalog/src/models.ts and packages/adapters/hooks/core/src/discovery/detector.ts.
+    notes: Env-var names whose ABSENCE is required for the rule to match. Used by hooks-adapter ordered-rule detector (e.g. codex-without-claude-env disambiguates from claude when OPENAI_API_KEY is set but CLAUDE_PLUGIN_ROOT/CLAUDE_ENV_FILE are not). Consumed by `HooksMuxDetectionRule.absentSignals` in packages/agent-catalog/src/models.ts and packages/adapters/hooks/core/src/discovery/detector.ts.
   - name: argvMatches
     type: list<string>
     required: false

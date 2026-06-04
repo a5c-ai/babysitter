@@ -6,8 +6,8 @@ slug: "views/service-tower"
 articlePath: "wiki/views/service-tower.md"
 documents:
   - "layer:1-model"
-  - "layer:4-genty-core"
-  - "layer:5-genty-runtime"
+  - "layer:4-agent-core"
+  - "layer:5-agent-runtime"
   - "layer:11-presentation"
 reusableView:
   type: service-tower

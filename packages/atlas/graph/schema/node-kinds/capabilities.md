@@ -123,7 +123,7 @@ edge attributes:
 
 ```yaml
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:claude-code.runtime@1.x
+id: agent-runtime-impl:claude-code.runtime@1.x
 edges:
   supports:
     - target: capability:supports-mcp

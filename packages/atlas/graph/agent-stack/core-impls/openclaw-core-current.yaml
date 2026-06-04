@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:openclaw.core@current
+id: agent-core-impl:openclaw.core@current
 attributes:
   displayName: OpenClaw Core (current)
   agentVersionId: agentVersion:openclaw:ge-2026-5-27
@@ -42,7 +42,7 @@ attributes:
   thinkingChannelHandling: not-supported
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:openclaw
     role: core

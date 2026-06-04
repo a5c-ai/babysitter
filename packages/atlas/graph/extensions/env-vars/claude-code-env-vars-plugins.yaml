@@ -8,7 +8,7 @@ attributes:
   valueType: path
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-plugin-git-timeout-ms
@@ -21,7 +21,7 @@ attributes:
   defaultValue: "120000"
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-plugin-keep-marketplace-on-failure
@@ -33,7 +33,7 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-plugin-seed-dir
@@ -45,7 +45,7 @@ attributes:
   valueType: path
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-sync-plugin-install
@@ -57,7 +57,7 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-sync-plugin-install-timeout-ms
@@ -69,7 +69,7 @@ attributes:
   valueType: int
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
 ---
 nodeKind: EnvVar
 id: env-var:claude-code-disable-official-marketplace-autoinstall
@@ -81,4 +81,4 @@ attributes:
   valueType: bool
 edges:
   affects:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x

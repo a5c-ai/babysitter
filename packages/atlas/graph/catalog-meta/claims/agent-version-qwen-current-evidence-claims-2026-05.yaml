@@ -45,12 +45,12 @@ edges:
     - evidence:qwen-code-release-v0-16-2
   about_subject:
     - agent-version:qwen@current
-    - genty-core-impl:qwen.core@current
+    - agent-core-impl:qwen.core@current
 ---
 nodeKind: Claim
 id: claim:agent-version-qwen-current-telemetry-ttft-genai
 attributes:
-  subjectId: genty-runtime-impl:qwen.runtime@current
+  subjectId: agent-runtime-impl:qwen.runtime@current
   attribute: telemetryNotes
   value: ttft-genai-dual-emit
   subjectKind: AgentRuntimeImpl
@@ -69,12 +69,12 @@ edges:
   backed_by_evidence:
     - evidence:qwen-code-release-v0-16-2
   about_subject:
-    - genty-runtime-impl:qwen.runtime@current
+    - agent-runtime-impl:qwen.runtime@current
 ---
 nodeKind: Claim
 id: claim:agent-version-qwen-current-windows-terminal-install
 attributes:
-  subjectId: genty-platform-impl:qwen.platform@current
+  subjectId: agent-platform-impl:qwen.platform@current
   attribute: windowsInstallNotes
   value: bat-crlf-mintty-osc8-gate
   subjectKind: AgentPlatformImpl
@@ -93,5 +93,5 @@ edges:
   backed_by_evidence:
     - evidence:qwen-code-release-v0-16-2
   about_subject:
-    - genty-platform-impl:qwen.platform@current
+    - agent-platform-impl:qwen.platform@current
     - agent-ui-impl:qwen.ui@current

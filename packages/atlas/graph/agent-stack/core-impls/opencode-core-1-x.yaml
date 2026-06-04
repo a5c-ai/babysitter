@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:opencode.core@1.x
+id: agent-core-impl:opencode.core@1.x
 attributes:
   displayName: OpenCode Core (1.x)
   agentVersionId: agentVersion:opencode:ge-0-0-0
@@ -49,7 +49,7 @@ attributes:
   thinkingChannelHandling: not-supported
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:opencode
     role: core

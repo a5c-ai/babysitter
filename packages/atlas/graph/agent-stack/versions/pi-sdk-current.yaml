@@ -12,11 +12,11 @@ edges:
   version_of:
     - agent:pi
   composed_of:
-    - target: genty-core-impl:pi-sdk.core@current
+    - target: agent-core-impl:pi-sdk.core@current
       role: core
-    - target: genty-runtime-impl:pi.runtime@current
+    - target: agent-runtime-impl:pi.runtime@current
       role: runtime
-    - target: genty-platform-impl:pi.platform@current
+    - target: agent-platform-impl:pi.platform@current
       role: platform
   sourced_from: []
   supports:

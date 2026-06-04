@@ -6,7 +6,7 @@ attributes:
   path: ~/.a5c/profile.json
   pathKind: config-file
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: user
   evaluationContext: user
@@ -20,7 +20,7 @@ attributes:
     '
 edges:
   owned_by:
-    - target: graph:atlas-catalog
+    - target: graph:agent-catalog
 
 ---
 nodeKind: PathDescriptor
@@ -31,7 +31,7 @@ attributes:
   path: .a5c/config.yaml
   pathKind: config-file
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: project
   evaluationContext: project
@@ -45,7 +45,7 @@ attributes:
     '
 edges:
   owned_by:
-    - target: graph:atlas-catalog
+    - target: graph:agent-catalog
 
 ---
 nodeKind: PathDescriptor
@@ -56,7 +56,7 @@ attributes:
   path: .a5c/runs/<runId>/journal/events.jsonl
   pathKind: event-log
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: project
   evaluationContext: project
@@ -70,7 +70,7 @@ attributes:
     '
 edges:
   owned_by:
-    - target: graph:atlas-catalog
+    - target: graph:agent-catalog
 
 ---
 nodeKind: PathDescriptor
@@ -81,7 +81,7 @@ attributes:
   path: .a5c/runs/<runId>/tasks/
   pathKind: session-state-dir
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: project
   evaluationContext: project
@@ -93,7 +93,7 @@ attributes:
     '
 edges:
   owned_by:
-    - target: graph:atlas-catalog
+    - target: graph:agent-catalog
 
 ---
 nodeKind: PathDescriptor
@@ -104,7 +104,7 @@ attributes:
   path: .a5c/runs/<runId>/effects/
   pathKind: session-state-dir
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: project
   evaluationContext: project
@@ -118,7 +118,7 @@ attributes:
     '
 edges:
   owned_by:
-    - target: graph:atlas-catalog
+    - target: graph:agent-catalog
 
 ---
 nodeKind: PathDescriptor
@@ -129,7 +129,7 @@ attributes:
   path: .a5c/runs/<runId>/locks/
   pathKind: session-state-dir
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: project
   evaluationContext: project
@@ -141,7 +141,7 @@ attributes:
     '
 edges:
   owned_by:
-    - target: graph:atlas-catalog
+    - target: graph:agent-catalog
 
 ---
 nodeKind: PathDescriptor
@@ -152,7 +152,7 @@ attributes:
   path: docs/run-history-insights.md
   pathKind: doc-file
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: project
   evaluationContext: project
@@ -166,7 +166,7 @@ attributes:
     '
 edges:
   owned_by:
-    - target: graph:atlas-catalog
+    - target: graph:agent-catalog
 
 ---
 nodeKind: PathDescriptor
@@ -177,7 +177,7 @@ attributes:
   path: .adapters/hooks.json
   pathKind: config-file
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: project
   evaluationContext: project
@@ -200,7 +200,7 @@ attributes:
   path: ~/.adapters/hooks.json
   pathKind: config-file
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: user
   evaluationContext: user

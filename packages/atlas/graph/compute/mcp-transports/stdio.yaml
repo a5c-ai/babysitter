@@ -62,23 +62,23 @@ attributes:
     omit it. The 2025-06-18 spec revision removed JSON-RPC batch arrays.
 edges:
   spoken_by:
-    - target: genty-runtime-impl:a5c.runtime@current
-    - target: genty-runtime-impl:amp.runtime@current
-    - target: genty-runtime-impl:genty-platform.runtime@current
-    - target: genty-runtime-impl:babysitter.runtime@current
-    - target: genty-runtime-impl:babysitter-sdk.runtime@current
-    - target: genty-runtime-impl:claude-agent-sdk.runtime@current
-    - target: genty-runtime-impl:claude-code.runtime@1.x
-    - target: genty-runtime-impl:codex-app-server.runtime@current
-    - target: genty-runtime-impl:codex.runtime@1.x
-    - target: genty-runtime-impl:codex-sdk.runtime@current
-    - target: genty-runtime-impl:copilot-cli.runtime@current
-    - target: genty-runtime-impl:cursor.runtime@current
-    - target: genty-runtime-impl:droid.runtime@current
-    - target: genty-runtime-impl:gemini-cli.runtime@current
-    - target: genty-runtime-impl:hermes.runtime@current
-    - target: genty-runtime-impl:omp.runtime@current
-    - target: genty-runtime-impl:openclaw.runtime@current
-    - target: genty-runtime-impl:opencode.runtime@1.x
-    - target: genty-runtime-impl:pi.runtime@current
-    - target: genty-runtime-impl:qwen.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:amp.runtime@current
+    - target: agent-runtime-impl:agent-platform.runtime@current
+    - target: agent-runtime-impl:babysitter.runtime@current
+    - target: agent-runtime-impl:babysitter-sdk.runtime@current
+    - target: agent-runtime-impl:claude-agent-sdk.runtime@current
+    - target: agent-runtime-impl:claude-code.runtime@1.x
+    - target: agent-runtime-impl:codex-app-server.runtime@current
+    - target: agent-runtime-impl:codex.runtime@1.x
+    - target: agent-runtime-impl:codex-sdk.runtime@current
+    - target: agent-runtime-impl:copilot-cli.runtime@current
+    - target: agent-runtime-impl:cursor.runtime@current
+    - target: agent-runtime-impl:droid.runtime@current
+    - target: agent-runtime-impl:gemini-cli.runtime@current
+    - target: agent-runtime-impl:hermes.runtime@current
+    - target: agent-runtime-impl:omp.runtime@current
+    - target: agent-runtime-impl:openclaw.runtime@current
+    - target: agent-runtime-impl:opencode.runtime@1.x
+    - target: agent-runtime-impl:pi.runtime@current
+    - target: agent-runtime-impl:qwen.runtime@current

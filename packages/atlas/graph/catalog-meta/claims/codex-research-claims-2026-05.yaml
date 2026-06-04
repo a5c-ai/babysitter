@@ -26,7 +26,7 @@ edges:
 nodeKind: Claim
 id: claim:codex-research-approval-and-sandbox-controls
 attributes:
-  subjectId: genty-runtime-impl:codex.runtime@1.x
+  subjectId: agent-runtime-impl:codex.runtime@1.x
   subjectKind: AgentRuntimeImpl
   attribute: approvalAndSandboxControls
   value: approval-policy plus sandbox-mode
@@ -45,7 +45,7 @@ attributes:
   note: Supports approvalGatingPrimitive and subprocessSandboxStrategy attributes on the Codex runtime model.
 edges:
   about_subject:
-    - genty-runtime-impl:codex.runtime@1.x
+    - agent-runtime-impl:codex.runtime@1.x
   backed_by_evidence:
     - evidence:codex-research-openai-approvals-security-doc
     - evidence:codex-research-openai-sandbox-doc
@@ -53,7 +53,7 @@ edges:
 nodeKind: Claim
 id: claim:codex-research-config-files
 attributes:
-  subjectId: genty-platform-impl:codex.platform@1.x
+  subjectId: agent-platform-impl:codex.platform@1.x
   subjectKind: AgentPlatformImpl
   attribute: settingsFiles
   value: ~/.codex/config.toml and .codex/config.toml
@@ -71,14 +71,14 @@ attributes:
   note: Adds current OpenAI developer documentation provenance for Codex platform configuration files.
 edges:
   about_subject:
-    - genty-platform-impl:codex.platform@1.x
+    - agent-platform-impl:codex.platform@1.x
   backed_by_evidence:
     - evidence:codex-research-openai-config-doc
 ---
 nodeKind: Claim
 id: claim:codex-research-mcp-support
 attributes:
-  subjectId: genty-runtime-impl:codex.runtime@1.x
+  subjectId: agent-runtime-impl:codex.runtime@1.x
   subjectKind: AgentRuntimeImpl
   attribute: supportedMCPTransports
   value: stdio and streamable-http capable MCP integration
@@ -97,7 +97,7 @@ attributes:
   note: Adds current OpenAI developer documentation provenance for Codex MCP runtime support.
 edges:
   about_subject:
-    - genty-runtime-impl:codex.runtime@1.x
+    - agent-runtime-impl:codex.runtime@1.x
   backed_by_evidence:
     - evidence:codex-research-openai-mcp-doc
     - evidence:codex-research-openai-agents-sdk-doc
@@ -130,7 +130,7 @@ edges:
 nodeKind: Claim
 id: claim:codex-research-cli-approval-flag
 attributes:
-  subjectId: genty-runtime-impl:codex.runtime@1.x
+  subjectId: agent-runtime-impl:codex.runtime@1.x
   subjectKind: AgentRuntimeImpl
   attribute: approvalGatingPrimitive
   value: --ask-for-approval values plus --full-auto and --dangerously-bypass-approvals-and-sandbox
@@ -148,7 +148,7 @@ attributes:
   note: Adds current command-line help provenance for Codex approval controls and launch recipes.
 edges:
   about_subject:
-    - genty-runtime-impl:codex.runtime@1.x
+    - agent-runtime-impl:codex.runtime@1.x
   backed_by_evidence:
     - evidence:codex-research-openai-cli-reference-doc
 ---
@@ -180,7 +180,7 @@ edges:
 nodeKind: Claim
 id: claim:codex-research-approval-policy-permission-modes
 attributes:
-  subjectId: genty-runtime-impl:codex.runtime@1.x
+  subjectId: agent-runtime-impl:codex.runtime@1.x
   subjectKind: AgentRuntimeImpl
   attribute: operates_in_permission_mode
   value: untrusted, on-failure, on-request, never
@@ -198,7 +198,7 @@ attributes:
   note: Supports the current Codex PermissionMode nodes and replaces stale suggest/auto-edit/full-auto approval-mode modeling.
 edges:
   about_subject:
-    - genty-runtime-impl:codex.runtime@1.x
+    - agent-runtime-impl:codex.runtime@1.x
   backed_by_evidence:
     - evidence:codex-research-cli-help-0-120-0
 ---
@@ -231,7 +231,7 @@ edges:
 nodeKind: Claim
 id: claim:codex-research-sandbox-modes
 attributes:
-  subjectId: genty-runtime-impl:codex.runtime@1.x
+  subjectId: agent-runtime-impl:codex.runtime@1.x
   subjectKind: AgentRuntimeImpl
   attribute: subprocessSandboxStrategy
   value: read-only, workspace-write, danger-full-access
@@ -249,7 +249,7 @@ attributes:
   note: Supports Codex Sandbox nodes and --sandbox LaunchConfig recipes.
 edges:
   about_subject:
-    - genty-runtime-impl:codex.runtime@1.x
+    - agent-runtime-impl:codex.runtime@1.x
     - sandbox:codex-read-only
     - sandbox:codex-workspace-write
     - sandbox:codex-danger-full-access

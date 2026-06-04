@@ -1,8 +1,8 @@
 nodeKind: CiSurface
-id: ci:a5c-ai-atlas-catalog
+id: ci:a5c-ai-agent-catalog
 attributes:
   ciId: "@a5c-ai/atlas/catalog"
-  packageId: package:a5c-ai-atlas-catalog
+  packageId: package:a5c-ai-agent-catalog
   scripts:
     - build
     - test
@@ -26,4 +26,4 @@ attributes:
     - pr
 edges:
   validates_package:
-    - target: package:a5c-ai-atlas-catalog
+    - target: package:a5c-ai-agent-catalog

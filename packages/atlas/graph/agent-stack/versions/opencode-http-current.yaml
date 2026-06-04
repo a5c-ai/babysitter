@@ -16,11 +16,11 @@ edges:
   version_of:
     - agent:opencode
   composed_of:
-    - target: genty-core-impl:opencode-http.core@current
+    - target: agent-core-impl:opencode-http.core@current
       role: core
-    - target: genty-runtime-impl:opencode.runtime@1.x
+    - target: agent-runtime-impl:opencode.runtime@1.x
       role: runtime
-    - target: genty-platform-impl:opencode.platform@1.x
+    - target: agent-platform-impl:opencode.platform@1.x
       role: platform
   sourced_from:
     - evidence:opencode-1-15-12-release

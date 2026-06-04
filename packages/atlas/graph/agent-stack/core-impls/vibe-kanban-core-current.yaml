@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:vibe-kanban.core@current
+id: agent-core-impl:vibe-kanban.core@current
 attributes:
   displayName: "Vibe Kanban Core (current)"
   agentVersionId: agent-version:vibe-kanban@current
@@ -48,7 +48,7 @@ attributes:
     Agent tool schemas define structured contracts for agent interactions.
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:vibe-kanban
       role: core

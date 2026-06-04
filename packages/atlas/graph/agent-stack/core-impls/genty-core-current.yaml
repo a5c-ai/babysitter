@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:genty.core@current
+id: agent-core-impl:genty.core@current
 attributes:
   displayName: "genty Core (current) — composed genty-core + babysitter-sdk loop"
   agentVersionId: agent-version:genty@current
@@ -16,7 +16,7 @@ attributes:
   subagentInvokerPolicy: platform-mediated
   subagentInvokerNotes: |
     Subagents dispatched via `ctx.task(...)` and spawned as harness
-    subprocesses through the composed genty-platform layer.
+    subprocesses through the composed agent-platform layer.
   resultSynthesisPolicy: process-function-defined
   resultSynthesisNotes: |
     Final result is whatever the wrapped process function returns.
@@ -32,7 +32,7 @@ attributes:
     barrel exports, and adapters bridging on top.
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:genty
       role: core

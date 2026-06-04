@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:codex.platform@1.x
+id: agent-platform-impl:codex.platform@1.x
 attributes:
   displayName: Codex CLI Platform (1.x)
   agentVersionId: agentVersion:codex:ge-0-119-0
@@ -26,7 +26,7 @@ attributes:
   supportedChannelKinds: []
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   supports:
     - target: capability:requires-tool-approval
       versionRange: '>=0.1.0'

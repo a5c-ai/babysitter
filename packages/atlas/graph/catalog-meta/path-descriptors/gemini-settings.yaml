@@ -6,7 +6,7 @@ attributes:
   path: "~/.gemini/settings.json"
   pathKind: settings-file
   ownerKind: AgentPlatformImpl
-  ownerId: genty-platform-impl:gemini-cli.platform@current
+  ownerId: agent-platform-impl:gemini-cli.platform@current
   platform: cross-platform
   scope: user
   evaluationContext: user
@@ -14,4 +14,4 @@ attributes:
 
 edges:
   owned_by:
-    - target: genty-platform-impl:gemini-cli.platform@current
+    - target: agent-platform-impl:gemini-cli.platform@current

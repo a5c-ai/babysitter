@@ -65,12 +65,12 @@ attributes:
     Mandatory request header from spec 2025-06-18: `MCP-Protocol-Version: <rev>`.
 edges:
   spoken_by:
-    - target: genty-runtime-impl:a5c.runtime@current
-    - target: genty-runtime-impl:genty-platform.runtime@current
-    - target: genty-runtime-impl:babysitter.runtime@current
-    - target: genty-runtime-impl:babysitter-sdk.runtime@current
-    - target: genty-runtime-impl:claude-agent-sdk.runtime@current
-    - target: genty-runtime-impl:claude-code.runtime@1.x
-    - target: genty-runtime-impl:codex-app-server.runtime@current
-    - target: genty-runtime-impl:codex.runtime@1.x
-    - target: genty-runtime-impl:codex-sdk.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:agent-platform.runtime@current
+    - target: agent-runtime-impl:babysitter.runtime@current
+    - target: agent-runtime-impl:babysitter-sdk.runtime@current
+    - target: agent-runtime-impl:claude-agent-sdk.runtime@current
+    - target: agent-runtime-impl:claude-code.runtime@1.x
+    - target: agent-runtime-impl:codex-app-server.runtime@current
+    - target: agent-runtime-impl:codex.runtime@1.x
+    - target: agent-runtime-impl:codex-sdk.runtime@current

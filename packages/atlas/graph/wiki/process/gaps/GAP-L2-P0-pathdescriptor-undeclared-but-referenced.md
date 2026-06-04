@@ -20,7 +20,7 @@ documents: []
 | owner | tbd |
 
 ## Current state
-`coverage-checklist.md` references `PathDescriptor` in at least 4 rows ("Run dir layout PathDescriptor per file", "PathDescriptor for `~/.a5c/`", "Layout version", others). It is **NOT** present in `schema/ontology-schema.yaml` `nodeKinds:` list (verified by grep). It is **NOT** in `02-node-kinds/README.md` cluster table. The repo atlas-catalog DOES define `PathDescriptor`. So the v6 schema cites a NodeKind that does not exist.
+`coverage-checklist.md` references `PathDescriptor` in at least 4 rows ("Run dir layout PathDescriptor per file", "PathDescriptor for `~/.a5c/`", "Layout version", others). It is **NOT** present in `schema/ontology-schema.yaml` `nodeKinds:` list (verified by grep). It is **NOT** in `02-node-kinds/README.md` cluster table. The repo agent-catalog DOES define `PathDescriptor`. So the v6 schema cites a NodeKind that does not exist.
 
 ## Desired state
 Add `PathDescriptor` NodeKind in v6 ontology-schema.yaml, lift the repo definition, and document in `02-node-kinds/catalog-meta.md` (or new file). All coverage-checklist rows resolve to a real schema element.
@@ -28,7 +28,7 @@ Add `PathDescriptor` NodeKind in v6 ontology-schema.yaml, lift the repo definiti
 ## Evidence
 - C:/work/v6/graph/schema/ontology-schema.yaml (no PathDescriptor)
 - C:/work/v6/graph/coverage-checklist.md (multiple PathDescriptor mentions)
-- packages/atlas-catalog/graph/schema/ontology-schema.yaml lines 221-229
+- packages/agent-catalog/graph/schema/ontology-schema.yaml lines 221-229
 
 ## Propagation status
 - Level 1: open (also a Level 1 gap — see GAP-L1-P2-repo-graph-cisurface-packagesurface.md)

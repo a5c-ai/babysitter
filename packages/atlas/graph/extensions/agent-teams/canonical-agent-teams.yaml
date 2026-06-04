@@ -15,7 +15,7 @@ attributes:
   - subagent:claude-code.plan
 edges:
   team_of:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
   has_member:
   - target: subagent:claude-code.explore
   - target: subagent:claude-code.plan
@@ -39,7 +39,7 @@ attributes:
   - subagent:vulnerability-scanner
 edges:
   team_of:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
   has_member:
   - target: subagent:code-reviewer
   - target: subagent:vulnerability-scanner
@@ -63,7 +63,7 @@ attributes:
   - subagent:typo-fixer
 edges:
   team_of:
-  - target: genty-runtime-impl:claude-code.runtime@1.x
+  - target: agent-runtime-impl:claude-code.runtime@1.x
   has_member:
   - target: subagent:doc-generator
   - target: subagent:typo-fixer

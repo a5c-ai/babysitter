@@ -6,7 +6,7 @@ attributes:
   path: "~/.codex/rollouts/"
   pathKind: session-state-dir
   ownerKind: AgentPlatformImpl
-  ownerId: genty-platform-impl:codex.platform@1.x
+  ownerId: agent-platform-impl:codex.platform@1.x
   platform: cross-platform
   scope: user
   evaluationContext: user
@@ -14,4 +14,4 @@ attributes:
 
 edges:
   owned_by:
-    - target: genty-platform-impl:codex.platform@1.x
+    - target: agent-platform-impl:codex.platform@1.x

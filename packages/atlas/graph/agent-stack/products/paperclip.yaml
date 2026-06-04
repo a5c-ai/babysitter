@@ -55,11 +55,11 @@ edges:
   version_of:
     - agent:paperclip
   composed_of:
-    - target: genty-core-impl:paperclip.core@current
+    - target: agent-core-impl:paperclip.core@current
       role: core
-    - target: genty-runtime-impl:paperclip.runtime@current
+    - target: agent-runtime-impl:paperclip.runtime@current
       role: runtime
-    - target: genty-platform-impl:paperclip.platform@current
+    - target: agent-platform-impl:paperclip.platform@current
       role: platform
   sourced_from: []
   supports:

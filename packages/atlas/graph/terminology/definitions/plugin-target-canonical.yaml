@@ -9,8 +9,8 @@ attributes:
     particular agent host. Distinct from AgentPlatformImpl (the platform itself);
     PluginTarget is the *target descriptor* — manifest format, command format,
     script variants, install layout, package metadata, distribution model, etc.
-    Sourced from the legacy atlas-catalog ontology
-    (packages/atlas-catalog/graph/schema/ontology-schema.yaml :: PluginTarget).
+    Sourced from the legacy agent-catalog ontology
+    (packages/agent-catalog/graph/schema/ontology-schema.yaml :: PluginTarget).
   status: canonical
 edges:
   defines:

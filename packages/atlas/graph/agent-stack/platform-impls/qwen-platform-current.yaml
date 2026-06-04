@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:qwen.platform@current
+id: agent-platform-impl:qwen.platform@current
 attributes:
   displayName: Qwen Code Platform (current)
   agentVersionId: agent-version:qwen@current
@@ -50,7 +50,7 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:qwen
     role: platform

@@ -4,7 +4,7 @@ id: benchmark:toolbench
 attributes:
   displayName: "ToolBench"
   homepageUrl: https://github.com/OpenBMB/ToolBench
-  kind: genty-platform
+  kind: agent-platform
   targetsKind: AgentVersion
   description: |
     ToolBench (OpenBMB) is a large-scale instruction-tuning and

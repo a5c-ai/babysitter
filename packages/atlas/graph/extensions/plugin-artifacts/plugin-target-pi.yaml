@@ -92,4 +92,4 @@ attributes:
 edges:
   hosted_by:
     - target: agent:pi
-    - target: genty-platform-impl:pi.platform@current
+    - target: agent-platform-impl:pi.platform@current

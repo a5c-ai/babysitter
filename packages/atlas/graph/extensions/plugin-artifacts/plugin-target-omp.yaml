@@ -93,4 +93,4 @@ attributes:
 edges:
   hosted_by:
     - target: agent:omp
-    - target: genty-platform-impl:omp.platform@current
+    - target: agent-platform-impl:omp.platform@current

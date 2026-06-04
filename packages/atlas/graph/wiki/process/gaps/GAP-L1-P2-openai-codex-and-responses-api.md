@@ -31,7 +31,7 @@ documents: []
 
 ## Evidence
 - platform.openai.com/docs/api-reference/responses
-- packages/atlas-catalog evidence files referencing OpenAI
+- packages/agent-catalog evidence files referencing OpenAI
 
 ## Propagation status
 - Level 1: open

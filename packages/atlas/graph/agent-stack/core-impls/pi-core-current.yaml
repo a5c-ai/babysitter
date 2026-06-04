@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:pi.core@current
+id: agent-core-impl:pi.core@current
 attributes:
   displayName: Pi Core (current)
   agentVersionId: agentVersion:pi:ge-0-75-5
@@ -49,7 +49,7 @@ attributes:
     engineering tasks.
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:pi
     role: core

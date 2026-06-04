@@ -41,4 +41,4 @@ attributes:
 edges:
   hosted_by:
     - target: agent:amp
-    - target: genty-platform-impl:amp.platform@current
+    - target: agent-platform-impl:amp.platform@current

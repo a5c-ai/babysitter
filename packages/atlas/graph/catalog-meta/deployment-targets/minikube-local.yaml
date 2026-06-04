@@ -14,6 +14,6 @@ attributes:
   autoApplyKubernetes: true
   description: |
     Single-node minikube profile used for local development of the
-    babysitter cloud bundle (kanban + gateway + genty-platform).
+    babysitter cloud bundle (kanban + gateway + agent-platform).
     `authMode = local-dev` means the bootstrap admin password is read
     from a local-dev secret rather than a managed secret reference.

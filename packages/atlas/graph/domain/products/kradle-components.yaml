@@ -22,7 +22,7 @@ attributes:
     can reconcile state changes in real time.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
       notes: "Core control plane for the Kradle forge runtime"
   part_of:
     - target: platform:kradle
@@ -42,7 +42,7 @@ attributes:
     that grow with usage.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
       notes: "Aggregated API server for data-plane resources"
   part_of:
     - target: platform:kradle
@@ -65,7 +65,7 @@ attributes:
     to ensure the forge never creates a parallel permission system.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
       notes: "Identity and RBAC enforcement layer"
   part_of:
     - target: platform:kradle
@@ -178,7 +178,7 @@ attributes:
     and streams session output back through SSE.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
       notes: "Agent dispatch runtime component"
   part_of:
     - target: platform:kradle
@@ -198,7 +198,7 @@ attributes:
     as an AgentTriggerExecution for audit trail purposes.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
       notes: "Event-driven agent trigger routing"
   part_of:
     - target: platform:kradle
@@ -218,7 +218,7 @@ attributes:
     auto-approve rules for trusted agent stacks.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
       notes: "Human-in-the-loop approval gates"
   part_of:
     - target: platform:kradle
@@ -258,7 +258,7 @@ attributes:
     explicitly refreshed. Every prompt fragment has traceable provenance.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
       notes: "Context assembly and prompt safety"
   part_of:
     - target: platform:kradle

@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:symphony.runtime@current
+id: agent-runtime-impl:symphony.runtime@current
 attributes:
   displayName: "Symphony Runtime (current)"
   agentVersionId: agent-version:symphony@current
@@ -25,7 +25,7 @@ attributes:
     retry on transient failures.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
     - target: agent:symphony
       role: runtime

@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:langgraph.platform@current
+id: agent-platform-impl:langgraph.platform@current
 attributes:
   displayName: "LangGraph Platform / LangSmith Deployment (current)"
   agentVersionId: agent-version:langgraph@current
@@ -29,7 +29,7 @@ attributes:
     and wired by the host application.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
     - target: agent:langgraph
       role: platform

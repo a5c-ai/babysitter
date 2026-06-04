@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:kradle.platform@current
+id: agent-platform-impl:kradle.platform@current
 attributes:
   displayName: "Kradle Platform (current) — K8s-native agent governance"
   packageRef: source-ref:babysitter-sdk
@@ -34,7 +34,7 @@ attributes:
     75 Kradle CRDs total. All queryable via kubectl.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
     - target: platform:kradle
       role: platform

@@ -13,11 +13,11 @@ edges:
   version_of:
     - agent:genty
   composed_of:
-    - target: genty-core-impl:genty.core@current
+    - target: agent-core-impl:genty.core@current
       role: core
-    - target: genty-runtime-impl:genty.runtime@current
+    - target: agent-runtime-impl:genty.runtime@current
       role: runtime
-    - target: genty-platform-impl:genty.platform@current
+    - target: agent-platform-impl:genty.platform@current
       role: platform
     - target: agent-ui-impl:genty.ui@current
       role: ui
@@ -26,7 +26,7 @@ edges:
     - target: capability:can-multi-turn
       versionRange: '>=5.0.0'
       level: full
-      notes: genty orchestrates multi-turn agent sessions via the composed genty-platform and babysitter-sdk.
+      notes: genty orchestrates multi-turn agent sessions via the composed agent-platform and babysitter-sdk.
     - target: capability:supports-text-streaming
       versionRange: '>=5.0.0'
       level: full
@@ -34,11 +34,11 @@ edges:
     - target: capability:supports-mcp
       versionRange: '>=5.0.0'
       level: full
-      notes: genty integrates with MCP servers via genty-platform and adapters.
+      notes: genty integrates with MCP servers via agent-platform and adapters.
     - target: capability:supports-subagent-dispatch
       versionRange: '>=5.0.0'
       level: full
-      notes: genty dispatches tasks to subagent processes via the composed genty-platform runtime.
+      notes: genty dispatches tasks to subagent processes via the composed agent-platform runtime.
     - target: capability:can-resume
       versionRange: '>=5.0.0'
       level: full

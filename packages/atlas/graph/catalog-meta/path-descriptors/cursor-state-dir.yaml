@@ -6,7 +6,7 @@ attributes:
   path: "~/Library/Application Support/Cursor/"
   pathKind: session-state-dir
   ownerKind: AgentPlatformImpl
-  ownerId: genty-platform-impl:cursor.platform@current
+  ownerId: agent-platform-impl:cursor.platform@current
   platform: macos
   scope: user
   evaluationContext: user
@@ -21,4 +21,4 @@ attributes:
 
 edges:
   owned_by:
-    - target: genty-platform-impl:cursor.platform@current
+    - target: agent-platform-impl:cursor.platform@current

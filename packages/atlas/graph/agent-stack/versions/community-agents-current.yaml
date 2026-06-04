@@ -37,7 +37,7 @@ attributes:
   minSchemaVersion: 6.0.0
 edges:
   composed_of:
-  - target: genty-core-impl:psclaudecode.core@current
+  - target: agent-core-impl:psclaudecode.core@current
     role: core
   version_of:
   - agent:psclaudecode
@@ -60,7 +60,7 @@ attributes:
   minSchemaVersion: 6.0.0
 edges:
   composed_of:
-  - target: genty-core-impl:cyclop-one.core@current
+  - target: agent-core-impl:cyclop-one.core@current
     role: core
   version_of:
   - agent:cyclop-one
@@ -83,7 +83,7 @@ attributes:
   minSchemaVersion: 6.0.0
 edges:
   composed_of:
-  - target: genty-core-impl:cli-anything.core@current
+  - target: agent-core-impl:cli-anything.core@current
     role: core
   version_of:
   - agent:cli-anything
@@ -106,7 +106,7 @@ attributes:
   minSchemaVersion: 6.0.0
 edges:
   composed_of:
-  - target: genty-core-impl:nanny.core@current
+  - target: agent-core-impl:nanny.core@current
     role: core
   version_of:
   - agent:nanny

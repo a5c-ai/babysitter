@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:qwen.core@current
+id: agent-core-impl:qwen.core@current
 attributes:
   displayName: Qwen Code Core (current)
   agentVersionId: agent-version:qwen@current
@@ -41,7 +41,7 @@ attributes:
     notebook loop directly; the graph records the upstream runtime behavior.
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:qwen
     role: core

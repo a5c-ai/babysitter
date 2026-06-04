@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:copilot-cli.core@current
+id: agent-core-impl:copilot-cli.core@current
 attributes:
   displayName: GitHub Copilot CLI Core (current)
   agentVersionId: agentVersion:copilot:ge-1-0-55-3
@@ -44,7 +44,7 @@ attributes:
   thinkingChannelHandling: not-supported
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:copilot-cli
     role: core

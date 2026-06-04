@@ -1,12 +1,12 @@
 nodeKind: Layer
-id: layer:4-genty-core
+id: layer:4-agent-core
 attributes:
   displayName: Agent-Core
   position: 4
   path: compute
   scope: Inner loop and graph/turn semantics for one agent brain.
   summary: |
-    The genty-core layer drives an inference turn or graph step end-to-end:
+    The agent-core layer drives an inference turn or graph step end-to-end:
     prompt/context assembly, state transition, tool dispatch, child-agent
     handoff, message materialization, result synthesis, and stop detection.
     Realized by `AgentCoreImpl` instances.

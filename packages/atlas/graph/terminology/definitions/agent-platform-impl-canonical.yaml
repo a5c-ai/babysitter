@@ -1,11 +1,11 @@
 nodeKind: Definition
-id: definition:genty-platform-impl.canonical
+id: definition:agent-platform-impl.canonical
 attributes:
   authoredAt: "2026-04-28T00:00:00Z"
-  termId: term:genty-platform-impl
+  termId: term:agent-platform-impl
   text: |
     concrete platform impl
   status: canonical
 edges:
   defines:
-    - term:genty-platform-impl
+    - term:agent-platform-impl

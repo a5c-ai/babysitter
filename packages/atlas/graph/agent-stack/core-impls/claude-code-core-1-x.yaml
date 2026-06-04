@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:claude-code.core@1.x
+id: agent-core-impl:claude-code.core@1.x
 attributes:
   displayName: Claude Code Core (1.x)
   agentVersionId: agentVersion:claude:ge-0-0-0
@@ -76,7 +76,7 @@ edges:
   speaks:
   - target: model-transport:anthropic-messages
   realizes:
-  - target: layer:4-genty-core
+  - target: layer:4-agent-core
   supports:
   - target: capability:can-multi-turn
     versionRange: '>=1.0.0 <2.0.0'

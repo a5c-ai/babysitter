@@ -11,9 +11,9 @@ edges:
   version_of:
     - agent:symphony
   composed_of:
-    - target: genty-core-impl:symphony.core@current
+    - target: agent-core-impl:symphony.core@current
       role: core
-    - target: genty-runtime-impl:symphony.runtime@current
+    - target: agent-runtime-impl:symphony.runtime@current
       role: runtime
   sourced_from: []
   supports:

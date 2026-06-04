@@ -25,9 +25,9 @@ attributes:
     stable source-file evidence instead of broad repository evidence.
   owner: "@a5c-ai/catalog-stewards"
   affectedEntities:
-    - genty-core-impl:a5c.core@current
-    - genty-runtime-impl:a5c.runtime@current
-    - genty-platform-impl:a5c.platform@current
+    - agent-core-impl:a5c.core@current
+    - agent-runtime-impl:a5c.runtime@current
+    - agent-platform-impl:a5c.platform@current
     - agent-ui-impl:a5c.ui@current
   status: open
   raisedAt: "2026-05-04T00:00:00Z"
@@ -45,8 +45,8 @@ attributes:
     confidence.
   owner: "@a5c-ai/catalog-stewards"
   affectedEntities:
-    - genty-runtime-impl:codex.runtime@1.x
-    - genty-core-impl:codex.core@1.x
+    - agent-runtime-impl:codex.runtime@1.x
+    - agent-core-impl:codex.core@1.x
   status: open
   raisedAt: "2026-05-04T00:00:00Z"
 edges: {}

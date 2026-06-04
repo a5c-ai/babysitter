@@ -97,4 +97,4 @@ attributes:
 edges:
   hosted_by:
     - target: agent:cursor
-    - target: genty-platform-impl:cursor.platform@current
+    - target: agent-platform-impl:cursor.platform@current

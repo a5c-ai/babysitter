@@ -1,12 +1,12 @@
 nodeKind: PackageSurface
-id: package:a5c-ai-genty-platform
+id: package:a5c-ai-agent-platform
 attributes:
   packageId: "@a5c-ai/genty-platform"
   packageName: "@a5c-ai/genty-platform"
   workspacePath: packages/genty/platform
   moduleType: typescript
   surfaceKinds:
-    - genty-runtime
+    - agent-runtime
     - bin-entrypoint
     - cli
   sourceOfTruthRole: application
@@ -20,6 +20,6 @@ edges:
     - target: path:a5c-runs-dir
 # `babysitter-harness` runtime command set
   # (HARNESS_RUNTIME_COMMANDS in sdk program.ts) is shared between the
-  # sdk and agent packages; the harness bin lives in genty-platform.
+  # sdk and agent packages; the harness bin lives in agent-platform.
   exposes_subcommand:
     - target: interaction-primitive:babysitter-sdk-cli-harness-runtime

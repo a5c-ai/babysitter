@@ -17,4 +17,4 @@ attributes:
     - "Ctrl+C: cancel"
 edges:
   bundled_with:
-    - genty-platform-impl:omp.platform@current
+    - agent-platform-impl:omp.platform@current

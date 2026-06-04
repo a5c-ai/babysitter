@@ -1,7 +1,7 @@
 nodeKind: Claim
 id: claim:cursor-platform-defines-rule-frontmatter-fields
 attributes:
-  subjectId: genty-platform-impl:cursor.platform@current
+  subjectId: agent-platform-impl:cursor.platform@current
   subjectKind: AgentPlatformImpl
   attribute: defines_frontmatter_field
   value: Cursor platform defines description, globs, and alwaysApply frontmatter fields for .mdc rules.
@@ -17,14 +17,14 @@ attributes:
   claimKind: provenance
 edges:
   about_subject:
-    - genty-platform-impl:cursor.platform@current
+    - agent-platform-impl:cursor.platform@current
   backed_by_evidence:
     - evidence:frontmatter-cursor-rules-docs
 ---
 nodeKind: Claim
 id: claim:babysitter-platform-defines-task-schema-fields
 attributes:
-  subjectId: genty-platform-impl:babysitter.platform@current
+  subjectId: agent-platform-impl:babysitter.platform@current
   subjectKind: AgentPlatformImpl
   attribute: defines_frontmatter_field
   value: Babysitter platform defines task-schema fields for defineTask id/name/kind/title/description/labels/source/inputs/outputs/io/metadata/execution/node/breakpoint/sleep/subprocess.
@@ -40,7 +40,7 @@ attributes:
   claimKind: provenance
 edges:
   about_subject:
-    - genty-platform-impl:babysitter.platform@current
+    - agent-platform-impl:babysitter.platform@current
   backed_by_evidence:
     - evidence:frontmatter-babysitter-task-schema-source
 ---

@@ -144,11 +144,11 @@ nodeKinds:
   - eolAt >= releasedAt (when present)
   - installMethods non-empty
   examples: []
-- id: node:genty-core-impl
+- id: node:agent-core-impl
   name: AgentCoreImpl
   origin: derived
   originContext: catalog pass 3/catalog pass 22 — synthesized from observations across multiple agent products (Claude Code, Codex, Cursor, Gemini-CLI). Tier model is a5c-coined but the underlying concept is cross-vendor.
-  prefix: genty-core-impl
+  prefix: agent-core-impl
   cluster: 3-agent-stack
   purpose: concrete loop+transport-client impl
   attributes:
@@ -254,11 +254,11 @@ nodeKinds:
   - composes carries role=core
   - supportedTransportProtocols non-empty
   examples: []
-- id: node:genty-runtime-impl
+- id: node:agent-runtime-impl
   name: AgentRuntimeImpl
   origin: derived
   originContext: catalog pass 3/catalog pass 22 — synthesized from observations across multiple agent products (Claude Code, Codex, Cursor, Gemini-CLI). Tier model is a5c-coined but the underlying concept is cross-vendor.
-  prefix: genty-runtime-impl
+  prefix: agent-runtime-impl
   cluster: 3-agent-stack
   purpose: concrete runtime+tools+hook-sockets impl
   attributes:
@@ -422,11 +422,11 @@ nodeKinds:
   invariants:
   - composes carries role=runtime
   examples: []
-- id: node:genty-platform-impl
+- id: node:agent-platform-impl
   name: AgentPlatformImpl
   origin: derived
   originContext: catalog pass 3/catalog pass 22 — synthesized from observations across multiple agent products (Claude Code, Codex, Cursor, Gemini-CLI). Tier model is a5c-coined but the underlying concept is cross-vendor.
-  prefix: genty-platform-impl
+  prefix: agent-platform-impl
   cluster: 3-agent-stack
   purpose: concrete platform impl
   attributes:

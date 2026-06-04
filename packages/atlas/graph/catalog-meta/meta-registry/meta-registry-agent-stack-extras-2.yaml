@@ -186,56 +186,56 @@ edges:
   - target: meta-node-kind:agent-version
 ---
 nodeKind: MetaAttribute
-id: meta-attribute:genty-core-impl--id
+id: meta-attribute:agent-core-impl--id
 attributes:
   displayName: AgentCoreImpl.id
   name: id
-  parentNodeKindId: meta-node-kind:genty-core-impl
+  parentNodeKindId: meta-node-kind:agent-core-impl
   type: id
   required: true
   description: id on AgentCoreImpl.
 edges:
   defined_on:
-  - target: meta-node-kind:genty-core-impl
+  - target: meta-node-kind:agent-core-impl
 ---
 nodeKind: MetaAttribute
-id: meta-attribute:genty-core-impl--display-name
+id: meta-attribute:agent-core-impl--display-name
 attributes:
   displayName: AgentCoreImpl.displayName
   name: displayName
-  parentNodeKindId: meta-node-kind:genty-core-impl
+  parentNodeKindId: meta-node-kind:agent-core-impl
   type: string
   required: true
   description: displayName on AgentCoreImpl.
 edges:
   defined_on:
-  - target: meta-node-kind:genty-core-impl
+  - target: meta-node-kind:agent-core-impl
 ---
 nodeKind: MetaAttribute
-id: meta-attribute:genty-runtime-impl--id
+id: meta-attribute:agent-runtime-impl--id
 attributes:
   displayName: AgentRuntimeImpl.id
   name: id
-  parentNodeKindId: meta-node-kind:genty-runtime-impl
+  parentNodeKindId: meta-node-kind:agent-runtime-impl
   type: id
   required: true
   description: id on AgentRuntimeImpl.
 edges:
   defined_on:
-  - target: meta-node-kind:genty-runtime-impl
+  - target: meta-node-kind:agent-runtime-impl
 ---
 nodeKind: MetaAttribute
-id: meta-attribute:genty-runtime-impl--display-name
+id: meta-attribute:agent-runtime-impl--display-name
 attributes:
   displayName: AgentRuntimeImpl.displayName
   name: displayName
-  parentNodeKindId: meta-node-kind:genty-runtime-impl
+  parentNodeKindId: meta-node-kind:agent-runtime-impl
   type: string
   required: true
   description: displayName on AgentRuntimeImpl.
 edges:
   defined_on:
-  - target: meta-node-kind:genty-runtime-impl
+  - target: meta-node-kind:agent-runtime-impl
 ---
 nodeKind: MetaNodeKind
 id: meta-node-kind:agent-ui-impl
@@ -317,30 +317,30 @@ edges:
   - target: meta-node-kind:agent-ui-impl
 ---
 nodeKind: MetaAttribute
-id: meta-attribute:genty-platform-impl--id
+id: meta-attribute:agent-platform-impl--id
 attributes:
   displayName: AgentPlatformImpl.id
   name: id
-  parentNodeKindId: meta-node-kind:genty-platform-impl
+  parentNodeKindId: meta-node-kind:agent-platform-impl
   type: id
   required: true
   description: id on AgentPlatformImpl.
 edges:
   defined_on:
-  - target: meta-node-kind:genty-platform-impl
+  - target: meta-node-kind:agent-platform-impl
 ---
 nodeKind: MetaAttribute
-id: meta-attribute:genty-platform-impl--display-name
+id: meta-attribute:agent-platform-impl--display-name
 attributes:
   displayName: AgentPlatformImpl.displayName
   name: displayName
-  parentNodeKindId: meta-node-kind:genty-platform-impl
+  parentNodeKindId: meta-node-kind:agent-platform-impl
   type: string
   required: true
   description: displayName on AgentPlatformImpl.
 edges:
   defined_on:
-  - target: meta-node-kind:genty-platform-impl
+  - target: meta-node-kind:agent-platform-impl
 ---
 nodeKind: MetaAttribute
 id: meta-attribute:agent-host-transport--id

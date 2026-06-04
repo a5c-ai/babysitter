@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:antigravity-cli.platform@current
+id: agent-platform-impl:antigravity-cli.platform@current
 attributes:
   displayName: Antigravity CLI Platform (current)
   agentVersionId: agentVersion:antigravity:2-0-11
@@ -30,14 +30,14 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:antigravity-cli
     role: platform
   bundles:
   - target: presentation:antigravity-cli-tui
   succeeds:
-  - target: genty-platform-impl:gemini-cli.platform@current
+  - target: agent-platform-impl:gemini-cli.platform@current
     notes: 'Antigravity CLI platform is the successor to Gemini CLI platform, rewritten in Go with SKILL.md plugins and workflow-driven hooks replacing the gemini-extension format.
       '
   supports:

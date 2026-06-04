@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:codex-app-server.core@current
+id: agent-core-impl:codex-app-server.core@current
 attributes:
   displayName: Codex App-Server Core (current)
   agentVersionId: agent-version:codex-app-server@current
@@ -32,7 +32,7 @@ attributes:
   thinkingChannelHandling: model-dependent
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:codex-app-server
     role: core

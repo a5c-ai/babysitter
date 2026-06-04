@@ -66,7 +66,7 @@ flowchart TB
       layer_5_agent_runtime["Agent-Runtime"]
       layer_5_agent_runtime_scope["Scope<br/><small>Host process and operational runtime for an agent core.</small>"]
       layer_5_agent_runtime_resp["Responsibilities<br/><small>- Maintain internal session and transcript state.<br/>- Provide built-in tools, dynamic tool discovery, hooks, and approvals.<br/>- Manage subprocess/tool execution posture and streaming events.<br/>- Enforce runtime output, resume, and journal/event contracts.</small>"]
-      layer_5_agent_runtime_examples["Examples<br/><small>- LangGraph checkpointer/store, thread state, interrupts, streaming runtime.<br/>- Claude Code/Codex/Gemini CLI process runtimes.<br/>- a5c unified runtime, Pi-compatible session profiles, adapters remote runtime.<br/>- Built-in file/shell/search tools, approval gates, session files.</small>"]
+      layer_5_agent_runtime_examples["Examples<br/><small>- LangGraph checkpointer/store, thread state, interrupts, streaming runtime.<br/>- Claude Code/Codex/Gemini CLI process runtimes.<br/>- a5c unified runtime, Pi-compatible session profiles, agent-mux remote runtime.<br/>- Built-in file/shell/search tools, approval gates, session files.</small>"]
       layer_5_agent_runtime_fit["Fit note<br/><small>Frameworks can leave runtime to the host app; CLI products often combine core and runtime in one binary. a5c runtime is modeled as a unified same-lay...</small>"]
       layer_5_agent_runtime --- layer_5_agent_runtime_scope --- layer_5_agent_runtime_resp --- layer_5_agent_runtime_examples --- layer_5_agent_runtime_fit
     end

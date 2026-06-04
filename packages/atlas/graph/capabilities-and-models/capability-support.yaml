@@ -1,77 +1,77 @@
 ---
 nodeKind: CapabilitySupport
-id: capabilitySupport:genty-platform:ge-5-0-0:mcp
+id: capabilitySupport:agent-platform:ge-5-0-0:mcp
 attributes:
-  supportId: "capabilitySupport:genty-platform:ge-5-0-0:mcp"
+  supportId: "capabilitySupport:agent-platform:ge-5-0-0:mcp"
   capabilityId: "mcp"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:genty-platform:ge-5-0-0"
+  subjectId: "agentVersion:agent-platform:ge-5-0-0"
   versionRange: ">=5.0.0"
-  notes: "genty-platform can launch a built-in MCP server and agent-facing MCP integration surfaces."
+  notes: "agent-platform can launch a built-in MCP server and agent-facing MCP integration surfaces."
   evidenceRefs:
-    - "repo-genty-platform-package"
-    - "repo-genty-platform-cli"
+    - "repo-agent-platform-package"
+    - "repo-agent-platform-cli"
 edges:
   capability_of_version:
-    - target: agentVersion:genty-platform:ge-5-0-0
+    - target: agentVersion:agent-platform:ge-5-0-0
   evidences_capability:
     - target: capability:supports-mcp
 ---
 nodeKind: CapabilitySupport
-id: capabilitySupport:genty-platform:ge-5-0-0:interactive-mode
+id: capabilitySupport:agent-platform:ge-5-0-0:interactive-mode
 attributes:
-  supportId: "capabilitySupport:genty-platform:ge-5-0-0:interactive-mode"
+  supportId: "capabilitySupport:agent-platform:ge-5-0-0:interactive-mode"
   capabilityId: "interactive-mode"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:genty-platform:ge-5-0-0"
+  subjectId: "agentVersion:agent-platform:ge-5-0-0"
   versionRange: ">=5.0.0"
-  notes: "genty-platform is a terminal-first runtime CLI with interactive create-run, observe, and orchestration flows."
+  notes: "agent-platform is a terminal-first runtime CLI with interactive create-run, observe, and orchestration flows."
   evidenceRefs:
-    - "repo-genty-platform-package"
-    - "repo-genty-platform-cli"
+    - "repo-agent-platform-package"
+    - "repo-agent-platform-cli"
 edges:
   capability_of_version:
-    - target: agentVersion:genty-platform:ge-5-0-0
+    - target: agentVersion:agent-platform:ge-5-0-0
   evidences_capability:
     - target: capability:interactive-mode
 ---
 nodeKind: CapabilitySupport
-id: capabilitySupport:genty-platform:ge-5-0-0:stdin-injection
+id: capabilitySupport:agent-platform:ge-5-0-0:stdin-injection
 attributes:
-  supportId: "capabilitySupport:genty-platform:ge-5-0-0:stdin-injection"
+  supportId: "capabilitySupport:agent-platform:ge-5-0-0:stdin-injection"
   capabilityId: "stdin-injection"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:genty-platform:ge-5-0-0"
+  subjectId: "agentVersion:agent-platform:ge-5-0-0"
   versionRange: ">=5.0.0"
-  notes: "genty-platform accepts prompts, command templates, and harness invocations via CLI input arguments."
+  notes: "agent-platform accepts prompts, command templates, and harness invocations via CLI input arguments."
   evidenceRefs:
-    - "repo-genty-platform-package"
-    - "repo-genty-platform-cli"
+    - "repo-agent-platform-package"
+    - "repo-agent-platform-cli"
 edges:
   capability_of_version:
-    - target: agentVersion:genty-platform:ge-5-0-0
+    - target: agentVersion:agent-platform:ge-5-0-0
   evidences_capability:
     - target: capability:stdin-injection
 ---
 nodeKind: CapabilitySupport
-id: capabilitySupport:genty-platform:ge-5-0-0:session-resume
+id: capabilitySupport:agent-platform:ge-5-0-0:session-resume
 attributes:
-  supportId: "capabilitySupport:genty-platform:ge-5-0-0:session-resume"
+  supportId: "capabilitySupport:agent-platform:ge-5-0-0:session-resume"
   capabilityId: "session-resume"
   supportLevel: "native"
   subjectKind: "AgentVersion"
-  subjectId: "agentVersion:genty-platform:ge-5-0-0"
+  subjectId: "agentVersion:agent-platform:ge-5-0-0"
   versionRange: ">=5.0.0"
-  notes: "genty-platform resumes runs and sessions through explicit resume-run and session-history command surfaces."
+  notes: "agent-platform resumes runs and sessions through explicit resume-run and session-history command surfaces."
   evidenceRefs:
-    - "repo-genty-platform-package"
-    - "repo-genty-platform-cli"
+    - "repo-agent-platform-package"
+    - "repo-agent-platform-cli"
 edges:
   capability_of_version:
-    - target: agentVersion:genty-platform:ge-5-0-0
+    - target: agentVersion:agent-platform:ge-5-0-0
 ---
 nodeKind: CapabilitySupport
 id: capabilitySupport:claude:ge-0-0-0:skills

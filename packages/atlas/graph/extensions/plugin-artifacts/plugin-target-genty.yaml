@@ -38,7 +38,7 @@ attributes:
   configPaths: []
   processNames:
     - "genty"
-    - "genty-platform"
+    - "agent-platform"
   capabilities:
     - SessionBinding
     - HeadlessPrompt

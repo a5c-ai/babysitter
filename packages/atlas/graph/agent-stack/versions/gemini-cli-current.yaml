@@ -120,11 +120,11 @@ edges:
   version_of:
     - agent:gemini-cli
   composed_of:
-    - target: genty-core-impl:gemini-cli.core@current
+    - target: agent-core-impl:gemini-cli.core@current
       role: core
-    - target: genty-runtime-impl:gemini-cli.runtime@current
+    - target: agent-runtime-impl:gemini-cli.runtime@current
       role: runtime
-    - target: genty-platform-impl:gemini-cli.platform@current
+    - target: agent-platform-impl:gemini-cli.platform@current
       role: platform
     - target: agent-ui-impl:gemini-cli.ui@current
       role: ui

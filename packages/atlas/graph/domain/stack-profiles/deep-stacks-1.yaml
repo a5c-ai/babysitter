@@ -313,7 +313,7 @@ edges:
     - skill-area:context-management
 ---
 nodeKind: StackProfile
-id: stack-profile:coding-genty-platform
+id: stack-profile:coding-agent-platform
 attributes:
   displayName: "Coding Agent Platform Stack (Claude Code, hooks-adapter, Git, Docker, TypeScript)"
   description: |

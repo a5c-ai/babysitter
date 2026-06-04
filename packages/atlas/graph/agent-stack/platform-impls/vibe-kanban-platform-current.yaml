@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:vibe-kanban.platform@current
+id: agent-platform-impl:vibe-kanban.platform@current
 attributes:
   displayName: "Vibe Kanban Platform (current)"
   agentVersionId: agent-version:vibe-kanban@current
@@ -33,7 +33,7 @@ attributes:
     kanban board with live updates.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
     - target: agent:vibe-kanban
       role: platform

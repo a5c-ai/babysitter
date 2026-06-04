@@ -11,7 +11,7 @@ attributes:
   accessibilitySupport: basic
   notes: |
     genty's user-facing surface is its CLI binary (`genty`). The CLI wraps
-    genty-platform and adapters surfaces. Operator UIs (TUI, web, mobile)
+    agent-platform and adapters surfaces. Operator UIs (TUI, web, mobile)
     are delivered via the adapters package family.
 edges:
   realizes:

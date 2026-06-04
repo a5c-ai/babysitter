@@ -50,7 +50,7 @@ A named test or test-suite.
 | `homepageUrl` | url | yes, evidence: vendor-doc-or-better | Canonical homepage for the benchmark. Required and evidence-bound. |
 | `description` | markdown | yes | One-paragraph description: what the benchmark measures, who maintains it, and the canonical citation. |
 | `version` | string | yes | The benchmark's own version identifier (e.g., `"verified-2024-12"`, `"v1.1"`, `"2025-01"`). Free-form because benchmark vendors do not share a versioning scheme. |
-| `kind` | enum<full-stack,model-only,genty-platform,skill,extension-interface,layer-specific,domain-specific,sub-stack-component> | yes | What kind of subject the benchmark addresses. Editorial classification. |
+| `kind` | enum<full-stack,model-only,agent-platform,skill,extension-interface,layer-specific,domain-specific,sub-stack-component> | yes | What kind of subject the benchmark addresses. Editorial classification. |
 | `targetsKind` | string (a NodeKind name) | yes | The NodeKind name this benchmark scores entities of (e.g., `"AgentVersion"`, `"ModelVersion"`, `"StackProfile"`). MUST match an existing NodeKind. |
 | `metrics` | list<map<name:string, description:string, unit:string>> | yes | The metrics this benchmark publishes, each with a unit (e.g., `pct`, `tokens`, `seconds`, `pass-rate`). |
 | `scopeBoundary` | ref<ScopeBoundary> | optional | When the benchmark explicitly excludes parts of a larger surface. |
@@ -83,16 +83,16 @@ The Phase-2 population enumerates these benchmarks (this list is illustrative, n
 
 | id | displayName | targetsKind | kind | domain |
 |---|---|---|---|---|
-| `benchmark:swe-bench` | SWE-bench | `AgentVersion` | genty-platform | software engineering |
-| `benchmark:swe-bench-verified` | SWE-bench Verified | `AgentVersion` | genty-platform | software engineering (refined) |
+| `benchmark:swe-bench` | SWE-bench | `AgentVersion` | agent-platform | software engineering |
+| `benchmark:swe-bench-verified` | SWE-bench Verified | `AgentVersion` | agent-platform | software engineering (refined) |
 | `benchmark:human-eval` | HumanEval | `ModelVersion` | model-only | code generation |
 | `benchmark:mmlu` | MMLU | `ModelVersion` | model-only | knowledge |
 | `benchmark:gaia` | GAIA | `AgentVersion` | full-stack | multi-step agentic tasks |
 | `benchmark:mle-bench` | MLE-bench | `AgentVersion` | full-stack | ML engineering |
-| `benchmark:webarena` | WebArena | `AgentVersion` | genty-platform | web navigation |
-| `benchmark:terminal-bench` | Terminal-Bench | `AgentVersion` | genty-platform | terminal/shell |
-| `benchmark:tau-bench` | τ-bench | `AgentVersion` | genty-platform | tool-use |
-| `benchmark:agentbench` | AgentBench | `AgentVersion` | genty-platform | general agent eval |
+| `benchmark:webarena` | WebArena | `AgentVersion` | agent-platform | web navigation |
+| `benchmark:terminal-bench` | Terminal-Bench | `AgentVersion` | agent-platform | terminal/shell |
+| `benchmark:tau-bench` | τ-bench | `AgentVersion` | agent-platform | tool-use |
+| `benchmark:agentbench` | AgentBench | `AgentVersion` | agent-platform | general agent eval |
 | `benchmark:mbpp` | MBPP | `ModelVersion` | model-only | Python programming |
 
 Canonical homepages (each requires an `EvidenceSource` at `vendor-doc-or-better`):
@@ -336,7 +336,7 @@ No evidence-bound attributes by default.
     reliably correct ground-truth fixes. Targets full-stack agent platforms
     (loop + tools + sandbox) on real GitHub-issue resolution in Python repos.
   version: "verified-2024-12"
-  kind: genty-platform
+  kind: agent-platform
   targetsKind: AgentVersion
   metrics:
     - name: resolved

@@ -8,9 +8,9 @@ documents:
   - "layer:1-model"
   - "layer:2-provider"
   - "layer:3-transport"
-  - "layer:4-genty-core"
-  - "layer:5-genty-runtime"
-  - "layer:6-genty-platform"
+  - "layer:4-agent-core"
+  - "layer:5-agent-runtime"
+  - "layer:6-agent-platform"
   - "layer:7-workspace"
   - "layer:8-execution"
   - "layer:9-sandbox"
@@ -36,9 +36,9 @@ That means not every page here is fully generated, but the core layer facts and 
 - `graph/stack-layers/layers/layer-1-model.yaml` -> Layer 1: Model
 - `graph/stack-layers/layers/layer-2-provider.yaml` -> Layer 2: Provider
 - `graph/stack-layers/layers/layer-3-transport.yaml` -> Layer 3: Transport
-- `graph/stack-layers/layers/layer-4-genty-core.yaml` -> Layer 4: Agent-Core
-- `graph/stack-layers/layers/layer-5-genty-runtime.yaml` -> Layer 5: Agent-Runtime
-- `graph/stack-layers/layers/layer-6-genty-platform.yaml` -> Layer 6: Agent-Platform
+- `graph/stack-layers/layers/layer-4-agent-core.yaml` -> Layer 4: Agent-Core
+- `graph/stack-layers/layers/layer-5-agent-runtime.yaml` -> Layer 5: Agent-Runtime
+- `graph/stack-layers/layers/layer-6-agent-platform.yaml` -> Layer 6: Agent-Platform
 - `graph/stack-layers/layers/layer-7-workspace.yaml` -> Layer 7: Workspace
 - `graph/stack-layers/layers/layer-8-execution.yaml` -> Layer 8: Execution
 - `graph/stack-layers/layers/layer-9-sandbox.yaml` -> Layer 9: Sandbox

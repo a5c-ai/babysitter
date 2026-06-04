@@ -49,7 +49,7 @@ A named term in the ontology.
 
 | Attribute | Type | Required | Notes |
 |---|---|---|---|
-| `id` | id | yes | `term:<slug>`, e.g. `term:invocation`, `term:run`, `term:genty-platform`. |
+| `id` | id | yes | `term:<slug>`, e.g. `term:invocation`, `term:run`, `term:agent-platform`. |
 | `displayName` | string | yes | The canonical spelling. |
 | `kind` | enum<concept,role,layer,primitive,adapter,extension-shape,hook,capability,lifecycle-state,protocol,format,tool,operation> | yes | The term-kind classifier. Collapsed from former TermKind NodeKind (remodel 2026-04-29). |
 | `canonicalDefinitionId` | ref<`Definition`> | yes | The default definition. |

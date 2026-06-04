@@ -15,7 +15,7 @@ documents: []
 | level | 1 |
 | priority | P1 |
 | discoveredAt | 2026-04-28T00:00:00Z |
-| source | packages/atlas-catalog/graph/schema/ontology-schema.yaml |
+| source | packages/agent-catalog/graph/schema/ontology-schema.yaml |
 | status | open |
 | owner | tbd |
 
@@ -32,7 +32,7 @@ v6 schema has `SessionModel` (cluster 3) but no `LifecycleSemantics` analog. The
 - Required for accurate cross-harness behavioral comparison (which is exactly what coverage-checklist row "Per-product comparison-table fields (Vendor, Layers, Surface, Plugin formats, MCP, Hooks, Execution typical, Sandbox default, Resume, Fork)" claims is derivable).
 
 ## Evidence
-- packages/atlas-catalog/graph/schema/ontology-schema.yaml (lines 183-201)
+- packages/agent-catalog/graph/schema/ontology-schema.yaml (lines 183-201)
 
 ## Propagation status
 - Level 1: open

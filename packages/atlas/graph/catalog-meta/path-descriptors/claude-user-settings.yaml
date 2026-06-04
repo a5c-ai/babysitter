@@ -6,7 +6,7 @@ attributes:
   path: "~/.claude/settings.json"
   pathKind: settings-file
   ownerKind: AgentPlatformImpl
-  ownerId: genty-platform-impl:claude-code.platform@1.x
+  ownerId: agent-platform-impl:claude-code.platform@1.x
   platform: cross-platform
   scope: user
   evaluationContext: user

@@ -26,7 +26,7 @@ edges:
 nodeKind: Claim
 id: claim:a5c-research-sdk-package-current
 attributes:
-  subjectId: genty-runtime-impl:a5c.runtime@current
+  subjectId: agent-runtime-impl:a5c.runtime@current
   subjectKind: AgentRuntimeImpl
   attribute: sdkPackage
   value: '@a5c-ai/babysitter-sdk'
@@ -44,7 +44,7 @@ attributes:
   note: Adds web-researched runtime package provenance for a5c.
 edges:
   about_subject:
-    - genty-runtime-impl:a5c.runtime@current
+    - agent-runtime-impl:a5c.runtime@current
   backed_by_evidence:
     - evidence:a5c-research-sdk-npm-package
 ---
@@ -82,7 +82,7 @@ edges:
 nodeKind: Claim
 id: claim:a5c-research-unified-transport-profile
 attributes:
-  subjectId: genty-core-impl:a5c.core@current
+  subjectId: agent-core-impl:a5c.core@current
   subjectKind: AgentCoreImpl
   attribute: supportedTransportProtocols
   value: anthropic-messages openai-responses openai-chat-completions gemini-generate-content openai-compat openrouter github-copilot
@@ -100,7 +100,7 @@ attributes:
   note: Adds research provenance for the a5c core transport profile.
 edges:
   about_subject:
-    - genty-core-impl:a5c.core@current
+    - agent-core-impl:a5c.core@current
   backed_by_evidence:
     - evidence:a5c-research-local-core-model
 ---

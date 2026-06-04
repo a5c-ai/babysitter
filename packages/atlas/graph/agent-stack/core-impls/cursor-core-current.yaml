@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:cursor.core@current
+id: agent-core-impl:cursor.core@current
 attributes:
   displayName: Cursor Core (current)
   agentVersionId: agentVersion:cursor:ge-0-0-0
@@ -38,7 +38,7 @@ attributes:
   thinkingChannelHandling: not-supported
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:cursor
     role: core

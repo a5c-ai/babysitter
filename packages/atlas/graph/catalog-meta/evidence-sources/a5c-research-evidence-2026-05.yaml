@@ -44,7 +44,7 @@ attributes:
   trustLevel: trust-level:repo
   observedAt: '2026-05-04T00:00:00Z'
   observedBy: a5c-ai-catalog
-  locator: graph-node:genty-core-impl:a5c.core@current
+  locator: graph-node:agent-core-impl:a5c.core@current
 edges: {}
 ---
 nodeKind: EvidenceSource
@@ -57,7 +57,7 @@ attributes:
   trustLevel: trust-level:repo
   observedAt: '2026-05-04T00:00:00Z'
   observedBy: a5c-ai-catalog
-  locator: graph-node:genty-runtime-impl:a5c.runtime@current
+  locator: graph-node:agent-runtime-impl:a5c.runtime@current
 edges: {}
 ---
 nodeKind: EvidenceSource
@@ -70,7 +70,7 @@ attributes:
   trustLevel: trust-level:repo
   observedAt: '2026-05-04T00:00:00Z'
   observedBy: a5c-ai-catalog
-  locator: graph-node:genty-platform-impl:a5c.platform@current
+  locator: graph-node:agent-platform-impl:a5c.platform@current
 edges: {}
 ---
 nodeKind: EvidenceSource

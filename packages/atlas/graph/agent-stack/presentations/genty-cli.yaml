@@ -5,7 +5,7 @@ attributes:
   displayName: "genty CLI"
   kind: cli
   description: |
-    CLI entry point for the genty agent. Wraps genty-platform and adapters
+    CLI entry point for the genty agent. Wraps agent-platform and adapters
     surfaces into a single `genty` binary. Supports both interactive and
     headless/CI modes; emits a normalized JSON event stream when invoked
     with `--json`.
@@ -17,4 +17,4 @@ attributes:
   updateChannel: npm
 edges:
   bundled_with:
-    - genty-platform-impl:genty.platform@current
+    - agent-platform-impl:genty.platform@current

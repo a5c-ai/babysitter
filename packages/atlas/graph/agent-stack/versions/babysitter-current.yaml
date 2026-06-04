@@ -12,11 +12,11 @@ edges:
   version_of:
     - agent:babysitter
   composed_of:
-    - target: genty-core-impl:babysitter.core@current
+    - target: agent-core-impl:babysitter.core@current
       role: core
-    - target: genty-runtime-impl:babysitter.runtime@current
+    - target: agent-runtime-impl:babysitter.runtime@current
       role: runtime
-    - target: genty-platform-impl:babysitter.platform@current
+    - target: agent-platform-impl:babysitter.platform@current
       role: platform
     - target: agent-ui-impl:babysitter.ui@current
       role: ui
@@ -27,19 +27,19 @@ edges:
     - target: capability:supports-mcp
       versionRange: ">=5.0.0"
       level: full
-      notes: genty-platform can launch a built-in MCP server and agent-facing MCP integration surfaces.
+      notes: agent-platform can launch a built-in MCP server and agent-facing MCP integration surfaces.
     - target: capability:interactive-mode
       versionRange: ">=5.0.0"
       level: full
-      notes: genty-platform is a terminal-first runtime CLI with interactive create-run, observe, and orchestration flows.
+      notes: agent-platform is a terminal-first runtime CLI with interactive create-run, observe, and orchestration flows.
     - target: capability:stdin-injection
       versionRange: ">=5.0.0"
       level: full
-      notes: genty-platform accepts prompts, command templates, and harness invocations via CLI input arguments.
+      notes: agent-platform accepts prompts, command templates, and harness invocations via CLI input arguments.
     - target: capability:can-resume
       versionRange: ">=5.0.0"
       level: full
-      notes: genty-platform resumes runs and sessions through explicit resume-run and session-history command surfaces.
+      notes: agent-platform resumes runs and sessions through explicit resume-run and session-history command surfaces.
   uses_memory_system:
     - target: memory-system:auto-dream-consolidation-pattern
     - target: memory-system:claude-code-auto-memory

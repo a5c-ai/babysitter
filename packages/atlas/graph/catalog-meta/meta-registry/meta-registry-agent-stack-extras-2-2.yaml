@@ -450,9 +450,9 @@ attributes:
   - meta-node-kind:agent-product
   - meta-node-kind:agent-version
   target:
-  - meta-node-kind:genty-core-impl
-  - meta-node-kind:genty-runtime-impl
-  - meta-node-kind:genty-platform-impl
+  - meta-node-kind:agent-core-impl
+  - meta-node-kind:agent-runtime-impl
+  - meta-node-kind:agent-platform-impl
   cardinality: 1:N
   origin: universal
   description: an agent product/version is composed of stack-layer implementations; a stack profile is composed of languages/frameworks/tools (alias of composes for ergonomics)
@@ -461,9 +461,9 @@ edges:
   - target: meta-node-kind:agent-product
   - target: meta-node-kind:agent-version
   target_of_meta_edge:
-  - target: meta-node-kind:genty-core-impl
-  - target: meta-node-kind:genty-runtime-impl
-  - target: meta-node-kind:genty-platform-impl
+  - target: meta-node-kind:agent-core-impl
+  - target: meta-node-kind:agent-runtime-impl
+  - target: meta-node-kind:agent-platform-impl
 ---
 nodeKind: MetaEdgeKind
 id: meta-edge-kind:version-of
@@ -517,8 +517,8 @@ attributes:
   displayName: exposes (meta)
   name: exposes
   source:
-  - meta-node-kind:genty-platform-impl
-  - meta-node-kind:genty-runtime-impl
+  - meta-node-kind:agent-platform-impl
+  - meta-node-kind:agent-runtime-impl
   target:
   - meta-node-kind:agent-host-transport
   cardinality: N:N
@@ -526,8 +526,8 @@ attributes:
   description: an agent platform/runtime exposes a host transport or hook surface
 edges:
   source_of_meta_edge:
-  - target: meta-node-kind:genty-platform-impl
-  - target: meta-node-kind:genty-runtime-impl
+  - target: meta-node-kind:agent-platform-impl
+  - target: meta-node-kind:agent-runtime-impl
   target_of_meta_edge:
   - target: meta-node-kind:agent-host-transport
 ---

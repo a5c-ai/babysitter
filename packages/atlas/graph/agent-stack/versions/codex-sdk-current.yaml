@@ -20,9 +20,9 @@ edges:
   version_of:
     - agent:codex-sdk
   composed_of:
-    - target: genty-core-impl:codex-sdk.core@current
+    - target: agent-core-impl:codex-sdk.core@current
       role: core
-    - target: genty-runtime-impl:codex-sdk.runtime@current
+    - target: agent-runtime-impl:codex-sdk.runtime@current
       role: runtime
   sourced_from:
     - source-ref:openai-node-npm

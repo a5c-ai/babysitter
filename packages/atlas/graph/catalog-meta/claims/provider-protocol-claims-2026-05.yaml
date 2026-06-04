@@ -139,7 +139,7 @@ edges:
 nodeKind: Claim
 id: claim:openai-agents-sdk-runner-streaming-events
 attributes:
-  subjectId: genty-runtime-impl:openai-agents-sdk.runtime@current
+  subjectId: agent-runtime-impl:openai-agents-sdk.runtime@current
   subjectKind: AgentRuntimeImpl
   attribute: emits_journal_event
   value: OpenAI Agents SDK Runner streaming emits raw response, run item, and agent updated stream events modeled as JournalEvent nodes.
@@ -155,14 +155,14 @@ attributes:
   claimKind: provenance
 edges:
   about_subject:
-    - genty-runtime-impl:openai-agents-sdk.runtime@current
+    - agent-runtime-impl:openai-agents-sdk.runtime@current
   backed_by_evidence:
     - evidence:openai-agents-sdk-streaming-docs
 ---
 nodeKind: Claim
 id: claim:openai-agents-sdk-handoffs-as-tools
 attributes:
-  subjectId: genty-core-impl:openai-agents-sdk.core@current
+  subjectId: agent-core-impl:openai-agents-sdk.core@current
   subjectKind: AgentCoreImpl
   attribute: subagentInvokerPolicy
   value: OpenAI Agents SDK handoffs are modeled as tool-call based delegation to another Agent.
@@ -178,6 +178,6 @@ attributes:
   claimKind: provenance
 edges:
   about_subject:
-    - genty-core-impl:openai-agents-sdk.core@current
+    - agent-core-impl:openai-agents-sdk.core@current
   backed_by_evidence:
     - evidence:openai-agents-sdk-handoffs-docs

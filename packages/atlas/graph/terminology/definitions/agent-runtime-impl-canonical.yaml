@@ -1,11 +1,11 @@
 nodeKind: Definition
-id: definition:genty-runtime-impl.canonical
+id: definition:agent-runtime-impl.canonical
 attributes:
   authoredAt: "2026-04-28T00:00:00Z"
-  termId: term:genty-runtime-impl
+  termId: term:agent-runtime-impl
   text: |
     concrete runtime+tools+hook-sockets impl
   status: canonical
 edges:
   defines:
-    - term:genty-runtime-impl
+    - term:agent-runtime-impl

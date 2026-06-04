@@ -10,7 +10,7 @@ attributes:
     - "Related 15.7.2 metadata adds providers.autoThinkingModel plus auto thinking-level classification for user turns."
     - "Whole tool-call result elision changes transcript/context replay assumptions because replay consumers may encounter placeholders instead of the original bulky tool result payload."
   releaseHighlights:
-    - "Shake compaction primitives under @oh-my-pi/pi-genty-core/compaction."
+    - "Shake compaction primitives under @oh-my-pi/pi-agent-core/compaction."
     - "Provider-agnostic extractive compression and elision path for heavy context regions."
     - "Local-on-device completion backends can be used for compression."
     - "Auto thinking model selection via providers.autoThinkingModel and per-turn thinking-level classification."
@@ -19,7 +19,7 @@ attributes:
     compaction:
       shakeCompaction:
         introducedIn: "15.7.3"
-        packageSubpath: "@oh-my-pi/pi-genty-core/compaction"
+        packageSubpath: "@oh-my-pi/pi-agent-core/compaction"
         primitives:
           - collectShakeRegions
           - applyShakeRegion

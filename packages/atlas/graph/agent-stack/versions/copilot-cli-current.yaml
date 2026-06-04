@@ -125,11 +125,11 @@ edges:
   version_of:
     - agent:copilot-cli
   composed_of:
-    - target: genty-core-impl:copilot-cli.core@current
+    - target: agent-core-impl:copilot-cli.core@current
       role: core
-    - target: genty-runtime-impl:copilot-cli.runtime@current
+    - target: agent-runtime-impl:copilot-cli.runtime@current
       role: runtime
-    - target: genty-platform-impl:copilot-cli.platform@current
+    - target: agent-platform-impl:copilot-cli.platform@current
       role: platform
     - target: agent-ui-impl:copilot-cli.ui@current
       role: ui

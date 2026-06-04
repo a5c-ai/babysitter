@@ -15,7 +15,7 @@ documents: []
 | level | 1 |
 | priority | P2 |
 | discoveredAt | 2026-04-28T00:00:00Z |
-| source | packages/atlas-catalog/graph/schema/ontology-schema.yaml |
+| source | packages/agent-catalog/graph/schema/ontology-schema.yaml |
 | status | open |
 | owner | tbd |
 
@@ -26,7 +26,7 @@ Repo has `PluginArtifact` (`artifactKind`, `pathPattern`, `installerSurface`) em
 Add `PluginArtifact` NodeKind under cluster 7 with edge `NativeExtension emits_artifact PluginArtifact`. Distinguishes "plugin definition" (Plugin node) from "compiled artifact on disk" (PluginArtifact node).
 
 ## Evidence
-- packages/atlas-catalog/graph/schema/ontology-schema.yaml (lines 164-171, 385-394)
+- packages/agent-catalog/graph/schema/ontology-schema.yaml (lines 164-171, 385-394)
 
 ## Propagation status
 - Level 1: open

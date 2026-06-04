@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:codex-app-server.platform@current
+id: agent-platform-impl:codex-app-server.platform@current
 attributes:
   displayName: Codex App-Server Platform (current)
   agentVersionId: agent-version:codex-app-server@current
@@ -29,7 +29,7 @@ attributes:
     consumer clients (Symphony, custom hosts) build their own surfaces.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
     - target: agent:codex-app-server
       role: platform

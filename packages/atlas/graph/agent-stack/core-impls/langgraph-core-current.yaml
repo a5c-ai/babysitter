@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:langgraph.core@current
+id: agent-core-impl:langgraph.core@current
 attributes:
   displayName: "LangGraph Graph Core (current)"
   agentVersionId: agent-version:langgraph@current
@@ -38,7 +38,7 @@ attributes:
     active for a concrete application.
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:langgraph
       role: core

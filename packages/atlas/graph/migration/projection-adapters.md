@@ -1,4 +1,4 @@
-# Projection adapters — required for legacy `atlas-catalog` SDK on atlas graph
+# Projection adapters — required for legacy `agent-catalog` SDK on atlas graph
 
 This is the codegen team's checklist. Each adapter projects a atlas graph subset
 into the shape the legacy SDK accessor returns, so downstream adapter generators
@@ -6,7 +6,7 @@ can swap the underlying graph without rewriting templates.
 
 ## 1. `PluginTargetDescriptor` (driver: `extensions-adapter`)
 
-**Legacy shape (per `packages/atlas-catalog/src/models.ts:467`):** flat record
+**Legacy shape (per `packages/agent-catalog/src/models.ts:467`):** flat record
 with `targetId`, `displayName`, `adapterName`, `pluginRootEnvVar`,
 `pluginRootEnvVarForExtension`, `manifestFormat` (string token),
 `commandFormat`, `skillHandling`, `hookRegistrationFormat`, `scriptVariants`,
@@ -75,7 +75,7 @@ legacy `discovery-signals-hooks.yaml`). Schema additions in catalog pass 92:
 `DiscoverySignal`.
 
 **Adapter (consumer-side, trivial):**
-`buildHooksMuxDetectionRules` in `packages/atlas-catalog/src/data.ts` reads
+`buildHooksMuxDetectionRules` in `packages/agent-catalog/src/data.ts` reads
 `listNodesByKind("DiscoverySignal").filter(n => n.scope === "hooks-adapter")`
 and maps `{ adapter ← key, confidence, signals, absentSignals }` — already
 implemented and now resolves data on the atlas graph.
@@ -96,7 +96,7 @@ needed.
 ## 5. `HarnessFallbackMetadata` (driver: `sdk/src/harness/adapterFallbackMetadata.ts`) — SPEC FIXED (catalog pass 92, path-b)
 
 **Decision (catalog pass 92):** keep atlas normalized; adapter lives in
-`packages/atlas-catalog/src/data.ts :: buildFallbackMetadata`. The legacy
+`packages/agent-catalog/src/data.ts :: buildFallbackMetadata`. The legacy
 function is *already* a projection (it joins SessionNuance + AgentVersion +
 capability claims at read-time — it does not load a bundled record), so
 authoring a duplicate atlas bundle would create a drift surface without
@@ -127,7 +127,7 @@ removing any work. Adapter is the right home; this section is the spec.
 | `capabilities.{hasRuntimeHooks,hasStopHook}` | `Capability:runtime-hooks`, `Capability:stop-hook` `supports` |
 | `evidenceIds` | `EvidenceSource` ids referenced by the agent-version (already loaded by legacy SDK) |
 
-**Adapter ownership:** `packages/atlas-catalog/src/data.ts ::
+**Adapter ownership:** `packages/agent-catalog/src/data.ts ::
 buildFallbackMetadata`. Migration: replace the existing legacy-graph reads
 with atlas-graph reads using the table above. Tests:
 `sdk/src/harness/adapterFallbackMetadata.contract.test.ts` already pins the
@@ -145,12 +145,12 @@ records, (3) violate the atlas design principle of normalization. Adapter is
 Every accessor takes a string id. Legacy uses camelCase prefixes
 (`pluginTarget:`, `agentVersion:`); atlas uses kebab-case + semver
 (`plugin-target:`, `agent-version:claude-code@1.x`). See
-`legacy-id-aliases.yaml` for the seed mapping. The atlas-catalog package
+`legacy-id-aliases.yaml` for the seed mapping. The agent-catalog package
 should accept both forms during cutover by normalizing on read.
 
 ## Adapter ownership
 
 - Backfill 1, 2, 3 → atlas graph team (this repo).
-- Adapters 4, 5, 6 → babysitter-monorepo atlas-catalog package — they live in
+- Adapters 4, 5, 6 → babysitter-monorepo agent-catalog package — they live in
   the SDK shim, not in atlas.
 

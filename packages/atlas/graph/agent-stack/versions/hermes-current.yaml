@@ -114,11 +114,11 @@ edges:
   version_of:
     - agent:hermes
   composed_of:
-    - target: genty-core-impl:hermes.core@current
+    - target: agent-core-impl:hermes.core@current
       role: core
-    - target: genty-runtime-impl:hermes.runtime@current
+    - target: agent-runtime-impl:hermes.runtime@current
       role: runtime
-    - target: genty-platform-impl:hermes.platform@current
+    - target: agent-platform-impl:hermes.platform@current
       role: platform
     - target: agent-ui-impl:hermes.ui@current
       role: ui

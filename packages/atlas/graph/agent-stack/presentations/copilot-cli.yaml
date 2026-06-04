@@ -18,4 +18,4 @@ attributes:
     - "Ctrl+C: cancel suggestion"
 edges:
   bundled_with:
-    - genty-platform-impl:copilot-cli.platform@current
+    - agent-platform-impl:copilot-cli.platform@current

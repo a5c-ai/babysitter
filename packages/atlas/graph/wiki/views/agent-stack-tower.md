@@ -8,9 +8,9 @@ documents:
   - "layer:1-model"
   - "layer:2-provider"
   - "layer:3-transport"
-  - "layer:4-genty-core"
-  - "layer:5-genty-runtime"
-  - "layer:6-genty-platform"
+  - "layer:4-agent-core"
+  - "layer:5-agent-runtime"
+  - "layer:6-agent-platform"
   - "layer:7-workspace"
   - "layer:8-execution"
   - "layer:9-sandbox"
@@ -27,7 +27,7 @@ reusableView:
     floors:
       - id: base-layers
         label: "BASE LAYERS"
-        subtitle: "Model, provider, transport, and genty-core records."
+        subtitle: "Model, provider, transport, and agent-core records."
         rooms:
           - id: models
             label: "Models"

@@ -176,10 +176,10 @@ nodeKinds:
 - id: node:output-guard
   name: OutputGuard
   origin: derived
-  originContext: catalog pass 53 / pi-mono packages/coding-agent/src/core/output-guard.ts + claude-code services/api/errors.ts getErrorMessageIfRefusal (refusal stop_reason handling, AUP violation messaging) + tool-output sanitization seen in claude-code tool implementations. Distinct from ContentPolicy (compliance-side, organization-mandated rules) — OutputGuard is the genty-core runtime gate that runs over generated tokens / tool results before they reach the user.
+  originContext: catalog pass 53 / pi-mono packages/coding-agent/src/core/output-guard.ts + claude-code services/api/errors.ts getErrorMessageIfRefusal (refusal stop_reason handling, AUP violation messaging) + tool-output sanitization seen in claude-code tool implementations. Distinct from ContentPolicy (compliance-side, organization-mandated rules) — OutputGuard is the agent-core runtime gate that runs over generated tokens / tool results before they reach the user.
   prefix: output-guard
   cluster: 19-compliance-safety
-  purpose: an genty-core runtime guard that inspects model output / tool results for safety, refusal, secret leakage, format conformance — and rewrites or blocks before surfacing
+  purpose: an agent-core runtime guard that inspects model output / tool results for safety, refusal, secret leakage, format conformance — and rewrites or blocks before surfacing
   attributes:
   - name: id
     type: id

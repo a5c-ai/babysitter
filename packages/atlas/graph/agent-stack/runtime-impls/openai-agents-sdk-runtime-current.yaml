@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:openai-agents-sdk.runtime@current
+id: agent-runtime-impl:openai-agents-sdk.runtime@current
 attributes:
   displayName: "OpenAI Agents SDK Runtime (current)"
   agentVersionId: agent-version:openai-agents-sdk@current
@@ -22,7 +22,7 @@ attributes:
     by the host application.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
     - target: agent:openai-agents-sdk
       role: runtime

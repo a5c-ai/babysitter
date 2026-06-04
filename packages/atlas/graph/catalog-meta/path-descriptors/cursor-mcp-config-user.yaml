@@ -6,7 +6,7 @@ attributes:
   path: "~/.cursor/mcp.json"
   pathKind: mcp-config
   ownerKind: AgentPlatformImpl
-  ownerId: genty-platform-impl:cursor.platform@current
+  ownerId: agent-platform-impl:cursor.platform@current
   platform: cross-platform
   scope: user
   evaluationContext: user
@@ -14,4 +14,4 @@ attributes:
 
 edges:
   owned_by:
-    - target: genty-platform-impl:cursor.platform@current
+    - target: agent-platform-impl:cursor.platform@current

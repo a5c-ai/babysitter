@@ -17,6 +17,6 @@ edges:
   surfaces_process:
     - target: process:packages/catalog/process-library-catalog
   wraps_graph:
-    - target: graph:atlas-catalog
+    - target: graph:agent-catalog
   validated_by_ci:
     - target: ci:a5c-ai-catalog

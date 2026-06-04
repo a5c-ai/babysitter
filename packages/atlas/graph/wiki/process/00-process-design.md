@@ -14,7 +14,7 @@ documents: []
 
 ## 1. Vision
 
-The **atlas-catalog graph** is the single source of truth for the v6 domain. Every other artifact — node-kind specs, validation rules, generated documentation, the wiki, generator code, the SDK, and user-facing interfaces — is a *projection* of the graph, never authored independently.
+The **agent-catalog graph** is the single source of truth for the v6 domain. Every other artifact — node-kind specs, validation rules, generated documentation, the wiki, generator code, the SDK, and user-facing interfaces — is a *projection* of the graph, never authored independently.
 
 The flow is strict and one-directional:
 

@@ -13,4 +13,4 @@ edges:
   defines:
     - target: term:ontology-schema
   defined_in_context_of:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core

@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:pi.platform@current
+id: agent-platform-impl:pi.platform@current
 attributes:
   displayName: Pi Platform (current)
   agentVersionId: agentVersion:pi:ge-0-75-5
@@ -26,7 +26,7 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:pi
     role: platform

@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:babysitter-sdk.runtime@current
+id: agent-runtime-impl:babysitter-sdk.runtime@current
 attributes:
   displayName: "babysitter SDK Runtime (current) — task-effect dispatcher"
   agentVersionId: agent-version:babysitter-sdk@current
@@ -30,10 +30,10 @@ attributes:
     orchestratorTask / subprocess / hook intrinsics) into the journal
     and replays them deterministically across iterations. Harness
     adapters spawn subprocesses for kind: 'agent' tasks. This runtime
-    is reused by the genty-platform CLI binary.
+    is reused by the agent-platform CLI binary.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
     - target: agent:babysitter-sdk
       role: runtime

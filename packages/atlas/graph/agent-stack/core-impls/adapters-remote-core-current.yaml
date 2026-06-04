@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:adapters-remote.core@current
+id: agent-core-impl:adapters-remote.core@current
 attributes:
   displayName: adapters-remote Core (current) — transport-only delegator
   agentVersionId: agent-version:adapters-remote@current
@@ -33,7 +33,7 @@ attributes:
     to whichever agent runs on the remote target (selected via AGENT_MUX_REMOTE_AGENT).
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:adapters-remote
       role: core

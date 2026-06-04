@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:babysitter.core@current
+id: agent-core-impl:babysitter.core@current
 attributes:
   displayName: "babysitter Core (current) — process orchestrator + journal"
   agentVersionId: agent-version:babysitter@current
@@ -43,7 +43,7 @@ attributes:
     model client.
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:babysitter
       role: core

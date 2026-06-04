@@ -61,8 +61,8 @@ attributes:
   displayName: "Google Cloud Vertex AI Gemini image model listing for issue #534"
   kindLabel: web
   trustLevel: trust-level:official-web
-  sourceUrl: https://docs.cloud.google.com/gemini-enterprise-genty-platform/models/google-models
-  sourcePathOrUrl: https://docs.cloud.google.com/gemini-enterprise-genty-platform/models/google-models
+  sourceUrl: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models
+  sourcePathOrUrl: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models
   locator: "Google models navigation includes Gemini 3 Pro Image, Gemini 3.1 Flash Image, and Gemini 2.5 Flash Image pages"
   capturedAt: "2026-05-29T12:10:00Z"
   observedAt: "2026-05-29T12:10:00Z"

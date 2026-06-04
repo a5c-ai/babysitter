@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:pikiclaw.runtime@current
+id: agent-runtime-impl:pikiclaw.runtime@current
 attributes:
   displayName: "PikiClaw Runtime (current)"
   agentVersionId: agent-version:pikiclaw@current
@@ -22,7 +22,7 @@ attributes:
     plugin loading, and model dispatch.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
     - target: agent:pikiclaw
       role: runtime

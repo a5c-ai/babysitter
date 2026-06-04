@@ -1,4 +1,4 @@
-# Hook mappings for babysitter plugin targets (migrated from atlas-catalog)
+# Hook mappings for babysitter plugin targets (migrated from agent-catalog)
 ---
 nodeKind: HookMapping
 id: hook-mapping:session-start-claude-code

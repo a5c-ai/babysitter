@@ -1,17 +1,17 @@
-# Legacy `atlas-catalog` graph vs atlas `graph` — coverage matrix
+# Legacy `agent-catalog` graph vs atlas `graph` — coverage matrix
 
 catalog pass 90 audit. Source of truth for the migration team: which fields of the
-legacy graph at `packages/atlas-catalog/graph/` (consumed by the babysitter
+legacy graph at `packages/agent-catalog/graph/` (consumed by the babysitter
 monorepo's adapter generators) are carried by the atlas graph at
 `C:/work/v6/graph/` and which need adapter logic / backfill.
 
-The legacy SDK (`packages/atlas-catalog/src/sdk.ts`) exposes the canonical
+The legacy SDK (`packages/agent-catalog/src/sdk.ts`) exposes the canonical
 projection accessors. Each row below corresponds to one accessor and the
 adapter/sdk consumer that calls it.
 
 ## Inventory snapshot
 
-| Metric | Legacy `atlas-catalog/graph/` | atlas `graph/` |
+| Metric | Legacy `agent-catalog/graph/` | atlas `graph/` |
 | --- | --- | --- |
 | YAML/JSON files | 86 | 1698 |
 | Top-level subdirs | nodes/, edges/, schema/ (3) | 18 cluster dirs |
@@ -30,7 +30,7 @@ adapter/sdk consumer that calls it.
 | `adapters/core/src/invocation.ts` | `getHarnessImages`, `lookupHarnessImage` | `PluginArtifact` filtered to `artifactKind=container-image` | partial — atlas has `PluginArtifact` instances but no `artifactKind=container-image` rows; legacy projection synthesizes `HarnessImageEntry` from artifact path + installerSurface | (a) missing data |
 | `hooks-adapter/core/src/discovery/detector.ts` | `getHooksMuxDetectionRules` | `DiscoverySignal` (scope=hooks-adapter) | **closed (catalog pass 92)** — 10 atlas DiscoverySignal rows scoped `hooks-adapter` under `extensions/discovery-signals/*-hooks-adapter*.yaml` (verbatim from legacy `discovery-signals-hooks.yaml`); schema gained `hooks-adapter` scope, `all-present-with-absences` matchMode, and `absentSignals` field | covered |
 | `extensions-adapter/src/targets/index.ts` | `listPluginTargetDescriptors`, `getPluginTargetDescriptor`, `getHookNameMap` | `PluginTarget`, `HookMapping` | shape-divergent — atlas PluginTargets have `manifestPath`, `installLayout` (object with concrete keys: manifest/commands/agents/skills/hooks/mcp), `distribution` array, `adapterFamily`, `description`. Legacy descriptor needs: `targetId`, `adapterName`, `pluginRootEnvVar`, `pluginRootEnvVarForExtension`, `manifestFormat` (string token like "plugin.json + openclaw.plugin.json"), `commandFormat`, `skillHandling`, `hookRegistrationFormat`, `scriptVariants`, `distribution` (string), `distributionModel`, `marketplacePath`, `npmPublishable`, `installLayout.{harnessHomeRelative, pluginsDirRelative, marketplacePathRelative}`, `packageMetadata.{moduleType, binScriptExt, installLifecycle, activationMessage, extraPackageFiles, extraScripts, peerDependencyPackage, emitCjsWrappers}`, `componentSupport.{agents, context}` | (b) missing fields (8+ field-level) + (e) shape divergence |
-| `sdk/src/harness/discovery.ts` + `adapterFallbackMetadata.ts` | `getFallbackHarnessMetadata`, `listFallbackHarnessMetadata`, `listAgentVersions`, `getAgentVersion` | `AgentVersion`, HarnessFallbackMetadata projection | **consumer-adapter-required (catalog pass 92, path-b)** — atlas keeps the data normalized across AgentVersion + DiscoverySignal[host-detection] + SessionModel + Capability; the bundle is rebuilt by `atlas-catalog/src/data.ts :: buildFallbackMetadata` (already a projection in legacy too — it never loaded a bundled record). Adapter spec frozen in `migration/projection-adapters.md` § 5. | covered (via consumer adapter) |
+| `sdk/src/harness/discovery.ts` + `adapterFallbackMetadata.ts` | `getFallbackHarnessMetadata`, `listFallbackHarnessMetadata`, `listAgentVersions`, `getAgentVersion` | `AgentVersion`, HarnessFallbackMetadata projection | **consumer-adapter-required (catalog pass 92, path-b)** — atlas keeps the data normalized across AgentVersion + DiscoverySignal[host-detection] + SessionModel + Capability; the bundle is rebuilt by `agent-catalog/src/data.ts :: buildFallbackMetadata` (already a projection in legacy too — it never loaded a bundled record). Adapter spec frozen in `migration/projection-adapters.md` § 5. | covered (via consumer adapter) |
 | `adapters/core/tests/invocation.contract.test.ts` | (consumes harnessImages above) | — | — | — |
 | `catalog/src/app/api/...` | `listCatalogAgents`, `searchCatalogDiscovery` (process catalog) | `ProcessDescriptor`, `PackageSurface`, `PathDescriptor`, agent listings | covered for ProcessDescriptor (atlas has 24 records under `extensions/process-descriptors/`); agents covered as AgentVersion | (e) shape minor |
 
@@ -49,7 +49,7 @@ adapter/sdk consumer that calls it.
 catalog pass 92 closed the two catalog pass 91 residuals: (1) hooks-adapter-scope DiscoverySignal
 rows + `absentSignals` field/scope-enum extension; (2) HarnessFallbackMetadata
 adapter spec frozen (path-b: keep atlas normalized, adapter lives in
-`atlas-catalog/src/data.ts`). All five projection consumers
+`agent-catalog/src/data.ts`). All five projection consumers
 (`adapters`, `hooks-adapter`, `extensions-adapter`, `sdk/harness/*`, catalog API)
 now resolve against the atlas graph either directly (consumers 1–4) or via a
 trivial spec'd adapter (consumer 5). No data/schema gap remains.
@@ -118,7 +118,7 @@ catalog-faithful (codegen-ready).
 
 | Package | Internal concepts | atlas NodeKind(s) used | Status |
 | --- | --- | --- | --- |
-| `atlas-catalog` | exports, projection types | PackageSurface + all NodeKinds it projects | GREEN |
+| `agent-catalog` | exports, projection types | PackageSurface + all NodeKinds it projects | GREEN |
 | `adapters/core` | adapter-registry, capabilities, host-detection, hook-catalog, hook-dispatcher, builtin-hooks | AgentRuntimeImpl, AgentCapabilities (Capability), HostDetectionRule, HookSurface, HookMapping; builtin-hooks runtime-only (out of scope) | GREEN |
 | `adapters/cli` | adapters bin entrypoint | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
 | `adapters/gateway` | HTTP gateway, fanout server, kanban control plane | PackageSurface + PathDescriptor (catalog pass 96-new) | GREEN |
@@ -148,14 +148,14 @@ catalog pass 98 promoted the catalog pass 97c group-level tasks-adapter records 
 authored outbound-client APIEndpoints, promoted harness-mock error +
 runtime-hook fixtures to InteractionPrimitive[mock-scenario], and added
 PackageSurface command-group enrichment for babysitter-sdk and
-genty-platform.
+agent-platform.
 
 | Package | catalog pass 98 delta |
 | --- | --- |
 | `tasks-adapter` | 17 leaf CLI subcommand records authored (auth login/logout/status/keygen/key-push/keys/server set/server clear/token set/token clear; breakpoints pending/answer/status/poll; responders list/show; server start) + 8 outbound-client APIEndpoint records (POST/GET/DELETE under /api/v1/{questions,experts,...}). |
 | `adapters/harness-mock` | 5 `error:*` + 3 `runtimeHook*` scenarios promoted from data fixtures to InteractionPrimitive[mock-scenario]. |
 | `babysitter-sdk` | PackageSurface enriched with bins (babysitter, babysitter-sdk, babysitter-mcp-server) + 12 top-level CLI command-group records spanning run:/task:/session:/plugin:/skill:/process-library:/profile:/instructions:/compression:/breakpoint:/hook:/mcp-server. |
-| `genty-platform` | PackageSurface enriched with bin (babysitter-harness) + harness-runtime command-set primitive (HARNESS_RUNTIME_COMMANDS literal). |
+| `agent-platform` | PackageSurface enriched with bin (babysitter-harness) + harness-runtime command-set primitive (HARNESS_RUNTIME_COMMANDS literal). |
 | `babysitter` (metapackage) | Confirmed wrapper-over-graph (bin/babysitter.js aliases babysitter-sdk CLI); existing PackageSurface remains accurate. |
 | `cloud`, `observer-dashboard` | Existing PackageSurface (Next.js apps) confirmed accurate; per-route HTTP endpoints intentionally not enumerated (would couple atlas to deploy-time UI surface). |
 
@@ -171,7 +171,7 @@ left as graph-visible placeholders rather than silent gaps:
 | Codex `AGENTS.md` FrontmatterField | deferred-work:frontmatter-codex-agents-md | abandoned (not-applicable; no frontmatter) |
 | babysitter `defineTask` task-schema fields | deferred-work:task-schema-field-define-task | open (NodeKind decision) |
 | adapters/adapters per-harness dispatch | deferred-work:adapters-adapters-per-harness-dispatch | abandoned (wrapper-over-graph per catalog pass 96) |
-| atlas-catalog public library functions | deferred-work:atlas-catalog-library-functions | abandoned (projection-over-graph) |
+| agent-catalog public library functions | deferred-work:agent-catalog-library-functions | abandoned (projection-over-graph) |
 | adapters/ui + webui React components | deferred-work:adapters-ui-webui-react-components | abandoned (presentation-only per catalog pass 97c) |
 | transport-adapter runtime.ts programmatic API | deferred-work:transport-adapter-runtime-programmatic-api | abandoned (wrapper-over-graph) |
 | hooks-adapter internal helpers | deferred-work:hooks-adapter-internals-helpers | abandoned (private code) |

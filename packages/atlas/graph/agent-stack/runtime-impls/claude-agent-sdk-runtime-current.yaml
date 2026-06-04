@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:claude-agent-sdk.runtime@current
+id: agent-runtime-impl:claude-agent-sdk.runtime@current
 attributes:
   displayName: Claude Agent SDK Runtime (current)
   agentVersionId: agent-version:claude-agent-sdk@current
@@ -26,7 +26,7 @@ attributes:
     delegated back to the host program.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
     - target: agent:claude-agent-sdk
       role: runtime

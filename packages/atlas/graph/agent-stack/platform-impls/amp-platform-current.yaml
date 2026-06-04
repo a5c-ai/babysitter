@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:amp.platform@current
+id: agent-platform-impl:amp.platform@current
 attributes:
   displayName: Sourcegraph Amp Platform (current)
   agentVersionId: agent-version:amp@current
@@ -24,7 +24,7 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:amp
     role: platform

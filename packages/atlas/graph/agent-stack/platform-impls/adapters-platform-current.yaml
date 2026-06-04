@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:adapters.platform@current
+id: agent-platform-impl:adapters.platform@current
 attributes:
   displayName: "adapters Platform (current) — surface registry"
   agentVersionId: agent-version:adapters@current
@@ -28,7 +28,7 @@ attributes:
     skills, slash commands, and subagents live with the remote target.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
     - target: agent:adapters
       role: platform

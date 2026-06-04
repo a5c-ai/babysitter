@@ -20,4 +20,4 @@ attributes:
     - "Cmd+Shift+P / Ctrl+Shift+P: command palette"
 edges:
   bundled_with:
-    - genty-platform-impl:cursor.platform@current
+    - agent-platform-impl:cursor.platform@current

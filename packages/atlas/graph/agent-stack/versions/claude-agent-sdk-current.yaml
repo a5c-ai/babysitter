@@ -21,9 +21,9 @@ edges:
   version_of:
     - agent:claude-agent-sdk
   composed_of:
-    - target: genty-core-impl:claude-agent-sdk.core@current
+    - target: agent-core-impl:claude-agent-sdk.core@current
       role: core
-    - target: genty-runtime-impl:claude-agent-sdk.runtime@current
+    - target: agent-runtime-impl:claude-agent-sdk.runtime@current
       role: runtime
   sourced_from:
     - evidence:claude-agent-sdk-0-3-159-release

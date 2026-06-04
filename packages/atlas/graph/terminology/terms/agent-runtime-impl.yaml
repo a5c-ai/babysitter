@@ -1,7 +1,7 @@
 nodeKind: Term
-id: term:genty-runtime-impl
+id: term:agent-runtime-impl
 attributes:
-  canonicalDefinitionId: definition:genty-runtime-impl.canonical
+  canonicalDefinitionId: definition:agent-runtime-impl.canonical
   displayName: "AgentRuntimeImpl"
   kind: concept
   references:

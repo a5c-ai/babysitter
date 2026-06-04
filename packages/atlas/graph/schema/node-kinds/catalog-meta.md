@@ -44,7 +44,7 @@ for rationale, freshness rules, and worked examples.
 | `value` | any | yes | The claimed value, typed by the subject's attribute spec. |
 | `statement` | markdown | yes | Natural-language form of the claim (e.g. "Claude Code 1.x supports MCP stdio transport since 1.0.0"). |
 | `evidenceSourceIds` | list<ref<`EvidenceSource`>> | yes | At least one (V-2.1). |
-| `evidenceIds` | list<string> | no | Legacy alias for `evidenceSourceIds` for cross-walk with the legacy atlas-catalog. |
+| `evidenceIds` | list<string> | no | Legacy alias for `evidenceSourceIds` for cross-walk with the legacy agent-catalog. |
 | `confidence` | enum<high,medium,low,unverified> | yes | Confidence in the claim. Defaults to `medium` if a single vendor-doc evidence source backs it. |
 | `provenanceKind` | enum<vendor-doc,repo-inspection,community,benchmark,observation> | yes | What kind of provenance the evidence rests on. |
 | `evidenceStrength` | enum<strong,adequate,weak> | yes | Strength of the evidence chain (independent of confidence). |
@@ -98,7 +98,7 @@ for the full conditional-required matrix.
 | `evidenceId` | string | no | Vendor-stable id when available (e.g. doc page slug, packaged manifest hash). |
 | `kindLabel` | enum<web,file,package,observation,attestation> | yes | What sort of source. |
 | `trustLevel` | ref<`TrustLevel`> | yes | One of the four levels. |
-| `sourcePathOrUrl` | string | no | Unified source pointer (URL for `web`, path for `file`, package coord for `package`). Used for cross-walk with the legacy atlas-catalog. |
+| `sourcePathOrUrl` | string | no | Unified source pointer (URL for `web`, path for `file`, package coord for `package`). Used for cross-walk with the legacy agent-catalog. |
 | `sourceUrl` | url | conditional | Required when `kindLabel = web`. |
 | `filePath` | string | conditional | Required when `kindLabel = file`. |
 | `packageId` | string | conditional | Required when `kindLabel = package`. |
@@ -268,7 +268,7 @@ they're published.
 | `id` | id | yes | `package:<name>`, e.g. `package:@a5c-ai/atlas/catalog`. |
 | `packageId` | string | yes | Stable id (typically equals the npm/PyPI package name). |
 | `packageName` | string | yes | Human-readable / publishable name. |
-| `workspacePath` | string | yes | Repo-relative path to the package root (e.g. `packages/atlas-catalog`). |
+| `workspacePath` | string | yes | Repo-relative path to the package root (e.g. `packages/agent-catalog`). |
 | `moduleType` | enum<typescript,commonjs,esm,nextjs,python,rust,go,other> | yes | Module / build flavor. |
 | `surfaceKinds` | list<string> | yes | Surface kinds the package exposes (e.g. `graph-source`, `sdk`, `cli`, `ui`, `internal-workspace-package`, `sdk-consumer`, `discovery-consumer`, `plugin-consumer`, `host-detection-consumer`, `invocation-consumer`, `ui-consumer`, `api-consumer`, `transport-runtime`, `provider-ontology-source`). |
 | `sourceOfTruthRole` | enum<graph-source-of-truth,wrapper-over-graph,ontology-input,application,external> | yes | Role the package plays w.r.t. the graph. |
@@ -334,8 +334,8 @@ A host-detection signal — env var, binary on PATH, file presence, registry key
 argv match, exit code, or a combination — used by `adapters` to detect whether a
 particular agent harness is the active host or installed on the machine.
 
-Sourced from the legacy atlas-catalog ontology
-(`packages/atlas-catalog/graph/schema/ontology-schema.yaml :: DiscoverySignal`)
+Sourced from the legacy agent-catalog ontology
+(`packages/agent-catalog/graph/schema/ontology-schema.yaml :: DiscoverySignal`)
 and the runtime probe in
 `packages/adapters/core/src/host-detection.ts`.
 
@@ -514,7 +514,7 @@ spec deferred to Phase 2 (extension-interfaces track).
 ### NodeKind: `DeploymentTarget`
 
 Cluster 13. A named Kubernetes-cluster (or local minikube) target that the
-babysitter cloud package can deploy the kanban / gateway / genty-platform
+babysitter cloud package can deploy the kanban / gateway / agent-platform
 components to. Reifies the union of `TargetConfig` variants
 (`minikube` | `existing` | `eks` | `aks` | `gke`) declared in
 `packages/cloud/src/types.ts` so cluster fleets, cost reports, and multi-tenant

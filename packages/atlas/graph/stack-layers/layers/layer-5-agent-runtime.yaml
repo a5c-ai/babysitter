@@ -1,5 +1,5 @@
 nodeKind: Layer
-id: layer:5-genty-runtime
+id: layer:5-agent-runtime
 attributes:
   displayName: Agent-Runtime
   position: 5

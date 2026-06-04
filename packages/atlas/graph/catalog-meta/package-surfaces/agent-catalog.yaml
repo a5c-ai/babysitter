@@ -1,5 +1,5 @@
 nodeKind: PackageSurface
-id: package:a5c-ai-atlas-catalog
+id: package:a5c-ai-agent-catalog
 attributes:
   packageId: "@a5c-ai/atlas/catalog"
   packageName: "@a5c-ai/atlas/catalog"
@@ -16,8 +16,8 @@ attributes:
   versionPolicy: semver
 edges:
   references_path:
-    - target: path:atlas-catalog-graph
+    - target: path:agent-catalog-graph
   wraps_graph:
-    - target: graph:atlas-catalog
+    - target: graph:agent-catalog
   validated_by_ci:
-    - target: ci:a5c-ai-atlas-catalog
+    - target: ci:a5c-ai-agent-catalog

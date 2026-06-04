@@ -1,5 +1,5 @@
 nodeKind: Layer
-id: layer:6-genty-platform
+id: layer:6-agent-platform
 attributes:
   displayName: Agent-Platform
   position: 6

@@ -1,7 +1,7 @@
 # ProtocolMessage records for Google Gemini generateContent API.
 #
 # Source: https://ai.google.dev/api/generate-content (fetched 2026-05-05).
-# Wired from genty-core-impl:gemini-cli.core@current via emits_message_type.
+# Wired from agent-core-impl:gemini-cli.core@current via emits_message_type.
 nodeKind: ProtocolMessage
 id: protocol-message:gemini-content
 attributes:

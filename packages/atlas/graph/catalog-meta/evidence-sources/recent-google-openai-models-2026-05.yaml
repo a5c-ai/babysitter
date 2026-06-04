@@ -290,8 +290,8 @@ attributes:
   displayName: "Google Cloud Gemini 3.5 Flash model documentation, May 2026"
   kindLabel: web
   trustLevel: trust-level:official-web
-  sourceUrl: https://cloud.google.com/gemini-enterprise-genty-platform/models/gemini/3-5-flash
-  sourcePathOrUrl: https://cloud.google.com/gemini-enterprise-genty-platform/models/gemini/3-5-flash
+  sourceUrl: https://cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash
+  sourcePathOrUrl: https://cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash
   locator: "Google Cloud model page listing Gemini 3.5 Flash"
   capturedAt: "2026-05-26T00:00:00Z"
   observedAt: "2026-05-26T00:00:00Z"

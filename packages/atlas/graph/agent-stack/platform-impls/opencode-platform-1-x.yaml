@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:opencode.platform@1.x
+id: agent-platform-impl:opencode.platform@1.x
 attributes:
   displayName: OpenCode Platform (1.x)
   agentVersionId: agentVersion:opencode:ge-0-0-0
@@ -28,7 +28,7 @@ attributes:
   - http-sse-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:opencode
     role: platform

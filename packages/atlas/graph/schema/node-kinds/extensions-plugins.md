@@ -646,8 +646,8 @@ command format, script variants, install layout, package metadata, distribution 
 It is distinct from `AgentPlatformImpl` (the platform itself); a single
 `AgentPlatformImpl` is wired to one `PluginTarget` via `targets`.
 
-Sourced from the legacy atlas-catalog ontology
-(`packages/atlas-catalog/graph/schema/ontology-schema.yaml :: PluginTarget`).
+Sourced from the legacy agent-catalog ontology
+(`packages/agent-catalog/graph/schema/ontology-schema.yaml :: PluginTarget`).
 
 ### Attributes
 

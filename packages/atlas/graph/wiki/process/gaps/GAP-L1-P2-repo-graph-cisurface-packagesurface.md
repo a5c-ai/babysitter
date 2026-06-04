@@ -15,7 +15,7 @@ documents: []
 | level | 1 |
 | priority | P2 |
 | discoveredAt | 2026-04-28T00:00:00Z |
-| source | packages/atlas-catalog/graph/schema/ontology-schema.yaml |
+| source | packages/agent-catalog/graph/schema/ontology-schema.yaml |
 | status | open |
 | owner | tbd |
 
@@ -33,7 +33,7 @@ v6 has `ProcessDescriptor` (cluster 11) — partially overlaps with `PackageSurf
 - Add `PackageSurface` (or merge into ProcessDescriptor with new attributes `moduleType`, `sourceOfTruthRole`).
 
 ## Evidence
-- packages/atlas-catalog/graph/schema/ontology-schema.yaml (lines 212-247)
+- packages/agent-catalog/graph/schema/ontology-schema.yaml (lines 212-247)
 - C:/work/v6/graph/coverage-checklist.md (multiple rows reference `PathDescriptor`)
 
 ## Propagation status

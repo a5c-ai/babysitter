@@ -22,11 +22,11 @@ edges:
   version_of:
     - agent:droid
   composed_of:
-    - target: genty-core-impl:droid.core@current
+    - target: agent-core-impl:droid.core@current
       role: core
-    - target: genty-runtime-impl:droid.runtime@current
+    - target: agent-runtime-impl:droid.runtime@current
       role: runtime
-    - target: genty-platform-impl:droid.platform@current
+    - target: agent-platform-impl:droid.platform@current
       role: platform
     - target: agent-ui-impl:droid.ui@current
       role: ui

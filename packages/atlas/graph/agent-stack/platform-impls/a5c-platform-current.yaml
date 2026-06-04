@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:a5c.platform@current
+id: agent-platform-impl:a5c.platform@current
 attributes:
   displayName: a5c Unified Platform (current) — unified extension host
   agentVersionId: agent-version:a5c@current
@@ -74,7 +74,7 @@ attributes:
     compatibility profile via pi-plugin-compatible directories and settings.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
     - target: agent:a5c
       role: platform

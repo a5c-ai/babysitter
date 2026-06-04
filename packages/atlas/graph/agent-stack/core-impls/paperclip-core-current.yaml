@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:paperclip.core@current
+id: agent-core-impl:paperclip.core@current
 attributes:
   displayName: "Paperclip Core (current)"
   agentVersionId: agent-version:paperclip@current
@@ -50,7 +50,7 @@ attributes:
     - Activity log: append-only mutation audit trail
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:paperclip
       role: core

@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:symphony.core@current
+id: agent-core-impl:symphony.core@current
 attributes:
   displayName: "Symphony Core (current)"
   agentVersionId: agent-version:symphony@current
@@ -37,7 +37,7 @@ attributes:
     - Agent Session Runner: spawns and monitors coding agent processes
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:symphony
       role: core

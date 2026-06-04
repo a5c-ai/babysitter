@@ -18,4 +18,4 @@ attributes:
     - "Esc: cancel pending approval"
 edges:
   bundled_with:
-    - genty-platform-impl:codex.platform@1.x
+    - agent-platform-impl:codex.platform@1.x

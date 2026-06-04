@@ -43,11 +43,11 @@ edges:
     versionRange: '>=1.0.0'
     level: full
   composed_of:
-  - target: genty-core-impl:sweep-ai.core@current
+  - target: agent-core-impl:sweep-ai.core@current
     role: core
 ---
 nodeKind: AgentCoreImpl
-id: genty-core-impl:sweep-ai.core@current
+id: agent-core-impl:sweep-ai.core@current
 attributes:
   displayName: "Sweep AI Core (current)"
   agentVersionId: agent-version:sweep-ai@current
@@ -66,7 +66,7 @@ attributes:
   thinkingChannelHandling: none
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:sweep-ai
       role: core

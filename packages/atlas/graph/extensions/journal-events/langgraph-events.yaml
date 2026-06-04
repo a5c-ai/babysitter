@@ -21,7 +21,7 @@ attributes:
   sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=values)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:langgraph.runtime@current
+    - target: agent-runtime-impl:langgraph.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:langgraph-stream-updates
@@ -38,7 +38,7 @@ attributes:
   sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=updates)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:langgraph.runtime@current
+    - target: agent-runtime-impl:langgraph.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:langgraph-stream-messages
@@ -55,7 +55,7 @@ attributes:
   sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=messages)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:langgraph.runtime@current
+    - target: agent-runtime-impl:langgraph.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:langgraph-stream-custom
@@ -72,7 +72,7 @@ attributes:
   sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=custom)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:langgraph.runtime@current
+    - target: agent-runtime-impl:langgraph.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:langgraph-stream-checkpoints
@@ -89,7 +89,7 @@ attributes:
   sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=checkpoints)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:langgraph.runtime@current
+    - target: agent-runtime-impl:langgraph.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:langgraph-stream-tasks
@@ -106,7 +106,7 @@ attributes:
   sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=tasks)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:langgraph.runtime@current
+    - target: agent-runtime-impl:langgraph.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:langgraph-stream-debug
@@ -123,4 +123,4 @@ attributes:
   sourceCitation: "docs.langchain.com/oss/python/langgraph/streaming (stream_mode=debug)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:langgraph.runtime@current
+    - target: agent-runtime-impl:langgraph.runtime@current

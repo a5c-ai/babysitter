@@ -17,4 +17,4 @@ attributes:
     - "Ctrl+C: cancel"
 edges:
   bundled_with:
-    - genty-platform-impl:openclaw.platform@current
+    - agent-platform-impl:openclaw.platform@current

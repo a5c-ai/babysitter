@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:claude-code.platform@1.x
+id: agent-platform-impl:claude-code.platform@1.x
 attributes:
   displayName: Claude Code Platform (1.x)
   agentVersionId: agentVersion:claude:ge-0-0-0
@@ -106,7 +106,7 @@ attributes:
     introducedIn: "2.1.153"
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:claude-code
     role: platform

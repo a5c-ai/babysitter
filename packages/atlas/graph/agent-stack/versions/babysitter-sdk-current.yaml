@@ -12,9 +12,9 @@ edges:
   version_of:
     - agent:babysitter-sdk
   composed_of:
-    - target: genty-core-impl:babysitter-sdk.core@current
+    - target: agent-core-impl:babysitter-sdk.core@current
       role: core
-    - target: genty-runtime-impl:babysitter-sdk.runtime@current
+    - target: agent-runtime-impl:babysitter-sdk.runtime@current
       role: runtime
     - target: agent-governance-impl:babysitter-sdk-tool.governance@current
       role: governance

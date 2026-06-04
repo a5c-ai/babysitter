@@ -408,21 +408,21 @@ edges:
     - agent:babysitter-sdk
 ---
 nodeKind: TestableClaim
-id: claim:genty-platform-has-version-5
+id: claim:agent-platform-has-version-5
 attributes:
   displayName: "Babysitter Agent version is >=5.0.0"
   description: |
-    Babysitter Agent (agent:genty-platform) has a has_version edge
-    to agentVersion:genty-platform:ge-5-0-0, confirming the v5+
+    Babysitter Agent (agent:agent-platform) has a has_version edge
+    to agentVersion:agent-platform:ge-5-0-0, confirming the v5+
     version pin in the graph.
   testStatus: passing
   testType: unit
-  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.from==='agent:genty-platform'&&e.kind==='has_version'&&e.to.includes('ge-5-0-0'))?0:1)\""
+  testCommand: "node -e \"const i=JSON.parse(require('fs').readFileSync('packages/atlas/src/index.json','utf8'));process.exit(i.edges.some(e=>e.from==='agent:agent-platform'&&e.kind==='has_version'&&e.to.includes('ge-5-0-0'))?0:1)\""
   category: graph-integrity
   priority: medium
 edges:
   asserts_about:
-    - agent:genty-platform
+    - agent:agent-platform
 ---
 nodeKind: TestableClaim
 id: claim:claude-agent-sdk-distinct-from-claude-code

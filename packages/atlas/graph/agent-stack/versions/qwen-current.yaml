@@ -28,11 +28,11 @@ edges:
   version_of:
     - agent:qwen
   composed_of:
-    - target: genty-core-impl:qwen.core@current
+    - target: agent-core-impl:qwen.core@current
       role: core
-    - target: genty-runtime-impl:qwen.runtime@current
+    - target: agent-runtime-impl:qwen.runtime@current
       role: runtime
-    - target: genty-platform-impl:qwen.platform@current
+    - target: agent-platform-impl:qwen.platform@current
       role: platform
     - target: agent-ui-impl:qwen.ui@current
       role: ui

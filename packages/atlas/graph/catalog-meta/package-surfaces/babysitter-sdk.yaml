@@ -20,7 +20,7 @@ edges:
     - target: shared-context-spec:default
     - target: shared-context-spec:run-scoped
   references_path:
-    - target: path:atlas-catalog-graph
+    - target: path:agent-catalog-graph
 # top-level CLI subcommand groups (run:, task:, session:,
   # plugin:, skill:, process-library:, profile:, instructions:,
   # compression:, breakpoint:, hook:) plus the babysitter-harness

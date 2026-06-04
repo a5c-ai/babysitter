@@ -35,7 +35,7 @@ A repo + ref + path pointer to the source-of-truth for an imported artifact.
 
 | Attribute | Type | Required | Notes |
 |---|---|---|---|
-| `id` | id | yes | `source-ref:<slug>`, e.g. `source-ref:packages-atlas-catalog-v1`. |
+| `id` | id | yes | `source-ref:<slug>`, e.g. `source-ref:packages-agent-catalog-v1`. |
 | `repoUrl` | url | yes | Repository URL. |
 | `ref` | string | yes | Branch, tag, or commit SHA. |
 | `path` | string | yes | Relative path within the repo. |
@@ -104,11 +104,11 @@ multiple boundaries (e.g., one per dimension).
 ## Examples
 
 ```yaml
-# A SourceRef pointing at packages/atlas-catalog at a specific commit
-- id: source-ref:packages-atlas-catalog-v1
+# A SourceRef pointing at packages/agent-catalog at a specific commit
+- id: source-ref:packages-agent-catalog-v1
   repoUrl: https://github.com/a5c-ai/babysitter
   ref: "ef128993"
-  path: "packages/atlas-catalog/v1"
+  path: "packages/agent-catalog/v1"
   packageManager: npm
   packageName: "@a5c-ai/atlas/catalog"
   version: "1.4.2"

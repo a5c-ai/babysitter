@@ -36,7 +36,7 @@ attributes:
       level: full
       note: |
         a5c platform exposes stdio, streamable-http, and http-sse MCP
-        transports (see genty-runtime-impl:a5c.runtime@current.connects).
+        transports (see agent-runtime-impl:a5c.runtime@current.connects).
     capability:streaming:
       enabled: true
       level: full
@@ -46,7 +46,7 @@ attributes:
       enabled: true
       level: full
       note: |
-        Native a5c-plugin descriptor; see genty-platform-impl:a5c.platform@current.
+        Native a5c-plugin descriptor; see agent-platform-impl:a5c.platform@current.
     capability:supports-custom-subagents:
       enabled: true
       level: full

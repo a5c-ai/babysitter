@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:adapters-remote.platform@current
+id: agent-platform-impl:adapters-remote.platform@current
 attributes:
   displayName: adapters-remote Platform (current) — MCP broker only
   agentVersionId: agent-version:adapters-remote@current
@@ -32,7 +32,7 @@ attributes:
     '
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:adapters-remote
     role: platform

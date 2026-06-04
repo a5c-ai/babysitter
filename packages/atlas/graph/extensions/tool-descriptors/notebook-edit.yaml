@@ -11,4 +11,4 @@ attributes:
   vendor: anthropic
 edges:
   bundled_in:
-    - target: genty-runtime-impl:claude-code.runtime@1.x
+    - target: agent-runtime-impl:claude-code.runtime@1.x

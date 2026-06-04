@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:amp.core@current
+id: agent-core-impl:amp.core@current
 attributes:
   displayName: Sourcegraph Amp Core (current)
   agentVersionId: agent-version:amp@current
@@ -28,7 +28,7 @@ attributes:
   thinkingChannelHandling: not-supported
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
   - target: agent:amp
     role: core

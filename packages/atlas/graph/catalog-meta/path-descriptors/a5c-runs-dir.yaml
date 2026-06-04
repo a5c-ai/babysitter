@@ -6,7 +6,7 @@ attributes:
   path: ".a5c/runs"
   pathKind: session-state-dir
   ownerKind: GraphDocument
-  ownerId: graph:atlas-catalog
+  ownerId: graph:agent-catalog
   platform: cross-platform
   scope: project
   evaluationContext: project

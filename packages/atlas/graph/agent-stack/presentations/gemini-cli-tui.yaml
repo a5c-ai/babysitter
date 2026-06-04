@@ -18,4 +18,4 @@ attributes:
     - "Ctrl+D: exit"
 edges:
   bundled_with:
-    - genty-platform-impl:gemini-cli.platform@current
+    - agent-platform-impl:gemini-cli.platform@current

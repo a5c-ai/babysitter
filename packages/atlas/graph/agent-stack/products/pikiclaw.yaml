@@ -36,11 +36,11 @@ edges:
   version_of:
     - agent:pikiclaw
   composed_of:
-    - target: genty-core-impl:pikiclaw.core@current
+    - target: agent-core-impl:pikiclaw.core@current
       role: core
-    - target: genty-runtime-impl:pikiclaw.runtime@current
+    - target: agent-runtime-impl:pikiclaw.runtime@current
       role: runtime
-    - target: genty-platform-impl:pikiclaw.platform@current
+    - target: agent-platform-impl:pikiclaw.platform@current
       role: platform
     - target: agent-ui-impl:pikiclaw.ui@current
       role: ui

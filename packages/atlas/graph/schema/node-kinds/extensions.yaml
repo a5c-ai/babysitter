@@ -959,9 +959,9 @@ nodeKinds:
 
     script variants, install layout, package metadata, distribution model, etc.
 
-    Sourced from the legacy atlas-catalog ontology
+    Sourced from the legacy agent-catalog ontology
 
-    (packages/atlas-catalog/graph/schema/ontology-schema.yaml :: PluginTarget).
+    (packages/agent-catalog/graph/schema/ontology-schema.yaml :: PluginTarget).
 
     '
   attributes:

@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:babysitter-sdk.core@current
+id: agent-core-impl:babysitter-sdk.core@current
 attributes:
   displayName: "babysitter SDK Core (current) — process-function loop"
   agentVersionId: agent-version:babysitter-sdk@current
@@ -29,12 +29,12 @@ attributes:
   thinkingChannelHandling: delegated-to-remote
   notes: |
     @a5c-ai/babysitter-sdk is the programmatic surface of babysitter — a
-    library imported by host harnesses (and by the genty-platform CLI).
+    library imported by host harnesses (and by the agent-platform CLI).
     Layer-3 (model transport) concerns are delegated to whichever harness
     subprocess is spawned for kind: 'agent' tasks.
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:babysitter-sdk
       role: core

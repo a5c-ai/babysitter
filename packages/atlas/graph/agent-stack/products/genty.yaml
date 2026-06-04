@@ -9,8 +9,8 @@ attributes:
   productKind: full-cli-agent
   stackScope: full
   description: |
-    genty — top-level integrated agent product. Composes genty-core (L4),
-    genty-runtime (L5), genty-platform (L6), adapters, and babysitter-sdk
+    genty — top-level integrated agent product. Composes agent-core (L4),
+    agent-runtime (L5), agent-platform (L6), adapters, and babysitter-sdk
     into a single CLI binary and barrel-export package. This is the package
     end users install and interact with; it provides the `genty` CLI command
     and re-exports the full agent stack through @a5c-ai/genty on npm.

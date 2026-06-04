@@ -109,11 +109,11 @@ edges:
   version_of:
     - agent:omp
   composed_of:
-    - target: genty-core-impl:omp.core@current
+    - target: agent-core-impl:omp.core@current
       role: core
-    - target: genty-runtime-impl:omp.runtime@current
+    - target: agent-runtime-impl:omp.runtime@current
       role: runtime
-    - target: genty-platform-impl:omp.platform@current
+    - target: agent-platform-impl:omp.platform@current
       role: platform
     - target: agent-ui-impl:omp.ui@current
       role: ui

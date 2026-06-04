@@ -13,7 +13,7 @@ attributes:
   sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RawResponsesStreamEvent)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:openai-agents-sdk.runtime@current
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:openai-agents-run-item-message-output-created
@@ -30,7 +30,7 @@ attributes:
   sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:openai-agents-sdk.runtime@current
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:openai-agents-run-item-tool-called
@@ -47,7 +47,7 @@ attributes:
   sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:openai-agents-sdk.runtime@current
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:openai-agents-run-item-tool-output
@@ -64,7 +64,7 @@ attributes:
   sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:openai-agents-sdk.runtime@current
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:openai-agents-run-item-handoff-requested
@@ -81,7 +81,7 @@ attributes:
   sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:openai-agents-sdk.runtime@current
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:openai-agents-run-item-handoff-occurred
@@ -98,7 +98,7 @@ attributes:
   sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:openai-agents-sdk.runtime@current
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:openai-agents-run-item-reasoning-item-created
@@ -115,7 +115,7 @@ attributes:
   sourceCitation: "openai.github.io/openai-agents-python/streaming/ (RunItemStreamEvent)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:openai-agents-sdk.runtime@current
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:openai-agents-agent-updated-stream-event
@@ -132,4 +132,4 @@ attributes:
   sourceCitation: "openai.github.io/openai-agents-python/streaming/ (AgentUpdatedStreamEvent)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:openai-agents-sdk.runtime@current
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current

@@ -259,7 +259,7 @@ attributes:
   startedAt: "2026-05-10"
   completedAt: "2026-05-10"
   evidence: |
-    Reviewed atlas graph agent-version and genty-core-impl nodes for Codex.
+    Reviewed atlas graph agent-version and agent-core-impl nodes for Codex.
     Confirmed via graph data:
     - No --thinking-level/--reasoning-effort flag in CLI help (codex#9381 closed)
     - memory-system:codex-agents-md has autoExtraction=false, consolidation=none
@@ -317,7 +317,7 @@ attributes:
     Reviewed atlas graph nodes for Claude Code:
     - memory-system:claude-code-auto-memory has autoExtraction=true,
       consolidation=auto-dream confirmed
-    - genty-core-impl:claude-code.core@1.x fires 7 hook surfaces including
+    - agent-core-impl:claude-code.core@1.x fires 7 hook surfaces including
       pre-tool-use, post-tool-use, stop, user-prompt-submit, subagent-start,
       subagent-stop, pre-compact — all confirmed in graph
     - capability:runtime-hooks and capability:stop-hook both at level:full
@@ -402,7 +402,7 @@ attributes:
   startedAt: "2026-05-10"
   completedAt: "2026-05-10"
   evidence: |
-    Reviewed atlas graph genty-core-impl:amp.core@current and
+    Reviewed atlas graph agent-core-impl:amp.core@current and
     memory-system:amp-memory nodes. Confirmed AGENTS.md + Sourcegraph code
     intelligence hybrid, Oracle and Librarian subagents, up to 8 concurrent
     parallel tasks. No other primary CLI agent bundles cross-repo code

@@ -13,11 +13,11 @@ edges:
   version_of:
     - agent:langgraph
   composed_of:
-    - target: genty-core-impl:langgraph.core@current
+    - target: agent-core-impl:langgraph.core@current
       role: core
-    - target: genty-runtime-impl:langgraph.runtime@current
+    - target: agent-runtime-impl:langgraph.runtime@current
       role: runtime
-    - target: genty-platform-impl:langgraph.platform@current
+    - target: agent-platform-impl:langgraph.platform@current
       role: platform
   sourced_from:
     - source-ref:langgraph-docs

@@ -11,12 +11,12 @@ attributes:
   description: |
     babysitter — multi-surface umbrella for catalog-driven agentic
     workflows. Composes the babysitter SDK (programmatic core+runtime),
-    the genty-platform CLI binary, and the adapters UI suite
+    the agent-platform CLI binary, and the adapters UI suite
     (TUI/CLI/web/mobile/TV/watch) into a single product narrative.
     Implements the Symphony SPEC pattern (poll workflow, dispatch agent
     runs, reconcile, repair) and brokers any harness (claude-code, codex,
     cursor, opencode, gemini-cli, …) via thin runner adapters. The
-    sibling AgentProducts `agent:babysitter-sdk`, `agent:genty-platform`,
+    sibling AgentProducts `agent:babysitter-sdk`, `agent:agent-platform`,
     and `agent:adapters` carry the per-surface detail.
 edges:
   has_version:

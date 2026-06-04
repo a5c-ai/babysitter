@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:copilot-cli.platform@current
+id: agent-platform-impl:copilot-cli.platform@current
 attributes:
   displayName: GitHub Copilot CLI Platform (current)
   agentVersionId: agentVersion:copilot:ge-1-0-55-3
@@ -26,7 +26,7 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:copilot-cli
     role: platform

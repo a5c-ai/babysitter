@@ -14,7 +14,7 @@ attributes:
   sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:94 + packages/sdk/src/cli/main/runCreate.ts"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-run-completed
@@ -31,7 +31,7 @@ attributes:
   sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:13,95 + packages/sdk/src/harness/__tests__/harness.test.ts:474"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-run-failed
@@ -48,7 +48,7 @@ attributes:
   sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:13,96 + packages/sdk/src/runtime/exceptions.ts (RunFailedError)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-effect-requested
@@ -73,7 +73,7 @@ attributes:
   sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:15-26,98 (EffectRequestedPayload)"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-effect-resolved
@@ -94,7 +94,7 @@ attributes:
   sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:28-35,101 (EffectResolvedPayload)"
 edges:
   journal_event_emitted_by:
-    - target: genty-platform-impl:a5c.platform@current
+    - target: agent-platform-impl:a5c.platform@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-effect-cancelled
@@ -111,7 +111,7 @@ attributes:
   sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:37-40,104 (EffectCancelledPayload)"
 edges:
   journal_event_emitted_by:
-    - target: genty-platform-impl:a5c.platform@current
+    - target: agent-platform-impl:a5c.platform@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-effect-progress
@@ -131,7 +131,7 @@ attributes:
   sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:53-59,107 (EffectProgressPayload)"
 edges:
   journal_event_emitted_by:
-    - target: genty-platform-impl:a5c.platform@current
+    - target: agent-platform-impl:a5c.platform@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-cost-tracked
@@ -154,7 +154,7 @@ attributes:
   sourceCitation: "packages/sdk/src/runtime/replay/effectIndex.ts:42-51,110 (CostTrackedPayload)"
 edges:
   journal_event_emitted_by:
-    - target: genty-platform-impl:a5c.platform@current
+    - target: agent-platform-impl:a5c.platform@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-stop-hook-invoked
@@ -171,7 +171,7 @@ attributes:
   sourceCitation: "packages/sdk/src/harness/hooks/utils.ts:128 + packages/sdk/src/runtime/__tests__/effectIndex.test.ts:106"
 edges:
   journal_event_emitted_by:
-    - target: genty-platform-impl:a5c.platform@current
+    - target: agent-platform-impl:a5c.platform@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-compression-applied
@@ -189,7 +189,7 @@ attributes:
   sourceCitation: "packages/sdk/src/cli/commands/tokensStats.ts:42,121"
 edges:
   journal_event_emitted_by:
-    - target: genty-platform-impl:a5c.platform@current
+    - target: agent-platform-impl:a5c.platform@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-task-start
@@ -206,7 +206,7 @@ attributes:
   sourceCitation: "packages/sdk/src/cli/commands/hooks/log.ts:33"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-task-complete
@@ -223,7 +223,7 @@ attributes:
   sourceCitation: "packages/sdk/src/cli/commands/hooks/log.ts:34"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current
 ---
 nodeKind: JournalEvent
 id: journal-event:babysitter-step-dispatch
@@ -240,4 +240,4 @@ attributes:
   sourceCitation: "packages/sdk/src/cli/commands/hooks/log.ts:35"
 edges:
   journal_event_emitted_by:
-    - target: genty-runtime-impl:a5c.runtime@current
+    - target: agent-runtime-impl:a5c.runtime@current

@@ -219,7 +219,7 @@ attributes:
     - "The compressor is provider-agnostic and can be wired to local on-device models; context compaction capability metadata should represent this mode."
     - "Recent 15.7.2 added providers.autoThinkingModel and auto thinking-level classification for each user turn."
   releaseHighlights:
-    - "Shake compaction primitives under @oh-my-pi/pi-genty-core/compaction."
+    - "Shake compaction primitives under @oh-my-pi/pi-agent-core/compaction."
     - "Provider-agnostic elision/extractive compression path."
     - "Recent auto thinking model setting."
   installMethods:

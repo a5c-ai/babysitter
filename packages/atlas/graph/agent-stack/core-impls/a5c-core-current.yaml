@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:a5c.core@current
+id: agent-core-impl:a5c.core@current
 attributes:
   displayName: a5c Unified Core (current) — unified agent loop
   agentVersionId: agent-version:a5c@current
@@ -43,10 +43,10 @@ attributes:
   parallelToolCallHandling: native
   programmaticToolCalling: optional
   programmaticToolCallingNotes: |
-    a5c genty-core can optionally expose `code_executor`, a Code Mode /
+    a5c agent-core can optionally expose `code_executor`, a Code Mode /
     Programmatic Tool Calling surface inspired by UTCP Code-Mode and Open-PTC.
     The executor runs a bounded JavaScript tool chain against the configured
-    genty-core tools so a model can batch discovery, schema fetches, filesystem,
+    agent-core tools so a model can batch discovery, schema fetches, filesystem,
     shell, web, and host tools behind one model-level call.
   streamingFidelity: full
   thinkingChannelHandling: model-dependent
@@ -64,7 +64,7 @@ attributes:
     provider-specific thinking channels. Pi is a compatibility target, not an implementation base. Compatibility is modeled as a native a5c contract; there is no depends_on edge to Pi.
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:a5c
       role: core
@@ -94,8 +94,8 @@ edges:
       versionRange: "*"
       level: optional
       notes: |
-        Implemented as the opt-in genty-core `code_executor` tool. It presents
-        the existing a5c genty-core tool surface to generated code through
+        Implemented as the opt-in agent-core `code_executor` tool. It presents
+        the existing a5c agent-core tool surface to generated code through
         `tools.<name>(params)` and `callTool(name, params)` helpers.
     - target: capability:streaming
       versionRange: "*"

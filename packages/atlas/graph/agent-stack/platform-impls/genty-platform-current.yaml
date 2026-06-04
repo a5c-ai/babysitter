@@ -1,7 +1,7 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:genty.platform@current
+id: agent-platform-impl:genty.platform@current
 attributes:
-  displayName: "genty Platform (current) — composed genty-platform + plugin/skill registry"
+  displayName: "genty Platform (current) — composed agent-platform + plugin/skill registry"
   agentVersionId: agent-version:genty@current
   packageRef: source-ref:packages-genty
   subagentDefinitionFormat: js-module-export
@@ -37,13 +37,13 @@ attributes:
   supportedChannelKinds:
     - mcp-channel
   notes: |
-    genty platform layer composes genty-platform's defineTask registry,
+    genty platform layer composes agent-platform's defineTask registry,
     plugin/skill/agent loader, and breakpoint policy engine. Inherits all
-    genty-platform platform surfaces and adds barrel-export convenience for
+    agent-platform platform surfaces and adds barrel-export convenience for
     downstream consumers.
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
     - target: agent:genty
       role: platform

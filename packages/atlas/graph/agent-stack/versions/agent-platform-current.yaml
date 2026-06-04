@@ -1,0 +1,61 @@
+nodeKind: AgentVersion
+id: agentVersion:agent-platform:ge-5-0-0
+attributes:
+  agentId: "agent-platform"
+  aliases: []
+  runtimeFamily: "sdk-runtime"
+  releaseChannel: "stable"
+  displayName: "agent-platform"
+  summary: "agent-platform CLI binary — long-running agent service"
+  sourcePackage: "@a5c-ai/genty-platform"
+  osSupport:
+    - "linux"
+    - "macos"
+    - "windows"
+  agentProductId: agent:agent-platform
+  versionRange: ">=5.0.0"
+  releasedAt: "2026-01-11"
+  cliCommand: "agent-platform"
+  installMethods:
+    - install:npm
+  minSchemaVersion: "6.0.0"
+edges:
+  version_of:
+    - agent:agent-platform
+  composed_of:
+    - target: agent-core-impl:agent-platform.core@current
+      role: core
+    - target: agent-runtime-impl:agent-platform.runtime@current
+      role: runtime
+    - target: agent-platform-impl:agent-platform.platform@current
+      role: platform
+    - target: agent-ui-impl:agent-platform.ui@current
+      role: ui
+  uses_transport:
+    - transport-runtime:terminal-cli
+  supports_modality:
+    - modality:mcp
+  sourced_from: []
+  supports:
+    - target: capability:can-multi-turn
+      versionRange: '>=5.0.0'
+      level: full
+      notes: agent-platform orchestrates long-running multi-turn agent sessions.
+    - target: capability:supports-text-streaming
+      versionRange: '>=5.0.0'
+      level: full
+      notes: agent-platform streams agent output in real time.
+    - target: capability:supports-mcp
+      versionRange: '>=5.0.0'
+      level: full
+      notes: agent-platform integrates with MCP servers.
+    - target: capability:supports-subagent-dispatch
+      versionRange: '>=5.0.0'
+      level: full
+      notes: agent-platform dispatches tasks to subagent processes.
+    - target: capability:can-resume
+      versionRange: '>=5.0.0'
+      level: full
+      notes: agent-platform supports run resume and session recovery.
+  uses_memory_system:
+    - target: memory-system:instruction-file-hierarchy

@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:codex-sdk.runtime@current
+id: agent-runtime-impl:codex-sdk.runtime@current
 attributes:
   displayName: Codex SDK Runtime (current)
   agentVersionId: agent-version:codex-sdk@current
@@ -26,7 +26,7 @@ attributes:
     convention — all of that is the host program's responsibility.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
     - target: agent:codex-sdk
       role: runtime

@@ -509,9 +509,9 @@ edges:
   version_of:
     - agent:openai-agents-sdk
   composed_of:
-    - target: genty-core-impl:openai-agents-sdk.core@current
+    - target: agent-core-impl:openai-agents-sdk.core@current
       role: core
-    - target: genty-runtime-impl:openai-agents-sdk.runtime@current
+    - target: agent-runtime-impl:openai-agents-sdk.runtime@current
       role: runtime
   sourced_from: []
   supports:

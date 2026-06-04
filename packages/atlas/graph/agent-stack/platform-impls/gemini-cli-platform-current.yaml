@@ -1,5 +1,5 @@
 nodeKind: AgentPlatformImpl
-id: genty-platform-impl:gemini-cli.platform@current
+id: agent-platform-impl:gemini-cli.platform@current
 attributes:
   displayName: Gemini CLI Platform (current)
   agentVersionId: agentVersion:gemini:ge-0-43-0
@@ -28,7 +28,7 @@ attributes:
   - mcp-channel
 edges:
   realizes:
-    - target: layer:6-genty-platform
+    - target: layer:6-agent-platform
   composes:
   - target: agent:gemini-cli
     role: platform

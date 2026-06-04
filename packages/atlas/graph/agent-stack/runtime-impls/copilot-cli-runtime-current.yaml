@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:copilot-cli.runtime@current
+id: agent-runtime-impl:copilot-cli.runtime@current
 attributes:
   displayName: GitHub Copilot CLI Runtime (current)
   agentVersionId: agentVersion:copilot:ge-1-0-55-3
@@ -23,7 +23,7 @@ attributes:
   supportsStreaming: true
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
   - target: agent:copilot-cli
     role: runtime

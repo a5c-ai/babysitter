@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:paperclip.runtime@current
+id: agent-runtime-impl:paperclip.runtime@current
 attributes:
   displayName: "Paperclip Runtime (current)"
   agentVersionId: agent-version:paperclip@current
@@ -22,7 +22,7 @@ attributes:
     zero-human operation with full workflow autonomy.
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
     - target: agent:paperclip
       role: runtime

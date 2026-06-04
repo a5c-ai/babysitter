@@ -36,7 +36,7 @@ These are all `InteractionPrimitive`s in the v6 model, but Cursor's `Profile` is
 
 ## Evidence
 - https://cursor.com/docs (modes section — confirmed via fetch redirect)
-- packages/atlas-catalog/graph/nodes/agents/ may carry richer Cursor data
+- packages/agent-catalog/graph/nodes/agents/ may carry richer Cursor data
 
 ## Propagation status
 - Level 1: open

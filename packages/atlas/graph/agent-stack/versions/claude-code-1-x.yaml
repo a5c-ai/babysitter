@@ -135,11 +135,11 @@ edges:
   version_of:
     - agent:claude-code
   composed_of:
-    - target: genty-core-impl:claude-code.core@1.x
+    - target: agent-core-impl:claude-code.core@1.x
       role: core
-    - target: genty-runtime-impl:claude-code.runtime@1.x
+    - target: agent-runtime-impl:claude-code.runtime@1.x
       role: runtime
-    - target: genty-platform-impl:claude-code.platform@1.x
+    - target: agent-platform-impl:claude-code.platform@1.x
       role: platform
     - target: agent-ui-impl:claude-code.ui@current
       role: ui

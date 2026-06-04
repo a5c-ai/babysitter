@@ -1,6 +1,6 @@
 kind: NodeDocument
 nodes:
-  - id: source-ref:atlas-catalog
+  - id: source-ref:agent-catalog
     kind: SourceRef
     edges:
       source_of:
@@ -105,7 +105,7 @@ nodes:
     edges:
       source_of:
         - target: agent:babysitter
-  - id: source-ref:genty-platform-adapter-reference
+  - id: source-ref:agent-platform-adapter-reference
     kind: SourceRef
     edges:
       source_of:
@@ -134,7 +134,7 @@ nodes:
     kind: SourceRef
     edges:
       source_of:
-        - target: agent:genty
+        - target: agent:agent-platform
   - id: source-ref:packages-genty
     kind: SourceRef
     edges:

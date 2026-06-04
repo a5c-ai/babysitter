@@ -13,9 +13,9 @@ edges:
   composed_of:
     - target: agent-ui-impl:vibe-kanban.ui@current
       role: ui
-    - target: genty-core-impl:vibe-kanban.core@current
+    - target: agent-core-impl:vibe-kanban.core@current
       role: core
-    - target: genty-platform-impl:vibe-kanban.platform@current
+    - target: agent-platform-impl:vibe-kanban.platform@current
       role: platform
     - target: presentation:vibe-kanban-web
       role: presentation

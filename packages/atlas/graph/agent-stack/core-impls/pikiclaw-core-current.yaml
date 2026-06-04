@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:pikiclaw.core@current
+id: agent-core-impl:pikiclaw.core@current
 attributes:
   displayName: "PikiClaw Core (current)"
   agentVersionId: agent-version:pikiclaw@current
@@ -30,7 +30,7 @@ attributes:
   thinkingChannelHandling: not-supported
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:pikiclaw
       role: core

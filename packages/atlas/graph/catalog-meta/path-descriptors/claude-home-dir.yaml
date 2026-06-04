@@ -6,7 +6,7 @@ attributes:
   path: "~/.claude/projects/<hash>/"
   pathKind: session-state-dir
   ownerKind: AgentRuntimeImpl
-  ownerId: genty-runtime-impl:claude-code.runtime@1.x
+  ownerId: agent-runtime-impl:claude-code.runtime@1.x
   platform: cross-platform
   scope: user
   evaluationContext: user
@@ -21,4 +21,4 @@ attributes:
 
 edges:
   owned_by:
-    - target: genty-runtime-impl:claude-code.runtime@1.x
+    - target: agent-runtime-impl:claude-code.runtime@1.x

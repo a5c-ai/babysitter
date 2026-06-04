@@ -6,7 +6,7 @@ attributes:
   workspacePath: packages/genty/runtime
   moduleType: typescript
   surfaceKinds:
-    - genty-runtime
+    - agent-runtime
     - host-adapter
   sourceOfTruthRole: wrapper-over-graph
   publishedTo: npm

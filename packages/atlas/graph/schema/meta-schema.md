@@ -142,7 +142,7 @@ Examples (canonical):
 agent-version:claude-code@1.x
 agent-version:codex@1.x
 model:claude-opus-4-7@1.x
-catalog-version:atlas-catalog@2026-04
+catalog-version:agent-catalog@2026-04
 ```
 
 Bare `<prefix-version>:<slug>` ids without an `@<version-spec>` (e.g. `agent-version:codex`) are **invalid**. If they appear in legacy data they SHOULD be interpreted as references to the most recent canonical version of that product, and linters MUST flag them for migration. See `../schema/validation-rules.md` rule **V-1.8**.

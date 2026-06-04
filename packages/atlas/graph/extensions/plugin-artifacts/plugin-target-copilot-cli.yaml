@@ -114,4 +114,4 @@ attributes:
 edges:
   hosted_by:
     - target: agent:copilot-cli
-    - target: genty-platform-impl:copilot-cli.platform@current
+    - target: agent-platform-impl:copilot-cli.platform@current

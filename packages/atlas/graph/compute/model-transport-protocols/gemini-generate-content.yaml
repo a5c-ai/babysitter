@@ -97,5 +97,5 @@ edges:
     - provider:google
   spoken_by:
     - model:gemini-2-5-pro@current
-    - target: genty-core-impl:cursor.core@current
-    - target: genty-core-impl:opencode.core@1.x
+    - target: agent-core-impl:cursor.core@current
+    - target: agent-core-impl:opencode.core@1.x

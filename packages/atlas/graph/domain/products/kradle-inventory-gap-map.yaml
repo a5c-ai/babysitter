@@ -14,7 +14,7 @@ attributes:
 edges:
   relates_to:
     - platform:kradle
-    - genty-platform-impl:kradle.platform@current
+    - agent-platform-impl:kradle.platform@current
     - platform-service:kradle-forge
     - platform-service:kradle-agent-dispatch
     - platform-service:kradle-company-brain

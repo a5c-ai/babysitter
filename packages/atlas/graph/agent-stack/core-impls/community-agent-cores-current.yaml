@@ -1,5 +1,5 @@
 nodeKind: AgentCoreImpl
-id: genty-core-impl:psclaudecode.core@current
+id: agent-core-impl:psclaudecode.core@current
 attributes:
   displayName: "PSClaudeCode Core (current)"
   agentVersionId: agent-version:psclaudecode@current
@@ -21,7 +21,7 @@ attributes:
   thinkingChannelHandling: model-dependent
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:psclaudecode
       role: core
@@ -29,7 +29,7 @@ edges:
     - target: source-ref:psclaudecode-github
 ---
 nodeKind: AgentCoreImpl
-id: genty-core-impl:cyclop-one.core@current
+id: agent-core-impl:cyclop-one.core@current
 attributes:
   displayName: "Cyclop One Core (current)"
   agentVersionId: agent-version:cyclop-one@current
@@ -51,7 +51,7 @@ attributes:
   thinkingChannelHandling: model-dependent
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:cyclop-one
       role: core
@@ -59,7 +59,7 @@ edges:
     - target: source-ref:cyclop-one-github
 ---
 nodeKind: AgentCoreImpl
-id: genty-core-impl:cli-anything.core@current
+id: agent-core-impl:cli-anything.core@current
 attributes:
   displayName: "CLI Anything Core (current)"
   agentVersionId: agent-version:cli-anything@current
@@ -81,7 +81,7 @@ attributes:
   thinkingChannelHandling: not-supported
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:cli-anything
       role: core
@@ -89,7 +89,7 @@ edges:
     - target: source-ref:cli-anything-github
 ---
 nodeKind: AgentCoreImpl
-id: genty-core-impl:nanny.core@current
+id: agent-core-impl:nanny.core@current
 attributes:
   displayName: "Nanny Core (current)"
   agentVersionId: agent-version:nanny@current
@@ -110,7 +110,7 @@ attributes:
   thinkingChannelHandling: delegated-to-remote
 edges:
   realizes:
-    - target: layer:4-genty-core
+    - target: layer:4-agent-core
   composes:
     - target: agent:nanny
       role: core

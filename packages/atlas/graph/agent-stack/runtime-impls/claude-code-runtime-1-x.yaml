@@ -1,5 +1,5 @@
 nodeKind: AgentRuntimeImpl
-id: genty-runtime-impl:claude-code.runtime@1.x
+id: agent-runtime-impl:claude-code.runtime@1.x
 attributes:
   displayName: Claude Code Runtime (1.x)
   agentVersionId: agentVersion:claude:ge-0-0-0
@@ -76,7 +76,7 @@ attributes:
     combinedMcpServerAndConnectorAuthNotices: true
 edges:
   realizes:
-    - target: layer:5-genty-runtime
+    - target: layer:5-agent-runtime
   composes:
   - target: agent:claude-code
     role: runtime
