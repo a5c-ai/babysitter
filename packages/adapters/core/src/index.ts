@@ -474,6 +474,16 @@ export { ModelRegistryImpl } from './model-registry.js';
 // Session Manager
 export type { SessionManager } from './session-manager.js';
 export { SessionManagerImpl } from './session-manager.js';
+export type {
+  PersistentSessionAdapter,
+  PersistentSessionAdapterMetadata,
+} from './session-adapter-registry.js';
+export {
+  SessionAdapterRegistry,
+  createLegacySessionAdapter,
+  registerLegacySessionAdapters,
+  createSessionAdapterRegistry,
+} from './session-adapter-registry.js';
 
 // Config Manager
 export type { ConfigManager } from './config-manager.js';

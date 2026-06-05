@@ -1,8 +1,10 @@
 # Sessions
 
-Adapters persists every run as a **session**: a JSONL file written by the
-underlying CLI (Claude, Codex, Gemini, …) that you can list, resume, inspect,
-and export through the SDK or `adapters` CLI.
+Adapters reads each agent's native **session** storage through a shared
+persistent-session registry. Most targets use JSONL files written by the
+underlying CLI, while some targets use JSON or SQLite. The SDK and `adapters`
+CLI normalize those formats so you can list, resume, inspect, and export
+sessions consistently.
 
 ## Listing sessions
 
@@ -42,18 +44,22 @@ adapters run claude --session-id abc123 "Continue from where we stopped."
 
 ## Reading session contents
 
-Each adapter exposes `parseSessionFile()` which returns a normalized `Session`
-object (messages, tool calls, cost totals). This is useful for building
-dashboards or replaying a run:
+Use the `sessions` surface for normalized content. It preserves the native
+session ID, adds the deterministic unified ID (`<agent>:<native-id>`), and
+uses the same registry path as gateway and CLI session APIs:
 
 ```ts
-const adapter = client.registry.get('claude');
-const paths = await adapter.listSessionFiles();
-const parsed = await adapter.parseSessionFile(paths[0]);
+const parsed = await client.sessions.get('claude', 'abc123');
 
 console.log(parsed.messages.length, 'messages');
-console.log(parsed.totalCost?.totalUsd ?? 0, 'USD');
+console.log(parsed.cost?.totalUsd ?? 0, 'USD');
+console.log(parsed.unifiedId); // claude:abc123
 ```
+
+Direct adapter methods (`sessionDir()`, `listSessionFiles()`, and
+`parseSessionFile()`) are still available for compatibility, but new code should
+prefer `client.sessions` so native adapters and plugin-generated targets follow
+the same contract.
 
 ## Where sessions live
 
@@ -64,9 +70,24 @@ console.log(parsed.totalCost?.totalUsd ?? 0, 'USD');
 | cursor    | `~/.cursor/sessions/`                      |
 | gemini    | `~/.gemini/sessions/`                      |
 | opencode  | `~/.config/opencode/sessions/`             |
+| pi        | `~/.pi/agent/sessions/`                    |
 
-Override by setting the adapter's `sessionDir(cwd?)` — or pass `cwd` on the
-run and adapters that key on cwd will scope their sessions accordingly.
+Atlas `SessionSemantics` and `PluginTarget` metadata describe target aliases,
+session ID sources, and directory strategies. The runtime registry uses that
+metadata when available, while target-specific codecs keep responsibility for
+parsing native formats.
+
+## Plugin targets and gateway sessions
+
+Plugin-generated targets use the same session registry as native adapters. A
+target may be addressable by its Atlas `PluginTarget.targetId` or by the
+underlying adapter name; the normalized session still uses the adapter-native
+session ID and the deterministic unified ID.
+
+Gateway session endpoints (`/api/v1/sessions`, `/api/v1/sessions/:id`, and
+`/api/v1/sessions/:id/full`) prefer the SDK `client.sessions` path. That keeps
+gateway responses aligned with CLI and SDK output. A direct adapter-file fallback
+exists only for embedded clients that do not expose `client.sessions`.
 
 ## Watching sessions
 

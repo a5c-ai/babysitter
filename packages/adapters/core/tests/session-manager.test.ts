@@ -8,6 +8,7 @@ import {
   AgentMuxError,
 } from '../src/index.js';
 import type { AgentAdapter } from '../src/index.js';
+import { SessionAdapterRegistry } from '../src/session-adapter-registry.js';
 
 /**
  * Creates a minimal mock adapter with configurable session data.
@@ -165,6 +166,61 @@ describe('SessionManagerImpl', () => {
       registry.register(mockAdapter('claude', []));
       const result = await manager.list('claude');
       expect(result).toEqual([]);
+    });
+
+    it('can route listing through the shared persistent-session registry', async () => {
+      registry.register({
+        ...mockAdapter('claude', []),
+        listSessionFiles: async () => {
+          throw new Error('legacy adapter should not be used');
+        },
+      } as unknown as AgentAdapter);
+      const sessionAdapters = new SessionAdapterRegistry();
+      sessionAdapters.register({
+        agent: 'claude',
+        metadata: { adapterName: 'claude', pluginTargetId: 'claude-code' },
+        sessionDir: () => '/registry/sessions',
+        listSessionFiles: async () => ['/registry/sessions/from-registry.jsonl'],
+        parseSessionFile: async () => ({
+          agent: 'claude',
+          sessionId: 'from-registry',
+          createdAt: '2026-01-02T03:04:05.000Z',
+          updatedAt: '2026-01-02T03:05:05.000Z',
+          turnCount: 1,
+          messages: [{ role: 'user', content: 'hello from registry' }],
+        }),
+      });
+
+      manager = new SessionManagerImpl(registry, sessionAdapters);
+
+      await expect(manager.list('claude')).resolves.toMatchObject([
+        {
+          agent: 'claude',
+          sessionId: 'from-registry',
+          unifiedId: 'claude:from-registry',
+        },
+      ]);
+    });
+
+    it('can list by Atlas plugin target alias after adapter registration', async () => {
+      registry.register(
+        mockAdapter('claude', [
+          {
+            sessionId: 'alias-session',
+            turnCount: 1,
+            createdAt: '2025-01-01T00:00:00Z',
+            updatedAt: '2025-01-01T01:00:00Z',
+          },
+        ]),
+      );
+
+      const result = await manager.list('claude-code');
+
+      expect(result[0]).toMatchObject({
+        agent: 'claude',
+        sessionId: 'alias-session',
+        unifiedId: 'claude:alias-session',
+      });
     });
 
     it('returns session summaries from adapter', async () => {

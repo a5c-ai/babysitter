@@ -19,6 +19,8 @@ import {
   getSessionDates,
   listByRecentFiles,
 } from './session-manager-helpers.js';
+import { SessionAdapterRegistry, registerLegacySessionAdapters } from './session-adapter-registry.js';
+import type { PersistentSessionAdapter } from './session-adapter-registry.js';
 
 // Re-export all session types from the dedicated module
 export type {
@@ -96,10 +98,12 @@ export interface SessionManager {
  */
 export class SessionManagerImpl implements SessionManager {
   private readonly _adapters: AdapterRegistry;
+  private readonly _sessionAdapters: SessionAdapterRegistry;
   private readonly logger = createComponentLogger('sessions');
 
-  constructor(adapters: AdapterRegistry) {
+  constructor(adapters: AdapterRegistry, sessionAdapters = new SessionAdapterRegistry()) {
     this._adapters = adapters;
+    this._sessionAdapters = sessionAdapters;
   }
 
   // -- Helper: ensure adapter exists -------------------------------------------
@@ -112,11 +116,20 @@ export class SessionManagerImpl implements SessionManager {
     return adapter;
   }
 
+  private _getSessionAdapter(agent: AgentName): PersistentSessionAdapter {
+    registerLegacySessionAdapters(this._adapters, this._sessionAdapters);
+    const adapter = this._sessionAdapters.get(agent);
+    if (adapter) return adapter;
+
+    this._getAdapter(agent);
+    throw new AgentMuxError('AGENT_NOT_FOUND', `Unknown agent: "${agent}"`);
+  }
+
   // -- list() ------------------------------------------------------------------
 
   async list(agent: AgentName, options?: SessionListOptions): Promise<SessionSummary[]> {
     this.logger.debug({ agent, limit: options?.limit }, 'Listing sessions');
-    const adapter = this._getAdapter(agent);
+    const adapter = this._getSessionAdapter(agent);
     const filePaths = await adapter.listSessionFiles();
     const limit = options?.limit ?? 100;
     const sortField = options?.sort ?? 'date';
@@ -173,7 +186,7 @@ export class SessionManagerImpl implements SessionManager {
 
   async get(agent: AgentName, sessionId: string): Promise<FullSession> {
     this.logger.debug({ agent, sessionId }, 'Getting session');
-    const adapter = this._getAdapter(agent);
+    const adapter = this._getSessionAdapter(agent);
     const filePaths = await adapter.listSessionFiles();
 
     for (const fp of filePaths) {
@@ -451,23 +464,21 @@ export class SessionManagerImpl implements SessionManager {
   // -- resolveUnifiedId() ------------------------------------------------------
 
   resolveUnifiedId(agent: AgentName, nativeSessionId: string): string {
-    return `${agent}:${nativeSessionId}`;
+    return this._sessionAdapters.resolveUnifiedId(agent, nativeSessionId);
   }
 
   // -- resolveNativeId() -------------------------------------------------------
 
   resolveNativeId(unifiedId: string): { agent: AgentName; nativeSessionId: string } | null {
+    const parsed = this._sessionAdapters.resolveNativeId(unifiedId);
+    if (parsed) return parsed;
+
     const colonIndex = unifiedId.indexOf(':');
     if (colonIndex === -1) return null;
 
     const agent = unifiedId.slice(0, colonIndex);
     const nativeSessionId = unifiedId.slice(colonIndex + 1);
-
-    if (!agent || !nativeSessionId) return null;
-
-    // Check if the agent is known in the registry
-    const adapter = this._adapters.get(agent);
-    if (!adapter) return null;
+    if (!agent || !nativeSessionId || !this._adapters.get(agent)) return null;
 
     return { agent, nativeSessionId };
   }

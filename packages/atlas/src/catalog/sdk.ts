@@ -1568,12 +1568,26 @@ export function getTransportCodecCapabilities(transportId: string): CodecCapabil
 export function getAdapterMetadata(harness: string): import('./models.js').AdapterMetadata | undefined {
   // Walk versions from most-specific to catch-all and return the first
   // with a non-empty adapterMetadata object.
-  for (const v of getAgentVersions(harness)) {
-    if (v.adapterMetadata && Object.keys(v.adapterMetadata).length > 0) {
-      return v.adapterMetadata;
+  for (const candidate of sessionMetadataLookupCandidates(harness)) {
+    for (const v of getAgentVersions(candidate)) {
+      if (v.adapterMetadata && Object.keys(v.adapterMetadata).length > 0) {
+        return v.adapterMetadata;
+      }
     }
   }
   return undefined;
+}
+
+function sessionMetadataLookupCandidates(harness: string): string[] {
+  const target = getPluginTargetDescriptor(harness);
+  const aliased = HARNESS_ALIASES[harness] ?? HARNESS_ALIASES[harness.toLowerCase()];
+  return Array.from(new Set([
+    harness,
+    aliased,
+    target?.targetId,
+    target?.adapterName,
+    target?.cliCommand,
+  ].filter((candidate): candidate is string => typeof candidate === "string" && candidate.length > 0)));
 }
 
 export interface ResolvedInstallMethod {
@@ -1627,7 +1641,23 @@ function expandHome(p: string | undefined): string | undefined {
 
 export function getSessionConfig(harness: string): { sessionDir?: string; sessionPersistence?: string } {
   const metadata = getAdapterMetadata(harness);
-  return { sessionDir: expandHome(metadata?.sessionDir), sessionPersistence: metadata?.sessionPersistence };
+  if (metadata?.sessionDir || metadata?.sessionPersistence) {
+    return { sessionDir: expandHome(metadata.sessionDir), sessionPersistence: metadata.sessionPersistence };
+  }
+
+  for (const candidate of sessionMetadataLookupCandidates(harness)) {
+    const agent = getAgentVersion(candidate);
+    if (!agent) continue;
+    const session = findSessionSemantics(agent)[0];
+    if (session) {
+      return {
+        sessionDir: expandHome(session.sessionDirStrategy),
+        sessionPersistence: "file",
+      };
+    }
+  }
+
+  return {};
 }
 
 export function getCapabilityFlags(harness: string): Record<string, unknown> {
