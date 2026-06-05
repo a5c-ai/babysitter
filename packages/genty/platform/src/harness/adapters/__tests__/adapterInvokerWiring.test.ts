@@ -51,13 +51,30 @@ vi.mock("@a5c-ai/babysitter-sdk", () => {
 });
 
 // Mock child_process so the direct path doesn't actually spawn
-vi.mock("node:child_process", () => ({
-  execFile: vi.fn((_cmd: string, _args: string[], _opts: unknown, cb: (err: null, stdout: string, stderr: string) => void) => {
-    cb(null, "direct-output", "");
-    return { pid: 12345, stdin: null };
-  }),
-  spawn: vi.fn(),
-}));
+vi.mock("node:child_process", () => {
+  const EventEmitter = require("node:events");
+  return {
+    execFile: vi.fn((_cmd: string, _args: string[], _opts: unknown, cb: (err: null, stdout: string, stderr: string) => void) => {
+      cb(null, "direct-output", "");
+      return { pid: 12345, stdin: null };
+    }),
+    spawn: vi.fn(() => {
+      const child = new EventEmitter();
+      child.pid = 12345;
+      child.stdin = null;
+      const stdoutEmitter = new EventEmitter();
+      const stderrEmitter = new EventEmitter();
+      child.stdout = stdoutEmitter;
+      child.stderr = stderrEmitter;
+      child.kill = vi.fn();
+      process.nextTick(() => {
+        stdoutEmitter.emit("data", Buffer.from("direct-output"));
+        child.emit("close", 0, null);
+      });
+      return child;
+    }),
+  };
+});
 
 // Mock agent-core
 vi.mock("@a5c-ai/genty-core", () => ({
