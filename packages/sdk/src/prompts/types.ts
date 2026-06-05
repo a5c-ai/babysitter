@@ -142,6 +142,22 @@ export interface PromptContext {
   /** Always-on additions (enabled by default). */
   hasPriorityLadder?: boolean;
   hasRootCauseGuardrail?: boolean;
+
+  /**
+   * GAP-STATE-001: Long-term memories to inject into the prompt.
+   * Populated from the global memory store before prompt composition.
+   */
+  longTermMemories?: LongTermMemoryEntry[];
+}
+
+/**
+ * GAP-STATE-001: A single long-term memory entry for prompt injection.
+ */
+export interface LongTermMemoryEntry {
+  content: string;
+  category: string;
+  confidence: string;
+  tags: string[];
 }
 
 /**
