@@ -19,6 +19,7 @@ export function applyPositionalArgs(parsed: ParsedArgs, positionals: string[]) {
     case "run:rebuild-state":
     case "run:repair-journal":
     case "run:recover-process-error":
+    case "run:halt":
       [parsed.runDirArg] = positionals;
       return;
     case "configure":

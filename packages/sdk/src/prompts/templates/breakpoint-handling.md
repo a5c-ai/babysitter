@@ -33,7 +33,10 @@ so the user's intent is unambiguous.
   If bad posted data later causes `PROCESS_RUNTIME_ERROR`, inspect it with
   `run:status`/`run:events` and recover with `run:recover-process-error`;
   reserve manual journal repair for malformed or partially written journal
-  entries that targeted recovery cannot represent.
+  entries that targeted recovery cannot represent. If a rejected breakpoint
+  should deliberately stop a divergent run after external verification, use
+  `run:halt --reason ...` as an operator manual seal rather than hand-writing a
+  terminal journal event.
 - Only use `--status error` if the {{interactiveToolName}} itself throws an error.
 
 **Breakpoint posting examples:**

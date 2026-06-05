@@ -1203,6 +1203,213 @@ describe("run lifecycle inspection commands", () => {
     });
   });
 
+  describe("run:halt", () => {
+    it("requires a non-empty audit reason without mutating the journal", async () => {
+      const runDir = await createRunWithPendingEffects();
+      const before = await loadJournal(runDir);
+
+      const exitCode = await cli.run(["run:halt", runDir, "--reason", "   ", "--json"]);
+
+      expect(exitCode).toBe(1);
+      expect(hasLineContaining(errorSpy, "[run:halt] --reason is required")).toBe(true);
+      expect((await loadJournal(runDir)).map((event) => event.type)).toEqual(before.map((event) => event.type));
+      await expectStateCacheMissing(runDir);
+    });
+
+    it("rejects unsupported final statuses without mutating the journal", async () => {
+      const runDir = await createRunWithPendingEffects();
+      const before = await loadJournal(runDir);
+
+      const exitCode = await cli.run([
+        "run:halt",
+        runDir,
+        "--reason",
+        "operator recovery",
+        "--final-status",
+        "cancelled",
+        "--json",
+      ]);
+
+      expect(exitCode).toBe(1);
+      expect(hasLineContaining(errorSpy, "--final-status must be one of: halted, completed, failed")).toBe(true);
+      expect((await loadJournal(runDir)).map((event) => event.type)).toEqual(before.map((event) => event.type));
+    });
+
+    it("supports dry-run JSON without appending or rebuilding state", async () => {
+      const runDir = await createRunWithPendingEffects();
+      const before = await loadJournal(runDir);
+
+      const exitCode = await cli.run(["run:halt", runDir, "--reason", "operator recovery", "--dry-run", "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({
+        dryRun: true,
+        sealed: false,
+        runDir,
+        finalStatus: "halted",
+        plannedTerminalEvent: { type: "RUN_HALTED" },
+        priorLifecycleState: "waiting",
+        pendingEffectsSummary: {
+          totalPending: 2,
+          countsByKind: { breakpoint: 1, node: 1 },
+          autoRunnableCount: 1,
+        },
+      });
+      expect((await loadJournal(runDir)).map((event) => event.type)).toEqual(before.map((event) => event.type));
+      await expectStateCacheMissing(runDir);
+    });
+
+    it("defaults to an auditable RUN_HALTED manual seal and rebuilds state", async () => {
+      const runDir = await createRunWithPendingEffects();
+
+      const exitCode = await cli.run(["run:halt", runDir, "--reason", "accepted external recovery", "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({
+        sealed: true,
+        runDir,
+        finalStatus: "halted",
+        terminalEvent: { type: "RUN_HALTED", seq: 4 },
+        pendingEffectsSummary: { totalPending: 2 },
+        metadata: {
+          stateRebuilt: true,
+          stateRebuildReason: "manual_seal",
+          pendingEffectsByKind: { breakpoint: 1, node: 1 },
+        },
+        completionProof: null,
+      });
+
+      const journal = await loadJournal(runDir);
+      expect(journal.filter((event) => event.type === "RUN_HALTED")).toHaveLength(1);
+      expect(journal.at(-1)).toMatchObject({
+        type: "RUN_HALTED",
+        data: {
+          manual_seal_reason: "accepted external recovery",
+          sealedBy: "run:halt",
+          requestedFinalStatus: "halted",
+          priorLifecycleState: "waiting",
+          pendingEffectsSummary: {
+            totalPending: 2,
+            countsByKind: { breakpoint: 1, node: 1 },
+            autoRunnableCount: 1,
+          },
+        },
+      });
+
+      logSpy.mockClear();
+      const statusExit = await cli.run(["run:status", runDir, "--json"]);
+      expect(statusExit).toBe(0);
+      const status = readLastJson(logSpy);
+      expect(status.state).toBe("halted");
+      expect(status.completionProof).toBeNull();
+      expect(status.lastEvent.data.manual_seal_reason).toBe("accepted external recovery");
+    });
+
+    it("supports explicit failed seals without completion proofs", async () => {
+      const runDir = await createRunWithPendingEffects();
+
+      const exitCode = await cli.run([
+        "run:halt",
+        runDir,
+        "--reason",
+        "operator marked failed",
+        "--final-status",
+        "failed",
+        "--json",
+      ]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({
+        sealed: true,
+        finalStatus: "failed",
+        terminalEvent: { type: "RUN_FAILED" },
+        completionProof: null,
+      });
+      const journal = await loadJournal(runDir);
+      expect(journal.at(-1)).toMatchObject({
+        type: "RUN_FAILED",
+        data: {
+          manual_seal_reason: "operator marked failed",
+          requestedFinalStatus: "failed",
+          sealedBy: "run:halt",
+        },
+      });
+    });
+
+    it("supports explicit completed seals with existing completion proof semantics", async () => {
+      const runId = "run-halt-completed";
+      const runDir = await createRunSkeleton(runId);
+      await appendRequestedEffect(runDir, "ef-node", "node", "build");
+
+      const exitCode = await cli.run([
+        "run:halt",
+        runDir,
+        "--reason",
+        "external artifacts already landed",
+        "--final-status",
+        "completed",
+        "--json",
+      ]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload).toMatchObject({
+        sealed: true,
+        finalStatus: "completed",
+        terminalEvent: { type: "RUN_COMPLETED" },
+        completionProof: deriveCompletionProof(runId),
+      });
+      const journal = await loadJournal(runDir);
+      expect(journal.at(-1)).toMatchObject({
+        type: "RUN_COMPLETED",
+        data: {
+          manual_seal_reason: "external artifacts already landed",
+          requestedFinalStatus: "completed",
+          sealedBy: "run:halt",
+          completionProof: deriveCompletionProof(runId),
+        },
+      });
+    });
+
+    it("rejects already terminal runs without appending another terminal event", async () => {
+      const runDir = await createRunSkeleton("run-halt-terminal");
+      await appendEvent({
+        runDir,
+        eventType: "RUN_COMPLETED",
+        event: { outputRef: "state/output.json" },
+      });
+      const before = await loadJournal(runDir);
+
+      const exitCode = await cli.run(["run:halt", runDir, "--reason", "too late", "--json"]);
+
+      expect(exitCode).toBe(1);
+      expect(hasLineContaining(errorSpy, "run is already terminal")).toBe(true);
+      expect((await loadJournal(runDir)).map((event) => event.type)).toEqual(before.map((event) => event.type));
+    });
+
+    it("exposes manual seal audit fields through run:events JSON", async () => {
+      const runDir = await createRunWithPendingEffects();
+      await cli.run(["run:halt", runDir, "--reason", "inspectable audit", "--json"]);
+      logSpy.mockClear();
+
+      const exitCode = await cli.run(["run:events", runDir, "--filter-type", "RUN_HALTED", "--json"]);
+
+      expect(exitCode).toBe(0);
+      const payload = readLastJson(logSpy);
+      expect(payload.events).toHaveLength(1);
+      expect(payload.events[0]).toMatchObject({
+        type: "RUN_HALTED",
+        data: {
+          manual_seal_reason: "inspectable audit",
+          sealedBy: "run:halt",
+          requestedFinalStatus: "halted",
+        },
+      });
+    });
+  });
 
   describe("run:repair-journal", () => {
     it("skips 0-byte corrupt journal files and reports droppedCorrupt count", async () => {
