@@ -22,6 +22,7 @@ import type { ModelRegistry } from './model-registry.js';
 import { ModelRegistryImpl } from './model-registry.js';
 import type { SessionManager } from './session-manager.js';
 import { SessionManagerImpl } from './session-manager.js';
+import { createSessionAdapterRegistry } from './session-adapter-registry.js';
 import type { ConfigManager } from './config-manager.js';
 import { ConfigManagerImpl } from './config-manager.js';
 import type { AuthManager } from './auth-manager.js';
@@ -143,7 +144,7 @@ export class AgentMuxClient {
     const adapterRegistry = new AdapterRegistryImpl();
     this.adapters = adapterRegistry;
     this.models = new ModelRegistryImpl(adapterRegistry);
-    this.sessions = new SessionManagerImpl(adapterRegistry);
+    this.sessions = new SessionManagerImpl(adapterRegistry, createSessionAdapterRegistry(adapterRegistry));
     this.config = new ConfigManagerImpl(adapterRegistry, this.profiles);
     this.auth = new AuthManagerImpl(adapterRegistry);
     this.plugins = new PluginManagerImpl(adapterRegistry);

@@ -27,6 +27,7 @@ import {
   getOntologyClaim,
   getOntologyEvidenceSource,
   getPluginTargetDescriptor,
+  getSessionConfig,
   getPackageTopology,
   getPathDescriptor,
   getProviderTranslation,
@@ -144,6 +145,19 @@ describe("agent-catalog graph-backed ontology", () => {
     expect(codex!.supportedHooks.Stop).toBe("Stop");
     expect(codex!.installLayout?.marketplacePathRelative).toBe(".agents/plugins/marketplace.json");
     expect(codex!.packageMetadata?.activationMessage).toBe("codex-open-plugins");
+  });
+
+  it("exposes session adapter metadata for required persistent-session targets", () => {
+    const targets = ["claude-code", "codex", "pi", "gemini-cli", "opencode"];
+
+    for (const target of targets) {
+      const config = getSessionConfig(target);
+      expect(config.sessionDir).toBeTruthy();
+      expect(config.sessionPersistence).toBeTruthy();
+    }
+
+    expect(getPluginTargetDescriptor("codex")?.adapterName).toBe("codex");
+    expect(getPluginTargetDescriptor("gemini-cli")?.adapterName).toBe("gemini");
   });
 
   it("models Hermes non-interactive launches through oneshot prompt delivery", () => {

@@ -21,10 +21,71 @@ The session subsystem addresses four primary concerns:
 
 - **Read-only by contract.** `SessionManager` never writes to agent session files. Session creation and mutation happen exclusively through `RunHandle` (which spawns the agent subprocess) or the agent's own CLI. This avoids corruption of agent-native formats.
 - **Lazy parsing.** Session files are parsed on demand, not indexed eagerly. The `list()` method reads only metadata (file timestamps, lightweight header parsing) unless content is explicitly requested.
-- **Adapter-delegated parsing.** Each agent adapter implements `parseSessionFile()` and `listSessionFiles()`. The `SessionManager` orchestrates; the adapter knows the format.
+- **Registry-mediated parsing.** Each persistent-session adapter registers how to find, list, and parse its native files. Existing agent adapter methods (`sessionDir()`, `listSessionFiles()`, and `parseSessionFile()`) remain supported compatibility shims, but the `SessionManager` routes through the shared session adapter contract.
 - **Unified ID scheme.** Every session gets a deterministic unified ID of the form `<agent>:<native-id>`. This enables cross-agent references without a central registry.
+- **Atlas-backed metadata.** Runtime session metadata comes from Atlas `SessionSemantics` and `PluginTarget` projections when available. Parser implementations still live with the target-specific codec because native file formats differ.
 
-### 1.2 Cross-References
+### 1.2 Unified Persistent Session Adapter Contract
+
+The persistent-session contract is the boundary between the SDK/gateway/CLI session surfaces and target-specific storage formats. A registered session adapter is read-only and provides:
+
+```typescript
+interface PersistentSessionAdapter {
+  readonly agent: AgentName;
+  readonly metadata?: {
+    readonly sessionDirStrategy?: string;
+    readonly sessionPersistence?: string;
+    readonly pluginTargetId?: string;
+    readonly adapterName?: string;
+  };
+
+  sessionDir(cwd?: string): string;
+  listSessionFiles(cwd?: string): Promise<string[]>;
+  parseSessionFile(filePath: string): Promise<Session>;
+}
+```
+
+The registry owns target lookup and ID mapping through `resolveUnifiedId(agent, nativeSessionId)` and `resolveNativeId(unifiedId)`. Target codecs own native parsing. This keeps the shared contract small enough for claude-code, codex, pi, gemini, opencode, and plugin-generated targets while preserving target-specific behavior such as JSONL message heuristics, tree linearization, and SQLite-backed sessions.
+
+#### Metadata Inputs
+
+- `SessionSemantics` supplies session directory strategy, explicit session ID flags, session ID sources, and resume semantics.
+- `PluginTarget` supplies target ID, adapter name, launch behavior, plugin-root environment variables, and generated-target aliases.
+- Runtime adapters may override directory resolution when Atlas describes the strategy but the concrete path depends on local CLI configuration or `cwd`.
+- The default client lazily registers current adapter instances into the session registry with Atlas-derived aliases, so adapters added during CLI bootstrap or plugin loading can be reached by `PluginTarget.targetId` and `adapterName`.
+
+Atlas metadata is a tested input to registry construction, not a replacement for parser code. If Atlas metadata is missing or incomplete, the compatibility wrapper around the existing adapter methods remains the source of truth for that adapter.
+
+#### Parser Responsibilities
+
+Each target parser must:
+
+1. Preserve the native session ID exactly as exposed by the agent.
+2. Return normalized `Session` / `FullSession` data without mutating native files.
+3. Skip malformed records inside otherwise readable append-only files where the existing codec already does so.
+4. Throw for unreadable or unsupported full-session reads while allowing list operations to skip unparseable files.
+5. Preserve raw target data in `raw` when lossy normalization would hide useful native details.
+
+#### Compatibility Rules
+
+- `AgentAdapter.sessionDir()`, `AgentAdapter.listSessionFiles()`, and `AgentAdapter.parseSessionFile()` remain public during the migration.
+- Existing callers that invoke those methods directly continue to work.
+- New SDK, CLI, and gateway session paths should use the shared registry so listing, get/full, export, and resume behavior converge.
+- Unified IDs remain deterministic: `<agent>:<nativeSessionId>`. Native IDs are never rewritten to match unified IDs.
+- Plugin-generated targets register under both `PluginTarget.targetId` and `PluginTarget.adapterName` when those differ.
+
+#### Gateway and CLI Behavior
+
+The CLI continues to call `client.sessions.*`; it does not parse native files independently. Gateway session content loading also prefers the shared `client.sessions.get(agent, sessionId)` path so `/api/v1/sessions/:id` and `/api/v1/sessions/:id/full` match SDK output. The gateway keeps a direct adapter fallback only for minimal embedded clients that expose adapter file methods but not a `sessions` facade.
+
+#### Troubleshooting
+
+- If `list()` omits a session, confirm the target is registered in the session adapter registry and that `listSessionFiles()` returns the native file path.
+- If `get()` cannot find a session that appears in `list()`, compare the native session ID from the parser with the filename or database record ID. The parser must return the native ID, not the unified ID.
+- If a plugin-generated target resolves under one name but not another, verify the Atlas `PluginTarget.targetId`, `adapterName`, and generated registry aliases.
+- If Atlas metadata differs from runtime behavior, prefer the parser/runtime result for compatibility and add or correct the `SessionSemantics` / `PluginTarget` graph record with a projection test.
+
+### 1.3 Cross-References
 
 | Type / Concept | Spec | Section |
 |---|---|---|
@@ -42,8 +103,10 @@ The session subsystem addresses four primary concerns:
 | `AgentCapabilities.canFork` | `06-capabilities-and-models.md` | 2 |
 | `ErrorCode`, `AgentMuxError` | `01-core-types-and-client.md` | 3.1 |
 | `ConfigManager` | `08-config-and-auth.md` | 2 |
+| `SessionSemantics` | `packages/atlas/graph/lifecycle/session-semantics/*.yaml` | graph |
+| `PluginTarget` | `packages/atlas/graph/extensions/plugin-artifacts/*.yaml` | graph |
 
-### 1.3 Access Point
+### 1.4 Access Point
 
 ```typescript
 const adapter = createClient();
@@ -614,7 +677,7 @@ interface DiffOperation {
 
 ## 4. Native Session File Locations
 
-adapters reads session data from each agent's native storage location. The `SessionManager` never writes to these locations. Each agent adapter implements `sessionDir()`, `listSessionFiles()`, and `parseSessionFile()` to handle its native format.
+adapters reads session data from each agent's native storage location. The `SessionManager` never writes to these locations. The shared persistent-session registry resolves the target and metadata, then delegates to the target parser. Existing agent adapter methods (`sessionDir()`, `listSessionFiles()`, and `parseSessionFile()`) remain the compatibility surface for direct callers and for adapters that have not yet registered a richer session adapter.
 
 ### 4.1 Session Storage by Agent
 
@@ -793,8 +856,8 @@ const recent = await adapter.sessions.list('claude', {
 
 **Behavior:**
 
-1. Resolves the agent adapter via the `AdapterRegistry`.
-2. Calls `adapter.listSessionFiles(options?.cwd)` to enumerate session file paths.
+1. Resolves the persistent-session adapter via the session registry, falling back to the legacy adapter wrapper when needed.
+2. Calls `sessionAdapter.listSessionFiles(options?.cwd)` to enumerate session file paths.
 3. For each file, reads lightweight metadata (file timestamps, header lines for JSONL, or summary queries for SQLite) without parsing full content.
 4. Applies filters (`since`, `until`, `model`, `tags`, `cwd`) in-memory after metadata extraction.
 5. Sorts results per `options.sort` and `options.sortDirection`.
@@ -816,9 +879,9 @@ console.log(session.cost?.totalUsd);  // Aggregated cost
 
 **Behavior:**
 
-1. Resolves the adapter.
-2. Calls `adapter.parseSessionFile(filePath)` where `filePath` is resolved from `adapter.sessionDir()` and the session ID.
-3. The adapter returns a fully parsed `Session` object with all messages, tool calls, and cost records.
+1. Resolves the persistent-session adapter through the registry.
+2. Calls the registered parser for the target file where `filePath` is resolved from `sessionAdapter.sessionDir()` and the native session ID.
+3. The parser returns a fully parsed `Session` object with all messages, tool calls, and cost records.
 4. The `SessionManager` sets `unifiedId` on the returned object.
 5. Returns the `Session`.
 
