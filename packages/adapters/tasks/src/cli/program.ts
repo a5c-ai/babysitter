@@ -17,7 +17,7 @@ export function createProgram(): Command {
   const program = new Command();
 
   program
-    .name("adapters-tasks")
+    .name("tasks-adapter")
     .version("5.0.0")
     .description("CLI for Breakpoints Adapter - route breakpoints to domain responders")
     .option(
