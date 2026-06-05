@@ -1,0 +1,62 @@
+{
+  "issueNumber": 878,
+  "baseBranch": "staging",
+  "implementationBranch": "feature/issue-878-sessions-adapter",
+  "maxAttempts": 3,
+  "targetAgents": [
+    "claude-code",
+    "codex",
+    "pi",
+    "gemini",
+    "opencode"
+  ],
+  "fixtureTargets": [
+    "claude-code",
+    "codex",
+    "pi",
+    "gemini",
+    "opencode",
+    "plugin-generated-target"
+  ],
+  "targetFiles": [
+    "docs/adapters/reference/07-session-manager.md",
+    "docs/adapters/tutorials/sessions.md",
+    "packages/adapters/core/src/session-manager.ts",
+    "packages/adapters/core/src/adapter-types.ts",
+    "packages/adapters/codecs/src/session-fs.ts",
+    "packages/adapters/codecs/src/claude-adapter.ts",
+    "packages/adapters/codecs/src/codex-adapter.ts",
+    "packages/adapters/codecs/src/pi-adapter.ts",
+    "packages/adapters/codecs/src/gemini-adapter.ts",
+    "packages/adapters/codecs/src/opencode-adapter.ts",
+    "packages/adapters/gateway/src/runs/manager.ts",
+    "packages/atlas/src/catalog/sdk.ts",
+    "packages/atlas/src/catalog/catalog.test.ts",
+    "packages/atlas/graph/lifecycle/session-semantics",
+    "packages/atlas/graph/extensions/plugin-artifacts"
+  ],
+  "verificationCommands": [
+    "npm run build:atlas",
+    "npm run build:adapters:non-realtime",
+    "npm run test:atlas-catalog-contracts",
+    "npm run test:adapters",
+    "npm run verify:metadata",
+    "npm run docs:snippets"
+  ],
+  "acceptanceCriteria": [
+    "A concrete spec documents the unified session adapter contract, parser responsibilities, Atlas metadata inputs, native ID handling, unified ID handling, and compatibility behavior.",
+    "Stable fixtures cover claude-code, codex, pi, gemini, opencode, and at least one plugin-generated target.",
+    "Unit tests cover parser/listing behavior from stable native session fixtures and preserve existing adapter API compatibility.",
+    "Atlas projection tests prove runtime metadata inputs match SessionSemantics and PluginTarget graph records.",
+    "SessionManagerImpl and gateway session loading use the shared contract without duplicating session parsing behavior.",
+    "CLI and gateway e2e tests cover sessions list/read/show/full/export paths.",
+    "Docs explain the new contract, target matrix, troubleshooting, and plugin target extension path."
+  ],
+  "riskMitigations": [
+    "Freeze representative fixtures before implementation to catch cross-adapter parser regressions.",
+    "Keep native session IDs and unified IDs separate and test both mapping directions.",
+    "Preserve sessionDir/listSessionFiles/parseSessionFile compatibility while introducing the shared registry.",
+    "Route gateway native-session fallback through the same shared contract as SDK/CLI session management.",
+    "Use Atlas metadata as tested runtime input rather than copying path metadata into a second hard-coded registry."
+  ]
+}
