@@ -394,6 +394,7 @@ export const investigateTask = defineTask('investigate', (args, taskCtx) => ({
         'PHASE 0 RULE: Before forming any hypothesis, run `git diff` and `git log --oneline -20` to identify what changed recently that could have introduced this issue',
         'PHASE 0 RULE: You MUST NOT make any code changes during investigation. This is diagnosis only.',
         'PHASE 0 RULE: You must gather at least 2 independent evidence signals before drawing conclusions. Evidence examples: git blame output, test output, log comparison, config diff.',
+        'STRIKE-3 CONTRACT: For Strike-3/post-instrumentation fix handoffs only, no source-code fix may proceed until you list at least 3 candidate root-cause hypotheses, name a falsifying log line or observation for each, and cite concrete log evidence for the selected fix. Prefer seq number; otherwise cite timestamp, log-id, or artifact path plus exact log line. If there is no specific log line or log record citation, mark needs-more-data.',
         'Read existing debug session file if resuming',
         'Review previous findings to avoid repeating investigations',
         'Form a specific, testable hypothesis about the root cause',

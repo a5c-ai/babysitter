@@ -1,0 +1,46 @@
+{
+  "issueNumber": 881,
+  "baseBranch": "staging",
+  "implementationBranch": "issue/881-strike3-hypothesis-before-fix",
+  "maxAttempts": 3,
+  "targetFiles": [
+    "docs/agent-reference/process-authoring.md",
+    "library/specializations/qa-testing-automation/diagnostic-first-phase.js",
+    "library/specializations/qa-testing-automation/diagnostic-first-phase.md",
+    "library/processes/shared/n-strikes-escalation.js",
+    "library/methodologies/shared/root-cause-diagnosis.js",
+    "library/methodologies/gsd/debug.js",
+    "library/methodologies/cc10x/cc10x-debug.js",
+    "library/methodologies/rpikit/skills/systematic-debugging/SKILL.md"
+  ],
+  "verificationCommands": [
+    "npm run check:library-syntax",
+    "npm run test:library",
+    "npm run test:shared",
+    "npm run verify:metadata",
+    "npm run build:sdk"
+  ],
+  "contractTerms": {
+    "minimumHypotheses": 3,
+    "requiresHypothesesBeforeFix": true,
+    "requiresFalsifyingObservationPerHypothesis": true,
+    "requiresConcreteLogCitation": true,
+    "preferredCitation": "seq number when present",
+    "citationFallbacks": [
+      "timestamp",
+      "log-id",
+      "artifact path plus exact log line"
+    ],
+    "rejectionOutcomeWithoutCitation": "needs-more-data",
+    "scope": "Strike-3 and post-instrumentation fix handoffs only"
+  },
+  "expectedNewOrUpdatedGuards": [
+    "A focused library/process prompt regression test or deterministic metadata check that fails if the 3+ hypothesis requirement disappears.",
+    "A guard that fails if falsifying observations, log citation by seq/timestamp/log-id, or needs-more-data rejection language disappears."
+  ],
+  "nonGoals": [
+    "Do not implement source-code fixes for the timer-overlay example.",
+    "Do not broaden the contract to ordinary first-attempt bugfixes unless the implementation evidence shows the canonical handoff surface cannot be scoped more narrowly.",
+    "Do not add new SDK dependencies or environment variables."
+  ]
+}

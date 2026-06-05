@@ -49,6 +49,13 @@
  *   - Dumps the raw query results to `<outputDir>/diagnose.json` and an
  *     analyst-readable Markdown summary to `<outputDir>/diagnose-summary.md`,
  *     including a top hypothesis + one-paragraph fix recommendation.
+ *   - When this phase follows Strike-3 or other post-instrumentation evidence,
+ *     the Phase B source-code fix is blocked until the summary enumerates at
+ *     least 3 candidate root-cause hypotheses, names a falsifying log line or
+ *     observation for each hypothesis, and cites concrete log evidence for the
+ *     selected fix. Use seq number when present, with timestamp, log-id, or
+ *     artifact path plus exact log line as fallback. Without a specific log
+ *     citation, return needs-more-data instead of accepting a fix PR.
  *   - No code under src/, tests/, or supabase/ may be modified by Phase A.
  */
 
@@ -118,6 +125,14 @@ export const diagnosticFirstPhaseTask = defineTask('diagnostic-first-phase', (ar
           '  - "## Top hypothesis" — one paragraph naming the most-likely cause and citing the rows that support it',
           '  - "## Recommendation" — one paragraph the Phase B implementer can act on (file paths, the specific data shape to fix, the contract the fix must restore)',
           '',
+          'STRIKE-3 / POST-INSTRUMENTATION INTERPRETATION CONTRACT:',
+          '  If this diagnostic follows Strike-3 instrumentation or any handoff with captured log artifacts, no source-code fix phase may proceed until the summary includes:',
+          '  - at least 3 candidate root-cause hypotheses before writing a fix;',
+          '  - a falsifying log line or observation for each hypothesis;',
+          '  - the selected fix hypothesis citing concrete log evidence by seq number when present;',
+          '  - timestamp, log-id, or artifact path plus exact log line as fallback when no seq number exists;',
+          '  - needs-more-data when no proposed fix cites at least one specific log line or log record.',
+          '',
           'CONSTRAINTS — STRICT, YOLO-SAFE:',
           '  - READ-ONLY. The diagnose.mjs script MUST NOT contain any of: `.update(`, `.delete(`, `.insert(`, `.upsert(`, `.rpc(` with a mutating function, or any raw SQL matching `UPDATE|DELETE|INSERT|TRUNCATE|ALTER|DROP|CREATE`. Refuse to write the script if a requested query contains a write.',
           '  - DO NOT touch src/, tests/, supabase/, scripts/, or any framework-config file.',
@@ -129,6 +144,8 @@ export const diagnosticFirstPhaseTask = defineTask('diagnostic-first-phase', (ar
           `    "artifacts": ["${outputDir}/diagnose.mjs", "${outputDir}/diagnose.json", "${outputDir}/diagnose-summary.md", "${outputDir}/diagnose-stdout.txt"],`,
           '    "queries": [<echo of the queries you ran, by name>],',
           '    "topHypothesis": "<one-sentence root-cause hypothesis grounded in the query results>",',
+          '    "candidateHypotheses": [{"id":"H1","cause":"<candidate cause>","supportingLogCitation":"<seq/timestamp/log-id/artifact path + exact log line>","falsifyingObservation":"<log line or observation that would disprove it>"}],',
+          '    "selectedFixEvidence": "<specific log citation for the selected fix, using seq when present; otherwise timestamp/log-id/artifact path + exact log line; needs-more-data if absent>",',
           '    "examples": [<up to 3 representative rows that motivate the hypothesis>],',
           '    "recommendation": "<one-paragraph fix recommendation for the Phase B implementer>"',
           '  }',
@@ -138,6 +155,19 @@ export const diagnosticFirstPhaseTask = defineTask('diagnostic-first-phase', (ar
       outputSchema: {
         type: 'object',
         required: ['artifacts', 'topHypothesis', 'recommendation'],
+        properties: {
+          candidateHypotheses: {
+            type: 'array',
+            minItems: 3,
+            description:
+              'Required for Strike-3/post-instrumentation handoffs: at least 3 candidate root-cause hypotheses with falsifying observations and log citations.',
+          },
+          selectedFixEvidence: {
+            type: 'string',
+            description:
+              'Specific log citation for the selected fix: seq number when present, otherwise timestamp/log-id/artifact path plus exact log line, or needs-more-data.',
+          },
+        },
       },
     },
     io: {

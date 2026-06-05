@@ -28,6 +28,11 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
  * - At least 2 independent evidence signals
  * - Document alternative causes that were ruled out
  * - NO CODE CHANGES during diagnosis
+ * - For Strike-3/post-instrumentation handoffs only: require at least 3
+ *   candidate root-cause hypotheses before any fix, a falsifying log line or
+ *   observation per hypothesis, concrete log citation by seq number when
+ *   present (timestamp/log-id/artifact path plus exact log line fallback), and
+ *   needs-more-data when no proposed fix cites a specific log record.
  *
  * @param {Object} args
  * @param {string} args.description - Description of the bug or issue
@@ -83,6 +88,13 @@ export const rootCauseDiagnosisTask = defineTask('root-cause-diagnosis', (args, 
           'Examples of evidence signals: git blame output, test output diff, dependency version mismatch, ' +
           'config file diff, log output comparison, reproducing with/without the suspect change. ' +
           'Each signal must independently point to the same root cause.',
+
+        // 4b. STRIKE-3 INTERPRETATION CONTRACT
+        'STRIKE-3 CONTRACT: If this diagnosis is interpreting post-instrumentation or Strike-3 logs for a follow-up fix, ' +
+          'do not proceed to a source-code fix until you enumerate at least 3 candidate root-cause hypotheses, ' +
+          'give each hypothesis a falsifying log line or observation, and cite concrete log evidence for the selected fix. ' +
+          'Use seq number when present; otherwise use timestamp, log-id, or artifact path plus exact log line. ' +
+          'If no proposed fix cites at least one specific log line or log record, mark the result needs-more-data.',
 
         // 5. ALTERNATIVES
         'ALTERNATIVES: Document at least one alternative cause you considered and explain ' +

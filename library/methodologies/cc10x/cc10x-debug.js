@@ -32,6 +32,7 @@ const logInvestigationTask = defineTask('cc10x-debug-investigate', (args, taskCt
         'PHASE 0 RULE: Run `git diff` (not just git log) to identify the exact breaking change that introduced the regression',
         'PHASE 0 RULE: You MUST NOT make any code changes during investigation. This is diagnosis only.',
         'PHASE 0 RULE: Gather at least 2 independent evidence signals before concluding. Each signal must come from a different source (e.g., log output + git diff, test output + code reading).',
+        'STRIKE-3 CONTRACT: For Strike-3/post-instrumentation fix handoffs only, no source-code fix may proceed until you enumerate at least 3 candidate root-cause hypotheses, include a falsifying log line or observation for each, and cite concrete log evidence for the selected fix. Use seq number when present, with timestamp, log-id, or artifact path plus exact log line fallback. If no proposed fix cites a specific log line or log record, mark needs-more-data.',
         'Read all available logs, error output, stack traces, and crash reports FIRST',
         'DO NOT hypothesize before reading evidence',
         'Identify the exact error message, file, line number, and call stack',

@@ -16,6 +16,24 @@ Choose the process shape before writing `process.js`:
 - Use a HYPOTHESES tree when the bug class is unknown and forensics are required. Multiple causal models should compete explicitly, with each hypothesis carrying its own evidence to gather, falsifying observations, and follow-up phases.
 - Rule of thumb: if the first phase is "investigate", use HYPOTHESES-tree mode. If the first phase is "implement X", use flat-phase-list mode.
 
+## Strike-3 Post-Instrumentation Contract
+
+When a Strike-3 or post-instrumentation handoff asks for a data-driven fix,
+the next source-code fix phase is blocked until the interpretation contract is
+satisfied:
+
+- Enumerate at least 3 candidate root-cause hypotheses before writing a fix.
+- For each hypothesis, name the falsifying log line or observation that would
+  disprove it.
+- Select the fix only after citing concrete log evidence: use the seq number
+  when present, otherwise cite timestamp, log-id, or artifact path plus the
+  exact log line.
+- If no proposed fix cites at least one specific log line or log record, mark
+  the handoff `needs-more-data` instead of accepting or opening a fix PR.
+
+This contract is scoped to Strike-3/post-instrumentation fix handoffs. Do not
+apply it as a blanket requirement for ordinary first-attempt bug fixes.
+
 ## Agent Task Responders
 
 Use internal agent tasks for most contributor-facing process work. They are the

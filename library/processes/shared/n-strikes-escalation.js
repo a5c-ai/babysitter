@@ -41,6 +41,15 @@
  * Returns an explicit `outcome` so downstream consumers can distinguish
  * "passed cleanly" from "human override". Never silently flips rejection
  * into approval.
+ *
+ * Strike-3/post-instrumentation fix handoffs that use this loop must also
+ * satisfy the interpretation contract before a source-code fix is accepted:
+ * enumerate at least 3 candidate root-cause hypotheses, include a falsifying log line
+ * or falsifying observation for each hypothesis, and cite concrete log evidence for
+ * the selected fix. Prefer seq number citations when present; otherwise use
+ * timestamp, log-id, or artifact path plus the exact log line. If the fix PR or
+ * handoff cites no specific log line or log record, return needs-more-data
+ * instead of treating the fix as passed.
  */
 
 /**

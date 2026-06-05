@@ -26,6 +26,12 @@ graph:
 ## Key Rules
 
 - Never apply fixes without understanding the root cause
+- For Strike-3/post-instrumentation handoffs, do not apply a source-code fix
+  until you enumerate at least 3 candidate root-cause hypotheses, give each
+  hypothesis a falsifying log line or observation, and cite concrete log
+  evidence for the selected fix. Use seq number when present; otherwise cite
+  timestamp, log-id, or artifact path plus the exact log line. If no proposed
+  fix cites a specific log line or log record, mark `needs-more-data`.
 - Use web-researcher agent for unfamiliar error patterns
 - Document the investigation path for future reference
 - Verify that the fix does not introduce regressions

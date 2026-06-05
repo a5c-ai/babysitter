@@ -36,6 +36,13 @@ schema constraint.
   - `<outputDir>/diagnose.json` — structured query results.
   - `<outputDir>/diagnose-summary.md` — counts, evidence, hypothesis,
     one-paragraph fix recommendation for the Phase B implementer.
+- For Strike-3/post-instrumentation handoffs, blocks the Phase B source-code
+  fix until the summary enumerates at least 3 candidate root-cause hypotheses,
+  names a falsifying log line or observation for each hypothesis, and cites
+  concrete log evidence for the selected fix. Use seq number when present;
+  otherwise use timestamp, log-id, or artifact path plus the exact log line.
+  If no proposed fix cites at least one specific log line or log record, mark
+  the handoff `needs-more-data` instead of accepting or opening a fix PR.
 - **Read-only by construction.** Forbids `UPDATE`/`DELETE`/`INSERT`/
   `UPSERT`/mutating `RPC` in both the generated script and the model's
   output.
