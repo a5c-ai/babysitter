@@ -6,7 +6,7 @@
 
 You are a diagnostic agent for the babysitter runtime. Your job is to perform a comprehensive health check across 14 areas and produce a structured diagnostic report. Follow each section methodically. Track results as you go and produce the final summary at the end.
 
-Initialize a results tracker with these 14 checks, all starting as PENDING:
+Initialize a results tracker with these 14 checks, all starting as PENDING. Valid final check statuses are PASS, WARN, FAIL, ERROR, INFO, and N/A. Treat N/A as neutral: it must never contribute to WARNING or CRITICAL health.
 1. Run Discovery
 2. Journal Integrity
 3. State Cache Consistency
@@ -21,6 +21,46 @@ Initialize a results tracker with these 14 checks, all starting as PENDING:
 12. Ancestor Liveness
 13. Concurrent Session Detection
 14. Windows Ancestor-Walk Strategy
+
+## Phase 0. Harness Capability Detection
+
+**Goal:** Identify the active harness and whether stop-hook diagnostics apply before evaluating hook health.
+
+- Run this detection before section 1 and save the result for sections 7, 10, 11, 12, 13, and escalation guidance.
+- Prefer SDK-owned capability truth. Use `detectCallerHarness()` first, then `detectAdapter()` / `getAdapterByName()` as a fallback. A direct Node probe is acceptable:
+
+```bash
+node - <<'NODE'
+const sdk = require('@a5c-ai/babysitter-sdk');
+const caller = sdk.detectCallerHarness?.() ?? null;
+const explicit = process.env.BABYSITTER_HARNESS || process.env.BABYSITTER_HARNESS_NAME;
+const adapter = explicit
+  ? sdk.getAdapterByName?.(explicit)
+  : caller?.name
+    ? sdk.getAdapterByName?.(caller.name)
+    : sdk.detectAdapter?.();
+const capabilities = (adapter?.getCapabilities?.() ?? caller?.capabilities ?? []).map(String);
+const supportsStopHook = adapter?.supportsHookType?.('stop')
+  ?? (capabilities.length ? capabilities.includes(String(sdk.HarnessCapability.StopHook)) : null);
+const supportsSessionStartHook = adapter?.supportsHookType?.('session-start') ?? null;
+console.log(JSON.stringify({
+  harness: explicit ?? caller?.name ?? adapter?.name ?? 'unknown',
+  source: explicit ? 'env' : caller ? 'detectCallerHarness' : adapter ? 'detectAdapter' : 'fallback',
+  matchedEnvVars: caller?.matchedEnvVars ?? [],
+  capabilities,
+  supportsStopHook,
+  supportsSessionStartHook,
+}, null, 2));
+NODE
+```
+
+- This probe must use SDK-owned harness truth (`detectCallerHarness`, `getAdapterByName`, `getCapabilities`, and `supportsHookType`) rather than a local capability table in the doctor guidance.
+- If the Node probe cannot import the SDK, record the failure and try again after `npm run build:sdk`. If it still fails, use `npx babysitter session:whoami --json`, `run.json`, and harness env vars as low-confidence evidence. Record the fallback and confidence level.
+- Display the detected harness, matched evidence, capabilities, and `supportsStopHook` value near the top of the report.
+- If the detected harness is known and does not advertise `HarnessCapability.StopHook`, section 10 must be marked `N/A` with a harness-aware explanation. Do not inspect Claude hook files, `hooks.json`, hook shell scripts, or `~/.claude` settings for that harness.
+- If the harness is `pi`, explicitly note that Pi uses command-backed skills and extension/session events rather than Claude Code StopHook registration.
+- If the harness is unknown and no StopHook capability evidence is available, do not turn missing Claude hook files into a FAIL. Mark section 10 as N/A unless there is explicit evidence that the current harness should provide StopHook hooks.
+- Any check may report `N/A` when a capability is explicitly unsupported. `N/A` is neutral: it must not count as PASS, WARN, FAIL, or ERROR for the overall health verdict.
 
 ---
 
@@ -255,15 +295,26 @@ Mark as PASS if total size < 500MB and no files > 10MB. Mark as WARN if total si
 
 ## 10. Hook Execution Health
 
-**Goal:** Verify that the stop hook and session-start hook are properly configured, can execute, and have been running. If the stop hook has NOT been running, diagnose why.
+**Goal:** Verify stop-hook health only for harnesses that support StopHook. If the active harness does not support StopHook, report a neutral N/A instead of a failure.
+
+Before running 10a, inspect the Phase 0 harness detection result:
+
+- If `supportsStopHook` is `false`, mark check 10 as `N/A` and skip 10a-10f.
+- The N/A detail must say: `N/A - harness <harness> does not advertise HarnessCapability.StopHook; stop-hook registration and Claude-style hook files are not required for this harness.`
+- Include the detected capability list and matched evidence in the N/A detail.
+- For Pi and Oh My Pi, also note that these harnesses use command-backed skills and extension/session events instead of Claude-style `hooks.json`, `CLAUDE_PLUGIN_ROOT`, hook shell scripts, or `~/.claude` plugin settings.
+- Do not mark missing `CLAUDE_PLUGIN_ROOT`, `hooks.json`, `babysitter-stop-hook.sh`, `babysitter-session-start-hook.sh`, or `~/.claude` files as FAIL when `supportsStopHook` is `false`.
+- If harness detection is inconclusive but the environment exposes non-StopHook markers such as `PI_SESSION_ID` or `PI_PLUGIN_ROOT`, treat stop-hook execution health as `N/A` for the same reason.
+- If `supportsStopHook` is `null` or unknown and there is no explicit evidence that the current harness should provide StopHook hooks, mark check 10 as `N/A` instead of turning missing Claude-style hook files into FAIL.
+- Continue with 10a-10f only when `supportsStopHook` is `true` or there is explicit evidence that the current harness should provide StopHook hooks.
 
 ### 10a. Hook Registration
 
-- Locate the plugin root. Check for `CLAUDE_PLUGIN_ROOT` env var first, or search for a babysitter `hooks.json` by walking up from the current directory.
+- Locate the StopHook-capable plugin root. For Claude Code, check `CLAUDE_PLUGIN_ROOT` first. Otherwise, search for a babysitter `hooks.json` by walking up from the current directory or use the harness-specific plugin root env var from Phase 0.
 - If found, read `hooks.json` and verify:
   - A `Stop` hook entry exists with a command referencing `babysitter-stop-hook.sh`.
   - A `SessionStart` hook entry exists with a command referencing `babysitter-session-start-hook.sh`.
-- If `hooks.json` is not found, mark as FAIL ("Hook registration file not found — hooks are not registered with Claude Code").
+- If `hooks.json` is not found for a StopHook-capable harness, mark as FAIL ("Hook registration file not found -- hooks are not registered for the detected StopHook-capable harness").
 
 ### 10b. Hook Script Availability
 
@@ -314,12 +365,13 @@ If the stop hook shows NO evidence of execution (no log entries, no journal even
 
 Perform these diagnostic steps in order and report the first failure found:
 
-1. **Plugin not installed**: Check if `CLAUDE_PLUGIN_ROOT` is set or if a babysitter plugin directory exists relative to the project root. If neither exists, report: "Plugin not installed — the babysitter plugin directory is missing."
+1. **Plugin not installed**: For Claude Code, check if `CLAUDE_PLUGIN_ROOT` is set. For other StopHook-capable harnesses, check the harness-specific plugin root from Phase 0. Also check if a babysitter plugin directory exists relative to the project root. If none exist, report: "Plugin not installed -- the babysitter plugin directory is missing."
 
-2. **Plugin not enabled**: Check for Claude settings files:
+2. **Plugin not enabled**: For Claude Code only, check Claude settings files:
    - `~/.claude/settings.json` — look for `babysitter` in `enabledPlugins`.
    - `~/.claude/plugins/installed_plugins.json` — look for `babysitter` in the plugins list.
    - If not found in either, report: "Plugin not enabled in Claude Code settings."
+   For non-Claude StopHook-capable harnesses, use that harness's plugin enablement file or extension registration mechanism instead of `~/.claude`.
 
 3. **hooks.json not registered**: If `hooks.json` doesn't contain a `Stop` hook entry (checked in 10a), report: "Stop hook not registered in hooks.json."
 
@@ -351,6 +403,12 @@ Mark as FAIL if:
 - CLI is not available
 - Stop hook is failing (consistent non-zero exit codes or stderr errors)
 
+Mark as N/A if:
+- The Phase 0 SDK harness capability probe shows `supportsStopHook: false`
+- The detected harness lacks `HarnessCapability.StopHook`
+
+`N/A` is terminal for check 10 and neutral for the final verdict.
+
 ---
 
 ## 11. Session-ID Provenance
@@ -359,10 +417,10 @@ Mark as FAIL if:
 
 - Invoke: `npx babysitter session:whoami --json`
 - Parse the output and inspect the `resolvedFrom` field. Classify as follows:
-  - `resolvedFrom: "pid-marker"` → mark as PASS ("Session ID derives from the live Claude Code ancestor process -- authoritative").
-  - `resolvedFrom: "env-file"` → mark as PASS with a note ("CLAUDE_ENV_FILE was used; typically healthy").
-  - `resolvedFrom: "env-var"` → mark as WARN ("`AGENT_SESSION_ID` is set without a corroborating PID marker. Likely stale from a prior Claude Code session -- see GitHub issue #130").
-    - Remediation: run `babysitter session:cleanup` and start a fresh Claude Code session, or `unset AGENT_SESSION_ID` before invoking babysitter.
+  - `resolvedFrom: "pid-marker"` → mark as PASS ("Session ID derives from the live harness ancestor process -- authoritative").
+  - `resolvedFrom: "env-file"` → mark as PASS with a note ("A harness env file was used; typically healthy. For Claude Code this is commonly `CLAUDE_ENV_FILE`.").
+  - `resolvedFrom: "env-var"` → mark as WARN ("`AGENT_SESSION_ID` is set without a corroborating PID marker. Likely stale from a prior harness session -- see GitHub issue #130").
+    - Remediation: run `babysitter session:cleanup` and start a fresh harness session, or `unset AGENT_SESSION_ID` before invoking babysitter.
   - `resolvedFrom: "none"` → mark as ERROR ("No session ID resolvable. Either no session-start hook fired, or the ancestor walk failed").
 
 **Env-var shadow check:**
@@ -373,11 +431,11 @@ Mark as FAIL if:
 
 ## 12. Ancestor Liveness
 
-**Goal:** Confirm the PID marker references a live Claude Code process.
+**Goal:** Confirm the PID marker references a live harness process.
 
 - Reuse the `session:whoami --json` output from check 11.
 - Inspect the `ancestorAlive` field.
-- If `ancestorAlive === false`, mark as ERROR ("The PID marker references a dead Claude Code process").
+- If `ancestorAlive === false`, mark as ERROR ("The PID marker references a dead harness process").
   - Remediation: `babysitter session:cleanup`.
 - Otherwise mark as PASS.
 
@@ -389,7 +447,7 @@ Mark as FAIL if:
 
 - Enumerate files in `~/.a5c/` matching the pattern `current-session-*-pid-*`.
 - Count markers per harness (derived from the filename).
-- If more than one live marker exists for the same harness, mark as INFO ("Multiple live Claude Code / harness sessions detected; ensure each shell scopes `AGENT_SESSION_ID` appropriately -- the PID marker handles this automatically").
+- If more than one live marker exists for the same harness, mark as INFO ("Multiple live harness sessions detected; ensure each shell scopes `AGENT_SESSION_ID` appropriately -- the PID marker handles this automatically").
 - Otherwise mark as PASS.
 
 ---
@@ -447,30 +505,34 @@ OVERALL HEALTH: <HEALTHY | WARNING | CRITICAL>
   ISSUES & RECOMMENDATIONS
 --------------------------------------------
 
-<For each WARN or FAIL check, list:>
-- [WARN|FAIL] <Check name>: <description of issue>
+<For each WARN, FAIL, or ERROR check, list. Do not list N/A checks here unless the user asks for skipped capability checks:>
+- [WARN|FAIL|ERROR] <Check name>: <description of issue>
   Fix: <specific actionable command or instruction>
+- Do not add this N/A to warnings, failures, or recommendations.
 
 --------------------------------------------
 ```
 
 **Overall health determination:**
-- **HEALTHY**: All 14 checks are PASS (INFO notes are acceptable).
+- **HEALTHY**: All 14 checks are PASS or N/A (INFO notes are acceptable).
 - **WARNING**: At least one check is WARN but none are FAIL or ERROR.
 - **CRITICAL**: At least one check is FAIL or ERROR.
+- **N/A is neutral**: Do not count N/A as PASS, WARN, FAIL, or ERROR. A report with PASS checks plus N/A-only capability skips is HEALTHY.
 
 Present the full detailed findings for each check BEFORE the summary table, so the user can see the evidence. End with the summary table and recommendations. Also, create a single HTML report file with all the findings that uses the arwes UI framework and open it for the user in the browser.
 
 ---
 
-## Escalation: Claude /debug
+## Escalation
 
-If any check results in FAIL and the root cause is unclear after your own analysis -- especially for environment issues, hook execution failures, CLI availability problems, or permission errors that may relate to the Claude Code runtime itself -- invoke the built-in Claude `/debug` command to get additional diagnostic context from the Claude Code environment. This is particularly useful for:
+If the detected harness is `claude-code` and any check results in FAIL with an unclear root cause after your own analysis -- especially for environment issues, hook execution failures, CLI availability problems, or permission errors that may relate to the Claude Code runtime itself -- invoke the built-in Claude `/debug` command to get additional diagnostic context from the Claude Code environment. This is particularly useful for:
 - Hook scripts that should be running but show no evidence of execution (check 10)
 - Permission or path resolution issues that don't match expected behavior
 - Unexpected CLI behavior that might be a Claude Code environment issue rather than a babysitter issue
 
 Call `/debug` with a summary of the failing check and what you've already ruled out, so it can focus on environment-level causes.
+
+For non-Claude harnesses, do not suggest `/debug`; use the harness's native diagnostics if available, or `/babysitter:contrib` when the issue should be reported upstream.
 
 ---
 
@@ -505,7 +567,7 @@ unset AGENT_SESSION_ID
 # 3. Re-bind a run explicitly if needed
 babysitter session:resume --session-id <fresh-id> --state-dir ~/.a5c --run-id <runId> --runs-dir .a5c/runs
 
-# 4. Start a fresh Claude Code session (closes and reopens the session)
+# 4. Start a fresh harness session (closes and reopens the session)
 ```
 
-Run steps 1 and 2 first; re-run `/babysitter:doctor` after each step to confirm the session-provenance checks return to PASS. Step 3 is only needed when a specific run must be re-bound to the fresh session. If the issue persists after step 4, escalate via `/debug` or `/babysitter:contrib`.
+Run steps 1 and 2 first; re-run `/babysitter:doctor` after each step to confirm the session-provenance checks return to PASS. Step 3 is only needed when a specific run must be re-bound to the fresh session. If the issue persists after step 4, escalate via Claude `/debug` only on Claude Code; otherwise use the harness's native diagnostics or `/babysitter:contrib`.
