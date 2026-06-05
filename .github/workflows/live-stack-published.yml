@@ -87,7 +87,8 @@ jobs:
               };
               const models = {
                 'foundry-gpt55': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.5', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
-                'google-gemini31': {provider:'google', adapters_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'},
+                'google-gemini35flash': {provider:'google', adapters_provider:'google', model:'gemini-3.5-flash', required_env:'GOOGLE_API_KEY'},
+                'google-gemini31pro': {provider:'google', adapters_provider:'google', model:'gemini-3.1-pro-preview', required_env:'GOOGLE_API_KEY'},
                 'anthropic-sonnet46': {provider:'anthropic', adapters_provider:'anthropic', model:'claude-sonnet-4-6', required_env:'ANTHROPIC_API_KEY'},
                 'foundry-deepseek': {provider:'foundry-openai', adapters_provider:'foundry', model:'DeepSeek-V4-Pro', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
                 'foundry-gpt54mini': {provider:'foundry-openai', adapters_provider:'foundry', model:'gpt-5.4-mini', required_env:'AZURE_API_KEY,AGENT_MUX_API_BASE'},
