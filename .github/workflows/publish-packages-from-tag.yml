@@ -78,8 +78,6 @@ jobs:
             (
               cd packages/genty/web-app
               npx --no-install vite build
-              npx --no-install tsc --build
-              npx --no-install tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json
             )
           }
 
