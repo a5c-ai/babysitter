@@ -201,20 +201,29 @@ export async function process(inputs, ctx) {
 }
 
 export const readIssueSpecTask = defineTask('issue-881.read-issue-spec', (args, taskCtx) => ({
-  kind: 'shell',
+  kind: 'agent',
   title: 'Read issue #881 and linked PR context verbatim',
   labels: ['issue-881', 'spec', 'github'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      `gh issue view ${args.issueNumber} --json title,body,labels,comments`,
-      'printf "\\n--- pr-context-if-present ---\\n"',
-      `gh pr view ${args.issueNumber} --json files,title,body,comments 2>/tmp/issue-881-pr.err || cat /tmp/issue-881-pr.err`,
-      'printf "\\n--- git-status ---\\n"',
-      'git status --short --branch',
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 120000,
+  agent: {
+    name: 'issue-spec-reader',
+    prompt: {
+      role: 'GitHub issue researcher',
+      task: 'Read issue #881 and any PR context verbatim. Do not edit files.',
+      instructions: [
+        `Run: gh issue view ${args.issueNumber} --json title,body,labels,comments`,
+        `Run: gh pr view ${args.issueNumber} --json files,title,body,comments`,
+        'If the PR command reports that no PR exists, record that exact outcome rather than treating it as a failure.',
+        'Run: git status --short --branch',
+        'Return JSON: { stdout } where stdout contains the issue JSON, a pr-context-if-present section, and a git-status section.',
+      ],
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['stdout'],
+      properties: {
+        stdout: { type: 'string' },
+      },
+    },
   },
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
@@ -223,26 +232,35 @@ export const readIssueSpecTask = defineTask('issue-881.read-issue-spec', (args, 
 }));
 
 export const reuseAuditTask = defineTask('issue-881.reuse-audit', (args, taskCtx) => ({
-  kind: 'shell',
+  kind: 'agent',
   title: 'Run Phase 0 reuse audit for Strike-3 contract surfaces',
   labels: ['issue-881', 'reuse-audit', 'process-library'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'printf "## Reuse-audit findings (REVIEW BEFORE PROCEEDING)\\n\\n"',
-      'printf "### Existing repo configuration\\n"',
-      'test -f .a5c/reuse-audit.json && sed -n "1,220p" .a5c/reuse-audit.json || printf "No .a5c/reuse-audit.json found.\\n"',
-      'printf "\\n### Matching docs/library/process surfaces\\n"',
-      'rg -n -i "strike[- ]?3|instrumentation-deploy|post[- ]instrumentation|hypothesis-before-fix|falsifying log|seq number|needs-more-data|diagnostic-first|root-cause-diagnosis|n-strikes" docs library packages plugins scripts .a5c/processes -S || true',
-      'printf "\\n### Matching environment variables\\n"',
-      'rg -n "process\\.env\\.[A-Z0-9_]*(STRIKE|INSTRUMENT|HYPOTH|DIAGNOSTIC|A5C|BABYSITTER)[A-Z0-9_]*" . -g "!node_modules" -g "!e2e-artifacts" -g "!coverage" -S || true',
-      'printf "\\n### Package scripts and dependency context\\n"',
-      'node -e "const p=require(\'./package.json\'); console.log(JSON.stringify({dependencies:p.dependencies,devDependencies:p.devDependencies,scripts:p.scripts}, null, 2))"',
-      'printf "\\n### Candidate target files\\n"',
-      `for f in ${targetFileArgs(args.inputs.targetFiles)}; do if test -f "$f"; then printf "\\n--- %s ---\\n" "$f"; sed -n '1,220p' "$f"; else printf "\\nMISSING: %s\\n" "$f"; fi; done`,
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 180000,
+  agent: {
+    name: 'reuse-auditor',
+    prompt: {
+      role: 'brownfield reuse auditor',
+      task: 'Run Phase 0 reuse audit for Strike-3 contract surfaces. Do not edit files.',
+      instructions: [
+        'Render the heading: ## Reuse-audit findings (REVIEW BEFORE PROCEEDING).',
+        'If .a5c/reuse-audit.json exists, read it and use its scan guidance; otherwise state that it is absent.',
+        'Search docs, library, packages, plugins, scripts, and .a5c/processes for: strike-3, instrumentation-deploy, post-instrumentation, hypothesis-before-fix, falsifying log, seq number, needs-more-data, diagnostic-first, root-cause-diagnosis, n-strikes.',
+        'Search environment-variable usage for matching STRIKE, INSTRUMENT, HYPOTH, DIAGNOSTIC, A5C, and BABYSITTER terms.',
+        'Read package.json scripts/dependencies enough to identify reusable verification commands and dependency constraints.',
+        'Read each candidate target file from inputs.targetFiles if present; record missing targets explicitly.',
+        'Return JSON: { stdout } where stdout is a markdown reuse-audit report with matching migrations, routes, env vars, SDKs, prompt surfaces, docs surfaces, tests, and reuse recommendations.',
+      ],
+      context: {
+        issueSpecStdout: args.issueSpecStdout,
+        targetFiles: args.inputs.targetFiles,
+      },
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['stdout'],
+      properties: {
+        stdout: { type: 'string' },
+      },
+    },
   },
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
@@ -251,27 +269,35 @@ export const reuseAuditTask = defineTask('issue-881.reuse-audit', (args, taskCtx
 }));
 
 export const libraryResearchTask = defineTask('issue-881.library-research', (args, taskCtx) => ({
-  kind: 'shell',
+  kind: 'agent',
   title: 'Research active process library methodologies and skills',
   labels: ['issue-881', 'library-research', 'methodology'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'babysitter process-library:active --json',
-      'printf "\\n--- qa-testing discovery ---\\n"',
-      'babysitter skill:discover --process-path specializations/qa-testing-automation --json',
-      'printf "\\n--- active-library strike/contract search ---\\n"',
-      'ACTIVE_ROOT="$(babysitter process-library:active --json | node -e \\"let s=\\\'\\\';process.stdin.on(\\\'data\\\',d=>s+=d);process.stdin.on(\\\'end\\\',()=>console.log(JSON.parse(s).binding.dir))\\")"',
-      'rg -n -i "strike[- ]?3|instrumentation|hypothes|falsif|seq|needs-more-data|diagnostic-first|root-cause" "$ACTIVE_ROOT" -S || true',
-      'printf "\\n--- active shared root-cause diagnosis ---\\n"',
-      'test -f "$ACTIVE_ROOT/methodologies/shared/root-cause-diagnosis.js" && sed -n "1,220p" "$ACTIVE_ROOT/methodologies/shared/root-cause-diagnosis.js" || true',
-      'printf "\\n--- repo-local diagnostic-first phase ---\\n"',
-      'sed -n "1,240p" library/specializations/qa-testing-automation/diagnostic-first-phase.js',
-      'printf "\\n--- repo-local n-strikes escalation ---\\n"',
-      'sed -n "1,220p" library/processes/shared/n-strikes-escalation.js',
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 180000,
+  agent: {
+    name: 'process-library-researcher',
+    prompt: {
+      role: 'Babysitter process-library researcher',
+      task: 'Research active process-library methodologies and repo-local Strike-3 surfaces. Do not edit files.',
+      instructions: [
+        'Run: babysitter process-library:active --json.',
+        'Run: babysitter skill:discover --process-path specializations/qa-testing-automation --json.',
+        'Search the active library root for Strike-3, instrumentation, hypothesis, falsifying, seq, needs-more-data, diagnostic-first, and root-cause.',
+        'Read the active-library shared root-cause diagnosis file if present.',
+        'Read repo-local library/specializations/qa-testing-automation/diagnostic-first-phase.js.',
+        'Read repo-local library/processes/shared/n-strikes-escalation.js.',
+        'Return JSON: { stdout } where stdout contains command/search findings and concise notes about which methodology patterns should be reused.',
+      ],
+      context: {
+        issueSpecStdout: args.issueSpecStdout,
+        reuseAuditStdout: args.reuseAuditStdout,
+      },
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['stdout'],
+      properties: {
+        stdout: { type: 'string' },
+      },
+    },
   },
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
@@ -398,20 +424,33 @@ export const verifyContractTask = defineTask('issue-881.verify-contract', (args,
 }));
 
 export const readArtifactsTask = defineTask('issue-881.read-artifacts', (args, taskCtx) => ({
-  kind: 'shell',
+  kind: 'agent',
   title: 'Read final artifacts for spec comparison',
   labels: ['issue-881', 'artifacts', 'review'],
-  shell: {
-    command: [
-      'set -euo pipefail',
-      'git status --short --branch',
-      'printf "\\n--- diff stat ---\\n"',
-      'git diff --stat',
-      'printf "\\n--- implementation diff ---\\n"',
-      'git diff -- docs library packages scripts .a5c/processes',
-    ].join('\n'),
-    expectedExitCode: 0,
-    timeout: 120000,
+  agent: {
+    name: 'artifact-reader',
+    prompt: {
+      role: 'implementation artifact reader',
+      task: 'Read current implementation artifacts for later spec comparison. Do not edit files.',
+      instructions: [
+        'Run: git status --short --branch.',
+        'Run: git diff --stat.',
+        'Run: git diff -- docs library packages scripts .a5c/processes.',
+        'Return JSON: { stdout } where stdout contains those three sections verbatim enough for a reviewer to compare against the issue spec.',
+      ],
+      context: {
+        implementation: args.implementation,
+        verification: args.verification,
+        attempt: args.attempt,
+      },
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['stdout'],
+      properties: {
+        stdout: { type: 'string' },
+      },
+    },
   },
   io: {
     inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
@@ -511,25 +550,34 @@ export const deliverTask = defineTask('issue-881.deliver', (args, taskCtx) => {
     'Quality gates include the configured npm checks plus prompt-contract guards for 3+ hypotheses, falsifying log observations, seq/timestamp log citation, and needs-more-data rejection.',
   ].join('\n');
   return {
-    kind: 'shell',
+    kind: 'agent',
     title: 'Commit, push, create PR, and comment on issue #881',
     labels: ['issue-881', 'delivery', 'github'],
-    shell: {
-      command: [
-        'set -euo pipefail',
-        `git switch ${shellQuote(branch)} 2>/dev/null || git switch -c ${shellQuote(branch)}`,
-        'CHANGED="$(git diff --name-only)"',
-        'test -n "$CHANGED"',
-        'printf "%s\\n" "$CHANGED" | xargs git add --',
-        'git diff --cached --check',
-        `git commit -m ${shellQuote(prTitle)}`,
-        `git push -u origin ${shellQuote(branch)}`,
-        `PR_URL="$(gh pr create --draft --base ${shellQuote(args.inputs.baseBranch)} --head ${shellQuote(branch)} --title ${shellQuote(prTitle)} --body ${shellQuote(prBody)})"`,
-        'printf "%s\\n" "$PR_URL"',
-        `gh issue comment ${issue} --body "$(printf "%s\\n\\nPR: %s\\n" ${shellQuote(issueComment)} "$PR_URL")"`,
-      ].join('\n'),
-      expectedExitCode: 0,
-      timeout: 180000,
+    agent: {
+      name: 'github-delivery-agent',
+      responderType: 'agent',
+      adapter: 'codex',
+      fallbackType: 'internal',
+      prompt: {
+        role: 'release delivery engineer',
+        task: 'Commit the implementation, push the branch, create a draft PR, and comment on issue #881.',
+        instructions: [
+          `Use branch: ${branch}.`,
+          `Use base branch: ${args.inputs.baseBranch}.`,
+          `Use PR title: ${prTitle}.`,
+          'Stage only files changed for this issue. Do not stage unrelated dirty worktree files.',
+          'Run git diff --cached --check before committing.',
+          'Create a new commit with the PR title as the commit message.',
+          'Push the branch to origin.',
+          'Create a draft PR with the PR body provided in context.',
+          `Comment on issue #${issue} with the issue comment provided in context plus the PR URL.`,
+          'Return JSON: { branch, commit, prUrl, issueCommentUrl, changedFiles }.',
+        ],
+        context: {
+          prBody,
+          issueComment,
+        },
+      },
     },
     io: {
       inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
