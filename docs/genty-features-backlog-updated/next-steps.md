@@ -2,6 +2,9 @@
 
 Concrete actions to begin executing the gap analysis roadmap.
 
+> **Update 2026-06-05:** All 18 Pi parity + trust enforcement gaps are now CLOSED.
+> The priority items below (from the original M0 quick wins) remain the next focus.
+
 ---
 
 ## First 5 PRs to Create

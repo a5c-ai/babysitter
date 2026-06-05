@@ -67,6 +67,9 @@ export async function runInternalOrchestrationPhase(
   } catch {
     // Genty context is optional; orchestration works without it
   }
+  if (gentyCtx) {
+    args.gentyContext = gentyCtx;
+  }
   const activePiSessions = new Set<AgentCoreSessionHandle>();
   const writeVerbose = (message: string): void => {
     writeVerboseLine(args.verbose, args.json, message, args.outputMode);

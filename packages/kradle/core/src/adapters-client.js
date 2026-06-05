@@ -410,7 +410,7 @@ export function createAgentMuxClient(options = {}) {
       }
       const containers = [{
         name: 'agent',
-        image: image || 'ghcr.io/a5c-ai/adapters:latest',
+        image: image || process.env.KRADLE_AGENT_IMAGE || 'ghcr.io/a5c-ai/adapters:latest',
         command: ['node', 'dist/cli/index.js', 'launch', adapter, provider],
         args: model ? ['--model', model] : [],
         env: containerEnv,

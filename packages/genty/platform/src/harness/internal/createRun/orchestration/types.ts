@@ -7,6 +7,7 @@ import type {
   OutputMode,
 } from "../utils";
 import type { SessionBindResult } from "../../../types";
+import type { GentySessionContext } from "../../../gentySessionContext";
 
 export type RunOrchestrationPhaseArgs = {
   invocationCommand?: string;
@@ -29,6 +30,7 @@ export type RunOrchestrationPhaseArgs = {
   existingSessionBound?: SessionBindResult;
   planningConversationSummary?: string;
   outputMode?: OutputMode;
+  gentyContext?: GentySessionContext;
 };
 
 export type OrchestrationWriteVerbose = (message: string) => void;

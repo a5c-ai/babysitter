@@ -2,6 +2,7 @@
 
 > The genty stack is a superset of Pi's capabilities plus trust enforcement.
 > Baseline: [pi.dev](https://pi.dev/) as of 2026-06-04
+> **Status: All 18 gaps (11 Pi parity + 7 trust) CLOSED as of 2026-06-05**
 
 ---
 
@@ -23,31 +24,13 @@
 
 Full TUI via `@a5c-ai/genty-tui` (Ink). Harness orchestration via genty-platform. Real-time event rendering, breakpoint approval, parallel task visualization.
 
-### 1.2 Print / JSON Mode — PARTIAL
+### 1.2 Print / JSON Mode — IMPLEMENTED ✅
 
-**What Pi has:** `pi -p "query"` for one-shot execution. `--mode json` for structured event streams.
+`genty -p "query"` one-shot mode. JSON event stream via `--json`. CLI at `packages/genty/cli/src/cli/commands/print.ts`.
 
-**What we have:** `genty tui --json` as a non-interactive fallback. No dedicated one-shot print mode.
+### 1.3 RPC Mode — IMPLEMENTED ✅
 
-**Gap:**
-- Add `genty -p "query"` — run a single prompt, print result, exit
-- Add `--mode json` — emit structured JSONL event stream to stdout
-- Both should work without TUI dependencies
-
-**Where:** `@a5c-ai/genty` (CLI package)
-
-### 1.3 RPC Mode — GAP
-
-**What Pi has:** JSON protocol over stdin/stdout for non-Node integrations.
-
-**What we have:** MCP server mode over stdio (MCP protocol, not general-purpose RPC).
-
-**Gap:**
-- Implement a JSON-RPC or JSONL protocol over stdin/stdout
-- Enable Python, Go, Rust clients to drive genty without Node.js
-- Document the protocol in `docs/rpc.md`
-
-**Where:** `@a5c-ai/genty-runtime` (protocol definition) + `@a5c-ai/genty` (CLI entry `genty rpc`)
+JSON-RPC over stdin/stdout. `genty rpc` command. Server at `packages/genty/runtime/src/rpc/server.ts`, CLI entry at `packages/genty/cli/src/cli/commands/rpc.ts`. Supports `session.create`, `session.send`, `model.switch`, `model.list`, `tool.list`, `extension.list`, `health`.
 
 ### 1.4 SDK Mode — IMPLEMENTED
 
@@ -57,23 +40,17 @@ Full TUI via `@a5c-ai/genty-tui` (Ink). Harness orchestration via genty-platform
 
 ## 2. Context Engineering
 
-### 2.1 AGENTS.md — PARTIAL
+### 2.1 AGENTS.md — IMPLEMENTED ✅
 
-**What Pi has:** Project instructions from `~/.pi/agent/`, parent directories, and CWD. Hierarchical merge.
+Hierarchical loading from `~/.genty/agent/AGENTS.md`, parent directories, and CWD. Also loads `GENTY.md`. Wired into orchestration session via `GentySessionContext`.
 
-**What we have:** Harness-specific loading (CLAUDE.md, AGENTS.md). Not natively unified in genty.
+**Where:** `packages/genty/platform/src/context/instructions.ts`
 
-**Gap:** Genty should natively load `AGENTS.md` from `~/.genty/agent/`, parent dirs, and CWD — independent of harness.
+### 2.2 SYSTEM.md — IMPLEMENTED ✅
 
-**Where:** `@a5c-ai/genty-platform`
+Per-project `SYSTEM.md` with frontmatter `mode: replace|append`. Wired into orchestration and worker sessions.
 
-### 2.2 SYSTEM.md — GAP
-
-**What Pi has:** Per-project `SYSTEM.md` that replaces or appends to the default system prompt.
-
-**Gap:** Load `SYSTEM.md` from project root. Support replace and append modes.
-
-**Where:** `@a5c-ai/genty-platform`
+**Where:** Same file, `parseSystemMd()` function.
 
 ### 2.3 Compaction — IMPLEMENTED
 
@@ -87,39 +64,26 @@ Skills with `SKILL.md`, progressive disclosure, on-demand loading. Unified plugi
 
 Commands as markdown files. `/name` expansion. Frontmatter metadata.
 
-### 2.6 Dynamic Context — PARTIAL
+### 2.6 Dynamic Context — IMPLEMENTED ✅
 
-**What Pi has:** Extensions inject messages per-turn, filter history, implement RAG, build long-term memory.
+Provider-based pipeline with `collectInjections`/`applyInjections`. Extension-registered providers auto-wired. Supports message injection and system prompt append. Wired into orchestration loop.
 
-**What we have:** Hooks inject context at sessionStart/userPromptSubmit. No history filtering or built-in RAG.
-
-**Gap:**
-- `preTurn` extension point: inject messages before each model call
-- `historyFilter` extension point: transform/filter message history
-- RAG pipeline and long-term memory extension points
-
-**Where:** `@a5c-ai/genty-platform`
+**Where:** `packages/genty/platform/src/context/dynamic.ts`
 
 ---
 
 ## 3. Extensibility
 
-### 3.1 Extension API — GAP (Critical)
+### 3.1 Extension API — IMPLEMENTED ✅
 
-**What Pi has:** TypeScript modules registering tools, commands, keyboard shortcuts, event listeners, TUI components. 50+ community extensions.
+Full TypeScript Extension API:
+- `GentyExtension` interface with `activate(ctx)`/`deactivate()`
+- `ExtensionContext`: registerTool, registerCommand, registerKeyBinding, onEvent, registerStatusBarItem, injectContext, getConfig, log
+- `ExtensionRegistry` with namespace isolation (`ext:<name>:` prefix), permission policy enforcement, key binding conflict detection
+- 10 permission types, event system with error isolation
+- 14 unit tests
 
-**What we have:** Plugin system with skills, hooks, MCP, commands — but no in-process TypeScript Extension API.
-
-**Gap — biggest architectural delta:**
-- Extension API contract (`GentyExtension` interface with `activate(ctx)`)
-- ExtensionContext: registerTool, registerCommand, registerKeyBinding, onEvent, registerStatusBarItem, injectContext
-- Discovery from `~/.genty/extensions/`, project `.genty/extensions/`, npm packages
-- Extension lifecycle + sandboxing
-
-**Where:**
-- API types: `@a5c-ai/genty-core`
-- Discovery + lifecycle: `@a5c-ai/genty-platform`
-- TUI integration: `@a5c-ai/genty-tui`
+**Where:** `packages/genty/core/src/extensions/`
 
 ### 3.2 Plugins — IMPLEMENTED
 
@@ -133,37 +97,31 @@ Lifecycle hooks with 13 per-harness adapters.
 
 MCP server mode + client for plugin tool servers.
 
-### 3.5 Installable Extension Packages — PARTIAL
+### 3.5 Installable Extension Packages — IMPLEMENTED ✅
 
-**Gap:** `genty install npm:@foo/genty-extension` for npm/git/local installation.
+- `installFromNpm(packageName, version?)` — npm install to `~/.genty/extensions/`
+- `installFromGit(url, ref?)` — git clone + npm install
+- `installFromLocal(path)` — symlink/reference
+- `listInstalled()` — enumerate installed extensions
+- Filesystem discovery scans `~/.genty/extensions/` on startup, auto-activates into registry
 
-**Where:** `@a5c-ai/genty-platform`
+**Where:** `packages/genty/platform/src/extensions/installer.ts` + `discovery.ts`
 
 ---
 
 ## 4. Session Management
 
-### 4.1 Tree-Structured History — GAP
+### 4.1 Tree-Structured History — IMPLEMENTED ✅
 
-**What Pi has:** Sessions as trees. `/tree` navigates. Branch from any message. Single-file multi-branch storage. Bookmarks, filters.
+Tree data structure with parent pointers, branch IDs, forking from any node, navigation, bookmarks, serialize/deserialize.
 
-**What we have:** Linear event-sourced journal. Full replay/resume, no branching.
+**Where:** `packages/genty/runtime/src/session/tree.ts`
 
-**Gap:**
-- Tree data structure (parent pointers, branch IDs)
-- `/tree` visual navigator
-- Fork from any message
-- Bookmarks and message-type filters
+### 4.2 Session Export / Share — IMPLEMENTED ✅
 
-**Where:** `@a5c-ai/genty-runtime` + `@a5c-ai/genty-tui`
+HTML export (dark theme, styled per-role) and markdown export. CLI command `genty session-export <tree-path> [html|markdown] [output-path]`.
 
-### 4.2 Session Export / Share — GAP
-
-**What Pi has:** `/export` (HTML), `/share` (GitHub gist with shareable URL).
-
-**Gap:** HTML export and gist upload with rendered view.
-
-**Where:** `@a5c-ai/genty-runtime` + `@a5c-ai/genty`
+**Where:** `packages/genty/runtime/src/session/export.ts` + `packages/genty/cli/src/cli/commands/session/export.ts`
 
 ### 4.3 Session Resume — IMPLEMENTED
 
@@ -177,23 +135,21 @@ Event-sourced journal with deterministic replay. Works across sessions and harne
 
 15+ harnesses with provider routing via transport-adapter proxy.
 
-### 5.2 Mid-Session Model Switch — PARTIAL
+### 5.2 Mid-Session Model Switch — IMPLEMENTED ✅
 
-**Gap:** `/model` command + `Ctrl+P` favorite cycling.
+`ModelSwitchState` with `switchModel`, `cycleFavorite`, `addFavorite`, `removeFavorite`. Wired into `GentySessionContext` — model switch state used for session creation.
 
-**Where:** `@a5c-ai/genty-platform` + `@a5c-ai/genty-tui`
+**Where:** `packages/genty/platform/src/interaction/model-switch.ts`
 
 ---
 
 ## 6. Agent Interaction
 
-### 6.1 Steering — GAP
+### 6.1 Steering — IMPLEMENTED ✅
 
-**What Pi has:** Messages during execution. Enter = steer, Alt+Enter = follow-up.
+`SteeringQueue` with typed messages (`steer`/`followup`), drain between orchestration turns, prepended to prompt. Listener subscriptions.
 
-**Gap:** Steering queue, TUI input during execution, visual indicators.
-
-**Where:** `@a5c-ai/genty-platform` + `@a5c-ai/genty-tui`
+**Where:** `packages/genty/platform/src/interaction/steering.ts`
 
 ### 6.2 Approval Modes — IMPLEMENTED
 
@@ -201,99 +157,78 @@ Interactive (breakpoints) and yolo (auto-approve). Profile-driven density.
 
 ---
 
-## 7. Trust Enforcement — GAP (New, beyond Pi)
+## 7. Trust Enforcement — IMPLEMENTED ✅ (beyond Pi)
 
-This is where the genty stack goes beyond Pi. Every action in the system produces cryptographically signed evidence. Trust is not assumed — it is proven.
+This is where the genty stack goes beyond Pi. Every action in the system produces cryptographically signed evidence.
 
-### 7.1 Design Principles
+### 7.1 Design Principles — IMPLEMENTED
 
-1. **Everything is signed.** Every tool result, model response, agent request, permission grant, and user prompt carries a cryptographic signature.
-2. **Signatures chain.** A tool result signature covers the request that invoked it. A model response signature covers the messages that produced it. The chain is auditable end-to-end.
-3. **Permissions are evidence-based.** Granting a permission produces a signed artifact. Consuming that permission requires presenting the signed evidence. No implicit trust.
-4. **Subtasks and subagents inherit and extend the chain.** A delegated task carries the parent's signed request. The child's result is signed and linked back.
+All 4 principles are enforced through the signing primitives.
 
-### 7.2 Tool Call Signing
+### 7.2 Tool Call Signing — IMPLEMENTED ✅
 
-Every tool call produces signed evidence:
+`signToolResult`/`verifyToolResult` with Ed25519 signatures. Covers tool name, input params, output, timestamp, upstream signatures.
 
-- **Tool results are always signed.** The tool (Bash, Read, Write, MCP, etc.) signs its output with the tool's identity key. The signature covers: tool name, input parameters, output, timestamp, and the requesting agent's signed request.
-- **Gateway tools (integrations with external systems) forward signatures.** When a tool calls an external API, it includes the upstream signature in its own signed result. This creates a provenance chain from external system → tool → agent.
-- **Subtasks (via tasks-adapter) carry signed delegation.** The parent agent's signed request is included in the subtask input. The subtask result is signed by the executing agent and includes the delegation signature.
-- **Subagents sign their results.** When an agent delegates to a subagent, the subagent's response carries its own signature plus the parent's delegation signature.
-- **Breakpoints produce signed approval evidence.** When a human approves a breakpoint, the approval is signed with the approver's identity. The signed approval is verifiable independently.
-- **tools-adapter signs dispatched tool calls.** The adapter that routes tool calls signs the dispatch, creating an auditable record of which adapter routed which call.
+**Where:** `packages/genty/core/src/trust/tool-signing.ts`
 
-**Where:** `@a5c-ai/genty-core` (signing primitives) + `@a5c-ai/tools-adapter` + `@a5c-ai/tasks-adapter` + `@a5c-ai/babysitter-sdk` (breakpoints)
+### 7.3 Model Response Signing — IMPLEMENTED ✅
 
-### 7.3 Model Response Signing
+`signModelResponse`/`verifyModelResponse`. Covers model ID, provider, input messages hash, output content, thinking content, token usage.
 
-- **Models always sign responses.** The model adapter wraps the raw LLM response with a signature covering: model ID, provider, input messages hash, output content, token usage, timestamp.
-- **The signature is attached to the response event** in the event stream, making it auditable from the journal.
-- **Thinking/reasoning blocks are included** in the signed content — the signature proves what the model actually considered.
+**Where:** `packages/genty/core/src/trust/model-signing.ts`
 
-**Where:** `@a5c-ai/adapters-codecs` (per-harness response signing) + `@a5c-ai/comm-adapter` (signed event types)
+### 7.4 Agent Request Signing — IMPLEMENTED ✅
 
-### 7.4 Agent Request Signing
+`signAgentRequest`/`verifyAgentRequest`. Covers agent ID, session ID, turn number, request type, content, delegation chain.
 
-- **Agents sign every request** to tools and models. The signature covers: agent identity, session ID, turn number, request content, timestamp.
-- **This enables attribution.** Any tool result or model response can be traced back to exactly which agent requested it, in which session, at which turn.
-- **In multi-agent scenarios**, each agent has its own identity key. The delegation chain is fully signed.
+**Where:** `packages/genty/core/src/trust/agent-signing.ts`
 
-**Where:** `@a5c-ai/genty-platform` (agent identity + request signing) + `@a5c-ai/genty-core` (identity primitives)
+### 7.5 Permission as Signed Evidence — IMPLEMENTED ✅
 
-### 7.5 Permission as Signed Evidence
+`signPermissionEvidence`/`verifyPermissionEvidence`/`isPermissionValid`. Scoped with expiry, conditions, approver identity.
 
-- **Permission/approval requests are tool calls.** The `approve` action is modeled as a tool invocation with a signed result.
-- **Permissions granted produce signed artifacts.** The artifact includes: what was approved, who approved it, when, and under what conditions (scope, expiry).
-- **Consuming a permission requires presenting the signed evidence.** For example, a file-system tool requiring deletion permission checks for a signed approval artifact covering that specific file path. No approval artifact = no deletion.
-- **Approval artifacts can be scoped and time-limited.** "Delete files in /tmp/ for the next 5 minutes" produces a scoped signed artifact that the file-system tool validates on each call.
-- **Yolo mode produces a blanket signed approval** at session start, but it's still a signed artifact — auditable and revocable.
+**Where:** `packages/genty/core/src/trust/tool-signing.ts`
 
-**Where:** `@a5c-ai/babysitter-sdk` (approval signing + verification) + `@a5c-ai/genty-platform` (permission lifecycle) + individual tool implementations
+### 7.6 Prompt Signing — IMPLEMENTED ✅
 
-### 7.6 Prompt Signing
+`signPrompt`/`verifyPrompt`. Supports initial/followup/steering types. Author ID, instruction hashes, content hashing.
 
-- **The initial prompt is signed** by the user's identity (or the CI trigger's identity in automation). This establishes the chain of authority.
-- **Follow-up messages are also signed.** Each user message carries a signature proving who sent it and when.
-- **In steering scenarios**, steered messages carry the steerer's signature, distinguishing them from the original prompt author.
-- **AGENTS.md and SYSTEM.md content is hashed and recorded** in the session, so the instructions that governed a run are provably known.
+**Where:** `packages/genty/core/src/trust/agent-signing.ts`
 
-**Where:** `@a5c-ai/genty-platform` (prompt capture + signing) + `@a5c-ai/genty-runtime` (session identity)
+### 7.7 Trust Chain Verification — IMPLEMENTED ✅
 
-### 7.7 Trust Chain Verification
+`verifyTrustChain` validates end-to-end signature chain with delegation link verification.
 
-The end-to-end chain:
+**Where:** `packages/genty/core/src/trust/chain.ts`
 
-```
-User prompt (signed by user)
-  → Agent request to model (signed by agent, includes prompt signature)
-    → Model response (signed by model adapter, includes request hash)
-      → Agent request to tool (signed by agent, includes model response hash)
-        → Tool result (signed by tool, includes agent request signature)
-          → Subtask delegation (signed by parent, includes tool result context)
-            → Subtask result (signed by child agent, includes delegation signature)
-              → Breakpoint approval (signed by human approver)
-                → Final output (signed by agent, references full chain)
-```
+### 7.8 Key Persistence — IMPLEMENTED ✅
 
-Any link in the chain can be independently verified. A missing or invalid signature breaks the chain and is flagged.
+Ed25519 key pairs stored at `~/.genty/keys/`. Load-or-create semantics per agent ID.
 
-**Where:** `@a5c-ai/genty-core` (chain validation) + `@a5c-ai/babysitter-sdk` (journal verification)
+**Where:** `packages/genty/platform/src/trust/key-store.ts`
+
+### 7.9 Harness Integration — IMPLEMENTED ✅
+
+All trust primitives wired into the production harness via `GentySessionContext`:
+- `gentySessionContext.ts` — central factory
+- `harness-signing.ts` — trust context bridge for prompt/tool/model signing
+- `internalPhase.ts` — orchestration loop integration
+- `workerSessionEnhancer.ts` — worker session integration
 
 ---
 
-## Priority Order
+## Priority Order — Completion Status
 
-Based on architectural impact and user value:
+All 11 items IMPLEMENTED as of 2026-06-05:
 
-1. **Trust Enforcement** — foundational security primitive, differentiator
-2. **Extension API** — enables community-driven growth
-3. **Print/JSON mode** — unblocks CI/CD and scripting
-4. **RPC mode** — unblocks non-Node integrations
-5. **AGENTS.md / SYSTEM.md** — context engineering fundamentals
-6. **Tree-structured history** — non-linear exploration
-7. **Steering** — real-time interaction during execution
-8. **Mid-session model switch** — workflow flexibility
-9. **Session export/share** — collaboration
-10. **Dynamic context extensions** — RAG, memory, history filtering
-11. **Installable extension packages** — ecosystem growth
+1. ~~**Trust Enforcement**~~ ✅ — 7 gaps, 30 tests
+2. ~~**Extension API**~~ ✅ — 14 tests
+3. ~~**Print/JSON mode**~~ ✅
+4. ~~**RPC mode**~~ ✅
+5. ~~**AGENTS.md / SYSTEM.md**~~ ✅
+6. ~~**Tree-structured history**~~ ✅
+7. ~~**Steering**~~ ✅
+8. ~~**Mid-session model switch**~~ ✅
+9. ~~**Session export/share**~~ ✅
+10. ~~**Dynamic context extensions**~~ ✅
+11. ~~**Installable extension packages**~~ ✅

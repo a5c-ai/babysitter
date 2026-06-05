@@ -151,6 +151,60 @@ const verifyCleanup = defineTask("verify-cleanup", (args) => ({
   }
 }));
 
+// ─── No-op short-circuit helper ────────────────────────────────────────────────
+// Returns true when nothing is eligible for removal. Saves ~2 heavy agent-task
+// invocations on cleanup passes where the prior pass was thorough and nothing
+// new has accumulated.
+function isNoopScan(scan, keepRecentDays) {
+  const runs = scan?.runs || [];
+  const processes = scan?.processes || [];
+
+  const removableRuns = runs.filter(
+    (r) => (r.state === "completed" || r.state === "failed") && r.ageDays > keepRecentDays,
+  );
+  const orphanedProcesses = processes.filter((p) => p.isOrphaned);
+
+  return removableRuns.length === 0 && orphanedProcesses.length === 0;
+}
+
+const writeNoopAuditEntry = defineTask("write-noop-audit", (args) => ({
+  kind: "shell",
+  title: "Write no-op audit entry to docs/run-history-insights.md",
+  shell: {
+    command: `cd "${args.repoRoot}" && mkdir -p docs && {
+      DATE=$(date -u +%Y-%m-%d)
+      RUNS_COUNT=${args.scan?.stats?.totalRuns ?? 0}
+      ACTIVE=${args.scan?.stats?.activeRuns ?? 0}
+      DISK=$(du -sh ${args.runsDir} 2>/dev/null | cut -f1)
+      ENTRY=$(cat <<EOF
+## Cleanup pass · $DATE (no-op)
+
+Scan found nothing eligible for removal (no terminal runs older than ${args.keepRecentDays}d, no orphaned process files). Skipped Phase 2 (aggregate) and Phase 3 (cleanup) — both are heavy agent tasks that produce no value when nothing is removable.
+
+| Snapshot | Value |
+|---|---|
+| Total runs | $RUNS_COUNT |
+| Active / in-flight | $ACTIVE |
+| .a5c/runs/ disk | $DISK |
+
+---
+
+EOF
+      )
+      if [ -f docs/run-history-insights.md ]; then
+        # Prepend to existing file
+        TMP=$(mktemp)
+        printf "%s" "$ENTRY" > "$TMP"
+        cat docs/run-history-insights.md >> "$TMP"
+        mv "$TMP" docs/run-history-insights.md
+      else
+        printf "%s" "$ENTRY" > docs/run-history-insights.md
+      fi
+      echo "audit entry prepended to docs/run-history-insights.md"
+    }`,
+  }
+}));
+
 // ─── Main process ──────────────────────────────────────────────────────────────
 
 export async function process(inputs, ctx) {
@@ -168,6 +222,29 @@ export async function process(inputs, ctx) {
     processesDir,
     keepRecentDays,
   });
+
+  // ── No-op short-circuit ──
+  // If nothing is eligible for removal, skip the heavy Phase 2 (aggregate) and
+  // Phase 3 (cleanup) agent tasks. Write a brief audit-trail entry instead and
+  // exit cleanly. This pattern emerged from cookbook usage (2026-06-05) where
+  // a thorough prior pass left nothing meaningful to reclaim — running full
+  // ceremony burned ~2 agent invocations to produce no useful change.
+  if (isNoopScan(scan, keepRecentDays)) {
+    ctx.log("No-op scan detected — nothing eligible for removal. Skipping Phases 2-3.");
+    await ctx.task(writeNoopAuditEntry, {
+      repoRoot,
+      runsDir,
+      scan,
+      keepRecentDays,
+    });
+    const verification = await ctx.task(verifyCleanup, { repoRoot });
+    return {
+      success: true,
+      summary: `No-op cleanup pass. ${scan?.stats?.totalRuns ?? 0} total runs scanned, 0 removable. Audit entry written to docs/run-history-insights.md.`,
+      scan,
+      noop: true,
+    };
+  }
 
   // Phase 2: Aggregate insights
   ctx.log("Phase 2: Aggregating insights from terminal runs...");

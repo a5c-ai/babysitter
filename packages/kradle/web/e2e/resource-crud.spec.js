@@ -8,6 +8,81 @@ import {
   test,
 } from './fixtures/kradle-fixtures.js';
 
+// ---------------------------------------------------------------------------
+// Resource page structure — verify key pages render their expected content
+// These do NOT mutate data; they only check that pages and forms exist.
+// ---------------------------------------------------------------------------
+test.describe('Resource page structure checks', () => {
+  const RESOURCE_PAGES = [
+    {
+      path: '/orgs/default/agents/stacks',
+      label: 'Agent Stacks',
+      expectedContent: /Stacks|Agent stacks|Create/i,
+    },
+    {
+      path: '/orgs/default/agents/stacks/new',
+      label: 'Create Stack form',
+      expectedContent: /Create.*stack|New.*stack|my-agent-stack/i,
+    },
+    {
+      path: '/orgs/default/agents/rules',
+      label: 'Trigger Rules',
+      expectedContent: /Trigger rules|Create.*rule|Rules/i,
+    },
+    {
+      path: '/orgs/default/agents/directory',
+      label: 'Agent Directory',
+      expectedContent: /Directory|Agent|persona/i,
+    },
+    {
+      path: '/orgs/default/evals',
+      label: 'Evaluations',
+      expectedContent: /Evaluation|Eval|suite/i,
+    },
+    {
+      path: '/orgs/default/datasets',
+      label: 'Datasets',
+      expectedContent: /Dataset|data/i,
+    },
+    {
+      path: '/orgs/default/guardrails',
+      label: 'Guardrails',
+      expectedContent: /Guardrail|Safety|rule/i,
+    },
+    {
+      path: '/orgs/default/agents/projects',
+      label: 'Projects',
+      expectedContent: /Project|Board|Create/i,
+    },
+    {
+      path: '/orgs/default/agents/memory',
+      label: 'Agent Memory',
+      expectedContent: /Memory|Repository|repositories/i,
+    },
+  ];
+
+  for (const { path, label, expectedContent } of RESOURCE_PAGES) {
+    test(`${label} page at ${path} renders expected content`, async ({ page }) => {
+      const errors = attachBrowserErrorCapture(page);
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+
+      if (page.url().includes('/login')) {
+        test.skip(true, 'Auth redirect — page structure test needs authenticated access.');
+        return;
+      }
+
+      await expect(page.locator('body')).toBeVisible();
+      await expectNoRawServerErrors(page);
+
+      // Verify page contains expected content related to the resource type
+      const bodyText = await page.locator('body').innerText({ timeout: 10_000 });
+      expect(bodyText).toMatch(expectedContent);
+
+      expectNoBrowserErrors(errors);
+    });
+  }
+});
+
 function resource(kind, name, spec = {}) {
   return {
     apiVersion: 'kradle.a5c.ai/v1alpha1',

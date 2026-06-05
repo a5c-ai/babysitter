@@ -2202,6 +2202,20 @@ jobs:
             --push .
           echo "KRADLE_CONTROLLER_IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
+      - name: Build and push adapters-agent image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE="${ACR_NAME}.azurecr.io/adapters-agent:${IMAGE_TAG}"
+          docker buildx build \
+            --file packages/adapters/cli/Dockerfile \
+            --tag "$IMAGE" \
+            --tag "${ACR_NAME}.azurecr.io/adapters-agent:latest" \
+            --cache-from type=gha,scope=adapters-agent \
+            --cache-to type=gha,mode=max,scope=adapters-agent \
+            --push .
+          echo "ADAPTERS_AGENT_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
       - name: Build and push kradle-web image
         env:
           IMAGE_TAG: ${{ github.sha }}
@@ -2274,6 +2288,7 @@ jobs:
             --from-literal=KRADLE_ASSISTANT_MODEL=gpt-5.5 \
             --from-literal=OPENAI_API_KEY="${OPENAI_API_KEY}" \
             --from-literal=GOOGLE_API_KEY="${GOOGLE_API_KEY}" \
+            --from-literal=KRADLE_AGENT_IMAGE="${ADAPTERS_AGENT_IMAGE:-${ACR_NAME}.azurecr.io/adapters-agent:latest}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
           helm upgrade --install kradle packages/kradle/charts \

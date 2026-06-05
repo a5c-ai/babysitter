@@ -790,24 +790,21 @@ export class RunManager {
 
   private async loadSessionContent(agent: string, sessionId: string): Promise<FullSession | null> {
     const client = this.client as DetectableSessionClient;
-    const direct = await this.tryLoadSessionContentDirect(agent, sessionId);
-    if (direct) {
-      return direct;
+    if (client.sessions?.get) {
+      try {
+        const session = await client.sessions.get(agent, sessionId);
+        const workspace = session.workspace ?? await this.workspaceService.resolveSessionContext({ cwd: session.cwd });
+        return {
+          ...session,
+          workspace: workspace ?? undefined,
+          workspaceId: session.workspaceId ?? workspace?.workspaceId,
+        };
+      } catch {
+        // Fall back below for minimal test clients that expose only adapter file methods.
+      }
     }
-    if (!client.sessions?.get) {
-      return null;
-    }
-    try {
-      const session = await client.sessions.get(agent, sessionId);
-      const workspace = session.workspace ?? await this.workspaceService.resolveSessionContext({ cwd: session.cwd });
-      return {
-        ...session,
-        workspace: workspace ?? undefined,
-        workspaceId: session.workspaceId ?? workspace?.workspaceId,
-      };
-    } catch {
-      return null;
-    }
+
+    return await this.tryLoadSessionContentDirect(agent, sessionId);
   }
 
   private async tryLoadSessionContentDirect(agent: string, sessionId: string): Promise<FullSession | null> {

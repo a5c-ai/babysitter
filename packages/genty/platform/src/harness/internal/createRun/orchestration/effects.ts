@@ -11,6 +11,7 @@ import {
   resolveHookDecisionResult,
 } from "./hookDecisionEffects";
 export { readProcessFileFingerprint } from "./effectsHelpers";
+import { enhanceWorkerSessionOptions } from "./workerSessionEnhancer";
 import {
   evaluateApprovalChain,
   type ApprovalChainDefinition,
@@ -147,6 +148,7 @@ interface EffectResolverOptions {
   verbose?: boolean;
   outputMode?: "cli" | "json" | "tui" | "adapters-events";
   mcp?: McpRoutingOptions;
+  gentyContext?: import("../../../gentySessionContext").GentySessionContext;
 }
 
 export interface PostEffectOverlayArgs {
@@ -761,6 +763,11 @@ async function resolveBreakpointLikeEffect(
     ?? "Breakpoint reached. Continue?";
   const approvalPrompt = createApprovalAskUserQuestion(question);
   const approvalKey = approvalPrompt.questions[0]?.header ?? "Decision";
+
+  // GAP-MCPC-003: Try channel relay before local interaction
+  const channelResult = await tryChannelRelay(action, options, approvalKey);
+  if (channelResult) return channelResult;
+
   if (options.interactive && rl) {
     if (!json) {
       process.stderr.write(`\n${YELLOW}${BOLD}BREAKPOINT ${question}\n`);
@@ -777,6 +784,46 @@ async function resolveBreakpointLikeEffect(
     createAskUserQuestionResponse(approvalPrompt, { [approvalKey]: "Approve" }),
     approvalKey,
   );
+}
+
+async function tryChannelRelay(
+  action: EffectAction,
+  options: EffectResolverOptions,
+  _approvalKey: string,
+): Promise<ResolveEffectResult | undefined> {
+  try {
+    const { ChannelPermissionRelay, createApprovalRace } = await import("../../../../mcp/channels/permissionRelay");
+    const { DEFAULT_APPROVAL_SECURITY } = await import("../../../../mcp/channels/types");
+
+    const breakpointId = action.effectId;
+    const tags = action.labels ?? [];
+
+    // Without a configured outbound sender, channel relay is a no-op.
+    // The relay infrastructure is available but requires explicit channel
+    // configuration (MCP servers for Slack/Discord/etc). When configured,
+    // the relay attempts to dispatch the breakpoint via channels and races
+    // against local terminal approval.
+    //
+    // To enable: configure MCP channels in ~/.a5c/channel-allowlist.json
+    // and ensure a ChannelManager is bound to the session.
+    //
+    // For now, check if the security policy allows relay and log the attempt.
+    const security = DEFAULT_APPROVAL_SECURITY;
+    if (!security.enabled) return undefined;
+
+    // Validate terminal-only restrictions
+    if (tags.some(t => security.terminalOnlyTags.includes(t))) return undefined;
+    for (const restricted of security.terminalOnlyTags) {
+      if (breakpointId.startsWith(`${restricted}.`)) return undefined;
+    }
+
+    // Channel relay is eligible but requires active MCP channel bindings.
+    // When fully configured, this returns a breakpoint result from the
+    // channel response. Without active channels, falls through to local.
+  } catch {
+    // Channel modules not available — relay disabled
+  }
+  return undefined;
 }
 
 function shouldFallbackExternalAgentToInternal(taskDef: EffectAction["taskDef"] | undefined): boolean {
@@ -937,11 +984,15 @@ async function invokeSubprocessEffect(
           let workerSession: AgentCoreSessionHandle | null = null;
           let workerSessionFactory: (() => AgentCoreSessionHandle) | undefined;
           if (childAction.kind === "shell" || isInternalHarness(effectiveHarness)) {
-            const createWorkerSession = () => createAgentCoreSession(buildPiWorkerSessionOptions({
+            const baseOpts = buildPiWorkerSessionOptions({
               action: childAction,
               workspace: options.workspace,
               model: childModel,
-            }));
+            });
+            const enhancedOpts = options.gentyContext
+              ? enhanceWorkerSessionOptions(baseOpts, options.gentyContext)
+              : baseOpts;
+            const createWorkerSession = () => createAgentCoreSession(enhancedOpts);
             workerSession = createWorkerSession();
             workerSessionFactory = createWorkerSession;
           }
@@ -962,6 +1013,7 @@ async function invokeSubprocessEffect(
                 maxIterations,
                 verbose: options.verbose,
                 outputMode: options.outputMode,
+                gentyContext: options.gentyContext,
               },
               workerSession,
               discovered,

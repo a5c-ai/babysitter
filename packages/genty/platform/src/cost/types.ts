@@ -286,7 +286,7 @@ export const MODEL_PRICING_EXTENDED: Record<string, ModelPricingExtended> = {
  * or similar dated suffixes. We strip the date and try progressively
  * shorter prefixes until we find a match.
  */
-function resolvePricing(model: string): ModelPricing | undefined {
+export function resolvePricing(model: string): ModelPricing | undefined {
   // Direct match first.
   if (MODEL_PRICING[model]) return MODEL_PRICING[model];
 

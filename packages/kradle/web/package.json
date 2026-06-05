@@ -10,6 +10,8 @@
     "start": "next start",
     "lint": "echo 'no lint configured'",
     "test:e2e": "npx playwright test --config=playwright.config.js",
+    "test:e2e:browser": "npx playwright test --config=playwright.config.js",
+    "test:e2e:browser:staging": "KRADLE_E2E_URL=https://kradle-staging.a5c.ai npx playwright test --config=playwright.config.js",
     "test:e2e:api": "node --test tests/api-e2e.test.js",
     "test:e2e:api:staging": "KRADLE_E2E_URL=https://kradle-staging.a5c.ai node --test tests/api-e2e.test.js",
     "test:e2e:staging": "KRADLE_E2E_URL=https://kradle-staging.a5c.ai npx playwright test --config=playwright.config.js",

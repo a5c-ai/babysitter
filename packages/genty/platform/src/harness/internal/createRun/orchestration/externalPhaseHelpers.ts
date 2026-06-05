@@ -16,6 +16,7 @@ import {
   type EffectAction,
 } from "../utils";
 import { subscribeVerbosePiEvents } from "./verbose";
+import { enhanceWorkerSessionOptions } from "./workerSessionEnhancer";
 import type { RunOrchestrationPhaseArgs } from "./types";
 
 export function extractErrorMessage(error: unknown): string {
@@ -39,7 +40,7 @@ export async function recoverExternalProcessError(args: {
   registerPiSession: (session: ReturnType<typeof createAgentCoreSession>) => ReturnType<typeof createAgentCoreSession>;
   shutdownPiSession: (session: ReturnType<typeof createAgentCoreSession> | null | undefined) => Promise<void>;
 }): Promise<void> {
-  const recoverySession = args.registerPiSession(createAgentCoreSession(buildPiWorkerSessionOptions({
+  const baseOpts = buildPiWorkerSessionOptions({
     action: {
       effectId: "process-error-recovery",
       invocationKey: "",
@@ -48,7 +49,10 @@ export async function recoverExternalProcessError(args: {
     } as EffectAction,
     workspace: args.args.workspace,
     model: args.args.model,
-  })));
+  });
+  const recoverySession = args.registerPiSession(createAgentCoreSession(
+    enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext),
+  ));
   const recoveryUnsub = subscribeVerbosePiEvents(recoverySession, "recovery", args.args);
   try {
     const guidelines = composeProcessCreatePrompt(createPromptContextFromCatalog('pi', { interactive: false }));

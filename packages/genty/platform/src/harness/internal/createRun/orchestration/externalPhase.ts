@@ -4,6 +4,7 @@ import {
   commitEffectResult,
 } from "@a5c-ai/babysitter-sdk";
 import { DEFAULT_COMPACTION_CONFIG } from "../../../../compression/compaction";
+import { enhanceWorkerSessionOptions } from "./workerSessionEnhancer";
 import { computeEffectCosts } from "../../../../cost/effectCost";
 import { addRunSummary } from "../../../../session/history";
 import {
@@ -427,22 +428,28 @@ async function resolveExternalAction(args: {
     shouldUseHostPiWorker
   ) {
     if (isInternalHarness(taskHarness) || args.action.kind === "shell") {
-      workerSession = args.registerPiSession(createAgentCoreSession(buildPiWorkerSessionOptions({
+      const baseOpts = buildPiWorkerSessionOptions({
         action: args.action,
         workspace: args.args.workspace,
         model: args.args.model,
-      })));
+      });
+      workerSession = args.registerPiSession(createAgentCoreSession(
+        enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext),
+      ));
       workerUnsub = subscribeVerbosePiEvents(
         workerSession,
         `worker:${args.action.effectId.slice(-8) /* last 8 chars of ULID for human-readable label */}`,
         args.args,
       );
     } else if (shouldUseHostPiWorker) {
-      workerSession = args.registerPiSession(createAgentCoreSession(buildPiWorkerSessionOptions({
+      const baseOpts = buildPiWorkerSessionOptions({
         action: args.action,
         workspace: args.args.workspace,
         model: args.args.model,
-      })));
+      });
+      workerSession = args.registerPiSession(createAgentCoreSession(
+        enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext),
+      ));
       workerUnsub = subscribeVerbosePiEvents(
         workerSession,
         `worker:${args.action.effectId.slice(-8) /* last 8 chars of ULID for human-readable label */}`,
@@ -452,11 +459,14 @@ async function resolveExternalAction(args: {
   }
   const piSessionFactory = workerSession
     ? () => {
-      const nextSession = args.registerPiSession(createAgentCoreSession(buildPiWorkerSessionOptions({
+      const baseOpts = buildPiWorkerSessionOptions({
         action: args.action,
         workspace: args.args.workspace,
         model: args.args.model,
-      })));
+      });
+      const nextSession = args.registerPiSession(createAgentCoreSession(
+        enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext),
+      ));
       workerUnsub?.();
       workerUnsub = subscribeVerbosePiEvents(
         nextSession,

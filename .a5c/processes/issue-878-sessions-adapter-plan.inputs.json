@@ -1,0 +1,117 @@
+{
+  "issueNumber": 878,
+  "baseBranch": "staging",
+  "implementationBranchName": "agent/issue-878-sessions-adapter",
+  "title": "Unified persistent session adapter layer",
+  "summary": "Implement a unified, ontology-driven persistent session adapter contract and registry so native adapters and plugin targets parse, list, resolve, resume, and expose sessions consistently across claude-code, codex, pi, gemini, opencode, and plugin-generated targets.",
+  "maxImplementationIterations": 3,
+  "targetAgents": [
+    "claude-code",
+    "codex",
+    "pi",
+    "gemini-cli",
+    "opencode"
+  ],
+  "pluginGeneratedTargetRequirement": "At least one plugin-generated target must be covered by fixture-backed parser/registry tests and Atlas/plugin-target projection tests.",
+  "primarySourceFiles": [
+    "packages/adapters/core/src/session-manager.ts",
+    "packages/adapters/core/src/session-manager-helpers.ts",
+    "packages/adapters/core/src/session-types.ts",
+    "packages/adapters/core/src/adapter-types.ts",
+    "packages/adapters/core/src/adapter.ts",
+    "packages/adapters/codecs/src/session-fs.ts",
+    "packages/adapters/codecs/src/claude-adapter.ts",
+    "packages/adapters/codecs/src/codex-adapter.ts",
+    "packages/adapters/codecs/src/pi-adapter.ts",
+    "packages/adapters/codecs/src/gemini-adapter.ts",
+    "packages/adapters/codecs/src/opencode-adapter.ts",
+    "packages/adapters/gateway/src/runs/manager.ts",
+    "packages/adapters/gateway/src/server.ts",
+    "packages/adapters/cli/src/commands/sessions.ts",
+    "packages/atlas/graph/lifecycle/session-semantics/*.yaml",
+    "packages/atlas/graph/extensions/plugin-artifacts/plugin-target-*.yaml"
+  ],
+  "docsToUpdate": [
+    "docs/adapters/reference/07-session-manager.md",
+    "docs/adapters/tutorials/sessions.md",
+    "docs/adapters/README.md"
+  ],
+  "testSurfaces": [
+    "packages/adapters/core/tests/session-manager.test.ts",
+    "packages/adapters/core/tests/session-types.test.ts",
+    "packages/adapters/codecs/tests/session-fs.test.ts",
+    "packages/adapters/codecs/tests/*-adapter.test.ts",
+    "packages/adapters/gateway/tests/server.test.ts",
+    "packages/adapters/gateway/tests/session-runtime.test.ts",
+    "packages/adapters/cli/tests/commands/*.test.ts",
+    "packages/adapters/tests/e2e/sessions-list-export.test.ts",
+    "packages/adapters/extensions/src/__tests__/targets.contract.test.ts",
+    "packages/atlas/**/__tests__/*.test.ts"
+  ],
+  "processLibraryReferences": [
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/spec-kit-brownfield.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/spec-driven-development.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/atdd-tdd/atdd-tdd.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/test-driven-development.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/superpowers/verification-before-completion.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/methodologies/v-model/v-model.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/processes/shared/tdd-triplet.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/processes/shared/completeness-gate.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/sdk-testing-strategy.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/backward-compatibility-management.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/sdk-platform-development/compatibility-testing.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/qa-testing-automation/contract-testing.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/qa-testing-automation/e2e-testing-strategy.js",
+    "/home/runner/.a5c/process-library/babysitter-repo/library/specializations/qa-testing-automation/quality-gates.js"
+  ],
+  "compatibilityRequirements": [
+    "Preserve native session IDs separately from unified IDs.",
+    "Preserve SessionManager resolveUnifiedId() and resolveNativeId() behavior unless a documented migration is approved.",
+    "Preserve existing AgentAdapter sessionDir(), listSessionFiles(), and parseSessionFile() as compatibility shims during migration.",
+    "Malformed or unreadable native session files must not break session listing.",
+    "Date-filtered fast listing must remain bounded and sorted.",
+    "Gateway /api/v1/sessions list/show/full behavior must remain stable except for documented new metadata fields.",
+    "CLI adapters sessions list/show/full/export/resume flows must work with fixture-backed adapters and must not require live provider credentials.",
+    "Atlas graph records must be tested inputs to runtime registry metadata, not untested documentation."
+  ],
+  "acceptanceCriteria": [
+    "A concrete spec documents the unified session adapter contract, registry behavior, native ID handling, unified ID handling, parser responsibilities, and Atlas metadata inputs.",
+    "A representative fixture matrix exists before or alongside implementation for claude-code, codex, pi, gemini, opencode, and at least one plugin-generated target.",
+    "Shared registry/interface consumes structured Atlas SessionSemantics and PluginTarget metadata while preserving target-specific parsers for native format differences.",
+    "SessionManagerImpl, adapter codecs, and gateway session loading use the shared contract without prematurely breaking current adapter APIs.",
+    "Unit tests cover parser behavior from stable native session fixtures and legacy API compatibility.",
+    "E2e tests cover CLI adapters sessions list/show/full/export/resume and gateway /api/v1/sessions behavior.",
+    "Atlas projection tests prove metadata used by the session adapter matches catalog graph records.",
+    "Docs and tutorials explain the unified registry, compatibility shims, target coverage, and migration expectations.",
+    "Focused and broad quality gates pass or document precise environment-only unavailable evidence."
+  ],
+  "verificationCommands": [
+    "git diff --check",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "npm run test --workspace=@a5c-ai/adapters-core",
+    "npm run test --workspace=@a5c-ai/adapters-codecs",
+    "npm run test --workspace=@a5c-ai/adapters-cli",
+    "npm run test --workspace=@a5c-ai/adapters-gateway",
+    "npm run test --workspace=@a5c-ai/adapters-extensions",
+    "npm exec --yes vitest run packages/adapters/tests/e2e/sessions-list-export.test.ts"
+  ],
+  "planningNotes": {
+    "issueLabels": [
+      "enhancement",
+      "priority:high",
+      "ready-for-dev",
+      "plugins",
+      "atlas",
+      "effort:large",
+      "risk:high",
+      "adapters"
+    ],
+    "triageSummary": "Add a unified, ontology-driven persistent session adapter layer for plugin targets and native adapters so session parsing/listing/resume behavior is consistent across claude-code, codex, pi, and related targets.",
+    "currentRootCause": "Atlas has SessionSemantics and PluginTarget data while adapters runtime still has separate per-agent parser methods and gateway fallback parsing. There is no shared session-adapter interface/registry connecting ontology metadata to persistent session parsing behavior.",
+    "processShape": "Flat phase list: feature requirements are known; first implementation phase is spec/contract and test-first planning, not open-ended forensics.",
+    "repoOverride": "Use agent tasks for implementation, verification, review, and delivery; do not use kind: shell subtasks unless a later user explicitly asks for a shell-oriented workflow.",
+    "planningArtifactOnly": true
+  }
+}

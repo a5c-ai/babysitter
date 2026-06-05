@@ -74,7 +74,11 @@ export {
   composeByStrata,
   composeByStrataWithMeta,
   detectStratumChanges,
+  stratumToCacheControl,
+  composeWithCacheHints,
+  shouldApplyCacheControl,
 } from './strata';
+export type { CacheControlType, CacheHintedBlock } from './strata';
 
 // GAP-PROMPT-002: Capability collection
 export {
