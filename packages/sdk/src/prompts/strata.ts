@@ -267,3 +267,56 @@ export function detectStratumChanges(
   }
   return changed;
 }
+
+// ---------------------------------------------------------------------------
+// GAP-PERF-001: Cache control hint generation
+// ---------------------------------------------------------------------------
+
+export type CacheControlType = 'ephemeral' | undefined;
+
+export interface CacheHintedBlock {
+  content: string;
+  stratum: PromptStratum;
+  cache_control?: { type: 'ephemeral' };
+}
+
+export function stratumToCacheControl(stratum: PromptStratum): CacheControlType {
+  switch (stratum) {
+    case 'stable': return 'ephemeral';
+    case 'runtime': return 'ephemeral';
+    case 'turnLocal': return undefined;
+  }
+}
+
+export function composeWithCacheHints(
+  taggedParts: StratumTaggedPart[],
+  ctx: PromptContext,
+  options?: ComposeByStrataOptions,
+): CacheHintedBlock[] {
+  const results = renderAllStrata(taggedParts, ctx, options);
+  const separator = options?.separator ?? DEFAULT_SEPARATOR;
+  const blocks: CacheHintedBlock[] = [];
+
+  for (const { stratum, formatted } of results) {
+    const content = formatted.join(separator);
+    if (!content) continue;
+
+    const cacheType = stratumToCacheControl(stratum);
+    blocks.push({
+      content,
+      stratum,
+      ...(cacheType ? { cache_control: { type: cacheType } } : {}),
+    });
+  }
+
+  return blocks;
+}
+
+export function shouldApplyCacheControl(
+  prevChecksums: StratumChecksums | undefined,
+  nextChecksums: StratumChecksums,
+  stratum: PromptStratum,
+): boolean {
+  if (!prevChecksums) return true;
+  return prevChecksums[stratum] === nextChecksums[stratum];
+}
