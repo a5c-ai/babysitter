@@ -40,12 +40,30 @@ function unsignedSessionCookie() {
   })).toString('base64url');
 }
 
-export function hasUsableAuthFixture() {
-  return Boolean(process.env.KRADLE_E2E_AUTH_STATE || localUnsignedAuthAvailable());
+/**
+ * Delegated identity auth is available when the config includes
+ * x-forwarded-user in extraHTTPHeaders (set by playwright.config.js).
+ * This works on staging when KRADLE_AUTH_DELEGATED_IDENTITY_ENABLED=true.
+ */
+function delegatedIdentityConfigured(testInfo) {
+  const headers = testInfo.project.use?.extraHTTPHeaders || {};
+  return Boolean(headers['x-forwarded-user']);
+}
+
+export function hasUsableAuthFixture(testInfo) {
+  if (process.env.KRADLE_E2E_AUTH_STATE) return true;
+  if (localUnsignedAuthAvailable()) return true;
+  // Delegated identity headers are set in playwright.config.js and sent
+  // automatically by Playwright's request context and page navigations
+  // when the target supports KRADLE_AUTH_DELEGATED_IDENTITY_ENABLED.
+  if (testInfo && delegatedIdentityConfigured(testInfo)) return true;
+  // Check env var directly as a fallback for calls without testInfo
+  if (process.env.KRADLE_E2E_USER) return true;
+  return false;
 }
 
 export function mutatingStagingEnabled() {
-  if (process.env.KRADLE_E2E_URL) return enabled('KRADLE_E2E_ENABLE_MUTATING_STAGING') && hasUsableAuthFixture();
+  if (process.env.KRADLE_E2E_URL) return enabled('KRADLE_E2E_ENABLE_MUTATING_STAGING') && (hasUsableAuthFixture() || Boolean(process.env.KRADLE_E2E_USER));
   return enabled('KRADLE_E2E_ENABLE_MUTATING_LOCAL');
 }
 
@@ -148,6 +166,8 @@ export const test = base.extend({
         sameSite: 'Strict',
       }]);
     }
+    // When delegated identity headers are configured in playwright.config.js,
+    // they are automatically sent with every request by Playwright's browser context.
     await use(page);
   },
 });

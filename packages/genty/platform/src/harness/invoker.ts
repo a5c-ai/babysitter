@@ -7,7 +7,7 @@
  * internal tool stack is available.
  */
 
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
 import {
   BabysitterRuntimeError,
   checkCliAvailable,
@@ -194,6 +194,7 @@ async function invokeHarnessDirect(
   const launch = buildLaunchSpec(name, spec, cliCheck.path, args);
 
   const startTime = Date.now();
+  const streaming = options.streaming;
 
   return new Promise<HarnessInvokeResult>((resolve, reject) => {
     const childEnv = options.env
@@ -202,53 +203,103 @@ async function invokeHarnessDirect(
 
     let trackedPid: number | undefined;
     try {
-      const child = execFile(
+      const child = spawn(
         launch.command,
         launch.args,
         {
           cwd: options.workspace,
-          timeout: timeoutMs,
           windowsHide: true,
-          maxBuffer: 50 * 1024 * 1024, // 50 MiB
           env: childEnv,
           shell: launch.shell,
-        },
-        (error: Error | null, stdout: string | Buffer, stderr: string | Buffer) => {
-          untrackChild(trackedPid);
-          const duration = Date.now() - startTime;
-          const stderrStr = String(stderr);
-          const output = stderrStr.length > 0
-            ? `${String(stdout)}\n${stderrStr}`.trim()
-            : String(stdout).trim();
-
-          if (error) {
-            const execError = error as NodeJS.ErrnoException & { killed?: boolean; status?: number };
-            const killed = execError.killed === true;
-            const exitCode = typeof execError.status === "number" ? execError.status : 1;
-
-            resolve({
-              success: false,
-              output: killed
-                ? `Process timed out after ${timeoutMs}ms\n${output}`.trim()
-                : output,
-              exitCode,
-              duration,
-              harness: name,
-            });
-            return;
-          }
-
-          resolve({
-            success: true,
-            output,
-            exitCode: 0,
-            duration,
-            harness: name,
-          });
+          stdio: ["pipe", "pipe", "pipe"],
         },
       );
       trackedPid = child.pid;
       trackChild(child);
+
+      let stdoutBuf = "";
+      let stderrBuf = "";
+      let streamChunkCount = 0;
+      let stdoutLineBuf = "";
+      let stderrLineBuf = "";
+
+      child.stdout?.on("data", (chunk: Buffer) => {
+        const text = chunk.toString("utf8");
+        stdoutBuf += text;
+        streamChunkCount++;
+        streaming?.onStdout?.(text);
+        if (streaming?.onLine) {
+          stdoutLineBuf += text;
+          const lines = stdoutLineBuf.split("\n");
+          stdoutLineBuf = lines.pop() ?? "";
+          for (const line of lines) streaming.onLine(line, "stdout");
+        }
+      });
+
+      child.stderr?.on("data", (chunk: Buffer) => {
+        const text = chunk.toString("utf8");
+        stderrBuf += text;
+        streamChunkCount++;
+        streaming?.onStderr?.(text);
+        if (streaming?.onLine) {
+          stderrLineBuf += text;
+          const lines = stderrLineBuf.split("\n");
+          stderrLineBuf = lines.pop() ?? "";
+          for (const line of lines) streaming.onLine(line, "stderr");
+        }
+      });
+
+      const timer = setTimeout(() => {
+        child.kill("SIGTERM");
+      }, timeoutMs);
+
+      if (options.signal) {
+        options.signal.addEventListener("abort", () => {
+          child.kill("SIGTERM");
+        }, { once: true });
+      }
+
+      child.on("close", (code, signal) => {
+        clearTimeout(timer);
+        untrackChild(trackedPid);
+        const duration = Date.now() - startTime;
+
+        // Flush remaining line buffers
+        if (streaming?.onLine) {
+          if (stdoutLineBuf) streaming.onLine(stdoutLineBuf, "stdout");
+          if (stderrLineBuf) streaming.onLine(stderrLineBuf, "stderr");
+        }
+
+        const output = stderrBuf.length > 0
+          ? `${stdoutBuf}\n${stderrBuf}`.trim()
+          : stdoutBuf.trim();
+        const killed = signal === "SIGTERM";
+        const exitCode = code ?? 1;
+
+        resolve({
+          success: exitCode === 0,
+          output: killed
+            ? `Process timed out after ${timeoutMs}ms\n${output}`.trim()
+            : output,
+          exitCode,
+          duration,
+          harness: name,
+          streamed: streamChunkCount > 0,
+          streamChunkCount,
+        });
+      });
+
+      child.on("error", (err: Error) => {
+        clearTimeout(timer);
+        untrackChild(trackedPid);
+        reject(
+          new BabysitterRuntimeError(
+            "HarnessSpawnError",
+            `Failed to spawn ${spec.cli}: ${err.message}`,
+            { category: ErrorCategory.External },
+          ),
+        );
+      });
     } catch (err: unknown) {
       reject(
         new BabysitterRuntimeError(
@@ -265,7 +316,9 @@ async function invokeAgentCoreThroughOrchestration(
   options: HarnessInvokeOptions,
 ): Promise<HarnessInvokeResult> {
   const startTime = Date.now();
+  const streaming = options.streaming;
   const { handleHarnessCreateRun } = await import("./internal/createRun");
+  let streamChunkCount = 0;
   const { result: exitCode, output } = await captureProcessOutput(() =>
     handleHarnessCreateRun({
       invocationCommand: "invoke",
@@ -276,7 +329,13 @@ async function invokeAgentCoreThroughOrchestration(
       json: false,
       verbose: false,
       interactive: false,
-    })
+    }),
+    streaming ? (chunk, source) => {
+      streamChunkCount++;
+      if (source === "stdout") streaming.onStdout?.(chunk);
+      else streaming.onStderr?.(chunk);
+      streaming.onLine?.(chunk.trimEnd(), source);
+    } : undefined,
   );
 
   return {
@@ -285,24 +344,29 @@ async function invokeAgentCoreThroughOrchestration(
     exitCode,
     duration: Date.now() - startTime,
     harness: "agent-core",
+    streamed: streamChunkCount > 0,
+    streamChunkCount,
   };
 }
 
 async function captureProcessOutput<T>(
   run: () => Promise<T>,
+  onChunk?: (chunk: string, source: "stdout" | "stderr") => void,
 ): Promise<{ result: T; output: string }> {
   const originalStdoutWrite = process.stdout.write.bind(process.stdout);
   const originalStderrWrite = process.stderr.write.bind(process.stderr);
   let output = "";
 
-  const captureWrite = (
+  const makeCaptureWrite = (source: "stdout" | "stderr") => (
     chunk: unknown,
     encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
     callback?: (error?: Error | null) => void,
   ): boolean => {
-    output += Buffer.isBuffer(chunk)
+    const text = Buffer.isBuffer(chunk)
       ? chunk.toString(typeof encodingOrCallback === "string" ? encodingOrCallback : "utf8")
       : String(chunk);
+    output += text;
+    onChunk?.(text, source);
     if (typeof encodingOrCallback === "function") {
       encodingOrCallback();
     } else if (typeof callback === "function") {
@@ -311,8 +375,8 @@ async function captureProcessOutput<T>(
     return true;
   };
 
-  process.stdout.write = captureWrite as typeof process.stdout.write;
-  process.stderr.write = captureWrite as typeof process.stderr.write;
+  process.stdout.write = makeCaptureWrite("stdout") as typeof process.stdout.write;
+  process.stderr.write = makeCaptureWrite("stderr") as typeof process.stderr.write;
   try {
     return { result: await run(), output };
   } finally {
