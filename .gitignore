@@ -99,5 +99,5 @@ coverage/
 artifacts/external-plugin-repos/
 {}
 /artifacts/
-packages/krate/web/test-results/
+packages/kradle/web/test-results/
 .hermes-win-patch/

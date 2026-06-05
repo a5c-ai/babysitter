@@ -4,19 +4,19 @@ Research snapshot: 2026-05-11. Live GitHub API check showed `kyverno/kyverno` la
 
 ## Executive decision
 
-Krate should integrate Kyverno as the default Kubernetes-native policy engine without replacing Kyverno, forking Kyverno, or inventing a Krate-only policy language.
+Kradle should integrate Kyverno as the default Kubernetes-native policy engine without replacing Kyverno, forking Kyverno, or inventing a Kradle-only policy language.
 
 Product shape:
 
 - BYO-first: detect and use an existing Kyverno installation by default.
-- Managed optional: optionally install Kyverno through Krate Helm/Argo CD for local demos and greenfield clusters.
-- Krate-native UX: expose policies, audit results, exceptions, and remediation in terms of orgs, repos, PRs, runs, runner pools, deployments, hooks, and people.
-- Kubernetes-native enforcement: let kube-apiserver admission call Kyverno for Krate CRDs and aggregated API resources.
-- No bypasses: every mutating Krate path that should be policy-governed must write through Kubernetes API admission, not directly to Postgres, Gitea, or a private store.
+- Managed optional: optionally install Kyverno through Kradle Helm/Argo CD for local demos and greenfield clusters.
+- Kradle-native UX: expose policies, audit results, exceptions, and remediation in terms of orgs, repos, PRs, runs, runner pools, deployments, hooks, and people.
+- Kubernetes-native enforcement: let kube-apiserver admission call Kyverno for Kradle CRDs and aggregated API resources.
+- No bypasses: every mutating Kradle path that should be policy-governed must write through Kubernetes API admission, not directly to Postgres, Gitea, or a private store.
 
-## Why Kyverno fits Krate
+## Why Kyverno fits Kradle
 
-Krate already treats Kubernetes as the backend for identity, RBAC, admission, audit, and declarative APIs. Kyverno fits because policies are Kubernetes resources, run through admission webhooks/background scans, and produce Kubernetes-native reports.
+Kradle already treats Kubernetes as the backend for identity, RBAC, admission, audit, and declarative APIs. Kyverno fits because policies are Kubernetes resources, run through admission webhooks/background scans, and produce Kubernetes-native reports.
 
 Good fit areas:
 
@@ -31,20 +31,20 @@ Good fit areas:
 Do not do:
 
 - Do not use Kyverno to implement Git receive-pack hooks; keep those in `RefPolicy`/Gitea receive-pack policy because they must run in the Git write path.
-- Do not mirror every `PolicyReport` row into a new Krate CRD initially; read reports directly and cache/index only if UI scale requires it.
+- Do not mirror every `PolicyReport` row into a new Kradle CRD initially; read reports directly and cache/index only if UI scale requires it.
 - Do not bundle Kyverno as an always-on dependency for enterprise clusters; platform teams often already own it.
 
 ## Kyverno research baseline
 
 Surfaces to integrate:
 
-- `ValidatingPolicy` (`policies.kyverno.io/v1`): CEL-based admission validation; primary target for Krate PR, repo, runner, hook, and deployment invariants.
+- `ValidatingPolicy` (`policies.kyverno.io/v1`): CEL-based admission validation; primary target for Kradle PR, repo, runner, hook, and deployment invariants.
 - `MutatingPolicy` (`policies.kyverno.io/v1`): CEL-based mutation for default labels, annotations, visibility defaults, run metadata, and org scoping.
 - `GeneratingPolicy` (`policies.kyverno.io/v1`): derived resources such as default `BranchProtection`, `RefPolicy`, `RepositoryPermission`, namespace bootstrap, and runner defaults.
 - `DeletingPolicy` (`policies.kyverno.io/v1`): cleanup for stale preview environments, expired invites, temporary runner resources, and generated-policy cleanup.
 - `ImageValidatingPolicy` (`policies.kyverno.io/v1`): image signature and attestation validation for runner pods, deployment images, and controller image allowlists.
-- Legacy `Policy` and `ClusterPolicy` (`kyverno.io/v1`): common in existing clusters and policy libraries; Krate must discover/display them, while new templates should prefer v1 CEL policy types.
-- `PolicyException`: approved bypasses; Krate should wrap this in a user-friendly request/approval workflow.
+- Legacy `Policy` and `ClusterPolicy` (`kyverno.io/v1`): common in existing clusters and policy libraries; Kradle must discover/display them, while new templates should prefer v1 CEL policy types.
+- `PolicyException`: approved bypasses; Kradle should wrap this in a user-friendly request/approval workflow.
 - `PolicyReport` and `ClusterPolicyReport`: read-only compliance/audit source for violations and policy previews.
 - Kyverno controllers: admission, background, reports, and cleanup controllers should be observed and surfaced as policy dependency health.
 - Metrics/monitoring: scrape or read Kyverno metrics for health, latency, and violation trends.
@@ -67,17 +67,17 @@ Research sources:
 
 ## Product model
 
-Use Krate words first and Kyverno words second:
+Use Kradle words first and Kyverno words second:
 
-| Krate UI term | Kubernetes/Kyverno object |
+| Kradle UI term | Kubernetes/Kyverno object |
 |---|---|
-| Policy template | Curated Krate metadata plus Kyverno policy manifest |
-| Policy binding | Krate resource that instantiates a template for org/repo/environment scope |
+| Policy template | Curated Kradle metadata plus Kyverno policy manifest |
+| Policy binding | Kradle resource that instantiates a template for org/repo/environment scope |
 | Audit mode | Kyverno audit validation action |
 | Enforce mode | Kyverno deny/enforce validation action |
 | Violation | `PolicyReport`/`ClusterPolicyReport` result or admission denial |
-| Exception request | Krate approval workflow that creates a Kyverno `PolicyException` |
-| Policy pack | Versioned set of templates shipped by Krate or installed through GitOps |
+| Exception request | Kradle approval workflow that creates a Kyverno `PolicyException` |
+| Policy pack | Versioned set of templates shipped by Kradle or installed through GitOps |
 | Remediation | Human guidance and optional patch/apply action |
 
 Navigation additions:
@@ -90,11 +90,11 @@ Navigation additions:
 - Insights: policy violation trends and Kyverno controller health.
 - Advanced plans: raw Kyverno YAML, `kubectl` commands, and reports.
 
-## Required Krate CRDs and API surface
+## Required Kradle CRDs and API surface
 
-Krate already has the right resource families: `Organization`, `OrgNamespaceBinding`, `User`, `Team`, `Invite`, `IdentityMapping`, `AuthProvider`, `Repository`, `RepositoryPermission`, `SSHKey`, `BranchProtection`, `RefPolicy`, `PullRequest`, `Issue`, `Review`, `Pipeline`, `Job`, `WebhookDelivery`, `WebhookSubscription`, `RunnerPool`, `View`, `Selector`, and KubeVela/OAM resources discovered from `core.oam.dev`.
+Kradle already has the right resource families: `Organization`, `OrgNamespaceBinding`, `User`, `Team`, `Invite`, `IdentityMapping`, `AuthProvider`, `Repository`, `RepositoryPermission`, `SSHKey`, `BranchProtection`, `RefPolicy`, `PullRequest`, `Issue`, `Review`, `Pipeline`, `Job`, `WebhookDelivery`, `WebhookSubscription`, `RunnerPool`, `View`, `Selector`, and KubeVela/OAM resources discovered from `core.oam.dev`.
 
-Add minimal Krate CRDs for the policy experience:
+Add minimal Kradle CRDs for the policy experience:
 
 ### `PolicyProfile`
 
@@ -165,7 +165,7 @@ Spec:
 
 - `organizationRef`: required.
 - `policyRef`, `ruleNames`.
-- `resourceRef`: target Krate resource or selector.
+- `resourceRef`: target Kradle resource or selector.
 - `repository`, `pullRequest`, `pipeline`, `job`: optional typed convenience fields.
 - `requestedBy`, `justification`, `expiresAt`.
 - `riskAcceptance`: required for enforce-mode exceptions.
@@ -180,27 +180,27 @@ Do not add initially:
 
 - `PolicyViolation` CRD. Use `PolicyReport`/`ClusterPolicyReport` directly until scale demands an index.
 - `KyvernoInstallation` CRD. Helm values and controller discovery are enough for now.
-- A custom Krate policy language.
+- A custom Kradle policy language.
 
 ## Required labels and annotations
 
-Labels on Krate resources:
+Labels on Kradle resources:
 
-- `krate.a5c.ai/org`: org slug.
-- `krate.a5c.ai/namespace`: tenant namespace where applicable.
-- `krate.a5c.ai/repository`: repository name when scoped.
-- `krate.a5c.ai/environment`: `development` | `staging` | `production`.
-- `krate.a5c.ai/trust-tier`: `trusted` | `untrusted` for runs/jobs.
-- `krate.a5c.ai/surface`: `repo` | `pr` | `run` | `runner` | `deployment` | `hook` | `identity`.
+- `kradle.a5c.ai/org`: org slug.
+- `kradle.a5c.ai/namespace`: tenant namespace where applicable.
+- `kradle.a5c.ai/repository`: repository name when scoped.
+- `kradle.a5c.ai/environment`: `development` | `staging` | `production`.
+- `kradle.a5c.ai/trust-tier`: `trusted` | `untrusted` for runs/jobs.
+- `kradle.a5c.ai/surface`: `repo` | `pr` | `run` | `runner` | `deployment` | `hook` | `identity`.
 
 Annotations on generated Kyverno policies:
 
-- `krate.a5c.ai/policy-template`: template name/version.
-- `krate.a5c.ai/policy-binding`: binding name.
-- `krate.a5c.ai/profile`: profile name.
-- `krate.a5c.ai/ui-path`: canonical Krate URL for viewing/editing.
+- `kradle.a5c.ai/policy-template`: template name/version.
+- `kradle.a5c.ai/policy-binding`: binding name.
+- `kradle.a5c.ai/profile`: profile name.
+- `kradle.a5c.ai/ui-path`: canonical Kradle URL for viewing/editing.
 - `policies.kyverno.io/title`: human title.
-- `policies.kyverno.io/category`: Krate category.
+- `policies.kyverno.io/category`: Kradle category.
 - `policies.kyverno.io/severity`: `low` | `medium` | `high` | `critical`.
 - `policies.kyverno.io/subject`: target resource family.
 
@@ -234,17 +234,17 @@ Owns:
 Rules:
 
 - Generated policies must be deterministic and GitOps-friendly.
-- Names should be stable: `krate-{org}-{scope}-{template}` with truncation/hash.
+- Names should be stable: `kradle-{org}-{scope}-{template}` with truncation/hash.
 - Audit mode must be default for new templates unless explicitly configured otherwise.
-- Every generated policy must carry Krate labels and annotations.
+- Every generated policy must carry Kradle labels and annotations.
 
 ### 3. Policy reconciler
 
 Owns:
 
-- Apply generated Kyverno policies when Krate owns the binding.
+- Apply generated Kyverno policies when Kradle owns the binding.
 - Update `PolicyBinding.status` and `PolicyProfile.status`.
-- Respect `suspend` and prune generated policies only when Krate owns them.
+- Respect `suspend` and prune generated policies only when Kradle owns them.
 - Never mutate externally managed policies unless explicitly imported.
 
 Failure behavior:
@@ -258,7 +258,7 @@ Failure behavior:
 Owns:
 
 - Watch/list `PolicyReport` and `ClusterPolicyReport`.
-- Correlate report results with Krate org/repo/resource labels.
+- Correlate report results with Kradle org/repo/resource labels.
 - Normalize reports into UI DTOs without creating new CRDs.
 - Track background scan recency and report staleness.
 
@@ -277,7 +277,7 @@ Important rule: exceptions are product workflows, not ad hoc YAML edits. Raw `Po
 
 ### 6. Admission-safe mutation boundary
 
-Required invariant: creating/updating/deleting any policy-governed Krate resource must go through Kubernetes API admission.
+Required invariant: creating/updating/deleting any policy-governed Kradle resource must go through Kubernetes API admission.
 
 Audit these paths:
 
@@ -308,7 +308,7 @@ externalDependencies:
   kyverno:
     mode: auto # auto | disabled | byo | managed
     namespace: kyverno
-    policyNamespace: krate-system
+    policyNamespace: kradle-system
     requireForEnforceMode: true
     discoverExisting: true
     managed:
@@ -341,9 +341,9 @@ Chart tasks:
 
 Install modes:
 
-- Disabled: no Kyverno dependency errors; UI shows policy engine empty state and native Krate `RefPolicy`/`BranchProtection` only.
-- BYO: Krate detects existing Kyverno and reads policies/reports; write access is opt-in through RBAC.
-- Managed: Krate owns a Kyverno Argo CD Application or Helm dependency; best for local demos and greenfield installs, with full values passthrough.
+- Disabled: no Kyverno dependency errors; UI shows policy engine empty state and native Kradle `RefPolicy`/`BranchProtection` only.
+- BYO: Kradle detects existing Kyverno and reads policies/reports; write access is opt-in through RBAC.
+- Managed: Kradle owns a Kyverno Argo CD Application or Helm dependency; best for local demos and greenfield installs, with full values passthrough.
 
 ## API changes
 
@@ -406,7 +406,7 @@ Primary actions: `Add policy`, `Preview impact`, `Switch to enforce`, `Request e
 Add a `Policies` panel next to Git hooks and outbound webhooks:
 
 - Policies affecting this repo.
-- Branch/ref policies from Krate `RefPolicy` and `BranchProtection`.
+- Branch/ref policies from Kradle `RefPolicy` and `BranchProtection`.
 - Kyverno admission policies affecting `PullRequest`, `Pipeline`, `Job`, `WebhookSubscription`, and deployment resources.
 - Recent repo-scoped violations.
 - `Add policy for this repo` and `Request exception` actions.
@@ -445,8 +445,8 @@ Deployments show:
 
 If Kyverno is missing:
 
-- Show: `Kyverno is not installed or not readable. Krate can still manage repositories, hooks, and native RefPolicy, but admission policy templates are unavailable.`
-- Actions: `Install with Krate`, `Connect existing Kyverno`, `View install docs`.
+- Show: `Kyverno is not installed or not readable. Kradle can still manage repositories, hooks, and native RefPolicy, but admission policy templates are unavailable.`
+- Actions: `Install with Kradle`, `Connect existing Kyverno`, `View install docs`.
 
 If reports are missing but admission works:
 
@@ -486,24 +486,24 @@ Post-MVP templates:
 
 ### Require PR description
 
-Rendered as `ValidatingPolicy` for Krate PR resources:
+Rendered as `ValidatingPolicy` for Kradle PR resources:
 
 ```yaml
 apiVersion: policies.kyverno.io/v1
 kind: ValidatingPolicy
 metadata:
-  name: krate-default-require-pr-description
+  name: kradle-default-require-pr-description
   labels:
-    krate.a5c.ai/org: default
-    krate.a5c.ai/surface: pr
+    kradle.a5c.ai/org: default
+    kradle.a5c.ai/surface: pr
   annotations:
-    krate.a5c.ai/policy-template: require-pr-description@v1
+    kradle.a5c.ai/policy-template: require-pr-description@v1
 spec:
   validationActions:
     - Audit
   matchConstraints:
     resourceRules:
-      - apiGroups: ["krate.a5c.ai"]
+      - apiGroups: ["kradle.a5c.ai"]
         apiVersions: ["v1alpha1"]
         operations: ["CREATE", "UPDATE"]
         resources: ["pullrequests"]
@@ -518,16 +518,16 @@ spec:
 apiVersion: policies.kyverno.io/v1
 kind: ValidatingPolicy
 metadata:
-  name: krate-default-fork-runs-untrusted
+  name: kradle-default-fork-runs-untrusted
   labels:
-    krate.a5c.ai/org: default
-    krate.a5c.ai/surface: run
+    kradle.a5c.ai/org: default
+    kradle.a5c.ai/surface: run
 spec:
   validationActions:
     - Deny
   matchConstraints:
     resourceRules:
-      - apiGroups: ["krate.a5c.ai"]
+      - apiGroups: ["kradle.a5c.ai"]
         apiVersions: ["v1alpha1"]
         operations: ["CREATE", "UPDATE"]
         resources: ["pipelines", "jobs"]
@@ -544,11 +544,11 @@ Use `GeneratingPolicy` after the MVP once the controller path can safely own gen
 apiVersion: policies.kyverno.io/v1
 kind: GeneratingPolicy
 metadata:
-  name: krate-default-branch-protection
+  name: kradle-default-branch-protection
 spec:
   matchConstraints:
     resourceRules:
-      - apiGroups: ["krate.a5c.ai"]
+      - apiGroups: ["kradle.a5c.ai"]
         apiVersions: ["v1alpha1"]
         operations: ["CREATE"]
         resources: ["repositories"]
@@ -560,7 +560,7 @@ The generation example is intentionally skeletal. Validate exact CEL object cons
 
 ## Observability
 
-Krate should collect/display:
+Kradle should collect/display:
 
 - Kyverno controller readiness.
 - Admission review latency and rejection count.
@@ -581,7 +581,7 @@ UI surfaces:
 
 Principles:
 
-- Krate UI must not decide authorization locally; use Kubernetes RBAC and admission results.
+- Kradle UI must not decide authorization locally; use Kubernetes RBAC and admission results.
 - Viewing reports can be broader than editing policies.
 - Editing policies is platform/admin scope.
 - Requesting an exception is narrower than approving one.
@@ -593,7 +593,7 @@ Suggested RBAC split:
 - Developers: view repo-scoped policy status, view relevant violations, request exceptions.
 - Repo admins: bind approved templates to repos in audit mode, request enforce promotion.
 - Platform engineers: manage templates, profiles, enforce mode, Kyverno installation, approvals.
-- Krate controller SA: list/watch reports; apply generated policies only in managed mode; create exceptions only from approved `PolicyExceptionRequest`.
+- Kradle controller SA: list/watch reports; apply generated policies only in managed mode; create exceptions only from approved `PolicyExceptionRequest`.
 
 ## Testing plan
 
@@ -601,20 +601,20 @@ Unit tests:
 
 - Render `PolicyTemplate` + `PolicyBinding` to deterministic Kyverno YAML.
 - Validate audit vs enforce mode mapping.
-- Normalize `PolicyReport` results to Krate UI DTOs.
+- Normalize `PolicyReport` results to Kradle UI DTOs.
 - Convert approved `PolicyExceptionRequest` to Kyverno `PolicyException`.
 - Confirm generated labels/annotations include org/repo/surface.
 
 Chart tests:
 
-- `helm lint charts/krate` with Kyverno disabled, BYO, and managed modes.
+- `helm lint charts/kradle` with Kyverno disabled, BYO, and managed modes.
 - Render RBAC for report-read-only vs policy-write modes.
 - Render env vars into API/controllers/web deployments.
 - Render optional Argo CD Application only in managed mode.
 
 Local cluster tests:
 
-- Install Krate with Kyverno disabled: UI shows empty state, no failing dependencies.
+- Install Kradle with Kyverno disabled: UI shows empty state, no failing dependencies.
 - Install Kyverno into Docker Desktop/minikube, set BYO mode, verify discovery.
 - Apply audit `require-pr-description`, create violating PR, verify report appears.
 - Switch to enforce, create violating PR, verify Kubernetes admission denial reaches UI.
@@ -623,7 +623,7 @@ Local cluster tests:
 
 End-to-end demo path:
 
-1. `helm install krate` with BYO or managed Kyverno.
+1. `helm install kradle` with BYO or managed Kyverno.
 2. Create org and repository.
 3. Apply `require-pr-description` in audit mode.
 4. Create PR without description.
@@ -645,7 +645,7 @@ End-to-end demo path:
 
 ### Phase 1: discovery and read-only UX
 
-- [ ] Add Kyverno resource definitions to Kubernetes discovery without making them Krate-owned resources.
+- [ ] Add Kyverno resource definitions to Kubernetes discovery without making them Kradle-owned resources.
 - [ ] Extend controller snapshot with `policyEngine.kyverno`.
 - [ ] Add Helm values/env vars for Kyverno mode/namespace/reporting.
 - [ ] Add RBAC to list Kyverno policies/reports/exceptions in BYO mode.
@@ -692,23 +692,23 @@ End-to-end demo path:
 
 ## Open questions
 
-- Should `PolicyTemplate` be a Krate CRD or shipped as ConfigMaps for easier GitOps review?
-- Should managed Kyverno be installed by the Krate chart directly or by an Argo CD child Application only?
+- Should `PolicyTemplate` be a Kradle CRD or shipped as ConfigMaps for easier GitOps review?
+- Should managed Kyverno be installed by the Kradle chart directly or by an Argo CD child Application only?
 - Which users can promote audit policies to enforce in repo scope?
-- How should Krate represent denied admission attempts when no resource is created and therefore no `PolicyReport` resource exists?
-- Should Krate persist a lightweight event for enforce-mode denials for long-term audit search?
+- How should Kradle represent denied admission attempts when no resource is created and therefore no `PolicyReport` resource exists?
+- Should Kradle persist a lightweight event for enforce-mode denials for long-term audit search?
 - Do we require Policy Reporter for nicer dashboards, or is native `PolicyReport` enough for MVP?
 - How will multi-org clusters isolate policy report visibility when reports contain resource names from shared namespaces?
 
 ## Acceptance criteria for seamless integration
 
-- Users can install Krate without Kyverno and are not broken.
+- Users can install Kradle without Kyverno and are not broken.
 - Users can connect an existing Kyverno install without reconfiguring their cluster policy stack.
-- Platform engineers can add a policy from a Krate template, preview impact, run audit mode, and promote to enforce.
+- Platform engineers can add a policy from a Kradle template, preview impact, run audit mode, and promote to enforce.
 - Developers see policy failures exactly where they act: PRs, runs, deployments, and repo hooks/settings.
 - Every UI policy action has raw YAML and `kubectl` transparency.
-- Kyverno reports and exceptions are correlated to Krate org/repo/resource context.
+- Kyverno reports and exceptions are correlated to Kradle org/repo/resource context.
 - Enforce-mode denials are real Kubernetes admission denials, not client-side UI blocks.
-- The Krate controller never bypasses Kyverno for spec-changing, policy-governed resources.
+- The Kradle controller never bypasses Kyverno for spec-changing, policy-governed resources.
 - Helm supports disabled, BYO, and managed Kyverno modes.
 - Local cluster conformance proves a bad PR is denied and a policy violation appears in the UI.

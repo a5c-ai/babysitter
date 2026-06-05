@@ -52,7 +52,7 @@ The dispatch controller creates `AgentDispatchRun` CRDs but `agentMuxClient.subm
 `createMemorySnapshot()`, `createImport()` return objects but never call `applyResource()`. The API routes must persist the returned objects. Fix:
 ```javascript
 const snapshot = controller.createMemorySnapshot(params);
-await krateSdk.applyResource(snapshot); // This line is missing
+await kradleSdk.applyResource(snapshot); // This line is missing
 ```
 
 ### 1.3 Model route manifests must be applied
