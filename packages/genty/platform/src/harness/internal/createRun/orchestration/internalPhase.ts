@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
+import { randomUUID } from "node:crypto";
 import type { EffectAction } from "@a5c-ai/babysitter-sdk";
 import {
   BabysitterRuntimeError,
@@ -37,6 +38,9 @@ import type { OrchestrationProgressSnapshot, RunOrchestrationPhaseArgs } from ".
 import { subscribeVerbosePiEvents } from "./verbose";
 import { listTasks, readTask } from "../../../../tasks";
 import { addRunSummary } from "../../../../session/history";
+import { createGentySessionContext, destroyGentySessionContext, type GentySessionContext } from "../../../gentySessionContext";
+import { drainSteeringMessages } from "../../../gentySessionIntegration";
+import { bridgeExtensionTools } from "../../../extensionToolBridge";
 
 export async function runInternalOrchestrationPhase(
   args: RunOrchestrationPhaseArgs,
@@ -50,6 +54,19 @@ export async function runInternalOrchestrationPhase(
     pendingEffectResults: new Map(),
   };
   let orchestrationSession: AgentCoreSessionHandle | null = null;
+
+  // Initialize genty session context — wires trust, extensions, instructions, steering, model switch
+  let gentyCtx: GentySessionContext | null = null;
+  try {
+    gentyCtx = await createGentySessionContext({
+      workspace: args.workspace ?? process.cwd(),
+      sessionId: randomUUID(),
+      model: args.model,
+      agentId: `genty-orchestrator-${Date.now()}`,
+    });
+  } catch {
+    // Genty context is optional; orchestration works without it
+  }
   const activePiSessions = new Set<AgentCoreSessionHandle>();
   const writeVerbose = (message: string): void => {
     writeVerboseLine(args.verbose, args.json, message, args.outputMode);
@@ -344,24 +361,45 @@ export async function runInternalOrchestrationPhase(
     writeVerbose(`[phaseOrchestration agent] ${summarizeAgentText(result.output)}`);
   };
 
+  // Build orchestration system prompt, then layer in genty context (instructions, extensions)
+  const orchestrationSystemPrompt = buildOrchestrationSystemPrompt(
+    args.selectedHarnessName,
+    args.promptContext,
+    args.interactive,
+    args.invocationCommand === "call",
+  );
+  const appendSystemPrompt = [orchestrationSystemPrompt];
+  let sessionCustomTools: unknown[] = mergedTools;
+
+  if (gentyCtx) {
+    // Apply AGENTS.md / SYSTEM.md instructions
+    if (gentyCtx.instructions.agentInstructions.length > 0) {
+      appendSystemPrompt.push(...gentyCtx.instructions.agentInstructions);
+    }
+    if (gentyCtx.instructions.systemPromptMode === 'append' && gentyCtx.instructions.systemPrompt) {
+      appendSystemPrompt.push(gentyCtx.instructions.systemPrompt);
+    }
+    // Bridge extension tools into the custom tools array
+    const extensionTools = bridgeExtensionTools(gentyCtx.extensionRegistry);
+    if (extensionTools.length > 0) {
+      sessionCustomTools = [...mergedTools, ...extensionTools];
+    }
+  }
+
   orchestrationSession = registerPiSession(createAgentCoreSession({
     workspace: args.workspace,
-    model: args.model,
+    model: gentyCtx?.modelSwitch.currentModel ?? args.model,
     backend: resolveAgentCoreBackendForHarness(args.selectedHarnessName),
     toolsMode: "coding",
-    customTools: mergedTools,
+    customTools: sessionCustomTools,
     uiContext: args.interactive && args.rl
       ? createReadlineAskUserQuestionUiContext(args.rl)
       : undefined,
-    appendSystemPrompt: [
-      buildOrchestrationSystemPrompt(
-        args.selectedHarnessName,
-        args.promptContext,
-        args.interactive,
-        args.invocationCommand === "call",
-      ),
-    ],
+    appendSystemPrompt,
     ephemeral: true,
+    ...(gentyCtx?.instructions.systemPromptMode === 'replace' && gentyCtx.instructions.systemPrompt
+      ? { systemPrompt: gentyCtx.instructions.systemPrompt }
+      : {}),
   }));
 
   emitProgress(
@@ -374,6 +412,13 @@ export async function runInternalOrchestrationPhase(
   let unsubscribe: (() => void) | null = null;
   try {
     await orchestrationSession.initialize();
+    if (gentyCtx) {
+      await gentyCtx.extensionRegistry.emit({
+        type: 'sessionStart',
+        timestamp: new Date().toISOString(),
+        data: { model: gentyCtx.modelSwitch.currentModel, extensions: gentyCtx.extensionLoadResult },
+      });
+    }
     if (!args.json && args.verbose && args.outputMode !== "tui") {
       unsubscribe = subscribeVerbosePiEvents(orchestrationSession, "orchestrator", args);
     }
@@ -500,22 +545,39 @@ export async function runInternalOrchestrationPhase(
       }
 
       const progressBeforeTurn = captureProgressSnapshot();
+
+      // Drain any mid-execution steering messages and prepend to prompt
+      const steeringContent = gentyCtx ? drainSteeringMessages(gentyCtx) : undefined;
+
+      // Emit extension turnStart event
+      if (gentyCtx) {
+        await gentyCtx.extensionRegistry.emit({
+          type: 'turnStart',
+          timestamp: new Date().toISOString(),
+          data: { iteration: state.iteration, runId: state.runId },
+        });
+      }
+
       try {
+        let turnPrompt = buildOrchestrationTurnPrompt({
+          processPath: path.resolve(args.processPath),
+          userPrompt: args.prompt,
+          planningConversationSummary: args.planningConversationSummary,
+          maxIterations: args.maxIterations,
+          currentIteration: state.iteration,
+          runId: state.runId,
+          runDir: state.runDir,
+          lastStatus: state.lastIterationResult?.status,
+          lastError: state.lastIterationResult?.status === "process-error"
+            ? extractIterationError(state.lastIterationResult.error)
+            : undefined,
+          pendingEffects: describePendingActions(),
+        });
+        if (steeringContent) {
+          turnPrompt = `[Steering messages from user]\n${steeringContent}\n\n${turnPrompt}`;
+        }
         await promptOrchestrationAgent(
-          buildOrchestrationTurnPrompt({
-            processPath: path.resolve(args.processPath),
-            userPrompt: args.prompt,
-            planningConversationSummary: args.planningConversationSummary,
-            maxIterations: args.maxIterations,
-            currentIteration: state.iteration,
-            runId: state.runId,
-            runDir: state.runDir,
-            lastStatus: state.lastIterationResult?.status,
-            lastError: state.lastIterationResult?.status === "process-error"
-              ? extractIterationError(state.lastIterationResult.error)
-              : undefined,
-            pendingEffects: describePendingActions(),
-          }),
+          turnPrompt,
           `phaseOrchestration iteration ${state.iteration + 1}`,
         );
       } catch (err: unknown) {
@@ -534,6 +596,15 @@ export async function runInternalOrchestrationPhase(
           );
         }
         continue;
+      }
+
+      // Emit extension turnEnd event
+      if (gentyCtx) {
+        await gentyCtx.extensionRegistry.emit({
+          type: 'turnEnd',
+          timestamp: new Date().toISOString(),
+          data: { iteration: state.iteration, runId: state.runId },
+        });
       }
 
       await cleanupUnexpectedRunSiblings();
@@ -632,6 +703,14 @@ export async function runInternalOrchestrationPhase(
   } finally {
     unsubscribe?.();
     await Promise.allSettled(Array.from(activePiSessions).map((session) => shutdownPiSession(session)));
+    if (gentyCtx) {
+      await gentyCtx.extensionRegistry.emit({
+        type: 'sessionEnd',
+        timestamp: new Date().toISOString(),
+        data: { runId: state.runId },
+      });
+      await destroyGentySessionContext(gentyCtx).catch(() => {});
+    }
   }
 }
 
