@@ -44,7 +44,7 @@ describe('context/dynamic', () => {
     ];
 
     const result = pipeline.applyInjections(
-      [{ systemPromptAppend: '\nExtra instructions' }],
+      [{ systemPromptAppend: 'Extra instructions' }],
       messages,
     );
     expect((result[0] as any).content).toBe('Base prompt\nExtra instructions');
