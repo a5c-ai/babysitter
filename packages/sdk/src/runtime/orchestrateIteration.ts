@@ -161,7 +161,11 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
       return result;
     } catch (error) {
       const waiting = asWaitingResult(error);
-      if (waiting) { finalStatus = waiting.status; return { status: "waiting", nextActions: annotateWaitingActions(waiting.nextActions), metadata: createIterationMetadata(engine) }; }
+      if (waiting) {
+        const actions = await collectConcurrentWaitingActions(options.runDir, preExecJournalHead, waiting.nextActions);
+        finalStatus = waiting.status;
+        return { status: "waiting", nextActions: annotateWaitingActions(actions), metadata: createIterationMetadata(engine) };
+      }
 
       if (error instanceof RunHaltedError) {
         const result = await appendRunHalted({
@@ -228,6 +232,47 @@ interface EntrypointDefaults { importPath?: string; exportName?: string; }
 async function detectStrayEffectEvents(runDir: string, afterSeq: number) {
   const postExecJournal = await loadJournal(runDir);
   return postExecJournal.filter((e) => e.seq > afterSeq && e.type === "EFFECT_REQUESTED");
+}
+
+async function collectConcurrentWaitingActions(
+  runDir: string,
+  afterSeq: number,
+  seedActions: EffectAction[],
+): Promise<EffectAction[]> {
+  for (let i = 0; i < 4; i++) await new Promise<void>((resolve) => setImmediate(resolve));
+  await new Promise<void>((resolve) => setTimeout(resolve, 250));
+
+  const actions = new Map<string, EffectAction>();
+  for (const action of seedActions) {
+    actions.set(action.effectId, action);
+  }
+  const events = await detectStrayEffectEvents(runDir, afterSeq);
+  for (const event of events) {
+    const action = await effectActionFromRequestedEvent(runDir, event);
+    if (!actions.has(action.effectId)) {
+      actions.set(action.effectId, action);
+    }
+  }
+  return [...actions.values()];
+}
+
+async function effectActionFromRequestedEvent(runDir: string, event: JournalEvent): Promise<EffectAction> {
+  const data = event.data as Record<string, unknown>;
+  const effectId = data.effectId as string;
+  const storedDef = await readTaskDefinition(runDir, effectId).catch(() => null);
+  const taskDef = (storedDef ?? { kind: (data.kind as string) ?? "unknown" }) as EffectAction["taskDef"];
+  return {
+    effectId,
+    invocationKey: (data.invocationKey as string) ?? "",
+    kind: (data.kind as string) ?? "unknown",
+    label: data.label as string | undefined,
+    labels: data.labels as string[] | undefined,
+    taskDef,
+    taskId: data.taskId as string | undefined,
+    stepId: data.stepId as string | undefined,
+    taskDefRef: data.taskDefRef as string | undefined,
+    inputsRef: data.inputsRef as string | undefined,
+  };
 }
 
 async function loadProcessFunction(options: OrchestrateOptions, defaults: EntrypointDefaults, runDir: string): Promise<ProcessFunction> {

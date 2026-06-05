@@ -647,6 +647,58 @@ describe("orchestrateIteration integration", () => {
     }
   });
 
+  test("reports all raw Promise.all ctx.task requests with contiguous journal sequences", async () => {
+    const processDir = path.join(tmpRoot, "processes-promise-all-tasks");
+    await fs.mkdir(processDir, { recursive: true });
+
+    const processPath = path.join(processDir, "parallel-tasks.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      const taskA = { id: "parallel-a", async build() { return { kind: "node", title: "A" }; } };
+      const taskB = { id: "parallel-b", async build() { await delay(100); return { kind: "node", title: "B" }; } };
+      const taskC = { id: "parallel-c", async build() { await delay(200); return { kind: "node", title: "C" }; } };
+
+      export async function process(_inputs, ctx) {
+        const [a, b, c] = await Promise.all([
+          ctx.task(taskA, {}),
+          ctx.task(taskB, {}),
+          ctx.task(taskC, {}),
+        ]);
+        return { a, b, c };
+      }
+      `,
+      "utf8",
+    );
+
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-promise-all-tasks",
+      request: "raw promise all task test",
+      processPath,
+      inputs: {},
+    });
+
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-promise-all-tasks" } });
+
+    const result = await orchestrateIteration({ runDir });
+    expect(result.status).toBe("waiting");
+    if (result.status !== "waiting") return;
+
+    expect(result.nextActions).toHaveLength(3);
+    expect(result.nextActions.map((action) => action.taskId).sort()).toEqual([
+      "parallel-a",
+      "parallel-b",
+      "parallel-c",
+    ]);
+    expect(result.nextActions.every((action) => action.schedulerHints?.pendingCount === 3)).toBe(true);
+
+    const journal = await loadJournal(runDir);
+    expect(journal.map((event) => event.seq)).toEqual(journal.map((_, index) => index + 1));
+    expect(journal.filter((event) => event.type === "EFFECT_REQUESTED")).toHaveLength(3);
+  });
+
   test("completes non-interactive breakpoints that append PROCESS_LOG events concurrently", async () => {
     const processDir = path.join(tmpRoot, "processes-breakpoints");
     await fs.mkdir(processDir, { recursive: true });
