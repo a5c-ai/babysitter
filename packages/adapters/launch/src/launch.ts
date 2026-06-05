@@ -1032,12 +1032,13 @@ export async function launchCommand(client: AgentMuxClient, args: ParsedArgs): P
         plan.env['AGENT_MUX_API_BASE'] = `${proxyRuntime.url}/v1`;
         plan.env['AGENT_MUX_API_KEY'] = proxyRuntime.authToken ?? 'proxy-token';
         plan.env['AGENT_MUX_MODEL'] = plan.proxy?.targetModel ?? plan.model ?? '';
-        // Clear Azure/foundry env vars so agent-core uses generic OpenAI path
-        // (sends Authorization: Bearer, which the proxy accepts)
-        delete plan.env['AGENT_MUX_PROVIDER'];
-        delete plan.env['AZURE_API_KEY'];
-        delete plan.env['AZURE_OPENAI_API_KEY'];
-        delete plan.env['AZURE_OPENAI_PROJECT_NAME'];
+        // Override Azure/foundry env vars so agent-core uses generic OpenAI path
+        // (sends Authorization: Bearer, which the proxy accepts).
+        // Must set empty, not delete — child env is { ...process.env, ...plan.env }
+        plan.env['AGENT_MUX_PROVIDER'] = '';
+        plan.env['AZURE_API_KEY'] = '';
+        plan.env['AZURE_OPENAI_API_KEY'] = '';
+        plan.env['AZURE_OPENAI_PROJECT_NAME'] = '';
         console.error(`[adapters launch] Genty proxy: AGENT_MUX_API_BASE=${plan.env['AGENT_MUX_API_BASE']}, AGENT_MUX_MODEL=${plan.env['AGENT_MUX_MODEL']}`);
       }
 
