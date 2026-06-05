@@ -15,14 +15,22 @@
     "./package.json": "./package.json",
     "./trust": {
       "import": {
-        "types": "./src/trust/index.ts",
-        "default": "./src/trust/index.ts"
+        "types": "./dist/trust/index.d.ts",
+        "default": "./dist/trust/index.js"
+      },
+      "require": {
+        "types": "./dist/trust/index.d.ts",
+        "default": "./dist/trust/index.js"
       }
     },
     "./extensions": {
       "import": {
-        "types": "./src/extensions/index.ts",
-        "default": "./src/extensions/index.ts"
+        "types": "./dist/extensions/index.d.ts",
+        "default": "./dist/extensions/index.js"
+      },
+      "require": {
+        "types": "./dist/extensions/index.d.ts",
+        "default": "./dist/extensions/index.js"
       }
     }
   },

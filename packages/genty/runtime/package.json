@@ -40,20 +40,32 @@
     "./package.json": "./package.json",
     "./rpc": {
       "import": {
-        "types": "./src/rpc/index.ts",
-        "default": "./src/rpc/index.ts"
+        "types": "./dist/rpc/index.d.ts",
+        "default": "./dist/rpc/index.js"
+      },
+      "require": {
+        "types": "./dist/rpc/index.d.ts",
+        "default": "./dist/rpc/index.js"
       }
     },
     "./session/tree": {
       "import": {
-        "types": "./src/session/tree.ts",
-        "default": "./src/session/tree.ts"
+        "types": "./dist/session/tree.d.ts",
+        "default": "./dist/session/tree.js"
+      },
+      "require": {
+        "types": "./dist/session/tree.d.ts",
+        "default": "./dist/session/tree.js"
       }
     },
     "./session/export": {
       "import": {
-        "types": "./src/session/export.ts",
-        "default": "./src/session/export.ts"
+        "types": "./dist/session/export.d.ts",
+        "default": "./dist/session/export.js"
+      },
+      "require": {
+        "types": "./dist/session/export.d.ts",
+        "default": "./dist/session/export.js"
       }
     }
   },
