@@ -32,6 +32,37 @@ edges:
     - model:qwen3-7-max@current
 ---
 nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-7-plus-model-studio-catalog
+attributes:
+  subjectId: model:qwen3-7-plus@current
+  predicate: modelMetadata
+  value: qwen3.7-plus; Qwen3.7-Plus; text-generation catalog card; qwen3.7-plus-2026-05-26 equivalent; 1M-token pricing tier
+  statement: "Alibaba Cloud Model Studio lists qwen3.7-plus in the Qwen text-generation model catalog, and its pricing page says current qwen3.7-plus capability is equivalent to qwen3.7-plus-2026-05-26 with pricing tiers through 1M input tokens."
+  confidence: high
+  reviewedAt: "2026-06-05T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-qwen-catalog-2026-05
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-7-plus@current
+---
+nodeKind: EvidenceClaim
+id: claim:model-version-qwen3-7-plus-pricing
+attributes:
+  subjectId: model:qwen3-7-plus@current
+  predicate: pricing
+  value: mainland/global 2-6 CNY input and 8-24 CNY output per 1M tokens across 0<Token<=1M tiers
+  statement: "Alibaba Cloud Model Studio's pricing page lists qwen3.7-plus at 2 CNY input and 8 CNY output per 1M tokens for 0<Token<=256K, and 6 CNY input and 24 CNY output per 1M tokens for 256K<Token<=1M."
+  confidence: high
+  reviewedAt: "2026-06-05T00:00:00Z"
+edges:
+  sourced_from:
+    - evidence:alibaba-model-studio-qwen-pricing-2026-05
+  about:
+    - model:qwen3-7-plus@current
+---
+nodeKind: EvidenceClaim
 id: claim:model-version-qwen3-6-plus-model-studio-catalog
 attributes:
   subjectId: model:qwen3-6-plus@current
@@ -133,8 +164,8 @@ id: claim:model-version-qwen3-7-3-6-omni-alibaba-availability
 attributes:
   subjectId: provider:alibaba-cloud
   predicate: serves
-  value: qwen3.7-max; qwen3.6-plus; qwen3.6-flash; qwen3.5-omni-plus
-  statement: "Alibaba Cloud Model Studio is the confirmed serving provider for qwen3.7-max, qwen3.6-plus, qwen3.6-flash, and qwen3.5-omni-plus. This claim intentionally does not assert AWS Bedrock, Azure, or Vertex availability for these non-coder model IDs."
+  value: qwen3.7-max; qwen3.7-plus; qwen3.6-plus; qwen3.6-flash; qwen3.5-omni-plus
+  statement: "Alibaba Cloud Model Studio is the confirmed serving provider for qwen3.7-max, qwen3.7-plus, qwen3.6-plus, qwen3.6-flash, and qwen3.5-omni-plus. This claim intentionally does not assert AWS Bedrock, Azure, or Vertex availability for these non-coder model IDs."
   confidence: high
   reviewedAt: "2026-05-27T00:00:00Z"
 edges:
@@ -144,6 +175,7 @@ edges:
   about:
     - provider:alibaba-cloud
     - model:qwen3-7-max@current
+    - model:qwen3-7-plus@current
     - model:qwen3-6-plus@current
     - model:qwen3-6-flash@current
     - model:qwen3-5-omni-plus@current

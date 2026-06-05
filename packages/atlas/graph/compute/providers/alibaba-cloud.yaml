@@ -38,6 +38,7 @@ edges:
     - target: layer:2-provider
   serves:
     - model:qwen3-7-max@current
+    - model:qwen3-7-plus@current
     - model:qwen3-6-plus@current
     - model:qwen3-6-flash@current
     - model:qwen3-5-omni-plus@current

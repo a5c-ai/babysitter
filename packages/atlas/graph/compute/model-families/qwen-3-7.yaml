@@ -15,3 +15,4 @@ edges:
     - target: layer:1-model
   has_version:
     - model:qwen3-7-max@current
+    - model:qwen3-7-plus@current

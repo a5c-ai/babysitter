@@ -7,7 +7,7 @@ attributes:
   trustLevel: trust-level:vendor-doc
   sourceUrl: https://help.aliyun.com/zh/model-studio/models
   sourcePathOrUrl: https://help.aliyun.com/zh/model-studio/models
-  locator: "Model catalog cards for qwen3.7-max, qwen3.6-plus, qwen3.6-flash, and qwen3.5-omni-plus"
+  locator: "Model catalog cards for qwen3.7-max, qwen3.7-plus, qwen3.6-plus, qwen3.6-flash, and qwen3.5-omni-plus"
   capturedAt: "2026-05-27T00:00:00Z"
   observedAt: "2026-05-27T00:00:00Z"
   observedBy: a5c-ai-team
@@ -45,7 +45,7 @@ attributes:
   trustLevel: trust-level:vendor-doc
   sourceUrl: https://help.aliyun.com/zh/model-studio/model-pricing
   sourcePathOrUrl: https://help.aliyun.com/zh/model-studio/model-pricing
-  locator: "Model pricing tables for Qwen Max, Plus, Flash, and Omni families"
+  locator: "Model pricing tables for qwen3.7-max, qwen3.7-plus, Qwen Plus, Flash, and Omni families"
   capturedAt: "2026-05-27T00:00:00Z"
   observedAt: "2026-05-27T00:00:00Z"
   observedBy: a5c-ai-team
