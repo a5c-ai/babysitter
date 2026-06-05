@@ -1,5 +1,96 @@
 # Changelog
 
+## [Unreleased] - 2026-06-05
+
+### Features
+
+- 095b96c4f feat(trust): implement GAP-TRUST-001 — signing primitives in genty-core (Tal Muskal, 10 minutes ago)
+- dca1fd81d feat: add gemini-3.1-pro-preview to live-stack-published model map (Tal Muskal, 19 minutes ago)
+- b37c54eb7 feat(kradle): add Evaluations, Datasets, and Guardrails feature domains (Tal Muskal, 14 hours ago)
+- a76908a88 feat(graph): add genty vs Pi (pi.dev) feature parity gap analysis (Tal Muskal, 14 hours ago)
+- 9436b453c feat(graph): enrich all 52 package surface YAMLs with descriptions (Tal Muskal, 15 hours ago)
+- 752fb01e1 feat(graph): deep rename — eliminate all stale terms from atlas graph (Tal Muskal, 15 hours ago)
+- 6fb5a3d67 feat(kradle): add quality gates — post-deploy health check, feature availability, controller contract tests (Tal Muskal, 15 hours ago)
+- 344f31ee0 feat(kradle): add API E2E tests that verify product works against a real server (Tal Muskal, 15 hours ago)
+- 68941b986 feat(graph): sync atlas package surfaces with actual repo packages (Tal Muskal, 16 hours ago)
+- 13813554d feat(live-stack): add gemini-3.1-pro-preview model, push defaults use it (Tal Muskal, 17 hours ago)
+- 39912a88a feat(publish): add hooks-adapter-antigravity to publish matrix (Tal Muskal, 17 hours ago)
+- 9738b6b05 feat(live-stack): add antigravity to test matrix (Tal Muskal, 17 hours ago)
+- e3ce34cf4 feat(graph): add Antigravity SDK 0.1.1 product and version records (Tal Muskal, 17 hours ago)
+- a37fe6f91 feat(unified-plugin): add antigravity target to babysitter plugin (Tal Muskal, 17 hours ago)
+- f6ad9cbba feat(graph): add Antigravity CLI platform, runtime, knowledge, launch, presentation, and UI records (Tal Muskal, 17 hours ago)
+- a8fc64975 feat(extension-mux): add Antigravity CLI target adapter (Tal Muskal, 18 hours ago)
+- 09b9ff356 feat(hooks-mux): add Antigravity CLI adapter (Tal Muskal, 18 hours ago)
+- 1ca1533cc feat(graph): add Antigravity CLI 2.0.11 agent records (Tal Muskal, 18 hours ago)
+
+### Fixes
+
+- b9aa082fb fix(trust): address adversarial review — canonicalization + signedAt (Tal Muskal, 6 minutes ago)
+- b4746e2e4 fix: add local vitest config to adapters CLI for live-stack tests (Tal Muskal, 8 minutes ago)
+- 583e3d9a6 fix(ci): add missing 'clean' script to genty-web-app and genty-desktop-app (Tal Muskal, 55 minutes ago)
+- 5ad08884f fix: update adapters/tui → genty/tui paths in build scripts and verify-release (Tal Muskal, 9 hours ago)
+- 7e046eb87 fix(publish): add tasks-adapter + SDK to TUI build prerequisites (Tal Muskal, 11 hours ago)
+- 5e9212888 fix: update stale adapters/ui → genty/ui paths in build scripts (Tal Muskal, 11 hours ago)
+- 52898ebfc fix(genty-web-app): add placeholder test:e2e script (Tal Muskal, 12 hours ago)
+- 002d7545c fix(adapters-core): update test fixture for local vitest command (Tal Muskal, 12 hours ago)
+- 076a325a7 fix(adapters-core): update verify-release assertion for local vitest config (Tal Muskal, 12 hours ago)
+- 9a2421b53 fix(adapters): add local vitest configs to core/gateway/harness-mock/transport (Tal Muskal, 12 hours ago)
+- af3b375b5 fix(triggers): add local vitest config to avoid root setup file TSCONFIG_ERROR (Tal Muskal, 13 hours ago)
+- f67d19cb9 fix(adapters): add tsconfig.json for e2e tests (vite:oxc requires it) (Tal Muskal, 13 hours ago)
+- cbd5c0ab5 fix(ci): make Kradle snapshot smoke test resilient to non-JSON responses (Tal Muskal, 13 hours ago)
+- 86c83c02c fix(ci): add version field to marketplace.json files (Tal Muskal, 14 hours ago)
+- 85abd300f fix: marketplace manifests point to generated repos, not unified source (Tal Muskal, 14 hours ago)
+- 2ec4297e1 fix(ci): make post-deploy E2E non-blocking until staging catches up (Tal Muskal, 14 hours ago)
+- e66fb73ff fix: per-agent-scenarios imports ../../adapters/ → ../../codecs/ (Tal Muskal, 14 hours ago)
+- 4bddc0d67 fix(graph): installable extensions belong in genty-platform, not extensions-adapter (Tal Muskal, 14 hours ago)
+- 474a8142e fix(ci): quote step names with colons in publish.yml (Tal Muskal, 15 hours ago)
+- a5775b614 fix: replace adapters/adapters → adapters/codecs in scripts and CI (Tal Muskal, 15 hours ago)
+- 9fc677d82 fix(kradle): persist AgentMemoryQuery resource in queryAgentMemory (Tal Muskal, 16 hours ago)
+- e11b0601e fix(kradle): Phase 0 — fix Gitea health probe URL, multi-provider assistant detection, emptyDir persistence (Tal Muskal, 16 hours ago)
+- cec52448d fix: rename remaining agentMux/amux files in genty, sdk, and platform (Tal Muskal, 16 hours ago)
+- 647c24a3a fix: use adapters vitest.config.ts for adapter tests (no setup file) (Tal Muskal, 16 hours ago)
+- 4b8169c7e fix: include vitest.setup.ts in root tsconfig (Tal Muskal, 16 hours ago)
+- aea775561 fix(live-stack): fix genty CLI path + build, add tsconfig to vitest (Tal Muskal, 16 hours ago)
+- c5f79fe7e fix: observability vitest config + kradle health probe sort order (Tal Muskal, 16 hours ago)
+- b5a3bf081 fix: hooks-adapter script names, kradle-installer verify + tests (Tal Muskal, 17 hours ago)
+- c35726b6c fix: krate→kradle in genty-ui + kradle-web, add antigravity hooks adapter surface (Tal Muskal, 17 hours ago)
+- 32ef16a0e fix: add antigravity adapter to docs coverage + README (Tal Muskal, 18 hours ago)
+- 7b32de1b4 fix: cloud verify script, docs @a5c-ai/cloud refs, observability vitest config (Tal Muskal, 18 hours ago)
+- 382d00d35 fix: add react-native → react-native-web alias in genty-web-app vite config (Tal Muskal, 18 hours ago)
+- ced39b713 fix: correct wrong rename qwen3-5-tula-plus → qwen3-5-omni-plus (Tal Muskal, 18 hours ago)
+- c0fb443eb fix: upgrade electron to 42.3.3 — resolves 1 high vulnerability (Tal Muskal, 19 hours ago)
+- b36a105a2 fix: npm audit fix — patch qs and react-router vulnerabilities (Tal Muskal, 19 hours ago)
+- 08752563d fix: regenerate package-lock.json for tula→genty rename (Tal Muskal, 19 hours ago)
+- ac531c13b fix(kradle-web): rename all Krate→Kradle in UI strings, env vars, and identifiers (Tal Muskal, 19 hours ago)
+- 147442345 fix(ci): increase kradle Helm timeout to 600s, remove --wait (Tal Muskal, 24 hours ago)
+- a3587d13f fix(ci): use upload/download-artifact v4 (v8 doesn't exist) (Tal Muskal, 24 hours ago)
+- 79550b85c fix: docs nesting, cloud refs, observability vitest config (Tal Muskal, 24 hours ago)
+- ebd53f32c fix(ci): build kradle-core before Docker image build in deploy job (Tal Muskal, 24 hours ago)
+
+### Refactors
+
+- e55cc3ed9 refactor: eliminate Amux/amux/AMUX_ identifiers + fix release test (Tal Muskal, 16 hours ago)
+- 06280912c refactor: eliminate -mux terminology from source — use -adapter (Tal Muskal, 17 hours ago)
+- fdc5c6d5a refactor: complete tula -> genty rename across docs, workflows, .a5c, library, atlas graph, and test fixtures (Tal Muskal, 18 hours ago)
+
+### Documentation
+
+- af9bbef57 docs: merge trust enforcement + Pi parity into genty features backlog (Tal Muskal, 13 hours ago)
+- 97437bc18 docs(genty-backlog): adversarial gap analysis — 69 closed, 78 actionable, 6-milestone roadmap (Tal Muskal, 13 hours ago)
+- 264cd636b docs: genty stack roadmap — trust enforcement + Pi parity gaps (Tal Muskal, 14 hours ago)
+- 8b30a6599 docs: genty vs Pi parity gap analysis — 7 gaps, 5 partial, 12 implemented (Tal Muskal, 14 hours ago)
+- 113695b6a docs(kradle): product improvement plan — honest audit + phased fix strategy (Tal Muskal, 16 hours ago)
+- f6d898577 docs: move Sero research to reference-repos, add research.md (Tal Muskal, 17 hours ago)
+- fe3dff037 docs: Sero deep architecture analysis — concepts and build opportunities (Tal Muskal, 17 hours ago)
+- 5f3a115d6 docs: Sero Agent OS gap analysis vs babysitter stack (Tal Muskal, 17 hours ago)
+
+### Maintenance
+
+- 4100b1a92 Revert "feat(graph): deep rename — eliminate all stale terms from atlas graph" (Tal Muskal, 15 hours ago)
+- 7e330438c revert: remove esbuild.tsconfig from root vitest.config.ts (Tal Muskal, 16 hours ago)
+- 925aa9694 chore: bump version 5.0.0 → 5.1.0 across all packages (Tal Muskal, 18 hours ago)
+- d8a7fb81c refactor!: rename tula -> genty across all packages and references (Tal Muskal, 19 hours ago)
+
 ## [Unreleased] - 2026-06-01
 
 ### Features
