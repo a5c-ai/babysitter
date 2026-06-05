@@ -1,0 +1,72 @@
+{
+  "issueNumber": 877,
+  "baseBranch": "staging",
+  "implementationBranch": "fix/issue-877-harness-aware-doctor",
+  "maxAttempts": 3,
+  "targetFiles": [
+    "plugins/babysitter-unified/commands/doctor.md",
+    "packages/sdk/src/prompts/templates/commands/doctor.md",
+    "scripts/sync-sdk-command-templates.cjs",
+    "scripts/generate-plugins.mjs",
+    "plugins/babysitter/skills/doctor/SKILL.md",
+    "plugins/babysitter-unified/per-harness/pi/extensions-index.ts",
+    "packages/sdk/src/harness/adapters/pi.ts",
+    "packages/sdk/src/harness/adapters/claude-code.ts",
+    "packages/sdk/src/harness/adapters/codex.ts",
+    "packages/sdk/src/harness/adapters/cursor.ts",
+    "packages/sdk/src/harness/adapters/opencode.ts",
+    "packages/sdk/src/harness/adapters/openclaw.ts",
+    "packages/sdk/src/harness/discovery.ts",
+    "packages/sdk/src/harness/registry.ts",
+    "packages/sdk/src/harness/types.ts",
+    "packages/sdk/src/harness/__tests__/discovery.test.ts",
+    "packages/sdk/src/harness/__tests__/harness.test.ts",
+    "packages/sdk/src/prompts/__tests__",
+    "packages/sdk/src/cli/commands/hooks/run.ts"
+  ],
+  "verificationCommands": [
+    "npm run check:sdk-command-templates",
+    "npm run generate:plugins",
+    "npm run build:sdk",
+    "npm run test:sdk",
+    "npm run verify:metadata",
+    "git diff --check"
+  ],
+  "acceptanceCriteria": [
+    "The doctor command performs an initial harness detection step using SDK-owned harness capability truth or an equivalent existing CLI wrapper.",
+    "Section 10 hook execution health is gated on HarnessCapability.StopHook or adapter supportsHookType(\"stop\").",
+    "When the detected harness lacks StopHook, section 10 reports N/A with a clear harness-aware explanation instead of FAIL.",
+    "N/A outcomes are neutral in the final health determination and cannot make the report WARNING or CRITICAL.",
+    "Pi no longer requires CLAUDE_PLUGIN_ROOT, hooks.json, babysitter-stop-hook.sh, babysitter-session-start-hook.sh, or ~/.claude settings for a healthy doctor run.",
+    "Claude Code and other StopHook harnesses retain actionable hook registration, script availability, CLI availability, execution evidence, and root-cause diagnostics.",
+    "Generic session-provenance and escalation guidance is harness-neutral, with Claude-specific remediation shown only for Claude Code.",
+    "The canonical unified doctor command, SDK generated template, and relevant generated plugin skill/command copies are synchronized through existing scripts.",
+    "Regression coverage or static verification prevents a non-StopHook harness from being marked critical solely because Claude-style hook files are absent.",
+    "The implementation preserves unrelated local changes and avoids broad plugin or generated-file churn outside the doctor surfaces needed for #877."
+  ],
+  "knownIssueContext": {
+    "title": "[Docs] Question: doctor /skill:doctor SKILL.md sections 6/7/10 hard-code Claude Code plugin layout -- false-FAIL on Pi (and other non-StopHook harnesses)",
+    "labels": [
+      "bug",
+      "documentation",
+      "sdk",
+      "effort:medium",
+      "ready-for-dev",
+      "plugins",
+      "priority:medium",
+      "automated-triage",
+      "plugin-pi",
+      "root-cause"
+    ],
+    "reportedFailure": "A healthy Pi run can be reported as CRITICAL because doctor section 10 asserts Claude-style Stop and SessionStart hook registration, scripts, hook logs, and ~/.claude settings even though the Pi adapter explicitly does not support StopHook.",
+    "triageRecommendation": "Fix the canonical doctor source first, reuse SDK harness detection/capability APIs, gate hook checks on StopHook support, make non-StopHook hook health N/A and neutral, clean up Claude-specific generic wording, synchronize generated copies, and add a regression guard.",
+    "affectedComponents": [
+      "plugins",
+      "plugin-pi",
+      "sdk",
+      "doctor command guidance",
+      "generated command templates",
+      "harness capability detection"
+    ]
+  }
+}
