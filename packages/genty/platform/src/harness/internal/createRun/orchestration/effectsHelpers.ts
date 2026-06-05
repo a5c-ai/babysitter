@@ -82,11 +82,12 @@ export async function invokePromptEffect(
 
 export async function invokeAgentHarness(
   action: EffectAction, taskHarness: string, prompt: string,
-  options: { workspace?: string; model?: string },
+  options: { workspace?: string; model?: string; streaming?: import("../../../types").StreamingOutputOptions },
 ): Promise<ResolveEffectResult> {
   const result = await invokeHarness(taskHarness, {
     prompt: compressInternalHarnessPrompt(prompt, null, "agent"),
     workspace: options.workspace, model: options.model,
+    streaming: options.streaming,
   });
   return {
     status: result.success ? "ok" : "error",
