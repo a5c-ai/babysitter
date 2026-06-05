@@ -657,8 +657,8 @@ describe("orchestrateIteration integration", () => {
       `
       const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const taskA = { id: "parallel-a", async build() { return { kind: "node", title: "A" }; } };
-      const taskB = { id: "parallel-b", async build() { await delay(100); return { kind: "node", title: "B" }; } };
-      const taskC = { id: "parallel-c", async build() { await delay(200); return { kind: "node", title: "C" }; } };
+      const taskB = { id: "parallel-b", async build() { await delay(350); return { kind: "node", title: "B" }; } };
+      const taskC = { id: "parallel-c", async build() { await delay(450); return { kind: "node", title: "C" }; } };
 
       export async function process(_inputs, ctx) {
         const [a, b, c] = await Promise.all([

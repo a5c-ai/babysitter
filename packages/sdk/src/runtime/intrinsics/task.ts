@@ -41,8 +41,13 @@ import {
 } from "./taskHelpers";
 
 let _newEffectRequestCount = 0;
+let _inFlightEffectRequestCount = 0;
 export function getNewEffectRequestCount(): number { return _newEffectRequestCount; }
-export function resetNewEffectRequestCount(): void { _newEffectRequestCount = 0; }
+export function getInFlightEffectRequestCount(): number { return _inFlightEffectRequestCount; }
+export function resetNewEffectRequestCount(): void {
+  _newEffectRequestCount = 0;
+  _inFlightEffectRequestCount = 0;
+}
 
 export interface TaskIntrinsicContext {
   runId: string;
@@ -112,104 +117,109 @@ async function requestNewEffect<TArgs, TResult>(
   options: TaskIntrinsicInvokeOptions<TArgs, TResult>
 ): Promise<TResult> {
   _newEffectRequestCount++;
-  const effectId = nextUlid();
-  const buildCtx = createTaskBuildContext({
-    effectId, runId: options.context.runId, runDir: options.context.runDir,
-    invocationKey, taskId: options.task.id, label: options.invokeOptions?.label,
-  });
-  const taskDef = await Promise.resolve(options.task.build(options.args, buildCtx));
-  if (!taskDef || typeof taskDef.kind !== "string") {
-    throw new InvalidTaskDefinitionError(`Task ${options.task.id} did not provide a kind`);
-  }
-  normalizeAgentTaskDispatch(taskDef);
-
-  const taskCreatedHookResult = await callRuntimeHook(
-    "task.created",
-    {
-      runId: options.context.runId,
-      processId: options.context.processId,
-      task_id: effectId,
-      task_kind: taskDef.kind,
-      task_title: taskDef.title,
-      task_labels: taskDef.labels,
-      taskId: options.task.id,
-      effectId,
-      kind: taskDef.kind,
-      title: taskDef.title,
-      labels: taskDef.labels,
-    },
-    { cwd: options.context.runDir, logger: options.context.logger },
-  );
-  assertRuntimeHookAllowed(taskCreatedHookResult, "task.created");
-
-  // Policy evaluation
-  if (options.context.policyEngine) {
-    const policyCtx: PolicyEvaluationContext = {
-      effectKind: taskDef.kind, taskId: options.task.id, processId: options.context.processId,
-      runId: options.context.runId, labels: taskDef.labels,
-      metadata: taskDef.metadata as Record<string, string> | undefined,
-    };
-    const decision = options.context.policyEngine.evaluate(policyCtx);
-    if (options.context.reportPolicyDecision) {
-      try { await options.context.reportPolicyDecision({ timestamp: new Date().toISOString(), context: policyCtx, decision, ruleId: decision.rule?.id }); }
-      catch (e) { process.stderr.write(`[babysitter] policy decision report failed: ${e instanceof Error ? e.message : String(e)}\n`); }
-    }
-    if (!decision.allowed) {
-      throw new RunFailedError(`Policy denied effect dispatch: ${decision.reason} [rule: ${decision.rule?.id ?? "unknown"}]`, { details: { ruleId: decision.rule?.id, decision } });
-    }
-  }
-
-  // Pre-compute autoApproval for breakpoint effects
-  if (taskDef.kind === "breakpoint") {
-    try {
-      const meta = taskDef.metadata as Record<string, unknown> | undefined;
-      const breakpointId = meta?.breakpointId as string | undefined;
-      if (breakpointId) {
-        const rules = await readRules();
-        const autoApproval = evaluateAutoApproval({
-          breakpointId, tags: meta?.tags as string[] | undefined,
-          expert: meta?.expert as string | undefined, rules,
-          autoApproveAfterN: meta?.autoApproveAfterN as number | undefined,
-        });
-        (taskDef as Record<string, unknown>).autoApproval = autoApproval;
-      }
-    } catch (e) { process.stderr.write(`[babysitter] breakpoint auto-approval eval failed: ${e instanceof Error ? e.message : String(e)}\n`); }
-  }
-
-  const { taskRef: taskDefRef, inputsRef } = await serializeAndWriteTaskDefinition({
-    runDir: options.context.runDir, effectId, taskId: options.task.id,
-    invocationKey, stepId, task: taskDef, inputs: options.args,
-  });
-  const kind = taskDef.kind;
-  const normalizedLabels = collectInvocationLabels(buildCtx, taskDef);
-  const label = deriveEffectLabel(buildCtx, taskDef, normalizedLabels, options.task.id);
-  const labelMetadata = normalizedLabels.length ? normalizedLabels : undefined;
-  const eventPayload = {
-    effectId, invocationKey, invocationHash, stepId, taskId: options.task.id,
-    kind, label, taskDefRef, inputsRef, labels: labelMetadata,
-  };
-  const appendResult = await appendEvent({ runDir: options.context.runDir, eventType: "EFFECT_REQUESTED", event: eventPayload });
-  const syntheticEvent: JournalEvent = {
-    seq: appendResult.seq, ulid: appendResult.ulid, filename: appendResult.filename,
-    path: appendResult.path, type: "EFFECT_REQUESTED", recordedAt: appendResult.recordedAt,
-    data: eventPayload, checksum: appendResult.checksum,
-  };
+  _inFlightEffectRequestCount++;
   try {
-    options.context.effectIndex.applyEvent(syntheticEvent, undefined, { skipSequenceValidation: true });
-  } catch (error) {
-    emitRuntimeMetric(options.context.logger, "invocation.collision", { invocationKey, effectId });
-    throw new InvocationCollisionError(invocationKey);
+    const effectId = nextUlid();
+    const buildCtx = createTaskBuildContext({
+      effectId, runId: options.context.runId, runDir: options.context.runDir,
+      invocationKey, taskId: options.task.id, label: options.invokeOptions?.label,
+    });
+    const taskDef = await Promise.resolve(options.task.build(options.args, buildCtx));
+    if (!taskDef || typeof taskDef.kind !== "string") {
+      throw new InvalidTaskDefinitionError(`Task ${options.task.id} did not provide a kind`);
+    }
+    normalizeAgentTaskDispatch(taskDef);
+
+    const taskCreatedHookResult = await callRuntimeHook(
+      "task.created",
+      {
+        runId: options.context.runId,
+        processId: options.context.processId,
+        task_id: effectId,
+        task_kind: taskDef.kind,
+        task_title: taskDef.title,
+        task_labels: taskDef.labels,
+        taskId: options.task.id,
+        effectId,
+        kind: taskDef.kind,
+        title: taskDef.title,
+        labels: taskDef.labels,
+      },
+      { cwd: options.context.runDir, logger: options.context.logger },
+    );
+    assertRuntimeHookAllowed(taskCreatedHookResult, "task.created");
+
+    // Policy evaluation
+    if (options.context.policyEngine) {
+      const policyCtx: PolicyEvaluationContext = {
+        effectKind: taskDef.kind, taskId: options.task.id, processId: options.context.processId,
+        runId: options.context.runId, labels: taskDef.labels,
+        metadata: taskDef.metadata as Record<string, string> | undefined,
+      };
+      const decision = options.context.policyEngine.evaluate(policyCtx);
+      if (options.context.reportPolicyDecision) {
+        try { await options.context.reportPolicyDecision({ timestamp: new Date().toISOString(), context: policyCtx, decision, ruleId: decision.rule?.id }); }
+        catch (e) { process.stderr.write(`[babysitter] policy decision report failed: ${e instanceof Error ? e.message : String(e)}\n`); }
+      }
+      if (!decision.allowed) {
+        throw new RunFailedError(`Policy denied effect dispatch: ${decision.reason} [rule: ${decision.rule?.id ?? "unknown"}]`, { details: { ruleId: decision.rule?.id, decision } });
+      }
+    }
+
+    // Pre-compute autoApproval for breakpoint effects
+    if (taskDef.kind === "breakpoint") {
+      try {
+        const meta = taskDef.metadata as Record<string, unknown> | undefined;
+        const breakpointId = meta?.breakpointId as string | undefined;
+        if (breakpointId) {
+          const rules = await readRules();
+          const autoApproval = evaluateAutoApproval({
+            breakpointId, tags: meta?.tags as string[] | undefined,
+            expert: meta?.expert as string | undefined, rules,
+            autoApproveAfterN: meta?.autoApproveAfterN as number | undefined,
+          });
+          (taskDef as Record<string, unknown>).autoApproval = autoApproval;
+        }
+      } catch (e) { process.stderr.write(`[babysitter] breakpoint auto-approval eval failed: ${e instanceof Error ? e.message : String(e)}\n`); }
+    }
+
+    const { taskRef: taskDefRef, inputsRef } = await serializeAndWriteTaskDefinition({
+      runDir: options.context.runDir, effectId, taskId: options.task.id,
+      invocationKey, stepId, task: taskDef, inputs: options.args,
+    });
+    const kind = taskDef.kind;
+    const normalizedLabels = collectInvocationLabels(buildCtx, taskDef);
+    const label = deriveEffectLabel(buildCtx, taskDef, normalizedLabels, options.task.id);
+    const labelMetadata = normalizedLabels.length ? normalizedLabels : undefined;
+    const eventPayload = {
+      effectId, invocationKey, invocationHash, stepId, taskId: options.task.id,
+      kind, label, taskDefRef, inputsRef, labels: labelMetadata,
+    };
+    const appendResult = await appendEvent({ runDir: options.context.runDir, eventType: "EFFECT_REQUESTED", event: eventPayload });
+    const syntheticEvent: JournalEvent = {
+      seq: appendResult.seq, ulid: appendResult.ulid, filename: appendResult.filename,
+      path: appendResult.path, type: "EFFECT_REQUESTED", recordedAt: appendResult.recordedAt,
+      data: eventPayload, checksum: appendResult.checksum,
+    };
+    try {
+      options.context.effectIndex.applyEvent(syntheticEvent, undefined, { skipSequenceValidation: true });
+    } catch (error) {
+      emitRuntimeMetric(options.context.logger, "invocation.collision", { invocationKey, effectId });
+      throw new InvocationCollisionError(invocationKey);
+    }
+    globalTaskRegistry.recordEffect({
+      effectId, invocationKey, taskId: options.task.id, kind, label, labels: normalizedLabels,
+      status: "pending", taskDefRef, inputsRef, metadata: taskDef.metadata, stepId, requestedAt: appendResult.recordedAt,
+    });
+    const actionRecord: EffectRecord = {
+      effectId, invocationKey, invocationHash, stepId, taskId: options.task.id,
+      status: "requested", kind, label, labels: labelMetadata, taskDefRef, inputsRef, requestedAt: appendResult.recordedAt,
+    };
+    const action = buildEffectAction(actionRecord, taskDef);
+    throw new EffectRequestedError(action);
+  } finally {
+    _inFlightEffectRequestCount--;
   }
-  globalTaskRegistry.recordEffect({
-    effectId, invocationKey, taskId: options.task.id, kind, label, labels: normalizedLabels,
-    status: "pending", taskDefRef, inputsRef, metadata: taskDef.metadata, stepId, requestedAt: appendResult.recordedAt,
-  });
-  const actionRecord: EffectRecord = {
-    effectId, invocationKey, invocationHash, stepId, taskId: options.task.id,
-    status: "requested", kind, label, labels: labelMetadata, taskDefRef, inputsRef, requestedAt: appendResult.recordedAt,
-  };
-  const action = buildEffectAction(actionRecord, taskDef);
-  throw new EffectRequestedError(action);
 }
 
 function normalizeAgentTaskDispatch(taskDef: TaskDef): void {

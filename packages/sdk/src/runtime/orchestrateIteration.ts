@@ -22,7 +22,7 @@ import type { JournalEvent } from "../storage/types";
 import { serializeUnknownError } from "./errorUtils";
 import { emitRuntimeMetric } from "./instrumentation";
 import { callRuntimeHook } from "./hooks/runtime";
-import { getNewEffectRequestCount, resetNewEffectRequestCount } from "./intrinsics/task";
+import { getInFlightEffectRequestCount, getNewEffectRequestCount, resetNewEffectRequestCount } from "./intrinsics/task";
 import { resolveProjectRootForRun } from "../config";
 import {
   asWaitingResult,
@@ -93,7 +93,7 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
 
       const strayRequestCount = getNewEffectRequestCount();
       if (strayRequestCount > 0) {
-        for (let i = 0; i < 4; i++) await new Promise<void>((resolve) => setImmediate(resolve));
+        await waitForInFlightEffectRequestsToSettle();
         if (capturedStrayEffect) {
           const waiting = asWaitingResult(capturedStrayEffect);
           if (waiting) {
@@ -102,7 +102,6 @@ export async function orchestrateIteration(options: OrchestrateOptions): Promise
             return { status: "waiting", nextActions: annotateWaitingActions(waiting.nextActions), metadata: createIterationMetadata(engine) };
           }
         }
-        await new Promise<void>((resolve) => setTimeout(resolve, 250));
         const strayEffectEvents = await detectStrayEffectEvents(options.runDir, preExecJournalHead);
         if (strayEffectEvents.length > 0) {
           console.warn(`[babysitter] Process completed but journal contains ${strayEffectEvents.length} stray EFFECT_REQUESTED event(s). Treating as waiting.`);
@@ -239,8 +238,7 @@ async function collectConcurrentWaitingActions(
   afterSeq: number,
   seedActions: EffectAction[],
 ): Promise<EffectAction[]> {
-  for (let i = 0; i < 4; i++) await new Promise<void>((resolve) => setImmediate(resolve));
-  await new Promise<void>((resolve) => setTimeout(resolve, 250));
+  await waitForInFlightEffectRequestsToSettle();
 
   const actions = new Map<string, EffectAction>();
   for (const action of seedActions) {
@@ -254,6 +252,13 @@ async function collectConcurrentWaitingActions(
     }
   }
   return [...actions.values()];
+}
+
+async function waitForInFlightEffectRequestsToSettle(): Promise<void> {
+  while (getInFlightEffectRequestCount() > 0) {
+    await new Promise<void>((resolve) => setImmediate(resolve));
+  }
+  await new Promise<void>((resolve) => setImmediate(resolve));
 }
 
 async function effectActionFromRequestedEvent(runDir: string, event: JournalEvent): Promise<EffectAction> {
