@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
-    "lib": ["ES2022", "DOM"],
+    "lib": ["ES2023", "DOM"],
     "composite": true,
     "declaration": true,
     "declarationMap": true,
@@ -20,6 +20,7 @@
     "node_modules",
     "dist",
     "src/**/__tests__",
+    "src/**/*.test.ts",
     "src/harness/agenticTools.ts",
     "src/harness/agenticTools/**",
     "src/harness/backgroundProcessRegistry.ts",

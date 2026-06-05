@@ -85,6 +85,15 @@
       ],
       "telemetry": [
         "dist/telemetry/index.d.ts"
+      ],
+      "rpc": [
+        "dist/rpc/index.d.ts"
+      ],
+      "session/tree": [
+        "dist/session/tree.d.ts"
+      ],
+      "session/export": [
+        "dist/session/export.d.ts"
       ]
     }
   },

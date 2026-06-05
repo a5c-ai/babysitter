@@ -1,4 +1,4 @@
-import type { ParsedHarnessArgs } from "../args/types.js";
+import type { HarnessParsedArgs } from "../args/types.js";
 
 export interface PrintOptions {
   prompt: string;
@@ -9,7 +9,7 @@ export interface PrintOptions {
   verbose?: boolean;
 }
 
-export async function handlePrint(args: ParsedHarnessArgs): Promise<number> {
+export async function handlePrint(args: HarnessParsedArgs): Promise<number> {
   const prompt = args.prompt;
   if (!prompt) {
     if (args.json) {
