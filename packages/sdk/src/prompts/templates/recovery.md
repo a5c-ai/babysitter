@@ -16,6 +16,20 @@ Patch the offending task result only when the fix is clear. Running recovery
 without a patch is allowed, but the next `run:iterate` should honestly rethrow if
 the bad result remains.
 
+Use `run:halt` only when operational reality is known and the run must be
+sealed manually rather than repaired:
+
+```bash
+$CLI run:halt <runId> --reason '<why this manual seal is correct>' --dry-run --json
+$CLI run:halt <runId> --reason '<why this manual seal is correct>' [--final-status halted|completed|failed] --json
+```
+
+Prefer `ctx.halt(...)` for process-authored early exits,
+`run:recover-process-error` for typed process exceptions, `run:repair-journal`
+for malformed journal files, and `run:rebuild-state` for cache drift. A
+completed manual seal is an explicit operator assertion, not proof that normal
+process execution finished.
+
 When recovery requires it, repair the actual process/run artifacts instead of
 only describing the problem. If the process authored a bad loop, impossible
 shell command, or permanently failing effect pattern, edit the process file

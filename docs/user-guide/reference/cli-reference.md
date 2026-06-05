@@ -23,6 +23,7 @@ Complete reference documentation for the core Babysitter command-line interface.
   - [run:iterate](#runiterate)
   - [run:rebuild-state](#runrebuild-state)
   - [run:recover-process-error](#runrecover-process-error)
+  - [run:halt](#runhalt)
 - [Task Commands](#task-commands)
   - [task:list](#tasklist)
   - [task:show](#taskshow)
@@ -597,6 +598,45 @@ Without `--patch-effect`, recovery is honest: if the underlying result is still 
 ```bash
 babysitter run:recover-process-error run-20260125-143012 --dry-run --json
 babysitter run:recover-process-error run-20260125-143012 --patch-effect 'ef-live:checks=[]' --json
+```
+
+---
+
+### run:halt
+
+Seals a divergent run with an auditable operator-authored terminal event.
+
+#### Synopsis
+
+```bash
+babysitter run:halt <runId> --reason <text> \
+  [--final-status halted|completed|failed] \
+  [--dry-run] \
+  [--json]
+```
+
+#### Description
+
+Use this only when the SDK journal/state no longer matches known operational reality and narrower recovery commands do not apply. The command requires a non-empty `--reason`, rejects already-terminal runs, appends exactly one terminal event through the journal API, records `manual_seal_reason`, `sealedBy`, requested final status, prior lifecycle state/event, and pending-effect summary, then rebuilds state with reason `manual_seal`.
+
+Default `--final-status` is `halted`, which writes `RUN_HALTED`. Explicit `completed` writes `RUN_COMPLETED` and exposes the existing completion proof. Explicit `failed` writes `RUN_FAILED`. Failed and halted seals return `completionProof: null`.
+
+#### Recovery Command Selection
+
+| Situation | Command |
+|-----------|---------|
+| Process intentionally exits early | `ctx.halt(...)` in process code |
+| Process code threw and recorded `PROCESS_RUNTIME_ERROR` | `run:recover-process-error` |
+| Journal has malformed or duplicate entries | `run:repair-journal` |
+| State cache is missing or stale but journal is valid | `run:rebuild-state` |
+| Operator must seal a divergent run after external verification | `run:halt` |
+
+#### Examples
+
+```bash
+babysitter run:halt run-20260125-143012 --reason "external artifacts already landed" --dry-run --json
+babysitter run:halt run-20260125-143012 --reason "accepted manual recovery"
+babysitter run:halt run-20260125-143012 --reason "operator marked failed" --final-status failed --json
 ```
 
 ---

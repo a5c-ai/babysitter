@@ -1,0 +1,99 @@
+{
+  "issueNumber": 880,
+  "baseBranch": "staging",
+  "implementationBranch": "feat/issue-880-run-halt",
+  "title": "Add 'babysitter run:halt' command for sealing divergent runs",
+  "labels": [
+    "enhancement",
+    "sdk",
+    "effort:medium",
+    "ready-for-dev",
+    "feature",
+    "priority:medium",
+    "risk:medium"
+  ],
+  "summary": "Implement an operator-facing `babysitter run:halt <runDir>` command that appends a synthetic terminal event through journal primitives, records an audit reason, rebuilds state, and exposes safe human/JSON output for divergent run recovery.",
+  "relatedIssues": [
+    879,
+    574,
+    573,
+    191,
+    181
+  ],
+  "targetFiles": [
+    "packages/sdk/src/cli/main/program.ts",
+    "packages/sdk/src/cli/main/dispatchRunSession.ts",
+    "packages/sdk/src/cli/main/runCommands.ts",
+    "packages/sdk/src/cli/main/argPositionals.ts",
+    "packages/sdk/src/cli/main/argFlagParsers.ts",
+    "packages/sdk/src/cli/main/types.ts",
+    "packages/sdk/src/cli/main/usage.ts",
+    "packages/sdk/src/cli/main/runCreate.ts",
+    "packages/sdk/src/cli/main/runState.ts",
+    "packages/sdk/src/cli/main/runInspection.ts",
+    "packages/sdk/src/cli/completionProof.ts",
+    "packages/sdk/src/storage/journal.ts",
+    "packages/sdk/src/runtime/replay/stateCache.ts",
+    "packages/sdk/src/runtime/runLifecycleState.ts"
+  ],
+  "testTargets": [
+    "packages/sdk/src/cli/__tests__/cliRuns.test.ts",
+    "packages/sdk/src/runtime/__tests__/orchestrateIteration.integration.test.ts",
+    "packages/sdk/src/runtime/__tests__/effectIndex.test.ts"
+  ],
+  "docsTargets": [
+    "docs/reference/babysitter_cli_surface_spec.md",
+    "docs/user-guide/reference/cli-reference.md",
+    "docs/agent-reference/runtime-and-layout.md",
+    "packages/sdk/src/prompts/templates/recovery.md",
+    "packages/sdk/src/prompts/templates/breakpoint-handling.md"
+  ],
+  "qualityCommands": [
+    "npm run build:sdk",
+    "npm run test:sdk -- --run packages/sdk/src/cli/__tests__/cliRuns.test.ts",
+    "npm run test:sdk",
+    "npm run verify:metadata"
+  ],
+  "acceptanceCriteria": [
+    "`babysitter run:halt <runDir>` is registered, parsed, dispatched, and documented.",
+    "The command requires a non-empty audit reason and supports JSON output and dry-run behavior.",
+    "The command validates selected final status and appends exactly one terminal event via `appendEvent` rather than hand-writing journal files.",
+    "The terminal event records `manual_seal_reason`, command source, requested final status, prior state, and pending-effect summary.",
+    "Completed seals preserve existing completionProof behavior; failed or halted seals do not expose completionProof.",
+    "Successful seals rebuild state cache with a manual-seal rebuild reason.",
+    "Already terminal runs are rejected by default without mutation.",
+    "Tests cover dry-run, JSON output, reason recording, supported final statuses, already-terminal rejection, state rebuild, and status/events visibility.",
+    "Docs explain when to use `run:halt` versus `ctx.halt`, `run:recover-process-error`, `run:repair-journal`, and `run:rebuild-state`."
+  ],
+  "nonGoals": [
+    "Do not implement a broad journal surgery tool.",
+    "Do not bypass `appendEvent` or `rebuildStateCache`.",
+    "Do not change normal `ctx.halt(...)` process-authored behavior except where status consumers need to display manual-seal events.",
+    "Do not add new storage dependencies or database/API infrastructure.",
+    "Do not add an override for resealing already-terminal runs unless the contract phase receives maintainer approval."
+  ],
+  "defaultContractRecommendation": {
+    "requireReason": true,
+    "defaultFinalStatus": "halted",
+    "explicitFinalStatuses": [
+      "halted",
+      "completed",
+      "failed"
+    ],
+    "eventMapping": {
+      "halted": "RUN_HALTED",
+      "completed": "RUN_COMPLETED",
+      "failed": "RUN_FAILED"
+    },
+    "stateRebuildReason": "manual_seal",
+    "auditFields": [
+      "manual_seal_reason",
+      "sealedBy",
+      "requestedFinalStatus",
+      "priorLifecycleState",
+      "priorLifecycleEvent",
+      "pendingEffectsSummary"
+    ]
+  },
+  "maxImplementationAttempts": 3
+}

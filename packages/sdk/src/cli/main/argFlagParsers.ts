@@ -4,6 +4,7 @@
  */
 
 import type { ParsedArgs } from "./types";
+import type { RunHaltFinalStatus } from "./types";
 import { resolveRunsDir } from "../../config";
 
 type FlagParser = (parsed: ParsedArgs, args: string[], index: number) => number;
@@ -41,6 +42,14 @@ function parseSourceType(raw: string): "github" | "well-known" {
 
 function parseIntegerFlag(raw: string): number {
   return parseInt(raw, 10);
+}
+
+function parseRunHaltFinalStatus(raw: string): RunHaltFinalStatus {
+  const normalized = raw.toLowerCase();
+  if (normalized !== "halted" && normalized !== "completed" && normalized !== "failed") {
+    throw new Error("--final-status must be one of: halted, completed, failed");
+  }
+  return normalized;
 }
 
 function readOptionalSessionId(args: string[], index: number): { sessionId?: string; index: number } {
@@ -332,7 +341,16 @@ export const FLAG_PARSERS: Record<string, FlagParser> = {
     return index + 1;
   },
   "--reason": (parsed, args, index) => {
-    parsed.cancelReason = expectFlagValue(args, index + 1, "--reason");
+    const reason = expectFlagValue(args, index + 1, "--reason");
+    if (parsed.command === "run:halt") {
+      parsed.runHaltReason = reason;
+    } else {
+      parsed.cancelReason = reason;
+    }
+    return index + 1;
+  },
+  "--final-status": (parsed, args, index) => {
+    parsed.runHaltFinalStatus = parseRunHaltFinalStatus(expectFlagValue(args, index + 1, "--final-status"));
     return index + 1;
   },
   "--action": (parsed, args, index) => {

@@ -2,12 +2,14 @@ import * as crypto from "node:crypto";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { createRun } from "../../runtime/createRun";
-import { loadJournal } from "../../storage/journal";
+import { appendEvent, loadJournal } from "../../storage/journal";
 import { writeFileAtomic } from "../../storage/atomic";
+import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { rebuildStateCache } from "../../runtime/replay/stateCache";
 import type { IterationMetadata } from "../../runtime/types";
 import type { JournalEvent, JsonRecord } from "../../storage/types";
 import { nextUlid } from "../../storage/ulids";
+import { resolveCompletionProof } from "../completionProof";
 import {
   getAdapter,
   getAdapterByName,
@@ -28,8 +30,8 @@ import {
   readInputsFile,
   validateProcessEntrypoint,
 } from "./runSupport";
-import { formatIterationMetadata, readRunMetadataSafe } from "./runState";
-import type { ParsedArgs } from "./types";
+import { countPendingByKind, deriveRunState, findLastLifecycleEvent, formatIterationMetadata, readRunMetadataSafe } from "./runState";
+import type { ParsedArgs, RunHaltFinalStatus } from "./types";
 import { USAGE } from "./usage";
 
 export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
@@ -312,6 +314,144 @@ export async function handleRunRebuildState(parsed: ParsedArgs): Promise<number>
     console.log(`[run:rebuild-state] runDir=${runDir}${suffix}`);
   }
   return 0;
+}
+
+export async function handleRunHalt(parsed: ParsedArgs): Promise<number> {
+  if (!parsed.runDirArg) {
+    console.error(USAGE);
+    return 1;
+  }
+  const runDir = resolveRunDir(parsed.runsDir, parsed.runDirArg);
+  const finalStatus = parsed.runHaltFinalStatus ?? "halted";
+  logVerbose("run:halt", parsed, { runDir, dryRun: parsed.dryRun, json: parsed.json, finalStatus });
+
+  const reason = parsed.runHaltReason?.trim() ?? "";
+  if (!reason) {
+    console.error("[run:halt] --reason is required");
+    return 1;
+  }
+
+  const metadata = await readRunMetadataSafe(runDir, "run:halt");
+  if (!metadata) return 1;
+
+  let journal: JournalEvent[];
+  let pendingRecords;
+  try {
+    journal = await loadJournal(runDir);
+    pendingRecords = (await buildEffectIndex({ runDir, events: journal })).listPendingEffects();
+  } catch (error) {
+    console.error(`[run:halt] unable to read run at ${runDir}: ${error instanceof Error ? error.message : String(error)}`);
+    return 1;
+  }
+
+  const pendingByKind = countPendingByKind(pendingRecords);
+  const pendingEffectsSummary = {
+    totalPending: pendingRecords.length,
+    countsByKind: pendingByKind,
+    autoRunnableCount: pendingRecords.filter((record) => record.kind === "node").length,
+  };
+  const priorLifecycleEvent = findLastLifecycleEvent(journal);
+  const priorLifecycleState = deriveRunState(priorLifecycleEvent?.type, pendingRecords.length);
+  if (priorLifecycleState === "completed" || priorLifecycleState === "halted" || priorLifecycleState === "failed") {
+    console.error(`[run:halt] run is already terminal (state=${priorLifecycleState})`);
+    return 1;
+  }
+
+  const terminalType = terminalEventTypeForRunHalt(finalStatus);
+  const completionProof = finalStatus === "completed" ? resolveCompletionProof(metadata) : null;
+  const eventData: JsonRecord = {
+    reason: "manual_seal",
+    payload: {
+      manual_seal_reason: reason,
+      requestedFinalStatus: finalStatus,
+    },
+    manual_seal_reason: reason,
+    sealedBy: "run:halt",
+    requestedFinalStatus: finalStatus,
+    priorLifecycleState,
+    priorLifecycleEvent: priorLifecycleEvent ? summarizeLifecycleEvent(priorLifecycleEvent) : null,
+    pendingEffectsSummary,
+    ...(completionProof ? { completionProof } : {}),
+  };
+
+  const summaryBase = {
+    dryRun: parsed.dryRun,
+    sealed: !parsed.dryRun,
+    runDir,
+    finalStatus,
+    priorLifecycleState,
+    priorLifecycleEvent: priorLifecycleEvent ? summarizeLifecycleEvent(priorLifecycleEvent) : null,
+    pendingEffectsSummary,
+    completionProof,
+  };
+
+  if (parsed.dryRun) {
+    const dryRunSummary = {
+      ...summaryBase,
+      sealed: false,
+      plannedTerminalEvent: {
+        type: terminalType,
+        data: eventData,
+      },
+    };
+    if (parsed.json) {
+      console.log(JSON.stringify(dryRunSummary, null, 2));
+    } else {
+      console.log(`[run:halt] dry-run runDir=${runDir} finalStatus=${finalStatus} event=${terminalType} pending[total]=${pendingEffectsSummary.totalPending}`);
+    }
+    return 0;
+  }
+
+  const appendResult = await appendEvent({
+    runDir,
+    eventType: terminalType,
+    event: eventData,
+  });
+  const snapshot = await rebuildStateCache(runDir, { reason: "manual_seal" });
+  const formatted = formatIterationMetadata({
+    pendingEffectsByKind: snapshot.pendingEffectsByKind,
+    stateVersion: snapshot.stateVersion,
+    journalHead: snapshot.journalHead ?? null,
+    stateRebuilt: true,
+    stateRebuildReason: snapshot.rebuildReason ?? undefined,
+  });
+  const summary = {
+    ...summaryBase,
+    terminalEvent: {
+      type: terminalType,
+      seq: appendResult.seq,
+      ulid: appendResult.ulid,
+      filename: appendResult.filename,
+      checksum: appendResult.checksum,
+      recordedAt: appendResult.recordedAt,
+      data: eventData,
+    },
+    metadata: formatted.jsonMetadata ?? null,
+  };
+  if (parsed.json) {
+    console.log(JSON.stringify(summary, null, 2));
+  } else {
+    const proofSuffix = completionProof ? ` completionProof=${completionProof}` : "";
+    const metadataSuffix = formatted.textParts.length ? ` ${formatted.textParts.join(" ")}` : "";
+    console.log(`[run:halt] sealed runDir=${runDir} finalStatus=${finalStatus} event=${terminalType}#${String(appendResult.seq).padStart(6, "0")} pending[total]=${pendingEffectsSummary.totalPending}${metadataSuffix}${proofSuffix}`);
+  }
+  return 0;
+}
+
+function terminalEventTypeForRunHalt(finalStatus: RunHaltFinalStatus): string {
+  if (finalStatus === "completed") return "RUN_COMPLETED";
+  if (finalStatus === "failed") return "RUN_FAILED";
+  return "RUN_HALTED";
+}
+
+function summarizeLifecycleEvent(event: JournalEvent): JsonRecord {
+  return {
+    type: event.type,
+    seq: event.seq,
+    ulid: event.ulid,
+    recordedAt: event.recordedAt,
+    data: event.data,
+  };
 }
 
 export async function handleRunRepairJournal(parsed: ParsedArgs): Promise<number> {

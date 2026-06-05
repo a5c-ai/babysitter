@@ -1,4 +1,5 @@
 export type HelpSurface = "agent" | "human";
+export type RunHaltFinalStatus = "halted" | "completed" | "failed";
 
 export interface ParsedArgs {
   command?: string;
@@ -104,6 +105,8 @@ export interface ParsedArgs {
   breakpointTags?: string;
   breakpointExpert?: string;
   cancelReason?: string;
+  runHaltReason?: string;
+  runHaltFinalStatus?: RunHaltFinalStatus;
   patchEffect?: string;
   verbosity?: string;
   tuiFlag?: boolean;
