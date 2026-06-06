@@ -28,6 +28,21 @@ attributes:
   installMethods:
     - install:brew
     - install:curl
+  hookSupport:
+    interactive:
+      sessionStart: native
+      stop: native
+      userPromptSubmit: native
+      preToolUse: native
+      sessionEnd: native
+    nonInteractive:
+      sessionStart: emulated
+      stop: unsupported
+      userPromptSubmit: unsupported
+  bridgeCapabilities:
+    interactiveBridge: true
+    sessionResume: false
+    positionalPrompt: true
 edges:
   version_of:
     - agent:antigravity-cli
