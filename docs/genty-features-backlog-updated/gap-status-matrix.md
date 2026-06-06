@@ -77,7 +77,7 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 | GAP-UX-014 | Operator Mode Selection | user-experience | Partial | CLOSED | -- | -- | -- | -- |
 | GAP-ECO-001 | CC Plugin Compatibility Layer | ecosystem | Missing | IN_PROGRESS | L | M | M3 | Critical |
 | GAP-PERF-001 | Prompt Caching (Ephemeral) | performance | Missing | CLOSED | S | -- | -- | -- |
-| GAP-PERF-002 | Session Compaction | performance | Partial | IN_PROGRESS | L | M | M1 | Critical |
+| GAP-PERF-002 | Session Compaction | performance | Partial | CLOSED | L | -- | -- | -- |
 | GAP-SUBOBS-001 | Streaming Output Capture from Invoked Harnesses | subagent-observability | Missing | CLOSED | M | -- | -- | -- |
 | GAP-AGENT-001 | Sub-Harness Invocation with Isolation | agent-delegation | Partial | CLOSED | M | -- | -- | -- |
 | GAP-AGENT-003 | Process Orchestration with Effect Routing | agent-delegation | Partial | IN_PROGRESS | L | L | M3 | High |
@@ -87,27 +87,27 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 | GAP-JSON-004 | JSON Session Management API | json-interaction | Missing | CLOSED | S | -- | -- | -- |
 | GAP-MCPC-003 | Channel Permission Relay (Breakpoint Approval via Channels) | mcp-channels | Missing | CLOSED | S | -- | -- | -- |
 | GAP-OBS-NEW-001 | Embedded SDK Dashboard Webhook and Alert System | observer-integration | Missing | CLOSED | S | -- | -- | -- |
-| GAP-PAR-001 | Concurrent Effect Execution | parallelization | Partial | IN_PROGRESS | M | M | M1 | High |
-| GAP-PAR-003 | Multi-Harness Parallel Dispatch | parallelization | Partial | IN_PROGRESS | L | L | M1 | High |
-| GAP-PERF-004 | Streaming Message Rendering | performance | Missing | IN_PROGRESS | M | M | M1 | High |
+| GAP-PAR-001 | Concurrent Effect Execution | parallelization | Partial | CLOSED | M | -- | -- | -- |
+| GAP-PAR-003 | Multi-Harness Parallel Dispatch | parallelization | Partial | CLOSED | L | -- | -- | -- |
+| GAP-PERF-004 | Streaming Message Rendering | performance | Missing | CLOSED | M | -- | -- | -- |
 | GAP-PROC-001 | Process Chaining and Pipelines | process-composition | Missing | CLOSED | M | -- | -- | -- |
 | GAP-PROMPT-010 | Safety and Reversibility Prompt Framework | prompt-engineering | Missing | CLOSED | S | -- | -- | -- |
 | GAP-REMOTE-003 | Remote Sessions (WebSocket) | remote-integration | Missing | IN_PROGRESS | L | M | M2 | High |
 | GAP-REMOTE-007 | Host Contract Layer | remote-integration | Missing | CLOSED | M | -- | -- | -- |
 | GAP-SEC-002 | Trust Classes for Plugins | security | Missing | CLOSED | S | -- | -- | -- |
 | GAP-STATE-001 | Long-Term Memory Extraction | state-continuity | Missing | CLOSED | S | -- | -- | -- |
-| GAP-SUBOBS-002 | Subagent Progress Tracking | subagent-observability | Missing | IN_PROGRESS | M | S | M1 | High |
+| GAP-SUBOBS-002 | Subagent Progress Tracking | subagent-observability | Missing | CLOSED | M | -- | -- | -- |
 | GAP-TOOLS-023 | Multi-Step Workflow Composition Within Effects | tools-capabilities | Partial | IN_PROGRESS | L | L | M4 | High |
 | GAP-USER-017 | Plugin Management Integration | user-experience | Partial | IN_PROGRESS | M | S | M2 | High |
 | GAP-UX-001c | Permission and Breakpoint Approval UI | user-experience | Partial | IN_PROGRESS | M | S | M4 | High |
 | GAP-AGENT-004 | Built-in Process Templates | agent-delegation | Partial | IN_PROGRESS | M | S | M2 | Medium |
-| GAP-ECO-004 | Plugin Auto-Update and Versioning | ecosystem | Missing | IN_PROGRESS | S | S | M2 | Medium |
-| GAP-ECO-005 | Plugin Validation and Diagnostics | ecosystem | Missing | IN_PROGRESS | S | S | M2 | Medium |
-| GAP-ROUTE-002 | Effect Priority and Scheduling | effect-routing | Missing | IN_PROGRESS | S | S | M1 | Medium |
+| GAP-ECO-004 | Plugin Auto-Update and Versioning | ecosystem | Missing | CLOSED | S | -- | -- | -- |
+| GAP-ECO-005 | Plugin Validation and Diagnostics | ecosystem | Missing | CLOSED | S | -- | -- | -- |
+| GAP-ROUTE-002 | Effect Priority and Scheduling | effect-routing | Missing | CLOSED | S | -- | -- | -- |
 | GAP-ROUTE-003 | Effect Result Caching and Deduplication | effect-routing | Partial | IN_PROGRESS | M | S | M2 | Medium |
-| GAP-HADAPT-005 | Harness Health Monitoring and Circuit Breaker | harness-adaptation | Missing | IN_PROGRESS | S | S | M2 | Medium |
-| GAP-OBS-003 | Prompt Plan Observability | observability | Partial | IN_PROGRESS | S | S | M2 | Medium |
-| GAP-OBS-005 | Context Introspection | observability | Partial | IN_PROGRESS | S | S | M2 | Medium |
+| GAP-HADAPT-005 | Harness Health Monitoring and Circuit Breaker | harness-adaptation | Missing | CLOSED | S | -- | -- | -- |
+| GAP-OBS-003 | Prompt Plan Observability | observability | Partial | CLOSED | S | -- | -- | -- |
+| GAP-OBS-005 | Context Introspection | observability | Partial | CLOSED | S | -- | -- | -- |
 | GAP-OBS-006 | Analytics and Feature Flags | observability | Partial | IN_PROGRESS | M | M | M3 | Medium |
 | GAP-PAR-005 | Parallel File Operations | parallelization | Partial | IN_PROGRESS | M | M | M3 | Medium |
 | GAP-PAR-006 | Streaming Parallelism | parallelization | Partial | IN_PROGRESS | M | M | M3 | Medium |
@@ -116,14 +116,14 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 | GAP-PROMPT-004 | Prompt Inspection Tooling | prompt-engineering | Partial | CLOSED | S | -- | -- | -- |
 | GAP-PROMPT-006 | Instructions Loaded Hook | prompt-engineering | Missing | CLOSED | S | -- | -- | -- |
 | GAP-PROMPT-007 | Context Compression Families | prompt-engineering | Partial | IN_PROGRESS | L | L | M3 | Medium |
-| GAP-SUBOBS-004 | Subagent Health and Timeout Monitoring | subagent-observability | Missing | IN_PROGRESS | M | S | M1 | Medium |
+| GAP-SUBOBS-004 | Subagent Health and Timeout Monitoring | subagent-observability | Missing | CLOSED | M | -- | -- | -- |
 | GAP-TOOLS-026 | Structured User Interaction from Within Effects | tools-capabilities | Partial | IN_PROGRESS | M | S | M2 | Medium |
-| GAP-TOOLS-031 | MCP Resource Browsing and Reading | tools-capabilities | Missing | IN_PROGRESS | S | S | M2 | Medium |
+| GAP-TOOLS-031 | MCP Resource Browsing and Reading | tools-capabilities | Missing | CLOSED | S | -- | -- | -- |
 | GAP-UX-008 | Resume Dashboard | user-experience | Partial | IN_PROGRESS | M | S | M4 | Medium |
 | GAP-UX-009 | Failure Triage View | user-experience | Partial | IN_PROGRESS | M | S | M4 | Medium |
 | GAP-UX-010 | Typed Effect Interaction Patterns | user-experience | Partial | IN_PROGRESS | M | M | M4 | Medium |
-| GAP-UX-011 | Command Discoverability | user-experience | Partial | IN_PROGRESS | S | S | M2 | Medium |
-| GAP-TOOLS-028 | Sleep/Delay Effect Enhancement | tools-capabilities | Partial | IN_PROGRESS | S | S | M2 | Low |
+| GAP-UX-011 | Command Discoverability | user-experience | Partial | CLOSED | S | -- | -- | -- |
+| GAP-TOOLS-028 | Sleep/Delay Effect Enhancement | tools-capabilities | Partial | CLOSED | S | -- | -- | -- |
 | GAP-AGENT-005 | Cross-Run Communication | agent-delegation | Missing | OPEN | L | L | M3 | High |
 | GAP-ECO-002 | CC Marketplace Protocol Support | ecosystem | Missing | OPEN | L | L | M2 | High |
 | GAP-TOOLS-012 | LSP Integration for Code-Aware Routing | tools-capabilities | Missing | OPEN | L | L | M5 | High |
@@ -162,13 +162,13 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 
 | Status | Count | % |
 |--------|-------|---|
-| CLOSED | 103 | 62% |
-| IN_PROGRESS | 33 | 20% |
+| CLOSED | 118 | 72% |
+| IN_PROGRESS | 18 | 11% |
 | OPEN | 22 | 13% |
 | NEEDS_RESPEC | 7 | 4% |
 | **Total** | **165** | **100%** |
 
-*Updated 2026-06-06: 34 gaps closed across 2 days (18 Pi/Trust + 5 M0 quick wins + 11 M0 remaining). Was 69/147.*
+*Updated 2026-06-06: 49 gaps closed across 2 days. M0, M1, and M2 (S-effort) milestones cleared. Was 69/147.*
 
 ### By Category
 
@@ -207,13 +207,13 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 
 | Priority | Count |
 |----------|-------|
-| Critical | 2 |
-| High | 11 |
-| Medium | 37 |
-| Low | 6 |
-| **Total** | **56** |
+| Critical | 1 |
+| High | 7 |
+| Medium | 26 |
+| Low | 5 |
+| **Total** | **39** |
 
-*Updated 2026-06-06: 34 gaps closed. Critical: 2 remaining (ECO-001, PERF-002). High: 11 remaining. M0 milestone fully cleared.*
+*Updated 2026-06-06: 49 gaps closed. Critical: 1 remaining (ECO-001). M0+M1+M2 (S-effort) cleared.*
 
 ### By Milestone
 
