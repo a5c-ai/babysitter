@@ -1,0 +1,47 @@
+# Hermes provider runtime resolver -- deep-research atlas node.
+
+nodeKind: AgentRuntimeImpl
+id: agent-runtime-impl:hermes.provider-runtime
+attributes:
+  displayName: "Hermes Provider Runtime"
+  agentVersionId: agentVersion:hermes:ge-0-0-0
+  description: |
+    Plugin-based provider runtime resolver shared across CLI, gateway,
+    cron jobs, ACP, and auxiliary model calls. Providers declared in
+    plugins/model-providers/<name>/ and registered via register_provider().
+    30+ provider integrations with OAuth, alias resolution, fallback chains,
+    and auxiliary model routing for side tasks.
+  keyFiles:
+    - hermes_cli/runtime_provider.py
+    - hermes_cli/auth.py
+    - hermes_cli/model_switch.py
+    - plugins/model-providers/
+  resolutionPrecedence:
+    - "Explicit CLI/runtime request"
+    - "config.yaml model/provider"
+    - "Environment variables"
+    - "Provider-specific defaults or auto-resolution"
+  providerFamilies:
+    - "OpenRouter, Nous Portal, OpenAI Codex"
+    - "Anthropic (native), Google Gemini, DeepSeek"
+    - "AWS Bedrock, Azure Foundry, NVIDIA NIM"
+    - "Ollama Cloud, LM Studio"
+    - "Custom OpenAI-compatible endpoints"
+  fallbackBehavior: |
+    Ordered list of (provider, model) pairs tried sequentially on errors.
+    Activation triggers: invalid API responses after max retries, non-retryable
+    client errors (401/403/404), transient errors (429/500/502/503) after
+    retry exhaustion. Subagents inherit parent settings but not fallback config.
+  auxiliaryRouting: |
+    Tasks like vision, summarization, and memory operations route to
+    independent providers using the same runtime resolution path.
+  ourEquivalent: |
+    packages/adapters/proxy/ handles cross-harness provider routing.
+    Individual harnesses own their own provider resolution. Our adapters
+    proxy provides a multi-harness layer that Hermes lacks -- Hermes
+    provider resolution is internal to a single agent instance.
+edges:
+  realizes:
+    - target: layer:5-agent-runtime
+  part_of:
+    - target: agent:hermes

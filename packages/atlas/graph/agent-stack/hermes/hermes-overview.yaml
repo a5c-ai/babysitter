@@ -1,0 +1,43 @@
+# Hermes Agent deep-research overview node.
+# Maps the product-level architecture to atlas layers and notes our equivalents.
+
+nodeKind: AgentProduct
+id: agent:hermes
+attributes:
+  displayName: "Hermes Agent"
+  vendor: "Nous Research"
+  homepageUrl: "https://github.com/NousResearch/hermes-agent"
+  primarySurface: cli
+  supportTier: adapter-only
+  productKind: full-cli-agent
+  stackScope: full
+  description: |
+    Python CLI coding agent by Nous Research. MIT-licensed, ~4,400 LOC core
+    AIAgent class. Supports 30+ LLM providers, 70+ tools across 28 toolsets,
+    20+ messaging platform adapters via gateway, pluggable memory providers,
+    ACP IDE integration, self-evolution companion repo, and a Skills Hub at
+    agentskills.io. Integrated into our stack through adapter-hermes in
+    packages/adapters/hooks/adapter-hermes/.
+  deepResearchNotes:
+    architectureStyle: monolithic-agent-with-gateway
+    coreFile: run_agent.py (~4,400 lines)
+    language: "Python 83.6%, TypeScript 12.6%"
+    license: MIT
+    layerCoverage:
+      L2-provider: "30+ providers via plugin-based resolver"
+      L3-transport: "3 API modes (chat_completions, codex_responses, anthropic_messages)"
+      L4-agent-core: "AIAgent class with synchronous orchestration loop"
+      L5-agent-runtime: "SQLite sessions, 70+ tools, 8 callback surfaces"
+      L6-agent-platform: "plugins, skills, gateway, cron, MCP, self-evolution"
+      L7-workspace: "working directory binding via sessions"
+      L8-execution: "6 terminal backends (local, Docker, SSH, Daytona, Modal, Singularity)"
+      L10-interaction: "slash commands, voice mode, mid-task model switching"
+      L11-presentation: "classic CLI, Ink TUI, API server, ACP"
+      L12-knowledge-fabric: "MEMORY.md, USER.md, pluggable memory providers, FTS5 session search"
+      L13-orchestration: "subagent delegation, cron scheduler, gateway routing"
+      L14-governance: "approval callbacks, profile isolation, gateway auth"
+    ourEquivalent: "adapter-hermes (hooks adapter) + genty-platform orchestration"
+edges:
+  has_version:
+    - agent-version:hermes@current
+    - agentVersion:hermes:0-15-2
