@@ -75,12 +75,12 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 | GAP-UX-006 | Pending Work Inspector | user-experience | Partial | CLOSED | -- | -- | -- | -- |
 | GAP-UX-007 | Rich Breakpoint Interaction | user-experience | Partial | CLOSED | -- | -- | -- | -- |
 | GAP-UX-014 | Operator Mode Selection | user-experience | Partial | CLOSED | -- | -- | -- | -- |
-| GAP-ECO-001 | CC Plugin Compatibility Layer | ecosystem | Missing | IN_PROGRESS | L | M | M3 | Critical |
+| GAP-ECO-001 | CC Plugin Compatibility Layer | ecosystem | Missing | CLOSED | L | -- | -- | -- |
 | GAP-PERF-001 | Prompt Caching (Ephemeral) | performance | Missing | CLOSED | S | -- | -- | -- |
 | GAP-PERF-002 | Session Compaction | performance | Partial | CLOSED | L | -- | -- | -- |
 | GAP-SUBOBS-001 | Streaming Output Capture from Invoked Harnesses | subagent-observability | Missing | CLOSED | M | -- | -- | -- |
 | GAP-AGENT-001 | Sub-Harness Invocation with Isolation | agent-delegation | Partial | CLOSED | M | -- | -- | -- |
-| GAP-AGENT-003 | Process Orchestration with Effect Routing | agent-delegation | Partial | IN_PROGRESS | L | L | M3 | High |
+| GAP-AGENT-003 | Process Orchestration with Effect Routing | agent-delegation | Partial | CLOSED | L | -- | -- | -- |
 | GAP-AGENT-006 | Cross-Run State Sharing | agent-delegation | Missing | CLOSED | M | -- | -- | -- |
 | GAP-ECO-003 | Plugin Trust, Provenance, and Blocklist | ecosystem | Missing | CLOSED | S | -- | -- | -- |
 | GAP-HADAPT-003 | Cost-Based Routing Policies | harness-adaptation | Missing | CLOSED | S | -- | -- | -- |
@@ -92,12 +92,12 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 | GAP-PERF-004 | Streaming Message Rendering | performance | Missing | CLOSED | M | -- | -- | -- |
 | GAP-PROC-001 | Process Chaining and Pipelines | process-composition | Missing | CLOSED | M | -- | -- | -- |
 | GAP-PROMPT-010 | Safety and Reversibility Prompt Framework | prompt-engineering | Missing | CLOSED | S | -- | -- | -- |
-| GAP-REMOTE-003 | Remote Sessions (WebSocket) | remote-integration | Missing | IN_PROGRESS | L | M | M2 | High |
+| GAP-REMOTE-003 | Remote Sessions (WebSocket) | remote-integration | Missing | CLOSED | L | -- | -- | -- |
 | GAP-REMOTE-007 | Host Contract Layer | remote-integration | Missing | CLOSED | M | -- | -- | -- |
 | GAP-SEC-002 | Trust Classes for Plugins | security | Missing | CLOSED | S | -- | -- | -- |
 | GAP-STATE-001 | Long-Term Memory Extraction | state-continuity | Missing | CLOSED | S | -- | -- | -- |
 | GAP-SUBOBS-002 | Subagent Progress Tracking | subagent-observability | Missing | CLOSED | M | -- | -- | -- |
-| GAP-TOOLS-023 | Multi-Step Workflow Composition Within Effects | tools-capabilities | Partial | IN_PROGRESS | L | L | M4 | High |
+| GAP-TOOLS-023 | Multi-Step Workflow Composition Within Effects | tools-capabilities | Partial | CLOSED | L | -- | -- | -- |
 | GAP-USER-017 | Plugin Management Integration | user-experience | Partial | CLOSED | M | -- | -- | -- |
 | GAP-UX-001c | Permission and Breakpoint Approval UI | user-experience | Partial | CLOSED | M | -- | -- | -- |
 | GAP-AGENT-004 | Built-in Process Templates | agent-delegation | Partial | CLOSED | M | -- | -- | -- |
@@ -108,20 +108,20 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 | GAP-HADAPT-005 | Harness Health Monitoring and Circuit Breaker | harness-adaptation | Missing | CLOSED | S | -- | -- | -- |
 | GAP-OBS-003 | Prompt Plan Observability | observability | Partial | CLOSED | S | -- | -- | -- |
 | GAP-OBS-005 | Context Introspection | observability | Partial | CLOSED | S | -- | -- | -- |
-| GAP-OBS-006 | Analytics and Feature Flags | observability | Partial | IN_PROGRESS | M | M | M3 | Medium |
-| GAP-PAR-005 | Parallel File Operations | parallelization | Partial | IN_PROGRESS | M | M | M3 | Medium |
-| GAP-PAR-006 | Streaming Parallelism | parallelization | Partial | IN_PROGRESS | M | M | M3 | Medium |
-| GAP-PERF-007 | Aggressive Parallelism | performance | Partial | IN_PROGRESS | M | M | M3 | Medium |
+| GAP-OBS-006 | Analytics and Feature Flags | observability | Partial | CLOSED | M | -- | -- | -- |
+| GAP-PAR-005 | Parallel File Operations | parallelization | Partial | CLOSED | M | -- | -- | -- |
+| GAP-PAR-006 | Streaming Parallelism | parallelization | Partial | CLOSED | M | -- | -- | -- |
+| GAP-PERF-007 | Aggressive Parallelism | performance | Partial | CLOSED | M | -- | -- | -- |
 | GAP-PROF-001 | Auto-Configure Orchestration from User Profile | profile-orchestration | Missing | CLOSED | M | -- | -- | -- |
 | GAP-PROMPT-004 | Prompt Inspection Tooling | prompt-engineering | Partial | CLOSED | S | -- | -- | -- |
 | GAP-PROMPT-006 | Instructions Loaded Hook | prompt-engineering | Missing | CLOSED | S | -- | -- | -- |
-| GAP-PROMPT-007 | Context Compression Families | prompt-engineering | Partial | IN_PROGRESS | L | L | M3 | Medium |
+| GAP-PROMPT-007 | Context Compression Families | prompt-engineering | Partial | CLOSED | L | -- | -- | -- |
 | GAP-SUBOBS-004 | Subagent Health and Timeout Monitoring | subagent-observability | Missing | CLOSED | M | -- | -- | -- |
 | GAP-TOOLS-026 | Structured User Interaction from Within Effects | tools-capabilities | Partial | CLOSED | M | -- | -- | -- |
 | GAP-TOOLS-031 | MCP Resource Browsing and Reading | tools-capabilities | Missing | CLOSED | S | -- | -- | -- |
 | GAP-UX-008 | Resume Dashboard | user-experience | Partial | CLOSED | M | -- | -- | -- |
 | GAP-UX-009 | Failure Triage View | user-experience | Partial | CLOSED | M | -- | -- | -- |
-| GAP-UX-010 | Typed Effect Interaction Patterns | user-experience | Partial | IN_PROGRESS | M | M | M4 | Medium |
+| GAP-UX-010 | Typed Effect Interaction Patterns | user-experience | Partial | CLOSED | M | -- | -- | -- |
 | GAP-UX-011 | Command Discoverability | user-experience | Partial | CLOSED | S | -- | -- | -- |
 | GAP-TOOLS-028 | Sleep/Delay Effect Enhancement | tools-capabilities | Partial | CLOSED | S | -- | -- | -- |
 | GAP-AGENT-005 | Cross-Run Communication | agent-delegation | Missing | OPEN | L | L | M3 | High |
@@ -162,13 +162,13 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 
 | Status | Count | % |
 |--------|-------|---|
-| CLOSED | 126 | 76% |
-| IN_PROGRESS | 10 | 6% |
+| CLOSED | 136 | 82% |
+| IN_PROGRESS | 0 | 0% |
 | OPEN | 22 | 13% |
 | NEEDS_RESPEC | 7 | 4% |
 | **Total** | **165** | **100%** |
 
-*Updated 2026-06-06: 57 gaps closed across 2 days. M0, M1, M2 fully cleared. Was 69/147.*
+*Updated 2026-06-06: 67 gaps closed across 2 days. ALL IN_PROGRESS gaps cleared. Was 69/147.*
 
 ### By Category
 
@@ -207,13 +207,13 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 
 | Priority | Count |
 |----------|-------|
-| Critical | 1 |
-| High | 5 |
-| Medium | 20 |
+| Critical | 0 |
+| High | 4 |
+| Medium | 16 |
 | Low | 5 |
-| **Total** | **31** |
+| **Total** | **25** |
 
-*Updated 2026-06-06: 57 gaps closed. Only 10 IN_PROGRESS remain. M0+M1+M2 fully cleared.*
+*Updated 2026-06-06: 67 gaps closed. Zero IN_PROGRESS. Zero Critical. Only OPEN + NEEDS_RESPEC remain (M5 long-tail).*
 
 ### By Milestone
 
