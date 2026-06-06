@@ -58,3 +58,20 @@ export {
   type ContextSnapshot,
   type ContextDiff,
 } from './contextIntrospection';
+
+// Resume dashboard (GAP-UX-008)
+export {
+  buildResumeDashboard,
+  formatDashboardText,
+  type ResumeDashboardData,
+  type StepSummary,
+} from './resumeDashboard';
+
+// Failure triage (GAP-UX-009)
+export {
+  triageFailures,
+  formatTriageReport,
+  type FailureEntry,
+  type FailureSeverity,
+  type TriageReport,
+} from './failureTriage';

@@ -41,3 +41,10 @@ export {
   type ValidationResult,
   type DiagnosticEntry,
 } from './validation';
+
+// Management (GAP-USER-017)
+export {
+  PluginManager,
+  type PluginInfo,
+  type TrustLevel,
+} from './management';

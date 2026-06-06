@@ -8,3 +8,5 @@ export * from "./batching";
 export * from "./grouping";
 export * from "./concurrentExecution";
 export * from "./sleepEffect";
+export * from "./resultCache";
+export * from "./structuredInteraction";

@@ -17,6 +17,7 @@ export * from "./breakpoints";
 export * from "./mcp";
 export * from "./config";
 export * from "./processLibrary/active";
+export * from "./processLibrary/templates";
 export * from "./utils/sessionMarker";
 export * from "./utils/processLiveness";
 export * as session from "./session";

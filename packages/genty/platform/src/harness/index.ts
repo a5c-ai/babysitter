@@ -96,3 +96,13 @@ export {
   type CircuitBreakerOptions,
   type CircuitBreakerSnapshot,
 } from "./circuitBreaker";
+
+// Profile orchestration (GAP-PROF-001)
+export {
+  deriveOrchestrationConfig,
+  applyProfileToProcessOptions,
+  type OrchestrationConfig,
+  type BreakpointDensity,
+  type ProcessOptions,
+  type ProfileLike,
+} from "./profileOrchestration";

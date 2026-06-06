@@ -18,3 +18,13 @@ export {
   type CommandDefinition,
   type CommandSuggestion,
 } from './commandDiscovery';
+
+// Permission approval UI (GAP-UX-001c)
+export {
+  formatApprovalPrompt,
+  parseApprovalResponse,
+  getDefaultApprovalForRisk,
+  type ApprovalPrompt,
+  type RiskLevel,
+  type ApprovalAction,
+} from './permissionApprovalUi';
