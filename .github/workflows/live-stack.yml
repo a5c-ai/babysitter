@@ -406,7 +406,6 @@ jobs:
           else
             echo "Installing antigravity-cli via official installer"
             curl -fsSL https://antigravity.google/cli/install.sh | bash 2>&1 || echo "curl installer failed"
-            # The installer puts the binary as 'agy' in ~/.local/bin
             for dir in "$HOME/.local/bin" "$HOME/bin" "$HOME/.antigravity/bin"; do
               if [ -f "$dir/agy" ]; then
                 echo "$dir" >> "$GITHUB_PATH"
@@ -415,6 +414,15 @@ jobs:
               fi
             done
           fi
+          # Pre-seed antigravity auth — write a fake OAuth token so it skips browser login.
+          # The proxy handles actual model API auth; agy just needs to pass its own auth gate.
+          mkdir -p "$HOME/.config/antigravity" "$HOME/.antigravity"
+          # Try ADC credentials — some Google Go SDKs respect this
+          ADC_PATH="$HOME/.config/gcloud/application_default_credentials.json"
+          mkdir -p "$(dirname "$ADC_PATH")"
+          echo '{"type":"authorized_user","client_id":"1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com","client_secret":"proxy-managed","refresh_token":"proxy-managed","universe_domain":"googleapis.com"}' > "$ADC_PATH"
+          export GOOGLE_APPLICATION_CREDENTIALS="$ADC_PATH"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$ADC_PATH" >> "$GITHUB_ENV"
           which agy && agy --version 2>&1 || echo "WARNING: agy (antigravity) not available"
 
       - name: Remove agent skill directories from workspace (vanilla only)
