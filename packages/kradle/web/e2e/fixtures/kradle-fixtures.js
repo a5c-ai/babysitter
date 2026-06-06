@@ -52,12 +52,9 @@ function delegatedIdentityConfigured(testInfo) {
 
 export function hasUsableAuthFixture(testInfo) {
   if (process.env.KRADLE_E2E_AUTH_STATE) return true;
+  if (process.env.KRADLE_TEST_AUTH_SECRET) return true;
   if (localUnsignedAuthAvailable()) return true;
-  // Delegated identity headers are set in playwright.config.js and sent
-  // automatically by Playwright's request context and page navigations
-  // when the target supports KRADLE_AUTH_DELEGATED_IDENTITY_ENABLED.
   if (testInfo && delegatedIdentityConfigured(testInfo)) return true;
-  // Check env var directly as a fallback for calls without testInfo
   if (process.env.KRADLE_E2E_USER) return true;
   return false;
 }
@@ -156,18 +153,36 @@ export const test = base.extend({
     });
   },
 
-  authenticatedPage: async ({ page }, use, testInfo) => {
-    if (!process.env.KRADLE_E2E_AUTH_STATE && localUnsignedAuthAvailable()) {
+  authenticatedPage: async ({ page, request }, use, testInfo) => {
+    const url = baseUrl(testInfo);
+    if (process.env.KRADLE_E2E_AUTH_STATE) {
+      // pre-configured auth state — no action needed
+    } else if (process.env.KRADLE_TEST_AUTH_SECRET) {
+      const resp = await request.post(`${url}/api/auth/test-session`, {
+        data: { secret: process.env.KRADLE_TEST_AUTH_SECRET, username: `${E2E_PREFIX}-user` },
+      });
+      if (resp.ok()) {
+        const setCookie = resp.headers()['set-cookie'] || '';
+        const match = setCookie.match(/kradle_session=([^;]+)/);
+        if (match) {
+          await page.context().addCookies([{
+            name: 'kradle_session',
+            value: match[1],
+            url,
+            httpOnly: true,
+            sameSite: 'Strict',
+          }]);
+        }
+      }
+    } else if (localUnsignedAuthAvailable()) {
       await page.context().addCookies([{
         name: process.env.KRADLE_AUTH_COOKIE_NAME || 'kradle_session',
         value: unsignedSessionCookie(),
-        url: baseUrl(testInfo),
+        url,
         httpOnly: true,
         sameSite: 'Strict',
       }]);
     }
-    // When delegated identity headers are configured in playwright.config.js,
-    // they are automatically sent with every request by Playwright's browser context.
     await use(page);
   },
 });

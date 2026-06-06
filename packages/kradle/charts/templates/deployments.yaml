@@ -394,6 +394,16 @@ spec:
               value: {{ .Values.admin.org | quote }}
             - name: KRADLE_ADMIN_USERNAME
               value: {{ .Values.admin.username | quote }}
+            {{- if .Values.auth.testSession.secret }}
+            - name: KRADLE_TEST_AUTH_SECRET
+              value: {{ .Values.auth.testSession.secret | quote }}
+            {{- else if .Values.auth.testSession.existingSecret }}
+            - name: KRADLE_TEST_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.testSession.existingSecret | quote }}
+                  key: {{ .Values.auth.testSession.key | default "test-auth-secret" | quote }}
+            {{- end }}
             - name: KRADLE_NAMESPACE
               value: {{ .Release.Namespace | quote }}
             - name: KRADLE_KUBEVELA_NAMESPACE

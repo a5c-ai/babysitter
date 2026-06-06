@@ -2276,6 +2276,7 @@ jobs:
         env:
           KRADLE_GITHUB_CLIENT_ID: ${{ vars.KRATE_GITHUB_CLIENT_ID }}
           KRADLE_GITHUB_CLIENT_SECRET: ${{ secrets.KRATE_GITHUB_CLIENT_SECRET }}
+          KRADLE_TEST_AUTH_SECRET: ${{ secrets.KRADLE_TEST_AUTH_SECRET }}
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_PROJECT_NAME: ${{ vars.AZURE_OPENAI_PROJECT_NAME }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -2302,6 +2303,7 @@ jobs:
             --set "global.imagePullSecrets[0].name=acr-pull" \
             --set auth.github.clientId="${KRADLE_GITHUB_CLIENT_ID}" \
             --set auth.github.clientSecret="${KRADLE_GITHUB_CLIENT_SECRET}" \
+            --set auth.testSession.secret="${KRADLE_TEST_AUTH_SECRET}" \
             --set admin.org=a5c-ai \
             --set admin.username=tmuskal \
             --set ingress.enabled=true \
@@ -2409,6 +2411,35 @@ jobs:
           STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 "https://${APP_HOST}/api/orgs/default/agents/tools/catalog" || echo "000")
           echo "Tools catalog status: $STATUS"
           [ "$STATUS" -lt 500 ] || { echo "::error::Tools catalog returned $STATUS"; exit 1; }
+
+      - name: 'E2E smoke - authenticated session via test endpoint'
+        env:
+          KRADLE_TEST_AUTH_SECRET: ${{ secrets.KRADLE_TEST_AUTH_SECRET }}
+        run: |
+          if [ -z "${KRADLE_TEST_AUTH_SECRET}" ]; then
+            echo "::notice::KRADLE_TEST_AUTH_SECRET not set — skipping authenticated smoke tests"
+            exit 0
+          fi
+          RESPONSE=$(curl -sf --max-time 15 -X POST "https://${APP_HOST}/api/auth/test-session" \
+            -H "Content-Type: application/json" \
+            -d "{\"secret\":\"${KRADLE_TEST_AUTH_SECRET}\",\"username\":\"ci-smoke-test\"}" \
+            -c /tmp/kradle-cookies.txt 2>&1) || { echo "::warning::Test session endpoint not available (deploy may not include it yet)"; exit 0; }
+          echo "Test session: $RESPONSE"
+          echo "$RESPONSE" | jq -e '.ok == true' || { echo "::error::Test session creation failed"; exit 1; }
+
+          COOKIE=$(grep kradle_session /tmp/kradle-cookies.txt | awk '{print $NF}' || true)
+          if [ -z "$COOKIE" ]; then
+            echo "::warning::No session cookie returned"
+            exit 0
+          fi
+
+          DASH_STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 -b /tmp/kradle-cookies.txt "https://${APP_HOST}/orgs/a5c-ai" || echo "000")
+          echo "Authenticated dashboard status: $DASH_STATUS"
+          [ "$DASH_STATUS" -eq 200 ] || echo "::warning::Dashboard returned $DASH_STATUS (expected 200)"
+
+          SNAP_STATUS=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 -b /tmp/kradle-cookies.txt "https://${APP_HOST}/orgs/a5c-ai/agents" || echo "000")
+          echo "Agents page status: $SNAP_STATUS"
+          [ "$SNAP_STATUS" -eq 200 ] || echo "::warning::Agents page returned $SNAP_STATUS"
 
   deploy_staging_cloud:
     name: Deploy Cloud

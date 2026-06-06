@@ -141,6 +141,10 @@ admin:
 auth:
   session:
     cookieName: kradle_session
+  testSession:
+    secret: ""
+    existingSecret: ""
+    key: test-auth-secret
   delegatedIdentity:
     enabled: false
     userHeader: x-forwarded-user
