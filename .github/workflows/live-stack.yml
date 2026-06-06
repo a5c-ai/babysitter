@@ -414,21 +414,9 @@ jobs:
               fi
             done
           fi
-          # Antigravity requires Google OAuth and ignores env vars / credential files.
-          # Use gcloud to set up ADC which the Go oauth2 library will find via
-          # the metadata server emulation or the well-known ADC file.
-          if command -v gcloud &>/dev/null; then
-            echo '{"type":"api_key","api_key":"'"${GOOGLE_API_KEY}"'"}' > /tmp/agy-key.json
-            gcloud auth activate-service-account --key-file=/tmp/agy-key.json 2>/dev/null || true
-            rm -f /tmp/agy-key.json
-          fi
-          # Write ADC with the API key as an authorized_user token
-          mkdir -p "$HOME/.config/gcloud"
-          cat > "$HOME/.config/gcloud/application_default_credentials.json" <<EOF
-          {"client_id":"1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com","client_secret":"","refresh_token":"","type":"authorized_user"}
-          EOF
-          echo "GEMINI_API_KEY=${GOOGLE_API_KEY}" >> "$GITHUB_ENV"
-          echo "GOOGLE_API_KEY=${GOOGLE_API_KEY}" >> "$GITHUB_ENV"
+          # NOTE: Antigravity requires browser-based Google OAuth and ignores all
+          # env vars and credential files. CI auth requires a GOOGLE_SERVICE_ACCOUNT_KEY
+          # secret (not yet configured). See issue for tracking.
           which agy && agy --version 2>&1 || echo "WARNING: agy (antigravity) not available"
 
       - name: Remove agent skill directories from workspace (vanilla only)
