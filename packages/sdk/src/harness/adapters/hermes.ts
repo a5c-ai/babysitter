@@ -11,7 +11,7 @@ function buildConfig(): AdapterConfig {
     pluginRootEnvVars: ["HERMES_PLUGIN_ROOT", "AGENT_PLUGIN_ROOT"],
     sessionIdEnvVars: ["HERMES_SESSION", "AGENT_SESSION_ID"],
     pluginRootVar: "${HERMES_PLUGIN_ROOT}",
-    interactiveToolName: null,
+    interactiveToolName: undefined,
     sessionEnvVars: "HERMES_SESSION and AGENT_SESSION_ID",
     hasIntentFidelityChecks: false,
     hasNonNegotiables: false,
