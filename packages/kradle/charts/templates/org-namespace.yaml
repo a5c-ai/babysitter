@@ -1,0 +1,12 @@
+{{- $org := .Values.admin.org | default "default" }}
+{{- $orgNamespace := printf "kradle-org-%s" $org }}
+{{- if ne $orgNamespace .Release.Namespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $orgNamespace }}
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+    kradle.a5c.ai/org: {{ $org | quote }}
+    kradle.a5c.ai/namespace: {{ $orgNamespace | quote }}
+{{- end }}

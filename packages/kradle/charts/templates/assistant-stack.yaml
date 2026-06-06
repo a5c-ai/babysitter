@@ -1,14 +1,17 @@
 {{- if .Values.agents.enabled }}
+{{- $org := .Values.admin.org | default "default" }}
+{{- $orgNamespace := printf "kradle-org-%s" $org }}
 apiVersion: kradle.a5c.ai/v1alpha1
 kind: AgentStack
 metadata:
   name: assistant
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $orgNamespace }}
   labels:
     {{- include "kradle.labels" . | nindent 4 }}
     kradle.a5c.ai/builtin: "true"
+    kradle.a5c.ai/org: {{ $org | quote }}
 spec:
-  organizationRef: {{ .Values.admin.org | default "default" | quote }}
+  organizationRef: {{ $org | quote }}
   baseAgent: claude-code
   adapter: default
   provider: anthropic
