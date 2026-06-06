@@ -52,6 +52,7 @@ const HARNESS_PLUGIN_INSTALLERS: Readonly<Record<string, HarnessPluginInstaller>
   "cursor": { packageName: "@a5c-ai/babysitter-cursor", supportsWorkspace: true },
   "gemini-cli": { packageName: "@a5c-ai/babysitter-gemini", supportsWorkspace: true },
   "github-copilot": { packageName: "@a5c-ai/babysitter-github", supportsWorkspace: true },
+  "hermes": { packageName: "@a5c-ai/babysitter-hermes", supportsWorkspace: true },
   "oh-my-pi": { packageName: "@a5c-ai/babysitter-omp", supportsWorkspace: true },
   "openclaw": { packageName: "@a5c-ai/babysitter-openclaw", supportsWorkspace: true },
   "opencode": { packageName: "@a5c-ai/babysitter-opencode", supportsWorkspace: true },
