@@ -10,3 +10,4 @@ export * from "./concurrentExecution";
 export * from "./sleepEffect";
 export * from "./resultCache";
 export * from "./structuredInteraction";
+export * from "./jsRepl";

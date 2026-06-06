@@ -76,6 +76,22 @@ export {
   type TriageReport,
 } from './failureTriage';
 
+// Audit export (GAP-OBS-007)
+export {
+  exportAuditLog,
+  collectAuditRecords,
+  type AuditRecord,
+  type AuditExportFormat,
+} from './auditExport';
+
+// Progress summarization (GAP-OBS-008)
+export {
+  summarizeProgress,
+  formatProgressText,
+  formatProgressJson,
+  type ProgressSummary,
+} from './progressSummarizer';
+
 // Analytics and feature flags (GAP-OBS-006)
 export {
   FeatureFlagStore,

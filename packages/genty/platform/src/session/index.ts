@@ -114,3 +114,10 @@ export {
   checkBudget,
   markThresholdsTriggered,
 } from "@a5c-ai/genty-runtime/session";
+
+// Cross-run communication (GAP-AGENT-005)
+export {
+  CrossRunMailbox,
+  type CrossRunMessage,
+  type CrossRunMessageType,
+} from './crossRunComm';

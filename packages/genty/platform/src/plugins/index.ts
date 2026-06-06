@@ -49,6 +49,16 @@ export {
   type TrustLevel,
 } from './management';
 
+// Marketplace protocol (GAP-ECO-002)
+export {
+  MarketplaceClient,
+  MarketplaceInstaller,
+  type MarketplaceEntry,
+  type MarketplaceSearchResult,
+  type MarketplaceCategoryList,
+  type FetchFn,
+} from './marketplace';
+
 // CC Plugin Compatibility (GAP-ECO-001)
 export {
   CcCompatibilityLayer,

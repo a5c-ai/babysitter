@@ -139,6 +139,18 @@ export {
   type FileWriteResult,
 } from "./parallelFileOps";
 
+// Worktree isolation (GAP-TOOLS-017)
+export {
+  createWorktree,
+  removeWorktree,
+  listWorktrees,
+  isInsideWorktree,
+  parsePorcelainOutput,
+  type WorktreeConfig,
+  type WorktreeInfo,
+  type ExecSyncFn,
+} from "./worktreeIsolation";
+
 // Streaming parallelism (GAP-PAR-006)
 export {
   StreamMerger,
