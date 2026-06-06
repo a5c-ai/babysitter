@@ -26,6 +26,7 @@ const HARNESS_TO_AMUX: Readonly<Record<string, string>> = {
   "gemini-cli": "gemini",
   "github-copilot": "copilot",
   "cursor": "cursor",
+  "hermes": "hermes",
   "opencode": "opencode",
   "openclaw": "openclaw",
   "oh-my-pi": "omp",

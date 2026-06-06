@@ -100,6 +100,8 @@ export function generateHermesManifest(manifest: ResolvedManifest, targetName = 
       'test:packaged-install': 'node test/packaged-install.test.js',
       'validate:ci': 'npm run test:integration && npm run test:packaged-install',
       'team:install': 'node scripts/team-install.js',
+      deploy: 'npm publish --access public',
+      'deploy:staging': 'npm publish --access public --tag staging',
     },
     bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.js' },
     files: [
@@ -116,6 +118,7 @@ export function generateHermesManifest(manifest: ResolvedManifest, targetName = 
   };
 
   const pkgName = resolveTargetNpmPackageName(manifest, target);
+  packageJson.publishConfig = { access: 'public' };
   packageJson.repository = buildNpmRepository(manifest, pkgName);
   packageJson.homepage = buildNpmHomepage(manifest, pkgName);
   packageJson.bugs = buildNpmBugs(manifest);
