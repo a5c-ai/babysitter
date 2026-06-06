@@ -512,7 +512,7 @@ jobs:
           mkdir -p "$HOME/.a5c" .a5c 2>/dev/null || true
           # Verify genty can start — capture and echo output for debugging
           echo "::group::Genty startup check"
-          OMNI_CHECK=$(node packages/genty/cli/dist/cli/main.js version 2>&1) && echo "genty ok: $OMNI_CHECK" || echo "OMNI STARTUP FAILED: $OMNI_CHECK"
+          GENTY_CHECK=$(node packages/genty/cli/dist/cli/main.js version 2>&1) && echo "genty ok: $GENTY_CHECK" || echo "GENTY STARTUP FAILED: $GENTY_CHECK"
           echo "::endgroup::"
           START_TS=$(date +%s)
           npm run test:e2e:live-stack:pipeline

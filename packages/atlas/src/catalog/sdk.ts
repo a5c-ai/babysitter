@@ -1557,12 +1557,22 @@ export function getInteractiveSignals(harness: string): InteractiveSignals | und
 
 export function getHookSupport(harness: string, mode: 'interactive' | 'nonInteractive'): Partial<HookSupportMap> | undefined {
   const agent = getAgentVersion(harness);
-  return agent?.hookSupport?.[mode];
+  if (agent?.hookSupport?.[mode]) return agent.hookSupport[mode];
+  const allVersions = getAgentVersions(harness);
+  for (const v of allVersions) {
+    if (v.hookSupport?.[mode]) return v.hookSupport[mode];
+  }
+  return undefined;
 }
 
 export function getBridgeCapabilities(harness: string): BridgeCapabilities | undefined {
   const agent = getAgentVersion(harness);
-  return agent?.bridgeCapabilities;
+  if (agent?.bridgeCapabilities) return agent.bridgeCapabilities;
+  const allVersions = getAgentVersions(harness);
+  for (const v of allVersions) {
+    if (v.bridgeCapabilities) return v.bridgeCapabilities;
+  }
+  return undefined;
 }
 
 export function getTransportCodecCapabilities(transportId: string): CodecCapabilities | undefined {
