@@ -11,3 +11,10 @@ export {
   removeFavorite,
 } from './model-switch';
 export type { ModelSwitchState } from './model-switch';
+
+// Command discovery (UX-011)
+export {
+  CommandRegistry,
+  type CommandDefinition,
+  type CommandSuggestion,
+} from './commandDiscovery';

@@ -7,3 +7,4 @@ export * from "./kinds";
 export * from "./batching";
 export * from "./grouping";
 export * from "./concurrentExecution";
+export * from "./sleepEffect";

@@ -37,3 +37,24 @@ export {
   type WebhookRegistrationInput,
   WEBHOOK_SCHEMA_VERSION,
 } from "@a5c-ai/genty-runtime/observability";
+
+// Prompt plan (OBS-003)
+export {
+  capturePromptPlan,
+  updatePlanProgress,
+  formatPlanSummary,
+  type PlanStep,
+  type PlanStepStatus,
+  type PromptPlan,
+  type PlanSummary,
+} from './promptPlan';
+
+// Context introspection (OBS-005)
+export {
+  captureContext,
+  diffContexts,
+  formatContextReport,
+  type ContextEntry,
+  type ContextSnapshot,
+  type ContextDiff,
+} from './contextIntrospection';

@@ -22,3 +22,22 @@ export { PluginLoader } from './loader';
 
 // Version checker
 export { PluginVersionChecker, type VersionCheckResult } from './version-check';
+
+// Versioning (ECO-004)
+export {
+  checkForUpdate,
+  shouldAutoUpdate,
+  parseVersion,
+  type PluginVersion,
+  type UpdateAction,
+  type UpdateCheckResult,
+} from './versioning';
+
+// Validation (ECO-005)
+export {
+  validatePlugin,
+  diagnosePlugin,
+  formatDiagnostics,
+  type ValidationResult,
+  type DiagnosticEntry,
+} from './validation';

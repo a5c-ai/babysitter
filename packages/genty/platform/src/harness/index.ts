@@ -88,3 +88,11 @@ export {
   mapHarnessToAmuxAdapter,
   hasAmuxAdapter,
 } from "./adapters";
+
+// Circuit breaker (HADAPT-005)
+export {
+  CircuitBreaker,
+  type CircuitState,
+  type CircuitBreakerOptions,
+  type CircuitBreakerSnapshot,
+} from "./circuitBreaker";

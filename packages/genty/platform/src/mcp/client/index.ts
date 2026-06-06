@@ -46,3 +46,12 @@ export {
   McpToolExecutor,
   type McpToolExecutionRequest,
 } from "./executor";
+
+// Resource browser (TOOLS-031)
+export {
+  McpResourceBrowser,
+  type McpResource,
+  type McpResourceContent,
+  type ResourceFetcher,
+  type McpResourceBrowserOptions,
+} from "./resourceBrowser";
