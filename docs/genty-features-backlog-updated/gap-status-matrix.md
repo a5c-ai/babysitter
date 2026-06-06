@@ -79,22 +79,22 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 | GAP-PERF-001 | Prompt Caching (Ephemeral) | performance | Missing | CLOSED | S | -- | -- | -- |
 | GAP-PERF-002 | Session Compaction | performance | Partial | IN_PROGRESS | L | M | M1 | Critical |
 | GAP-SUBOBS-001 | Streaming Output Capture from Invoked Harnesses | subagent-observability | Missing | CLOSED | M | -- | -- | -- |
-| GAP-AGENT-001 | Sub-Harness Invocation with Isolation | agent-delegation | Partial | IN_PROGRESS | M | S | M0 | High |
+| GAP-AGENT-001 | Sub-Harness Invocation with Isolation | agent-delegation | Partial | CLOSED | M | -- | -- | -- |
 | GAP-AGENT-003 | Process Orchestration with Effect Routing | agent-delegation | Partial | IN_PROGRESS | L | L | M3 | High |
-| GAP-AGENT-006 | Cross-Run State Sharing | agent-delegation | Missing | IN_PROGRESS | M | S | M0 | High |
-| GAP-ECO-003 | Plugin Trust, Provenance, and Blocklist | ecosystem | Missing | IN_PROGRESS | S | S | M0 | High |
+| GAP-AGENT-006 | Cross-Run State Sharing | agent-delegation | Missing | CLOSED | M | -- | -- | -- |
+| GAP-ECO-003 | Plugin Trust, Provenance, and Blocklist | ecosystem | Missing | CLOSED | S | -- | -- | -- |
 | GAP-HADAPT-003 | Cost-Based Routing Policies | harness-adaptation | Missing | CLOSED | S | -- | -- | -- |
-| GAP-JSON-004 | JSON Session Management API | json-interaction | Missing | IN_PROGRESS | S | S | M0 | High |
+| GAP-JSON-004 | JSON Session Management API | json-interaction | Missing | CLOSED | S | -- | -- | -- |
 | GAP-MCPC-003 | Channel Permission Relay (Breakpoint Approval via Channels) | mcp-channels | Missing | CLOSED | S | -- | -- | -- |
-| GAP-OBS-NEW-001 | Embedded SDK Dashboard Webhook and Alert System | observer-integration | Missing | IN_PROGRESS | S | S | M0 | High |
+| GAP-OBS-NEW-001 | Embedded SDK Dashboard Webhook and Alert System | observer-integration | Missing | CLOSED | S | -- | -- | -- |
 | GAP-PAR-001 | Concurrent Effect Execution | parallelization | Partial | IN_PROGRESS | M | M | M1 | High |
 | GAP-PAR-003 | Multi-Harness Parallel Dispatch | parallelization | Partial | IN_PROGRESS | L | L | M1 | High |
 | GAP-PERF-004 | Streaming Message Rendering | performance | Missing | IN_PROGRESS | M | M | M1 | High |
-| GAP-PROC-001 | Process Chaining and Pipelines | process-composition | Missing | IN_PROGRESS | M | M | M0 | High |
-| GAP-PROMPT-010 | Safety and Reversibility Prompt Framework | prompt-engineering | Missing | IN_PROGRESS | S | S | M0 | High |
+| GAP-PROC-001 | Process Chaining and Pipelines | process-composition | Missing | CLOSED | M | -- | -- | -- |
+| GAP-PROMPT-010 | Safety and Reversibility Prompt Framework | prompt-engineering | Missing | CLOSED | S | -- | -- | -- |
 | GAP-REMOTE-003 | Remote Sessions (WebSocket) | remote-integration | Missing | IN_PROGRESS | L | M | M2 | High |
-| GAP-REMOTE-007 | Host Contract Layer | remote-integration | Missing | IN_PROGRESS | M | M | M0 | High |
-| GAP-SEC-002 | Trust Classes for Plugins | security | Missing | IN_PROGRESS | S | S | M0 | High |
+| GAP-REMOTE-007 | Host Contract Layer | remote-integration | Missing | CLOSED | M | -- | -- | -- |
+| GAP-SEC-002 | Trust Classes for Plugins | security | Missing | CLOSED | S | -- | -- | -- |
 | GAP-STATE-001 | Long-Term Memory Extraction | state-continuity | Missing | CLOSED | S | -- | -- | -- |
 | GAP-SUBOBS-002 | Subagent Progress Tracking | subagent-observability | Missing | IN_PROGRESS | M | S | M1 | High |
 | GAP-TOOLS-023 | Multi-Step Workflow Composition Within Effects | tools-capabilities | Partial | IN_PROGRESS | L | L | M4 | High |
@@ -113,8 +113,8 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 | GAP-PAR-006 | Streaming Parallelism | parallelization | Partial | IN_PROGRESS | M | M | M3 | Medium |
 | GAP-PERF-007 | Aggressive Parallelism | performance | Partial | IN_PROGRESS | M | M | M3 | Medium |
 | GAP-PROF-001 | Auto-Configure Orchestration from User Profile | profile-orchestration | Missing | IN_PROGRESS | M | S | M2 | Medium |
-| GAP-PROMPT-004 | Prompt Inspection Tooling | prompt-engineering | Partial | IN_PROGRESS | S | S | M0 | Medium |
-| GAP-PROMPT-006 | Instructions Loaded Hook | prompt-engineering | Missing | IN_PROGRESS | S | S | M0 | Medium |
+| GAP-PROMPT-004 | Prompt Inspection Tooling | prompt-engineering | Partial | CLOSED | S | -- | -- | -- |
+| GAP-PROMPT-006 | Instructions Loaded Hook | prompt-engineering | Missing | CLOSED | S | -- | -- | -- |
 | GAP-PROMPT-007 | Context Compression Families | prompt-engineering | Partial | IN_PROGRESS | L | L | M3 | Medium |
 | GAP-SUBOBS-004 | Subagent Health and Timeout Monitoring | subagent-observability | Missing | IN_PROGRESS | M | S | M1 | Medium |
 | GAP-TOOLS-026 | Structured User Interaction from Within Effects | tools-capabilities | Partial | IN_PROGRESS | M | S | M2 | Medium |
@@ -162,13 +162,13 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 
 | Status | Count | % |
 |--------|-------|---|
-| CLOSED | 92 | 56% |
-| IN_PROGRESS | 44 | 27% |
+| CLOSED | 103 | 62% |
+| IN_PROGRESS | 33 | 20% |
 | OPEN | 22 | 13% |
 | NEEDS_RESPEC | 7 | 4% |
 | **Total** | **165** | **100%** |
 
-*Updated 2026-06-05: 23 gaps closed today (18 Pi/Trust + 5 M0 quick wins). Was 69/147.*
+*Updated 2026-06-06: 34 gaps closed across 2 days (18 Pi/Trust + 5 M0 quick wins + 11 M0 remaining). Was 69/147.*
 
 ### By Category
 
@@ -208,12 +208,12 @@ Full 147-gap matrix from the adversarial backlog analysis. Sorted by Final Statu
 | Priority | Count |
 |----------|-------|
 | Critical | 2 |
-| High | 19 |
-| Medium | 39 |
+| High | 11 |
+| Medium | 37 |
 | Low | 6 |
-| **Total** | **66** |
+| **Total** | **56** |
 
-*Updated 2026-06-05: 23 gaps closed today. Critical: 4→2 (PERF-001+SUBOBS-001 closed). High: 29→19.*
+*Updated 2026-06-06: 34 gaps closed. Critical: 2 remaining (ECO-001, PERF-002). High: 11 remaining. M0 milestone fully cleared.*
 
 ### By Milestone
 
