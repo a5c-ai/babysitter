@@ -171,6 +171,10 @@ export const FLAG_PARSERS: Record<string, FlagParser> = {
     parsed.workspace = expectFlagValue(args, index + 1, "--workspace");
     return index + 1;
   },
+  "--tag": (parsed, args, index) => {
+    parsed.tag = expectFlagValue(args, index + 1, "--tag");
+    return index + 1;
+  },
   "--daemon-dir": (parsed, args, index) => {
     parsed.daemonDir = expectFlagValue(args, index + 1, "--daemon-dir");
     return index + 1;

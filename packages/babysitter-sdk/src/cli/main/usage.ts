@@ -31,7 +31,7 @@ function coreAgentUsage(commandName: string): string {
   ${commandName} profile:render --user|--project [--dir <dir>] [--json]
   ${commandName} instructions:babysit-skill [--harness <name>] [--interactive|--no-interactive] [--json]
   ${commandName} harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
-  ${commandName} harness:install-plugin <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]`;
+  ${commandName} harness:install-plugin <name> [--workspace <dir>] [--tag <dist-tag>] [--json] [--dry-run] [--verbose]`;
 }
 
 function coreHumanUsage(commandName: string): string {
@@ -70,7 +70,7 @@ function coreHumanUsage(commandName: string): string {
   ${commandName} compression:set <layer.key> <value> [--json]
   ${commandName} compression:reset [--json]
   ${commandName} harness:install <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
-  ${commandName} harness:install-plugin <name> [--workspace <dir>] [--json] [--dry-run] [--verbose]
+  ${commandName} harness:install-plugin <name> [--workspace <dir>] [--tag <dist-tag>] [--json] [--dry-run] [--verbose]
   ${commandName} instructions:process-create [--harness <name>] [--interactive|--no-interactive] [--json]
   ${commandName} instructions:orchestrate [--harness <name>] [--interactive|--no-interactive] [--json]
   ${commandName} instructions:breakpoint-handling [--harness <name>] [--interactive|--no-interactive] [--json]

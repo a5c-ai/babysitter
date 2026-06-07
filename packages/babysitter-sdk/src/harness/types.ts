@@ -134,6 +134,8 @@ export interface HookHandlerArgs {
 
 export interface HarnessInstallOptions {
   workspace?: string;
+  /** npm dist-tag for plugin package (staging, latest, develop). Defaults to latest. */
+  tag?: string;
   json: boolean;
   dryRun: boolean;
   verbose: boolean;

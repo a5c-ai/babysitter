@@ -266,9 +266,13 @@ export async function installHarnessPlugin(
     packageArgs.push("--global");
   }
 
+  const resolvedPackage = options.tag
+    ? `${installer.packageName}@${options.tag}`
+    : installer.packageName;
+
   return await runPackageBinaryViaNpx({
     harness: harnessName,
-    packageName: installer.packageName,
+    packageName: resolvedPackage,
     packageArgs,
     summary: options.workspace
       ? `Install Babysitter plugin for ${harnessName} into ${options.workspace}`

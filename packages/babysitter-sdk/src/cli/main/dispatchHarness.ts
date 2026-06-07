@@ -64,6 +64,7 @@ export async function executeHarnessInfraCommand(parsed: ParsedArgs): Promise<nu
       return await handleHarnessInstallPlugin({
         harnessName: parsed.positional?.[0],
         workspace: parsed.workspace,
+        tag: parsed.tag,
         json: parsed.json,
         dryRun: parsed.dryRun,
         verbose: parsed.verbose,
