@@ -4,17 +4,17 @@ This guide explains how to create blueprint packages for the babysitter SDK. A B
 
 ## Concepts
 
-- **Plugin package** -- A directory within a marketplace repository containing instruction files and optional babysitter process files.
+- **Blueprint package** -- A directory within a marketplace repository containing instruction files and optional babysitter process files.
 - **Marketplace** -- A Git repository with a `marketplace.json` manifest that indexes available blueprints.
-- **Registry** -- A local JSON file (`plugin-registry.json`) that tracks which blueprints are installed and at what version.
-- **Scope** -- Plugins can be installed at `global` scope (`~/.a5c/blueprints/`) or `project` scope (`<projectDir>/.a5c/blueprints/`).
+- **Registry** -- A local JSON file (`blueprint-registry.json`) that tracks which blueprints are installed and at what version.
+- **Scope** -- Blueprints can be installed at `global` scope (`~/.a5c/blueprints/`) or `project` scope (`<projectDir>/.a5c/blueprints/`).
 
 ## Blueprint Package Directory Structure
 
 A blueprint package is a directory with the following layout:
 
 ```
-my-plugin/
+my-blueprint/
   install.md              # Agent-readable installation instructions
   uninstall.md            # Agent-readable uninstallation instructions
   configure.md            # Agent-readable configuration instructions
@@ -44,7 +44,7 @@ Guidelines:
 ### Example install.md
 
 ```markdown
-# Install my-plugin
+# Install my-blueprint
 
 ## Prerequisites
 - Node.js 18 or later
@@ -88,19 +88,19 @@ The `uninstall.md` file contains instructions for removing the plugin. It should
 1. Remove the blueprint entry from `.claude/settings.json` under `permissions.allow`.
 2. Delete the plugin configuration directory:
    ```
-   rm -rf .a5c/plugins/my-plugin
+   rm -rf .a5c/plugins/my-blueprint
    ```
 3. Remove any environment variables set during installation.
 ```
 
 ## Writing configure.md
 
-The `configure.md` file contains instructions for configuring or reconfiguring the plugin after installation. This is useful for changing settings, updating API keys, or adjusting plugin behavior.
+The `configure.md` file contains instructions for configuring or reconfiguring the blueprint after installation. This is useful for changing settings, updating API keys, or adjusting blueprint behavior.
 
 ### Example configure.md
 
 ```markdown
-# Configure my-plugin
+# Configure my-blueprint
 
 ## Available Settings
 
@@ -170,7 +170,7 @@ Contain agent-readable instructions for performing the migration:
 
 ## Steps
 
-1. Open `.a5c/plugins/my-plugin/config.json`
+1. Open `.a5c/blueprints/my-blueprint/config.json`
 2. Move the `timeout` value:
    - Remove `"timeout": <value>` from the top level
    - Add `"settings": { "timeout": <value> }` if the `settings` key does not exist
@@ -199,22 +199,22 @@ With a corresponding marketplace.json entry:
 
 ```json
 {
-  "name": "example-plugin",
+  "name": "example-blueprint",
   "description": "An example Babysitter blueprint",
   "latestVersion": "2.1.0",
   "versions": ["2.1.0", "2.0.0", "1.1.0", "1.0.0"],
-  "packagePath": "plugins/example-plugin",
+  "packagePath": "blueprints/example-blueprint",
   "tags": ["example", "tutorial"],
   "author": "my-org"
 }
 ```
 
-## Plugin Lifecycle
+## Blueprint Lifecycle
 
-The complete lifecycle for a plugin from the agent's perspective:
+The complete lifecycle for a blueprint from the agent's perspective:
 
-1. **Discovery** -- `blueprint:list-plugins` to browse available blueprints in a marketplace.
-2. **Install** -- `blueprint:install` returns instructions from `install.md`. Agent executes them. Then `blueprint:update-registry` records the version.
-3. **Configure** -- `blueprint:configure` returns instructions from `configure.md`. Agent executes them.
-4. **Update** -- `blueprint:update` resolves the migration chain and returns ordered migration instructions. Agent executes each migration step. Then `blueprint:update-registry` records the new version.
-5. **Uninstall** -- `blueprint:uninstall` returns instructions from `uninstall.md`. Agent executes them. Then `blueprint:remove-from-registry` cleans up the registry.
+1. **Discovery** -- `blueprints:list-blueprints` to browse available blueprints in a marketplace.
+2. **Install** -- `blueprints:install` returns instructions from `install.md`. Agent executes them. Then `blueprints:update-registry` records the version.
+3. **Configure** -- `blueprints:configure` returns instructions from `configure.md`. Agent executes them.
+4. **Update** -- `blueprints:update` resolves the migration chain and returns ordered migration instructions. Agent executes each migration step. Then `blueprints:update-registry` records the new version.
+5. **Uninstall** -- `blueprints:uninstall` returns instructions from `uninstall.md`. Agent executes them. Then `blueprints:remove-from-registry` cleans up the registry.

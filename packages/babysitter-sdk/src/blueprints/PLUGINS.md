@@ -155,43 +155,43 @@ All commands accept `--json` for machine-readable output and `--scope global|pro
 
 ```bash
 # Clone a marketplace repository
-babysitter plugin:add-marketplace --marketplace-url <url> [--marketplace-path <relative-path>] [--marketplace-branch <ref>] --scope global
+babysitter blueprints:add-marketplace --marketplace-url <url> [--marketplace-path <relative-path>] [--marketplace-branch <ref>] --scope global
 
 # Pull latest changes for a marketplace
-babysitter plugin:update-marketplace --marketplace-name <name> --scope global
+babysitter blueprints:update-marketplace --marketplace-name <name> --scope global
 
 # List plugins available in a marketplace
-babysitter plugin:list-plugins --marketplace-name <name> --scope global
+babysitter blueprints:list-blueprints --marketplace-name <name> --scope global
 ```
 
 ### Plugin Lifecycle Commands
 
 ```bash
 # Install a plugin (fetches instructions and optional process file)
-babysitter plugin:install --plugin-name <name> --marketplace-name <mp> --scope global
+babysitter blueprints:install --plugin-name <name> --marketplace-name <mp> --scope global
 
 # Uninstall a plugin (fetches uninstall instructions)
-babysitter plugin:uninstall --plugin-name <name> --scope global
+babysitter blueprints:uninstall --plugin-name <name> --scope global
 
 # Update a plugin (resolves migration chain between versions)
-babysitter plugin:update --plugin-name <name> --marketplace-name <mp> --scope global
+babysitter blueprints:update --plugin-name <name> --marketplace-name <mp> --scope global
 
 # Show configure instructions for an installed plugin
-babysitter plugin:configure --plugin-name <name> --marketplace-name <mp> --scope global
+babysitter blueprints:configure --plugin-name <name> --marketplace-name <mp> --scope global
 ```
 
 ### Registry Commands
 
 ```bash
 # List all installed plugins
-babysitter plugin:list-installed --scope global
+babysitter blueprints:list-installed --scope global
 
 # Register or update a plugin entry in the registry
-babysitter plugin:update-registry --plugin-name <name> --plugin-version <ver> \
+babysitter blueprints:update-registry --plugin-name <name> --plugin-version <ver> \
   --marketplace-name <mp> --scope global
 
 # Remove a plugin entry from the registry
-babysitter plugin:remove-from-registry --plugin-name <name> --scope global
+babysitter blueprints:remove-from-registry --plugin-name <name> --scope global
 ```
 
 ## Module Overview

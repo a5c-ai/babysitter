@@ -89,21 +89,21 @@ That is the present discovery model. The repo does not currently evidence a firs
 
 Current lifecycle commands are explicit and deterministic at the SDK layer:
 
-- `plugin:add-marketplace`
-- `plugin:update-marketplace`
-- `plugin:list-plugins`
-- `plugin:install`
-- `plugin:configure`
-- `plugin:uninstall`
-- `plugin:list-installed`
-- `plugin:update-registry`
-- `plugin:remove-from-registry`
+- `blueprints:add-marketplace`
+- `blueprints:update-marketplace`
+- `blueprints:list-blueprints`
+- `blueprints:install`
+- `blueprints:configure`
+- `blueprints:uninstall`
+- `blueprints:list-installed`
+- `blueprints:update-registry`
+- `blueprints:remove-from-registry`
 
-`plugin:install` resolves the package from the marketplace, reads `install.md`, and returns any optional `install-process.js`. `plugin:configure` and `plugin:uninstall` do the same for their respective lifecycle files. The AI agent performs the package instructions; the SDK handles resolution, manifest reading, and registry operations.
+`blueprints:install` resolves the package from the marketplace, reads `install.md`, and returns any optional `install-process.js`. `blueprints:configure` and `blueprints:uninstall` do the same for their respective lifecycle files. The AI agent performs the package instructions; the SDK handles resolution, manifest reading, and registry operations.
 
 ### Registry Tracking
 
-Installed state is tracked in `plugin-registry.json`, scoped globally or per project. The registry records which plugins are installed, which marketplace they came from, and which version is active.
+Installed state is tracked in `blueprints-registry.json`, scoped globally or per project. The registry records which blueprints are installed, which marketplace they came from, and which version is active.
 
 That registry is the current operational record. It is the concrete answer to "what is installed now?" and "what version is this project on?".
 
@@ -111,7 +111,7 @@ That registry is the current operational record. It is the concrete answer to "w
 
 ### Update Behavior
 
-Plugin updates are currently explicit. `plugin:update`:
+Blueprint updates are currently explicit. `blueprints:update`:
 
 - reads the installed version from the registry,
 - resolves the target version from the marketplace manifest,
@@ -124,7 +124,7 @@ This is the current compatibility mechanism: manifest metadata plus migration fi
 
 Compatibility claims should be grounded in:
 
-- plugin manifests,
+- blueprint manifests,
 - marketplace metadata,
 - compiler-emitted target outputs,
 - package instruction files,
@@ -136,21 +136,21 @@ If a compatibility matrix or requirement is documented, it should be derivable f
 
 Current rollback behavior is package- and operator-defined, not platform-governance-defined. In practice that means:
 
-- uninstall instructions can remove plugin-managed state,
+- uninstall instructions can remove blueprint-managed state,
 - reconfiguration can move a project to a supported setup,
 - migration design can preserve forward or backward movement where authors explicitly provide it.
 
-There is no repo evidence for a universal automatic rollback service supervising all plugins.
+There is no repo evidence for a universal automatic rollback service supervising all blueprints.
 
 ## Out Of Scope For Current V6 Docs
 
-The following ideas may become future product or platform concerns, but they are not current plugin-ecosystem guarantees and should not be written as if they already exist:
+The following ideas may become future product or platform concerns, but they are not current blueprint-ecosystem guarantees and should not be written as if they already exist:
 
 - certification programs or trust tiers beyond concrete manifest validation,
 - compliance attestations such as SOC 2, GDPR, or HIPAA validation pipelines,
 - dispute resolution, takedown programs, or marketplace moderation operations,
 - revenue sharing or paid marketplace settlement mechanics,
-- ML-based performance-regression detection for installed plugins,
+- ML-based performance-regression detection for installed blueprints,
 - automatic mitigation or automatic rollback services,
 - developer certification or support-tier programs.
 

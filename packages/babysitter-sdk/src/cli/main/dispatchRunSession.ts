@@ -302,7 +302,7 @@ async function executeSupportCommand(parsed: ParsedArgs): Promise<number | undef
         return await handlePluginAddMarketplace(args);
       case "plugin:update-marketplace":
         return await handlePluginUpdateMarketplace(args);
-      case "plugin:list-plugins":
+      case "plugin:list-blueprints":
         return await handlePluginListPlugins(args);
       case "plugin:install":
         return await handlePluginInstall(args);
@@ -327,7 +327,7 @@ function normalizeBlueprintCommand(command: string): string {
   switch (command) {
     case "blueprints:list":
     case "blueprints:marketplace":
-      return "plugin:list-plugins";
+      return "plugin:list-blueprints";
     case "blueprints:add-marketplace":
       return "plugin:add-marketplace";
     case "blueprints:update-marketplace":
@@ -348,7 +348,7 @@ function normalizeBlueprintCommand(command: string): string {
 
 function toBlueprintCommand(command: string): string {
   switch (command) {
-    case "plugin:list-plugins":
+    case "plugin:list-blueprints":
       return "blueprints:list";
     case "plugin:add-marketplace":
       return "blueprints:add-marketplace";

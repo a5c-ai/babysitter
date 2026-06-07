@@ -63,7 +63,7 @@ function coreHumanUsage(commandName: string): string {
   ${commandName} blueprints:update-marketplace --marketplace-name <name> [--marketplace-branch <ref>] [--global|--project] [--json] [--verbose]
   ${commandName} blueprints:update-registry [<name>] [--plugin-name <name>] [--plugin-version <ver>] [--global|--project] [--json] [--verbose]
   ${commandName} blueprints:remove-from-registry [<name>] [--plugin-name <name>] [--global|--project] [--json] [--verbose]
-  Deprecated aliases: plugin:install, plugin:uninstall, plugin:update, plugin:configure, plugin:list-installed, plugin:list-plugins, plugin:add-marketplace, plugin:update-marketplace, plugin:update-registry, plugin:remove-from-registry.
+  Deprecated aliases: plugin:install, plugin:uninstall, plugin:update, plugin:configure, plugin:list-installed, plugin:list-blueprints, plugin:add-marketplace, plugin:update-marketplace, plugin:update-registry, plugin:remove-from-registry.
   ${commandName} tokens:stats [runId] [--all] [--json]
   ${commandName} compression:status [--json]
   ${commandName} compression:toggle <layer> <on|off> [--json]

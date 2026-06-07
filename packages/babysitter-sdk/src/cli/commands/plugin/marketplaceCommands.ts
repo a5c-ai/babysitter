@@ -106,7 +106,7 @@ export async function handlePluginUpdateMarketplace(args: PluginCommandArgs): Pr
 export async function handlePluginListPlugins(args: PluginCommandArgs): Promise<number> {
   const { scope, json } = args;
   let { marketplaceName } = args;
-  if (!requireScope(scope, 'plugin:list-plugins', json)) {
+  if (!requireScope(scope, 'plugin:list-blueprints', json)) {
     return 1;
   }
 
@@ -115,7 +115,7 @@ export async function handlePluginListPlugins(args: PluginCommandArgs): Promise<
     marketplaceName = await autoResolveMarketplace(scope, projectDir) ?? undefined;
   }
 
-  const name = requireArg(marketplaceName, '--marketplace-name', 'plugin:list-plugins', json);
+  const name = requireArg(marketplaceName, '--marketplace-name', 'plugin:list-blueprints', json);
   if (!name) {
     return 1;
   }
@@ -130,6 +130,6 @@ export async function handlePluginListPlugins(args: PluginCommandArgs): Promise<
     return 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return emitError('plugin:list-plugins', json, 'list_failed', message);
+    return emitError('plugin:list-blueprints', json, 'list_failed', message);
   }
 }

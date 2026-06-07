@@ -48,16 +48,16 @@ attributes:
     Source: packages/babysitter-sdk/src/cli/main/program.ts:75-85.
 ---
 nodeKind: InteractionPrimitive
-id: interaction-primitive:babysitter-sdk-cli-plugin
+id: interaction-primitive:babysitter-sdk-cli-blueprint
 attributes:
-  displayName: "babysitter plugin:{install|uninstall|update|configure|list-installed|list-plugins|add-marketplace|update-marketplace|update-registry|remove-from-registry}"
+  displayName: "babysitter blueprints:{install|uninstall|update|configure|list-installed|list-blueprints|add-marketplace|update-marketplace|update-registry|remove-from-registry}"
   kind: cli-subcommand
   surface: cli
   parentBin: "babysitter"
-  subcommandVerb: "plugin"
+  subcommandVerb: "blueprints"
   flags: []
   description: |
-    Plugin management — install, configure, marketplace operations.
+    Blueprint management — install, configure, marketplace operations.
     Source: packages/babysitter-sdk/src/cli/main/program.ts:67-69.
 ---
 nodeKind: InteractionPrimitive

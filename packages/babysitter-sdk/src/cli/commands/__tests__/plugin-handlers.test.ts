@@ -78,7 +78,7 @@ describe("blueprint command surface", () => {
     expect(commands).toContain("blueprints:list");
     expect(commands).toContain("blueprints:marketplace");
     expect(commands).toContain("plugin:install");
-    expect(commands).toContain("plugin:list-plugins");
+    expect(commands).toContain("plugin:list-blueprints");
   });
 });
 

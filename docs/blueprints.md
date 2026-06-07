@@ -35,22 +35,22 @@ The SDK still reads legacy `.a5c/marketplaces/` clones for compatibility. New cl
 
 ```bash
 # Add the official marketplace
-babysitter plugin:add-marketplace \
+babysitter blueprints:add-marketplace \
   --marketplace-url https://github.com/a5c-ai/babysitter \
   --marketplace-path blueprints/a5c/marketplace \
   --global
 
 # See what is available
-babysitter plugin:list-plugins --marketplace-name babysitter --global
+babysitter blueprints:list-blueprints --marketplace-name babysitter --global
 
 # Install a blueprint
-babysitter plugin:install testing-suite --global
+babysitter blueprints:install testing-suite --global
 
 # Reconfigure later
-babysitter plugin:configure testing-suite --project
+babysitter blueprints:configure testing-suite --project
 
 # Remove it
-babysitter plugin:uninstall testing-suite --global
+babysitter blueprints:uninstall testing-suite --global
 ```
 
 ## Command Reference
@@ -59,16 +59,16 @@ All commands accept `--json` for machine-readable output and `--global|--project
 
 | Command | Description |
 | --- | --- |
-| `plugin:add-marketplace` | Clone a marketplace repository. |
-| `plugin:update-marketplace` | Pull the latest marketplace changes. |
-| `plugin:list-plugins` | List available blueprints in a marketplace. |
-| `plugin:install` | Read install instructions for a blueprint. |
-| `plugin:update` | Resolve migration instructions for an installed blueprint. |
-| `plugin:configure` | Read configuration instructions for a blueprint. |
-| `plugin:uninstall` | Read uninstall instructions for a blueprint. |
-| `plugin:list-installed` | List installed blueprints. |
-| `plugin:update-registry` | Register or update an installed blueprint entry. |
-| `plugin:remove-from-registry` | Remove a blueprint registry entry. |
+| `blueprints:add-marketplace` | Clone a marketplace repository. |
+| `blueprints:update-marketplace` | Pull the latest marketplace changes. |
+| `blueprints:list-blueprints` | List available blueprints in a marketplace. |
+| `blueprints:install` | Read install instructions for a blueprint. |
+| `blueprints:update` | Resolve migration instructions for an installed blueprint. |
+| `blueprints:configure` | Read configuration instructions for a blueprint. |
+| `blueprints:uninstall` | Read uninstall instructions for a blueprint. |
+| `blueprints:list-installed` | List installed blueprints. |
+| `blueprints:update-registry` | Register or update an installed blueprint entry. |
+| `blueprints:remove-from-registry` | Remove a blueprint registry entry. |
 
 Deprecated `plugin:*` aliases forward to these commands and print a deprecation warning in human-readable mode.
 
@@ -79,14 +79,12 @@ my-blueprint/
   install.md
   uninstall.md
   configure.md
-  plugin.json
+  blueprint.json
   migrations/
     1.0.0_to_1.1.0.md
   process/
     main.js
 ```
-
-The marketplace manifest still uses the existing `plugins` object field for compatibility with published marketplace data, but documentation should refer to the packages as blueprints.
 
 ## Agent Plugins Stay Separate
 

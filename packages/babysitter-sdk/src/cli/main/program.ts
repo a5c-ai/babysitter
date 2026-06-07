@@ -67,7 +67,7 @@ const SHARED_VALID_COMMANDS = [
   "blueprints:list-installed", "blueprints:marketplace", "blueprints:add-marketplace", "blueprints:update-marketplace",
   "blueprints:update-registry", "blueprints:remove-from-registry",
   "plugin:install", "plugin:uninstall", "plugin:update", "plugin:configure", "plugin:list-installed",
-  "plugin:list-plugins", "plugin:add-marketplace", "plugin:update-marketplace", "plugin:update-registry",
+  "plugin:list-blueprints", "plugin:add-marketplace", "plugin:update-marketplace", "plugin:update-registry",
   "plugin:remove-from-registry", "instructions:babysit-skill", "instructions:process-create", "instructions:orchestrate",
   "instructions:breakpoint-handling", "health", "configure", "tokens:stats", "compression:status", "compression:toggle",
   "compression:set", "compression:reset", "compress-output", "breakpoint:approve-rule", "breakpoint:remove-rule",

@@ -31,12 +31,12 @@ babysitter blueprints:update-marketplace --marketplace-name <name> [--marketplac
 ### List blueprints in a marketplace
 
 ```bash
-babysitter blueprints:list-plugins --marketplace-name <name> --global|--project [--json]
+babysitter blueprints:list-blueprints --marketplace-name <name> --global|--project [--json]
 ```
 
 ## Blueprint Lifecycle
 
-For `blueprint:install`, `blueprint:update`, `blueprint:configure`, and `blueprint:list-plugins`, the `--marketplace-name` flag is auto-detected when only one marketplace is cloned for the selected scope.
+For `blueprint:install`, `blueprint:update`, `blueprint:configure`, and `blueprint:list-blueprints`, the `--marketplace-name` flag is auto-detected when only one marketplace is cloned for the selected scope.
 
 ```bash
 babysitter blueprints:install --plugin-name <name> [--marketplace-name <mp>] --global|--project [--json]
