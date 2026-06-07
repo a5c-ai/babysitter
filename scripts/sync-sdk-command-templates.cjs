@@ -11,7 +11,7 @@ const {
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const SOURCE_ROOT = path.join(REPO_ROOT, 'plugins', 'babysitter-unified', 'commands');
-const TARGET_ROOT = path.join(REPO_ROOT, 'packages', 'sdk', 'src', 'prompts', 'templates', 'commands');
+const TARGET_ROOT = path.join(REPO_ROOT, 'packages', 'babysitter-sdk', 'src', 'prompts', 'templates', 'commands');
 const LABEL = 'sdk command templates';
 const CHECK = process.argv.includes('--check');
 const REQUIRED_SKILL_COMMANDS = ['blueprints'];

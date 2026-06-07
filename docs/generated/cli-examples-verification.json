@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-05-07",
+  "generatedAt": "2026-06-07",
   "generatedBy": "scripts/generate-cli-examples-artifacts.cjs",
   "docsSurface": {
     "cliExamples": "docs/cli-examples.md",
-    "testingReadme": "packages/sdk/src/testing/README.md",
+    "testingReadme": "packages/babysitter-sdk/src/testing/README.md",
     "sdkReference": "library/reference/sdk.md",
     "generatedIndex": "docs/generated/cli-examples-verification.md"
   },
   "rootScripts": [
     {
       "name": "build:runtime",
-      "command": "npm run build:runtime:babysitter-agent-deps && npm run build --workspace=@a5c-ai/babysitter-agent"
+      "command": "npm run build:runtime:genty-platform-deps && npm run build --workspace=@a5c-ai/genty-platform"
     },
     {
       "name": "docs:prepare",
@@ -52,7 +52,7 @@
     },
     {
       "name": "smoke:cli",
-      "command": "node scripts/smoke-cli.js --runs-dir packages/sdk/test-fixtures/cli/runs/smoke"
+      "command": "node scripts/smoke-cli.js --runs-dir packages/babysitter-sdk/test-fixtures/cli/runs/smoke"
     }
   ],
   "canonicalWorkflow": [
@@ -65,8 +65,8 @@
     {
       "step": "Build the SDK CLI used by the smoke harness",
       "command": "npm run build --workspace=@a5c-ai/babysitter-sdk",
-      "implementation": "packages/sdk/package.json#scripts.build",
-      "artifact": "packages/sdk/dist/"
+      "implementation": "packages/babysitter-sdk/package.json#scripts.build",
+      "artifact": "packages/babysitter-sdk/dist/"
     },
     {
       "step": "Generate repo docs artifacts, including this traceability index",
@@ -78,7 +78,7 @@
       "step": "Run the real CLI smoke harness",
       "command": "npm run docs:examples:smoke",
       "implementation": "package.json#scripts.docs:examples:smoke",
-      "artifact": "packages/sdk/test-fixtures/cli/runs/smoke/"
+      "artifact": "packages/babysitter-sdk/test-fixtures/cli/runs/smoke/"
     },
     {
       "step": "Validate fenced code samples and command references in staged docs",
@@ -97,8 +97,8 @@
     {
       "surface": "CLI walkthrough command flow in docs/cli-examples.md",
       "command": "npm run docs:examples:smoke",
-      "implementation": "packages/sdk/scripts/smoke-cli.js",
-      "evidence": "packages/sdk/test-fixtures/cli/runs/smoke/"
+      "implementation": "packages/babysitter-sdk/scripts/smoke-cli.js",
+      "evidence": "packages/babysitter-sdk/test-fixtures/cli/runs/smoke/"
     },
     {
       "surface": "Repo-published command references and fenced examples",
@@ -115,8 +115,8 @@
     {
       "surface": "Deterministic SDK harness APIs referenced from docs",
       "command": "npm run test --workspace=@a5c-ai/babysitter-sdk",
-      "implementation": "packages/sdk/package.json#scripts.test",
-      "evidence": "packages/sdk/src/testing/__tests__/runHarness.test.ts, packages/sdk/src/testing/__tests__/parallelHarness.test.ts, packages/sdk/src/runtime/__tests__/deterministicHarness.test.ts"
+      "implementation": "packages/babysitter-sdk/package.json#scripts.test",
+      "evidence": "packages/babysitter-sdk/src/testing/__tests__/runHarness.test.ts, packages/babysitter-sdk/src/testing/__tests__/parallelHarness.test.ts, packages/babysitter-sdk/src/runtime/__tests__/deterministicHarness.test.ts"
     },
     {
       "surface": "Generated CLI/docs traceability inventory",
@@ -127,19 +127,19 @@
   ],
   "sourceFiles": [
     "package.json",
-    "packages/sdk/package.json",
-    "packages/sdk/scripts/smoke-cli.js",
+    "packages/babysitter-sdk/package.json",
+    "packages/babysitter-sdk/scripts/smoke-cli.js",
     "scripts/docs-code-samples-check.cjs",
     "scripts/docs-style-check.cjs",
     "scripts/docs-freshness-report.cjs",
     "docs/cli-examples.md",
-    "packages/sdk/src/testing/README.md",
+    "packages/babysitter-sdk/src/testing/README.md",
     "library/reference/sdk.md"
   ],
   "smokeHarness": {
     "command": "npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk",
-    "implementation": "packages/sdk/scripts/smoke-cli.js",
-    "defaultRunsDir": "packages/sdk/test-fixtures/cli/runs/smoke",
+    "implementation": "packages/babysitter-sdk/scripts/smoke-cli.js",
+    "defaultRunsDir": "packages/babysitter-sdk/test-fixtures/cli/runs/smoke",
     "supportedFlags": [
       "--runs-dir",
       "--cli",

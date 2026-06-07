@@ -48,7 +48,7 @@ function assertScriptExists(name, scripts, owner) {
 
 function buildTraceabilityModel(repoRoot) {
   const rootPackagePath = path.join(repoRoot, "package.json");
-  const sdkPackagePath = path.join(repoRoot, "packages", "sdk", "package.json");
+  const sdkPackagePath = path.join(repoRoot, "packages", "babysitter-sdk", "package.json");
   const rootPackage = readJson(rootPackagePath);
   const sdkPackage = readJson(sdkPackagePath);
 

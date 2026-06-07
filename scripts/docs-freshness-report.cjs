@@ -192,7 +192,7 @@ function main() {
 
   const now = Date.now();
   const validCommands = collectValidCommands(
-    fs.readFileSync(path.join(repoRoot, "packages", "sdk", "src", "cli", "main", "program.ts"), "utf8"),
+    fs.readFileSync(path.join(repoRoot, "packages", "babysitter-sdk", "src", "cli", "main", "program.ts"), "utf8"),
   );
   const knownPackages = new Set(collectKnownPackages());
   // External plugin packages — derived from Atlas PluginTarget records
