@@ -23,8 +23,8 @@ Process definitions can express fork-join: spawn parallel branches that inherit 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| Task batching | `packages/sdk/src/tasks/batching.ts` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| Task batching | `packages/babysitter-sdk/src/tasks/batching.ts` |
 
 ## Recommendation
 Phase 3 implementation. Define fork-join as a first-class pattern in process definitions, with branch context inheritance and join-point aggregation.

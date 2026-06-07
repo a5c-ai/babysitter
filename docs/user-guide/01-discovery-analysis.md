@@ -562,7 +562,7 @@ Based on analysis of existing documentation:
 | CLI Examples | `/docs/cli-examples.md` | Usage patterns |
 | Breakpoints README | `/packages/breakpoints/README.md` | Human approval system |
 | Process Library README | `/library/README.md` | Built-in library overview |
-| SDK Package.json | `/packages/sdk/package.json` | Version, dependencies |
+| SDK Package.json | `/packages/babysitter-sdk/package.json` | Version, dependencies |
 
 ## Appendix B: Key Metrics for Documentation Success
 

@@ -31,7 +31,7 @@ HIGH VALUE for harness assimilation - modern terminal AI interface with sophisti
 **Integration Viability:** PARTIAL - Excellent MCP integration and skills system but **lacks critical stop-hook capability** for babysitter's orchestration loop interruption needs.
 
 - **Harness Adapter**: New harness integration for Crush platform
-  - Adapter implementation: `createCrushAdapter` in `packages/sdk/src/harness/adapters/`
+  - Adapter implementation: `createCrushAdapter` in `packages/babysitter-sdk/src/harness/adapters/`
   - Plugin structure: `plugins/babysitter-crush/` for Charmbracelet Crush integration
   - CLI integration: Terminal UI patterns, session management, MCP server orchestration
   - Current limitation: **No stop hooks for conversation interruption**

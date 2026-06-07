@@ -22,9 +22,9 @@ Resume command shows available runs with status, progress percentage, last activ
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
-| Session management | `packages/sdk/src/session/` |
-| Interaction module | `packages/sdk/src/interaction/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| Interaction module | `packages/babysitter-sdk/src/interaction/` |
 
 ## Recommendation
 Phase 3 implementation. Enhance harness:resume with run picker showing status and context summaries.

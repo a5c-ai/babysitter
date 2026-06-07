@@ -45,7 +45,7 @@ Use it to answer three questions quickly:
 | `packages/tasks-adapter` | Public package | [packages/tasks-adapter/README.md](../packages/tasks-adapter/README.md) | — | README is the canonical package-level contract. |
 | `packages/cloud` | Public package | [packages/cloud/README.md](../packages/cloud/README.md) | — | README is the canonical public docs home today; the validation matrix does not currently expose a separate central docs entrypoint for this package. |
 | `packages/kradle/core` | Public package | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Kubernetes-native Git forge runtime. No package README today; this map is the documentation home until a README is added. |
-| `packages/sdk` | Public package | [packages/sdk/README.md](../packages/sdk/README.md) | — | README is the canonical package-level contract. |
+| `packages/babysitter-sdk` | Public package | [packages/babysitter-sdk/README.md](../packages/babysitter-sdk/README.md) | — | README is the canonical package-level contract. |
 
 ## Public product and operator apps
 

@@ -15,7 +15,7 @@ skills, hooks, output-styles, MCP servers, and LSP servers. Babysitter needs to
 load and execute CC plugins so that the orchestration platform benefits from the
 CC plugin ecosystem.
 
-**This is NOT about babysitter's existing plugin system** (`packages/sdk/src/plugins/`).
+**This is NOT about babysitter's existing plugin system** (`packages/babysitter-sdk/src/plugins/`).
 Babysitter already has harness-integration plugins (`plugins/babysitter/`,
 `plugins/babysitter-codex/`, etc.) and a marketplace (`blueprints/a5c/marketplace/`).
 This gap is about a NEW compatibility layer that bridges CC's plugin format into
@@ -60,7 +60,7 @@ CC plugin loading (`src/utils/plugins/`):
 - `schemas.ts` -- PluginManifest Zod schema
 
 ## Current State
-Babysitter has its OWN plugin system (`packages/sdk/src/plugins/`) with:
+Babysitter has its OWN plugin system (`packages/babysitter-sdk/src/plugins/`) with:
 - `PluginRegistryEntry`, `MarketplaceManifest` types
 - `readPluginPackage`, `listMarketplacePlugins` functions
 - Migration support (`parseMigrationFilename`, `resolveMigrationChain`)
@@ -90,7 +90,7 @@ separate plugin implementations.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Babysitter plugins module | `packages/sdk/src/plugins/` |
+| Babysitter plugins module | `packages/babysitter-sdk/src/plugins/` |
 | CC plugin loader | `src/utils/plugins/pluginLoader.ts` |
 | CC plugin schema | `src/utils/plugins/schemas.ts` |
 | CC plugin types | `src/types/plugin.ts` |

@@ -27,9 +27,9 @@ CC's Ink infrastructure includes:
 - `src/components/VirtualMessageList.tsx` -- virtualized scrolling message list
 
 ## Current State
-No embedded SDK dashboard exists yet (`packages/sdk/src/dashboard/` does not exist).
+No embedded SDK dashboard exists yet (`packages/babysitter-sdk/src/dashboard/` does not exist).
 CLI commands (`run:status`, `task:list`) output flat JSON or plain text tables.
-Interaction module (`packages/sdk/src/interaction/`) uses raw readline for prompts.
+Interaction module (`packages/babysitter-sdk/src/interaction/`) uses raw readline for prompts.
 No Ink, no React, no component model for terminal rendering.
 
 ## Target State
@@ -52,13 +52,13 @@ uses Ink for rich breakpoint prompts.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
-| Interaction module | `packages/sdk/src/interaction/` |
-| CLI entry | `packages/sdk/src/cli/main.ts` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
+| Interaction module | `packages/babysitter-sdk/src/interaction/` |
+| CLI entry | `packages/babysitter-sdk/src/cli/main.ts` |
 | CC reference | `src/ink.ts` |
 | CC components | `src/components/` (144 files) |
 
 ## Recommendation
 Phase 2 foundation. Add `ink` and `react` as SDK dependencies. Create
-`packages/sdk/src/rendering/` with base components. Build embedded SDK dashboard
-(`packages/sdk/src/dashboard/`) as proof of concept. Then extend to CLI commands and breakpoint UI.
+`packages/babysitter-sdk/src/rendering/` with base components. Build embedded SDK dashboard
+(`packages/babysitter-sdk/src/dashboard/`) as proof of concept. Then extend to CLI commands and breakpoint UI.

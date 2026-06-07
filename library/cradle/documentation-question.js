@@ -290,7 +290,7 @@ export const searchExistingDocsTask = defineTask('search-existing-docs', (args, 
       instructions: [
         'Search these documentation sources:',
         '  - CLAUDE.md (project instructions)',
-        '  - packages/sdk/sdk.md (SDK API reference)',
+        '  - packages/babysitter-sdk/sdk.md (SDK API reference)',
         '  - README.md files in relevant packages',
         '  - plugins/babysitter-unified/skills/babysit/SKILL.md (babysit skill docs)',
         '  - library/reference/ (advanced patterns)',

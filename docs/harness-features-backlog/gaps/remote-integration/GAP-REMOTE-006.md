@@ -22,8 +22,8 @@ MCP client with stdio and HTTP transport. mcp:connect registers MCP server endpo
 ## Key Files
 | Component | Path |
 |-----------|------|
-| MCP server | `packages/sdk/src/mcp/` |
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
 
 ## Recommendation
 Phase 4 implementation. Create MCP client module. Register external MCP server tools as agentic tools. Support resource listing and reading.

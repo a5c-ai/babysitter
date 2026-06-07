@@ -120,7 +120,7 @@ The Phase 2 audit upgraded many gaps from Missing/Partial to IMPLEMENTED. This a
 
 **Target State:** "ctx.subprocess() effect that invokes a child process. Child process inherits parent context. Results returned to parent as effect result."
 
-**What exists:** `packages/sdk/src/runtime/intrinsics/subprocess.ts` provides `runSubprocessIntrinsic` with `SubprocessInvocation` type including `processPath`, `exportName`, `processId`, `prompt`, `inputs`, `inputSchema`, `outputSchema`, `harness`, `model`, `maxIterations`, `shareSession`. Imported by `processContext.ts` -- wired into the context object.
+**What exists:** `packages/babysitter-sdk/src/runtime/intrinsics/subprocess.ts` provides `runSubprocessIntrinsic` with `SubprocessInvocation` type including `processPath`, `exportName`, `processId`, `prompt`, `inputs`, `inputSchema`, `outputSchema`, `harness`, `model`, `maxIterations`, `shareSession`. Imported by `processContext.ts` -- wired into the context object.
 
 **Verdict:** Correctly marked IMPLEMENTED. The ctx.subprocess() intrinsic is fully available.
 
@@ -216,7 +216,7 @@ Evidence states `AskUserQuestion` tool supports structured mode but no `ctx.ask(
 
 ## 4. RENAME AWARENESS: Path References
 
-All evidence paths in phase2-codebase-audit.json reference current paths (`packages/genty/platform/src/...` and `packages/sdk/src/...`). No stale references to old paths like `packages/sdk/src/harness/` where the code has moved to `packages/genty/platform/src/harness/`. One minor note: `packages/sdk/src/harness/types.ts` is still referenced for `HarnessCapability` -- this appears to still be valid as the SDK has its own harness types that the platform imports.
+All evidence paths in phase2-codebase-audit.json reference current paths (`packages/genty/platform/src/...` and `packages/babysitter-sdk/src/...`). No stale references to old paths like `packages/babysitter-sdk/src/harness/` where the code has moved to `packages/genty/platform/src/harness/`. One minor note: `packages/babysitter-sdk/src/harness/types.ts` is still referenced for `HarnessCapability` -- this appears to still be valid as the SDK has its own harness types that the platform imports.
 
 ---
 

@@ -22,8 +22,8 @@ Edit `.github/labeler.yml`:
 area/storage:
   - changed-files:
       - any-glob-to-any-file:
-          - 'packages/sdk/src/storage/**/*'
-          - 'packages/sdk/src/storage/**/*.test.ts'
+          - 'packages/babysitter-sdk/src/storage/**/*'
+          - 'packages/babysitter-sdk/src/storage/**/*.test.ts'
 ```
 
 Seed the label:
@@ -40,7 +40,7 @@ Require that every listed glob matches at least one file (stricter):
 area/multi:
   - changed-files:
       - all-globs-to-all-files:
-          - 'packages/sdk/**/*'
+          - 'packages/babysitter-sdk/**/*'
           - '**/*.test.ts'
 ```
 

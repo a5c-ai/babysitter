@@ -389,4 +389,4 @@ CRITICAL RULE: For sub-agent delegation, use `@agent` in your prompts. This is t
 ## See Also
 - `process/tdd-quality-convergence.js` - TDD quality convergence example
 - `reference/ADVANCED_PATTERNS.md` - Agent/skill patterns, iterative convergence
-- `packages/sdk/sdk.md` - SDK API reference
+- `packages/babysitter-sdk/sdk.md` - SDK API reference

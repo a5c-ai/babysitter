@@ -15,7 +15,7 @@ The platform layer builds on the foundation by hardening plugin, session, and ex
 - Describe metaplugins as capability composition above concrete plugin and hook bundles, without requiring a new package boundary
 
 **Session Management Evolution**
-- Clarify session ownership across `packages/genty/platform`, `packages/sdk`, and plugin integration points
+- Clarify session ownership across `packages/genty/platform`, `packages/babysitter-sdk`, and plugin integration points
 - Improve persistence, context propagation, and recovery only where the current runtime already exposes those seams
 - Keep session changes rollbackable and testable without introducing broad cross-package churn
 

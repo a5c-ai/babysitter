@@ -360,7 +360,7 @@ This provides the standard Babysitter MCP tools (runs, tasks, sessions, discover
 
 ## PiSessionHandle API
 
-The `PiSessionHandle` class (from `packages/sdk/src/harness/piWrapper.ts`) provides the Babysitter SDK's programmatic interface for controlling Pi sessions. It wraps `@mariozechner/pi-coding-agent`'s `createAgentSession()` behind a babysitter-friendly API.
+The `PiSessionHandle` class (from `packages/babysitter-sdk/src/harness/piWrapper.ts`) provides the Babysitter SDK's programmatic interface for controlling Pi sessions. It wraps `@mariozechner/pi-coding-agent`'s `createAgentSession()` behind a babysitter-friendly API.
 
 ### Factory Function
 

@@ -22,9 +22,9 @@ Programmatic API for run lifecycle: create, iterate, status, events. JSON reques
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
-| MCP server | `packages/sdk/src/mcp/` |
-| Runtime | `packages/sdk/src/runtime/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
+| Runtime | `packages/babysitter-sdk/src/runtime/` |
 
 ## Recommendation
 Phase 1 implementation. Extract CLI command logic into importable API functions. Expose via both direct import and HTTP/MCP endpoints.

@@ -23,8 +23,8 @@ Delegation policies define capability subsets per role. An explorer gets read-on
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
-| Task definitions | `packages/sdk/src/tasks/` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
 
 ## Recommendation
 Phase 3 implementation. Define CapabilityProfile types (full, read-only, plan-only, verify-only). Enforce via agentic tool filtering in createAgenticToolDefinitions().

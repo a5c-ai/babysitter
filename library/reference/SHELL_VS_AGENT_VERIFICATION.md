@@ -63,7 +63,7 @@ const result = await ctx.task(deterministicGateTask, {
     { label: 'ESLint', command: 'npx eslint src/' },
   ],
   failFast: true,
-  projectDir: 'packages/sdk',
+  projectDir: 'packages/babysitter-sdk',
   timeout: 180000,
 });
 ```
@@ -172,14 +172,14 @@ import { createCompilationGate, executeDeterministicGate } from './deterministic
 
 const tsGate = createCompilationGate({
   tool: 'tsc',
-  projectDir: 'packages/sdk',
+  projectDir: 'packages/babysitter-sdk',
   configPath: 'tsconfig.build.json',
   extraFlags: ['--strict'],
 });
 
 const eslintGate = createCompilationGate({
   tool: 'eslint',
-  projectDir: 'packages/sdk',
+  projectDir: 'packages/babysitter-sdk',
   extraFlags: ['src/**/*.ts'],
 });
 ```
@@ -199,7 +199,7 @@ import { createTestSuiteGate, executeDeterministicGate } from './deterministic-q
 
 const vitestGate = createTestSuiteGate({
   runner: 'vitest',
-  projectDir: 'packages/sdk',
+  projectDir: 'packages/babysitter-sdk',
   testPattern: 'src/runtime/__tests__/',
   timeout: 180000,
 });
@@ -270,7 +270,7 @@ Verify the project compiles without type errors:
 const result = await executeDeterministicGate(ctx, {
   name: 'typescript-gate',
   commands: [
-    { label: 'SDK compiles', command: 'cd packages/sdk && npx tsc --noEmit' },
+    { label: 'SDK compiles', command: 'cd packages/babysitter-sdk && npx tsc --noEmit' },
     { label: 'Catalog compiles', command: 'cd packages/catalog && npx tsc --noEmit' },
   ],
   failFast: true,
@@ -283,7 +283,7 @@ Or using the dedicated `ts-check.js` shared component:
 import { executeTsCheck } from './ts-check.js';
 
 const result = await executeTsCheck(ctx, {
-  projectDir: 'packages/sdk',
+  projectDir: 'packages/babysitter-sdk',
   strict: true,
 });
 
@@ -302,7 +302,7 @@ Run tests and enforce a passing suite:
 const result = await executeDeterministicGate(ctx, {
   name: 'test-gate',
   commands: [
-    { label: 'Unit tests', command: 'cd packages/sdk && npx vitest run' },
+    { label: 'Unit tests', command: 'cd packages/babysitter-sdk && npx vitest run' },
     { label: 'E2E tests', command: 'npm run test:e2e:docker' },
   ],
   timeout: 600000,
@@ -373,7 +373,7 @@ const checkTask = defineTask('check-types', (args, taskCtx) => ({
   title: 'Verify TypeScript compiles',
   agent: {
     prompt: {
-      task: 'Check if the TypeScript code in packages/sdk compiles without errors. Review the code and verify there are no type errors.',
+      task: 'Check if the TypeScript code in packages/babysitter-sdk compiles without errors. Review the code and verify there are no type errors.',
     },
   },
 }));
@@ -385,7 +385,7 @@ The agent will read some files, reason about types, and report its assessment. I
 ```js
 const result = await executeDeterministicGate(ctx, {
   name: 'compile',
-  commands: [{ label: 'tsc', command: 'cd packages/sdk && npx tsc --noEmit' }],
+  commands: [{ label: 'tsc', command: 'cd packages/babysitter-sdk && npx tsc --noEmit' }],
 });
 ```
 
@@ -398,7 +398,7 @@ const testTask = defineTask('run-tests', (args, taskCtx) => ({
   title: 'Run the tests and check if they pass',
   agent: {
     prompt: {
-      task: 'Run the test suite for packages/sdk and verify all tests pass. Report any failures.',
+      task: 'Run the test suite for packages/babysitter-sdk and verify all tests pass. Report any failures.',
     },
   },
 }));
@@ -410,7 +410,7 @@ The agent may or may not actually run the tests. If it does, it may misinterpret
 ```js
 const result = await executeDeterministicGate(ctx, {
   name: 'tests',
-  commands: [{ label: 'vitest', command: 'cd packages/sdk && npx vitest run' }],
+  commands: [{ label: 'vitest', command: 'cd packages/babysitter-sdk && npx vitest run' }],
 });
 ```
 

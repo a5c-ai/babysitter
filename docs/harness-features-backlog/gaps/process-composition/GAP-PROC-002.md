@@ -22,8 +22,8 @@ ctx.subprocess() effect that invokes a child process. Child process inherits par
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| Runtime | `packages/sdk/src/runtime/` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| Runtime | `packages/babysitter-sdk/src/runtime/` |
 
 ## Recommendation
 Phase 2 implementation. Add ctx.subprocess() as first-class effect. Create child run with parent context inheritance.

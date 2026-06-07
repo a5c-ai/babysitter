@@ -23,8 +23,8 @@ Breakpoint routing to external systems via webhook. Slack integration for approv
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
-| Hook dispatcher | `packages/sdk/src/hooks/dispatcher.ts` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
+| Hook dispatcher | `packages/babysitter-sdk/src/hooks/dispatcher.ts` |
 
 ## Recommendation
 Phase 2 implementation. Add webhook routing for breakpoints. Implement Slack and email notification channels. Support async approval with timeout.

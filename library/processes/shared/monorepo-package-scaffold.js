@@ -36,7 +36,7 @@
  *   scope: '@a5c-ai',
  *   packageDir: 'packages/my-new-package',
  *   packageType: 'library',
- *   referencePackage: 'packages/sdk',
+ *   referencePackage: 'packages/babysitter-sdk',
  *   monorepoRoot: '.',
  * });
  *
@@ -102,7 +102,7 @@ const DEFAULT_TIMEOUT_MS = 120000;
  *   name: 'my-lib',
  *   scope: '@a5c-ai',
  *   packageType: 'library',
- *   referencePackage: 'packages/sdk',
+ *   referencePackage: 'packages/babysitter-sdk',
  *   monorepoRoot: '.',
  * });
  *
@@ -409,7 +409,7 @@ export function createPackageScaffold(config) {
  *   name: 'my-lib',
  *   scope: '@a5c-ai',
  *   packageType: 'library',
- *   referencePackage: 'packages/sdk',
+ *   referencePackage: 'packages/babysitter-sdk',
  *   monorepoRoot: '.',
  * });
  *
@@ -485,7 +485,7 @@ export async function executePackageScaffold(ctx, config) {
  * const config = createLibraryPackage({
  *   name: 'utils',
  *   scope: '@a5c-ai',
- *   referencePackage: 'packages/sdk',
+ *   referencePackage: 'packages/babysitter-sdk',
  * });
  * const result = await executePackageScaffold(ctx, config);
  * ```

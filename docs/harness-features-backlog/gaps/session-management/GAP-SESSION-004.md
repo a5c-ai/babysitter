@@ -23,8 +23,8 @@ Session-level cost aggregation across all runs. Configurable session budgets. Al
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
-| Token stats | `packages/sdk/src/cli/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| Token stats | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 2 implementation. Aggregate run-level costs into session state. Define budget configuration. Implement threshold alerts and auto-pause.

@@ -231,11 +231,11 @@ Verify Accomplish is setting this variable when spawning OpenCode. This is an Ac
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| OpenCode adapter | `packages/sdk/src/harness/opencode.ts` | Accomplish detection, `ACCOMPLISH_TASK_ID` handling, data dir resolution, session metadata |
-| Discovery module | `packages/sdk/src/harness/discovery.ts` | Caller detection via env vars including `ACCOMPLISH_TASK_ID` |
+| OpenCode adapter | `packages/babysitter-sdk/src/harness/opencode.ts` | Accomplish detection, `ACCOMPLISH_TASK_ID` handling, data dir resolution, session metadata |
+| Discovery module | `packages/babysitter-sdk/src/harness/discovery.ts` | Caller detection via env vars including `ACCOMPLISH_TASK_ID` |
 | Generated OpenCode bundle | `artifacts/generated-plugins/opencode/` | Harness-specific plugin output generated from `plugins/babysitter-unified` |
 | Installer (shared) | `artifacts/generated-plugins/opencode/bin/install-shared.cjs` | Accomplish detection, plugin bundle copy, surface installation |
 | Installer (entry) | `artifacts/generated-plugins/opencode/bin/install.cjs` | CLI entry point with `--accomplish` flag |
 | `/babysitter` skill (Accomplish format) | `artifacts/generated-plugins/opencode/skills/babysit/SKILL.md` | Orchestration skill formatted for Accomplish's skill system |
 | `/accomplish-status` skill | `artifacts/generated-plugins/opencode/skills/accomplish-status/SKILL.md` | Run status reporting |
-| Session types | `packages/sdk/src/session/types.ts` | `SessionState.metadata` field for `accomplishTaskId` correlation |
+| Session types | `packages/babysitter-sdk/src/session/types.ts` | `SessionState.metadata` field for `accomplishTaskId` correlation |

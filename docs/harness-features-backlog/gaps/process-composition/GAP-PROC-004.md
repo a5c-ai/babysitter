@@ -22,8 +22,8 @@ Process definitions include input/output JSON schemas. Validation at run:create 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Runtime | `packages/sdk/src/runtime/` |
-| Storage | `packages/sdk/src/storage/` |
+| Runtime | `packages/babysitter-sdk/src/runtime/` |
+| Storage | `packages/babysitter-sdk/src/storage/` |
 | Process definitions | `.a5c/processes/` |
 
 ## Recommendation

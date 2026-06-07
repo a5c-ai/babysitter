@@ -22,8 +22,8 @@ run:rewind creates a new run forked from a specific journal point. Session histo
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Journal storage | `packages/sdk/src/storage/` |
-| Replay engine | `packages/sdk/src/runtime/replay/createReplayEngine.ts` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| Replay engine | `packages/babysitter-sdk/src/runtime/replay/createReplayEngine.ts` |
 
 ## Recommendation
 Phase 4 implementation. Add run:rewind that truncates journal at fork point and creates new run. Enable session history browsing.

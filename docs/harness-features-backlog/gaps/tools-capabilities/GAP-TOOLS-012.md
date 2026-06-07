@@ -23,9 +23,9 @@ An optional LSP client module that the orchestrator can use to: query symbol def
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness adapters | `packages/sdk/src/harness/` |
-| Task definitions | `packages/sdk/src/tasks/` |
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
 
 ## Recommendation
 Phase 3-4 implementation. Start with a lightweight LSP client that can query diagnostics and symbol info. Use diagnostics as a post-task validation step. Enrich task prompts with type context for code-modification tasks.

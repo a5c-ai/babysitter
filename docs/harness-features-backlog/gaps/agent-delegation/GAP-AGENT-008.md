@@ -22,9 +22,9 @@ Harness selection policies that consider: task kind and capability requirements,
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Task definitions | `packages/sdk/src/tasks/` |
-| Task registry | `packages/sdk/src/tasks/registry.ts` |
-| Harness adapters | `packages/sdk/src/harness/` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Task registry | `packages/babysitter-sdk/src/tasks/registry.ts` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
 
 ## Recommendation
 Phase 2 implementation. Define harness selection policies in task registry. Match task requirements to harness capabilities. Select optimal harness per task.

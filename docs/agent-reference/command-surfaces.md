@@ -4,11 +4,11 @@ This page is the concise command map for contributors and coding agents. It is i
 
 ## Core CLI: `babysitter`
 
-The `babysitter` binary is shipped by [`@a5c-ai/babysitter`](../../packages/babysitter/package.json) and [`@a5c-ai/babysitter-sdk`](../../packages/sdk/package.json). The command families currently registered in the repo source live in [`packages/sdk/src/cli/main/program.ts`](../../packages/sdk/src/cli/main/program.ts).
+The `babysitter` binary is shipped by [`@a5c-ai/babysitter`](../../packages/babysitter/package.json) and [`@a5c-ai/babysitter-sdk`](../../packages/babysitter-sdk/package.json). The command families currently registered in the repo source live in [`packages/babysitter-sdk/src/cli/main/program.ts`](../../packages/babysitter-sdk/src/cli/main/program.ts).
 
 ### Agent-facing help
 
-`babysitter --help` is the automation surface. Its usage text is generated from [`packages/sdk/src/cli/main/usage.ts`](../../packages/sdk/src/cli/main/usage.ts) and centers on:
+`babysitter --help` is the automation surface. Its usage text is generated from [`packages/babysitter-sdk/src/cli/main/usage.ts`](../../packages/babysitter-sdk/src/cli/main/usage.ts) and centers on:
 
 - `run:*` and `task:*` for deterministic replay loops (includes `run:assign-process` for attaching a process to a bare run)
 - `session:*` for session binding and iteration guards
@@ -93,7 +93,7 @@ The repo source now treats global runs storage as the default:
 - repo scope: `<repo>/.a5c/runs` when `BABYSITTER_RUNS_SCOPE=repo`
 - explicit override: `BABYSITTER_RUNS_DIR` or `--runs-dir`
 
-The implementation lives in [`packages/sdk/src/config/runs.ts`](../../packages/sdk/src/config/runs.ts) and the default config in [`packages/sdk/src/config/defaults.ts`](../../packages/sdk/src/config/defaults.ts).
+The implementation lives in [`packages/babysitter-sdk/src/config/runs.ts`](../../packages/babysitter-sdk/src/config/runs.ts) and the default config in [`packages/babysitter-sdk/src/config/defaults.ts`](../../packages/babysitter-sdk/src/config/defaults.ts).
 
 When reading existing runs, the SDK also probes repo-local `.a5c/runs` for backward compatibility.
 
@@ -101,4 +101,4 @@ When reading existing runs, the SDK also probes repo-local `.a5c/runs` for backw
 
 Plugin concepts are covered in [Plugins Overview](../plugins.md). The dedicated command reference is [Plugin CLI Reference](../plugins/cli-reference.md).
 
-One current implementation detail worth remembering: `plugin:install`, `plugin:update`, and `plugin:configure` can auto-resolve the marketplace when `--marketplace-name` is omitted, as implemented in [`packages/sdk/src/cli/commands/plugin/packageCommands.ts`](../../packages/sdk/src/cli/commands/plugin/packageCommands.ts).
+One current implementation detail worth remembering: `plugin:install`, `plugin:update`, and `plugin:configure` can auto-resolve the marketplace when `--marketplace-name` is omitted, as implemented in [`packages/babysitter-sdk/src/cli/commands/plugin/packageCommands.ts`](../../packages/babysitter-sdk/src/cli/commands/plugin/packageCommands.ts).

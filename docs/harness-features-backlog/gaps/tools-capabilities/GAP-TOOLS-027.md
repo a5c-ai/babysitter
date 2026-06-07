@@ -23,10 +23,10 @@ A skill registry queryable from process definitions. A `ctx.skill(skillId, input
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Skill discovery | `packages/sdk/src/cli/` |
-| Plugin package reader | `packages/sdk/src/plugins/packageReader.ts` |
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| Harness adapters | `packages/sdk/src/harness/` |
+| Skill discovery | `packages/babysitter-sdk/src/cli/` |
+| Plugin package reader | `packages/babysitter-sdk/src/plugins/packageReader.ts` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
 
 ## Recommendation
 Phase 3 implementation. Build a skill registry from `skill:discover` output. Add `ctx.skill()` to ProcessContext. Route skill invocations through effect system to capable harnesses.

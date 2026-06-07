@@ -23,8 +23,8 @@ Breakpoints show context summary, risk level, recommended action, and alternativ
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
-| Interaction module | `packages/sdk/src/interaction/` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
+| Interaction module | `packages/babysitter-sdk/src/interaction/` |
 
 ## Recommendation
 Phase 3 implementation. Enrich breakpoint rendering with context, risk, and recommendations. Add always-approve workflow.

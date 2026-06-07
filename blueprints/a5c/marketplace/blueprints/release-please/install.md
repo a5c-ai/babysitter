@@ -121,7 +121,7 @@ Create `release-please-config.json`:
   "separate-pull-requests": false,
   "plugins": ["node-workspace"],
   "packages": {
-    "packages/sdk": { "package-name": "@a5c-ai/sdk", "release-type": "node" },
+    "packages/babysitter-sdk": { "package-name": "@a5c-ai/sdk", "release-type": "node" },
     "packages/adapters/cli": { "package-name": "@a5c-ai/cli", "release-type": "node" },
     "packages/catalog": { "package-name": "@a5c-ai/catalog", "release-type": "node" }
   }
@@ -132,7 +132,7 @@ Seed `.release-please-manifest.json`:
 
 ```json
 {
-  "packages/sdk": "0.1.0",
+  "packages/babysitter-sdk": "0.1.0",
   "packages/adapters/cli": "0.1.0",
   "packages/catalog": "0.1.0"
 }

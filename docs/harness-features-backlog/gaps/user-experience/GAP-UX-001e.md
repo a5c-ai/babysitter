@@ -45,8 +45,8 @@ yellow=slow, red=error.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Tokens stats CLI | `packages/sdk/src/cli/` (tokens:stats) |
-| Session module | `packages/sdk/src/session/` |
+| Tokens stats CLI | `packages/babysitter-sdk/src/cli/` (tokens:stats) |
+| Session module | `packages/babysitter-sdk/src/session/` |
 | CC reference: status | `src/components/StatusLine.tsx` |
 | CC reference: spinner | `src/components/Spinner/` |
 

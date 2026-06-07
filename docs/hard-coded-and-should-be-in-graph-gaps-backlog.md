@@ -116,7 +116,7 @@ export function createCodexContext(overrides?) { ... }
 export function createCursorContext(overrides?) { ... }
 ```
 
-**File:** packages/sdk/src/harness/hooks/promptContexts.ts
+**File:** packages/babysitter-sdk/src/harness/hooks/promptContexts.ts
 
 **Fix:** Already partially addressed — `createPromptContextFromCatalog()` exists. Remove the named factory functions entirely. Callers should use `createPromptContextFromCatalog(targetId)`.
 

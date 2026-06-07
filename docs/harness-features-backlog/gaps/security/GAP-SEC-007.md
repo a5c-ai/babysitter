@@ -22,8 +22,8 @@ Privacy configuration with controls for: log sensitivity levels, PII filtering i
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Logging module | `packages/sdk/src/logging/` |
-| Config module | `packages/sdk/src/config/` |
+| Logging module | `packages/babysitter-sdk/src/logging/` |
+| Config module | `packages/babysitter-sdk/src/config/` |
 
 ## Recommendation
 Phase 3 implementation. Define privacy configuration schema. Implement log filtering based on sensitivity levels. Add PII detection for export filtering.

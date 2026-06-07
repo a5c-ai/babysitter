@@ -511,7 +511,7 @@ export function createUpstreamSyncCheck(config) {
  * ```js
  * const compat = createCompatibilityTestSuite({
  *   command: 'npm run test:compat',
- *   projectDir: 'packages/sdk',
+ *   projectDir: 'packages/babysitter-sdk',
  * });
  * const { compatibilityTask } = createForkSync(compat);
  * const result = await ctx.task(compatibilityTask, {});

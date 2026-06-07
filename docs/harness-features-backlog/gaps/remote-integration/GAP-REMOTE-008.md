@@ -22,8 +22,8 @@ StreamEvent types (progress, effect-requested, effect-resolved, log). SSE endpoi
 ## Key Files
 | Component | Path |
 |-----------|------|
-| MCP server | `packages/sdk/src/mcp/` |
-| Journal storage | `packages/sdk/src/storage/` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
 
 ## Recommendation
 Phase 4 implementation. Define StreamEvent types. Add SSE endpoint to MCP server. Integrate with journal appendEvent.

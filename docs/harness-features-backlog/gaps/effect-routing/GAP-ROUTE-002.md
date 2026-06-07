@@ -22,8 +22,8 @@ Effect priority levels (critical, high, normal, low). High-priority effects sche
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Task definitions | `packages/sdk/src/tasks/` |
-| Scheduler hints | `packages/sdk/src/runtime/types.ts` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Scheduler hints | `packages/babysitter-sdk/src/runtime/types.ts` |
 
 ## Recommendation
 Phase 3 implementation. Add priority field to effect scheduler hints. Implement priority-aware scheduling in babysit skill.

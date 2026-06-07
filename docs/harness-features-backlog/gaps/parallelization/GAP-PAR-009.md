@@ -22,9 +22,9 @@ Multiple execution strategies: parallel strategy (same parallelGroupId concurren
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Scheduler hints | `packages/sdk/src/runtime/types.ts` |
-| Orchestrate iteration | `packages/sdk/src/runtime/orchestrateIteration.ts` |
-| Task batching | `packages/sdk/src/tasks/batching.ts` |
+| Scheduler hints | `packages/babysitter-sdk/src/runtime/types.ts` |
+| Orchestrate iteration | `packages/babysitter-sdk/src/runtime/orchestrateIteration.ts` |
+| Task batching | `packages/babysitter-sdk/src/tasks/batching.ts` |
 
 ## Recommendation
 Phase 1 implementation. Read scheduler hints in the babysit skill and implement at least the parallel and sleep strategies.

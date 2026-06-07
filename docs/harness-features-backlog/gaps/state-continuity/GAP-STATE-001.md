@@ -22,9 +22,9 @@ Memory extraction from completed runs into ~/.a5c/memory/. Memories indexed by p
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Journal storage | `packages/sdk/src/storage/` |
-| Session management | `packages/sdk/src/session/` |
-| Prompts module | `packages/sdk/src/prompts/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
 
 ## Recommendation
 Phase 2 implementation. Extend harness:retrospect to extract and persist key learnings. Index by project and topic. Inject into new run prompts.

@@ -22,9 +22,9 @@ Multiple compaction strategies: tool-output summarization, resolved effect pruni
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Compression module | `packages/sdk/src/compression/` |
-| Hook dispatcher | `packages/sdk/src/hooks/dispatcher.ts` |
-| State cache | `packages/sdk/src/runtime/replay/stateCache.ts` |
+| Compression module | `packages/babysitter-sdk/src/compression/` |
+| Hook dispatcher | `packages/babysitter-sdk/src/hooks/dispatcher.ts` |
+| State cache | `packages/babysitter-sdk/src/runtime/replay/stateCache.ts` |
 
 ## Recommendation
 Phase 3 implementation. Auto-compact trigger at token budget threshold. At least 2 strategies: tool-output summarization and iteration digest. Integrate via on-iteration-end hook.

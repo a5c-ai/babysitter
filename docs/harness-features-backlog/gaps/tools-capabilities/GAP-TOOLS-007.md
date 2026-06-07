@@ -27,7 +27,7 @@ None.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
 
 ## Recommendation
 M0 (Quick Wins). Low priority -- `bash` with `node -e` works. Add when Pi sessions need

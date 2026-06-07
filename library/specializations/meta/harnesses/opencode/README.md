@@ -487,7 +487,7 @@ The `plan` agent defaults to asking permission for all writes and bash commands 
 The Babysitter SDK includes an `opencode` harness adapter:
 
 ```typescript
-// From packages/sdk/src/harness/discovery.ts
+// From packages/babysitter-sdk/src/harness/discovery.ts
 {
   name: "opencode",
   cli: "opencode",

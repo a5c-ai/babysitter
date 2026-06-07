@@ -22,9 +22,9 @@ run:status --rich combines run state, token stats, pending effects count, health
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
-| Token stats | `packages/sdk/src/cli/` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
+| Token stats | `packages/babysitter-sdk/src/cli/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 1 implementation. Enhance run:status with --rich flag showing unified view. Include token usage, health score, phase, and pending summary.

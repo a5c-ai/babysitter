@@ -23,10 +23,10 @@ A `ctx.workflow()` intrinsic that accepts a workflow definition with: ordered st
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Runtime | `packages/sdk/src/runtime/` |
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| Task definitions | `packages/sdk/src/tasks/` |
-| Replay engine | `packages/sdk/src/runtime/replay/` |
+| Runtime | `packages/babysitter-sdk/src/runtime/` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Replay engine | `packages/babysitter-sdk/src/runtime/replay/` |
 
 ## Recommendation
 Phase 3 implementation. Define `WorkflowDefinition` type with steps, branches, and retry policies. Add `ctx.workflow()` to `ProcessContext`. Ensure workflow steps map to individual journal events for replayability.

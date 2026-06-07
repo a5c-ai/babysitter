@@ -22,7 +22,7 @@ babysitter help --search for command search. Contextual suggestions based on cur
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 3 implementation. Add help --search for command search. Implement contextual suggestions based on run state.

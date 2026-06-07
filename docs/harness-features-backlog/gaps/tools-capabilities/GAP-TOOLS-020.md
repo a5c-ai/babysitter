@@ -23,9 +23,9 @@ A scheduling subsystem that: defines recurring triggers with cron expressions, c
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI entry | `packages/sdk/src/cli/main.ts` |
-| Run creation | `packages/sdk/src/runtime/` |
-| Config | `packages/sdk/src/config/` |
+| CLI entry | `packages/babysitter-sdk/src/cli/main.ts` |
+| Run creation | `packages/babysitter-sdk/src/runtime/` |
+| Config | `packages/babysitter-sdk/src/config/` |
 
 ## Recommendation
 Phase 4 implementation. Build on GAP-REMOTE-001 daemon mode. Add a `trigger:create` / `trigger:list` / `trigger:delete` CLI surface. Store trigger definitions in `~/.a5c/triggers/`. Integrate with embedded SDK dashboard for visibility.

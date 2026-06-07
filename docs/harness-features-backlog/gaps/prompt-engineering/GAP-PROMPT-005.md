@@ -28,9 +28,9 @@ Resume prompts include:
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
-| Prompts module | `packages/sdk/src/prompts/` |
-| Journal storage | `packages/sdk/src/storage/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Section 8 (Compaction Protocol) documents CC's context preservation patterns for resume |
 
 ## Recommendation

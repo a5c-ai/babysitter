@@ -22,7 +22,7 @@ Sessions contain multiple runs. Session state persists across runs. Session hist
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
 | Run directory | `.a5c/runs/` |
 
 ## Recommendation

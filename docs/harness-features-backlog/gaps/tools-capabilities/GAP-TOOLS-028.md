@@ -22,9 +22,9 @@ Extended sleep API: `ctx.sleep(duration)` for relative delays, `ctx.sleepUntil(t
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| Task definitions | `packages/sdk/src/tasks/` |
-| Replay engine | `packages/sdk/src/runtime/replay/` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Replay engine | `packages/babysitter-sdk/src/runtime/replay/` |
 
 ## Recommendation
 Phase 4 implementation. Add `ctx.sleep(duration)` as syntactic sugar over `ctx.sleepUntil()`. Implement `ctx.waitFor()` as a polling effect. Build `ctx.retryWithBackoff()` as a composition of task + sleep effects. Low effort since the foundation exists.

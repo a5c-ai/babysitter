@@ -22,9 +22,9 @@ Progress updates from subagents (percentage, current step, ETA). Progress visibl
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
-| Task definitions | `packages/sdk/src/tasks/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
 
 ## Recommendation
 Phase 2 implementation. Define progress update protocol. Extract progress from harness output. Surface in embedded SDK dashboard.

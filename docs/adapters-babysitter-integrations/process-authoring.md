@@ -103,7 +103,7 @@ Update `packages/genty/platform/src/harness/internal/createRun/planProcess/phase
 | `packages/genty/platform/src/harness/internal/createRun/planProcess/prompts.ts` | Add externalAgentsSection to prompt builder |
 | `packages/genty/platform/src/harness/internal/createRun/planProcess/validation.ts` | Accept external agent tasks |
 | `packages/genty/platform/src/harness/internal/createRun/planProcess/validationSource.ts` | Update kind shape matching |
-| `packages/sdk/src/harness/externalAgentDiscovery.ts` | New — discovery API |
+| `packages/babysitter-sdk/src/harness/externalAgentDiscovery.ts` | New — discovery API |
 
 ## Documentation Updates
 

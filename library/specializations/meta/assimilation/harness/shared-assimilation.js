@@ -45,42 +45,42 @@ const babysitterRepo = 'https://github.com/a5c-ai/babysitter';
 
 const sdkHarnessCore = [
   // ── Adapter interface and types ──
-  'packages/sdk/src/harness/types.ts',         // HarnessAdapter interface, HarnessCapability enum, all binding/hook/install types, PiSessionOptions/PiPromptResult
-  'packages/sdk/src/harness/index.ts',         // Public exports: all adapters, discovery, invoker, registry, piWrapper
+  'packages/babysitter-sdk/src/harness/types.ts',         // HarnessAdapter interface, HarnessCapability enum, all binding/hook/install types, PiSessionOptions/PiPromptResult
+  'packages/babysitter-sdk/src/harness/index.ts',         // Public exports: all adapters, discovery, invoker, registry, piWrapper
 
   // ── Discovery subsystem (two mechanisms) ──
-  'packages/sdk/src/harness/discovery.ts',     // KNOWN_HARNESSES array, CONFIG_PATHS map, discoverHarnesses() (installed-discovery via parallel CLI probing), detectCallerHarness() (in-session detection via env vars), checkCliAvailable() (which/where + --version)
+  'packages/babysitter-sdk/src/harness/discovery.ts',     // KNOWN_HARNESSES array, CONFIG_PATHS map, discoverHarnesses() (installed-discovery via parallel CLI probing), detectCallerHarness() (in-session detection via env vars), checkCliAvailable() (which/where + --version)
 
   // ── Invocation/wrapping subsystem ──
-  'packages/sdk/src/harness/invoker.ts',       // HARNESS_CLI_MAP (per-harness flag mapping), buildHarnessArgs() (pure arg builder), invokeHarness() (spawn CLI as child process with timeout/model/workspace)
+  'packages/babysitter-sdk/src/harness/invoker.ts',       // HARNESS_CLI_MAP (per-harness flag mapping), buildHarnessArgs() (pure arg builder), invokeHarness() (spawn CLI as child process with timeout/model/workspace)
 
   // ── Adapter registry (auto-detection + lookup) ──
-  'packages/sdk/src/harness/registry.ts',      // detectAdapter() (priority-ordered env check), getAdapterByName(), listSupportedHarnesses(), get/set/resetAdapter()
+  'packages/babysitter-sdk/src/harness/registry.ts',      // detectAdapter() (priority-ordered env check), getAdapterByName(), listSupportedHarnesses(), get/set/resetAdapter()
 
   // ── Reference adapter implementations (MUST READ before assimilation) ──
-  'packages/sdk/src/harness/claudeCode.ts',    // Claude Code adapter (1200+ lines): session-start with compression + skill discovery, stop hook with journal replay + completion proof, installPlugin, getPromptContext
-  'packages/sdk/src/harness/codex.ts',         // Codex adapter: multi-format hooks.json, Windows hookDriven auto-detection, supportsHookType whitelist, CODEX_* env chain
-  'packages/sdk/src/harness/pi.ts',            // PI adapter: in-process model, loop-driver, PI_*/OMP_* dual env, piWrapper delegation
-  'packages/sdk/src/harness/ohMyPi.ts',        // Oh-my-pi adapter: separate from pi.ts, OMP_* env vars, omp CLI
-  'packages/sdk/src/harness/geminiCli.ts',     // Gemini CLI adapter (960+ lines): AfterAgent continuation, GEMINI_* env chain, session-start context
+  'packages/babysitter-sdk/src/harness/claudeCode.ts',    // Claude Code adapter (1200+ lines): session-start with compression + skill discovery, stop hook with journal replay + completion proof, installPlugin, getPromptContext
+  'packages/babysitter-sdk/src/harness/codex.ts',         // Codex adapter: multi-format hooks.json, Windows hookDriven auto-detection, supportsHookType whitelist, CODEX_* env chain
+  'packages/babysitter-sdk/src/harness/pi.ts',            // PI adapter: in-process model, loop-driver, PI_*/OMP_* dual env, piWrapper delegation
+  'packages/babysitter-sdk/src/harness/ohMyPi.ts',        // Oh-my-pi adapter: separate from pi.ts, OMP_* env vars, omp CLI
+  'packages/babysitter-sdk/src/harness/geminiCli.ts',     // Gemini CLI adapter (960+ lines): AfterAgent continuation, GEMINI_* env chain, session-start context
 
   // ── Programmatic session API ──
-  'packages/sdk/src/harness/piWrapper.ts',     // createPiSession → PiSessionHandle (.prompt(), .steer(), .followUp(), .subscribe(), .executeBash(), .abort(), .dispose()), PiEventListener, lazy init, compression integration
+  'packages/babysitter-sdk/src/harness/piWrapper.ts',     // createPiSession → PiSessionHandle (.prompt(), .steer(), .followUp(), .subscribe(), .executeBash(), .abort(), .dispose()), PiEventListener, lazy init, compression integration
 
   // ── Fallback/null adapters ──
-  'packages/sdk/src/harness/customAdapter.ts', // Custom/fallback adapter for unknown harnesses (autoResolvesSessionId=false, supportsHookType=false)
-  'packages/sdk/src/harness/nullAdapter.ts',   // Null adapter (no-op, used when no harness detected)
+  'packages/babysitter-sdk/src/harness/customAdapter.ts', // Custom/fallback adapter for unknown harnesses (autoResolvesSessionId=false, supportsHookType=false)
+  'packages/babysitter-sdk/src/harness/nullAdapter.ts',   // Null adapter (no-op, used when no harness detected)
 
   // ── Install support ──
-  'packages/sdk/src/harness/installSupport.ts', // installCliViaNpm, execFilePromise, isClaudePluginInstalled, getClaudeInstalledPluginsPath, renderCommand
+  'packages/babysitter-sdk/src/harness/installSupport.ts', // installCliViaNpm, execFilePromise, isClaudePluginInstalled, getClaudeInstalledPluginsPath, renderCommand
 
   // ── Cross-cutting SDK systems adapters integrate with ──
-  'packages/sdk/src/session.ts',               // Session state: readSessionFile, writeSessionFile, updateSessionState, deleteSessionFile, sessionFileExists, getSessionFilePath, getCurrentTimestamp, updateIterationTimes, isIterationTooFast
-  'packages/sdk/src/cli/completionProof.ts',   // resolveCompletionProof (SHA256 of runId + salt) — stop hook must validate
-  'packages/sdk/src/prompts/context.ts',       // PromptContext factories: createClaudeCodeContext, createCodexContext, createPiContext
-  'packages/sdk/src/prompts/types.ts',         // PromptContext interface: hookDriven, interactive tri-state, capabilities, loopControlTerm, etc.
-  'packages/sdk/src/compression/',             // loadCompressionConfig, densityFilterText, estimateTokens, getOrCompressFile, findLibraryFiles
-  'packages/sdk/src/cli/commands/skill.ts',    // discoverSkillsInternal — used by session-start hooks for context injection
+  'packages/babysitter-sdk/src/session.ts',               // Session state: readSessionFile, writeSessionFile, updateSessionState, deleteSessionFile, sessionFileExists, getSessionFilePath, getCurrentTimestamp, updateIterationTimes, isIterationTooFast
+  'packages/babysitter-sdk/src/cli/completionProof.ts',   // resolveCompletionProof (SHA256 of runId + salt) — stop hook must validate
+  'packages/babysitter-sdk/src/prompts/context.ts',       // PromptContext factories: createClaudeCodeContext, createCodexContext, createPiContext
+  'packages/babysitter-sdk/src/prompts/types.ts',         // PromptContext interface: hookDriven, interactive tri-state, capabilities, loopControlTerm, etc.
+  'packages/babysitter-sdk/src/compression/',             // loadCompressionConfig, densityFilterText, estimateTokens, getOrCompressFile, findLibraryFiles
+  'packages/babysitter-sdk/src/cli/commands/skill.ts',    // discoverSkillsInternal — used by session-start hooks for context injection
 
   // ── Command sync infrastructure (must be integrated per-plugin) ──
   'scripts/sync-plugin-commands.cjs',          // Central orchestrator: spawns all plugin sync scripts, supports --check mode
@@ -176,7 +176,7 @@ export const researchHarnessTask = defineTask('research-harness', (args, taskCtx
         'Understand how each reference plugin: registers hooks, defines skills, handles installation/uninstallation, manages versions, and delegates to the SDK CLI.',
 
         // ── Understand the full adapter interface ──
-        'Read packages/sdk/src/harness/types.ts thoroughly. Understand every method on HarnessAdapter (required and optional) and every type: HarnessCapability enum (Programmatic, SessionBinding, StopHook, Mcp, HeadlessPrompt), HarnessDiscoveryResult, CallerHarnessResult, HarnessInvokeOptions/Result, SessionBindOptions/Result, HookHandlerArgs, HarnessInstallOptions/Result, PiSessionOptions, PiPromptResult.',
+        'Read packages/babysitter-sdk/src/harness/types.ts thoroughly. Understand every method on HarnessAdapter (required and optional) and every type: HarnessCapability enum (Programmatic, SessionBinding, StopHook, Mcp, HeadlessPrompt), HarnessDiscoveryResult, CallerHarnessResult, HarnessInvokeOptions/Result, SessionBindOptions/Result, HookHandlerArgs, HarnessInstallOptions/Result, PiSessionOptions, PiPromptResult.',
 
         // ── Study ALL reference adapter implementations ──
         'Read claudeCode.ts (1200+ lines) as the canonical reference — understand how it implements: session-start hook (env file creation, state file baseline, skill discovery context injection, compression of session-start output via density filter), stop hook (journal replay, completion proof validation, pending effect inspection, approve/block decision), bindSession (state file creation with run association), installPlugin (filesystem operations to register with Claude), getPromptContext (createClaudeCodeContext factory).',
@@ -402,7 +402,7 @@ export const implementAdapterTask = defineTask('implement-adapter', (args, taskC
         'Read geminiCli.ts — note AfterAgent continuation, GEMINI_* env chain, session-start context generation.',
 
         // ── Create the adapter file ──
-        `Create packages/sdk/src/harness/${args.adapterFile || args.adapterName + '.ts'} implementing the HarnessAdapter interface.`,
+        `Create packages/babysitter-sdk/src/harness/${args.adapterFile || args.adapterName + '.ts'} implementing the HarnessAdapter interface.`,
 
         // ── Required methods ──
         'Implement isActive(): check the harness-specific environment variables identified in research.',
@@ -817,13 +817,13 @@ export const writeReadmeTask = defineTask('write-readme', (args, taskCtx) => ({
 
 /**
  * Reference test files the agent should study:
- *   packages/sdk/src/harness/__tests__/harness.test.ts     — adapter method tests, session binding, stop hook, registry
- *   packages/sdk/src/harness/__tests__/discovery.test.ts   — KNOWN_HARNESSES, checkCliAvailable, discoverHarnesses, detectCallerHarness
- *   packages/sdk/src/harness/__tests__/invoker.test.ts     — HARNESS_CLI_MAP, buildHarnessArgs, invokeHarness
- *   packages/sdk/src/harness/__tests__/types.test.ts       — HarnessCapability enum, type compilation
- *   packages/sdk/src/harness/__tests__/customAdapter.test.ts — fallback adapter
- *   packages/sdk/src/harness/__tests__/piWrapper.test.ts   — programmatic session wrapper
- *   packages/sdk/src/harness/__tests__/geminiCli.test.ts   — adapter + hook tests with stdin injection
+ *   packages/babysitter-sdk/src/harness/__tests__/harness.test.ts     — adapter method tests, session binding, stop hook, registry
+ *   packages/babysitter-sdk/src/harness/__tests__/discovery.test.ts   — KNOWN_HARNESSES, checkCliAvailable, discoverHarnesses, detectCallerHarness
+ *   packages/babysitter-sdk/src/harness/__tests__/invoker.test.ts     — HARNESS_CLI_MAP, buildHarnessArgs, invokeHarness
+ *   packages/babysitter-sdk/src/harness/__tests__/types.test.ts       — HarnessCapability enum, type compilation
+ *   packages/babysitter-sdk/src/harness/__tests__/customAdapter.test.ts — fallback adapter
+ *   packages/babysitter-sdk/src/harness/__tests__/piWrapper.test.ts   — programmatic session wrapper
+ *   packages/babysitter-sdk/src/harness/__tests__/geminiCli.test.ts   — adapter + hook tests with stdin injection
  */
 
 export const writeAdapterTestsTask = defineTask('write-adapter-tests', (args, taskCtx) => ({
@@ -846,7 +846,7 @@ export const writeAdapterTestsTask = defineTask('write-adapter-tests', (args, ta
       },
       instructions: [
         // ── Study reference test patterns ──
-        'Read packages/sdk/src/harness/__tests__/harness.test.ts thoroughly — this is the canonical reference for adapter tests. Understand:',
+        'Read packages/babysitter-sdk/src/harness/__tests__/harness.test.ts thoroughly — this is the canonical reference for adapter tests. Understand:',
         '  - How each adapter suite is structured (ClaudeCodeAdapter, CodexAdapter, NullAdapter sections)',
         '  - How environment variables are saved/restored in beforeEach/afterEach with comprehensive env key lists',
         '  - How isActive(), resolveSessionId(), resolveStateDir(), resolvePluginRoot(), findHookDispatcherPath() are tested',
@@ -871,7 +871,7 @@ export const writeAdapterTestsTask = defineTask('write-adapter-tests', (args, ta
         '  - bindSession conflict detection',
 
         // ── Create the test file ──
-        `Create packages/sdk/src/harness/__tests__/${args.adapterName}.test.ts using Vitest (import { describe, it, expect, vi, beforeEach, afterEach } from "vitest").`,
+        `Create packages/babysitter-sdk/src/harness/__tests__/${args.adapterName}.test.ts using Vitest (import { describe, it, expect, vi, beforeEach, afterEach } from "vitest").`,
 
         // ── Adapter method tests ──
         `Test suite: "${args.harnessName} Adapter"`,
@@ -933,7 +933,7 @@ export const writeAdapterTestsTask = defineTask('write-adapter-tests', (args, ta
         'Use mkdtemp for any file system operations, cleanup in afterEach',
         'Use synthetic Readable streams for stdin simulation in hook tests',
         'Use vi.spyOn(process.stdout, "write") for capturing hook output',
-        'Verify the test file passes: cd packages/sdk && npx vitest run src/harness/__tests__/' + args.adapterName + '.test.ts',
+        'Verify the test file passes: cd packages/babysitter-sdk && npx vitest run src/harness/__tests__/' + args.adapterName + '.test.ts',
       ],
       outputFormat: 'JSON with testFile, testSuites, testCount, filesCreated, summary',
     },
@@ -1017,7 +1017,7 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
         '  - SDK build: npm install --include=dev, COPY entire repo, npm run build:sdk',
         '  - Permissions: chown -R on /app, /home/<user>, /workspace before switching to non-root USER',
         '  - Harness CLI install: npm install -g <harness-cli> (e.g. @openai/codex@latest)',
-        '  - SDK global install: npm install -g /app/packages/sdk',
+        '  - SDK global install: npm install -g /app/packages/babysitter-sdk',
         '  - Process library seed: copy library/ to /tmp, git init, commit (for process library commands)',
         '  - Plugin install: npm install -g /app/plugins/<plugin-dir> with BABYSITTER_PROCESS_LIBRARY_REPO env, then run install command',
         '  - WORKDIR /workspace with empty env vars for API keys and harness-specific config',
@@ -1123,7 +1123,7 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
         `  - Create .local and harness config directories, write .npmrc with prefix=/home/<harness>/.local`,
         '  - WORKDIR /app',
         '  - COPY package.json and package-lock.json first (layer cache)',
-        '  - COPY packages/sdk/package.json to ./packages/sdk/',
+        '  - COPY packages/babysitter-sdk/package.json to ./packages/babysitter-sdk/',
         `  - COPY ${args.pluginDir}/package.json to ./${args.pluginDir}/`,
         '  - RUN npm install --include=dev',
         '  - COPY . . (full monorepo)',
@@ -1131,7 +1131,7 @@ export const writePluginTestsTask = defineTask('write-plugin-tests', (args, task
         `  - RUN mkdir -p /workspace && chown -R <user>:<group> /app /home/<user> /workspace`,
         '  - USER <harness-user> (switch to non-root)',
         `  - RUN npm install -g <harness-cli-package> (install the harness CLI globally, e.g. @openai/codex@latest)`,
-        '  - RUN npm install -g /app/packages/sdk (install babysitter SDK globally)',
+        '  - RUN npm install -g /app/packages/babysitter-sdk (install babysitter SDK globally)',
         '  - RUN process library seed block: mkdir -p /tmp/babysitter-process-library-source/library, cp library content, git init + add + commit',
         `  - RUN BABYSITTER_PROCESS_LIBRARY_REPO=/tmp/babysitter-process-library-source npm install -g /app/${args.pluginDir} && run plugin install command (e.g. babysitter-<harness> install --global)`,
         '  - WORKDIR /workspace',
@@ -1652,7 +1652,7 @@ export const verifyAssimilationTask = defineTask('verify-assimilation', (args, t
         'Verify the install target directory path matches the harness official docs (e.g. Cursor requires plugins/local/, not just plugins/).',
 
         // ── Testing coverage ──
-        'Verify adapter unit tests exist at packages/sdk/src/harness/__tests__/<adapterName>.test.ts.',
+        'Verify adapter unit tests exist at packages/babysitter-sdk/src/harness/__tests__/<adapterName>.test.ts.',
         'Verify adapter tests cover: isActive, resolveSessionId, resolveStateDir, resolvePluginRoot, bindSession, handleStopHook (with completion proof and journal replay), handleSessionStartHook (with state file and context injection), findHookDispatcherPath.',
         'Verify adapter tests cover discovery entries (KNOWN_HARNESSES), invoker entries (HARNESS_CLI_MAP, buildHarnessArgs), and registry integration (detectAdapter, getAdapterByName).',
         'Verify adapter tests use proper patterns: env var save/restore, vi.mock for execFile, mkdtemp for file ops, synthetic stdin for hooks.',

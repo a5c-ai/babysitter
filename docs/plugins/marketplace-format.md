@@ -136,7 +136,7 @@ babysitter blueprints:update-marketplace --marketplace-name <name> --global
 
 ## TypeScript Interfaces
 
-The marketplace types are defined in `packages/sdk/src/blueprints/types.ts`:
+The marketplace types are defined in `packages/babysitter-sdk/src/blueprints/types.ts`:
 
 - `MarketplaceManifest` -- The full manifest structure
 - `MarketplacePluginEntry` -- A single blueprint entry within the manifest

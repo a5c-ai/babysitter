@@ -52,7 +52,7 @@ Adapters is **optional**. The SDK must work without it. Discovery returns empty 
 | Package | Changes |
 |---------|---------|
 | `packages/tasks-adapter` | Agent responder backend, task router, responder types, adapters integration |
-| `packages/sdk` | Discovery API, responderType on tasks, route through tasks-adapter |
+| `packages/babysitter-sdk` | Discovery API, responderType on tasks, route through tasks-adapter |
 | `packages/genty/platform` | Effect resolution delegates to tasks-adapter, process prompt updates |
 | `packages/genty/core` | None (internal agent tasks unchanged) |
 | `packages/adapters` | None (existing run/launch API consumed by tasks-adapter) |

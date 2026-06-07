@@ -1109,7 +1109,7 @@ if (result.status === "waiting") {
 
 ### 10.6 Deterministic docs + CLI walkthrough workflow
 
-To keep the documentation and examples in sync with the shipped runtime/CLI, every edit to `sdk.md`, `README.md`, `docs/cli-examples.md`, or `packages/sdk/src/testing/README.md` should be paired with the current repo workflow below:
+To keep the documentation and examples in sync with the shipped runtime/CLI, every edit to `sdk.md`, `README.md`, `docs/cli-examples.md`, or `packages/babysitter-sdk/src/testing/README.md` should be paired with the current repo workflow below:
 
 1. **Build the SDK CLI from a fresh checkout**  
    `npm ci && npm run build --workspace=@a5c-ai/babysitter-sdk`
@@ -1118,7 +1118,7 @@ To keep the documentation and examples in sync with the shipped runtime/CLI, eve
    This writes `docs/generated/cli-examples-verification.md`, which maps the published walkthrough to the real repo scripts and artifacts.
 3. **Run the real CLI smoke harness**  
    `npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk`  
-   The harness implementation lives in `packages/sdk/scripts/smoke-cli.js` and stages deterministic fixtures under `packages/sdk/test-fixtures/cli/runs/smoke/`.
+   The harness implementation lives in `packages/babysitter-sdk/scripts/smoke-cli.js` and stages deterministic fixtures under `packages/babysitter-sdk/test-fixtures/cli/runs/smoke/`.
 4. **Validate published docs command surfaces**  
    `npm run docs:snippets && npm run docs:qa`
 5. **Verify the deterministic harness helpers referenced by the docs**  

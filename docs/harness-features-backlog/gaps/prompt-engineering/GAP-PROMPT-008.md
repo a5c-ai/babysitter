@@ -14,7 +14,7 @@ Inject coding philosophy guardrails into task prompts for code-writing effects. 
 CC includes detailed coding philosophy in its system prompt ("Don't add features beyond what was asked", "Don't create helpers for one-time operations", "Three similar lines is better than a premature abstraction"). When babysitter delegates to CC, these rules apply. When delegating to Pi, Gemini, or Codex, no equivalent rules exist. Process prompts and `instructions:*` output do not include coding philosophy.
 
 ## Target State
-A `codingPhilosophy` prompt section in `packages/sdk/src/prompts/` injected into task prompts for code-writing effects. Content adapted from CC's "Doing Tasks" section. Injected via the runtime stratum when task kind indicates code modification. Configurable per process definition (can override or extend).
+A `codingPhilosophy` prompt section in `packages/babysitter-sdk/src/prompts/` injected into task prompts for code-writing effects. Content adapted from CC's "Doing Tasks" section. Injected via the runtime stratum when task kind indicates code modification. Configurable per process definition (can override or extend).
 
 ## Dependencies
 - [GAP-PROMPT-001](../prompt-engineering/GAP-PROMPT-001.md) -- strata model for section placement
@@ -22,7 +22,7 @@ A `codingPhilosophy` prompt section in `packages/sdk/src/prompts/` injected into
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Prompts module | `packages/sdk/src/prompts/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Section 2 (Coding Philosophy) has exact CC phrasing to adopt |
 
 ## Recommendation

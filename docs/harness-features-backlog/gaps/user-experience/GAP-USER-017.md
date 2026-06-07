@@ -22,9 +22,9 @@ Plugin discovery as agentic tool. Plugin install/configure via breakpoint with a
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Plugin management | `packages/sdk/src/plugins/` |
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| Plugin management | `packages/babysitter-sdk/src/plugins/` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 2 implementation. Expose plugin management via agentic tools. Plugin install/configure through breakpoint with approval flow.

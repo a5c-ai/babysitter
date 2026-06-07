@@ -23,8 +23,8 @@ Tool execution overlaps with result streaming. Model can begin processing result
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Pi session wrapper | `packages/sdk/src/harness/piWrapper.ts` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Pi session wrapper | `packages/babysitter-sdk/src/harness/piWrapper.ts` |
 
 ## Recommendation
 Phase 3 implementation. Enable pipeline parallelism between execution phases. Leverage Pi event streaming for overlapped processing.

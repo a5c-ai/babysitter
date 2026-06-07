@@ -25,9 +25,9 @@ Sub-harness invocations create child runs with isolated context. Parent run trac
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Pi session wrapper | `packages/sdk/src/harness/piWrapper.ts` |
-| Harness adapters | `packages/sdk/src/harness/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Pi session wrapper | `packages/babysitter-sdk/src/harness/piWrapper.ts` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
 
 ## Recommendation
 Phase 3-4 implementation. Phase 3: isolated child runs with context separation. Phase 4: background execution, progress tracking, and worktree integration.

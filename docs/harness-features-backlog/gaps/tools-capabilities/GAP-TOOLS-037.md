@@ -46,7 +46,7 @@ Implementation options:
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
 | CC WebFetchTool | `src/tools/WebFetchTool/WebFetchTool.ts` |
 
 ## Recommendation

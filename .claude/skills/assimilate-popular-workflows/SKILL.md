@@ -263,7 +263,7 @@ that an AI agent executes to set up capabilities in a user's project>
 ## Harness Integration Ideas
 <For harness-framework repos: ideas for new harness adapters and TUI improvements>
 - **Harness Adapter**: New harness integration (like plugins/babysitter-codex for Codex)
-  - Adapter implementation: <what would go in packages/sdk/src/harness/adapters/>
+  - Adapter implementation: <what would go in packages/babysitter-sdk/src/harness/adapters/>
   - Plugin structure: <what would go in plugins/babysitter-[harness]/>
   - CLI integration: <command patterns, flag mapping, capability detection>
 - **Harness Assimilation**: Plugin FOR the target harness that integrates babysitter (NOT a babysitter marketplace plugin)

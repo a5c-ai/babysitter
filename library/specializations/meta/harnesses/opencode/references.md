@@ -42,9 +42,9 @@
 
 | Resource | URL | Accessed |
 |----------|-----|----------|
-| Babysitter Harness Discovery | packages/sdk/src/harness/discovery.ts | 2026-04-02 |
-| Babysitter Harness Invoker | packages/sdk/src/harness/invoker.ts | 2026-04-02 |
-| Babysitter MCP Server | packages/sdk/src/mcp/ | 2026-04-02 |
+| Babysitter Harness Discovery | packages/babysitter-sdk/src/harness/discovery.ts | 2026-04-02 |
+| Babysitter Harness Invoker | packages/babysitter-sdk/src/harness/invoker.ts | 2026-04-02 |
+| Babysitter MCP Server | packages/babysitter-sdk/src/mcp/ | 2026-04-02 |
 
 ---
 

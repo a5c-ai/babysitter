@@ -325,10 +325,10 @@ plugins: [
     '@docusaurus/plugin-content-docs',
     {
       id: 'sdk',
-      path: '../packages/sdk/docs',
+      path: '../packages/babysitter-sdk/docs',
       routeBasePath: 'sdk',
       sidebarPath: require.resolve('./sidebars-sdk.js'),
-      editUrl: 'https://github.com/org/repo/edit/main/packages/sdk/',
+      editUrl: 'https://github.com/org/repo/edit/main/packages/babysitter-sdk/',
     },
   ],
   [

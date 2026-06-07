@@ -22,8 +22,8 @@ Formal personality overlays per mode. A `plan` overlay emphasizes exploration an
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Prompts module | `packages/sdk/src/prompts/` |
-| Instructions CLI | `packages/sdk/src/cli/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Instructions CLI | `packages/babysitter-sdk/src/cli/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Section 10 (Proactive Mode) and Section 8 (Compaction Protocol) document personality-varying prompt patterns |
 
 ## Recommendation

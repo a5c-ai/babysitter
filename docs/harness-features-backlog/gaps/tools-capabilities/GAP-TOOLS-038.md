@@ -44,9 +44,9 @@ they need a simple confirmation or a complex multi-option workflow.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
 | CC AskUserQuestionTool | (inline in CC's tool definitions) |
-| Interaction module | `packages/sdk/src/interaction/` |
+| Interaction module | `packages/babysitter-sdk/src/interaction/` |
 
 ## Recommendation
 M0 (Quick Wins). Low priority. The current structured model works well for babysitter's

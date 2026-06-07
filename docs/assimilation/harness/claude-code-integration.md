@@ -157,7 +157,7 @@ Additionally, `artifacts/generated-plugins/claude-code/hooks/hooks.json` provide
 ## 2. SessionStart Hook
 
 **Generated shell entry:** `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-session-start.sh`
-**TypeScript handler:** `packages/sdk/src/harness/claudeCode.ts` -> `handleSessionStartHookImpl()`
+**TypeScript handler:** `packages/babysitter-sdk/src/harness/claudeCode.ts` -> `handleSessionStartHookImpl()`
 
 ### Execution Flow
 
@@ -237,7 +237,7 @@ The marker file (`{PLUGIN_ROOT}/.babysitter-install-attempted`) prevents repeate
 
 ## 3. Session State File Format
 
-**Module:** `packages/sdk/src/session/`
+**Module:** `packages/babysitter-sdk/src/session/`
 **Path convention:** `{pluginRoot}/skills/babysit/state/{sessionId}.md`
 
 Session state files use Markdown with YAML frontmatter. The frontmatter stores machine-readable state, and the body stores the user's original prompt.
@@ -310,7 +310,7 @@ The YAML frontmatter parser (`parseYamlFrontmatter`) is a lightweight implementa
 
 ## 4. Run Creation and Session Binding
 
-**Harness method:** `bindSessionImpl()` in `packages/sdk/src/harness/claudeCode.ts`
+**Harness method:** `bindSessionImpl()` in `packages/babysitter-sdk/src/harness/claudeCode.ts`
 
 When the babysitter skill creates a run via `run:create --harness claude-code`, the SDK binds the Claude Code session to the new run.
 
@@ -415,7 +415,7 @@ Build a REST API with authentication and rate limiting for the user service.
 ## 5. The Stop Hook -- Core Orchestration Loop Control
 
 **Generated shell entry:** `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-stop.sh`
-**TypeScript handler:** `handleStopHookImpl()` in `packages/sdk/src/harness/claudeCode.ts`
+**TypeScript handler:** `handleStopHookImpl()` in `packages/babysitter-sdk/src/harness/claudeCode.ts`
 
 The stop hook is the central mechanism that converts Claude Code's single-turn execution model into a multi-iteration orchestration loop. Every time Claude attempts to end its response, the stop hook intercepts and decides whether to allow the exit or block it with new context.
 
@@ -736,7 +736,7 @@ The `task:post` command:
 
 ## 7. Native Orchestration Hooks
 
-**SDK hook discovery:** `packages/sdk/src/hooks/dispatcher.ts`
+**SDK hook discovery:** `packages/babysitter-sdk/src/hooks/dispatcher.ts`
 
 The hook dispatcher executes native babysitter lifecycle hooks (distinct from Claude Code's `SessionStart`/`Stop` hooks). These hooks are triggered by the SDK runtime during `run:iterate`.
 
@@ -843,7 +843,7 @@ run:iterate detects breakpoint effect
 ## 9. Session Check-Iteration
 
 **CLI command:** `babysitter session:check-iteration`
-**Handler:** `handleSessionCheckIteration()` in `packages/sdk/src/cli/commands/session.ts`
+**Handler:** `handleSessionCheckIteration()` in `packages/babysitter-sdk/src/cli/commands/session.ts`
 
 The stop hook and `session:check-iteration` enforce only the max-iterations limit. Iteration-speed stopping is disabled; iteration timing is retained only as diagnostic data.
 
@@ -893,7 +893,7 @@ The completion proof is a cryptographic mechanism that prevents premature exit f
 
 ### Proof Generation
 
-**File:** `packages/sdk/src/cli/completionProof.ts`
+**File:** `packages/babysitter-sdk/src/cli/completionProof.ts`
 
 ```typescript
 const COMPLETION_PROOF_SALT = "babysitter-completion-secret-v1";
@@ -1003,10 +1003,10 @@ This ensures that:
 ## Harness Adapter Architecture
 
 **Files:**
-- `packages/sdk/src/harness/types.ts` -- Interface definition
-- `packages/sdk/src/harness/claudeCode.ts` -- Claude Code implementation
-- `packages/sdk/src/harness/nullAdapter.ts` -- No-op fallback
-- `packages/sdk/src/harness/registry.ts` -- Auto-detection and lookup
+- `packages/babysitter-sdk/src/harness/types.ts` -- Interface definition
+- `packages/babysitter-sdk/src/harness/claudeCode.ts` -- Claude Code implementation
+- `packages/babysitter-sdk/src/harness/nullAdapter.ts` -- No-op fallback
+- `packages/babysitter-sdk/src/harness/registry.ts` -- Auto-detection and lookup
 
 The harness adapter pattern abstracts host-specific behaviors so the SDK core remains harness-agnostic. The `HarnessAdapter` interface defines:
 
@@ -1038,7 +1038,7 @@ If no adapter matches, the null adapter is used, which approves all stop hooks (
 
 ### hookRun Command Dispatch
 
-**File:** `packages/sdk/src/cli/commands/hookRun.ts`
+**File:** `packages/babysitter-sdk/src/cli/commands/hookRun.ts`
 
 The `hook:run` command routes to the appropriate adapter method:
 
@@ -1065,22 +1065,22 @@ babysitter hook:run --hook-type stop --harness claude-code
 | `artifacts/generated-plugins/claude-code/hooks/hooks.json` | Claude Code hook registration file |
 | `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-session-start.sh` | Generated shell entry for SessionStart |
 | `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-stop.sh` | Generated shell entry for Stop |
-| `packages/sdk/src/hooks/dispatcher.ts` | SDK hook discovery for native babysitter lifecycle hooks |
+| `packages/babysitter-sdk/src/hooks/dispatcher.ts` | SDK hook discovery for native babysitter lifecycle hooks |
 | `plugins/babysitter-unified/hooks/` | Unified source hook implementations copied into generated bundles |
 | `plugins/babysitter-unified/skills/babysit/SKILL.md` | Primary orchestration skill definition |
-| `packages/sdk/src/harness/types.ts` | HarnessAdapter interface definition |
-| `packages/sdk/src/harness/claudeCode.ts` | Claude Code adapter (stop hook, session-start, binding) |
-| `packages/sdk/src/harness/nullAdapter.ts` | No-op fallback adapter |
-| `packages/sdk/src/harness/registry.ts` | Adapter auto-detection and lookup registry |
-| `packages/sdk/src/harness/index.ts` | Harness module public exports |
-| `packages/sdk/src/session/types.ts` | SessionState, SessionFile, error types |
-| `packages/sdk/src/session/parse.ts` | YAML frontmatter parsing, state file reading |
-| `packages/sdk/src/session/write.ts` | Atomic state file writes, timing utilities |
-| `packages/sdk/src/session/index.ts` | Session module public exports |
-| `packages/sdk/src/cli/commands/hookRun.ts` | hook:run CLI command dispatcher |
-| `packages/sdk/src/cli/commands/session.ts` | session:* CLI commands including check-iteration |
-| `packages/sdk/src/cli/commands/runIterate.ts` | run:iterate CLI command |
-| `packages/sdk/src/cli/completionProof.ts` | Completion proof derivation (SHA-256) |
+| `packages/babysitter-sdk/src/harness/types.ts` | HarnessAdapter interface definition |
+| `packages/babysitter-sdk/src/harness/claudeCode.ts` | Claude Code adapter (stop hook, session-start, binding) |
+| `packages/babysitter-sdk/src/harness/nullAdapter.ts` | No-op fallback adapter |
+| `packages/babysitter-sdk/src/harness/registry.ts` | Adapter auto-detection and lookup registry |
+| `packages/babysitter-sdk/src/harness/index.ts` | Harness module public exports |
+| `packages/babysitter-sdk/src/session/types.ts` | SessionState, SessionFile, error types |
+| `packages/babysitter-sdk/src/session/parse.ts` | YAML frontmatter parsing, state file reading |
+| `packages/babysitter-sdk/src/session/write.ts` | Atomic state file writes, timing utilities |
+| `packages/babysitter-sdk/src/session/index.ts` | Session module public exports |
+| `packages/babysitter-sdk/src/cli/commands/hookRun.ts` | hook:run CLI command dispatcher |
+| `packages/babysitter-sdk/src/cli/commands/session.ts` | session:* CLI commands including check-iteration |
+| `packages/babysitter-sdk/src/cli/commands/runIterate.ts` | run:iterate CLI command |
+| `packages/babysitter-sdk/src/cli/completionProof.ts` | Completion proof derivation (SHA-256) |
 
 
 

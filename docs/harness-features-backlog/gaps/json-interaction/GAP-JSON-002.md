@@ -22,9 +22,9 @@ JSON protocol for effect dispatch: request effect, receive pending notification,
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Task definitions | `packages/sdk/src/tasks/` |
-| Task serializer | `packages/sdk/src/tasks/serializer.ts` |
-| CLI commands | `packages/sdk/src/cli/` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Task serializer | `packages/babysitter-sdk/src/tasks/serializer.ts` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 1 implementation. Define JSON effect protocol. Implement as importable API and MCP tool.

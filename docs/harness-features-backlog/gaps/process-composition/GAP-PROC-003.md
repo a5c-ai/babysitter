@@ -22,9 +22,9 @@ Process definitions include version metadata. In-flight runs detect version mism
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Runtime | `packages/sdk/src/runtime/` |
+| Runtime | `packages/babysitter-sdk/src/runtime/` |
 | Process definitions | `.a5c/processes/` |
-| Process library | `packages/sdk/src/processLibrary/` |
+| Process library | `packages/babysitter-sdk/src/processLibrary/` |
 
 ## Recommendation
 Phase 3 implementation. Add version metadata to process definitions. Detect version mismatch on replay. Implement migration strategies.

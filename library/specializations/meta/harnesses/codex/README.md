@@ -525,7 +525,7 @@ Example `package.json` for a Codex plugin:
 
 ## Babysitter Integration
 
-The Babysitter SDK includes a Codex adapter at `packages/sdk/src/harness/codex.ts`:
+The Babysitter SDK includes a Codex adapter at `packages/babysitter-sdk/src/harness/codex.ts`:
 
 - `createCodexAdapter()` implements `HarnessAdapter`
 - Capabilities: `[Programmatic]`

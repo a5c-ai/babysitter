@@ -70,7 +70,7 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 1: SDK ADAPTER
-  // Codex adapter already exists at packages/sdk/src/harness/codex.ts.
+  // Codex adapter already exists at packages/babysitter-sdk/src/harness/codex.ts.
   // This phase verifies it is correct and updates if needed.
   // Key: multi-format hooks.json support, CODEX_* env vars, Windows hookDriven
   // auto-detection (hookDriven=false on Windows).
@@ -162,7 +162,7 @@ export async function process(inputs, ctx) {
   // ==========================================================================
   // PHASE 5: TESTING
   // Adapter unit tests and plugin integration tests run in parallel.
-  // Adapter tests: Vitest in packages/sdk/src/harness/__tests__/
+  // Adapter tests: Vitest in packages/babysitter-sdk/src/harness/__tests__/
   // Plugin tests: syntax validation + packaged-install in <pluginDir>/test/
   // ==========================================================================
 

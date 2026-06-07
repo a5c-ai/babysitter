@@ -22,8 +22,8 @@ Context grouped into families: per-effect context, per-file context, per-iterati
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Compression module | `packages/sdk/src/compression/` |
-| Prompts module | `packages/sdk/src/prompts/` |
+| Compression module | `packages/babysitter-sdk/src/compression/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Section 8 (Compaction Protocol) documents CC's semantic compression with mandatory sections and analysis/summary structure |
 
 ## Recommendation

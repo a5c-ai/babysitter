@@ -23,8 +23,8 @@ WebSocket transport for MCP server. Session multiplexing for concurrent remote u
 ## Key Files
 | Component | Path |
 |-----------|------|
-| MCP server entry | `packages/sdk/src/cli/mcpServeEntry.ts` |
-| MCP handlers | `packages/sdk/src/mcp/` |
+| MCP server entry | `packages/babysitter-sdk/src/cli/mcpServeEntry.ts` |
+| MCP handlers | `packages/babysitter-sdk/src/mcp/` |
 
 ## Recommendation
 Phase 5 implementation. Add WebSocket transport to MCP server. Implement session multiplexing and authentication.

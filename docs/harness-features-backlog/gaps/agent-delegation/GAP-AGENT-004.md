@@ -22,7 +22,7 @@ Process library includes: explorer template (read-only, fast model), planner tem
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Process library | `packages/sdk/src/processLibrary/` |
+| Process library | `packages/babysitter-sdk/src/processLibrary/` |
 | Process definitions | `.a5c/processes/` |
 
 ## Recommendation

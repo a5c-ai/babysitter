@@ -1362,7 +1362,7 @@
     "remainingEffort": "L",
     "statusChangeReason": "Reclassified to NEEDS_RESPEC. The original spec assumes an 'embedded SDK dashboard' that was never built. The architecture has evolved: observer-dashboard is a separate package, and tula-ui is being extracted. The spec should be rewritten to target the actual rendering surface (observer-dashboard or tula-ui components).",
     "blockers": null,
-    "adversarialNote": "packages/sdk/src/dashboard/ does not exist. The rendering target has fundamentally changed from the spec's assumption."
+    "adversarialNote": "packages/babysitter-sdk/src/dashboard/ does not exist. The rendering target has fundamentally changed from the spec's assumption."
   },
   {
     "gapId": "GAP-TOOLS-007",
@@ -1724,7 +1724,7 @@
     "finalStatus": "NEEDS_RESPEC",
     "reclassifiedPriority": "High",
     "remainingEffort": "L",
-    "statusChangeReason": "Reclassified to NEEDS_RESPEC. The architecture has evolved. tula-ui is being extracted as a separate component library, and observer-dashboard exists as a separate package. The original spec assumed Ink-based components inside packages/sdk/. The rendering foundation should be respecified to target tula-ui or the observer-dashboard, not a monolithic SDK dashboard.",
+    "statusChangeReason": "Reclassified to NEEDS_RESPEC. The architecture has evolved. tula-ui is being extracted as a separate component library, and observer-dashboard exists as a separate package. The original spec assumed Ink-based components inside packages/babysitter-sdk/. The rendering foundation should be respecified to target tula-ui or the observer-dashboard, not a monolithic SDK dashboard.",
     "blockers": null,
     "adversarialNote": "tula-ui components are being extracted (visible in git status). observer-dashboard is a separate package. The 'embedded SDK dashboard' assumption is outdated."
   },

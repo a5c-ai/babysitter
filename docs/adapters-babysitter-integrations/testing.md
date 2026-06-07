@@ -4,14 +4,14 @@
 
 ### 1. SDK Unit Tests
 
-**Discovery tests** (`packages/sdk/src/harness/__tests__/externalAgentDiscovery.test.ts`):
+**Discovery tests** (`packages/babysitter-sdk/src/harness/__tests__/externalAgentDiscovery.test.ts`):
 - Returns `{ available: false }` when adapters not importable
 - Returns agent list when adapters module available (mock adapter-registry)
 - Caches results for 60s, respects `force: true`
 - Handles timeout gracefully (returns empty on timeout)
 - Falls back to CLI (`adapters doctor --json`) when module import fails
 
-**Task type tests** (`packages/sdk/src/tasks/__tests__/kinds.test.ts`, `defineTask.test.ts`, `serializer.test.ts`):
+**Task type tests** (`packages/babysitter-sdk/src/tasks/__tests__/kinds.test.ts`, `defineTask.test.ts`, `serializer.test.ts`):
 - `externalAgentTask()` helper produces correct TaskDef shape
 - `agent.responderType: "agent"` metadata preserved through defineTask → build → TaskDef
 - `adapter` field required when `agent.responderType` is `"agent"`

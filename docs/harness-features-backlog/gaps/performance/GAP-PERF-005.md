@@ -23,8 +23,8 @@ Prompt sections tagged with volatility levels and sorted by stability. Stable se
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Prompts module | `packages/sdk/src/prompts/` |
-| Instructions CLI | `packages/sdk/src/cli/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Instructions CLI | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 2 implementation. Tag prompt sections with volatility levels and sort by stability during composition.

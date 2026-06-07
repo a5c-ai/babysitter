@@ -49,7 +49,7 @@ VERY HIGH - Contains production-ready agent architecture patterns directly appli
 
 **Integration Viability:** MODERATE - Excellent MCP integration but **lacks explicit stop hooks**. Python async patterns might allow custom interruption mechanisms.
 
-  - Adapter implementation: `createMcpAgentAdapter` in `packages/sdk/src/harness/adapters/`
+  - Adapter implementation: `createMcpAgentAdapter` in `packages/babysitter-sdk/src/harness/adapters/`
   - Plugin structure: `plugins/babysitter-mcp-agent/` enabling mcp-agent users to access babysitter processes
   - Integration approach: Bridge babysitter's deterministic orchestration with mcp-agent's pattern-based workflow system
   - Current limitation: No babysitter integration available + **no explicit stop hooks for conversation interruption**

@@ -48,9 +48,9 @@ A message dispatcher component that renders each event type appropriately:
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Run events CLI | `packages/sdk/src/cli/` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
-| Storage types | `packages/sdk/src/storage/types.ts` (event types) |
+| Run events CLI | `packages/babysitter-sdk/src/cli/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
+| Storage types | `packages/babysitter-sdk/src/storage/types.ts` (event types) |
 | CC reference | `src/components/messages/` |
 | CC message dispatcher | `src/components/Message.tsx` |
 

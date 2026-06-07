@@ -23,8 +23,8 @@ Configurable fallback chains per task kind. If primary harness fails, retry with
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Adapter registry | `packages/sdk/src/harness/registry.ts` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Adapter registry | `packages/babysitter-sdk/src/harness/registry.ts` |
 
 ## Recommendation
 Phase 2 implementation. Define fallback chain configuration. Implement retry with next harness on failure. Log fallback decisions.

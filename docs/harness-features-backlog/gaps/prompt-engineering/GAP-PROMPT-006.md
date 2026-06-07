@@ -22,8 +22,8 @@ An `on-instructions-loaded` hook fires after prompt composition with the assembl
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Hook dispatcher | `packages/sdk/src/hooks/dispatcher.ts` |
-| Prompts module | `packages/sdk/src/prompts/` |
+| Hook dispatcher | `packages/babysitter-sdk/src/hooks/dispatcher.ts` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Section 1 (System Prompt Architecture) documents CC's layered prompt assembly with override/coordinator/agent/custom/default hierarchy |
 
 ## Recommendation

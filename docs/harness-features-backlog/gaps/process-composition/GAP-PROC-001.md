@@ -22,8 +22,8 @@ Pipeline definitions chain processes. Output of process N becomes input of proce
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| CLI commands | `packages/sdk/src/cli/` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
 | Process definitions | `.a5c/processes/` |
 
 ## Recommendation

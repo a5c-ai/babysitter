@@ -29,10 +29,10 @@ plugins/a5c/babysitter/ → blueprints/a5c/babysitter/
 ### SDK Source
 | Current Path | Target Path |
 |-------------|------------|
-| `packages/sdk/src/plugins/` | `packages/sdk/src/blueprints/` |
-| `packages/sdk/src/plugins/marketplace.ts` | `packages/sdk/src/blueprints/marketplace.ts` |
-| `packages/sdk/src/plugins/install.ts` | `packages/sdk/src/blueprints/install.ts` |
-| `packages/sdk/src/plugins/registry.ts` | `packages/sdk/src/blueprints/registry.ts` |
+| `packages/babysitter-sdk/src/plugins/` | `packages/babysitter-sdk/src/blueprints/` |
+| `packages/babysitter-sdk/src/plugins/marketplace.ts` | `packages/babysitter-sdk/src/blueprints/marketplace.ts` |
+| `packages/babysitter-sdk/src/plugins/install.ts` | `packages/babysitter-sdk/src/blueprints/install.ts` |
+| `packages/babysitter-sdk/src/plugins/registry.ts` | `packages/babysitter-sdk/src/blueprints/registry.ts` |
 
 ### Configuration
 | Current | Target |

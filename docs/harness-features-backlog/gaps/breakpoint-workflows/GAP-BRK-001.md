@@ -23,8 +23,8 @@ Multi-level approval chains per breakpoint type. Configurable escalation timeout
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
-| Breakpoint evaluator | `packages/sdk/src/breakpoints/evaluator.ts` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
+| Breakpoint evaluator | `packages/babysitter-sdk/src/breakpoints/evaluator.ts` |
 
 ## Recommendation
 Phase 2 implementation. Add approval chain configuration to breakpoint rules. Implement escalation timer. Notify next approver on timeout.

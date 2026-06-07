@@ -24,8 +24,8 @@ Embedded SDK dashboard shows: per-subagent live output streams, progress bars pe
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
-| Embedded SDK dashboard CLI (new) | `packages/sdk/src/dashboard/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
+| Embedded SDK dashboard CLI (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 3 implementation. Build embedded SDK dashboard with subagent-level components. Integrate streaming output, progress, and cost data.

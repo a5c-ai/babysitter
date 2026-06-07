@@ -18,19 +18,19 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 const babysitterRepo = 'https://github.com/a5c-ai/babysitter';
 
 const sdkIntegrationReferences = [
-  'packages/sdk/src/harness/customAdapter.ts',
-  'packages/sdk/src/harness/types.ts',
-  'packages/sdk/src/harness/registry.ts',
-  'packages/sdk/src/runtime/createRun.ts',
-  'packages/sdk/src/runtime/orchestrateIteration.ts',
-  'packages/sdk/src/runtime/commitEffectResult.ts',
-  'packages/sdk/src/runtime/replay/',
-  'packages/sdk/src/session/',
-  'packages/sdk/src/storage/',
-  'packages/sdk/src/processLibrary/',
-  'packages/sdk/src/hooks/',
-  'packages/sdk/src/logging/',
-  'packages/sdk/src/cli/commands/harnessCreateRun.ts',
+  'packages/babysitter-sdk/src/harness/customAdapter.ts',
+  'packages/babysitter-sdk/src/harness/types.ts',
+  'packages/babysitter-sdk/src/harness/registry.ts',
+  'packages/babysitter-sdk/src/runtime/createRun.ts',
+  'packages/babysitter-sdk/src/runtime/orchestrateIteration.ts',
+  'packages/babysitter-sdk/src/runtime/commitEffectResult.ts',
+  'packages/babysitter-sdk/src/runtime/replay/',
+  'packages/babysitter-sdk/src/session/',
+  'packages/babysitter-sdk/src/storage/',
+  'packages/babysitter-sdk/src/processLibrary/',
+  'packages/babysitter-sdk/src/hooks/',
+  'packages/babysitter-sdk/src/logging/',
+  'packages/babysitter-sdk/src/cli/commands/harnessCreateRun.ts',
   'docs/assimilation/harness/generic-harness-guide.md',
 ];
 

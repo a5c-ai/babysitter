@@ -1,7 +1,7 @@
 # Tools Coverage Map: CC (42 tools) vs Babysitter Agentic Tools (16)
 
 This document maps every CC tool to its babysitter equivalent (if any) and identifies
-the gaps. Babysitter's agentic tools are defined in `packages/sdk/src/harness/agenticTools.ts`
+the gaps. Babysitter's agentic tools are defined in `packages/babysitter-sdk/src/harness/agenticTools.ts`
 and injected into Pi sessions. When delegating to CC or other harnesses, those harnesses
 provide their own tools -- this map is specifically about what babysitter can provide
 when it IS the executing runtime (Pi sessions, direct execution).

@@ -5,7 +5,7 @@ even after the Phase 1b corrections.
 
 ## Missing Paths
 
-### `packages/sdk/src/dashboard/`
+### `packages/babysitter-sdk/src/dashboard/`
 
 Referenced by: GAP-OBS-001, GAP-OBS-002, GAP-OBS-003, GAP-OBS-005, GAP-OBS-NEW-001,
 GAP-OBS-NEW-002, GAP-JSON-005, GAP-PERF-004, GAP-PERF-006, GAP-SUBOBS-001,
@@ -13,7 +13,7 @@ GAP-SUBOBS-002, GAP-SUBOBS-003, GAP-SUBOBS-005, GAP-USER-006, GAP-USER-017,
 GAP-UX-001, GAP-UX-001d, GAP-UX-001f, GAP-UX-005
 
 **Status:** This directory was never created. The "embedded SDK dashboard" concept
-is referenced by 19 gaps but no `packages/sdk/src/dashboard/` directory exists.
+is referenced by 19 gaps but no `packages/babysitter-sdk/src/dashboard/` directory exists.
 The functionality it was expected to provide is split between:
 - `packages/genty/platform/src/observability/` (health, timeline, runStatus, webhooks)
 - `packages/genty/platform/src/api/` (runs, effects, breakpoints, eventStream)
@@ -24,30 +24,30 @@ actual genty platform paths where observability and API modules live.
 
 ---
 
-### `packages/sdk/src/interaction/`
+### `packages/babysitter-sdk/src/interaction/`
 
 Referenced by: GAP-MCPC-003, GAP-SEC-003, GAP-TOOLS-026, GAP-TOOLS-038,
 GAP-UX-001c, GAP-UX-007, GAP-UX-008, GAP-UX-010, GAP-USER-001
 
-**Status:** This directory does not exist in `packages/sdk/src/`. The interaction
+**Status:** This directory does not exist in `packages/babysitter-sdk/src/`. The interaction
 module lives at `packages/genty/platform/src/interaction/` instead.
 
-**Recommendation:** Update all references from `packages/sdk/src/interaction/` to
+**Recommendation:** Update all references from `packages/babysitter-sdk/src/interaction/` to
 `packages/genty/platform/src/interaction/`.
 
 ---
 
-### `packages/sdk/src/processLibrary/` (partial)
+### `packages/babysitter-sdk/src/processLibrary/` (partial)
 
 Referenced by: GAP-AGENT-004, GAP-PROC-003, GAP-PROMPT-002
 
 **Status:** The directory exists but contains only `active.ts`, `activeTypes.ts`,
-and `__tests__/`. There is no `packages/sdk/src/processLibrary/` directory with
+and `__tests__/`. There is no `packages/babysitter-sdk/src/processLibrary/` directory with
 process templates. The actual process library lives at `library/` (top-level).
 
 **Recommendation:** Update references to point to `library/methodologies/` and
 `library/processes/` for template/definition content, keep
-`packages/sdk/src/processLibrary/` only for the active binding logic.
+`packages/babysitter-sdk/src/processLibrary/` only for the active binding logic.
 
 ---
 
@@ -81,7 +81,7 @@ into the genty platform layer:
 | Inventory Path | Actual Implementation |
 |---|---|
 | `packages/genty/platform/src/harness/agenticTools.ts` | Now a directory: `packages/genty/platform/src/harness/agenticTools/` with subdirectories (tools/, web/, background/, discovery/, config/, browser/) |
-| `packages/sdk/src/harness/registry.ts` | Exists, but routing logic is in `packages/genty/platform/src/harness/capabilityRouter.ts` and `selectionPolicies.ts` |
+| `packages/babysitter-sdk/src/harness/registry.ts` | Exists, but routing logic is in `packages/genty/platform/src/harness/capabilityRouter.ts` and `selectionPolicies.ts` |
 
 ## Summary
 

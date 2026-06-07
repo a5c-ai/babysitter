@@ -22,8 +22,8 @@ run:diff command comparing two runs. Shows: input differences, first divergence 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Journal storage | `packages/sdk/src/storage/` |
-| CLI commands | `packages/sdk/src/cli/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 3 implementation. Add run:diff command. Compare journals event-by-event. Highlight divergence points and outcome differences.

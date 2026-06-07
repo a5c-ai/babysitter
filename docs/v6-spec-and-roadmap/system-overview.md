@@ -10,7 +10,7 @@ This document describes the current Babysitter system and the bounded scope of V
 
 The repository currently works as a monorepo with a strong operational center:
 
-- `packages/sdk` contains the core orchestration model, storage, task system, replay, CLI infrastructure, hooks, harness abstractions, profiles, plugin management, and process-library support.
+- `packages/babysitter-sdk` contains the core orchestration model, storage, task system, replay, CLI infrastructure, hooks, harness abstractions, profiles, plugin management, and process-library support.
 - `packages/babysitter` exposes the primary CLI package.
 - `packages/genty/platform` provides the agent runtime layer and operational orchestration support.
 - `packages/adapters/*` provide harness dispatch, adapter normalization, gateway, and user-facing agent interaction surfaces.
@@ -23,7 +23,7 @@ This means V6 begins from a working but tightly coupled system, not from a clean
 
 The easiest way to read the repo is by package family:
 
-- **Orchestration core**: `packages/sdk`, `packages/babysitter`, and `packages/genty/platform` own runs, replay, effect dispatch, CLI surfaces, and runtime orchestration behavior.
+- **Orchestration core**: `packages/babysitter-sdk`, `packages/babysitter`, and `packages/genty/platform` own runs, replay, effect dispatch, CLI surfaces, and runtime orchestration behavior.
 - **Dispatch family**: `packages/adapters/*` owns harness-facing invocation, adapter normalization, gateway delivery, and shared user-facing agent interaction contracts.
 - **Support adapter family**: `packages/adapters/hooks/*`, `packages/extensions-adapter`, and `packages/tasks-adapter` own hook normalization, plugin compilation, and human approval routing.
 - **Distribution surfaces**: `plugins/babysitter-unified/` is the canonical authoring surface, while `plugins/babysitter-*` remain the concrete installable compatibility bundles.
@@ -36,7 +36,7 @@ From an operator perspective, the live execution path is:
 1. A harness surface such as Codex, Claude Code, Cursor, Gemini, Copilot, Pi, or OpenCode loads a concrete plugin bundle from `plugins/babysitter-*`.
 2. That bundle is produced from the unified source in `plugins/babysitter-unified/` with help from `packages/extensions-adapter` and, where relevant, `packages/adapters/hooks/*`.
 3. The harness integration reaches the operational CLI/runtime surface in `packages/babysitter` and `packages/genty/platform`.
-4. The CLI/runtime delegates run creation, replay, task lifecycle, journal/state handling, and process-library access to `packages/sdk`.
+4. The CLI/runtime delegates run creation, replay, task lifecycle, journal/state handling, and process-library access to `packages/babysitter-sdk`.
 5. The SDK executes workflows from `library/` or project-local `.a5c/processes/`, while `packages/tasks-adapter` handles structured human approval routing when a process needs it.
 6. Where agent dispatch or richer user-facing interaction is required, the runtime integrates with `packages/adapters/*` rather than replacing the orchestration core.
 

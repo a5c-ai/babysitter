@@ -29,7 +29,7 @@ Ask (multi-select):
 Ask the user to confirm or edit path → label mapping. Default suggestions based on repo layout:
 
 ```yaml
-area/sdk: packages/sdk/**/*
+area/sdk: packages/babysitter-sdk/**/*
 area/catalog: packages/catalog/**/*
 area/cli: packages/*/src/cli/**/*
 area/docs: '**/*.md'
@@ -53,7 +53,7 @@ Create `.github/labeler.yml`:
 
 area/sdk:
   - changed-files:
-      - any-glob-to-any-file: ['packages/sdk/**/*']
+      - any-glob-to-any-file: ['packages/babysitter-sdk/**/*']
 
 area/catalog:
   - changed-files:
@@ -62,7 +62,7 @@ area/catalog:
 area/cli:
   - changed-files:
       - any-glob-to-any-file:
-          - 'packages/sdk/src/cli/**/*'
+          - 'packages/babysitter-sdk/src/cli/**/*'
           - 'packages/babysitter/bin/**/*'
 
 area/docs:
@@ -220,7 +220,7 @@ create() {
 }
 
 # area
-create "area/sdk" "1d76db" "Changes in packages/sdk"
+create "area/sdk" "1d76db" "Changes in packages/babysitter-sdk"
 create "area/catalog" "1d76db" "Changes in packages/catalog"
 create "area/cli" "1d76db" "Changes in CLI surface"
 create "area/docs" "0e8a16" "Documentation changes"
@@ -270,7 +270,7 @@ babysitter plugin:update-registry --plugin-name auto-labeler --plugin-version 1.
 
 ## Step 9: Verify Setup
 
-1. Open a test PR modifying `packages/sdk/` → `area/sdk` applied automatically
+1. Open a test PR modifying `packages/babysitter-sdk/` → `area/sdk` applied automatically
 2. Modify `**/*.md` → `area/docs` applied
 3. PR title `feat: something` → `type/feat` + `release/minor` applied
 4. PR title `fix!: breaking` → `type/fix` + `release/major` applied

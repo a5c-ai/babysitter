@@ -236,7 +236,7 @@ Need another scenario documented? Open an issue with the desired flow (CLI flags
 
 ## Appendix A. Regenerating this walkthrough (deterministic workflow)
 
-This walkthrough is anchored to the real smoke harness in `packages/sdk/scripts/smoke-cli.js` and the generated traceability index at `docs/generated/cli-examples-verification.md`. When you change CLI output, flags, or wording in this file, use the current repo workflow below from a fresh checkout:
+This walkthrough is anchored to the real smoke harness in `packages/babysitter-sdk/scripts/smoke-cli.js` and the generated traceability index at `docs/generated/cli-examples-verification.md`. When you change CLI output, flags, or wording in this file, use the current repo workflow below from a fresh checkout:
 
 1. **Install dependencies and build the SDK CLI.**
 
@@ -257,7 +257,7 @@ npm run docs:prepare
 npm run docs:examples:smoke
 ```
 
-This delegates to `npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk`, which stages deterministic fixtures under `packages/sdk/test-fixtures/cli/runs/smoke/`. Add `-- --keep` to the underlying SDK command when you need to inspect the staged run directory after the smoke run finishes.
+This delegates to `npm run smoke:cli --workspace=@a5c-ai/babysitter-sdk`, which stages deterministic fixtures under `packages/babysitter-sdk/test-fixtures/cli/runs/smoke/`. Add `-- --keep` to the underlying SDK command when you need to inspect the staged run directory after the smoke run finishes.
 
 4. **Run the repo docs checks that validate published command surfaces.**
 
@@ -267,7 +267,7 @@ npm run docs:qa
 ```
 
 5. **Keep the harness API docs aligned.**
-   - `packages/sdk/src/testing/README.md` and `library/reference/sdk.md` should be updated in the same change when this walkthrough references `runToCompletionWithFakeRunner`, `captureRunSnapshot`, or other deterministic harness APIs.
+   - `packages/babysitter-sdk/src/testing/README.md` and `library/reference/sdk.md` should be updated in the same change when this walkthrough references `runToCompletionWithFakeRunner`, `captureRunSnapshot`, or other deterministic harness APIs.
    - Run `npm run test --workspace=@a5c-ai/babysitter-sdk` after changing those APIs or their examples.
 
 CLI output intentionally uses POSIX-style paths even on Windows so the published examples stay stable across platforms. Task payloads remain redacted unless `BABYSITTER_ALLOW_SECRET_LOGS=1` is set for verbose JSON inspection.

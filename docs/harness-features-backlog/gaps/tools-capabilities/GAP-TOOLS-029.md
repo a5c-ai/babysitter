@@ -37,8 +37,8 @@ Embedded SDK dashboard and `task:show` render each block type appropriately.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Task serializer | `packages/sdk/src/tasks/serializer.ts` |
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
+| Task serializer | `packages/babysitter-sdk/src/tasks/serializer.ts` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
 
 ## Recommendation
 Phase 3 (M5). Define output block schema in task types. Add rendering support in

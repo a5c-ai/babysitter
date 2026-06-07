@@ -61,7 +61,7 @@ Resolution order: explicit arg > provider detection > base URL heuristics > defa
 - **Context compression:** Preflight at 50% context window usage, gateway auto-compression at 85%. Memory flushed before compression, middle turns summarized, last N messages preserved intact, tool call/result pairs kept together.
 - **Budget management:** Default 90 iterations, configurable. Subagents get independent budgets.
 
-**Our equivalent:** `packages/genty/platform/` is the platform API for harness integration. The agent core itself lives in the upstream harness (Claude Code, Codex, etc.). For babysitter-orchestrated runs, the `packages/sdk/` runtime drives the turn lifecycle via task definitions and effects.
+**Our equivalent:** `packages/genty/platform/` is the platform API for harness integration. The agent core itself lives in the upstream harness (Claude Code, Codex, etc.). For babysitter-orchestrated runs, the `packages/babysitter-sdk/` runtime drives the turn lifecycle via task definitions and effects.
 
 **Unique to Hermes:**
 - Single monolithic `AIAgent` class that works identically across CLI, gateway, ACP, batch, and API -- true platform-agnostic core.
@@ -90,7 +90,7 @@ Resolution order: explicit arg > provider detection > base URL heuristics > defa
 
 **Our equivalent:**
 - `packages/genty/platform/src/harness/` -- harness adapters, adapter bridge, event mapper, stdin reader.
-- `packages/sdk/src/` -- core runtime with storage, tasks, hooks, profiles, plugins, compression.
+- `packages/babysitter-sdk/src/` -- core runtime with storage, tasks, hooks, profiles, plugins, compression.
 - `packages/genty/platform/src/governance/` -- approval, permission, decision trail.
 
 **Unique to Hermes:**
@@ -211,7 +211,7 @@ Resolution order: explicit arg > provider detection > base URL heuristics > defa
 - **Self-evolution memory:** The companion repo uses execution traces and reflective search to improve skills and prompts.
 
 **Our equivalent:**
-- `packages/sdk/src/` -- memoryExtraction, crossRunState for durable memory across babysitter runs.
+- `packages/babysitter-sdk/src/` -- memoryExtraction, crossRunState for durable memory across babysitter runs.
 - CLAUDE.md / MEMORY.md file conventions.
 - Atlas graph as structured organizational knowledge.
 
@@ -239,7 +239,7 @@ Resolution order: explicit arg > provider detection > base URL heuristics > defa
 - Basic iteration budget enforcement (90 turns default, configurable).
 
 **Our equivalent:**
-- `packages/sdk/` -- full orchestration runtime with task definitions, effects, breakpoints, journals, completion proof, state replay.
+- `packages/babysitter-sdk/` -- full orchestration runtime with task definitions, effects, breakpoints, journals, completion proof, state replay.
 - `packages/genty/platform/src/daemon/` -- durable queue, automation executor, timer scheduler.
 - Babysitter process definitions with phases, subtasks, and multi-agent coordination.
 

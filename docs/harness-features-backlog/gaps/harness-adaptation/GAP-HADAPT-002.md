@@ -22,8 +22,8 @@ Per-task model selection. Process definitions specify model preferences (e.g., f
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Task definitions | `packages/sdk/src/tasks/` |
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
 
 ## Recommendation
 Phase 2 implementation. Wire execution.model hint into routing decisions. Select harness that supports requested model.

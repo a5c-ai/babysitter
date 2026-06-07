@@ -9,7 +9,7 @@ Quick wins are gaps with **High or Critical priority**, **S remaining effort**, 
 ### GAP-PERF-001 -- Prompt Caching (Ephemeral)
 - **Priority:** Critical | **Remaining:** S | **Risk:** Low
 - **What remains:** Wire cache_control API integration uniformly across adapters. Strata-aware prompt assembly with stability tags and checksums already exists.
-- **Files:** `packages/sdk/src/prompts/strata.ts`, adapter-specific harness wrappers
+- **Files:** `packages/babysitter-sdk/src/prompts/strata.ts`, adapter-specific harness wrappers
 - **Impact:** Directly reduces API costs and latency for every orchestrated run. Foundation for context introspection (GAP-OBS-005).
 - **Suggested PR:** "feat(sdk): wire ephemeral cache_control across all prompt adapters"
 
@@ -48,28 +48,28 @@ Quick wins are gaps with **High or Critical priority**, **S remaining effort**, 
 ### GAP-PROMPT-010 -- Safety and Reversibility Prompt Framework
 - **Priority:** High | **Remaining:** S | **Risk:** Low
 - **What remains:** Dedicated reversibility assessment framework and blast radius reasoning section. criticalRules.ts and nonNegotiables.ts already provide safety content.
-- **Files:** `packages/sdk/src/prompts/parts/` (new safetyGuidelines.ts), `packages/sdk/src/prompts/templates/` (new template)
+- **Files:** `packages/babysitter-sdk/src/prompts/parts/` (new safetyGuidelines.ts), `packages/babysitter-sdk/src/prompts/templates/` (new template)
 - **Impact:** Improves agent safety for destructive operations. Pure prompt template work.
 - **Suggested PR:** "feat(sdk): add reversibility assessment and blast radius prompt framework"
 
 ### GAP-STATE-001 -- Long-Term Memory Extraction
 - **Priority:** High | **Remaining:** S | **Risk:** Low
 - **What remains:** Add a prompt section that renders long-term memories into new run prompts. memoryExtraction.ts already provides extraction, persistence, querying, and pruning.
-- **Files:** `packages/sdk/src/prompts/parts/` (new longTermMemory.ts), `packages/sdk/src/prompts/strata.ts` (add to PART_STRATA_MAP)
+- **Files:** `packages/babysitter-sdk/src/prompts/parts/` (new longTermMemory.ts), `packages/babysitter-sdk/src/prompts/strata.ts` (add to PART_STRATA_MAP)
 - **Impact:** Closes the loop on memory -- extracted memories will finally be consumed. Unblocks memory consolidation (STATE-002).
 - **Suggested PR:** "feat(sdk): inject long-term memories into new run prompts"
 
 ### GAP-ECO-003 -- Plugin Trust, Provenance, and Blocklist
 - **Priority:** High | **Remaining:** S | **Risk:** Low
 - **What remains:** Blocklist data store and provenance metadata at install time. Plugin sandbox and governance trust-level rules already exist.
-- **Files:** `packages/genty/platform/src/plugins/`, `packages/sdk/src/blueprints/registry.ts`
+- **Files:** `packages/genty/platform/src/plugins/`, `packages/babysitter-sdk/src/blueprints/registry.ts`
 - **Impact:** Strengthens plugin security. No upstream blockers (SEC-001 is CLOSED).
 - **Suggested PR:** "feat(platform): add plugin blocklist and provenance tracking"
 
 ### GAP-SEC-002 -- Trust Classes for Plugins
 - **Priority:** High | **Remaining:** S | **Risk:** Low
 - **What remains:** TrustLevel as first-class registry field with hook dispatch gating. Plugin sandbox with permission tracking already exists.
-- **Files:** `packages/genty/platform/src/plugins/`, `packages/sdk/src/blueprints/registry.ts`
+- **Files:** `packages/genty/platform/src/plugins/`, `packages/babysitter-sdk/src/blueprints/registry.ts`
 - **Impact:** Enables differentiated plugin permissions based on trust level.
 - **Suggested PR:** "feat(platform): add TrustLevel field to plugin registry with hook gating"
 
@@ -83,7 +83,7 @@ Quick wins are gaps with **High or Critical priority**, **S remaining effort**, 
 ### GAP-AGENT-001 -- Sub-Harness Invocation with Isolation
 - **Priority:** High | **Remaining:** S | **Risk:** Medium
 - **What remains:** Wire context isolation and model override per invocation into existing invoker. Subprocess intrinsic and Pi streaming exist.
-- **Files:** `packages/genty/platform/src/harness/invoker.ts`, `packages/sdk/src/runtime/intrinsics/subprocess.ts`
+- **Files:** `packages/genty/platform/src/harness/invoker.ts`, `packages/babysitter-sdk/src/runtime/intrinsics/subprocess.ts`
 - **Impact:** Unblocks 5 direct dependents including cross-run communication and state sharing.
 - **Suggested PR:** "feat(platform): add context isolation and model override to sub-harness invocation"
 

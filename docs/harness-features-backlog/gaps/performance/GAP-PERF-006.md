@@ -22,9 +22,9 @@ Journal events stream to observers in real-time as they are appended. Effect exe
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
-| Journal storage | `packages/sdk/src/storage/` |
-| MCP server | `packages/sdk/src/mcp/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
 
 ## Recommendation
 Phase 4 implementation. Integrate with journal appendEvent to emit stream events on writes. Add SSE endpoint to MCP server.

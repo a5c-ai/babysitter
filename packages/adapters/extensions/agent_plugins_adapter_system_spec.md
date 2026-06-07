@@ -2184,7 +2184,7 @@ The `extraFiles` field maps output paths to source paths, allowing targets to in
 
 The babysitter project uses synchronized versioning across all packages. The `scripts/bump-version.mjs` script updates:
 
-1. All workspace `package.json` files (root, `packages/sdk`, `packages/babysitter`, etc.)
+1. All workspace `package.json` files (root, `packages/babysitter-sdk`, `packages/babysitter`, etc.)
 2. All generated plugin `package.json` files or per-harness package surfaces (`artifacts/generated-plugins/codex/package.json`, etc.)
 3. All plugin manifest files (`plugin.json`, `gemini-extension.json`, `openclaw.plugin.json`)
 4. All `versions.json` files (setting `sdkVersion`)

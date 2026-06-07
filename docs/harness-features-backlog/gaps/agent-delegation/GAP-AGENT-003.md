@@ -24,9 +24,9 @@ Coordinator process template in process library. Fan-out/fan-in delegation patte
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| Task definitions | `packages/sdk/src/tasks/` |
-| Harness adapters | `packages/sdk/src/harness/` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
 
 ## Recommendation
 Phase 3-4 implementation. Create coordinator process template. Implement fan-out/fan-in with progress aggregation.

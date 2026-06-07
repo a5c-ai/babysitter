@@ -32,7 +32,7 @@ Read:
 
 Work mainly in:
 
-- `packages/sdk`
+- `packages/babysitter-sdk`
 - `packages/babysitter`
 - `packages/genty/platform`
 - `library/`
@@ -93,7 +93,7 @@ Read:
 Work mainly in:
 
 - `packages/tasks-adapter`
-- `packages/sdk` breakpoint integration
+- `packages/babysitter-sdk` breakpoint integration
 - related hook and plugin surfaces if the transport changes
 
 ## If You Need To Change UI Surfaces
@@ -120,7 +120,7 @@ Use this rule of thumb:
 | Concern | Primary source of truth | Supporting references |
 |---|---|---|
 | V6 architecture scope | `docs/v6-spec-and-roadmap/` | package READMEs, adversarial analyses |
-| Orchestration runtime behavior | `packages/sdk`, `packages/babysitter`, `packages/genty/platform` | V6 docs, CLI docs |
+| Orchestration runtime behavior | `packages/babysitter-sdk`, `packages/babysitter`, `packages/genty/platform` | V6 docs, CLI docs |
 | Harness dispatch behavior | `packages/adapters/*` and `docs/adapters/` | V6 integration docs |
 | Hook normalization | `packages/adapters/hooks/*` | per-harness plugin docs |
 | Unified plugin packaging | `packages/extensions-adapter`, `plugins/babysitter-unified/` | install READMEs for concrete bundles |

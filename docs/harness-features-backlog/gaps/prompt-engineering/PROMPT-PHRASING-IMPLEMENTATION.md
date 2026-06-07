@@ -1,18 +1,18 @@
 # Prompt Phrasing Implementation Guide
 
-**Purpose**: Concrete, copy-paste-ready prompt sections to add to `packages/sdk/src/prompts/`.
+**Purpose**: Concrete, copy-paste-ready prompt sections to add to `packages/babysitter-sdk/src/prompts/`.
 Each section below is a babysitter-adapted version of CC prompt patterns from
 [11-prompt-phrasing-analysis.md](../../11-prompt-phrasing-analysis.md).
 
-**Where these go**: New `.md` template files in `packages/sdk/src/prompts/templates/` with
-corresponding render functions in `packages/sdk/src/prompts/parts/`. The composer
+**Where these go**: New `.md` template files in `packages/babysitter-sdk/src/prompts/templates/` with
+corresponding render functions in `packages/babysitter-sdk/src/prompts/parts/`. The composer
 (`compose.ts`) injects them into task prompts based on task kind.
 
 ---
 
 ## 1. Coding Philosophy (GAP-PROMPT-008)
 
-**File**: `packages/sdk/src/prompts/templates/coding-philosophy.md`
+**File**: `packages/babysitter-sdk/src/prompts/templates/coding-philosophy.md`
 **Inject when**: Task kind is `agent` and task involves code changes (detect via labels or title keywords)
 
 ```markdown
@@ -47,7 +47,7 @@ Follow these principles:
 
 ## 2. Tool Preference Rules (GAP-PROMPT-009)
 
-**File**: `packages/sdk/src/prompts/templates/tool-preferences.md`
+**File**: `packages/babysitter-sdk/src/prompts/templates/tool-preferences.md`
 **Inject when**: Task uses agentic tools (Pi sessions, delegated harness invocations with tool access)
 
 ```markdown
@@ -77,7 +77,7 @@ specifically to change.
 
 ## 3. Safety and Reversibility (GAP-PROMPT-010)
 
-**File**: `packages/sdk/src/prompts/templates/safety-guidelines.md`
+**File**: `packages/babysitter-sdk/src/prompts/templates/safety-guidelines.md`
 **Inject when**: All agent tasks (always include)
 
 ```markdown
@@ -113,7 +113,7 @@ secure, and correct code.
 
 ## 4. Output Efficiency (GAP-PROMPT-011)
 
-**File**: `packages/sdk/src/prompts/templates/output-efficiency.md`
+**File**: `packages/babysitter-sdk/src/prompts/templates/output-efficiency.md`
 **Inject when**: All agent tasks (always include -- reduces token waste)
 
 ```markdown
@@ -139,7 +139,7 @@ did after completing an action.
 
 ## 5. Git Operations Protocol (GAP-PROMPT-012)
 
-**File**: `packages/sdk/src/prompts/templates/git-safety.md`
+**File**: `packages/babysitter-sdk/src/prompts/templates/git-safety.md`
 **Inject when**: Task involves code changes or version control operations
 
 ```markdown
@@ -169,7 +169,7 @@ When making git commits:
 
 ## 6. Compaction Protocol (GAP-PERF-002)
 
-**File**: `packages/sdk/src/prompts/templates/compaction-protocol.md`
+**File**: `packages/babysitter-sdk/src/prompts/templates/compaction-protocol.md`
 **Inject when**: Long-running orchestration sessions that need context compression
 
 ```markdown
@@ -198,7 +198,7 @@ without re-reading files.
 
 ## 7. Environment Context (GAP-PROMPT-003)
 
-**File**: `packages/sdk/src/prompts/templates/environment-context.md`
+**File**: `packages/babysitter-sdk/src/prompts/templates/environment-context.md`
 **Inject when**: All agent tasks (stable stratum)
 
 ```markdown
@@ -229,7 +229,7 @@ without re-reading files.
 
 ## 8. Read-Before-Edit Enforcement
 
-**Where**: Add to agentic tool descriptions in `packages/sdk/src/harness/agenticTools.ts`
+**Where**: Add to agentic tool descriptions in `packages/babysitter-sdk/src/harness/agenticTools.ts`
 
 For the file-edit tool description, append:
 ```

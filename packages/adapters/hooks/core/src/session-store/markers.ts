@@ -1,7 +1,7 @@
 /**
  * PID-based session marker mechanism (default-off).
  *
- * Ported from SDK `packages/sdk/src/utils/sessionMarker.ts`.
+ * Ported from SDK `packages/babysitter-sdk/src/utils/sessionMarker.ts`.
  *
  * All operations are gated behind env var AGENT_HOOKS_PROXY_ENABLE_PID_MARKERS.
  * When the env var is not set to "1", all functions are no-ops.

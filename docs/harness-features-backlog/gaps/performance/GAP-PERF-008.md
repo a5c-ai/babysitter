@@ -23,8 +23,8 @@ Structured continuity state persists across compactions: key decisions, modified
 ## Key Files
 | Component | Path |
 |-----------|------|
-| State cache | `packages/sdk/src/runtime/replay/stateCache.ts` |
-| Session management | `packages/sdk/src/session/` |
+| State cache | `packages/babysitter-sdk/src/runtime/replay/stateCache.ts` |
+| Session management | `packages/babysitter-sdk/src/session/` |
 | Run directory | `.a5c/runs/<runId>/state/` |
 
 ## Recommendation

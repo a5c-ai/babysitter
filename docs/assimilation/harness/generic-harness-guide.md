@@ -1099,7 +1099,7 @@ The babysitter SDK and harness integration involve two categories of hooks:
 ### SDK Hooks (13 `KnownHookType` values)
 
 These are dispatched by the SDK runtime during orchestration. They are defined in
-`packages/sdk/src/hooks/types.ts` and fired via `callHook(hookType, payload)`.
+`packages/babysitter-sdk/src/hooks/types.ts` and fired via `callHook(hookType, payload)`.
 
 | SDK Hook | Tier | Description |
 |---|---|---|
@@ -1601,11 +1601,11 @@ Key files in the reference implementation:
 
 | File | Role |
 |------|------|
-| `packages/sdk/src/harness/types.ts` | `HarnessAdapter` interface definition |
-| `packages/sdk/src/harness/claudeCode.ts` | Claude Code adapter (stop hook, session-start, binding) |
-| `packages/sdk/src/harness/nullAdapter.ts` | No-op fallback adapter (useful as a starting template) |
-| `packages/sdk/src/harness/registry.ts` | Adapter auto-detection and lookup |
-| `packages/sdk/src/session/` | Session state parsing, writing, and types |
+| `packages/babysitter-sdk/src/harness/types.ts` | `HarnessAdapter` interface definition |
+| `packages/babysitter-sdk/src/harness/claudeCode.ts` | Claude Code adapter (stop hook, session-start, binding) |
+| `packages/babysitter-sdk/src/harness/nullAdapter.ts` | No-op fallback adapter (useful as a starting template) |
+| `packages/babysitter-sdk/src/harness/registry.ts` | Adapter auto-detection and lookup |
+| `packages/babysitter-sdk/src/session/` | Session state parsing, writing, and types |
 | `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-stop.sh` | Generated Claude Code stop hook entry |
 | `artifacts/generated-plugins/claude-code/hooks/babysitter-proxied-session-start.sh` | Generated Claude Code session-start hook entry |
 
@@ -1628,7 +1628,7 @@ interface HarnessAdapter {
 }
 ```
 
-Register your adapter in `packages/sdk/src/harness/registry.ts` and it will be
+Register your adapter in `packages/babysitter-sdk/src/harness/registry.ts` and it will be
 auto-detected when its `isActive()` method returns `true`.
 
 For harnesses that cannot modify the SDK source, the entire integration can be

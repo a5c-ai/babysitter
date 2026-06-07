@@ -154,7 +154,7 @@ Root `tsconfig.json` as a solution config:
 {
   "files": [],
   "references": [
-    { "path": "./packages/sdk" },
+    { "path": "./packages/babysitter-sdk" },
     { "path": "./packages/adapters/cli" }
   ]
 }

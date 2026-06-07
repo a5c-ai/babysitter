@@ -33,8 +33,8 @@ during execution.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
-| MCP module | `packages/sdk/src/mcp/` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
+| MCP module | `packages/babysitter-sdk/src/mcp/` |
 
 ## Recommendation
 Phase 3. Implement alongside MCP client capability. Resource browsing is less

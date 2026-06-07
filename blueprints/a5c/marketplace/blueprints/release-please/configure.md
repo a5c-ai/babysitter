@@ -105,7 +105,7 @@ If `.release-please-manifest.json` gets out of sync with published tags:
 
 ```bash
 # Set each package's current version manually
-jq '.["packages/sdk"] = "1.4.2"' .release-please-manifest.json > .tmp && mv .tmp .release-please-manifest.json
+jq '.["packages/babysitter-sdk"] = "1.4.2"' .release-please-manifest.json > .tmp && mv .tmp .release-please-manifest.json
 git commit -am "chore: repair release-please manifest"
 ```
 

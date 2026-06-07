@@ -204,7 +204,7 @@ Concrete runtime: built-in tools, hook sockets, session-state, sandbox primitive
 | `internalSessionStateLocation` | string | yes | **Evidence-bound.** E.g. `~/.claude/projects/<hash>/`. |
 | `sessionFileFormat` | enum<jsonl,sqlite,json,jsonl-tree,delegated-to-remote,jsonl-with-sqlite-index,event-sourced-jsonl> | yes | **Evidence-bound.** `event-sourced-jsonl` = journal of effects; one event per JSONL entry. |
 | `sessionFilePathConvention` | string | yes | **Evidence-bound.** Path glob template. |
-| `approvalGatingPrimitive` | enum<per-call,per-tool-class,session-default,none,delegated-to-remote,server-managed,policy-engine> | yes | **Evidence-bound.** `policy-engine` = pluggable rule engine evaluating breakpoint events (e.g. babysitter `packages/sdk/src/breakpoints/`). |
+| `approvalGatingPrimitive` | enum<per-call,per-tool-class,session-default,none,delegated-to-remote,server-managed,policy-engine> | yes | **Evidence-bound.** `policy-engine` = pluggable rule engine evaluating breakpoint events (e.g. babysitter `packages/babysitter-sdk/src/breakpoints/`). |
 | `subprocessSandboxStrategy` | enum<none,wrapped-shell,container,sandboxed-syscall,platform-deferred,invocation-mode,native-sandbox,process-isolation> | yes | **Evidence-bound.** `process-isolation` = each subagent in its own subprocess + working directory. |
 | `runtimeIdentity` | enum<per-instance-keypair,platform-attested,none,delegated-to-remote,api-key,github-token,host-process> | yes | `host-process` = runs as a Node.js (or similar) process on the operator's host. |
 | `supportedMCPTransports` | list<ref<`MCPTransport`>> | yes | May be empty. |

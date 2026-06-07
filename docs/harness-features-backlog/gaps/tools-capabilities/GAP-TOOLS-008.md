@@ -45,8 +45,8 @@ when the tool is not available locally.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
-| Harness capabilities | `packages/sdk/src/harness/types.ts` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
+| Harness capabilities | `packages/babysitter-sdk/src/harness/types.ts` |
 | CC WebSearchTool | `src/tools/WebSearchTool/WebSearchTool.ts` |
 
 ## Recommendation

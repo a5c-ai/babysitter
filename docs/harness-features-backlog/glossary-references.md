@@ -75,79 +75,79 @@ Terms, abbreviations, file paths, and cross-codebase references used throughout 
 
 | Component | Path |
 |-----------|------|
-| CLI entry | `packages/sdk/src/cli/main.ts` |
-| MCP entry | `packages/sdk/src/cli/mcpServeEntry.ts` |
-| Runtime | `packages/sdk/src/runtime/` |
-| Orchestrate iteration | `packages/sdk/src/runtime/orchestrateIteration.ts` |
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| Exceptions | `packages/sdk/src/runtime/exceptions.ts` |
-| Replay engine | `packages/sdk/src/runtime/replay/createReplayEngine.ts` |
-| Replay cursor | `packages/sdk/src/runtime/replay/replayCursor.ts` |
-| Effect index | `packages/sdk/src/runtime/replay/effectIndex.ts` |
-| State cache | `packages/sdk/src/runtime/replay/stateCache.ts` |
+| CLI entry | `packages/babysitter-sdk/src/cli/main.ts` |
+| MCP entry | `packages/babysitter-sdk/src/cli/mcpServeEntry.ts` |
+| Runtime | `packages/babysitter-sdk/src/runtime/` |
+| Orchestrate iteration | `packages/babysitter-sdk/src/runtime/orchestrateIteration.ts` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| Exceptions | `packages/babysitter-sdk/src/runtime/exceptions.ts` |
+| Replay engine | `packages/babysitter-sdk/src/runtime/replay/createReplayEngine.ts` |
+| Replay cursor | `packages/babysitter-sdk/src/runtime/replay/replayCursor.ts` |
+| Effect index | `packages/babysitter-sdk/src/runtime/replay/effectIndex.ts` |
+| State cache | `packages/babysitter-sdk/src/runtime/replay/stateCache.ts` |
 
 ### Storage & Tasks
 
 | Component | Path |
 |-----------|------|
-| Storage module | `packages/sdk/src/storage/` |
-| Task definitions | `packages/sdk/src/tasks/` |
-| Task serializer | `packages/sdk/src/tasks/serializer.ts` |
-| Task registry | `packages/sdk/src/tasks/registry.ts` |
-| Task batching | `packages/sdk/src/tasks/batching.ts` |
+| Storage module | `packages/babysitter-sdk/src/storage/` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Task serializer | `packages/babysitter-sdk/src/tasks/serializer.ts` |
+| Task registry | `packages/babysitter-sdk/src/tasks/registry.ts` |
+| Task batching | `packages/babysitter-sdk/src/tasks/batching.ts` |
 
 ### Harness Adapters
 
 | Component | Path |
 |-----------|------|
-| Adapter directory | `packages/sdk/src/harness/` |
-| Harness discovery | `packages/sdk/src/harness/discovery.ts` |
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Pi wrapper | `packages/sdk/src/harness/piWrapper.ts` |
-| Pi secure sandbox | `packages/sdk/src/harness/piSecureSandbox.ts` |
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
-| Adapter registry | `packages/sdk/src/harness/registry.ts` |
-| Install support | `packages/sdk/src/harness/installSupport.ts` |
+| Adapter directory | `packages/babysitter-sdk/src/harness/` |
+| Harness discovery | `packages/babysitter-sdk/src/harness/discovery.ts` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Pi wrapper | `packages/babysitter-sdk/src/harness/piWrapper.ts` |
+| Pi secure sandbox | `packages/babysitter-sdk/src/harness/piSecureSandbox.ts` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
+| Adapter registry | `packages/babysitter-sdk/src/harness/registry.ts` |
+| Install support | `packages/babysitter-sdk/src/harness/installSupport.ts` |
 
 ### Plugins & Extensions
 
 | Component | Path |
 |-----------|------|
-| Plugin types | `packages/sdk/src/plugins/types.ts` |
-| Plugin registry | `packages/sdk/src/plugins/registry.ts` |
-| Plugin marketplace | `packages/sdk/src/plugins/marketplace.ts` |
-| Plugin migrations | `packages/sdk/src/plugins/migrations.ts` |
-| Plugin package reader | `packages/sdk/src/plugins/packageReader.ts` |
-| Process library | `packages/sdk/src/processLibrary/` |
+| Plugin types | `packages/babysitter-sdk/src/plugins/types.ts` |
+| Plugin registry | `packages/babysitter-sdk/src/plugins/registry.ts` |
+| Plugin marketplace | `packages/babysitter-sdk/src/plugins/marketplace.ts` |
+| Plugin migrations | `packages/babysitter-sdk/src/plugins/migrations.ts` |
+| Plugin package reader | `packages/babysitter-sdk/src/plugins/packageReader.ts` |
+| Process library | `packages/babysitter-sdk/src/processLibrary/` |
 
 ### Security & Breakpoints
 
 | Component | Path |
 |-----------|------|
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
-| Breakpoint patterns | `packages/sdk/src/breakpoints/patterns.ts` |
-| Breakpoint rules | `packages/sdk/src/breakpoints/rules.ts` |
-| Breakpoint evaluator | `packages/sdk/src/breakpoints/evaluator.ts` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
+| Breakpoint patterns | `packages/babysitter-sdk/src/breakpoints/patterns.ts` |
+| Breakpoint rules | `packages/babysitter-sdk/src/breakpoints/rules.ts` |
+| Breakpoint evaluator | `packages/babysitter-sdk/src/breakpoints/evaluator.ts` |
 
 ### Interaction & Prompts
 
 | Component | Path |
 |-----------|------|
-| Interaction module | `packages/sdk/src/interaction/` |
-| Prompts module | `packages/sdk/src/prompts/` |
-| Compression module | `packages/sdk/src/compression/` |
-| Session management | `packages/sdk/src/session/` |
-| Profiles | `packages/sdk/src/profiles/` |
+| Interaction module | `packages/babysitter-sdk/src/interaction/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Compression module | `packages/babysitter-sdk/src/compression/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| Profiles | `packages/babysitter-sdk/src/profiles/` |
 
 ### Observability
 
 | Component | Path |
 |-----------|------|
-| Logging module | `packages/sdk/src/logging/` |
-| Hooks | `packages/sdk/src/hooks/` |
-| Hook dispatcher | `packages/sdk/src/hooks/dispatcher.ts` |
+| Logging module | `packages/babysitter-sdk/src/logging/` |
+| Hooks | `packages/babysitter-sdk/src/hooks/` |
+| Hook dispatcher | `packages/babysitter-sdk/src/hooks/dispatcher.ts` |
 | Observer dashboard | `packages/observer-dashboard/` |
-| Config | `packages/sdk/src/config/` |
+| Config | `packages/babysitter-sdk/src/config/` |
 
 ### Harness Plugins
 

@@ -15,7 +15,7 @@
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
       "packages/genty/platform/src/harness/piWrapper.ts",
-      "packages/sdk/src/harness/"
+      "packages/babysitter-sdk/src/harness/"
     ]
   },
   {
@@ -33,9 +33,9 @@
       "GAP-ROUTE-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/tasks/",
-      "packages/sdk/src/harness/"
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/harness/"
     ]
   },
   {
@@ -51,7 +51,7 @@
       "GAP-HADAPT-002"
     ],
     "keyFiles": [
-      "packages/sdk/src/processLibrary/",
+      "packages/babysitter-sdk/src/processLibrary/",
       ".a5c/processes/"
     ]
   },
@@ -68,8 +68,8 @@
       "GAP-AGENT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/tasks/"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/tasks/"
     ]
   },
   {
@@ -86,8 +86,8 @@
       "GAP-SESSION-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/",
-      "packages/sdk/src/runtime/replay/stateCache.ts"
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
     ]
   },
   {
@@ -105,7 +105,7 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/agenticTools.ts",
-      "packages/sdk/src/tasks/"
+      "packages/babysitter-sdk/src/tasks/"
     ]
   },
   {
@@ -121,9 +121,9 @@
       "GAP-HADAPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/tasks/",
-      "packages/sdk/src/tasks/registry.ts",
-      "packages/sdk/src/harness/"
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/tasks/registry.ts",
+      "packages/babysitter-sdk/src/harness/"
     ]
   },
   {
@@ -140,8 +140,8 @@
       "GAP-SEC-005"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/types.ts",
-      "packages/sdk/src/breakpoints/evaluator.ts"
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts"
     ]
   },
   {
@@ -158,8 +158,8 @@
       "GAP-OBS-NEW-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/types.ts",
-      "packages/sdk/src/hooks/dispatcher.ts"
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts"
     ]
   },
   {
@@ -175,8 +175,8 @@
       "GAP-OBS-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/rules.ts",
-      "packages/sdk/src/logging/"
+      "packages/babysitter-sdk/src/breakpoints/rules.ts",
+      "packages/babysitter-sdk/src/logging/"
     ]
   },
   {
@@ -186,7 +186,7 @@
     "priority": "Critical",
     "effort": "XL",
     "status": "Missing",
-    "currentState": "Babysitter has its own plugin system (packages/sdk/src/plugins/) managing harness integrations. It does NOT load or execute CC plugin components (commands, agents, skills, hooks, MCP/LSP servers).",
+    "currentState": "Babysitter has its own plugin system (packages/babysitter-sdk/src/plugins/) managing harness integrations. It does NOT load or execute CC plugin components (commands, agents, skills, hooks, MCP/LSP servers).",
     "targetState": "A CC plugin compatibility adapter that reads CC plugin.json manifests, loads CC plugin components into babysitter's runtime, maps CC hooks to babysitter hook types, exposes CC plugin skills as available task kinds, and connects CC plugin MCP servers.",
     "dependencies": [
       "GAP-ECO-002",
@@ -207,7 +207,7 @@
     "targetState": "Babysitter can add CC marketplaces as sources and install CC plugins from them. The plugin:add-marketplace command accepts CC marketplace URLs.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/blueprints/marketplace.ts"
+      "packages/babysitter-sdk/src/blueprints/marketplace.ts"
     ]
   },
   {
@@ -267,9 +267,9 @@
       "GAP-HADAPT-005"
     ],
     "keyFiles": [
-      "packages/sdk/src/harness/",
-      "packages/sdk/src/tasks/",
-      "packages/sdk/src/harness/registry.ts"
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/harness/registry.ts"
     ]
   },
   {
@@ -285,8 +285,8 @@
       "GAP-PAR-009"
     ],
     "keyFiles": [
-      "packages/sdk/src/tasks/",
-      "packages/sdk/src/runtime/types.ts"
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/runtime/types.ts"
     ]
   },
   {
@@ -300,8 +300,8 @@
     "targetState": "Cross-run effect cache indexed by invocation key. Identical effects return cached results without re-execution. Configurable cache TTL.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/runtime/replay/",
-      "packages/sdk/src/storage/"
+      "packages/babysitter-sdk/src/runtime/replay/",
+      "packages/babysitter-sdk/src/storage/"
     ]
   },
   {
@@ -315,9 +315,9 @@
     "targetState": "Harnesses declare capabilities. Tasks declare required capabilities. Routing engine matches task requirements to available harnesses. Fallback to default harness when no match found.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/harness/",
-      "packages/sdk/src/harness/discovery.ts",
-      "packages/sdk/src/tasks/"
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/harness/discovery.ts",
+      "packages/babysitter-sdk/src/tasks/"
     ]
   },
   {
@@ -333,7 +333,7 @@
       "GAP-HADAPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/tasks/",
+      "packages/babysitter-sdk/src/tasks/",
       "packages/genty/platform/src/harness/invoker.ts"
     ]
   },
@@ -351,8 +351,8 @@
       "GAP-SESSION-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/harness/",
-      "packages/sdk/src/config/"
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/config/"
     ]
   },
   {
@@ -370,7 +370,7 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
-      "packages/sdk/src/harness/registry.ts"
+      "packages/babysitter-sdk/src/harness/registry.ts"
     ]
   },
   {
@@ -386,7 +386,7 @@
       "GAP-HADAPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/harness/discovery.ts",
+      "packages/babysitter-sdk/src/harness/discovery.ts",
       "packages/genty/platform/src/harness/invoker.ts"
     ]
   },
@@ -403,9 +403,9 @@
       "GAP-REMOTE-007"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/mcp/",
-      "packages/sdk/src/runtime/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/runtime/"
     ]
   },
   {
@@ -421,9 +421,9 @@
       "GAP-JSON-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/tasks/",
-      "packages/sdk/src/tasks/serializer.ts",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/tasks/serializer.ts",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -440,9 +440,9 @@
       "GAP-SEC-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/types.ts",
-      "packages/sdk/src/breakpoints/evaluator.ts",
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -458,8 +458,8 @@
       "GAP-JSON-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/",
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -476,9 +476,9 @@
       "GAP-REMOTE-008"
     ],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/mcp/",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -494,7 +494,7 @@
       "GAP-TOOLS-025"
     ],
     "keyFiles": [
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -526,8 +526,8 @@
       "GAP-BRK-002"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/evaluator.ts",
-      "packages/sdk/src/interaction/"
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/interaction/"
     ]
   },
   {
@@ -544,7 +544,7 @@
       "GAP-MCPC-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -560,8 +560,8 @@
       "GAP-STATE-008"
     ],
     "keyFiles": [
-      "packages/sdk/src/logging/",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/logging/",
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -577,8 +577,8 @@
       "GAP-OBS-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/dashboard/",
-      "packages/sdk/src/storage/"
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/storage/"
     ]
   },
   {
@@ -594,8 +594,8 @@
       "GAP-PROMPT-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -611,9 +611,9 @@
       "GAP-SEC-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/evaluator.ts",
-      "packages/sdk/src/breakpoints/rules.ts",
-      "packages/sdk/src/logging/"
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/breakpoints/rules.ts",
+      "packages/babysitter-sdk/src/logging/"
     ]
   },
   {
@@ -629,9 +629,9 @@
       "GAP-SESSION-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/compression/",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/compression/",
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -647,8 +647,8 @@
       "GAP-ECO-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/logging/",
-      "packages/sdk/src/config/"
+      "packages/babysitter-sdk/src/logging/",
+      "packages/babysitter-sdk/src/config/"
     ]
   },
   {
@@ -664,8 +664,8 @@
       "GAP-OBS-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -681,8 +681,8 @@
       "GAP-OBS-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/runtime/replay/stateCache.ts"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
     ]
   },
   {
@@ -698,9 +698,9 @@
       "GAP-STATE-008"
     ],
     "keyFiles": [
-      "packages/sdk/src/dashboard/",
-      "packages/sdk/src/hooks/dispatcher.ts",
-      "packages/sdk/src/config/"
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts",
+      "packages/babysitter-sdk/src/config/"
     ]
   },
   {
@@ -716,8 +716,8 @@
       "GAP-JSON-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/dashboard/",
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -733,10 +733,10 @@
       "GAP-PAR-009"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/intrinsics/parallel.ts",
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/tasks/batching.ts",
-      "packages/sdk/src/runtime/types.ts"
+      "packages/babysitter-sdk/src/runtime/intrinsics/parallel.ts",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/batching.ts",
+      "packages/babysitter-sdk/src/runtime/types.ts"
     ]
   },
   {
@@ -754,8 +754,8 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
-      "packages/sdk/src/runtime/types.ts",
-      "packages/sdk/src/runtime/orchestrateIteration.ts"
+      "packages/babysitter-sdk/src/runtime/types.ts",
+      "packages/babysitter-sdk/src/runtime/orchestrateIteration.ts"
     ]
   },
   {
@@ -773,9 +773,9 @@
       "GAP-HADAPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/tasks/batching.ts",
-      "packages/sdk/src/harness/",
-      "packages/sdk/src/runtime/processContext.ts"
+      "packages/babysitter-sdk/src/tasks/batching.ts",
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts"
     ]
   },
   {
@@ -792,7 +792,7 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/agenticTools.ts",
-      "packages/sdk/src/storage/"
+      "packages/babysitter-sdk/src/storage/"
     ]
   },
   {
@@ -824,9 +824,9 @@
     "targetState": "Multiple execution strategies: parallel strategy (same parallelGroupId concurrently), sleep strategy (skip sleep effects until epoch passes), priority strategy, cost strategy.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/runtime/types.ts",
-      "packages/sdk/src/runtime/orchestrateIteration.ts",
-      "packages/sdk/src/tasks/batching.ts"
+      "packages/babysitter-sdk/src/runtime/types.ts",
+      "packages/babysitter-sdk/src/runtime/orchestrateIteration.ts",
+      "packages/babysitter-sdk/src/tasks/batching.ts"
     ]
   },
   {
@@ -843,8 +843,8 @@
       "GAP-PROC-002"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/tasks/batching.ts"
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/batching.ts"
     ]
   },
   {
@@ -861,8 +861,8 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -878,9 +878,9 @@
       "GAP-PROMPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/compression/",
-      "packages/sdk/src/hooks/dispatcher.ts",
-      "packages/sdk/src/runtime/replay/stateCache.ts"
+      "packages/babysitter-sdk/src/compression/",
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
     ]
   },
   {
@@ -898,7 +898,7 @@
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
       "packages/genty/platform/src/harness/piWrapper.ts",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -915,8 +915,8 @@
       "GAP-PERF-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -932,9 +932,9 @@
       "GAP-JSON-005"
     ],
     "keyFiles": [
-      "packages/sdk/src/dashboard/",
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -951,8 +951,8 @@
       "GAP-PAR-009"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/tasks/batching.ts",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/batching.ts",
       "packages/genty/platform/src/harness/invoker.ts"
     ]
   },
@@ -970,8 +970,8 @@
       "GAP-STATE-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/replay/stateCache.ts",
-      "packages/sdk/src/session/",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts",
+      "packages/babysitter-sdk/src/session/",
       ".a5c/runs/<runId>/state/"
     ]
   },
@@ -988,8 +988,8 @@
       "GAP-PROC-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/cli/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/cli/",
       ".a5c/processes/"
     ]
   },
@@ -1006,8 +1006,8 @@
       "GAP-AGENT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/runtime/"
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/runtime/"
     ]
   },
   {
@@ -1021,9 +1021,9 @@
     "targetState": "Process definitions include version metadata. In-flight runs detect version mismatch. Migration strategies: replay with new version, fork, or continue with old version.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/runtime/",
+      "packages/babysitter-sdk/src/runtime/",
       ".a5c/processes/",
-      "packages/sdk/src/processLibrary/"
+      "packages/babysitter-sdk/src/processLibrary/"
     ]
   },
   {
@@ -1037,8 +1037,8 @@
     "targetState": "Process definitions include input/output JSON schemas. Validation at run:create time. Validation between pipeline stages. Type-safe process composition.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/runtime/",
-      "packages/sdk/src/storage/",
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/storage/",
       ".a5c/processes/"
     ]
   },
@@ -1055,9 +1055,9 @@
       "GAP-ECO-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/profiles/",
-      "packages/sdk/src/breakpoints/evaluator.ts",
-      "packages/sdk/src/prompts/"
+      "packages/babysitter-sdk/src/profiles/",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/prompts/"
     ]
   },
   {
@@ -1071,9 +1071,9 @@
     "targetState": "Prompt assembly follows a strata model: stable stratum (system identity, core rules, tool definitions), runtime stratum (capabilities, feature flags, workspace context), turn-local stratum (recent messages, current task). Each section tagged with its stratum.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/session/"
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/session/"
     ]
   },
   {
@@ -1090,10 +1090,10 @@
       "GAP-ECO-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/blueprints/packageReader.ts",
-      "packages/sdk/src/processLibrary/"
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/blueprints/packageReader.ts",
+      "packages/babysitter-sdk/src/processLibrary/"
     ]
   },
   {
@@ -1109,8 +1109,8 @@
       "GAP-PROMPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -1126,8 +1126,8 @@
       "GAP-PROMPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -1144,9 +1144,9 @@
       "GAP-STATE-008"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/",
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/storage/"
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/storage/"
     ]
   },
   {
@@ -1162,8 +1162,8 @@
       "GAP-PROMPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/hooks/dispatcher.ts",
-      "packages/sdk/src/prompts/"
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts",
+      "packages/babysitter-sdk/src/prompts/"
     ]
   },
   {
@@ -1179,8 +1179,8 @@
       "GAP-PROMPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/compression/",
-      "packages/sdk/src/prompts/"
+      "packages/babysitter-sdk/src/compression/",
+      "packages/babysitter-sdk/src/prompts/"
     ]
   },
   {
@@ -1196,7 +1196,7 @@
       "GAP-PROMPT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/"
+      "packages/babysitter-sdk/src/prompts/"
     ]
   },
   {
@@ -1213,7 +1213,7 @@
       "GAP-PROMPT-002"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/",
+      "packages/babysitter-sdk/src/prompts/",
       "packages/genty/platform/src/harness/agenticTools.ts"
     ]
   },
@@ -1231,8 +1231,8 @@
       "GAP-SEC-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/breakpoints/"
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/breakpoints/"
     ]
   },
   {
@@ -1249,8 +1249,8 @@
       "GAP-PERF-002"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/",
-      "packages/sdk/src/session/"
+      "packages/babysitter-sdk/src/prompts/",
+      "packages/babysitter-sdk/src/session/"
     ]
   },
   {
@@ -1267,7 +1267,7 @@
       "GAP-PROMPT-010"
     ],
     "keyFiles": [
-      "packages/sdk/src/prompts/"
+      "packages/babysitter-sdk/src/prompts/"
     ]
   },
   {
@@ -1283,7 +1283,7 @@
       "GAP-REMOTE-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
+      "packages/babysitter-sdk/src/cli/",
       "packages/genty/platform/src/harness/invoker.ts"
     ]
   },
@@ -1301,8 +1301,8 @@
       "GAP-JSON-005"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/mcpServeEntry.ts",
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/cli/mcpServeEntry.ts",
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -1316,8 +1316,8 @@
     "targetState": "Cron scheduling with persistent triggers surviving process restart. Standard cron expressions. trigger:list shows next scheduled execution time.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/config/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/config/"
     ]
   },
   {
@@ -1333,7 +1333,7 @@
       "GAP-SEC-006"
     ],
     "keyFiles": [
-      "packages/sdk/src/mcp/",
+      "packages/babysitter-sdk/src/mcp/",
       "packages/genty/platform/src/harness/agenticTools.ts"
     ]
   },
@@ -1349,8 +1349,8 @@
     "dependencies": [],
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
-      "packages/sdk/src/mcp/",
-      "packages/sdk/src/harness/registry.ts"
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/harness/registry.ts"
     ]
   },
   {
@@ -1366,8 +1366,8 @@
       "GAP-REMOTE-007"
     ],
     "keyFiles": [
-      "packages/sdk/src/mcp/",
-      "packages/sdk/src/storage/"
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/storage/"
     ]
   },
   {
@@ -1384,8 +1384,8 @@
       "GAP-SEC-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/types.ts",
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -1399,8 +1399,8 @@
     "targetState": "run:diff command comparing two runs. Shows input differences, first divergence point in journals, effect outcome differences, output deltas. Enables A/B testing.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -1414,8 +1414,8 @@
     "targetState": "run:archive compresses and moves completed runs to archive directory. run:restore retrieves archived runs. Configurable retention policies.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -1431,9 +1431,9 @@
       "GAP-STATE-006"
     ],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/runtime/replay/createReplayEngine.ts",
-      "packages/sdk/src/runtime/replay/stateCache.ts"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/runtime/replay/createReplayEngine.ts",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
     ]
   },
   {
@@ -1447,10 +1447,10 @@
     "targetState": "PolicyEngine evaluates declarative rules at effect dispatch and task execution. Policy types: rate-limit, permission, resource-limit, trust-level. Policy decisions persisted for audit trail.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/types.ts",
-      "packages/sdk/src/breakpoints/evaluator.ts",
-      "packages/sdk/src/config/",
-      "packages/sdk/src/runtime/processContext.ts"
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts",
+      "packages/babysitter-sdk/src/config/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts"
     ]
   },
   {
@@ -1468,7 +1468,7 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/plugins/types.ts",
-      "packages/sdk/src/hooks/dispatcher.ts"
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts"
     ]
   },
   {
@@ -1484,8 +1484,8 @@
       "GAP-SEC-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/types.ts",
-      "packages/sdk/src/interaction/"
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/interaction/"
     ]
   },
   {
@@ -1502,7 +1502,7 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/piSecureSandbox.ts",
-      "packages/sdk/src/harness/"
+      "packages/babysitter-sdk/src/harness/"
     ]
   },
   {
@@ -1519,8 +1519,8 @@
       "GAP-SEC-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/patterns.ts",
-      "packages/sdk/src/breakpoints/evaluator.ts"
+      "packages/babysitter-sdk/src/breakpoints/patterns.ts",
+      "packages/babysitter-sdk/src/breakpoints/evaluator.ts"
     ]
   },
   {
@@ -1536,8 +1536,8 @@
       "GAP-SEC-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/mcp/",
-      "packages/sdk/src/config/"
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/config/"
     ]
   },
   {
@@ -1553,8 +1553,8 @@
       "GAP-SEC-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/logging/",
-      "packages/sdk/src/config/"
+      "packages/babysitter-sdk/src/logging/",
+      "packages/babysitter-sdk/src/config/"
     ]
   },
   {
@@ -1568,7 +1568,7 @@
     "targetState": "Sessions contain multiple runs. Session state persists across runs. Session history browsable. Runs within a session share context and accumulated knowledge.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/session/",
+      "packages/babysitter-sdk/src/session/",
       ".a5c/runs/"
     ]
   },
@@ -1585,7 +1585,7 @@
       "GAP-SESSION-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/"
+      "packages/babysitter-sdk/src/session/"
     ]
   },
   {
@@ -1601,8 +1601,8 @@
       "GAP-SESSION-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/",
-      "packages/sdk/src/config/"
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/config/"
     ]
   },
   {
@@ -1619,8 +1619,8 @@
       "GAP-SUBOBS-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -1637,7 +1637,7 @@
       "GAP-REMOTE-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/"
+      "packages/babysitter-sdk/src/session/"
     ]
   },
   {
@@ -1653,9 +1653,9 @@
       "GAP-SESSION-002"
     ],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/session/",
-      "packages/sdk/src/prompts/"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/prompts/"
     ]
   },
   {
@@ -1671,8 +1671,8 @@
       "GAP-STATE-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/",
-      "packages/sdk/src/logging/"
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/logging/"
     ]
   },
   {
@@ -1688,8 +1688,8 @@
       "GAP-SESSION-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/",
-      "packages/sdk/src/runtime/replay/stateCache.ts"
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/runtime/replay/stateCache.ts"
     ]
   },
   {
@@ -1705,8 +1705,8 @@
       "GAP-STATE-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/runtime/replay/createReplayEngine.ts"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/runtime/replay/createReplayEngine.ts"
     ]
   },
   {
@@ -1720,9 +1720,9 @@
     "targetState": "RunHealthScore computed from journal: pending age score, retry churn score, progress score, no-op iteration detection. Surfaced in run:status and embedded SDK dashboard. Threshold-based warnings.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/runtime/orchestrateIteration.ts",
-      "packages/sdk/src/hooks/dispatcher.ts"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/runtime/orchestrateIteration.ts",
+      "packages/babysitter-sdk/src/hooks/dispatcher.ts"
     ]
   },
   {
@@ -1737,7 +1737,7 @@
     "dependencies": [],
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -1754,8 +1754,8 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
-      "packages/sdk/src/dashboard/",
-      "packages/sdk/src/tasks/"
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/tasks/"
     ]
   },
   {
@@ -1771,9 +1771,9 @@
       "GAP-SUBOBS-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/tasks/",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -1791,7 +1791,7 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
-      "packages/sdk/src/config/"
+      "packages/babysitter-sdk/src/config/"
     ]
   },
   {
@@ -1809,7 +1809,7 @@
       "GAP-SUBOBS-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -1841,7 +1841,7 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/agenticTools.ts",
-      "packages/sdk/src/harness/types.ts"
+      "packages/babysitter-sdk/src/harness/types.ts"
     ]
   },
   {
@@ -1858,8 +1858,8 @@
       "GAP-PROC-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/harness/",
-      "packages/sdk/src/tasks/",
+      "packages/babysitter-sdk/src/harness/",
+      "packages/babysitter-sdk/src/tasks/",
       "packages/genty/platform/src/harness/agenticTools.ts"
     ]
   },
@@ -1877,11 +1877,11 @@
       "GAP-JSON-002"
     ],
     "keyFiles": [
-      "packages/sdk/src/tasks/",
-      "packages/sdk/src/tasks/serializer.ts",
-      "packages/sdk/src/tasks/registry.ts",
-      "packages/sdk/src/mcp/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/tasks/serializer.ts",
+      "packages/babysitter-sdk/src/tasks/registry.ts",
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -1898,10 +1898,10 @@
       "GAP-AGENT-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/",
+      "packages/babysitter-sdk/src/runtime/",
       "packages/genty/platform/src/harness/invoker.ts",
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/tasks/batching.ts"
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/tasks/batching.ts"
     ]
   },
   {
@@ -1919,8 +1919,8 @@
     "keyFiles": [
       "library/",
       "library/methodologies/gsd/",
-      "packages/sdk/src/runtime/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -1937,9 +1937,9 @@
       "GAP-REMOTE-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/main.ts",
-      "packages/sdk/src/runtime/",
-      "packages/sdk/src/config/"
+      "packages/babysitter-sdk/src/cli/main.ts",
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/config/"
     ]
   },
   {
@@ -1957,9 +1957,9 @@
       "GAP-OBS-NEW-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/hooks/",
-      "packages/sdk/src/mcp/",
-      "packages/sdk/src/runtime/"
+      "packages/babysitter-sdk/src/hooks/",
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/runtime/"
     ]
   },
   {
@@ -1976,10 +1976,10 @@
       "GAP-PROC-002"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/",
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/tasks/",
-      "packages/sdk/src/runtime/replay/"
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/runtime/replay/"
     ]
   },
   {
@@ -1996,10 +1996,10 @@
       "GAP-REMOTE-006"
     ],
     "keyFiles": [
-      "packages/sdk/src/mcp/",
-      "packages/sdk/src/harness/types.ts",
-      "packages/sdk/src/harness/registry.ts",
-      "packages/sdk/src/tasks/"
+      "packages/babysitter-sdk/src/mcp/",
+      "packages/babysitter-sdk/src/harness/types.ts",
+      "packages/babysitter-sdk/src/harness/registry.ts",
+      "packages/babysitter-sdk/src/tasks/"
     ]
   },
   {
@@ -2016,10 +2016,10 @@
       "GAP-JSON-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/interaction/",
-      "packages/sdk/src/breakpoints/",
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/tasks/"
+      "packages/babysitter-sdk/src/interaction/",
+      "packages/babysitter-sdk/src/breakpoints/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/"
     ]
   },
   {
@@ -2036,10 +2036,10 @@
       "GAP-PROC-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/blueprints/packageReader.ts",
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/harness/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/blueprints/packageReader.ts",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/harness/"
     ]
   },
   {
@@ -2055,9 +2055,9 @@
       "GAP-TOOLS-020"
     ],
     "keyFiles": [
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/tasks/",
-      "packages/sdk/src/runtime/replay/"
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/tasks/",
+      "packages/babysitter-sdk/src/runtime/replay/"
     ]
   },
   {
@@ -2074,7 +2074,7 @@
       "GAP-UX-001d"
     ],
     "keyFiles": [
-      "packages/sdk/src/tasks/serializer.ts",
+      "packages/babysitter-sdk/src/tasks/serializer.ts",
       "packages/genty/platform/src/harness/agenticTools.ts"
     ]
   },
@@ -2090,9 +2090,9 @@
     "dependencies": [],
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
-      "packages/sdk/src/runtime/",
-      "packages/sdk/src/storage/",
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/runtime/",
+      "packages/babysitter-sdk/src/storage/",
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -2110,7 +2110,7 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/agenticTools.ts",
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -2127,7 +2127,7 @@
       "GAP-MCPC-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/mcp/"
+      "packages/babysitter-sdk/src/mcp/"
     ]
   },
   {
@@ -2141,9 +2141,9 @@
     "targetState": "A config agentic tool that can read and modify babysitter settings: compression settings, breakpoint auto-approval rules, model selection per-task, timeout overrides. Changes scoped to current run.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/config/",
-      "packages/sdk/src/compression/",
-      "packages/sdk/src/breakpoints/rules.ts"
+      "packages/babysitter-sdk/src/config/",
+      "packages/babysitter-sdk/src/compression/",
+      "packages/babysitter-sdk/src/breakpoints/rules.ts"
     ]
   },
   {
@@ -2161,7 +2161,7 @@
     ],
     "keyFiles": [
       "packages/genty/platform/src/harness/agenticTools.ts",
-      "packages/sdk/src/prompts/"
+      "packages/babysitter-sdk/src/prompts/"
     ]
   },
   {
@@ -2220,7 +2220,7 @@
     "dependencies": [],
     "keyFiles": [
       "packages/genty/platform/src/harness/agenticTools.ts",
-      "packages/sdk/src/interaction/"
+      "packages/babysitter-sdk/src/interaction/"
     ]
   },
   {
@@ -2236,9 +2236,9 @@
       "GAP-UX-005"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/breakpoints/types.ts",
-      "packages/sdk/src/interaction/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/interaction/"
     ]
   },
   {
@@ -2255,8 +2255,8 @@
       "GAP-SESSION-004"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -2273,9 +2273,9 @@
       "GAP-UX-007"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/breakpoints/types.ts"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/breakpoints/types.ts"
     ]
   },
   {
@@ -2293,7 +2293,7 @@
     "keyFiles": [
       "packages/genty/platform/src/plugins/",
       "packages/genty/platform/src/harness/agenticTools.ts",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -2307,9 +2307,9 @@
     "targetState": "Ink installed as dependency. Reusable component library for terminal rendering: Box, Text, Spinner, Table, StatusBar, ProgressBar, Tree. Embedded SDK dashboard and key CLI commands built with Ink components.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/dashboard/",
-      "packages/sdk/src/interaction/",
-      "packages/sdk/src/cli/main.ts"
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/interaction/",
+      "packages/babysitter-sdk/src/cli/main.ts"
     ]
   },
   {
@@ -2325,7 +2325,7 @@
       "GAP-UX-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -2342,7 +2342,7 @@
       "GAP-RUN-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -2359,8 +2359,8 @@
       "GAP-BRK-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/interaction/",
-      "packages/sdk/src/breakpoints/"
+      "packages/babysitter-sdk/src/interaction/",
+      "packages/babysitter-sdk/src/breakpoints/"
     ]
   },
   {
@@ -2376,9 +2376,9 @@
       "GAP-UX-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/dashboard/",
-      "packages/sdk/src/storage/types.ts"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/dashboard/",
+      "packages/babysitter-sdk/src/storage/types.ts"
     ]
   },
   {
@@ -2395,8 +2395,8 @@
       "GAP-SUBOBS-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/session/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/session/"
     ]
   },
   {
@@ -2415,7 +2415,7 @@
     "keyFiles": [
       "packages/genty/platform/src/harness/invoker.ts",
       "packages/genty/platform/src/harness/piWrapper.ts",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -2431,8 +2431,8 @@
       "GAP-STATE-008"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/dashboard/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/dashboard/"
     ]
   },
   {
@@ -2446,8 +2446,8 @@
     "targetState": "task:list --grouped organizes pending effects by kind (task, breakpoint, sleep), priority, and age. Counts per group. Works in --json mode.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/tasks/batching.ts"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/tasks/batching.ts"
     ]
   },
   {
@@ -2464,8 +2464,8 @@
       "GAP-SEC-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/breakpoints/types.ts",
-      "packages/sdk/src/interaction/"
+      "packages/babysitter-sdk/src/breakpoints/types.ts",
+      "packages/babysitter-sdk/src/interaction/"
     ]
   },
   {
@@ -2481,9 +2481,9 @@
       "GAP-PROMPT-005"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/session/",
-      "packages/sdk/src/interaction/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/interaction/"
     ]
   },
   {
@@ -2499,8 +2499,8 @@
       "GAP-OBS-001"
     ],
     "keyFiles": [
-      "packages/sdk/src/cli/",
-      "packages/sdk/src/storage/"
+      "packages/babysitter-sdk/src/cli/",
+      "packages/babysitter-sdk/src/storage/"
     ]
   },
   {
@@ -2516,10 +2516,10 @@
       "GAP-JSON-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/interaction/",
-      "packages/sdk/src/breakpoints/",
-      "packages/sdk/src/runtime/processContext.ts",
-      "packages/sdk/src/harness/"
+      "packages/babysitter-sdk/src/interaction/",
+      "packages/babysitter-sdk/src/breakpoints/",
+      "packages/babysitter-sdk/src/runtime/processContext.ts",
+      "packages/babysitter-sdk/src/harness/"
     ]
   },
   {
@@ -2533,7 +2533,7 @@
     "targetState": "babysitter help --search for command search. Contextual suggestions based on current run state. Command aliases and shortcuts for common workflows.",
     "dependencies": [],
     "keyFiles": [
-      "packages/sdk/src/cli/"
+      "packages/babysitter-sdk/src/cli/"
     ]
   },
   {
@@ -2549,8 +2549,8 @@
       "GAP-PROMPT-003"
     ],
     "keyFiles": [
-      "packages/sdk/src/session/",
-      "packages/sdk/src/prompts/"
+      "packages/babysitter-sdk/src/session/",
+      "packages/babysitter-sdk/src/prompts/"
     ]
   }
 ]

@@ -135,7 +135,7 @@ These gaps reference architectural assumptions that are no longer valid.
 
 | Gap ID | Title | Original Status | Final Status | Reason |
 |---|---|---|---|---|
-| GAP-SUBOBS-005 | Dashboard Subagent Drill-Down | Missing | NEEDS_RESPEC | Assumes 'embedded SDK dashboard' (packages/sdk/src/dashboard/) which does not exist. Architecture has evolved to observer-dashboard and tula-ui. |
+| GAP-SUBOBS-005 | Dashboard Subagent Drill-Down | Missing | NEEDS_RESPEC | Assumes 'embedded SDK dashboard' (packages/babysitter-sdk/src/dashboard/) which does not exist. Architecture has evolved to observer-dashboard and tula-ui. |
 | GAP-UX-001 | Ink/React Terminal Rendering Foundation | Missing | NEEDS_RESPEC | Assumes Ink-based components inside SDK. Architecture evolved to tula-ui extraction and observer-dashboard. |
 | GAP-UX-001a | Effect Tree Visualization | Missing | NEEDS_RESPEC | Depends on GAP-UX-001's Ink assumption, which is outdated. |
 | GAP-UX-001b | Structured Diff Rendering | Missing | NEEDS_RESPEC | Depends on GAP-UX-001's Ink assumption, which is outdated. |

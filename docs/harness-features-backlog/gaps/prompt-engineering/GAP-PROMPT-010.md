@@ -23,8 +23,8 @@ A `safetyGuidelines` prompt section injected into task prompts that includes: re
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Prompts module | `packages/sdk/src/prompts/` |
-| Breakpoints | `packages/sdk/src/breakpoints/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Breakpoints | `packages/babysitter-sdk/src/breakpoints/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Section 4 (Safety and Security) has exact CC phrasing for reversibility and cyber risk |
 
 ## Recommendation

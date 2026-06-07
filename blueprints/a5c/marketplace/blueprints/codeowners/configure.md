@@ -22,7 +22,7 @@ Edit `.github/CODEOWNERS`:
 
 ```
 # Later rules override earlier ones
-/packages/sdk/src/storage/    @org/storage-team @org/sdk-team
+/packages/babysitter-sdk/src/storage/    @org/storage-team @org/sdk-team
 *.tf                           @org/sre
 /migrations/                   @org/dba @org/backend
 ```
@@ -43,15 +43,15 @@ Notify `@org/old-team` in the PR description.
 For strict package-level ownership, use directory globs only:
 
 ```
-/packages/sdk/        @org/sdk
+/packages/babysitter-sdk/        @org/sdk
 /packages/catalog/    @org/frontend
 ```
 
 For mixed granularity, add file-pattern overrides **after** directory rules:
 
 ```
-/packages/sdk/                  @org/sdk
-/packages/sdk/**/*.sql           @org/dba   # DBAs override SDK team for SQL
+/packages/babysitter-sdk/                  @org/sdk
+/packages/babysitter-sdk/**/*.sql           @org/dba   # DBAs override SDK team for SQL
 ```
 
 ## 5. Exclude Paths from Ownership
@@ -113,7 +113,7 @@ babysitter run:create \
 Any owner listed can approve:
 
 ```
-/packages/sdk/   @org/sdk-team @org/maintainers @alice
+/packages/babysitter-sdk/   @org/sdk-team @org/maintainers @alice
 ```
 
 To require approval from **all** listed owners, use GitHub's **Require multiple reviewers** branch protection setting with `required_approving_review_count` equal to the number of owning teams.

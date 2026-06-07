@@ -23,10 +23,10 @@ A worktree manager that: creates isolated git worktrees for parallel code tasks,
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Parallelization | `packages/sdk/src/runtime/` |
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Storage | `packages/sdk/src/storage/` |
-| Task batching | `packages/sdk/src/tasks/batching.ts` |
+| Parallelization | `packages/babysitter-sdk/src/runtime/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Storage | `packages/babysitter-sdk/src/storage/` |
+| Task batching | `packages/babysitter-sdk/src/tasks/batching.ts` |
 
 ## Recommendation
 Phase 3 implementation. Build a `WorktreeManager` module that creates/tracks/merges worktrees. Integrate with `buildParallelBatch` to auto-provision worktrees for code tasks. Add worktree cleanup to effect resolution lifecycle.

@@ -22,8 +22,8 @@ Continuous harness health monitoring during runs. Error rate tracking per harnes
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness discovery | `packages/sdk/src/harness/discovery.ts` |
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
+| Harness discovery | `packages/babysitter-sdk/src/harness/discovery.ts` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
 
 ## Recommendation
 Phase 3 implementation. Add health tracking to harness adapters. Implement circuit-breaker pattern. Integrate with routing engine.

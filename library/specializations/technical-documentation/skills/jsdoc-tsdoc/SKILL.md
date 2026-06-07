@@ -53,7 +53,7 @@ Invoke this skill when you need to:
 
 ```json
 {
-  "projectPath": "./packages/sdk",
+  "projectPath": "./packages/babysitter-sdk",
   "entryPoints": ["src/index.ts", "src/client.ts"],
   "outputDir": "docs/api",
   "outputFormat": "html",

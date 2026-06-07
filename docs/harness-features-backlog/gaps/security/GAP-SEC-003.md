@@ -22,8 +22,8 @@ InteractionKind enum: clarification, approval, intervention, notification, hando
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
-| Interaction module | `packages/sdk/src/interaction/` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
+| Interaction module | `packages/babysitter-sdk/src/interaction/` |
 
 ## Recommendation
 Phase 2 implementation. Introduce InteractionKind to the breakpoint system. Route different kinds through different UX flows. Backward compatible with existing breakpoints.

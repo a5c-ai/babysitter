@@ -22,8 +22,8 @@ Export commands producing machine-readable (JSON, CSV) and human-readable (Markd
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Journal storage | `packages/sdk/src/storage/` |
-| CLI commands | `packages/sdk/src/cli/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 3 implementation. Add run:export command producing structured summaries in JSON and Markdown formats.

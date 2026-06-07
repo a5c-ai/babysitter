@@ -25,7 +25,7 @@ describe('live stack scenario contract primitives', () => {
     expect(scenario.agent.setupCommands).toEqual([
       'npm run generate:plugins',
       'adapters install claude',
-      'npm install --global ./packages/sdk',
+      'npm install --global ./packages/babysitter-sdk',
       'npm install --global ./packages/adapters/hooks/cli',
       'babysitter harness:install-plugin claude-code',
       'mkdir -p .a5c-live-test',

@@ -22,9 +22,9 @@ Every auto-approval evaluation logged to JSONL. Includes breakpointId, rules che
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint evaluator | `packages/sdk/src/breakpoints/evaluator.ts` |
-| Breakpoint rules | `packages/sdk/src/breakpoints/rules.ts` |
-| Logging module | `packages/sdk/src/logging/` |
+| Breakpoint evaluator | `packages/babysitter-sdk/src/breakpoints/evaluator.ts` |
+| Breakpoint rules | `packages/babysitter-sdk/src/breakpoints/rules.ts` |
+| Logging module | `packages/babysitter-sdk/src/logging/` |
 
 ## Recommendation
 Phase 2 implementation. Log every policy evaluation to structured JSONL. Enrich breakpoint:history with decision details. Surface in embedded SDK dashboard.

@@ -863,8 +863,8 @@ $CLI task:list <runId> --pending --json | jq '.tasks'
 
 - **Plugin Specification:** `plugins/babysitter-unified/plugin.json`
 - **Hooks Guide:** `plugins/babysitter-unified/skills/babysit/SKILL.md`
-- **SDK Reference:** `packages/sdk/sdk.md`
-- **In-Session Loops:** `packages/sdk/src/cli/commands/instructions.ts`
+- **SDK Reference:** `packages/babysitter-sdk/sdk.md`
+- **In-Session Loops:** `packages/babysitter-sdk/src/cli/commands/instructions.ts`
 
 ### CLI Help
 

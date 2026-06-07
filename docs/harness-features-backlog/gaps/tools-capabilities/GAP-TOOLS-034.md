@@ -35,8 +35,8 @@ schemas upfront would bloat the prompt.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
-| Prompts module | `packages/sdk/src/prompts/` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
 
 ## Recommendation
 Phase 3 (M4). Implement when MCP client adds many tools. The deferred loading

@@ -39,8 +39,8 @@ SDK journals resolution → next iteration
 - The SDK's `stopHookHandler.ts` needs a branch: if effect is external-agent, resolve it internally before returning control to host
 
 **Files affected:**
-- `packages/sdk/src/harness/hooks/stopHookHandler.ts:152-186` — detect external effects
-- `packages/sdk/src/harness/hooks/stopHookContinuation.ts` — include external dispatch results
+- `packages/babysitter-sdk/src/harness/hooks/stopHookHandler.ts:152-186` — detect external effects
+- `packages/babysitter-sdk/src/harness/hooks/stopHookContinuation.ts` — include external dispatch results
 - `packages/genty/platform/src/harness/internal/createRun/orchestration/externalAgentEffect.ts` — shared resolution logic
 
 ### 2. No host tool discovery
@@ -57,8 +57,8 @@ SDK journals resolution → next iteration
 **Files affected:**
 - `packages/adapters/hooks/core/src/types/adapter.ts` — extend AdapterCapabilities
 - `packages/adapters/hooks/adapter-claude/src/adapter.ts` — populate tool list
-- `packages/sdk/src/harness/unified/capabilities.ts` — parse tool inventory
-- `packages/sdk/src/harness/unified/promptContext.ts` — include in process context
+- `packages/babysitter-sdk/src/harness/unified/capabilities.ts` — parse tool inventory
+- `packages/babysitter-sdk/src/harness/unified/promptContext.ts` — include in process context
 
 ### 3. No effect cancellation from host
 
@@ -67,8 +67,8 @@ SDK journals resolution → next iteration
 **Needed:** `task_cancel` MCP tool so the host agent can abandon effects it can't or doesn't want to resolve.
 
 **Files affected:**
-- `packages/sdk/src/mcp/tools/tasks.ts` — add `task_cancel` tool
-- `packages/sdk/src/runtime/intrinsics/task.ts` — handle cancellation in journal
+- `packages/babysitter-sdk/src/mcp/tools/tasks.ts` — add `task_cancel` tool
+- `packages/babysitter-sdk/src/runtime/intrinsics/task.ts` — handle cancellation in journal
 
 ### 4. No cross-plugin coordination
 
@@ -78,7 +78,7 @@ SDK journals resolution → next iteration
 
 **Files affected:**
 - `packages/tasks-adapter/src/backend.ts` — backend needs multi-session support
-- `packages/sdk/src/harness/hooks/stopHookHandler.ts` — check for cross-session tasks
+- `packages/babysitter-sdk/src/harness/hooks/stopHookHandler.ts` — check for cross-session tasks
 
 ### 5. Subprocess support in plugin mode
 
@@ -87,9 +87,9 @@ SDK journals resolution → next iteration
 **Lifecycle:** Plugin-local subprocesses are emitted as subprocess effects. They stay tied to the parent run journal and existing `ctx.onCleanup()` terminal cleanup path, so cleanup callbacks are not flushed while the parent is waiting on the subprocess effect and are flushed on terminal run paths.
 
 **Files affected:**
-- `packages/sdk/src/runtime/intrinsics/subprocess.ts` — allow explicit supported modes while preserving disabled as a hard block
-- `packages/sdk/src/runtime/types.ts` — include the plugin-local subprocess support mode
-- `packages/sdk/src/cli/commands/runIterate.ts` — detect plugin-mode iteration and opt into plugin-local support
+- `packages/babysitter-sdk/src/runtime/intrinsics/subprocess.ts` — allow explicit supported modes while preserving disabled as a hard block
+- `packages/babysitter-sdk/src/runtime/types.ts` — include the plugin-local subprocess support mode
+- `packages/babysitter-sdk/src/cli/commands/runIterate.ts` — detect plugin-mode iteration and opt into plugin-local support
 
 ### 6. Process creation context lacks host agent identity
 

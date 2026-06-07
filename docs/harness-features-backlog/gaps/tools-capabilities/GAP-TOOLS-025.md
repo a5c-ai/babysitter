@@ -23,10 +23,10 @@ An MCP client module that: discovers tools on configured MCP servers, registers 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| MCP server | `packages/sdk/src/mcp/` |
-| Harness capabilities | `packages/sdk/src/harness/types.ts` |
-| Effect routing | `packages/sdk/src/harness/registry.ts` |
-| Task definitions | `packages/sdk/src/tasks/` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
+| Harness capabilities | `packages/babysitter-sdk/src/harness/types.ts` |
+| Effect routing | `packages/babysitter-sdk/src/harness/registry.ts` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
 
 ## Recommendation
 Phase 2-3 implementation. Build MCP client module alongside existing MCP server. Register discovered tools in capability registry. Add `ctx.mcpTool()` to ProcessContext with full journal tracking.

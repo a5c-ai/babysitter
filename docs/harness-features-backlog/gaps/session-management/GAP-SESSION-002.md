@@ -22,7 +22,7 @@ Rich session state persisted in dedicated session storage. Includes: accumulated
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
 
 ## Recommendation
 Phase 2 implementation. Define rich session state schema. Persist to dedicated session directory. Add session:history command.

@@ -42,7 +42,7 @@ None. ECO-002 is foundational -- ECO-001 depends on it, not the reverse.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Babysitter marketplace | `packages/sdk/src/plugins/marketplace.ts` |
+| Babysitter marketplace | `packages/babysitter-sdk/src/plugins/marketplace.ts` |
 | CC marketplace manager | `src/utils/plugins/marketplaceManager.ts` |
 | CC marketplace helpers | `src/utils/plugins/marketplaceHelpers.ts` |
 | CC schemas | `src/utils/plugins/schemas.ts` |

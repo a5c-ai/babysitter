@@ -39,7 +39,7 @@ HIGH - Contains alternative harness patterns and sophisticated agent template sy
   - CLI integration: OpenClaw command patterns, deployment workflows, agent template management
   - Current limitation: No OpenClaw support in babysitter harness adapter system + **no stop hooks for conversation interruption**
   - Integration approach: Create adapter for OpenClaw CLI with SOUL.md conversion to babysitter format
-  - Implementation scope: packages/sdk/src/harness/adapters/openclawAdapter.ts and plugin structure
+  - Implementation scope: packages/babysitter-sdk/src/harness/adapters/openclawAdapter.ts and plugin structure
 
 - **Agent Template Infrastructure**: Enhancement to agent template management and deployment
   - Current limitation: Limited agent template infrastructure in babysitter

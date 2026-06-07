@@ -27,8 +27,8 @@ A `PlanSchema` type defining structured plans with: ordered steps, estimated eff
 |-----------|------|
 | Process definitions | `library/` |
 | GSD phases | `library/gsd/` |
-| Runtime | `packages/sdk/src/runtime/` |
-| Harness create-run | `packages/sdk/src/cli/` |
+| Runtime | `packages/babysitter-sdk/src/runtime/` |
+| Harness create-run | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 2-3 implementation. Define `PlanSchema` type. Add `ctx.plan()` intrinsic to `ProcessContext`. Implement plan validation and plan-to-effect compilation. Wire plan approval through breakpoint system.

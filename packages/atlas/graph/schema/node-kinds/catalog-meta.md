@@ -541,7 +541,7 @@ _(graph-root: legitimately no parent — catalog-meta value-set enum of journal 
 
 Cluster 13. The enum of run journal event names emitted by the babysitter
 runtime and persisted to `<runDir>/journal/` as sequenced + ULID-tagged +
-sha256-checksummed JSON files. Sourced from `packages/sdk/src/storage/journal.ts`
+sha256-checksummed JSON files. Sourced from `packages/babysitter-sdk/src/storage/journal.ts`
 (`appendEvent`, `JournalEvent`).
 
 Attributes: `id`, `eventName` (evidence-bound), `category` ∈ {`run-lifecycle`,

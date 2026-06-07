@@ -289,16 +289,16 @@ export const analyzeExistingHarnessesTask = defineTask('analyze-existing-harness
         harnessType: args.harnessType,
         repoRoot: args.repoRoot,
         searchPaths: [
-          'packages/sdk/src/',
-          'packages/sdk/src/cli/',
-          'packages/sdk/src/hooks/',
-          'packages/sdk/src/config/',
+          'packages/babysitter-sdk/src/',
+          'packages/babysitter-sdk/src/cli/',
+          'packages/babysitter-sdk/src/hooks/',
+          'packages/babysitter-sdk/src/config/',
           'plugins/babysitter-unified/'
         ]
       },
       instructions: [
         'Search for existing harness implementations in the SDK source code',
-        'Look for harness-related files in packages/sdk/src/ (especially cli/, hooks/, config/)',
+        'Look for harness-related files in packages/babysitter-sdk/src/ (especially cli/, hooks/, config/)',
         'Identify the claude-code harness as a reference implementation',
         'Study how session:init, session:associate, session:resume commands work',
         'Analyze the hooks system (on-run-start, on-run-complete, on-task-start, etc.)',

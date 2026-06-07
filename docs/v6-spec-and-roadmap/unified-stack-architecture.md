@@ -55,7 +55,7 @@ The architecture is easiest to reason about as five package families that meet a
 
 Owned primarily by:
 
-- `packages/sdk`
+- `packages/babysitter-sdk`
 - `packages/babysitter`
 - `packages/genty/platform`
 
@@ -121,7 +121,7 @@ These packages are consumers of the orchestration and dispatch layers. They are 
 
 | Family | Primary paths | What it owns now | What it does not imply |
 |---|---|---|---|
-| Orchestration core | `packages/sdk`, `packages/babysitter`, `packages/genty/platform` | Run lifecycle, replay, storage, task dispatch, CLI/runtime surfaces | A future forced split into many more top-level runtime packages |
+| Orchestration core | `packages/babysitter-sdk`, `packages/babysitter`, `packages/genty/platform` | Run lifecycle, replay, storage, task dispatch, CLI/runtime surfaces | A future forced split into many more top-level runtime packages |
 | Dispatch family | `packages/adapters/*` | Harness invocation, adapter normalization, gateway, shared interaction contracts | Replacement of Babysitter orchestration |
 | Support adapter family | `packages/adapters/hooks/*`, `packages/extensions-adapter`, `packages/tasks-adapter` | Hook normalization, bundle compilation, human approval routing | A formal "platform layer" that already has independent product boundaries |
 | Distribution surfaces | `plugins/babysitter-unified`, `plugins/babysitter-*` | Canonical plugin authoring plus harness-specific installable outputs | One single bundle format with no compatibility constraints |
@@ -134,7 +134,7 @@ The end-to-end diagram above is the shape. The live execution narrative is:
 1. A concrete harness installs or loads a plugin bundle under `plugins/babysitter-*`.
 2. Those bundles are compiled from `plugins/babysitter-unified/` by `packages/extensions-adapter`, with `packages/adapters/hooks/*` normalizing hook behavior where the harness model requires it.
 3. The installed bundle reaches the operational runtime in `packages/babysitter` and `packages/genty/platform`.
-4. That runtime delegates the core orchestration work to `packages/sdk`, which owns run directories, journal/state replay, effect requests, process-library binding, and workflow execution.
+4. That runtime delegates the core orchestration work to `packages/babysitter-sdk`, which owns run directories, journal/state replay, effect requests, process-library binding, and workflow execution.
 5. When a workflow requires a reusable process, the runtime reaches into `library/` or project-local `.a5c/processes/`.
 6. When a workflow requires human approval routing, `packages/tasks-adapter` handles that concern as a distinct subsystem instead of burying it inside generic hook language.
 7. When the system needs adapter-level dispatch or richer interaction surfaces, `packages/adapters/*` carries that responsibility without changing the orchestration center of gravity.
@@ -171,7 +171,7 @@ That command matters because V6 is supposed to promote real seams with active ch
 ## What Is Normative Now
 
 - The monorepo already contains Babysitter, adapters, hooks-adapter, extensions-adapter, and tasks-adapter.
-- `packages/sdk` is still the main center of gravity.
+- `packages/babysitter-sdk` is still the main center of gravity.
 - adapters is already integrated as repo content, workspace packages, and documentation.
 - Unified plugin authoring coexists with per-harness plugin bundles.
 - Metaplugins are a current capability-layer concept over plugin and hook surfaces, with `extensions-adapter` serving as the concrete bundle compiler for legacy non-Babysitter agents.

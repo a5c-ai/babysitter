@@ -16,9 +16,9 @@ The core orchestration flow spans the SDK runtime and storage layers:
 
 Relevant source roots:
 
-- [`packages/sdk/src/runtime/`](../../packages/sdk/src/runtime)
-- [`packages/sdk/src/storage/`](../../packages/sdk/src/storage)
-- [`packages/sdk/src/tasks/`](../../packages/sdk/src/tasks)
+- [`packages/babysitter-sdk/src/runtime/`](../../packages/babysitter-sdk/src/runtime)
+- [`packages/babysitter-sdk/src/storage/`](../../packages/babysitter-sdk/src/storage)
+- [`packages/babysitter-sdk/src/tasks/`](../../packages/babysitter-sdk/src/tasks)
 
 ## Run Directory Layout
 

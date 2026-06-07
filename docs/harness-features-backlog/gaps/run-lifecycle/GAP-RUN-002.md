@@ -22,8 +22,8 @@ run:archive compresses and moves completed runs to archive directory. run:restor
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Storage | `packages/sdk/src/storage/` |
-| CLI commands | `packages/sdk/src/cli/` |
+| Storage | `packages/babysitter-sdk/src/storage/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 4 implementation. Add run:archive and run:restore commands. Implement retention policy configuration.

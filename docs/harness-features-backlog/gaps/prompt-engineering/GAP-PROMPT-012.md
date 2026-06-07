@@ -23,7 +23,7 @@ A `gitSafety` prompt section injected when task context indicates version contro
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Prompts module | `packages/sdk/src/prompts/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Section 6 (Git Operations Protocol) has exact CC phrasing for commit protocol and safety rules |
 
 ## Recommendation

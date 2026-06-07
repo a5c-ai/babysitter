@@ -23,9 +23,9 @@ SSE or WebSocket endpoint for run events. Real-time journal event streaming. Sub
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Journal storage | `packages/sdk/src/storage/` |
-| MCP server | `packages/sdk/src/mcp/` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 2 implementation. Add SSE endpoint to MCP server. Integrate with journal appendEvent for real-time streaming.

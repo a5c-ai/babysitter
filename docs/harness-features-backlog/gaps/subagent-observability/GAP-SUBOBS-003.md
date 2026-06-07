@@ -22,9 +22,9 @@ Token usage and cost tracked per effect. Aggregated at run and session level. Vi
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Token stats | `packages/sdk/src/cli/` |
-| Task definitions | `packages/sdk/src/tasks/` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| Token stats | `packages/babysitter-sdk/src/cli/` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 2 implementation. Capture token counts from harness output per effect. Aggregate at run and session level. Display in embedded SDK dashboard.

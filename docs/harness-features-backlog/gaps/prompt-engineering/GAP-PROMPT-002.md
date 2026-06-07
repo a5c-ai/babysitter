@@ -23,10 +23,10 @@ A capability collector queries all installed surfaces (plugins, skills, process 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Prompts module | `packages/sdk/src/prompts/` |
-| Skill discovery | `packages/sdk/src/cli/` |
-| Plugin package reader | `packages/sdk/src/plugins/packageReader.ts` |
-| Process library | `packages/sdk/src/processLibrary/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Skill discovery | `packages/babysitter-sdk/src/cli/` |
+| Plugin package reader | `packages/babysitter-sdk/src/plugins/packageReader.ts` |
+| Process library | `packages/babysitter-sdk/src/processLibrary/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Section 11 (Environment Context Assembly) documents capability injection patterns |
 
 ## Recommendation

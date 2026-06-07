@@ -23,8 +23,8 @@ Approval posture templates per action category (read, write, execute, destroy). 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint patterns | `packages/sdk/src/breakpoints/patterns.ts` |
-| Breakpoint evaluator | `packages/sdk/src/breakpoints/evaluator.ts` |
+| Breakpoint patterns | `packages/babysitter-sdk/src/breakpoints/patterns.ts` |
+| Breakpoint evaluator | `packages/babysitter-sdk/src/breakpoints/evaluator.ts` |
 
 ## Recommendation
 Phase 2 implementation. Define approval posture templates per action category and wire into breakpoint evaluation.

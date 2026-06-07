@@ -6,48 +6,48 @@ Silent fallback mechanisms that hide real problems, introduce unexpected degrade
 
 ---
 
-## SDK & Runtime (packages/sdk, packages/genty/runtime)
+## SDK & Runtime (packages/babysitter-sdk, packages/genty/runtime)
 
 ### Critical
 
-**Journal append queue swallows previous errors** — `packages/sdk/src/storage/journal.ts:19-27` **(logged)**
+**Journal append queue swallows previous errors** — `packages/babysitter-sdk/src/storage/journal.ts:19-27` **(logged)**
 `.catch(() => undefined)` on the previous operation means ALL prior journal write failures are silently swallowed. The journal — the system's audit trail and replay foundation — can silently lose events. Queue must continue (can't block future writes), so error is now logged to stderr.
 
-~~**Atomic write silently downgrades to non-atomic**~~ — `packages/sdk/src/storage/atomic.ts:30-47` **(hardened)**
+~~**Atomic write silently downgrades to non-atomic**~~ — `packages/babysitter-sdk/src/storage/atomic.ts:30-47` **(hardened)**
 On `ENOENT`, the atomic rename used to fall back to `fs.writeFile` (non-atomic). Now throws an error instead.
 
 ### High
 
-~~**Cost computation silent failure**~~ — `packages/sdk/src/runtime/orchestrateIteration.ts:135-136` **(hardened)**
+~~**Cost computation silent failure**~~ — `packages/babysitter-sdk/src/runtime/orchestrateIteration.ts:135-136` **(hardened)**
 Three operations in one `try/catch`. Error now captured as `costError` field in the RUN_COMPLETED event instead of silently vanishing.
 
-**Stray effect detection is a heuristic guess** — `packages/sdk/src/runtime/orchestrateIteration.ts:94-107`
+**Stray effect detection is a heuristic guess** — `packages/babysitter-sdk/src/runtime/orchestrateIteration.ts:94-107`
 Un-awaited `ctx.task()` detected via `setImmediate` loops + 250ms delay. Timing-dependent — effects can be silently lost.
 
-**Policy decision reporting — best effort** — `packages/sdk/src/runtime/intrinsics/task.ts:132-133` **(logged)**
+**Policy decision reporting — best effort** — `packages/babysitter-sdk/src/runtime/intrinsics/task.ts:132-133` **(logged)**
 Compliance decisions now log failures to stderr. Audit trail gaps are visible.
 
 ### Medium
 
-**Lock acquisition retries 41 times silently** — `packages/sdk/src/storage/lock.ts:68-79` **(logged)**
+**Lock acquisition retries 41 times silently** — `packages/babysitter-sdk/src/storage/lock.ts:68-79` **(logged)**
 Now logs on first retry attempt when contention is detected.
 
 **ESM → CJS module loading fallback chain** — `orchestrateIteration.ts:197-202`, `runSupport.ts:314-329`, `validation.ts:125-138`
 Try ESM `import()`, if fail try `require()`, swallow ESM error. Original failure reason lost. Three locations.
 
-**Require cache clear failures ignored** — `packages/sdk/src/runtime/orchestrateIteration.ts:200` **(logged)**
+**Require cache clear failures ignored** — `packages/babysitter-sdk/src/runtime/orchestrateIteration.ts:200` **(logged)**
 Now logs the failure with resolved path.
 
-**Breakpoint auto-approval — non-critical** — `packages/sdk/src/runtime/intrinsics/task.ts:141-154` **(logged)**
+**Breakpoint auto-approval — non-critical** — `packages/babysitter-sdk/src/runtime/intrinsics/task.ts:141-154` **(logged)**
 Now logs when auto-approval evaluation fails.
 
-**Process library resolution — fall through** — `packages/sdk/src/processLibrary/active.ts:196-203` **(logged)**
+**Process library resolution — fall through** — `packages/babysitter-sdk/src/processLibrary/active.ts:196-203` **(logged)**
 Now logs when falling through to default.
 
-**Git marketplace — nested fallback** — `packages/sdk/src/plugins/marketplace.ts:134-139` **(logged)**
+**Git marketplace — nested fallback** — `packages/babysitter-sdk/src/plugins/marketplace.ts:134-139` **(logged)**
 Stash errors now logged before force-checkout.
 
-**Session marker cleanup — ignore errors** — `packages/sdk/src/utils/sessionMarker.ts:79,101`
+**Session marker cleanup — ignore errors** — `packages/babysitter-sdk/src/utils/sessionMarker.ts:79,101`
 Stale markers accumulate on disk over time.
 
 **Daemon lifecycle cleanup — `.catch(() => {})`** — `packages/genty/runtime/src/daemon/lifecycle.ts:68-70,174-178,243`
@@ -262,33 +262,33 @@ Parse errors are counted internally but the count is not returned or logged. Cal
 
 ---
 
-## Harness Discovery & Config (packages/sdk/src/harness, packages/sdk/src/config)
+## Harness Discovery & Config (packages/babysitter-sdk/src/harness, packages/babysitter-sdk/src/config)
 
 ### Critical
 
-**Graph catalog resolution silently falls back to hardcoded metadata** — `packages/sdk/src/harness/adapterFallbackMetadata.ts:179-220` **(logged)**
+**Graph catalog resolution silently falls back to hardcoded metadata** — `packages/babysitter-sdk/src/harness/adapterFallbackMetadata.ts:179-220` **(logged)**
 `buildStaticFallbackMetadata()` catches ALL errors and returns `LOCAL_FALLBACK_METADATA`. If catalog loading fails or returns all-false capabilities (schema mismatch), silently uses hardcoded local fallback. No indication which metadata is active.
 
 ### High
 
-**Harness discovery falls back to legacy probing silently** — `packages/sdk/src/harness/discovery.ts:144-151` **(logged)**
+**Harness discovery falls back to legacy probing silently** — `packages/babysitter-sdk/src/harness/discovery.ts:144-151` **(logged)**
 `discoverHarnesses()` tries adapters discovery first, any error falls back to legacy direct probing. User never knows which path was taken. Degraded behavior (slower, less capable) is invisible.
 
-**Config resolution — 10+ `??` chains without logging** — `packages/sdk/src/config/configValidation.ts:49-86`
+**Config resolution — 10+ `??` chains without logging** — `packages/babysitter-sdk/src/config/configValidation.ts:49-86`
 `overrides?.field ?? parseEnvVar(..., DEFAULTS.field)` repeated for every config key. No logging of which source (override, env var, default) was selected. Effective config is unauditable.
 
-**Boolean parsing treats everything non-true as false** — `packages/sdk/src/config/configValidation.ts:18-21`
+**Boolean parsing treats everything non-true as false** — `packages/babysitter-sdk/src/config/configValidation.ts:18-21`
 `parseEnvBoolean()` returns `false` for undefined, empty string, or any non-"1"/"true" value. `false` is indistinguishable from "user explicitly set to false."
 
-**Log level parsing — invalid becomes default** — `packages/sdk/src/config/configValidation.ts:37-43`
+**Log level parsing — invalid becomes default** — `packages/babysitter-sdk/src/config/configValidation.ts:37-43`
 Invalid log level silently reverts to fallback. User thinks they set "debug" but gets "info."
 
 ### Medium
 
-**Legacy session directory remapping** — `packages/sdk/src/harness/adapterFallbackMetadata.ts:8-11`
+**Legacy session directory remapping** — `packages/babysitter-sdk/src/harness/adapterFallbackMetadata.ts:8-11`
 `resolveFallbackSessionDir()` silently remaps `LEGACY_REPO_RUNS_DIR` to default. Users with old config don't know they're using a different path.
 
-**Host signal map — empty on error** — `packages/sdk/src/harness/adapterFallbackMetadata.ts:189-191`
+**Host signal map — empty on error** — `packages/babysitter-sdk/src/harness/adapterFallbackMetadata.ts:189-191`
 If `hostSignalMap[name]` is undefined, silently falls back to empty array. Harness detection becomes impossible.
 
 ---

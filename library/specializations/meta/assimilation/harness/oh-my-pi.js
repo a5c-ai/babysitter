@@ -76,7 +76,7 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 1: SDK ADAPTER
-  // Oh-my-pi shares the adapter at packages/sdk/src/harness/pi.ts with Pi.
+  // Oh-my-pi shares the adapter at packages/babysitter-sdk/src/harness/pi.ts with Pi.
   // This phase verifies the oh-my-pi-specific discovery entry (name="oh-my-pi",
   // cli="omp", OMP_* env vars) and invoker entry are correct and distinct from
   // the pi entry. Key: Programmatic capability, loop-driver via agent_end,
@@ -172,7 +172,7 @@ export async function process(inputs, ctx) {
   // ==========================================================================
   // PHASE 5: TESTING
   // Adapter unit tests and plugin integration tests run in parallel.
-  // Adapter tests: Vitest in packages/sdk/src/harness/__tests__/
+  // Adapter tests: Vitest in packages/babysitter-sdk/src/harness/__tests__/
   // Plugin tests: syntax validation + packaged-install in <pluginDir>/test/
   // ==========================================================================
 

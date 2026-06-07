@@ -22,9 +22,9 @@ Harnesses declare capabilities. Tasks declare required capabilities. Routing eng
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness adapters | `packages/sdk/src/harness/` |
-| Harness discovery | `packages/sdk/src/harness/discovery.ts` |
-| Task definitions | `packages/sdk/src/tasks/` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
+| Harness discovery | `packages/babysitter-sdk/src/harness/discovery.ts` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
 
 ## Recommendation
 Phase 1 implementation. Define HarnessCapability declarations per adapter. Add required capabilities to task definitions. Implement matching in routing engine.

@@ -22,8 +22,8 @@ REST API exposing: run listing and status, journal events, task details, metrics
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
-| MCP server | `packages/sdk/src/mcp/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
 
 ## Recommendation
 Phase 3 implementation. Add REST API to embedded SDK dashboard or MCP server. Expose run state, events, and metrics endpoints.

@@ -637,7 +637,7 @@ See `plugins/babysitter-unified/skills/babysit/SKILL.md` for integration details
 
 - `plugins/babysitter-unified/plugin.json` - Unified plugin source metadata
 - `plugins/babysitter-unified/skills/babysit/SKILL.md` - Babysitter skill instructions
-- `packages/sdk/sdk.md` - SDK API reference
+- `packages/babysitter-sdk/sdk.md` - SDK API reference
 
 ### CLI Commands
 

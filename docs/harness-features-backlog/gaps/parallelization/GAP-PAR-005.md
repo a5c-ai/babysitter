@@ -22,8 +22,8 @@ File operations within the same effect can be batched and executed concurrently.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
-| Storage | `packages/sdk/src/storage/` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
+| Storage | `packages/babysitter-sdk/src/storage/` |
 
 ## Recommendation
 Phase 3 implementation. Batch independent file operations for concurrent execution within the agentic tools surface.

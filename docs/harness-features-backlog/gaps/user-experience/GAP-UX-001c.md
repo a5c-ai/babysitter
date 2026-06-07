@@ -25,10 +25,10 @@ CC has 29 files in `src/components/permissions/`:
 - Worker-specific: `WorkerBadge.tsx`, `WorkerPendingPermission.tsx`
 
 ## Current State
-Breakpoint interaction uses `packages/sdk/src/interaction/` which is raw
+Breakpoint interaction uses `packages/babysitter-sdk/src/interaction/` which is raw
 readline with arrow-key selectors. No context display beyond the question text.
 No risk visualization. No auto-approval rule explanation. The auto-approval
-system (`packages/sdk/src/breakpoints/`) computes recommendations but they are
+system (`packages/babysitter-sdk/src/breakpoints/`) computes recommendations but they are
 not surfaced in the UI.
 
 ## Target State
@@ -62,8 +62,8 @@ selectable options with keyboard navigation.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Interaction module | `packages/sdk/src/interaction/` |
-| Breakpoints module | `packages/sdk/src/breakpoints/` |
+| Interaction module | `packages/babysitter-sdk/src/interaction/` |
+| Breakpoints module | `packages/babysitter-sdk/src/breakpoints/` |
 | CC reference | `src/components/permissions/` |
 
 ## Recommendation

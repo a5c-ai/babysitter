@@ -4070,8 +4070,8 @@ files):
 1. `deferred-work:a5c-journal-event-protocol-messages` — a5c's journal events
    (RUN_*, EFFECT_*, COST_TRACKED, STOP_HOOK_INVOKED) don't fit
    `ProtocolMessage.messageType` enum; needs schema decision.
-   Refs: `packages/sdk/src/runtime/replay/effectIndex.ts`,
-   `packages/sdk/src/storage/types.ts`.
+   Refs: `packages/babysitter-sdk/src/runtime/replay/effectIndex.ts`,
+   `packages/babysitter-sdk/src/storage/types.ts`.
 2. `deferred-work:a5c-effort-level-mapping` — effort-level passthrough vs
    silent on dimension is undecided. Refs: `packages/adapters`.
 3. `deferred-work:a5c-output-guard` — refusal/AUP layer is harness-contributed;
@@ -4126,7 +4126,7 @@ Total: ~24 new edges across new and existing files.
 - Trust Chain remains OUT OF SCOPE.
 - No new NodeKinds or EdgeKinds introduced.
 - No fabrication: every populated value cites a babysitter-SDK source path
-  (packages/sdk/src/cli/main/usage.ts, runtime/replay/effectIndex.ts,
+  (packages/babysitter-sdk/src/cli/main/usage.ts, runtime/replay/effectIndex.ts,
   cli/commands/instructions.ts, storage/types.ts). Genuine N/A is recorded
   on the instance; genuine spec-undefined gaps are filed as deferred work items
   with `blockingRefs` pointing at concrete files.
@@ -4162,7 +4162,7 @@ Capability, and one new OutputGuard instance.
    - 12 JournalEvent instances under
      `graph/extensions/journal-events/babysitter-journal-events.yaml`,
      each citing its babysitter-SDK source: 8 from
-     `packages/sdk/src/runtime/replay/effectIndex.ts:13` SupportedEventType
+     `packages/babysitter-sdk/src/runtime/replay/effectIndex.ts:13` SupportedEventType
      (RUN_CREATED, RUN_COMPLETED, RUN_FAILED, EFFECT_REQUESTED,
      EFFECT_RESOLVED, EFFECT_CANCELLED, EFFECT_PROGRESS, COST_TRACKED) +
      STOP_HOOK_INVOKED (`harness/hooks/utils.ts:128`) +
@@ -4192,7 +4192,7 @@ Capability, and one new OutputGuard instance.
    - New OutputGuard instance `output-guard:babysitter-task-output-schema`
      (appliesTo=tool-result, phase=post-call, detectorKinds=[format-violation],
      onTrigger=block, severity=block-call) cited from
-     `packages/sdk/src/tasks/types.ts:46` (TaskDefinition.outputSchema).
+     `packages/babysitter-sdk/src/tasks/types.ts:46` (TaskDefinition.outputSchema).
    - Wired `output_guard_applied_by` from a5c.runtime to the new instance.
    - Existing `output-guard:claude-code-aup-refusal` wiring on
      claude-code.core/runtime confirmed intact.
@@ -5374,7 +5374,7 @@ small schema design call.
 | `deferred-node:protocol-message-gemini` | **closed-with-records** — 7 ProtocolMessage records (Content, Part subtypes text/inlineData/functionCall/functionResponse, Candidate, GenerateContentResponse) wired from `agent-core-impl:gemini-cli.core@current` |
 | `deferred-node:protocol-message-cohere`, `-mistral`, `-ollama` | **kept-open-structural** — vendor docs reachable; canonical taxonomies captured; blocker: no AgentCoreImpl record for these vendors exists; emits_message_type requires one |
 | `deferred-node:frontmatter-cursor-mdc` | **closed-with-decision** — appliesTo enum widened with `cursor-rule`; 3 FrontmatterField records (description, globs, alwaysApply) authored from cursor.com/docs/context/rules and wired from `agent-platform-impl:cursor.platform@current` |
-| `deferred-node:task-schema-field-define-task` | **closed-with-decision** — appliesTo enum widened with `task-schema` (no new NodeKind); 16 FrontmatterField records authored from packages/sdk/src/tasks/defineTask.ts + types.ts and wired from `agent-platform-impl:babysitter.platform@current` |
+| `deferred-node:task-schema-field-define-task` | **closed-with-decision** — appliesTo enum widened with `task-schema` (no new NodeKind); 16 FrontmatterField records authored from packages/babysitter-sdk/src/tasks/defineTask.ts + types.ts and wired from `agent-platform-impl:babysitter.platform@current` |
 
 ### Records authored
 

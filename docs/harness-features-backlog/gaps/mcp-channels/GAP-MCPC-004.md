@@ -49,7 +49,7 @@ A `mcp:connect` command to add MCP server connections. Connection manager with:
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Babysitter MCP module | `packages/sdk/src/mcp/` |
+| Babysitter MCP module | `packages/babysitter-sdk/src/mcp/` |
 | CC MCP connection mgr | `src/services/mcp/MCPConnectionManager.tsx` |
 | CC MCP config | `src/services/mcp/config.ts` |
 | CC MCP components | `src/components/mcp/` (10 files) |

@@ -172,7 +172,7 @@ npm run test:sdk
 npm run test:e2e:docker
 
 # Single test file
-cd packages/sdk && npx vitest run src/runtime/__tests__/someFile.test.ts
+cd packages/babysitter-sdk && npx vitest run src/runtime/__tests__/someFile.test.ts
 ```
 
 ### Building the SDK

@@ -12,7 +12,7 @@ The test strategy must treat the stack as modular. A valid E2E does not need eve
 
 | Layer | Package or surface | Owns | Does not own |
 | --- | --- | --- | --- |
-| Core Babysitter SDK | `packages/sdk`, `babysitter run:*`, `task:*`, `hook:*`, `plugin:*` | Event-sourced runs, task effects, process state, generic plugin registry, SDK harness install commands | Model session UI, adapters adapter registry, provider transport implementation |
+| Core Babysitter SDK | `packages/babysitter-sdk`, `babysitter run:*`, `task:*`, `hook:*`, `plugin:*` | Event-sourced runs, task effects, process state, generic plugin registry, SDK harness install commands | Model session UI, adapters adapter registry, provider transport implementation |
 | SDK harness setup | `babysitter harness:install`, `babysitter harness:install-plugin` | Installing external harness CLIs where supported and installing Babysitter harness plugins | `agent-platform` runtime behavior |
 | Babysitter-agent runtime | `packages/genty/platform` runtime CLI | Runtime orchestration UX, model-backed planning/execution, genty-core path, adapters bridge for external harness invocation | Harness plugin installation and setup commands |
 | Adapters core | `packages/adapters/core`, `@a5c-ai/adapters` | Adapter registry, `createClient().run`, sessions, workspaces, plugin manager, runtime hooks, provider/model config | Babysitter run journal ownership |

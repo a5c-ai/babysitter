@@ -23,8 +23,8 @@ Cost-aware routing considers harness/model pricing. Per-run and per-session cost
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness adapters | `packages/sdk/src/harness/` |
-| Config module | `packages/sdk/src/config/` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
+| Config module | `packages/babysitter-sdk/src/config/` |
 
 ## Recommendation
 Phase 2 implementation. Define cost model per harness/model. Implement budget tracking. Auto-downgrade when budget threshold reached.

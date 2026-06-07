@@ -20,15 +20,15 @@
  * // Standalone task usage:
  * const result = await ctx.task(traceRuntimeCallPathsTask, {
  *   featureAreas: [
- *     { name: 'run-create', entryPoint: 'packages/sdk/src/cli/commands/runCreate.ts' },
- *     { name: 'task-post',  entryPoint: 'packages/sdk/src/cli/commands/taskPost.ts' },
+ *     { name: 'run-create', entryPoint: 'packages/babysitter-sdk/src/cli/commands/runCreate.ts' },
+ *     { name: 'task-post',  entryPoint: 'packages/babysitter-sdk/src/cli/commands/taskPost.ts' },
  *   ],
  *   projectDir: '.',
  * });
  *
  * // Factory usage:
  * const tracerTask = createCallPathTracer({
- *   projectDir: 'packages/sdk',
+ *   projectDir: 'packages/babysitter-sdk',
  *   maxDepth: 6,
  * });
  *
@@ -240,14 +240,14 @@ export const traceRuntimeCallPathsTask = defineTask(
  *
  *   const phase1 = await ctx.task(tracerTask, {
  *     featureAreas: [
- *       { name: 'run-lifecycle', entryPoint: 'packages/sdk/src/runtime/orchestrateIteration.ts' },
+ *       { name: 'run-lifecycle', entryPoint: 'packages/babysitter-sdk/src/runtime/orchestrateIteration.ts' },
  *     ],
  *   });
  *
  *   const phase2 = await ctx.task(tracerTask, {
  *     featureAreas: [
- *       { name: 'storage-layer', entryPoint: 'packages/sdk/src/storage/index.ts' },
- *       { name: 'task-dispatch', entryPoint: 'packages/sdk/src/tasks/index.ts' },
+ *       { name: 'storage-layer', entryPoint: 'packages/babysitter-sdk/src/storage/index.ts' },
+ *       { name: 'task-dispatch', entryPoint: 'packages/babysitter-sdk/src/tasks/index.ts' },
  *     ],
  *   });
  *

@@ -22,8 +22,8 @@ Real-time stdout/stderr streaming from spawned harness processes. Stream events 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 1 implementation. Pipe stdout/stderr from child processes in invokeHarness(). Stream events to embedded SDK dashboard via journal or direct channel.

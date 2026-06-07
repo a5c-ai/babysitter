@@ -22,8 +22,8 @@ Cron scheduling with persistent triggers surviving process restart. Standard cro
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
-| Config module | `packages/sdk/src/config/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
+| Config module | `packages/babysitter-sdk/src/config/` |
 
 ## Recommendation
 Phase 4 implementation. Create scheduling module with cron parser. Store triggers in ~/.a5c/triggers.json. Implement trigger daemon.

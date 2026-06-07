@@ -4,7 +4,7 @@ Babysitter CLI Surface Spec (cli_tool)
 Scope & Intent
 --------------
 - Define the external CLI (`babysitter`) that ships with `@a5c-ai/babysitter-sdk` and gives humans or automation a thin, deterministic shell around run folders produced by the SDK.
-- Cover the commands already sketched in `sdk.md §12` and implemented in `packages/sdk/src/cli/*`: run lifecycle inspection, deterministic orchestration loops, task introspection/execution, and state-repair utilities.
+- Cover the commands already sketched in `sdk.md §12` and implemented in `packages/babysitter-sdk/src/cli/*`: run lifecycle inspection, deterministic orchestration loops, task introspection/execution, and state-repair utilities.
 - Keep the interface consistent across macOS, Linux, and Windows shells, honoring `cli_tool` domain guardrails (stable flags/defaults, explicit config precedence, and no sensitive payloads echoed to stdout).
 
 Behavior

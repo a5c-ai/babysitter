@@ -22,8 +22,8 @@ Session state includes: key decisions made, user preferences for this session, a
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
-| State cache | `packages/sdk/src/runtime/replay/stateCache.ts` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| State cache | `packages/babysitter-sdk/src/runtime/replay/stateCache.ts` |
 
 ## Recommendation
 Phase 2 implementation. Extend session state schema with rich fields. Populate from journal analysis during run completion. Inject into resume prompts.

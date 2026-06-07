@@ -22,9 +22,9 @@ Webhook configuration per event type (run-complete, run-failed, breakpoint-pendi
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
-| Hook dispatcher | `packages/sdk/src/hooks/dispatcher.ts` |
-| Config module | `packages/sdk/src/config/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
+| Hook dispatcher | `packages/babysitter-sdk/src/hooks/dispatcher.ts` |
+| Config module | `packages/babysitter-sdk/src/config/` |
 
 ## Recommendation
 Phase 2 implementation. Add webhook configuration to embedded SDK dashboard settings. Implement Slack and email notification channels. Fire webhooks from hook dispatcher.

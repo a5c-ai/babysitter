@@ -169,7 +169,7 @@ Blueprint `my-plugin` is installed at version `1.0.0`. A new version `1.2.0` is 
 
 ## MigrationDescriptor Type
 
-Defined in `packages/sdk/src/blueprints/types.ts`:
+Defined in `packages/babysitter-sdk/src/blueprints/types.ts`:
 
 ```typescript
 interface MigrationDescriptor {
@@ -186,7 +186,7 @@ interface MigrationDescriptor {
 
 ## SDK Functions
 
-The migration system is implemented in `packages/sdk/src/blueprints/migrations.ts` and exports:
+The migration system is implemented in `packages/babysitter-sdk/src/blueprints/migrations.ts` and exports:
 
 | Function | Description |
 |----------|-------------|

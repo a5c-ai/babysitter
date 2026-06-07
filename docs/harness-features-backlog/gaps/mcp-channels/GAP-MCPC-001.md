@@ -50,7 +50,7 @@ Note: MCPC-002 and MCPC-003 depend on MCPC-001, not the other way around.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Babysitter MCP server | `packages/sdk/src/mcp/` |
+| Babysitter MCP server | `packages/babysitter-sdk/src/mcp/` |
 | CC channel notifications | `src/services/mcp/channelNotification.ts` |
 | CC channel allowlist | `src/services/mcp/channelAllowlist.ts` |
 | CC MCP connection mgr | `src/services/mcp/MCPConnectionManager.tsx` |

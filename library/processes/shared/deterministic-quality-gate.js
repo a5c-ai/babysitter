@@ -70,8 +70,8 @@
  * }
  *
  * // Preset factory usage:
- * const tsGate = createCompilationGate({ tool: 'tsc', projectDir: 'packages/sdk' });
- * const testGate = createTestSuiteGate({ runner: 'vitest', projectDir: 'packages/sdk' });
+ * const tsGate = createCompilationGate({ tool: 'tsc', projectDir: 'packages/babysitter-sdk' });
+ * const testGate = createTestSuiteGate({ runner: 'vitest', projectDir: 'packages/babysitter-sdk' });
  * ```
  */
 
@@ -600,7 +600,7 @@ export async function executeDeterministicGate(ctx, config) {
  *     { label: 'No console.log', pattern: 'console\\.log', file: 'src/', expectMatch: false },
  *     { label: 'Has export', pattern: 'export default', file: 'src/index.ts', expectMatch: true },
  *   ],
- *   projectDir: 'packages/sdk',
+ *   projectDir: 'packages/babysitter-sdk',
  * });
  *
  * const result = await executeDeterministicGate(ctx, grepGate);
@@ -655,14 +655,14 @@ export function createGrepCheck(config) {
  * ```js
  * const tsGate = createCompilationGate({
  *   tool: 'tsc',
- *   projectDir: 'packages/sdk',
+ *   projectDir: 'packages/babysitter-sdk',
  *   configPath: 'tsconfig.build.json',
  *   extraFlags: ['--strict'],
  * });
  *
  * const eslintGate = createCompilationGate({
  *   tool: 'eslint',
- *   projectDir: 'packages/sdk',
+ *   projectDir: 'packages/babysitter-sdk',
  *   extraFlags: ['src/'],
  * });
  *
@@ -742,7 +742,7 @@ export function createCompilationGate(config) {
  * ```js
  * const vitestGate = createTestSuiteGate({
  *   runner: 'vitest',
- *   projectDir: 'packages/sdk',
+ *   projectDir: 'packages/babysitter-sdk',
  *   testPattern: 'src/runtime/__tests__/',
  *   timeout: 180000,
  * });

@@ -156,7 +156,7 @@ export async function process(inputs, ctx) {
   // ==========================================================================
   // PHASE 5: TESTING
   // Adapter unit tests and plugin integration tests run in parallel.
-  // Adapter tests: Vitest in packages/sdk/src/harness/__tests__/
+  // Adapter tests: Vitest in packages/babysitter-sdk/src/harness/__tests__/
   // Plugin tests: syntax validation + packaged-install in <pluginDir>/test/
   // ==========================================================================
 

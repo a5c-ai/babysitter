@@ -22,9 +22,9 @@ run:fork creates new run from specific journal point. Fork inherits journal hist
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Journal storage | `packages/sdk/src/storage/` |
-| Replay engine | `packages/sdk/src/runtime/replay/createReplayEngine.ts` |
-| State cache | `packages/sdk/src/runtime/replay/stateCache.ts` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| Replay engine | `packages/babysitter-sdk/src/runtime/replay/createReplayEngine.ts` |
+| State cache | `packages/babysitter-sdk/src/runtime/replay/stateCache.ts` |
 
 ## Recommendation
 Phase 3 implementation. Add run:fork command. Copy journal up to fork point. Create new run directory with forked history. Track fork relationships in metadata.

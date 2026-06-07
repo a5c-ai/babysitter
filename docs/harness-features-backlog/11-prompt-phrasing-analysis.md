@@ -3,7 +3,7 @@
 **Category**: Prompt Engineering Intelligence
 **Source**: CC source code -- exact phrasing extracted from Claude Code internals
 
-This document catalogs specific prompt text, tool descriptions, safety rules, persona instructions, and context assembly patterns from Claude Code that the Babysitter harness should adopt or adapt. Each section includes the exact CC phrasing and a gap assessment against our current prompt generation (`packages/sdk/src/prompts/`).
+This document catalogs specific prompt text, tool descriptions, safety rules, persona instructions, and context assembly patterns from Claude Code that the Babysitter harness should adopt or adapt. Each section includes the exact CC phrasing and a gap assessment against our current prompt generation (`packages/babysitter-sdk/src/prompts/`).
 
 ---
 
@@ -21,7 +21,7 @@ CC builds its system prompt in a strict priority hierarchy (`src/utils/systemPro
 
 **Gap**: Our `PromptContext` + per-harness context factories compose prompts but have no equivalent priority hierarchy. All sections are concatenated without precedence rules.
 
-**Actionable**: Implement a prompt priority model in `packages/sdk/src/prompts/` where overlay prompts (process-specific, phase-specific, mode-specific) have clear precedence over defaults.
+**Actionable**: Implement a prompt priority model in `packages/babysitter-sdk/src/prompts/` where overlay prompts (process-specific, phase-specific, mode-specific) have clear precedence over defaults.
 
 ### CC Prompt Sections (in order)
 
@@ -60,7 +60,7 @@ These instructions from `src/constants/prompts.ts` are highly effective at preve
 
 **Gap**: Our process prompts and `instructions:*` output do not include any equivalent coding philosophy. When orchestrating tasks via non-CC harnesses (Pi, Gemini, Codex), the delegated agent lacks these guardrails.
 
-**Recommendation**: Add a `codingPhilosophy` prompt section to `packages/sdk/src/prompts/` that is injected into task prompts for code-writing tasks.
+**Recommendation**: Add a `codingPhilosophy` prompt section to `packages/babysitter-sdk/src/prompts/` that is injected into task prompts for code-writing tasks.
 
 ---
 
@@ -78,7 +78,7 @@ CC has explicit rules preventing Bash misuse:
 > - To search the content of files, use Grep instead of grep or rg
 > - Reserve using the Bash exclusively for system commands and terminal operations that require shell execution."
 
-**Gap**: Our agentic tool definitions (`packages/sdk/src/harness/agenticTools.ts`) define tools but do not include meta-instructions about when to prefer which tool. When Pi sessions use our agentic tools, the agent lacks guidance on tool selection.
+**Gap**: Our agentic tool definitions (`packages/babysitter-sdk/src/harness/agenticTools.ts`) define tools but do not include meta-instructions about when to prefer which tool. When Pi sessions use our agentic tools, the agent lacks guidance on tool selection.
 
 **Recommendation**: Add tool preference instructions to the agentic tools system prompt preamble.
 
@@ -104,7 +104,7 @@ Specific examples listed:
 - **Actions visible to others**: pushing code, creating/closing PRs/issues, sending messages
 - **Third-party uploads**: consider sensitivity before sending to external tools
 
-**Gap**: Our breakpoint system (`packages/sdk/src/breakpoints/`) gates on user approval but process prompts do not include equivalent reversibility reasoning. The delegated agent is not instructed to think about blast radius before acting.
+**Gap**: Our breakpoint system (`packages/babysitter-sdk/src/breakpoints/`) gates on user approval but process prompts do not include equivalent reversibility reasoning. The delegated agent is not instructed to think about blast radius before acting.
 
 **Recommendation**: Add a `safetyGuidelines` prompt section for task prompts that includes both the cyber risk boundary and the reversibility framework.
 
@@ -202,9 +202,9 @@ Key rules:
 > "CRITICAL: Respond with TEXT ONLY. Do NOT call any tools."
 > Uses `<analysis>` block as drafting scratchpad (stripped before reaching context) + `<summary>` block for final output.
 
-**Gap**: Our compression module (`packages/sdk/src/compression/`) does token-level dedup but not conversation-level compaction. When orchestrating long runs, we rely on the host harness for compaction. For Pi and other non-CC harnesses, there is no equivalent.
+**Gap**: Our compression module (`packages/babysitter-sdk/src/compression/`) does token-level dedup but not conversation-level compaction. When orchestrating long runs, we rely on the host harness for compaction. For Pi and other non-CC harnesses, there is no equivalent.
 
-**Recommendation**: Implement a compaction prompt template in `packages/sdk/src/prompts/` that can be used to generate summary prompts for long-running orchestrations.
+**Recommendation**: Implement a compaction prompt template in `packages/babysitter-sdk/src/prompts/` that can be used to generate summary prompts for long-running orchestrations.
 
 ---
 
@@ -231,7 +231,7 @@ type: {{user, feedback, project, reference}}
 
 Indexed in `MEMORY.md`: `- [Title](file.md) -- one-line hook` (<150 chars per entry)
 
-**Gap**: Our profile system (`packages/sdk/src/profiles/`) stores user and project profiles but does not have the four-type taxonomy or the feedback/reference memory types. Our system does not extract and persist insights across runs.
+**Gap**: Our profile system (`packages/babysitter-sdk/src/profiles/`) stores user and project profiles but does not have the four-type taxonomy or the feedback/reference memory types. Our system does not extract and persist insights across runs.
 
 ---
 
@@ -277,7 +277,7 @@ CC injects the following runtime context into every prompt:
 
 **Gap**: Our `session:iteration-message` includes run context (run ID, iteration count, pending effects) but does not include platform, shell, git status, or model identity. When the delegated agent is Pi or another non-CC harness, it lacks this environmental awareness.
 
-**Recommendation**: Enrich the iteration prompt with environment context from `packages/sdk/src/config/` and runtime detection.
+**Recommendation**: Enrich the iteration prompt with environment context from `packages/babysitter-sdk/src/config/` and runtime detection.
 
 ---
 

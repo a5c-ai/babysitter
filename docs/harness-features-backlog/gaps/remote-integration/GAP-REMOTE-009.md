@@ -23,8 +23,8 @@ Host applications can render custom breakpoint UIs. Breakpoint context and optio
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
-| MCP server | `packages/sdk/src/mcp/` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
 
 ## Recommendation
 Phase 4 implementation. Extend HostContract with breakpoint interaction protocol. Define breakpoint rendering contract for host UIs.

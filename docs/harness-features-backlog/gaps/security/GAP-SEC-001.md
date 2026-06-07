@@ -22,10 +22,10 @@ PolicyEngine evaluates declarative rules at effect dispatch and task execution. 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
-| Breakpoint evaluator | `packages/sdk/src/breakpoints/evaluator.ts` |
-| Config module | `packages/sdk/src/config/` |
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
+| Breakpoint evaluator | `packages/babysitter-sdk/src/breakpoints/evaluator.ts` |
+| Config module | `packages/babysitter-sdk/src/config/` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
 
 ## Recommendation
-Phase 1 implementation. Create packages/sdk/src/governance/ module. Define PolicyRule type with evaluation logic. Evaluate at effect dispatch in processContext.ts. Log decisions to structured JSONL.
+Phase 1 implementation. Create packages/babysitter-sdk/src/governance/ module. Define PolicyRule type with evaluation logic. Evaluate at effect dispatch in processContext.ts. Log decisions to structured JSONL.

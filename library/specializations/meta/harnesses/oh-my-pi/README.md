@@ -12,18 +12,18 @@ The integration turns oh-my-pi into a fully orchestrated harness: babysitter dri
 
 ## Relationship to Pi
 
-The oh-my-pi adapter (`createOhMyPiAdapter()` in `packages/sdk/src/harness/ohMyPi.ts`) wraps `createPiAdapter()` with two differences:
+The oh-my-pi adapter (`createOhMyPiAdapter()` in `packages/babysitter-sdk/src/harness/ohMyPi.ts`) wraps `createPiAdapter()` with two differences:
 
 1. **Name**: Reports as `"oh-my-pi"` instead of `"pi"` so the registry can distinguish between the two when both are installed.
 2. **Activation check**: Only claims active when `OMP_SESSION_ID` or `OMP_PLUGIN_ROOT` environment variables are set (not PI_* variants).
 
-Everything else -- session binding, hook handling, state directory resolution, prompt context generation -- is inherited from the Pi adapter (`packages/sdk/src/harness/pi.ts`), which itself delegates stop-hook and session-start-hook handling to the Claude Code adapter.
+Everything else -- session binding, hook handling, state directory resolution, prompt context generation -- is inherited from the Pi adapter (`packages/babysitter-sdk/src/harness/pi.ts`), which itself delegates stop-hook and session-start-hook handling to the Claude Code adapter.
 
 The Pi adapter resolves environment state from both `OMP_*` and `PI_*` env var families, supporting the entire PI-family lineage. Oh-my-pi narrows activation detection to OMP-specific variables while sharing all runtime behavior.
 
 ### Adapter Capabilities
 
-Oh-my-pi advertises the following capabilities (from `packages/sdk/src/harness/discovery.ts`):
+Oh-my-pi advertises the following capabilities (from `packages/babysitter-sdk/src/harness/discovery.ts`):
 
 | Capability | Description |
 |------------|-------------|
@@ -332,7 +332,7 @@ The behavioral contract (`plugins/babysitter-pi/AGENTS.md`) defines 9 sections g
 
 ## Secure Sandbox
 
-The secure sandbox (`packages/sdk/src/harness/piSecureSandbox.ts`) provides Docker-based command execution isolation for Pi-family harnesses.
+The secure sandbox (`packages/babysitter-sdk/src/harness/piSecureSandbox.ts`) provides Docker-based command execution isolation for Pi-family harnesses.
 
 ### Configuration
 

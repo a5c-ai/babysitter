@@ -18,7 +18,7 @@ Key features: DSL-based filter configuration (capture/action/output templates), 
 
 ## Assessment
 
-HIGH extractable value. OMNI's approach to token compression via tool-specific output filtering is directly relevant to babysitter's existing compression layer (`packages/sdk/src/compression/`). The TOML filter registry pattern, capture/action DSL, and RewindStore concept are all adaptable. The 35+ pre-built filter definitions for common dev tools are immediately useful.
+HIGH extractable value. OMNI's approach to token compression via tool-specific output filtering is directly relevant to babysitter's existing compression layer (`packages/babysitter-sdk/src/compression/`). The TOML filter registry pattern, capture/action DSL, and RewindStore concept are all adaptable. The 35+ pre-built filter definitions for common dev tools are immediately useful.
 
 **Extraction priority**: HIGH
 

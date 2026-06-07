@@ -22,8 +22,8 @@ Cross-run effect cache indexed by invocation key. Identical effects return cache
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Runtime replay | `packages/sdk/src/runtime/replay/` |
-| Storage | `packages/sdk/src/storage/` |
+| Runtime replay | `packages/babysitter-sdk/src/runtime/replay/` |
+| Storage | `packages/babysitter-sdk/src/storage/` |
 
 ## Recommendation
 Phase 3 implementation. Add cross-run effect cache. Index by invocation key (SHA256 of processId:stepId:taskId). Configurable TTL.

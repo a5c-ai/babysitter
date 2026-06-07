@@ -59,8 +59,8 @@ babysitter: Breakpoint approved via Slack by @tal (12s response time)
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint evaluator | `packages/sdk/src/breakpoints/evaluator.ts` |
-| Interaction module | `packages/sdk/src/interaction/` |
+| Breakpoint evaluator | `packages/babysitter-sdk/src/breakpoints/evaluator.ts` |
+| Interaction module | `packages/babysitter-sdk/src/interaction/` |
 | CC channel permissions | `src/services/mcp/channelPermissions.ts` |
 
 ## Recommendation

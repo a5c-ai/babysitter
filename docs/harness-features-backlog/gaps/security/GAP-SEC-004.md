@@ -22,8 +22,8 @@ General sandbox capability across harness adapters. Runtime toggle to enable/dis
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Pi secure sandbox | `packages/sdk/src/harness/piSecureSandbox.ts` |
-| Harness adapters | `packages/sdk/src/harness/` |
+| Pi secure sandbox | `packages/babysitter-sdk/src/harness/piSecureSandbox.ts` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
 
 ## Recommendation
 Phase 3 implementation. Generalize piSecureSandbox pattern. Add sandbox config to run metadata. Enforce via governance policy.

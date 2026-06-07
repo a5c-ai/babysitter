@@ -22,9 +22,9 @@ Overall health score (0-100), top 3 issues with severity and recommended actions
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Logging module | `packages/sdk/src/logging/` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
-| Embedded SDK dashboard CLI (new) | `packages/sdk/src/dashboard/` |
+| Logging module | `packages/babysitter-sdk/src/logging/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
+| Embedded SDK dashboard CLI (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 1 implementation. Enhance harness:doctor to compute health score, surface top issues with actionable recommendations, and show health trend.

@@ -56,25 +56,25 @@ The inventory has three categories of broken keyFiles references:
 
 ### 4a. Moved to `packages/genty/platform/` (5 files, ~35 gap references)
 
-These files were relocated from `packages/sdk/src/harness/` to `packages/genty/platform/src/harness/` during the SDK restructuring:
+These files were relocated from `packages/babysitter-sdk/src/harness/` to `packages/genty/platform/src/harness/` during the SDK restructuring:
 
 | Old Path | New Path | Gaps Affected |
 |----------|----------|---------------|
-| `packages/sdk/src/harness/agenticTools.ts` | `packages/genty/platform/src/harness/agenticTools.ts` | GAP-AGENT-007, GAP-PAR-005, GAP-PROMPT-009, GAP-REMOTE-006, GAP-TOOLS-007/008/012/029/031/034/035/036/037/038, GAP-USER-017 (15 gaps) |
-| `packages/sdk/src/harness/invoker.ts` | `packages/genty/platform/src/harness/invoker.ts` | GAP-AGENT-001, GAP-HADAPT-002/004/005, GAP-PAR-002/006, GAP-PERF-001/004/007, GAP-REMOTE-001/007, GAP-SUBOBS-001/002/004, GAP-TOOLS-017/030, GAP-UX-001f (17 gaps) |
-| `packages/sdk/src/harness/piSecureSandbox.ts` | `packages/genty/platform/src/harness/piSecureSandbox.ts` | GAP-SEC-004 (1 gap) |
-| `packages/sdk/src/harness/piWrapper.ts` | `packages/genty/platform/src/harness/piWrapper.ts` | GAP-AGENT-001, GAP-PAR-006, GAP-PERF-004, GAP-UX-001f (4 gaps) |
-| `packages/sdk/src/plugins/types.ts` | `packages/genty/platform/src/plugins/types.ts` | GAP-SEC-002 (1 gap) |
+| `packages/babysitter-sdk/src/harness/agenticTools.ts` | `packages/genty/platform/src/harness/agenticTools.ts` | GAP-AGENT-007, GAP-PAR-005, GAP-PROMPT-009, GAP-REMOTE-006, GAP-TOOLS-007/008/012/029/031/034/035/036/037/038, GAP-USER-017 (15 gaps) |
+| `packages/babysitter-sdk/src/harness/invoker.ts` | `packages/genty/platform/src/harness/invoker.ts` | GAP-AGENT-001, GAP-HADAPT-002/004/005, GAP-PAR-002/006, GAP-PERF-001/004/007, GAP-REMOTE-001/007, GAP-SUBOBS-001/002/004, GAP-TOOLS-017/030, GAP-UX-001f (17 gaps) |
+| `packages/babysitter-sdk/src/harness/piSecureSandbox.ts` | `packages/genty/platform/src/harness/piSecureSandbox.ts` | GAP-SEC-004 (1 gap) |
+| `packages/babysitter-sdk/src/harness/piWrapper.ts` | `packages/genty/platform/src/harness/piWrapper.ts` | GAP-AGENT-001, GAP-PAR-006, GAP-PERF-004, GAP-UX-001f (4 gaps) |
+| `packages/babysitter-sdk/src/plugins/types.ts` | `packages/genty/platform/src/plugins/types.ts` | GAP-SEC-002 (1 gap) |
 
 ### 4b. Restructured plugin files (3 files, 4 gap references)
 
-The SDK plugin module was restructured. These files no longer exist at the old paths and have no direct 1:1 replacements (marketplace moved to `packages/sdk/src/blueprints/marketplace.ts`, packageReader to `packages/sdk/src/blueprints/packageReader.ts`, registry was removed):
+The SDK plugin module was restructured. These files no longer exist at the old paths and have no direct 1:1 replacements (marketplace moved to `packages/babysitter-sdk/src/blueprints/marketplace.ts`, packageReader to `packages/babysitter-sdk/src/blueprints/packageReader.ts`, registry was removed):
 
 | Old Path | Status | Gaps Affected |
 |----------|--------|---------------|
-| `packages/sdk/src/plugins/marketplace.ts` | Moved to `packages/sdk/src/blueprints/marketplace.ts` | GAP-ECO-002 |
-| `packages/sdk/src/plugins/packageReader.ts` | Moved to `packages/sdk/src/blueprints/packageReader.ts` | GAP-PROMPT-002, GAP-TOOLS-027 |
-| `packages/sdk/src/plugins/registry.ts` | Removed (no equivalent found) | GAP-SEC-002 |
+| `packages/babysitter-sdk/src/plugins/marketplace.ts` | Moved to `packages/babysitter-sdk/src/blueprints/marketplace.ts` | GAP-ECO-002 |
+| `packages/babysitter-sdk/src/plugins/packageReader.ts` | Moved to `packages/babysitter-sdk/src/blueprints/packageReader.ts` | GAP-PROMPT-002, GAP-TOOLS-027 |
+| `packages/babysitter-sdk/src/plugins/registry.ts` | Removed (no equivalent found) | GAP-SEC-002 |
 
 ### 4c. CC-sourced `src/` paths (27 paths, 11 gap references)
 
@@ -90,9 +90,9 @@ These paths reference Claude Code's internal source tree (`src/`), not the babys
 
 | Path | Nature | Gaps Affected |
 |------|--------|---------------|
-| `packages/sdk/src/dashboard/` | Target-state directory (does not yet exist) | 19 gaps |
-| `packages/sdk/src/interaction/` | Target-state directory (does not yet exist) | 10 gaps |
-| `packages/sdk/src/plugins/` | Moved to `packages/genty/platform/src/plugins/` | 2 gaps |
+| `packages/babysitter-sdk/src/dashboard/` | Target-state directory (does not yet exist) | 19 gaps |
+| `packages/babysitter-sdk/src/interaction/` | Target-state directory (does not yet exist) | 10 gaps |
+| `packages/babysitter-sdk/src/plugins/` | Moved to `packages/genty/platform/src/plugins/` | 2 gaps |
 
 ### 4e. Other stale references
 
@@ -140,12 +140,12 @@ Checked all dependency references across all 147 gaps (not just 5). Every refere
 
 The following keyFiles corrections were applied:
 
-1. **5 harness/plugin files**: Updated `packages/sdk/src/harness/*.ts` to `packages/genty/platform/src/harness/*.ts` and `packages/sdk/src/plugins/types.ts` to `packages/genty/platform/src/plugins/types.ts`
-2. **2 blueprint files**: Updated `packages/sdk/src/plugins/marketplace.ts` to `packages/sdk/src/blueprints/marketplace.ts` and `packages/sdk/src/plugins/packageReader.ts` to `packages/sdk/src/blueprints/packageReader.ts`
+1. **5 harness/plugin files**: Updated `packages/babysitter-sdk/src/harness/*.ts` to `packages/genty/platform/src/harness/*.ts` and `packages/babysitter-sdk/src/plugins/types.ts` to `packages/genty/platform/src/plugins/types.ts`
+2. **2 blueprint files**: Updated `packages/babysitter-sdk/src/plugins/marketplace.ts` to `packages/babysitter-sdk/src/blueprints/marketplace.ts` and `packages/babysitter-sdk/src/plugins/packageReader.ts` to `packages/babysitter-sdk/src/blueprints/packageReader.ts`
 3. **1 library path**: Updated `library/gsd/` to `library/methodologies/gsd/`
 4. **27 CC-sourced `src/` paths**: Removed entirely. These reference Claude Code's internal source tree, not the babysitter repo. The gaps describe target-state features; CC paths were incorrectly included as if they were babysitter files.
-5. **1 stale plugin reference**: Removed `packages/sdk/src/plugins/registry.ts` (no equivalent exists).
-6. **2 stale directory refs**: Updated `packages/sdk/src/plugins/` to `packages/genty/platform/src/plugins/`
+5. **1 stale plugin reference**: Removed `packages/babysitter-sdk/src/plugins/registry.ts` (no equivalent exists).
+6. **2 stale directory refs**: Updated `packages/babysitter-sdk/src/plugins/` to `packages/genty/platform/src/plugins/`
 
 **Total path corrections applied: 74**
 
@@ -153,7 +153,7 @@ The following keyFiles corrections were applied:
 
 Two directory references remain "missing" but are intentional -- they represent target-state directories where new code should be created as these gaps are implemented:
 
-- `packages/sdk/src/dashboard/` -- referenced by 19 gaps (the embedded SDK dashboard)
-- `packages/sdk/src/interaction/` -- referenced by 10 gaps (the interaction subsystem)
+- `packages/babysitter-sdk/src/dashboard/` -- referenced by 19 gaps (the embedded SDK dashboard)
+- `packages/babysitter-sdk/src/interaction/` -- referenced by 10 gaps (the interaction subsystem)
 
 These are not stale references; they are forward-looking placeholders for planned features.

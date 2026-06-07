@@ -22,9 +22,9 @@ User profile drives orchestration defaults: expert users get fewer breakpoints, 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Profiles | `packages/sdk/src/profiles/` |
-| Breakpoint evaluator | `packages/sdk/src/breakpoints/evaluator.ts` |
-| Prompts module | `packages/sdk/src/prompts/` |
+| Profiles | `packages/babysitter-sdk/src/profiles/` |
+| Breakpoint evaluator | `packages/babysitter-sdk/src/breakpoints/evaluator.ts` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
 
 ## Recommendation
 Phase 3 implementation. Wire user profile into orchestration initialization. Auto-configure breakpoint thresholds, model selection, and verbosity from profile.

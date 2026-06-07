@@ -23,9 +23,9 @@ Effects can be dispatched with a background flag. The orchestration loop continu
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Scheduler hints | `packages/sdk/src/runtime/types.ts` |
-| Orchestrate iteration | `packages/sdk/src/runtime/orchestrateIteration.ts` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Scheduler hints | `packages/babysitter-sdk/src/runtime/types.ts` |
+| Orchestrate iteration | `packages/babysitter-sdk/src/runtime/orchestrateIteration.ts` |
 
 ## Recommendation
 Phase 2 implementation. Add background flag to effect scheduler hints. Babysit skill dispatches background effects without waiting and tracks status via polling.

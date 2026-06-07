@@ -51,7 +51,7 @@ const flexibleTask = defineTask("flexible-review", (args) => ({
 
 ## SDK Changes
 
-### `packages/sdk/src/tasks/types.ts`
+### `packages/babysitter-sdk/src/tasks/types.ts`
 
 ```typescript
 interface AgentTaskOptions {
@@ -76,7 +76,7 @@ interface TaskDef {
 }
 ```
 
-### `packages/sdk/src/tasks/kinds/index.ts`
+### `packages/babysitter-sdk/src/tasks/kinds/index.ts`
 
 Add helper function:
 
@@ -88,7 +88,7 @@ const reviewTask = externalAgentTask("review", {
 });
 ```
 
-### `packages/sdk/src/tasks/defineTask.ts`
+### `packages/babysitter-sdk/src/tasks/defineTask.ts`
 
 When the task kind is `"agent"` and `agent.responderType` is `"agent"`:
 - Validate that `agent.adapter` is set
@@ -97,11 +97,11 @@ When the task kind is `"agent"` and `agent.responderType` is `"agent"`:
 
 ## Files to Modify
 
-- `packages/sdk/src/tasks/types.ts` — extend AgentTaskOptions with responder routing fields
-- `packages/sdk/src/tasks/kinds/index.ts` — export `externalAgentTask`, `humanTask`, and `autoTask` helpers
-- `packages/sdk/src/tasks/defineTask.ts` — validate agent adapter for `responderType: "agent"`
-- `packages/sdk/src/tasks/serializer.ts` — preserve typed agent routing metadata
-- `packages/sdk/src/tasks/__tests__/*.test.ts` — cover helpers, validation, serialization, and compatibility
+- `packages/babysitter-sdk/src/tasks/types.ts` — extend AgentTaskOptions with responder routing fields
+- `packages/babysitter-sdk/src/tasks/kinds/index.ts` — export `externalAgentTask`, `humanTask`, and `autoTask` helpers
+- `packages/babysitter-sdk/src/tasks/defineTask.ts` — validate agent adapter for `responderType: "agent"`
+- `packages/babysitter-sdk/src/tasks/serializer.ts` — preserve typed agent routing metadata
+- `packages/babysitter-sdk/src/tasks/__tests__/*.test.ts` — cover helpers, validation, serialization, and compatibility
 
 ## Validation Rules
 

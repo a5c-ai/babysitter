@@ -46,8 +46,8 @@ Used by embedded SDK dashboard and `run:status --tree` flag.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Task list CLI | `packages/sdk/src/cli/` (task:list command) |
-| Run status CLI | `packages/sdk/src/cli/` (run:status command) |
+| Task list CLI | `packages/babysitter-sdk/src/cli/` (task:list command) |
+| Run status CLI | `packages/babysitter-sdk/src/cli/` (run:status command) |
 | CC reference: tree | `src/components/Spinner/TeammateSpinnerTree.tsx` |
 | CC reference: agent status | `src/components/CoordinatorAgentStatus.tsx` |
 

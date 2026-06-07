@@ -45,7 +45,7 @@ view, `run:compare` (GAP-RUN-001) for run diffing.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Task show CLI | `packages/sdk/src/cli/` |
+| Task show CLI | `packages/babysitter-sdk/src/cli/` |
 | CC reference | `src/components/diff/` |
 | CC reference | `src/components/StructuredDiff.tsx` |
 

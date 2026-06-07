@@ -22,9 +22,9 @@ Harness invocation output streams in real-time. Pi adapter leverages `PiSessionH
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Pi session wrapper | `packages/sdk/src/harness/piWrapper.ts` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Pi session wrapper | `packages/babysitter-sdk/src/harness/piWrapper.ts` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 2 implementation. For Pi adapter, leverage `PiSessionHandle.subscribe()`. For CLI harnesses, pipe stdout/stderr from child processes in real-time.

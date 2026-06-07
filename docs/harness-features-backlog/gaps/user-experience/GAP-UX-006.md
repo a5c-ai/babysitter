@@ -22,8 +22,8 @@ task:list --grouped organizes pending effects by kind (task, breakpoint, sleep),
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
-| Task batching | `packages/sdk/src/tasks/batching.ts` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
+| Task batching | `packages/babysitter-sdk/src/tasks/batching.ts` |
 
 ## Recommendation
 Phase 1 implementation. Extend task:list with --grouped flag. Surface BatchedEffectSummary data in CLI output.

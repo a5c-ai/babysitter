@@ -19,7 +19,7 @@ npm run lint:hooks-adapter
 
 | Path | Package | Role |
 | --- | --- | --- |
-| `packages/sdk` | `@a5c-ai/babysitter-sdk` | Core runtime, storage, tasks, CLI, hooks, profiles, plugins, compression |
+| `packages/babysitter-sdk` | `@a5c-ai/babysitter-sdk` | Core runtime, storage, tasks, CLI, hooks, profiles, plugins, compression |
 | `packages/babysitter` | `@a5c-ai/babysitter` | Metapackage and `babysitter` binary |
 | `packages/genty/platform` | `@a5c-ai/genty-platform` | Platform API for harness integration, governance, interaction, and storage |
 | `packages/genty` | `@a5c-ai/genty` | Unified product package and owner of the `genty` CLI implementation |
@@ -30,9 +30,9 @@ npm run lint:hooks-adapter
 
 ## Key Entry Points
 
-- SDK CLI: [`packages/sdk/src/cli/main.ts`](../../packages/sdk/src/cli/main.ts)
-- SDK command registry: [`packages/sdk/src/cli/main/program.ts`](../../packages/sdk/src/cli/main/program.ts)
-- SDK config and runs resolution: [`packages/sdk/src/config/`](../../packages/sdk/src/config)
+- SDK CLI: [`packages/babysitter-sdk/src/cli/main.ts`](../../packages/babysitter-sdk/src/cli/main.ts)
+- SDK command registry: [`packages/babysitter-sdk/src/cli/main/program.ts`](../../packages/babysitter-sdk/src/cli/main/program.ts)
+- SDK config and runs resolution: [`packages/babysitter-sdk/src/config/`](../../packages/babysitter-sdk/src/config)
 - genty product CLI: [`packages/genty/src/cli/main.ts`](../../packages/genty/src/cli/main.ts)
 - Metapackage shim: `packages/babysitter/bin/babysitter.js`
 - Atlas graph explorer: [`packages/atlas/webui/app/page.tsx`](../../packages/atlas/webui/app/page.tsx)

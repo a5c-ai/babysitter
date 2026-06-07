@@ -24,9 +24,9 @@ Named effect groups with persistent identity across iterations. Multiple harness
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Task batching | `packages/sdk/src/tasks/batching.ts` |
-| Harness adapters | `packages/sdk/src/harness/` |
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
+| Task batching | `packages/babysitter-sdk/src/tasks/batching.ts` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
 
 ## Recommendation
 Phase 3-4 implementation. Phase 3: named effect groups with persistent identity. Phase 4: inter-effect messaging via journal events and coordinator process pattern.

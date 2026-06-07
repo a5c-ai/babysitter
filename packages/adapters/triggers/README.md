@@ -136,7 +136,7 @@ trigger-query: |
 | `action` | Event action | `opened`, `synchronize`, `created` |
 | `text` | Match text in title/body | `@develop-this`, `fix:` |
 | `diff` | Match text in diff patches | `TODO`, `FIXME` |
-| `paths` | Match changed file paths | `src/**/*.ts`, `packages/sdk/**` |
+| `paths` | Match changed file paths | `src/**/*.ts`, `packages/babysitter-sdk/**` |
 | `branch` | Match target branch | `main`, `release/*` |
 | `labels` | Match issue/PR labels | `bug`, `needs-review` |
 

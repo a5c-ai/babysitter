@@ -23,7 +23,7 @@ Session export/import for sharing. Session context includes accumulated decision
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
 
 ## Recommendation
 Phase 5 implementation. Add session:export and session:import commands. Define session sharing protocol.

@@ -22,8 +22,8 @@ Operator can switch modes mid-run via breakpoint interaction or session command.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
-| Prompts module | `packages/sdk/src/prompts/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
 
 ## Recommendation
 Phase 3 implementation. Allow mode changes via session state update. Mode affects prompt, breakpoint, and parallelism configuration.

@@ -22,7 +22,7 @@ CC has:
 - `src/components/CompactSummary.tsx` -- compact view of large outputs
 
 ## Current State
-`invokeHarness()` in `packages/sdk/src/harness/invoker.ts` captures stdout/stderr
+`invokeHarness()` in `packages/babysitter-sdk/src/harness/invoker.ts` captures stdout/stderr
 only after the child process exits. No streaming during execution. No embedded SDK dashboard exists yet to show what a delegated harness is doing in real-time. Task
 results are visible only after completion.
 
@@ -52,9 +52,9 @@ An Ink `StreamingPanel` component that:
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Pi wrapper | `packages/sdk/src/harness/piWrapper.ts` (has subscribe()) |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Pi wrapper | `packages/babysitter-sdk/src/harness/piWrapper.ts` (has subscribe()) |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 | CC reference | `src/components/MessageResponse.tsx` |
 | CC reference | `src/components/VirtualMessageList.tsx` |
 

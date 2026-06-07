@@ -2,7 +2,7 @@
 
 > Reference date: 2026-04-02
 
-## SDK Harness Layer (`packages/sdk/src/harness/`)
+## SDK Harness Layer (`packages/babysitter-sdk/src/harness/`)
 
 | File | Purpose | Key Exports |
 |------|---------|-------------|

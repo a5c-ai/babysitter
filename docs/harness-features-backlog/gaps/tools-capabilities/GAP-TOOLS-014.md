@@ -23,11 +23,11 @@ A `TaskManager` API class exposing: create task from definition, query tasks by 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Task definitions | `packages/sdk/src/tasks/` |
-| Task serializer | `packages/sdk/src/tasks/serializer.ts` |
-| Task registry | `packages/sdk/src/tasks/registry.ts` |
-| MCP server | `packages/sdk/src/mcp/` |
-| CLI task commands | `packages/sdk/src/cli/` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Task serializer | `packages/babysitter-sdk/src/tasks/serializer.ts` |
+| Task registry | `packages/babysitter-sdk/src/tasks/registry.ts` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
+| CLI task commands | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 2 implementation. Extract a `TaskManager` class from the existing task module internals. Expose via SDK public API and MCP tool surface. Align with JSON API conventions from GAP-JSON-001.

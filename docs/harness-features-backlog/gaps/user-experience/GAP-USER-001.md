@@ -22,9 +22,9 @@ Key commands (run:status, task:list, tokens:stats, run:events) surfaceable durin
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
-| Interaction module | `packages/sdk/src/interaction/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
+| Interaction module | `packages/babysitter-sdk/src/interaction/` |
 
 ## Recommendation
 Phase 2 implementation. Create operator command layer that wraps key CLI commands for in-session invocation during breakpoint interactions.

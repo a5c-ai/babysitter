@@ -22,8 +22,8 @@ Full prompt assembly visible via instructions:inspect. Orchestration plan (from 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Prompts module | `packages/sdk/src/prompts/` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 3 implementation. Integrate prompt inspection output into embedded SDK dashboard. Show plan state with progress indicators.

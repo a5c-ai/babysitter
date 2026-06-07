@@ -23,8 +23,8 @@ Continuous health monitoring for running subagents. Hang detection (no output fo
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Config module | `packages/sdk/src/config/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Config module | `packages/babysitter-sdk/src/config/` |
 
 ## Recommendation
 Phase 3 implementation. Add health monitor to invokeHarness(). Detect hangs via output silence. Enforce token budgets. Implement auto-recovery strategies.

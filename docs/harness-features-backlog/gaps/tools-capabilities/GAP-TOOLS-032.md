@@ -31,7 +31,7 @@ that require authentication.
 ## Key Files
 | Component | Path |
 |-----------|------|
-| MCP module | `packages/sdk/src/mcp/` |
+| MCP module | `packages/babysitter-sdk/src/mcp/` |
 | CC MCP auth | `src/services/mcp/auth.ts` |
 | CC OAuth port | `src/services/mcp/oauthPort.ts` |
 

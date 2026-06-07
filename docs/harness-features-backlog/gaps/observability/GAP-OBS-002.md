@@ -22,8 +22,8 @@ Embedded SDK dashboard renders a timeline view showing phase transitions, durati
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
-| Journal storage | `packages/sdk/src/storage/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
 
 ## Recommendation
 Phase 3 implementation. Derive phase transitions from journal event patterns. Render as timeline in embedded SDK dashboard.

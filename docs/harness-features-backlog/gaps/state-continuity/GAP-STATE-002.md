@@ -22,8 +22,8 @@ Periodic memory consolidation merges related learnings across runs. Stale memori
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
-| Logging module | `packages/sdk/src/logging/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| Logging module | `packages/babysitter-sdk/src/logging/` |
 
 ## Recommendation
 Phase 4 implementation. Schedule consolidation via harness:retrospect. Merge related memories. Prune by recency.

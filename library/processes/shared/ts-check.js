@@ -27,12 +27,12 @@
  * const result = await ctx.task(tsCheckTask, { projectDir: '.', tsconfigPath: 'tsconfig.json' });
  *
  * // Factory usage:
- * const { checkTask, reportTask } = createTsCheck({ projectDir: 'packages/sdk', strict: true });
+ * const { checkTask, reportTask } = createTsCheck({ projectDir: 'packages/babysitter-sdk', strict: true });
  * const checkResult = await ctx.task(checkTask, {});
  * const report = await ctx.task(reportTask, { tscOutput: checkResult });
  *
  * // Convenience usage:
- * const outcome = await executeTsCheck(ctx, { projectDir: 'packages/sdk' });
+ * const outcome = await executeTsCheck(ctx, { projectDir: 'packages/babysitter-sdk' });
  * if (!outcome.passed) {
  *   console.log(`${outcome.errorCount} errors found:`, outcome.errors);
  * }
@@ -220,7 +220,7 @@ export const tsCheckTask = defineTask(
  * @example
  * ```js
  * const { checkTask, reportTask } = createTsCheck({
- *   projectDir: 'packages/sdk',
+ *   projectDir: 'packages/babysitter-sdk',
  *   strict: true,
  *   timeout: 180000,
  * });
@@ -403,7 +403,7 @@ export function createTsCheck(config = {}) {
  * @example
  * ```js
  * const result = await executeTsCheck(ctx, {
- *   projectDir: 'packages/sdk',
+ *   projectDir: 'packages/babysitter-sdk',
  *   strict: true,
  * });
  *

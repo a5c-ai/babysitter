@@ -23,9 +23,9 @@ TrustLevel field in plugin registry. Trust levels enforced in hook dispatch and 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Plugin types | `packages/sdk/src/plugins/types.ts` |
-| Plugin registry | `packages/sdk/src/plugins/registry.ts` |
-| Hook dispatcher | `packages/sdk/src/hooks/dispatcher.ts` |
+| Plugin types | `packages/babysitter-sdk/src/plugins/types.ts` |
+| Plugin registry | `packages/babysitter-sdk/src/plugins/registry.ts` |
+| Hook dispatcher | `packages/babysitter-sdk/src/hooks/dispatcher.ts` |
 
 ## Recommendation
 Phase 2 implementation. Add TrustLevel to PluginRegistryEntry. Enforce trust levels in hook dispatch. Add plugin:security-review command.

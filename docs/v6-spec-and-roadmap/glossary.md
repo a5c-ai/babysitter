@@ -110,7 +110,7 @@ The current architecture program for the stack. V6 is a documentation and valida
 
 ### Working Surface
 
-The actual surface a developer changes to implement a feature or fix: for example `packages/sdk`, `packages/adapters/adapters`, `packages/adapters/hooks/core`, or `plugins/babysitter-unified`. V6 prefers identifying the real working surface before proposing extra package layers.
+The actual surface a developer changes to implement a feature or fix: for example `packages/babysitter-sdk`, `packages/adapters/adapters`, `packages/adapters/hooks/core`, or `plugins/babysitter-unified`. V6 prefers identifying the real working surface before proposing extra package layers.
 
 ## Naming Rule
 

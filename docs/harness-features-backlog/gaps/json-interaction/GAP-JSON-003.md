@@ -23,9 +23,9 @@ JSON API for breakpoint interaction: list pending breakpoints, get breakpoint co
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
-| Breakpoint evaluator | `packages/sdk/src/breakpoints/evaluator.ts` |
-| MCP server | `packages/sdk/src/mcp/` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
+| Breakpoint evaluator | `packages/babysitter-sdk/src/breakpoints/evaluator.ts` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
 
 ## Recommendation
 Phase 2 implementation. Expose breakpoint interaction as JSON API via MCP tools and importable functions.

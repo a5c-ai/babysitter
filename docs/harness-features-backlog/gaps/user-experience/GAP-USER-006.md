@@ -23,8 +23,8 @@ Real-time cost accumulation from task results. Per-model pricing (configurable).
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Token stats | `packages/sdk/src/cli/` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| Token stats | `packages/babysitter-sdk/src/cli/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 2 implementation. Accumulate token counts from task results. Apply per-model pricing. Surface in run:status and embedded SDK dashboard. Add cost threshold breakpoints.

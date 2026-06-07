@@ -11,7 +11,7 @@ Phased implementation plan for the 147 babysitter-native gaps. All recommendatio
 **Objective**: Separate prompt assembly into cache-friendly strata.
 
 **Implementation**:
-1. Define `PromptStratum` type in `packages/sdk/src/prompts/`
+1. Define `PromptStratum` type in `packages/babysitter-sdk/src/prompts/`
 2. Tag each prompt section with `stable`, `runtime`, or `turnLocal`
 3. Compose prompts stratum-by-stratum with clear boundaries
 4. Add `--show-strata` flag to `instructions:*` commands
@@ -26,7 +26,7 @@ Phased implementation plan for the 147 babysitter-native gaps. All recommendatio
 **Objective**: Centralized policy evaluation for security governance.
 
 **Implementation**:
-1. Create `packages/sdk/src/governance/` module
+1. Create `packages/babysitter-sdk/src/governance/` module
 2. Define `PolicyRule` type with evaluation logic
 3. Evaluate policies at effect dispatch in `processContext.ts`
 4. Log policy decisions to structured JSONL

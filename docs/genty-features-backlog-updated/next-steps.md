@@ -28,7 +28,7 @@ These are from the M0 quick wins, ordered by downstream impact. All have S remai
 
 **Why second:** Critical priority, directly reduces API costs and latency for every orchestrated run.
 
-- **Files:** `packages/sdk/src/prompts/strata.ts`, `packages/genty/platform/src/harness/piWrapper.ts`, `packages/adapters/codecs/src/claude-code/`
+- **Files:** `packages/babysitter-sdk/src/prompts/strata.ts`, `packages/genty/platform/src/harness/piWrapper.ts`, `packages/adapters/codecs/src/claude-code/`
 - **Branch:** `feat/perf-001-prompt-cache-control`
 - **Acceptance criteria:**
   - Stable strata sections include `cache_control: { type: 'ephemeral' }` in API calls
@@ -41,7 +41,7 @@ These are from the M0 quick wins, ordered by downstream impact. All have S remai
 
 **Why third:** Closes the loop on memory extraction (80% done) and unblocks memory consolidation.
 
-- **Files:** `packages/sdk/src/prompts/parts/` (new `longTermMemory.ts`), `packages/sdk/src/prompts/strata.ts` (add to `PART_STRATA_MAP`)
+- **Files:** `packages/babysitter-sdk/src/prompts/parts/` (new `longTermMemory.ts`), `packages/babysitter-sdk/src/prompts/strata.ts` (add to `PART_STRATA_MAP`)
 - **Branch:** `feat/state-001-memory-prompt-injection`
 - **Acceptance criteria:**
   - New `longTermMemory` prompt part renders extracted memories from `memoryExtraction.ts`
@@ -84,7 +84,7 @@ These are from the M0 quick wins, ordered by downstream impact. All have S remai
 
 **Decision needed before Track 6 (10 gaps, M4 milestone) can start.**
 
-The original spec assumed Ink-based components embedded in `packages/sdk/`. The architecture has evolved:
+The original spec assumed Ink-based components embedded in `packages/babysitter-sdk/`. The architecture has evolved:
 - `packages/tula/ui/` is being extracted as a component library
 - `packages/observer-dashboard/` exists as a separate package
 

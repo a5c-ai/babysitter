@@ -22,8 +22,8 @@ System service with start/stop/status lifecycle. File change watcher integration
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
 
 ## Recommendation
 Phase 3 implementation. Create daemon module with service manager, file watcher, and trigger activation. Add daemon:start/stop/status CLI commands.

@@ -111,7 +111,7 @@ npm install -D @semantic-release/exec
 ```json
 {
   "packages": {
-    "packages/sdk": { "package-name": "@scope/sdk", "release-type": "node" },
+    "packages/babysitter-sdk": { "package-name": "@scope/sdk", "release-type": "node" },
     "packages/adapters/cli": { "package-name": "@scope/cli", "release-type": "node" }
   },
   "separate-pull-requests": true

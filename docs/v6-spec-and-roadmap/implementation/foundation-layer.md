@@ -4,7 +4,7 @@
 
 ## Phase 1: Foundation Layer
 
-The foundation layer establishes the minimum V6 base inside the current repository shape. This phase clarifies seams, validation gates, and ownership in `packages/sdk`, `packages/genty/platform`, and `plugins/*`. It does not commit V6 to creating deferred top-level packages.
+The foundation layer establishes the minimum V6 base inside the current repository shape. This phase clarifies seams, validation gates, and ownership in `packages/babysitter-sdk`, `packages/genty/platform`, and `plugins/*`. It does not commit V6 to creating deferred top-level packages.
 
 ### Current-Package Seam Clarification
 
@@ -28,7 +28,7 @@ The foundation layer establishes the minimum V6 base inside the current reposito
 
 **Platform Candidate Preparation**
 - Describe plugin-system responsibilities in current-package terms
-- Identify which platform concerns are internal `packages/sdk` or `packages/genty/platform` candidates versus actual `plugins/*` responsibilities
+- Identify which platform concerns are internal `packages/babysitter-sdk` or `packages/genty/platform` candidates versus actual `plugins/*` responsibilities
 - Treat filesystem abstraction and plugin registration work as candidate slices only when they can be validated independently
 
 ## Deliverables

@@ -22,9 +22,9 @@ Real-time token usage per iteration. Context window utilization percentage. Cost
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Token stats | `packages/sdk/src/cli/` |
-| Compression module | `packages/sdk/src/compression/` |
-| Embedded SDK dashboard (new) | `packages/sdk/src/dashboard/` |
+| Token stats | `packages/babysitter-sdk/src/cli/` |
+| Compression module | `packages/babysitter-sdk/src/compression/` |
+| Embedded SDK dashboard (new) | `packages/babysitter-sdk/src/dashboard/` |
 
 ## Recommendation
 Phase 3 implementation. Accumulate token counts from task results in real-time. Display in embedded SDK dashboard with threshold warnings.

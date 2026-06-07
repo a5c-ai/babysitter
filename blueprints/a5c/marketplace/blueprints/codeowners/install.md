@@ -95,7 +95,7 @@ Final format at `.github/CODEOWNERS`:
 /Dockerfile                      @org/platform
 
 # Packages
-/packages/sdk/                   @org/sdk-team
+/packages/babysitter-sdk/                   @org/sdk-team
 /packages/adapters/cli/                   @org/sdk-team
 /packages/catalog/               @org/frontend
 
@@ -104,7 +104,7 @@ Final format at `.github/CODEOWNERS`:
 *.md                             @org/docs
 
 # Security-sensitive
-/packages/sdk/src/auth/          @org/security @org/sdk-team
+/packages/babysitter-sdk/src/auth/          @org/security @org/sdk-team
 SECURITY.md                      @org/security
 ```
 

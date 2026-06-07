@@ -39,12 +39,12 @@ None specific -- methodology content, not tool integration.
 ### Agent Loop Optimization
 - **Current limitation**: Could benefit from clearer agent loop architecture documentation
 - **Integration approach**: Apply educational agent loop patterns to babysitter runtime documentation
-- **Implementation scope**: `packages/sdk/src/runtime/`, improved loop architecture
+- **Implementation scope**: `packages/babysitter-sdk/src/runtime/`, improved loop architecture
 
 ### Permission System Enhancement
 - **Current limitation**: Limited safety validation patterns for model intent execution
 - **Integration approach**: Study permission layer patterns for agent execution safety
-- **Implementation scope**: `packages/sdk/src/security/`, model intent validation
+- **Implementation scope**: `packages/babysitter-sdk/src/security/`, model intent validation
 
 ## Implicit Procedural Knowledge
 - "Start with 3-5 capabilities, add more only when agent consistently fails" -- capability minimalism principle

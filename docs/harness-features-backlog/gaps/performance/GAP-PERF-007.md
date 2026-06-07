@@ -23,9 +23,9 @@ The orchestration loop detects independent effects and executes them concurrentl
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| Task batching | `packages/sdk/src/tasks/batching.ts` |
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| Task batching | `packages/babysitter-sdk/src/tasks/batching.ts` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
 
 ## Recommendation
 Phase 4 implementation. Modify babysit skill to execute parallel-grouped effects concurrently using multiple harness invocations.

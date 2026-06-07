@@ -22,9 +22,9 @@ Stable prompt strata are cached between iterations. Cache hit rate is measurable
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Prompts module | `packages/sdk/src/prompts/` |
-| Token stats CLI | `packages/sdk/src/cli/` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Token stats CLI | `packages/babysitter-sdk/src/cli/` |
 
 ## Recommendation
 Phase 2 implementation. Options: direct API integration bypassing harness CLI (highest savings), session-persistent prompt prefix with harness session binding, or harness-side prompt prefix caching with TTL.

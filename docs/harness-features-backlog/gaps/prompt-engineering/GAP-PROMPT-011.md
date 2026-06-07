@@ -25,8 +25,8 @@ An `outputEfficiency` prompt section injected into iteration prompts and task pr
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Prompts module | `packages/sdk/src/prompts/` |
-| Session management | `packages/sdk/src/session/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Section 5 (Output Efficiency Rules) has exact CC phrasing |
 
 ## Recommendation

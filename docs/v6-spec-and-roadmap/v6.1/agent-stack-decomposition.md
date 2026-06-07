@@ -37,7 +37,7 @@ The graph has `agent:adapters` and `agent:adapters-remote`:
 
 | Package | npm name | What it actually does |
 |---------|----------|----------------------|
-| `packages/sdk/` | `@a5c-ai/babysitter-sdk` | Orchestration engine: runs, replay, storage, tasks, hooks, plugins, profiles, session, compression, MCP, CLI commands |
+| `packages/babysitter-sdk/` | `@a5c-ai/babysitter-sdk` | Orchestration engine: runs, replay, storage, tasks, hooks, plugins, profiles, session, compression, MCP, CLI commands |
 | `packages/genty/core/` | `@a5c-ai/genty-core` | Thin: agentic tools, background process registry, session binding, deferred tool registry |
 | `packages/genty/platform/` | `@a5c-ai/genty-platform` | Fat CLI: wraps SDK + agent-core, adds daemon, observer, governance, harness bridge, cost, interaction |
 
@@ -59,7 +59,7 @@ The graph says agent-platform has Core, Runtime, Platform, and UI. The code shou
 
 | Graph Layer | Target Package | Current Location | What Moves |
 |-------------|---------------|------------------|------------|
-| L4 AgentCoreImpl | `@a5c-ai/babysitter-sdk` (stays) | `packages/sdk/` | Nothing — SDK IS the core. agent-core package contents fold into SDK or agent-platform. |
+| L4 AgentCoreImpl | `@a5c-ai/babysitter-sdk` (stays) | `packages/babysitter-sdk/` | Nothing — SDK IS the core. agent-core package contents fold into SDK or agent-platform. |
 | L5 AgentRuntimeImpl | `@a5c-ai/genty-platform` (stays, slimmed) | `packages/genty/platform/` | Keep: daemon, session, harness bridge, runtime. Remove: things that belong in other layers. |
 | L6 AgentPlatformImpl | `@a5c-ai/extensions-adapter` (renamed from extensions-adapter) + `@a5c-ai/agent-catalog` | `packages/extensions-adapter/`, `packages/agent-catalog/` | Plugin compilation, skill discovery, marketplace |
 | L11 AgentUIImpl | `@a5c-ai/genty-platform` CLI entry | `packages/genty/platform/src/cli/` | CLI stays in agent-platform — it's the binary |

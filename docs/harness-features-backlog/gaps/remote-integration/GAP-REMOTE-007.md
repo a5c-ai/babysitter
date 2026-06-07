@@ -22,9 +22,9 @@ HostContract interface with startRun, getStatus, postEffect, subscribe methods. 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| MCP server | `packages/sdk/src/mcp/` |
-| Adapter registry | `packages/sdk/src/harness/registry.ts` |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
+| Adapter registry | `packages/babysitter-sdk/src/harness/registry.ts` |
 
 ## Recommendation
 M1 (Foundation) implementation. Define HostContract interface. Implement over existing CLI. Expose via MCP and HTTP.

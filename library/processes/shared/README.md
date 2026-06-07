@@ -728,7 +728,7 @@ Expected args:
 
 ```js
 const result = await ctx.task(tsCheckTask, {
-  projectDir: 'packages/sdk',
+  projectDir: 'packages/babysitter-sdk',
   tsconfigPath: 'tsconfig.json',
 });
 ```
@@ -809,7 +809,7 @@ import { tsCheckTask } from '../shared/index.js';
 
 export async function process(inputs, ctx) {
   const result = await ctx.task(tsCheckTask, {
-    projectDir: 'packages/sdk',
+    projectDir: 'packages/babysitter-sdk',
   });
 }
 ```
@@ -821,7 +821,7 @@ import { createTsCheck } from '../shared/index.js';
 
 export async function process(inputs, ctx) {
   const { checkTask, reportTask } = createTsCheck({
-    projectDir: 'packages/sdk',
+    projectDir: 'packages/babysitter-sdk',
     strict: true,
     timeout: 180000,
   });
@@ -842,7 +842,7 @@ import { executeTsCheck } from '../shared/index.js';
 
 export async function process(inputs, ctx) {
   const result = await executeTsCheck(ctx, {
-    projectDir: 'packages/sdk',
+    projectDir: 'packages/babysitter-sdk',
     strict: true,
   });
 
@@ -935,8 +935,8 @@ import { traceRuntimeCallPathsTask } from '../shared/index.js';
 export async function process(inputs, ctx) {
   const result = await ctx.task(traceRuntimeCallPathsTask, {
     featureAreas: [
-      { name: 'run-create', entryPoint: 'packages/sdk/src/cli/commands/runCreate.ts' },
-      { name: 'task-post',  entryPoint: 'packages/sdk/src/cli/commands/taskPost.ts' },
+      { name: 'run-create', entryPoint: 'packages/babysitter-sdk/src/cli/commands/runCreate.ts' },
+      { name: 'task-post',  entryPoint: 'packages/babysitter-sdk/src/cli/commands/taskPost.ts' },
     ],
     projectDir: '.',
     maxDepth: 6,
@@ -992,16 +992,16 @@ export async function process(inputs, ctx) {
 {
   "runtimeCallPaths": {
     "run-create": {
-      "entryPoint": "packages/sdk/src/cli/commands/runCreate.ts",
+      "entryPoint": "packages/babysitter-sdk/src/cli/commands/runCreate.ts",
       "tracedFiles": [
-        "packages/sdk/src/cli/commands/runCreate.ts",
-        "packages/sdk/src/runtime/createRun.ts",
-        "packages/sdk/src/storage/createRunDir.ts",
-        "packages/sdk/src/storage/appendEvent.ts",
-        "packages/sdk/src/storage/lock.ts"
+        "packages/babysitter-sdk/src/cli/commands/runCreate.ts",
+        "packages/babysitter-sdk/src/runtime/createRun.ts",
+        "packages/babysitter-sdk/src/storage/createRunDir.ts",
+        "packages/babysitter-sdk/src/storage/appendEvent.ts",
+        "packages/babysitter-sdk/src/storage/lock.ts"
       ],
       "deadCodeCandidates": [
-        "packages/sdk/src/storage/createRunDir.ts:ensureParentDir"
+        "packages/babysitter-sdk/src/storage/createRunDir.ts:ensureParentDir"
       ],
       "hotPath": "cli#runCreate → createRun() → createRunDir() → acquireRunLock() → appendEvent(RUN_CREATED)"
     }

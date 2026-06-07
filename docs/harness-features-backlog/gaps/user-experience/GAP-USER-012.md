@@ -23,9 +23,9 @@ Plan phase generates structured task list. Breakpoint presents plan for approval
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
-| Process context | `packages/sdk/src/runtime/processContext.ts` |
-| Breakpoint types | `packages/sdk/src/breakpoints/types.ts` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
+| Process context | `packages/babysitter-sdk/src/runtime/processContext.ts` |
+| Breakpoint types | `packages/babysitter-sdk/src/breakpoints/types.ts` |
 
 ## Recommendation
 Phase 2 implementation. Enhance babysit skill to support plan-verify-execute loop with structured task list, approval breakpoints, and per-step verification.

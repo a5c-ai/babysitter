@@ -41,7 +41,7 @@ Implementation: straightforward ripgrep flag mapping. Each param maps directly t
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Agentic tools | `packages/sdk/src/harness/agenticTools.ts` |
+| Agentic tools | `packages/babysitter-sdk/src/harness/agenticTools.ts` |
 | CC GrepTool | `src/tools/GrepTool/GrepTool.ts` |
 
 ## Recommendation

@@ -79,7 +79,7 @@ operator / CI
 | 1 | `agent-platform` CLI | `call`, `create-run`, `yolo`, `plan`, `resume-run`; args parsed in `packages/genty/platform/src/cli/dispatch.ts` | Invocation command, selected harness, workspace, model, max iterations, output mode |
 | 2 | Create-run coordinator | `handleHarnessCreateRun` in `packages/genty/platform/src/harness/internal/createRun/index.ts` | Progress events for planning, process path, run creation, session binding |
 | 3 | Planning phase | Prompt, workspace context, selected harness, compression config | Process file path, process fingerprint or generated process report, optional planning conversation summary |
-| 4 | SDK run creation | `createRun` through `packages/sdk/src/cli/main/runCreate.ts` or SDK API | `runId`, `runDir`, process ID, entrypoint, inputs path, non-interactive metadata |
+| 4 | SDK run creation | `createRun` through `packages/babysitter-sdk/src/cli/main/runCreate.ts` or SDK API | `runId`, `runDir`, process ID, entrypoint, inputs path, non-interactive metadata |
 | 5 | Session binding | Selected harness session ID from `resolveHarnessSessionIdForBinding` and SDK session state | Babysitter session ID, state file, run/session association, harness name |
 | 6 | Orchestration loop | `orchestrateIteration`, pending `EffectAction`s, `resolveEffect`, `commitEffectResult` | Iteration count, pending effect IDs, task IDs, task result refs, stdout/stderr refs |
 | 7 | Effect execution | Internal `agent-core` for internal harnesses; external bridge for external harnesses | Model/provider trace redacted, backend name, task result JSON, errors/retries if any |
@@ -196,6 +196,6 @@ adapters launch/run
 | --- | --- |
 | Adapters CLI and sessions | `packages/adapters/cli/src/commands/run.ts`, `packages/adapters/cli/src/commands/launch.ts`, `packages/adapters/gateway/src/runs/session-runtime.ts`, `packages/adapters/gateway/src/runs/event-log.ts` |
 | Babysitter-agent runtime | `packages/genty/platform/src/cli/dispatch.ts`, `packages/genty/platform/src/cli/commands/harness/createRun.ts`, `packages/genty/platform/src/harness/internal/createRun/index.ts`, `packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts` |
-| SDK run/session loop | `packages/sdk/src/cli/main/runCreate.ts`, `packages/sdk/src/cli/main/taskCommands.ts`, `packages/sdk/src/cli/commands/session/init.ts`, `packages/sdk/src/cli/commands/session/associate.ts` |
+| SDK run/session loop | `packages/babysitter-sdk/src/cli/main/runCreate.ts`, `packages/babysitter-sdk/src/cli/main/taskCommands.ts`, `packages/babysitter-sdk/src/cli/commands/session/init.ts`, `packages/babysitter-sdk/src/cli/commands/session/associate.ts` |
 | Hooks-adapter | `packages/adapters/hooks/cli/src/cli/commands/invoke.ts`, `packages/adapters/hooks/cli/src/cli/bootstrap-runtime.ts`, `packages/adapters/hooks/core/src/types/event.ts`, `packages/adapters/hooks/core/src/normalizer/runner.ts` |
 | Transport-adapter | `packages/transport-adapter/src/index.ts`, `packages/transport-adapter/tests/e2e/http-roundtrip.test.ts`, `packages/transport-adapter/tests/runtime.test.ts` |

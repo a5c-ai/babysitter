@@ -22,8 +22,8 @@ An `instructions:inspect` command shows the complete prompt assembly with strata
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Prompts module | `packages/sdk/src/prompts/` |
-| Instructions CLI | `packages/sdk/src/cli/` |
+| Prompts module | `packages/babysitter-sdk/src/prompts/` |
+| Instructions CLI | `packages/babysitter-sdk/src/cli/` |
 | CC prompt phrasing analysis | [`11-prompt-phrasing-analysis.md`](../../11-prompt-phrasing-analysis.md) -- Full document catalogs the exact prompt sections that inspection tooling should surface |
 
 ## Recommendation

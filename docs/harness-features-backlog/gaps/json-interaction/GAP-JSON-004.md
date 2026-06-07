@@ -22,8 +22,8 @@ JSON API for session lifecycle: create, resume, list, update, delete. Session st
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
-| MCP server | `packages/sdk/src/mcp/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
 
 ## Recommendation
 Phase 2 implementation. Expose session management as JSON API via MCP tools.

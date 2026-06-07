@@ -535,12 +535,12 @@
       "note": "README is the canonical package-level contract."
     },
     {
-      "surface": "packages/sdk",
+      "surface": "packages/babysitter-sdk",
       "packageName": "@a5c-ai/babysitter-sdk",
       "description": "Storage and run-registry primitives for event-sourced babysitter workflows.",
       "hasReadme": true,
       "status": "Public package",
-      "canonicalHome": "../packages/sdk/README.md",
+      "canonicalHome": "../packages/babysitter-sdk/README.md",
       "supporting": [],
       "note": "README is the canonical package-level contract."
     },

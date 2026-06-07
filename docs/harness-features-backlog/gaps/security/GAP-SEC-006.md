@@ -22,8 +22,8 @@ OAuth flow for MCP server authentication. Secure credential storage with scoped 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| MCP server | `packages/sdk/src/mcp/` |
-| Config module | `packages/sdk/src/config/` |
+| MCP server | `packages/babysitter-sdk/src/mcp/` |
+| Config module | `packages/babysitter-sdk/src/config/` |
 
 ## Recommendation
 Phase 4 implementation. Add OAuth client library. Integrate with MCP authentication. Store tokens securely in global state directory.

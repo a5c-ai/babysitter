@@ -24,8 +24,8 @@ AGENT_MESSAGE journal event type. Message routing via effect IDs and run relatio
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Journal storage | `packages/sdk/src/storage/` |
-| Task definitions | `packages/sdk/src/tasks/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
 
 ## Recommendation
 Phase 2 implementation. Add AGENT_MESSAGE journal event type. Implement message routing via effect IDs. Add subscribe/poll mechanism.

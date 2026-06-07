@@ -22,8 +22,8 @@ Failure triage view shows: failure point in orchestration timeline, root cause a
 ## Key Files
 | Component | Path |
 |-----------|------|
-| CLI commands | `packages/sdk/src/cli/` |
-| Journal storage | `packages/sdk/src/storage/` |
+| CLI commands | `packages/babysitter-sdk/src/cli/` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
 
 ## Recommendation
 Phase 3 implementation. Enhance harness:doctor with failure-specific triage showing root cause and fix suggestions.

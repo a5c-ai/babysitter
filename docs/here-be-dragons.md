@@ -20,7 +20,7 @@ Files/modules that concentrate the most danger across multiple categories.
 | `packages/genty/core/src/agenticTools/shared/process.ts` | caveat, hazard | Ripgrep path cached at module load |
 | `packages/adapters/webui/src/lib/global-registry.ts` | coupling | globalThis shared mutable state, duplicated in observer-dashboard |
 | `packages/genty/platform/src/harness/internal/createRun/planProcess/phase.ts` | hazard | 3-layer recovery chain invisible without verbose *(code block extraction now rejects non-process blocks)* |
-| ~~`packages/sdk/src/storage/journal.ts`~~ | ~~fallback~~ | ~~Atomicity abandoned~~ → now throws on ENOENT. Queue errors logged. |
+| ~~`packages/babysitter-sdk/src/storage/journal.ts`~~ | ~~fallback~~ | ~~Atomicity abandoned~~ → now throws on ENOENT. Queue errors logged. |
 | ~~`packages/adapters/core/src/kanban.ts`~~ | ~~hazard~~ | ~~2518 lines, 6+ sealed switch statements, stringly-typed status values~~ -> status/workflow mappings now use typed tables with coverage tests. |
 
 ---

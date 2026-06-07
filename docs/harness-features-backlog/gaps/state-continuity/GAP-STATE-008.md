@@ -22,9 +22,9 @@ RunHealthScore computed from journal: pending age score, retry churn score, prog
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Journal storage | `packages/sdk/src/storage/` |
-| Orchestrate iteration | `packages/sdk/src/runtime/orchestrateIteration.ts` |
-| Hook dispatcher | `packages/sdk/src/hooks/dispatcher.ts` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| Orchestrate iteration | `packages/babysitter-sdk/src/runtime/orchestrateIteration.ts` |
+| Hook dispatcher | `packages/babysitter-sdk/src/hooks/dispatcher.ts` |
 
 ## Recommendation
 Phase 1 implementation. Define RunHealthScore type. Compute from journal analysis on every run:status call. Surface in harness:doctor with actionable recommendations.

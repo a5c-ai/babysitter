@@ -47,10 +47,10 @@ None (core cancellation is standalone).
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness invoker | `packages/sdk/src/harness/invoker.ts` |
-| Runtime exceptions | `packages/sdk/src/runtime/` (EffectRequestedError etc.) |
-| Storage events | `packages/sdk/src/storage/` (event types) |
-| Task CLI | `packages/sdk/src/cli/` (task:post) |
+| Harness invoker | `packages/babysitter-sdk/src/harness/invoker.ts` |
+| Runtime exceptions | `packages/babysitter-sdk/src/runtime/` (EffectRequestedError etc.) |
+| Storage events | `packages/babysitter-sdk/src/storage/` (event types) |
+| Task CLI | `packages/babysitter-sdk/src/cli/` (task:post) |
 
 ## Recommendation
 Phase 2. High priority for production use -- runaway effects are a real operational

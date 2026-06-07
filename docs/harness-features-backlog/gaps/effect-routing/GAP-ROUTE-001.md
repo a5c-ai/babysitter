@@ -24,9 +24,9 @@ Routing engine evaluates: task required capabilities, model preference, cost con
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Harness adapters | `packages/sdk/src/harness/` |
-| Task definitions | `packages/sdk/src/tasks/` |
-| Adapter registry | `packages/sdk/src/harness/registry.ts` |
+| Harness adapters | `packages/babysitter-sdk/src/harness/` |
+| Task definitions | `packages/babysitter-sdk/src/tasks/` |
+| Adapter registry | `packages/babysitter-sdk/src/harness/registry.ts` |
 
 ## Recommendation
 Phase 3 implementation. Build routing engine as central coordinator. Integrate capability matching, cost optimization, and health awareness.

@@ -309,6 +309,6 @@ Add node_modules and optionally .a5c/runs/ to .gitignore if they're noisy.
 
 ## Links
 
-- [Process Library](https://github.com/a5c-ai/babysitter/tree/main/packages/sdk/src/processes)
+- [Process Library](https://github.com/a5c-ai/babysitter/tree/main/packages/babysitter-sdk/src/processes)
 - [GitHub](https://github.com/a5c-ai/babysitter)
 - [a5c.ai](https://a5c.ai)

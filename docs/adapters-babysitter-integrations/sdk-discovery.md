@@ -9,7 +9,7 @@ Add an optional discovery layer to the SDK that detects adapters availability an
 ### `discoverExternalAgents(): ExternalAgentDiscovery`
 
 ```typescript
-// packages/sdk/src/harness/externalAgentDiscovery.ts
+// packages/babysitter-sdk/src/harness/externalAgentDiscovery.ts
 
 interface ExternalAgentInfo {
   name: string;              // adapter name (e.g., "claude", "codex", "gemini")
@@ -45,12 +45,12 @@ Discovery is expensive (spawns processes, checks file system). Cache for 60s. In
 ## Files to Create/Modify
 
 ### New Files
-- `packages/sdk/src/harness/externalAgentDiscovery.ts` — discovery API
-- `packages/sdk/src/harness/__tests__/externalAgentDiscovery.test.ts` — unit tests
+- `packages/babysitter-sdk/src/harness/externalAgentDiscovery.ts` — discovery API
+- `packages/babysitter-sdk/src/harness/__tests__/externalAgentDiscovery.test.ts` — unit tests
 
 ### Modified Files
-- `packages/sdk/src/index.ts` — export `discoverExternalAgents`
-- `packages/sdk/src/harness/discovery.ts` — integrate external agent discovery into harness discovery
+- `packages/babysitter-sdk/src/index.ts` — export `discoverExternalAgents`
+- `packages/babysitter-sdk/src/harness/discovery.ts` — integrate external agent discovery into harness discovery
 
 ## Integration with Process Creation
 

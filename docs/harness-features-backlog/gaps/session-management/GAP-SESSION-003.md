@@ -22,8 +22,8 @@ Session templates stored in .a5c/session-templates/. Templates specify: default 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
-| Config module | `packages/sdk/src/config/` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| Config module | `packages/babysitter-sdk/src/config/` |
 
 ## Recommendation
 Phase 3 implementation. Define session template schema. Store templates in project or user config. Apply at session creation.

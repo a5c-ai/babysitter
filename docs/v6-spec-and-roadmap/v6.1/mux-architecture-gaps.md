@@ -149,7 +149,7 @@ The Atlas graph defines **9 canonical muxes** as the bridging abstractions of th
 **Graph description:** Unified abstraction for reading and writing session files at rest.
 
 **Implementation reality:**
-- `packages/sdk/src/session/` handles init, associate, resume, update, state
+- `packages/babysitter-sdk/src/session/` handles init, associate, resume, update, state
 - YAML frontmatter session state management
 - Tied to `.a5c/` state directory
 

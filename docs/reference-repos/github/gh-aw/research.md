@@ -83,7 +83,7 @@ VERY HIGH - Contains official GitHub workflow orchestration patterns that are di
 
 **Integration Viability:** PARTIAL - Excellent tool ecosystem and MCP integration but **completely lacks stop hooks** needed for babysitter's orchestration interruption model.
 
-- **Adapter implementation**: `createGhAwAdapter` in `packages/sdk/src/harness/adapters/`
+- **Adapter implementation**: `createGhAwAdapter` in `packages/babysitter-sdk/src/harness/adapters/`
 - **Plugin structure**: `plugins/babysitter-gh-aw/` for GitHub Agentic Workflows integration
 - **CLI integration**: `gh aw` command patterns, workflow execution, agent session management
 - **Major limitation**: **No interruption mechanisms** - would require custom workflow pause/resume implementation
@@ -91,7 +91,7 @@ VERY HIGH - Contains official GitHub workflow orchestration patterns that are di
 ### TUI/Orchestration Improvement: Agentic Workflow Patterns
 - **Current limitation**: Our harness lacks natural language workflow definition and GitHub Actions integration
 - **Integration approach**: Adapt GitHub's agentic workflow patterns for babysitter process orchestration
-- **Implementation scope**: `packages/sdk/src/runtime/`, workflow definition language, GitHub integration
+- **Implementation scope**: `packages/babysitter-sdk/src/runtime/`, workflow definition language, GitHub integration
 
 ## Implicit Procedural Knowledge
 - **Error Classification and Recovery Strategy**: Systematic approach to categorizing errors as transient vs non-transient and applying appropriate recovery patterns

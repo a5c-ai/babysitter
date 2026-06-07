@@ -33,9 +33,9 @@ requested).
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Config module | `packages/sdk/src/config/` |
-| Compression config | `packages/sdk/src/compression/` |
-| Breakpoint rules | `packages/sdk/src/breakpoints/rules.ts` |
+| Config module | `packages/babysitter-sdk/src/config/` |
+| Compression config | `packages/babysitter-sdk/src/compression/` |
+| Breakpoint rules | `packages/babysitter-sdk/src/breakpoints/rules.ts` |
 
 ## Recommendation
 M0 (Quick Wins). Low priority -- configuration is typically set before orchestration.

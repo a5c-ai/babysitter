@@ -23,8 +23,8 @@ Shared state store accessible by related runs. Parent can seed child runs with a
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Session management | `packages/sdk/src/session/` |
-| State cache | `packages/sdk/src/runtime/replay/stateCache.ts` |
+| Session management | `packages/babysitter-sdk/src/session/` |
+| State cache | `packages/babysitter-sdk/src/runtime/replay/stateCache.ts` |
 
 ## Recommendation
 Phase 2 implementation. Define shared state store scoped to sessions. Allow parent runs to seed child context. Aggregate child results into session state.

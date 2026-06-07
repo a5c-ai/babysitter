@@ -73,7 +73,7 @@ export async function process(inputs, ctx) {
 
   // ==========================================================================
   // PHASE 1: SDK ADAPTER
-  // Pi adapter exists at packages/sdk/src/harness/pi.ts (shared with oh-my-pi).
+  // Pi adapter exists at packages/babysitter-sdk/src/harness/pi.ts (shared with oh-my-pi).
   // This phase verifies the pi-specific discovery entry (name="pi", cli="pi",
   // PI_* env vars) and invoker entry are correct and distinct from oh-my-pi.
   // Key: Programmatic capability, loop-driver, dual env var support.
@@ -165,7 +165,7 @@ export async function process(inputs, ctx) {
   // ==========================================================================
   // PHASE 5: TESTING
   // Adapter unit tests and plugin integration tests run in parallel.
-  // Adapter tests: Vitest in packages/sdk/src/harness/__tests__/
+  // Adapter tests: Vitest in packages/babysitter-sdk/src/harness/__tests__/
   // Plugin tests: syntax validation + packaged-install in <pluginDir>/test/
   // ==========================================================================
 

@@ -22,8 +22,8 @@ Per-iteration progress summary generated automatically. Run-level progress summa
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Journal storage | `packages/sdk/src/storage/` |
-| State cache | `packages/sdk/src/runtime/replay/stateCache.ts` |
+| Journal storage | `packages/babysitter-sdk/src/storage/` |
+| State cache | `packages/babysitter-sdk/src/runtime/replay/stateCache.ts` |
 
 ## Recommendation
 Phase 3 implementation. Generate summaries from journal analysis at each iteration end. Store as run artifacts. Surface in embedded SDK dashboard.

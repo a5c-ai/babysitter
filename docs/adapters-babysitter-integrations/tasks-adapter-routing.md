@@ -246,6 +246,6 @@ The stop-hook handler queries tasks-adapter for task routing before deciding wha
 |------|--------|
 | `packages/tasks-adapter/src/types.ts` | Add ResponderType, extend Responder |
 | `packages/tasks-adapter/src/backend.ts` | Support multiple backend types |
-| `packages/sdk/src/runtime/intrinsics/task.ts` | Route through tasks-adapter |
+| `packages/babysitter-sdk/src/runtime/intrinsics/task.ts` | Route through tasks-adapter |
 | `packages/genty/platform/src/harness/internal/createRun/orchestration/effects.ts` | Use tasks-adapter routing |
-| `packages/sdk/src/harness/hooks/stopHookHandler.ts` | Query tasks-adapter for routing decisions |
+| `packages/babysitter-sdk/src/harness/hooks/stopHookHandler.ts` | Query tasks-adapter for routing decisions |

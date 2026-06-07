@@ -130,7 +130,7 @@ graph TB
 | `packages/adapters/core` | Provider resolver, workspace service |
 | `packages/transport-adapter` | HTTP proxy: protocol translation between harness ↔ provider |
 | `packages/adapters/hooks` | Hook normalization: native events → canonical phases |
-| `packages/sdk` | Babysitter SDK: run lifecycle, session binding, MCP tools |
+| `packages/babysitter-sdk` | Babysitter SDK: run lifecycle, session binding, MCP tools |
 | `packages/triggers-adapter` | GitHub Action: trigger evaluation + agent dispatch |
 | `packages/kradle` | Kubernetes operator + web UI for cloud deployment |
 | `packages/extensions-adapter` | Plugin generator: unified source → per-harness distributions |

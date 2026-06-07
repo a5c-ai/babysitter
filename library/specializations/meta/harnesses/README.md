@@ -176,7 +176,7 @@ All adapters use `AGENT_SESSION_ID` as the cross-harness standard env var for se
 
 ### Babysitter Compatibility
 
-The Babysitter SDK includes adapters for all 8 harnesses (`packages/sdk/src/harness/`). Key compatibility considerations:
+The Babysitter SDK includes adapters for all 8 harnesses (`packages/babysitter-sdk/src/harness/`). Key compatibility considerations:
 
 | Harness | Stop Hook | Session Binding | Programmatic API |
 |---------|-----------|----------------|-----------------|

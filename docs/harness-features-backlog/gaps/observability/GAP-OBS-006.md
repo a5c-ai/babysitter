@@ -22,8 +22,8 @@ Structured event pipeline with configurable sinks (file, HTTP, custom). Unified 
 ## Key Files
 | Component | Path |
 |-----------|------|
-| Logging module | `packages/sdk/src/logging/` |
-| Config module | `packages/sdk/src/config/` |
+| Logging module | `packages/babysitter-sdk/src/logging/` |
+| Config module | `packages/babysitter-sdk/src/config/` |
 
 ## Recommendation
 Phase 4 implementation. Build analytics pipeline on top of existing JSONL logging. Integrate feature registry for flag management.

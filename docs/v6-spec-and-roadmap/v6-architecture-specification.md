@@ -10,7 +10,7 @@
 
 V6 is a controlled architecture evolution of the existing Babysitter stack. It does not assume that the repository should be decomposed into a large family of new packages immediately. Instead, V6 defines a bounded target state:
 
-- keep `packages/sdk` as the primary stable core,
+- keep `packages/babysitter-sdk` as the primary stable core,
 - keep the current CLI and agent runtime packages operational,
 - extract or rename only seams that are already visible in code and operational workflows,
 - require a written validation case before each structural move.
@@ -32,7 +32,7 @@ The following decisions are in scope for V6 unless explicitly changed by a decis
 
 ### 3.1 Keep The Current Center Of Gravity
 
-`packages/sdk` remains the architectural center. New boundaries must be justified relative to the SDK rather than described as a greenfield rewrite.
+`packages/babysitter-sdk` remains the architectural center. New boundaries must be justified relative to the SDK rather than described as a greenfield rewrite.
 
 ### 3.2 Prefer Staged Extraction Over Upfront Decomposition
 
@@ -80,7 +80,7 @@ The following are explicitly not committed for the current V6 stage:
 
 The next stage keeps the current monorepo shape and improves it in place:
 
-- `packages/sdk`: continue as the durable runtime/orchestration core.
+- `packages/babysitter-sdk`: continue as the durable runtime/orchestration core.
 - `packages/babysitter`: remain the primary CLI package.
 - `packages/genty/platform`: remain the agent runtime while internal seams are clarified.
 - `plugins/*`: remain first-class integration boundaries and packaging reality checks.
