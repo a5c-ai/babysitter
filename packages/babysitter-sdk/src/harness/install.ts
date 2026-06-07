@@ -22,14 +22,18 @@ import { execFilePromise, installCliViaNpm, renderCommand, runPackageBinaryViaNp
 
 const HARNESS_TO_AMUX: Readonly<Record<string, string>> = {
   "claude-code": "claude",
+  "claude": "claude",
   "codex": "codex",
+  "copilot": "copilot",
+  "cursor": "cursor",
+  "gemini": "gemini",
   "gemini-cli": "gemini",
   "github-copilot": "copilot",
-  "cursor": "cursor",
   "hermes": "hermes",
-  "opencode": "opencode",
-  "openclaw": "openclaw",
   "oh-my-pi": "omp",
+  "omp": "omp",
+  "openclaw": "openclaw",
+  "opencode": "opencode",
   "pi": "pi",
 };
 
@@ -50,11 +54,14 @@ const HARNESS_CLI_INSTALLERS: Readonly<Record<string, HarnessCliInstaller>> = {
 
 const HARNESS_PLUGIN_INSTALLERS: Readonly<Record<string, HarnessPluginInstaller>> = {
   "codex": { packageName: "@a5c-ai/babysitter-codex", supportsWorkspace: true },
+  "copilot": { packageName: "@a5c-ai/babysitter-github", supportsWorkspace: true },
   "cursor": { packageName: "@a5c-ai/babysitter-cursor", supportsWorkspace: true },
+  "gemini": { packageName: "@a5c-ai/babysitter-gemini", supportsWorkspace: true },
   "gemini-cli": { packageName: "@a5c-ai/babysitter-gemini", supportsWorkspace: true },
   "github-copilot": { packageName: "@a5c-ai/babysitter-github", supportsWorkspace: true },
   "hermes": { packageName: "@a5c-ai/babysitter-hermes", supportsWorkspace: true },
   "oh-my-pi": { packageName: "@a5c-ai/babysitter-omp", supportsWorkspace: true },
+  "omp": { packageName: "@a5c-ai/babysitter-omp", supportsWorkspace: true },
   "openclaw": { packageName: "@a5c-ai/babysitter-openclaw", supportsWorkspace: true },
   "opencode": { packageName: "@a5c-ai/babysitter-opencode", supportsWorkspace: true },
   "pi": { packageName: "@a5c-ai/babysitter-pi", supportsWorkspace: true },

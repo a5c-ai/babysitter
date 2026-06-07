@@ -161,20 +161,24 @@ babysitter harness:install-plugin github-copilot
 
 ### Pi (Experimental)
 
-Native Pi plugin install:
-
 ```bash
-pi install npm:@a5c-ai/babysitter-pi
+babysitter harness:install-plugin pi
 ```
 
 [Plugin README](plugins/babysitter-unified/per-harness/pi/README.md)
 
-### Oh-My-Pi (Experimental)
-
-Native omp plugin install:
+### Hermes (Experimental)
 
 ```bash
-omp plugin install @a5c-ai/babysitter-omp
+babysitter harness:install-plugin hermes
+```
+
+[Plugin README](plugins/babysitter-unified/per-harness/hermes/README.md)
+
+### Oh-My-Pi (Experimental)
+
+```bash
+babysitter harness:install-plugin oh-my-pi
 ```
 
 [Plugin README](plugins/babysitter-unified/per-harness/omp/README.md)
@@ -185,9 +189,15 @@ omp plugin install @a5c-ai/babysitter-omp
 babysitter harness:install-plugin opencode
 ```
 
-Use `--workspace /path/to/repo` to install into a project-local OpenCode plugin directory.
-
 [Plugin README](plugins/babysitter-unified/per-harness/opencode/README.md)
+
+### OpenClaw (Experimental)
+
+```bash
+babysitter harness:install-plugin openclaw
+```
+
+[Plugin README](plugins/babysitter-unified/per-harness/openclaw/README.md)
 
 ### Internal Harness (No AI Coding Agent Required)
 
