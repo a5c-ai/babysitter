@@ -5,7 +5,7 @@
  * can be evaluated by the unified policy engine.
  */
 
-import type { ActionCategory, ApprovalPosture } from "@a5c-ai/babysitter-sdk";
+import type { ActionCategory, ApprovalPosture } from "../types";
 import { DEFAULT_POSTURES } from "../breakpoints/postures";
 import type { PolicyRule } from './types';
 

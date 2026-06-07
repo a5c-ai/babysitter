@@ -5,7 +5,8 @@
  * extract cost events from a journal, and compute aggregated cost statistics.
  */
 
-import { appendEvent, type AppendEventResult, type JournalEvent } from "@a5c-ai/babysitter-sdk";
+import { appendEvent } from "@a5c-ai/babysitter-sdk";
+import type { AppendEventResult, JournalEvent } from "../types";
 import type {
   CostEventData,
   RunCostStats,

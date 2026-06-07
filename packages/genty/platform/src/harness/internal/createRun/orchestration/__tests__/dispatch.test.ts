@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { EffectAction } from "@a5c-ai/babysitter-sdk";
+import type { EffectAction } from "../../../../../types";
 import { dispatchEffectActions } from "../dispatch";
 
 function makeAction(

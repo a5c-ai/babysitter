@@ -4,8 +4,8 @@ import {
   loadCompressionConfig,
   densityFilterText,
   estimateTokens,
-  type CompressionConfig,
 } from "@a5c-ai/babysitter-sdk";
+import type { CompressionConfig } from "../../../types";
 import type { HarnessDiscoveryResult } from "../../types";
 import type { HarnessPromptContext } from "./prompts";
 import type { OutputMode, ProgressPayload } from "./utils";

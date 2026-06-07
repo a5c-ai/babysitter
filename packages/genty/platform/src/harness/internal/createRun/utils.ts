@@ -4,10 +4,10 @@
  */
 
 import { Type } from "@sinclair/typebox";
-import {
-  type EffectAction,
-  type IterationResult,
-} from "@a5c-ai/babysitter-sdk";
+import type {
+  EffectAction,
+  IterationResult,
+} from "../../../types";
 import type {
   HarnessDiscoveryResult,
   SessionBindResult,
@@ -389,7 +389,7 @@ export {
   resolveAgentCoreBackendForHarness,
 } from "./pi";
 
-export type { CompressionConfig } from "@a5c-ai/babysitter-sdk";
+export type { CompressionConfig } from "../../../types";
 export type {
   HarnessDiscoveryResult,
   AgentCoreSessionEvent,
@@ -402,7 +402,7 @@ export type {
   AskUserQuestionRequest,
   AskUserQuestionResponse,
 } from "../../../interaction";
-export type { EffectAction, IterationResult } from "@a5c-ai/babysitter-sdk";
+export type { EffectAction, IterationResult } from "../../../types";
 export type { HarnessPromptContext } from "./prompts";
 /** @deprecated Use HarnessPromptContext instead */
 export type { HarnessPromptContext as SessionCreatePromptContext } from "./prompts";
@@ -414,5 +414,5 @@ export {
 export { createAgentCoreSession } from "@a5c-ai/genty-core";
 export type { AgentCoreSessionHandle } from "@a5c-ai/genty-core";
 export { discoverHarnesses } from "@a5c-ai/babysitter-sdk";
-export { BabysitterRuntimeError, ErrorCategory } from "@a5c-ai/babysitter-sdk";
+export { BabysitterRuntimeError, ErrorCategory } from "../../../utils/errors";
 export { Type } from "@sinclair/typebox";

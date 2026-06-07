@@ -2,7 +2,7 @@ import type { AgentCoreSessionEvent } from "../types";
 import {
   BabysitterRuntimeError,
   ErrorCategory,
-} from "@a5c-ai/babysitter-sdk";
+} from "../../utils/errors";
 
 interface PiModelRegistry {
   find(provider: string, modelId: string): PiModelEntry | undefined;

@@ -7,7 +7,7 @@
  * @module interaction/interactionRouter
  */
 
-import type { InteractionKind } from '@a5c-ai/babysitter-sdk';
+import type { InteractionKind } from '../types';
 
 /**
  * UX hints for rendering a specific interaction kind.

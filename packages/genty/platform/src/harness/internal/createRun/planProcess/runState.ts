@@ -3,6 +3,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { WorkspaceService } from "@a5c-ai/comm-adapter";
 import { getAdapterByName } from "../../../";
 import { createRun, getSessionMarkerPath, readSessionMarker } from "@a5c-ai/babysitter-sdk";
+// NOTE: createRun, getSessionMarkerPath, readSessionMarker are
+// run-lifecycle / session SDK functions.
 import { updateSessionContext } from "../../../../session/context";
 import {
   BabysitterRuntimeError,

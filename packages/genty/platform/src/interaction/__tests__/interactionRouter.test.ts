@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { resolveInteractionUxHints } from '../interactionRouter';
-import type { InteractionKind } from '@a5c-ai/babysitter-sdk';
+import type { InteractionKind } from '../../types';
 
 describe('GAP-SEC-003: Interaction UX Routing', () => {
   describe('resolveInteractionUxHints', () => {

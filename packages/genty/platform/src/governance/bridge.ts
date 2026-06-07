@@ -3,7 +3,7 @@
  * Converts BreakpointRule[] into PolicyRule[] for unified evaluation.
  */
 
-import type { BreakpointRule } from "@a5c-ai/babysitter-sdk";
+import type { BreakpointRule } from "../types";
 import type { PolicyRule } from './types';
 
 /**

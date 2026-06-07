@@ -6,6 +6,8 @@ import {
   createPromptContextFromCatalog,
   composeProcessCreatePrompt,
 } from "@a5c-ai/babysitter-sdk";
+// NOTE: These SDK functions remain as direct imports for now —
+// they are process-creation and effect-orchestration helpers.
 import {
   BabysitterRuntimeError,
   ErrorCategory,

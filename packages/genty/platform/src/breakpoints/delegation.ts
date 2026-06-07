@@ -10,8 +10,8 @@
 import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { writeFileAtomic } from "@a5c-ai/babysitter-sdk/dist/storage/atomic";
-import { parsePattern, matchPattern } from "@a5c-ai/babysitter-sdk";
+import { writeFileAtomic } from "../utils/atomic";
+import { parsePattern, matchPattern } from "../utils/patterns";
 import type {
   DelegationRule,
   DelegationRulesFile,

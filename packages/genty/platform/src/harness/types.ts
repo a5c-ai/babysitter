@@ -8,7 +8,7 @@
  */
 
 import type { AskUserQuestionUiContext } from "../interaction";
-import type { PromptContext } from "@a5c-ai/babysitter-sdk";
+import type { PromptContext } from "../types";
 
 // ---------------------------------------------------------------------------
 // Harness capability enum

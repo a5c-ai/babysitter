@@ -8,7 +8,8 @@
 
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
-import { loadJournal, readRunMetadata, type JsonRecord } from "@a5c-ai/babysitter-sdk";
+import { loadJournal, readRunMetadata } from "@a5c-ai/babysitter-sdk";
+import type { JsonRecord } from "../types";
 import { computeRunHealthFromEvents } from "./health";
 import type { RunHealthSnapshot } from "./types";
 

@@ -30,6 +30,9 @@ export {
   setAdapter,
   resetAdapter,
 } from "@a5c-ai/babysitter-sdk";
+// NOTE: Harness registry functions (discoverHarnesses, detectCallerHarness,
+// etc.) remain as SDK imports. These are harness-infrastructure concerns
+// shared between genty and the SDK runtime.
 export {
   createAgentCoreToolDefinitions,
   disposeAgentCoreToolDefinitions,

@@ -1,6 +1,8 @@
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { loadJournal, readRunMetadata, readStateCache } from "@a5c-ai/babysitter-sdk";
+// NOTE: loadJournal, readRunMetadata, readStateCache are run-lifecycle
+// SDK functions for reading run state from disk.
 
 export interface RunSummary {
   runId: string;

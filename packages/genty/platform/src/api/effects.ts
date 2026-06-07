@@ -15,7 +15,7 @@ import {
 } from "@a5c-ai/babysitter-sdk";
 import { ok, fail, pathExists, buildBaseEffectMap } from "./utils";
 import type { ApiResult } from "./runs";
-import type { JournalEvent, JsonRecord } from "@a5c-ai/babysitter-sdk";
+import type { JournalEvent, JsonRecord } from "../types";
 import type { BaseEffectInfo } from "./utils";
 import type {
   EffectStatusFilter, EffectStatusOutput, ListEffectsInput, ListEffectsOutput,

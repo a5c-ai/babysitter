@@ -5,7 +5,7 @@
 
 import { promises as fs } from "fs";
 import type { ApiResult } from "./runs";
-import type { JournalEvent } from "@a5c-ai/babysitter-sdk";
+import type { JournalEvent } from "../storage/types";
 
 export function ok<T>(data: T): ApiResult<T> {
   return { ok: true, data };

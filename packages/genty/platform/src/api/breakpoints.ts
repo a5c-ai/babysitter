@@ -28,7 +28,7 @@ import type {
   BreakpointConfig,
   BreakpointRule,
   JsonRecord,
-} from "@a5c-ai/babysitter-sdk";
+} from "../types";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 

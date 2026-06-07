@@ -17,11 +17,8 @@ import {
   resolveAgentCoreBackendForHarness,
   resolveTaskHarness,
 } from "../utils";
-import {
-  BabysitterRuntimeError,
-  ErrorCategory,
-  detectCallerHarness,
-} from "@a5c-ai/babysitter-sdk";
+import { BabysitterRuntimeError, ErrorCategory } from "../../../../utils/errors";
+import { detectCallerHarness } from "@a5c-ai/babysitter-sdk";
 import type { AgentCoreSessionHandle } from "@a5c-ai/genty-core";
 
 describe("harnessUtils", () => {

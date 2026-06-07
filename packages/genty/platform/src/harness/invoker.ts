@@ -8,11 +8,8 @@
  */
 
 import { spawn } from "node:child_process";
-import {
-  BabysitterRuntimeError,
-  checkCliAvailable,
-  ErrorCategory,
-} from "@a5c-ai/babysitter-sdk";
+import { checkCliAvailable } from "@a5c-ai/babysitter-sdk";
+import { BabysitterRuntimeError, ErrorCategory } from "../utils/errors";
 import type { HarnessInvokeOptions, HarnessInvokeResult } from "./types";
 import {
   buildLaunchSpec,

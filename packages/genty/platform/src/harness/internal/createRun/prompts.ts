@@ -1,6 +1,6 @@
 import type { HarnessDiscoveryResult } from "../../types";
 import type { SessionHistory } from "../../../session/types";
-import type { ExternalAgentDiscovery, ExternalAgentInfo } from "@a5c-ai/babysitter-sdk";
+import type { ExternalAgentDiscovery, ExternalAgentInfo } from "../../../types";
 import {
   createPromptContextFromCatalog,
   composeProcessCreatePrompt,

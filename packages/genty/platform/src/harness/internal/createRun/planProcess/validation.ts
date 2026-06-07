@@ -2,6 +2,8 @@ import * as path from "node:path";
 import { promises as fs } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { discoverExternalAgents, resetGlobalTaskRegistry } from "@a5c-ai/babysitter-sdk";
+// NOTE: discoverExternalAgents and resetGlobalTaskRegistry are SDK functions
+// used for process validation.
 import {
   BabysitterRuntimeError,
   ErrorCategory,

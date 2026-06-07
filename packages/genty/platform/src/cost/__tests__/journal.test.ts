@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { JournalEvent } from "@a5c-ai/babysitter-sdk";
+import type { JournalEvent } from "../../types";
 import {
   COST_TRACKED_EVENT_TYPE,
   extractCostEvents,

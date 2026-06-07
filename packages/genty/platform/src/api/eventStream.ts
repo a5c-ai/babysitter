@@ -7,6 +7,9 @@
 
 import * as crypto from "node:crypto";
 import { resolveExistingRunDir, resolveRunsDir } from "@a5c-ai/babysitter-sdk";
+// NOTE: resolveExistingRunDir and resolveRunsDir are run-lifecycle SDK
+// functions that resolve filesystem paths.  They stay as SDK imports
+// until the orchestration provider exposes path-resolution methods.
 import { createJournalWatcher, type JournalWatcher } from "../storage/journalWatcher";
 import { ok, fail, pathExists } from "./utils";
 import type { ApiResult } from "./runs";

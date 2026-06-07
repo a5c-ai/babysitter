@@ -3,7 +3,7 @@
  * Extracted from effects.ts for max-lines compliance.
  */
 
-import type { JsonRecord } from "@a5c-ai/babysitter-sdk";
+import type { JsonRecord } from "../types";
 
 export type EffectStatusFilter = "requested" | "resolved" | "cancelled";
 export type EffectStatusOutput = "requested" | "resolved_ok" | "resolved_error" | "cancelled";

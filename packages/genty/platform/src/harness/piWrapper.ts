@@ -14,7 +14,7 @@ import type { AgentCoreSessionOptions, AgentCorePromptResult, AgentCoreSessionEv
 import {
   BabysitterRuntimeError,
   ErrorCategory,
-} from "@a5c-ai/babysitter-sdk";
+} from "../utils/errors";
 import { createSecureBashBackend } from "./piSecureSandbox";
 import {
   buildCompactionSettings,

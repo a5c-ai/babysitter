@@ -9,7 +9,7 @@
  * @module breakpoints/postures
  */
 
-import type { ActionCategory, ApprovalPosture } from '@a5c-ai/babysitter-sdk';
+import type { ActionCategory, ApprovalPosture } from '../types';
 
 /**
  * Default postures per action category.

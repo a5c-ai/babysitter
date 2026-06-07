@@ -13,9 +13,9 @@ import * as path from "node:path";
 import {
   createClaudeCodeAdapter,
   normalizeSessionStateDir,
-  type PromptContext,
   createInternalContext,
 } from "@a5c-ai/babysitter-sdk";
+import type { PromptContext } from "../types";
 import type {
   HarnessAdapter,
   HarnessCapability,

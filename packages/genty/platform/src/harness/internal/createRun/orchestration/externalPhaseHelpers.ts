@@ -8,6 +8,8 @@ import {
   createPromptContextFromCatalog,
   composeProcessCreatePrompt,
 } from "@a5c-ai/babysitter-sdk";
+// NOTE: createPromptContextFromCatalog, composeProcessCreatePrompt are
+// process-creation SDK functions for prompt authoring.
 import {
   buildPiWorkerSessionOptions,
   createAgentCoreSession,

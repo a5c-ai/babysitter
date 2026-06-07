@@ -7,8 +7,8 @@ import { promises as fs, existsSync } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { HarnessCapability, type HarnessDiscoveryResult, type HarnessInvokeResult } from "../../../types";
+import type { IterationResult } from "../../../../types";
 import {
-  type IterationResult,
   RunFailedError,
   __resetCacheForTests,
   __setAncestorResolverForTests,

@@ -3,7 +3,7 @@
  * Moved from @a5c-ai/babysitter-sdk.
  * Per-effect cost aggregation (GAP-SUBOBS-003).
  */
-import type { EffectIndex } from "@a5c-ai/babysitter-sdk";
+import type { EffectIndex } from "../types";
 
 export interface EffectCostSummary {
   effectId: string;

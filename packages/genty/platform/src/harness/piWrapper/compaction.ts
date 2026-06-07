@@ -1,4 +1,6 @@
 import { loadCompressionConfig } from "@a5c-ai/babysitter-sdk";
+// NOTE: loadCompressionConfig reads .a5c/compression.json from disk,
+// which is a genuine SDK runtime concern.
 
 export function loadCompressionConfigSafe(cwd: string) {
   try {

@@ -9,6 +9,6 @@ export type {
   PolicyDecision,
   PolicyDecisionLog,
   PolicyEngine,
-} from "@a5c-ai/babysitter-sdk";
+} from "../types";
 
 export { isStatefulRule } from "@a5c-ai/babysitter-sdk";

@@ -1,7 +1,7 @@
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { randomUUID } from "node:crypto";
-import type { EffectAction } from "@a5c-ai/babysitter-sdk";
+import type { EffectAction } from "../../../../types";
 import {
   BabysitterRuntimeError,
   DIM,

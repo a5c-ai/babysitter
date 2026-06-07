@@ -10,7 +10,7 @@
 
 import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
-import type { EffectAction } from "@a5c-ai/babysitter-sdk";
+import type { EffectAction } from "../../../types";
 import type {
   AgentCorePromptResult,
   AgentCoreSessionOptions,

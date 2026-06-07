@@ -1,6 +1,6 @@
-import type { JsonRecord } from "@a5c-ai/babysitter-sdk";
+import type { JsonRecord } from "../types";
 
-export type { JournalEvent, JsonRecord } from "@a5c-ai/babysitter-sdk";
+export type { JournalEvent, JsonRecord } from "../types";
 
 export interface SnapshotStateOptions {
   runDir: string;

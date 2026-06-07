@@ -31,6 +31,8 @@ import {
   discoverHarnesses,
 } from "./utils";
 import { DEFAULTS, getAdapterByName, resolveRunsDir } from "@a5c-ai/babysitter-sdk";
+// NOTE: DEFAULTS (maxIterations etc.), getAdapterByName, resolveRunsDir
+// remain as SDK imports — they are run-lifecycle infrastructure.
 import { getProcessOutputDir, runPlanProcessPhase } from "./planProcess";
 import { runOrchestrationPhase } from "./orchestration";
 import { normalizeBuiltInHarnessName } from "../../builtInHarness";

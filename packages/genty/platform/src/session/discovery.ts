@@ -1,4 +1,6 @@
 import { resolveSessionIdWithMarker } from "@a5c-ai/babysitter-sdk";
+// NOTE: resolveSessionIdWithMarker remains as SDK import for now —
+// session marker file I/O is a genuine SDK runtime concern.
 
 /**
  * Mapping of harness identifiers to their native session environment variables.

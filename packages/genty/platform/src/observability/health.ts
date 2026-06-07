@@ -5,7 +5,7 @@
  * Pure function — no file I/O, takes events as input.
  */
 
-import type { JournalEvent } from "@a5c-ai/babysitter-sdk";
+import type { JournalEvent } from "../types";
 import type {
   RunHealthSnapshot,
   RunHealthStatus,

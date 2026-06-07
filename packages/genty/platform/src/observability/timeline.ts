@@ -5,7 +5,8 @@
  * execution, verification, and completion phases with duration metrics.
  */
 
-import { loadJournal, type JournalEvent } from "@a5c-ai/babysitter-sdk";
+import { loadJournal } from "@a5c-ai/babysitter-sdk";
+import type { JournalEvent } from "../types";
 import type {
   PhaseTimeline,
   PhaseEntry,

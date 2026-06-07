@@ -1,4 +1,5 @@
-import { createScopedRuntimeConfigState, type RuntimeConfigValueType } from "@a5c-ai/babysitter-sdk";
+import { createScopedRuntimeConfigState } from "@a5c-ai/babysitter-sdk";
+import type { RuntimeConfigValueType } from "../../../types";
 
 const EXTENDED_CONFIG_KEYS: ReadonlySet<string> = new Set([
   "model",
