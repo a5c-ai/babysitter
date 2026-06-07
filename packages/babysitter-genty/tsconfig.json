@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "moduleResolution": "node",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@a5c-ai/genty-platform": ["../genty/platform/src/index.ts"],
+      "@a5c-ai/genty-platform/orchestration": ["../genty/platform/src/orchestration/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "src/**/__tests__", "src/**/*.test.ts"],
+  "references": [
+    { "path": "../genty/platform" },
+    { "path": "../babysitter-sdk" }
+  ]
+}

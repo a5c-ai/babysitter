@@ -93,6 +93,11 @@
       "default": "./dist/tasks/index.js"
     },
     "./package.json": "./package.json",
+    "./orchestration": {
+      "types": "./dist/orchestration/index.d.ts",
+      "require": "./dist/orchestration/index.js",
+      "default": "./dist/orchestration/index.js"
+    },
     "./mcp/transport": {
       "types": "./dist/mcp/transport/index.d.ts",
       "require": "./dist/mcp/transport/index.js",
