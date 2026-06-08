@@ -38,9 +38,15 @@ import {
 
 const ENV_KEYS = [
   "AGENT_SESSION_ID",
-  "AGENT_SESSION_ID",
   "CLAUDE_ENV_FILE",
   "CLAUDE_PLUGIN_ROOT",
+  // claude-code activationEnvVars also include these — they are set whenever the
+  // test suite itself runs inside a live Claude Code session, so they must be
+  // cleared for ClaudeCodeAdapter.isActive()/detectAdapter tests to be hermetic.
+  "CLAUDECODE",
+  "CLAUDE_CODE",
+  "CLAUDE_CODE_SESSION_ID",
+  "CLAUDE_PROJECT_DIR",
   "CODEX_THREAD_ID",
   "CODEX_SESSION_ID",
   "CODEX_PLUGIN_ROOT",
