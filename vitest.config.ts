@@ -4,6 +4,11 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default {
+  oxc: {
+    tsconfig: {
+      compilerOptions: {},
+    },
+  },
   resolve: {
     alias: {
       '@a5c-ai/agent-catalog': path.resolve(__dirname, 'packages/atlas/src/catalog/index.ts'),
