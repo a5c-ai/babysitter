@@ -12,7 +12,7 @@
 //
 // Exit code is non-zero if any assertion in the requested suite(s) fails.
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -78,6 +78,32 @@ const BABYSITTER_TARGETS = [
 ];
 
 const ATLAS_MCP_DEFAULT_URL = 'https://atlas-staging.a5c.ai/api/mcp';
+
+// The generated-output directory produced by `npm run generate:atlas-plugins`
+// (compiler emits one subdir per target, named by the logical target key —
+// see scripts/generate-plugins.mjs / compiler.compileAll: `${outputBaseDir}/${target}`).
+const GENERATED_DIR = join(ROOT, 'artifacts', 'generated-atlas-plugins');
+
+// The env-override token the compiler emits verbatim into command/args for the
+// JSON + TOML MCP shapes (SPEC §4.2/§4.3).
+const ATLAS_MCP_ENV_TOKEN = `\${ATLAS_MCP_URL:-${ATLAS_MCP_DEFAULT_URL}}`;
+
+// Per-target native MCP config — exact output path + shape per spec.json
+// mcp.perTargetPaths (SPEC §4.3). Keyed by the logical target key (== output
+// subdir name). `shape` selects how the MCP entry is located + validated.
+const MCP_PER_TARGET_PATHS = {
+  'claude-code': { path: '.mcp.json', shape: 'json-mcpServers', key: 'mcpServers.atlas' },
+  cursor: { path: '.cursor/mcp.json', shape: 'json-mcpServers', key: 'mcpServers.atlas' },
+  'github-copilot': { path: '.mcp.json', shape: 'json-mcpServers', key: 'mcpServers.atlas' },
+  'antigravity-cli': { path: 'mcp.json', shape: 'json-mcpServers', key: 'mcpServers.atlas' },
+  pi: { path: '.mcp.json', shape: 'json-mcpServers', key: 'mcpServers.atlas' },
+  'oh-my-pi': { path: '.mcp.json', shape: 'json-mcpServers', key: 'mcpServers.atlas' },
+  openclaw: { path: '.mcp.json', shape: 'json-mcpServers', key: 'mcpServers.atlas' },
+  genty: { path: '.mcp.json', shape: 'json-mcpServers', key: 'mcpServers.atlas' },
+  opencode: { path: 'opencode.json', shape: 'opencode-mcp', key: 'mcp.atlas' },
+  codex: { path: 'mcp-servers.toml', shape: 'codex-toml', key: '[mcp_servers.atlas]' },
+  gemini: { path: 'gemini-extension.json', shape: 'gemini-mcpServers', key: 'mcpServers.atlas' },
+};
 
 function readJson(path) {
   const raw = readFileSync(path, 'utf8');
@@ -280,13 +306,193 @@ function runSourceSuite(r) {
 // Registers zero assertions today so `--suite generated` exits 0.
 // ---------------------------------------------------------------------------
 
-function runGeneratedSuite(_r) {
-  // Intentionally empty stub. Implement testContract.generated[] here:
-  //   - artifacts/generated-atlas-plugins exists with one dir per target (all 11 present)
-  //   - each target dir contains native MCP config at §4.3 path with expected shape
-  //   - each target dir has a plugin.json/package.json that parses
-  //   - no broken refs: every command/skill referenced by manifest resolves
-  //   - generated command bundles reference babysitter:babysit and an existing atlas process
+function runGeneratedSuite(r) {
+  // 1. artifacts/generated-atlas-plugins exists with one dir per target (all 11 present).
+  r.assert('generated: artifacts/generated-atlas-plugins exists with one dir per target (all 11 present)', () => {
+    if (!existsSync(GENERATED_DIR)) throw new Error(`missing output dir ${GENERATED_DIR} (run: npm run generate:atlas-plugins)`);
+    if (!statSync(GENERATED_DIR).isDirectory()) throw new Error(`${GENERATED_DIR} is not a directory`);
+    for (const target of BABYSITTER_TARGETS) {
+      const dir = join(GENERATED_DIR, target);
+      if (!existsSync(dir) || !statSync(dir).isDirectory()) {
+        throw new Error(`missing generated target dir: ${target}`);
+      }
+    }
+    return true;
+  });
+
+  // 2. Each target dir contains its native MCP config at the §4.3 path with the
+  //    expected shape (JSON mcpServers.atlas / opencode mcp.atlas / codex TOML
+  //    [mcp_servers.atlas] / gemini mcpServers.atlas), each containing either the
+  //    ${ATLAS_MCP_URL:-...} token or the literal default URL.
+  r.assert('generated: each target dir has native MCP config at §4.3 path with expected shape and env-override token or default URL', () => {
+    for (const target of BABYSITTER_TARGETS) {
+      const spec = MCP_PER_TARGET_PATHS[target];
+      if (!spec) throw new Error(`no per-target MCP path spec for target "${target}"`);
+      const mcpPath = join(GENERATED_DIR, target, spec.path.split('/').join('/'));
+      if (!existsSync(mcpPath)) {
+        throw new Error(`${target}: missing native MCP config at ${spec.path}`);
+      }
+      const raw = readFileSync(mcpPath, 'utf8');
+
+      if (spec.shape === 'json-mcpServers') {
+        // claude-code/cursor/github-copilot/antigravity/pi/oh-my-pi/openclaw/genty:
+        // JSON with mcpServers.atlas, command "npx", args containing the env token.
+        const json = JSON.parse(raw);
+        const atlas = json.mcpServers && json.mcpServers.atlas;
+        if (!atlas) throw new Error(`${target}: ${spec.path} has no mcpServers.atlas`);
+        if (atlas.command !== 'npx') throw new Error(`${target}: mcpServers.atlas.command is ${JSON.stringify(atlas.command)}, expected "npx"`);
+        if (!Array.isArray(atlas.args)) throw new Error(`${target}: mcpServers.atlas.args is not an array`);
+        if (!atlas.args.includes('mcp-remote')) throw new Error(`${target}: mcpServers.atlas.args missing "mcp-remote"`);
+        if (!atlas.args.includes(ATLAS_MCP_ENV_TOKEN)) {
+          throw new Error(`${target}: mcpServers.atlas.args missing env-override token ${ATLAS_MCP_ENV_TOKEN}`);
+        }
+      } else if (spec.shape === 'opencode-mcp') {
+        // opencode: opencode.json with mcp.atlas, command array containing
+        // mcp-remote and the token, enabled:true.
+        const json = JSON.parse(raw);
+        const atlas = json.mcp && json.mcp.atlas;
+        if (!atlas) throw new Error(`${target}: ${spec.path} has no mcp.atlas`);
+        if (!Array.isArray(atlas.command)) throw new Error(`${target}: mcp.atlas.command is not an array`);
+        if (!atlas.command.includes('mcp-remote')) throw new Error(`${target}: mcp.atlas.command missing "mcp-remote"`);
+        if (!atlas.command.includes(ATLAS_MCP_ENV_TOKEN)) {
+          throw new Error(`${target}: mcp.atlas.command missing env-override token ${ATLAS_MCP_ENV_TOKEN}`);
+        }
+        if (atlas.enabled !== true) throw new Error(`${target}: mcp.atlas.enabled is ${JSON.stringify(atlas.enabled)}, expected true`);
+      } else if (spec.shape === 'codex-toml') {
+        // codex: TOML fragment containing [mcp_servers.atlas] and the env token.
+        if (!raw.includes('[mcp_servers.atlas]')) throw new Error(`${target}: ${spec.path} missing [mcp_servers.atlas] table`);
+        if (!raw.includes(ATLAS_MCP_ENV_TOKEN)) {
+          throw new Error(`${target}: ${spec.path} missing env-override token ${ATLAS_MCP_ENV_TOKEN}`);
+        }
+      } else if (spec.shape === 'gemini-mcpServers') {
+        // gemini: gemini-extension.json with mcpServers.atlas containing the
+        // default URL (httpUrl) and/or the args token.
+        const json = JSON.parse(raw);
+        const atlas = json.mcpServers && json.mcpServers.atlas;
+        if (!atlas) throw new Error(`${target}: ${spec.path} has no mcpServers.atlas`);
+        const hasDefaultUrl = atlas.httpUrl === ATLAS_MCP_DEFAULT_URL
+          || (typeof atlas.url === 'string' && atlas.url.includes(ATLAS_MCP_DEFAULT_URL))
+          || JSON.stringify(atlas).includes(ATLAS_MCP_DEFAULT_URL);
+        const hasToken = JSON.stringify(atlas).includes(ATLAS_MCP_ENV_TOKEN);
+        if (!hasDefaultUrl && !hasToken) {
+          throw new Error(`${target}: gemini mcpServers.atlas has neither the default URL nor the env-override token`);
+        }
+      } else {
+        throw new Error(`${target}: unknown MCP shape "${spec.shape}"`);
+      }
+    }
+    return true;
+  });
+
+  // 3. Each target dir has a plugin.json/package.json that parses.
+  r.assert('generated: each target dir has a plugin.json/package.json that parses', () => {
+    for (const target of BABYSITTER_TARGETS) {
+      const dir = join(GENERATED_DIR, target);
+      const pluginJsonPath = join(dir, 'plugin.json');
+      const packageJsonPath = join(dir, 'package.json');
+      const hasPlugin = existsSync(pluginJsonPath);
+      const hasPackage = existsSync(packageJsonPath);
+      if (!hasPlugin && !hasPackage) {
+        throw new Error(`${target}: neither plugin.json nor package.json present`);
+      }
+      if (hasPlugin) {
+        try {
+          readJson(pluginJsonPath);
+        } catch (err) {
+          throw new Error(`${target}: plugin.json does not parse — ${err.message}`);
+        }
+      }
+      if (hasPackage) {
+        try {
+          readJson(packageJsonPath);
+        } catch (err) {
+          throw new Error(`${target}: package.json does not parse — ${err.message}`);
+        }
+      }
+    }
+    return true;
+  });
+
+  // 4. No broken refs: every command/skill referenced by the target manifest
+  //    resolves to an emitted file in the bundle.
+  r.assert('generated: no broken refs — every command/skill referenced by the target manifest resolves to an emitted file', () => {
+    for (const target of BABYSITTER_TARGETS) {
+      const dir = join(GENERATED_DIR, target);
+      const pluginJsonPath = join(dir, 'plugin.json');
+      if (!existsSync(pluginJsonPath)) continue; // package.json-only bundles have no plugin.json manifest to dereference
+      const pj = readJson(pluginJsonPath);
+
+      // skills: [{ name, file }] — each referenced file must exist in the bundle.
+      if (Array.isArray(pj.skills)) {
+        for (const skill of pj.skills) {
+          if (!skill || !skill.file) continue;
+          const skillPath = join(dir, skill.file);
+          if (!existsSync(skillPath)) {
+            throw new Error(`${target}: skill "${skill.name}" references missing file ${skill.file}`);
+          }
+        }
+      }
+
+      // commands: a directory name (e.g. "commands") — must exist and contain the
+      // emitted *.md command bundles.
+      if (typeof pj.commands === 'string' && pj.commands.trim()) {
+        const commandsDir = join(dir, pj.commands);
+        if (!existsSync(commandsDir) || !statSync(commandsDir).isDirectory()) {
+          throw new Error(`${target}: commands dir "${pj.commands}" missing from bundle`);
+        }
+        const cmdFiles = readdirSync(commandsDir).filter((f) => f.endsWith('.md'));
+        if (cmdFiles.length === 0) {
+          throw new Error(`${target}: commands dir "${pj.commands}" emitted no *.md command bundles`);
+        }
+      }
+    }
+    return true;
+  });
+
+  // 5. Generated command bundles still reference babysitter:babysit and an atlas
+  //    process name that exists under processes/.
+  r.assert('generated: command bundles reference babysitter:babysit and an atlas process that exists under processes/', () => {
+    // Source-of-truth process module filenames live under the unified source.
+    const processesDir = join(PLUGIN_DIR, 'processes');
+    const sourceProcessNames = existsSync(processesDir)
+      ? new Set(readdirSync(processesDir).filter((f) => f.endsWith('.mjs')).map((f) => f.replace(/\.mjs$/, '')))
+      : new Set();
+
+    let inspectedAnyBundle = false;
+    for (const target of BABYSITTER_TARGETS) {
+      const dir = join(GENERATED_DIR, target);
+      const pluginJsonPath = join(dir, 'plugin.json');
+      let commandsRel = 'commands';
+      if (existsSync(pluginJsonPath)) {
+        const pj = readJson(pluginJsonPath);
+        if (typeof pj.commands === 'string' && pj.commands.trim()) commandsRel = pj.commands;
+      }
+      const commandsDir = join(dir, commandsRel);
+      if (!existsSync(commandsDir) || !statSync(commandsDir).isDirectory()) continue;
+      const cmdFiles = readdirSync(commandsDir).filter((f) => f.endsWith('.md'));
+      for (const cmdFile of cmdFiles) {
+        inspectedAnyBundle = true;
+        const content = readFileSync(join(commandsDir, cmdFile), 'utf8');
+        if (!content.includes('babysitter:babysit')) {
+          throw new Error(`${target}/${commandsRel}/${cmdFile}: does not reference babysitter:babysit`);
+        }
+        const procMatch = content.match(/atlas-[a-z][a-z-]*/g);
+        if (!procMatch || procMatch.length === 0) {
+          throw new Error(`${target}/${commandsRel}/${cmdFile}: names no atlas process`);
+        }
+        if (sourceProcessNames.size > 0) {
+          const referencesExisting = procMatch.some((name) => sourceProcessNames.has(name));
+          if (!referencesExisting) {
+            throw new Error(`${target}/${commandsRel}/${cmdFile}: atlas process name(s) ${JSON.stringify(procMatch)} do not map to any module under processes/`);
+          }
+        }
+      }
+    }
+    if (!inspectedAnyBundle) {
+      throw new Error('no generated command bundles found to inspect across any target');
+    }
+    return true;
+  });
 }
 
 // ---------------------------------------------------------------------------

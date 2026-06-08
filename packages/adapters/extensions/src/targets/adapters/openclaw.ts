@@ -154,8 +154,8 @@ export function generateOpenClawPackageManifest(manifest: ResolvedManifest, targ
       'versions.json',
       'plugin.json',
       `${targetName}.plugin.json`,
-      'hooks/',
-      'hooks.json',
+      // hooks/ + hooks.json only when the plugin ships hooks (hook-free for atlas).
+      ...(manifest.hooks && Object.keys(manifest.hooks).length > 0 ? ['hooks/', 'hooks.json'] : []),
       'extensions/',
       'skills/',
       'commands/',
@@ -182,7 +182,8 @@ export function generateOpenClawManifest(manifest: A5cPluginManifest): string {
     description: manifest.description,
     author: manifest.author,
     license: manifest.license,
-    hooks: 'hooks.json',
+    // Only declare hooks.json when the plugin ships hooks (hook-free for atlas).
+    ...(manifest.hooks && Object.keys(manifest.hooks).length > 0 ? { hooks: 'hooks.json' } : {}),
     commands: 'commands/',
     skills: 'skills/',
   };

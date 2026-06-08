@@ -101,6 +101,13 @@ const FALLBACK_TARGET_PROFILES: Record<string, TargetProfile> = {
     adapterFamily: 'programmatic',
     distribution: 'npm-cli',
     pluginRootEnvVarForExtension: 'GENTY_PLUGIN_ROOT',
+    // genty packages are ESM and expose CommonJS bin entrypoints (bin/cli.cjs);
+    // keep the emitted bin script extension aligned with the genty package.json
+    // bin target so output verification passes.
+    packageMetadata: {
+      moduleType: 'module',
+      binScriptExt: '.cjs',
+    },
   },
 };
 

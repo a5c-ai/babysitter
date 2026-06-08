@@ -53,7 +53,9 @@ export function generateCursorManifest(manifest: A5cPluginManifest): string {
     description: manifest.description,
     author: manifest.author,
     license: manifest.license,
-    hooks: 'hooks.json',
+    // Only declare a hooks registration file when the plugin ships hooks;
+    // a hook-free plugin (atlas) emits no hooks.json.
+    ...(manifest.hooks && Object.keys(manifest.hooks).length > 0 ? { hooks: 'hooks.json' } : {}),
     commands: 'commands/',
     skills: 'skills/',
   };

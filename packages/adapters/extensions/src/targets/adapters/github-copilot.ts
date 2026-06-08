@@ -62,7 +62,8 @@ export function generateGithubCopilotManifest(manifest: A5cPluginManifest): stri
     author: normalizeAuthorObject(manifest),
     license: manifest.license,
     skills: 'skills/',
-    hooks: 'hooks.json',
+    // Only declare hooks.json when the plugin ships hooks (hook-free for atlas).
+    ...(manifest.hooks && Object.keys(manifest.hooks).length > 0 ? { hooks: 'hooks.json' } : {}),
     commands: 'commands/',
     agents: 'AGENTS.md',
   };

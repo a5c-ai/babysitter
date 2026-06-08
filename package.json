@@ -94,6 +94,8 @@
     "lint:hooks-adapter": "node scripts/hooks-adapter-build.cjs lint",
     "generate:plugins": "node scripts/generate-plugins.mjs --output artifacts/generated-plugins",
     "compare:plugins": "npm run generate:plugins",
+    "generate:atlas-plugins": "node scripts/generate-atlas-plugins.mjs --output artifacts/generated-atlas-plugins",
+    "test:atlas-plugins": "node scripts/test-atlas-plugins.mjs",
     "generate:process-library-docs": "node ./scripts/generate-process-library-doc-artifacts.cjs",
     "build:adapters-extensions": "npm run build --workspace=@a5c-ai/extensions-adapter",
     "build:extension-mux": "npm run build --workspace=@a5c-ai/extensions-adapter",

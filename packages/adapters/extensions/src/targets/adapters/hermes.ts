@@ -105,8 +105,8 @@ export function generateHermesManifest(manifest: ResolvedManifest, targetName = 
     },
     bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.js' },
     files: [
-      'hooks/',
-      'hooks.json',
+      // hooks/ + hooks.json only when the plugin ships hooks (hook-free for atlas).
+      ...(manifest.hooks && Object.keys(manifest.hooks).length > 0 ? ['hooks/', 'hooks.json'] : []),
       'skills/',
       'bin/',
       'scripts/',

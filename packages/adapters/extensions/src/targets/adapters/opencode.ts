@@ -72,7 +72,8 @@ export function generateOpenCodeManifest(manifest: A5cPluginManifest, targetName
     author: manifest.author,
     license: manifest.license,
     harness: targetName,
-    hooks: 'hooks/',
+    // Only declare the hooks/ dir when the plugin ships hooks (hook-free for atlas).
+    ...(manifest.hooks && Object.keys(manifest.hooks).length > 0 ? { hooks: 'hooks/' } : {}),
     commands: 'commands/',
     skills: 'skills/',
   };

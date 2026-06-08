@@ -97,8 +97,31 @@ function buildNpmBugs(
   return { url: `${base}/issues` };
 }
 
+/**
+ * Collect the set of output paths the active extraFileSets will emit for this
+ * target, so the package.json `files` list only advertises paths that will
+ * actually exist (a hook-free / asset-free plugin like atlas must not list
+ * assets/ or plugin.lock.json — verify rejects listed-but-missing paths).
+ */
+function activeExtraFileOutputs(manifest: ResolvedManifest, targetName: string): Set<string> {
+  const out = new Set<string>();
+  const selected = manifest.targets?.[targetName]?.extraFileSets ?? [];
+  const defs = manifest.extraFileSets ?? {};
+  for (const setName of selected) {
+    const set = defs[setName];
+    if (!set) continue;
+    for (const outputPath of Object.keys(set)) out.add(outputPath);
+  }
+  const extraFiles = manifest.targets?.[targetName]?.extraFiles ?? {};
+  for (const outputPath of Object.keys(extraFiles)) out.add(outputPath);
+  return out;
+}
+
 export function generateCodexManifest(manifest: ResolvedManifest, targetName = 'codex'): string {
   const target: Pick<TargetProfile, 'name'> = { name: targetName };
+  const extraOutputs = activeExtraFileOutputs(manifest, targetName);
+  const hasAssets = [...extraOutputs].some((p) => p === 'assets/' || p.startsWith('assets/'));
+  const hasPluginLock = extraOutputs.has('plugin.lock.json');
   const packageJson: Record<string, unknown> = {
     name: resolveTargetNpmPackageName(manifest, target),
     version: manifest.version,
@@ -115,14 +138,15 @@ export function generateCodexManifest(manifest: ResolvedManifest, targetName = '
     bin: { [resolveTargetCliName(manifest, target)]: 'bin/cli.js' },
     files: [
       `.${targetName}-plugin/`,
-      'assets/',
-      'hooks/',
-      'hooks.json',
+      ...(hasAssets ? ['assets/'] : []),
+      // hooks/ + hooks.json only when the plugin ships hooks (hook-free plugins
+      // like atlas emit neither, and verify rejects listed-but-missing paths).
+      ...(manifest.hooks && Object.keys(manifest.hooks).length > 0 ? ['hooks/', 'hooks.json'] : []),
       'skills/',
       '.app.json',
       'bin/',
       'scripts/',
-      'plugin.lock.json',
+      ...(hasPluginLock ? ['plugin.lock.json'] : []),
       'README.md',
     ],
     keywords: [manifest.name, targetName, 'orchestration'],

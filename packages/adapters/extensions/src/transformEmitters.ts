@@ -159,8 +159,19 @@ export function generateManifests(
     for (const [scriptName, scriptValue] of Object.entries(packageMetadata.extraScripts ?? {})) {
       scripts[scriptName] = scriptValue;
     }
-    const packageFiles = ['bin/', ...(packageMetadata.extraPackageFiles ?? [])];
-    packageFiles.push('hooks/', 'skills/', 'commands/', 'scripts/', 'plugin.json');
+    const hasHooks = Boolean(manifest.hooks && Object.keys(manifest.hooks).length > 0);
+    // Drop hook artifacts from extraPackageFiles for hook-free plugins (e.g.
+    // atlas) — listing hooks/ or hooks.json that are never emitted fails output
+    // verification (publishable path missing).
+    const extraPackageFiles = (packageMetadata.extraPackageFiles ?? []).filter(
+      (entry) => hasHooks || (entry !== 'hooks/' && entry !== 'hooks.json' && entry !== 'hooks'),
+    );
+    const packageFiles = ['bin/', ...extraPackageFiles];
+    // Only list the hooks/ directory when the plugin actually ships hooks.
+    if (hasHooks) {
+      packageFiles.push('hooks/');
+    }
+    packageFiles.push('skills/', 'commands/', 'scripts/', 'plugin.json');
     packageFiles.push('README.md', 'versions.json', 'package.json');
     const pkgJson: Record<string, unknown> = {
       name: npmPkg,
