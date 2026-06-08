@@ -94,7 +94,15 @@
       "commands/babysit.md": "file:per-harness/{{targetDir}}/babysit-command.md"
     },
     "genty-extension": {
-      "extensions/index.ts": "file:per-harness/genty/extensions-index.ts"
+      "extensions/index.ts": "file:per-harness/genty/extensions-index.ts",
+      "src/provider.ts": "file:per-harness/genty/src/provider.ts",
+      "src/journal.ts": "file:per-harness/genty/src/journal.ts",
+      "src/governance.ts": "file:per-harness/genty/src/governance.ts",
+      "src/agents.ts": "file:per-harness/genty/src/agents.ts",
+      "src/session.ts": "file:per-harness/genty/src/session.ts",
+      "src/processes.ts": "file:per-harness/genty/src/processes.ts",
+      "src/register.ts": "file:per-harness/genty/src/register.ts",
+      "src/index.ts": "file:per-harness/genty/src/index.ts"
     }
   },
   "harnessInstallSurfaceExportSets": {
