@@ -22,11 +22,11 @@ function buildConfig(): AdapterConfig {
     sessionEnvVars: "PI_SESSION_ID and AGENT_SESSION_ID",
     hasIntentFidelityChecks: false,
     hasNonNegotiables: false,
-    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.HeadlessPrompt],
-    promptCapabilities: ["skills", "slash-commands", "task-tool", "harness-routing", "programmatic-session"],
-    loopControlTerm: "skill-driven",
-    hookDriven: false,
-    noHookSupport: true,
+    capabilities: [Cap.Programmatic, Cap.SessionBinding, Cap.StopHook, Cap.HeadlessPrompt],
+    promptCapabilities: ["skills", "slash-commands", "task-tool", "harness-routing", "programmatic-session", "stop-hook"],
+    loopControlTerm: "stop-hook",
+    hookDriven: true,
+    noHookSupport: false,
     missingSessionIdHint: "Pi should provide PI_SESSION_ID when the Babysitter package is active.",
   });
 }

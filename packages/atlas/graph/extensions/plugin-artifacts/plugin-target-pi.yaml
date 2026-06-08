@@ -42,6 +42,7 @@ attributes:
   capabilities:
     - Programmatic
     - SessionBinding
+    - StopHook
     - HeadlessPrompt
   adapterModule: "@a5c-ai/adapters-codecs/pi-adapter"
   externalRepo: "a5c-ai/babysitter-pi"
@@ -55,8 +56,9 @@ attributes:
     - task-tool
     - harness-routing
     - programmatic-session
-  loopControlTerm: skill-driven
-  hookDriven: false
+    - stop-hook
+  loopControlTerm: stop-hook
+  hookDriven: true
   interactiveToolName: "AskUserQuestion"
   sessionEnvVarsDescription: "PID-scoped session marker (authoritative); PI_SESSION_ID and AGENT_SESSION_ID are fallbacks"
   hasIntentFidelityChecks: false
@@ -88,6 +90,13 @@ attributes:
     stdinBehavior: close-after-prompt
     selfExits: false
     needsIdleKill: true
+  description: |
+    Pi as a programmatic plugin host. Pi drives the babysitter loop via the
+    `pi.on("agent_end")` lifecycle event, which invokes the proxied stop hook
+    (`babysitter-proxied-stop.js` -> `hook:run --hook-type stop`) after each
+    assistant turn — the StopHook-capability equivalent. Unlike Claude Code,
+    Pi does NOT register Claude-style hook files; the stop hook is driven by a
+    Pi extension event rather than `hooks/hooks.json`.
 
 edges:
   hosted_by:

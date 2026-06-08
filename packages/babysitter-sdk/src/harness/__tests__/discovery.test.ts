@@ -328,8 +328,9 @@ describe("discoverHarnesses", () => {
     expect(pi?.capabilities).toContain("programmatic");
     expect(pi?.capabilities).toContain("session-binding");
     expect(pi?.capabilities).toContain("headless-prompt");
-    expect(pi?.capabilities).not.toContain("stop-hook");
-
+    // Pi drives the babysitter loop via the `agent_end` lifecycle event
+    // (proxied stop hook), so it now advertises the StopHook capability.
+    expect(pi?.capabilities).toContain("stop-hook");
   });
 
   it("sets cliCommand from the spec", async () => {
