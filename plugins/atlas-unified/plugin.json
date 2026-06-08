@@ -1,0 +1,170 @@
+{
+  "name": "atlas",
+  "version": "5.0.1-staging.28347f861706",
+  "description": "Turn a stated need into a full system design by mining the Atlas knowledge graph.",
+  "author": "a5c.ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a5c-ai/babysitter"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/atlas-unified#readme",
+  "keywords": [
+    "atlas",
+    "knowledge-graph",
+    "system-design",
+    "discovery",
+    "process-mining",
+    "data-mining",
+    "mcp",
+    "agent",
+    "LLM"
+  ],
+  "commands": "commands",
+  "skills": [
+    {
+      "name": "atlas",
+      "file": "skills/atlas/SKILL.md"
+    },
+    {
+      "name": "atlas-graph-query",
+      "file": "skills/atlas-graph-query/SKILL.md"
+    }
+  ],
+  "mcpServers": {
+    "atlas": {
+      "type": "remote",
+      "url": "https://atlas-staging.a5c.ai/api/mcp",
+      "urlEnvVar": "ATLAS_MCP_URL"
+    }
+  },
+  "include": [
+    "versions.json"
+  ],
+  "sdk": {
+    "package": "@a5c-ai/babysitter-sdk",
+    "cli": "babysitter",
+    "proxyPackage": "@a5c-ai/hooks-adapter-cli",
+    "scope": "@a5c-ai",
+    "envPrefix": "BABYSITTER",
+    "stateDir": ".a5c"
+  },
+  "extraFileSets": {
+    "readme": {
+      "README.md": "file:per-harness/{{targetDir}}/README.md"
+    },
+    "agents-file": {
+      "AGENTS.md": "file:per-harness/{{targetDir}}/AGENTS.md"
+    },
+    "gemini-surface": {
+      "GEMINI.md": "file:per-harness/{{targetDir}}/GEMINI.md"
+    }
+  },
+  "targets": {
+    "antigravity-cli": {
+      "templateVars": {
+        "targetDir": "antigravity"
+      },
+      "extraFileSets": [
+        "readme"
+      ]
+    },
+    "claude-code": {
+      "extraFileSets": [
+        "readme"
+      ]
+    },
+    "codex": {
+      "npmPackageName": "@a5c-ai/atlas-codex",
+      "extraFileSets": [
+        "readme"
+      ],
+      "harnessManifest": {
+        "skills": "./skills/",
+        "interface": {
+          "displayName": "Atlas",
+          "shortDescription": "Mine the Atlas knowledge graph to design systems from Codex",
+          "longDescription": "Atlas adds graph-driven discovery entrypoints such as $discover, $mine-processes, $mine-data, and $collect-nuances that turn a stated need into a full system design by querying the Atlas knowledge graph.",
+          "developerName": "a5c.ai",
+          "category": "Coding",
+          "capabilities": [
+            "Interactive",
+            "Read",
+            "Write"
+          ],
+          "websiteURL": "https://github.com/a5c-ai/babysitter",
+          "privacyPolicyURL": "https://github.com/a5c-ai/babysitter",
+          "termsOfServiceURL": "https://github.com/a5c-ai/babysitter"
+        },
+        "author": {
+          "name": "a5c.ai",
+          "email": "support@a5c.ai"
+        },
+        "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/atlas-unified/per-harness/codex#readme",
+        "repository": "https://github.com/a5c-ai/babysitter"
+      }
+    },
+    "cursor": {
+      "extraFileSets": [
+        "readme"
+      ],
+      "harnessManifest": {
+        "skills": "skills/",
+        "commands": "commands/",
+        "author": {
+          "name": "a5c.ai",
+          "email": "support@a5c.ai"
+        },
+        "homepage": "https://github.com/a5c-ai/babysitter/tree/main/plugins/atlas-unified/per-harness/cursor#readme",
+        "repository": "https://github.com/a5c-ai/babysitter"
+      }
+    },
+    "gemini": {
+      "extraFileSets": [
+        "gemini-surface",
+        "readme"
+      ]
+    },
+    "github-copilot": {
+      "npmPackageName": "@a5c-ai/atlas-github",
+      "templateVars": {
+        "targetDir": "github"
+      },
+      "extraFileSets": [
+        "agents-file",
+        "readme"
+      ]
+    },
+    "pi": {
+      "npmPackageName": "@a5c-ai/atlas-pi",
+      "extraFileSets": [
+        "readme"
+      ]
+    },
+    "oh-my-pi": {
+      "npmPackageName": "@a5c-ai/atlas-omp",
+      "templateVars": {
+        "targetDir": "omp"
+      },
+      "extraFileSets": [
+        "readme"
+      ]
+    },
+    "opencode": {
+      "extraFileSets": [
+        "readme"
+      ]
+    },
+    "openclaw": {
+      "extraFileSets": [
+        "readme"
+      ]
+    },
+    "genty": {
+      "npmPackageName": "@a5c-ai/atlas-genty",
+      "extraFileSets": [
+        "readme"
+      ]
+    }
+  }
+}
