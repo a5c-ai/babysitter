@@ -20,7 +20,7 @@ normalize CI triggers, and run a remote gateway — from a single surface.
 | **Transport / provider proxy** (`transport` + `proxy`) | Agent-native API ⇄ any LLM provider | 5 codecs: `AnthropicCodec`, `OpenAiChatCodec`, `OpenAiResponsesCodec`, `GoogleCodec`, `BedrockConverseCodec`. Exposed transports: anthropic, openai-chat, openai-responses, google, bedrock-converse, azure-foundry, passthrough. Target providers (18+): Anthropic, OpenAI, Google/Vertex, Bedrock, OpenRouter, Groq, Fireworks, Together, DeepSeek, Mistral, Cerebras, SambaNova, NVIDIA NIM, Perplexity, Cohere, Ollama, LM Studio, vLLM. |
 | **Tools** (`tools`) | Tool schemas + dispatch across formats | `ToolRegistry`, `ToolDispatcher`, `convertTools`/`toToolDescriptor`, `McpBridge`, `HooksMuxToolHookBridge`, approval/execution policies, cost hints. |
 | **Hooks / comm** (`hooks`, `@a5c-ai/comm-adapter`) | Per-harness hook protocol ⇄ canonical events | hooks-adapter-core (canonical schemas, session store, merge engine, discovery) + 12 per-harness hook adapters (claude, codex, cursor, gemini, copilot, pi, oh-my-pi, opencode, openclaw, hermes, antigravity, genty). Bin `a5c-hooks-adapter`. |
-| **Tasks / breakpoints** (`tasks`) | Approval/breakpoint ⇄ pluggable backends, signed | Backends: git-native, github-issues, external-tracker (Jira/Linear/REST), server, agentmux-responder. Crypto signing (`signAnswer`/`verifyAnswer`). Own breakpoint **MCP server** (`createBreakpointMcpServer`). |
+| **Tasks = breakpoints + subtasks** (`tasks`) | A run's blocking question/approval ⇄ an async, routed, signable **breakpoint/subtask** that humans *or* agents *or* trackers answer | Full subsystem — see **§1b**. 5 backends, ~20 MCP tools, Ed25519-signed answers, routing strategies, escalation/SLA, responder-loop, `BreakpointMuxInteractionProvider`. |
 | **Config / auth / host** (`config`) | Install + auth + host detection per agent | `install/config/auth/detect-host/adapters` commands; OAuth / API-key / keychain detection; host-harness signal mapping; profiles & workspaces. |
 | **Launch** (`launch`) | Run request → spawned harness + proxy wiring | `launchCommand`, `resolveLaunchPlan` (LaunchPlan/ProxyPlan), `BridgeHookEmulator`, completion-engine selection. |
 | **Extensions** (`extensions`) | One `plugin.json` → all harness plugin formats | the compiler we extended for atlas (compile/validate/diff/init/list-targets + per-target MCP emission). |
@@ -84,6 +84,82 @@ observability-integration, advanced-uis-*, babysitter-parity, provider-adapter-t
 
 ---
 
+## 1b. Tasks = breakpoints + subtasks (the `@a5c-ai/tasks-adapter` / "BMUX" subsystem)
+
+The single most under-represented seam. A **breakpoint** here is not an inline,
+synchronous `ctx.breakpoint()` halt — it is an **async, decoupled, multiplexed
+question/approval/subtask** that is routed to one or more *responders* (human,
+agent, tracker, or internal), answered (optionally **cryptographically signed**),
+and resolved — possibly across projects/repos and via pluggable backends. A
+**subtask/todo** is the same record with task-management fields (priority,
+assignee, dependencies, comments, history, audit, SLA, metrics). One model,
+two framings: *"answer this question"* and *"do this subtask."*
+
+**Lifecycle:** `open → route → claim → answer → (sign) → resolve`.
+Statuses: pending, routed, claimed, answered, completed, in-progress, blocked,
+escalated, expired, cancelled. Strategies: `single`, `first-response-wins`
+(default), `collect-all`, `quorum`.
+
+### Backends (pluggable, routed by domain/tag rules)
+- **git-native** (default, full-featured) — `.breakpoints/*.json`; all
+  capabilities (search, bulk, assign, comments, history, metrics, export, forms,
+  escalation, **signing**).
+- **github-issues** — breakpoints ⇄ issues, answers ⇄ comments.
+- **external-tracker** — Jira / Linear / generic-REST, with field+status mapping
+  and inbound/outbound/bidirectional sync + conflict strategy.
+- **server** — remote HTTP "breakpoints-pro" service (Breakpoint/Responder ⇄
+  Question/Expert); `DEFAULT_BMUX_SERVER_URL`, bearer auth.
+- **adapters (agentmux-responder)** — routes a breakpoint to an *agent* via
+  `adapters.run()` and captures its output as the answer (agent answers the human's question).
+
+Routing: `.a5c/routing.json` `{ defaultBackend, routes:[{domains?,tags?,backend,backendConfig}] }`,
+first-match-wins. Responder profiles in `.a5c/responder/*.json` (type, domains,
+tags, capabilities, SLA, publicKeyFingerprint, adapter/model hints).
+
+### MCP server (`createBreakpointMcpServer` / `startHttpBreakpointMcpServer`) — ~20 tools
+- **Submitter**: `ask_breakpoint`, `check_breakpoint_status`, `list_breakpoints`,
+  `create_todo`, `create_task`, `assign_task`, `search_tasks`, `answer_breakpoint`,
+  `verify_breakpoint_answer`, `cancel_breakpoint`, `add_comment`,
+  `add_comment_to_breakpoint`, `bulk_update_tasks`, `task_stats`, `export_tasks`,
+  `escalate`, `escalate_breakpoint`.
+- **Responder**: `list_responders`, `claim_breakpoint`, `poll_breakpoints`.
+- **Resource**: `breakpoint://{id}` (subscribable, `resourceUpdated` notifications).
+
+### CLI (`adapters-tasks`) — full tree
+- `ask` (submit a breakpoint; `--strategy --wait --open-browser …`).
+- `breakpoints` list/search/assign/reassign/close/approve/pending/answer/status/poll.
+- `tasks` (subtask mgmt) search/assign/close/comment/approve/cancel/transition/**bulk**/stats/export.
+- `responders` list/search/show/stats · `responder-loop` (`--responder --interval --once` poller daemon).
+- `templates` list/show/create · `rules` (routing) list/add/remove.
+- `server start` (stdio MCP) · `auth` login/logout/status + `keygen`/`key-push`/`keys` (Ed25519).
+
+### Signing (proven answers)
+Ed25519 keypairs (`auth keygen`); `signAnswer`/`verifyAnswer` over canonical
+fields (id, breakpointId, responderId, text, approved, confidence, answeredAt);
+trusted-key store + rotation. `verify_breakpoint_answer` proves an answer came
+from the claimed responder — high-trust approvals.
+
+### Escalation / SLA / forms / metrics
+Escalation chains (`afterMs` steps → email/slack/discord/webhook), SLA
+(`responseDueAt`/`completionDueAt`/`breached`), structured answer **forms**, and
+metrics (`task_stats`: byStatus/byPriority/avg response+completion times).
+
+### Babysitter integration (key)
+`BreakpointMuxInteractionProvider` bridges a babysitter run's `ctx.breakpoint()`
+to this subsystem: instead of halting inline, the breakpoint is submitted to a
+backend, routed, and awaited — turning a process pause into a routed,
+answerable-by-anyone (human *or* agent) **subtask**. Returns the babysitter-shaped
+`{ approved, response, feedback, respondedBy }`. This is how a babysitter run can
+fan its approvals out to people or other agents.
+
+> **Scope note:** this subsystem is dense enough (20+ CLI subcommands, ~20 MCP
+> tools, 5 backends, signing, routing) to stand as its own **`tasks-unified`**
+> plugin. Default recommendation: ship it as a first-class **section** of
+> adapters-unified (skills/commands/MCP below); split into its own plugin if the
+> breakpoint/subtask audience diverges from the dispatch/proxy audience.
+
+---
+
 ## 2. What the plugin exposes
 
 ### Skills
@@ -98,8 +174,17 @@ observability-integration, advanced-uis-*, babysitter-parity, provider-adapter-t
   local models via Ollama/vLLM/LM Studio).
 - **`adapters-plugin-author`** — author a unified `plugin.json` and
   compile/validate/diff to all targets.
+- **`adapters-tasks`** — breakpoints + subtasks: when to open a breakpoint vs a
+  subtask, choose a backend (git-native / github-issues / jira-linear / server /
+  agent-responder), pick a routing strategy + responders, sign answers, and (for
+  agents) run the responder loop to answer assigned breakpoints.
 - **`adapters-gateway`** — run the remote gateway + Kanban; tokens/pairing; connect
   a client.
+- **`adapters-breakpoints`** — turn a blocking question/approval into a routed,
+  signable **breakpoint/subtask** (see §1b): pick a backend (git-native /
+  github-issues / Jira-Linear / server / agent-responder), a strategy, and
+  responders; answer/claim/verify; wire it into a babysitter run via
+  `BreakpointMuxInteractionProvider`.
 
 ### Commands (deterministic = CLI passthrough; multi-step = `babysitter:babysit` + an `.a5c` process)
 - `/adapters:run` — dispatch a task to a chosen harness.
@@ -108,7 +193,9 @@ observability-integration, advanced-uis-*, babysitter-parity, provider-adapter-t
 - `/adapters:sessions` — list/show/search/export/cost.
 - `/adapters:mcp` — manage MCP servers per agent.
 - `/adapters:hooks` — discover/list/add/remove per-harness hooks.
-- `/adapters:tasks` — create/route/await a breakpoint via the tasks backends.
+- `/adapters:ask` — open a **breakpoint** (question/approval), route it, await an answer (`adapters-tasks ask`).
+- `/adapters:respond` — claim + answer assigned breakpoints, optionally **signed** (responder side; `responder-loop --once`).
+- `/adapters:subtasks` — create/search/assign/comment/transition/**bulk**/stats subtasks (`adapters-tasks tasks …`).
 - `/adapters:compile-plugin` — validate → compile all targets → `--verify` → (optional) sync (process).
 - `/adapters:gateway` — serve the gateway + tokens (CLI passthrough).
 - `/adapters:triggers` — enrich/evaluate a CI/webhook event.
