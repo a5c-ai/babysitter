@@ -101,6 +101,7 @@ const futurePackageReferencePrefixes = [
   "docs/v6-spec-and-roadmap/",
   "docs/adapters/terminology-and-structure-gaps/",
   "docs/daily-updates/",
+  "docs/genty-decoupling/",
 ];
 
 function normalizeSlashes(value) {
