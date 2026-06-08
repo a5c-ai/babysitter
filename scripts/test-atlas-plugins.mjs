@@ -2,12 +2,14 @@
 // Dependency-free acceptance-test runner for the atlas-unified plugin pipeline.
 //
 // Usage:
-//   node scripts/test-atlas-plugins.mjs --suite <source|generated|processes|all>
+//   node scripts/test-atlas-plugins.mjs --suite <source|generated|processes|sync|all>
 //
 // Suites:
 //   source     — asserts on the plugins/atlas-unified source files (authored here, RED until source exists).
 //   generated  — asserts on artifacts/generated-atlas-plugins (stub — added later by another agent).
 //   processes  — asserts on plugins/atlas-unified/processes (stub — added later by another agent).
+//   sync       — asserts on artifacts/atlas-external-repos prepared by the dry-run atlas sync script
+//                (RED until scripts/sync-atlas-plugin-repos.mjs exists and has been run by the gate).
 //   all        — runs every suite.
 //
 // Exit code is non-zero if any assertion in the requested suite(s) fails.
@@ -605,6 +607,315 @@ async function runProcessesSuite(r) {
 }
 
 // ---------------------------------------------------------------------------
+// SUITE: sync — asserts on artifacts/atlas-external-repos (prepared by the gate
+// running the atlas generator then `node scripts/sync-atlas-plugin-repos.mjs
+// --work-dir=artifacts/atlas-external-repos` in DRY-RUN — no --push).
+// Implements exactly the spec's testContract.sync[] assertions (SPEC §6).
+// RED until scripts/sync-atlas-plugin-repos.mjs exists and has been run.
+// ---------------------------------------------------------------------------
+
+// The dry-run prepared-repo work dir (default --work-dir of the atlas sync
+// script per spec.json scriptContract.args).
+const SYNC_WORK_DIR = join(ROOT, 'artifacts', 'atlas-external-repos');
+
+// Hard-coded atlas destination-repo table per spec.json repos[] (SPEC §1).
+// Keyed by the atlas target key (== prepared-dir name == generator output dir).
+// suffix → repo a5c-ai/atlas-<suffix>; npm = expected package name or null.
+const ATLAS_SYNC_REPOS = {
+  'antigravity-cli': { suffix: 'antigravity', repo: 'a5c-ai/atlas-antigravity', npm: null },
+  'claude-code': { suffix: 'claude', repo: 'a5c-ai/atlas-claude', npm: null },
+  codex: { suffix: 'codex', repo: 'a5c-ai/atlas-codex', npm: '@a5c-ai/atlas-codex' },
+  cursor: { suffix: 'cursor', repo: 'a5c-ai/atlas-cursor', npm: null },
+  gemini: { suffix: 'gemini', repo: 'a5c-ai/atlas-gemini', npm: null },
+  'github-copilot': { suffix: 'github-copilot', repo: 'a5c-ai/atlas-github-copilot', npm: '@a5c-ai/atlas-github' },
+  pi: { suffix: 'pi', repo: 'a5c-ai/atlas-pi', npm: '@a5c-ai/atlas-pi' },
+  'oh-my-pi': { suffix: 'omp', repo: 'a5c-ai/atlas-omp', npm: '@a5c-ai/atlas-omp' },
+  opencode: { suffix: 'opencode', repo: 'a5c-ai/atlas-opencode', npm: null },
+  openclaw: { suffix: 'openclaw', repo: 'a5c-ai/atlas-openclaw', npm: null },
+  genty: { suffix: 'genty', repo: 'a5c-ai/atlas-genty', npm: '@a5c-ai/atlas-genty' },
+};
+
+function runSyncSuite(r) {
+  const targets = Object.keys(ATLAS_SYNC_REPOS);
+
+  // 1. artifacts/atlas-external-repos exists and contains exactly one prepared
+  //    repo dir per atlas target (11 dirs, named by target key).
+  r.assert('sync: artifacts/atlas-external-repos exists and contains exactly one prepared dir per atlas target (11 dirs, named by target key)', () => {
+    if (!existsSync(SYNC_WORK_DIR)) {
+      throw new Error(`missing work dir ${SYNC_WORK_DIR} (run: node scripts/sync-atlas-plugin-repos.mjs --work-dir=artifacts/atlas-external-repos)`);
+    }
+    if (!statSync(SYNC_WORK_DIR).isDirectory()) throw new Error(`${SYNC_WORK_DIR} is not a directory`);
+    const dirs = readdirSync(SYNC_WORK_DIR).filter((e) => statSync(join(SYNC_WORK_DIR, e)).isDirectory());
+    const expected = [...targets].sort();
+    const actual = [...dirs].sort();
+    if (actual.length !== expected.length || actual.some((d, i) => d !== expected[i])) {
+      throw new Error(`prepared dirs ${JSON.stringify(actual)} != atlas target set ${JSON.stringify(expected)}`);
+    }
+    return true;
+  });
+
+  // 2. Each target's prepared dir exists at artifacts/atlas-external-repos/<targetKey>
+  //    and is a directory.
+  r.assert('sync: each target prepared dir exists at artifacts/atlas-external-repos/<targetKey> and is a directory', () => {
+    for (const target of targets) {
+      const dir = join(SYNC_WORK_DIR, target);
+      if (!existsSync(dir) || !statSync(dir).isDirectory()) {
+        throw new Error(`missing prepared dir: ${target}`);
+      }
+    }
+    return true;
+  });
+
+  // 3. Each prepared dir's package.json — WHERE PRESENT — has repository.type==='git'
+  //    and repository.url === 'git+https://github.com/a5c-ai/atlas-<suffix>.git'.
+  r.assert("sync: each prepared dir package.json (where present) has repository.type='git' and repository.url=git+https://github.com/a5c-ai/atlas-<suffix>.git", () => {
+    for (const target of targets) {
+      const pkgPath = join(SYNC_WORK_DIR, target, 'package.json');
+      if (!existsSync(pkgPath)) continue;
+      const pkg = readJson(pkgPath);
+      const { repo } = ATLAS_SYNC_REPOS[target];
+      if (!pkg.repository || pkg.repository.type !== 'git') {
+        throw new Error(`${target}: repository.type is ${JSON.stringify(pkg.repository && pkg.repository.type)}, expected "git"`);
+      }
+      const expectedUrl = `git+https://github.com/${repo}.git`;
+      if (pkg.repository.url !== expectedUrl) {
+        throw new Error(`${target}: repository.url is ${JSON.stringify(pkg.repository.url)}, expected ${JSON.stringify(expectedUrl)}`);
+      }
+    }
+    return true;
+  });
+
+  // 4. Each prepared dir's package.json — WHERE PRESENT — has
+  //    homepage === 'https://github.com/a5c-ai/atlas-<suffix>#readme' and
+  //    bugs.url === 'https://github.com/a5c-ai/atlas-<suffix>/issues'.
+  r.assert('sync: each prepared dir package.json (where present) has homepage=...#readme and bugs.url=.../issues for a5c-ai/atlas-<suffix>', () => {
+    for (const target of targets) {
+      const pkgPath = join(SYNC_WORK_DIR, target, 'package.json');
+      if (!existsSync(pkgPath)) continue;
+      const pkg = readJson(pkgPath);
+      const { repo } = ATLAS_SYNC_REPOS[target];
+      const expectedHome = `https://github.com/${repo}#readme`;
+      if (pkg.homepage !== expectedHome) {
+        throw new Error(`${target}: homepage is ${JSON.stringify(pkg.homepage)}, expected ${JSON.stringify(expectedHome)}`);
+      }
+      const expectedBugs = `https://github.com/${repo}/issues`;
+      if (!pkg.bugs || pkg.bugs.url !== expectedBugs) {
+        throw new Error(`${target}: bugs.url is ${JSON.stringify(pkg.bugs && pkg.bugs.url)}, expected ${JSON.stringify(expectedBugs)}`);
+      }
+    }
+    return true;
+  });
+
+  // 5. For each npm target (codex, github-copilot, pi, oh-my-pi, genty) a
+  //    package.json IS present and name === the expected @a5c-ai/atlas-<short>.
+  r.assert('sync: each npm target (codex/github-copilot/pi/oh-my-pi/genty) has package.json with name === expected @a5c-ai/atlas-<short>', () => {
+    for (const target of targets) {
+      const { npm } = ATLAS_SYNC_REPOS[target];
+      if (!npm) continue;
+      const pkgPath = join(SYNC_WORK_DIR, target, 'package.json');
+      if (!existsSync(pkgPath)) throw new Error(`${target}: npm target is missing package.json (expected name ${npm})`);
+      const pkg = readJson(pkgPath);
+      if (pkg.name !== npm) {
+        throw new Error(`${target}: package.json name is ${JSON.stringify(pkg.name)}, expected ${JSON.stringify(npm)}`);
+      }
+    }
+    return true;
+  });
+
+  // 6. Each prepared dir has .github/workflows/publish.yml (non-empty, contains
+  //    'release/' and 'NODE_AUTH_TOKEN').
+  r.assert("sync: each prepared dir has .github/workflows/publish.yml (non-empty, contains 'release/' and 'NODE_AUTH_TOKEN')", () => {
+    for (const target of targets) {
+      const ymlPath = join(SYNC_WORK_DIR, target, '.github', 'workflows', 'publish.yml');
+      if (!existsSync(ymlPath)) throw new Error(`${target}: missing .github/workflows/publish.yml`);
+      const raw = readFileSync(ymlPath, 'utf8');
+      if (!raw.trim()) throw new Error(`${target}: publish.yml is empty`);
+      if (!raw.includes('release/')) throw new Error(`${target}: publish.yml missing 'release/'`);
+      if (!raw.includes('NODE_AUTH_TOKEN')) throw new Error(`${target}: publish.yml missing 'NODE_AUTH_TOKEN'`);
+    }
+    return true;
+  });
+
+  // 7. Each prepared dir has scripts/create-release-tag.mjs (non-empty,
+  //    references 'release/').
+  r.assert("sync: each prepared dir has scripts/create-release-tag.mjs (non-empty, references 'release/')", () => {
+    for (const target of targets) {
+      const p = join(SYNC_WORK_DIR, target, 'scripts', 'create-release-tag.mjs');
+      if (!existsSync(p)) throw new Error(`${target}: missing scripts/create-release-tag.mjs`);
+      const raw = readFileSync(p, 'utf8');
+      if (!raw.trim()) throw new Error(`${target}: create-release-tag.mjs is empty`);
+      if (!raw.includes('release/')) throw new Error(`${target}: create-release-tag.mjs does not reference 'release/'`);
+    }
+    return true;
+  });
+
+  // 8. Each prepared dir has scripts/publish-from-tag.mjs (non-empty). npm targets
+  //    reference 'npm' + 'publish'; non-npm targets are the no-op
+  //    'No npm package is published' script.
+  r.assert("sync: each prepared dir has scripts/publish-from-tag.mjs (non-empty); npm targets reference npm+publish, non-npm targets are the no-op 'No npm package is published' script", () => {
+    for (const target of targets) {
+      const p = join(SYNC_WORK_DIR, target, 'scripts', 'publish-from-tag.mjs');
+      if (!existsSync(p)) throw new Error(`${target}: missing scripts/publish-from-tag.mjs`);
+      const raw = readFileSync(p, 'utf8');
+      if (!raw.trim()) throw new Error(`${target}: publish-from-tag.mjs is empty`);
+      const { npm } = ATLAS_SYNC_REPOS[target];
+      if (npm) {
+        if (!raw.includes('npm') || !raw.includes('publish')) {
+          throw new Error(`${target}: npm target publish-from-tag.mjs does not reference 'npm' + 'publish'`);
+        }
+      } else if (!raw.includes('No npm package is published')) {
+        throw new Error(`${target}: non-npm target publish-from-tag.mjs is not the no-op 'No npm package is published' script`);
+      }
+    }
+    return true;
+  });
+
+  // 9. Each prepared dir has RELEASE.md referencing scripts/sync-atlas-plugin-repos.mjs.
+  r.assert('sync: each prepared dir has RELEASE.md referencing scripts/sync-atlas-plugin-repos.mjs', () => {
+    for (const target of targets) {
+      const p = join(SYNC_WORK_DIR, target, 'RELEASE.md');
+      if (!existsSync(p)) throw new Error(`${target}: missing RELEASE.md`);
+      const raw = readFileSync(p, 'utf8');
+      if (!raw.includes('scripts/sync-atlas-plugin-repos.mjs')) {
+        throw new Error(`${target}: RELEASE.md does not reference scripts/sync-atlas-plugin-repos.mjs`);
+      }
+    }
+    return true;
+  });
+
+  // 10. Each prepared dir contains the atlas plugin source copied in — manifest
+  //     present (plugin.json OR package.json parses) and, where the source target
+  //     ships them, a skills dir and/or a commands dir exist (proves a non-empty
+  //     bundle was synced — matches artifacts/generated-atlas-plugins/<target>).
+  r.assert('sync: each prepared dir contains the copied atlas source — a manifest parses and the bundle matches generated-atlas-plugins/<target> (skills/commands dirs where source ships them)', () => {
+    for (const target of targets) {
+      const dir = join(SYNC_WORK_DIR, target);
+      const pluginJsonPath = join(dir, 'plugin.json');
+      const packageJsonPath = join(dir, 'package.json');
+      const hasPlugin = existsSync(pluginJsonPath);
+      const hasPackage = existsSync(packageJsonPath);
+      if (!hasPlugin && !hasPackage) {
+        throw new Error(`${target}: neither plugin.json nor package.json present in prepared dir`);
+      }
+      if (hasPlugin) {
+        try {
+          readJson(pluginJsonPath);
+        } catch (err) {
+          throw new Error(`${target}: plugin.json does not parse — ${err.message}`);
+        }
+      }
+      if (hasPackage) {
+        try {
+          readJson(packageJsonPath);
+        } catch (err) {
+          throw new Error(`${target}: package.json does not parse — ${err.message}`);
+        }
+      }
+      // Cross-check against the generator source: wherever the source target ships
+      // a skills/ or commands/ dir, the prepared bundle must too (proves the bundle
+      // was copied, not left empty).
+      const sourceDir = join(GENERATED_DIR, target);
+      if (existsSync(sourceDir) && statSync(sourceDir).isDirectory()) {
+        for (const sub of ['skills', 'commands']) {
+          const srcSub = join(sourceDir, sub);
+          if (existsSync(srcSub) && statSync(srcSub).isDirectory()) {
+            const preparedSub = join(dir, sub);
+            if (!existsSync(preparedSub) || !statSync(preparedSub).isDirectory()) {
+              throw new Error(`${target}: source ships ${sub}/ but prepared dir is missing it (bundle not copied)`);
+            }
+          }
+        }
+      }
+    }
+    return true;
+  });
+
+  // 11. Each prepared dir's plugin.json (where present) still has mcpServers.atlas,
+  //     OR the bundle ships a native MCP config (sanity that the atlas bundle — not
+  //     an empty tree — was synced).
+  r.assert('sync: each prepared dir has mcpServers.atlas in plugin.json (where present) OR ships its native MCP config (atlas bundle was synced, not an empty tree)', () => {
+    for (const target of targets) {
+      const dir = join(SYNC_WORK_DIR, target);
+      const pluginJsonPath = join(dir, 'plugin.json');
+      let hasMcpInPlugin = false;
+      if (existsSync(pluginJsonPath)) {
+        try {
+          const pj = readJson(pluginJsonPath);
+          hasMcpInPlugin = Boolean(pj.mcpServers && pj.mcpServers.atlas);
+        } catch (err) {
+          throw new Error(`${target}: plugin.json does not parse — ${err.message}`);
+        }
+      }
+      let hasNativeMcp = false;
+      const mcpSpec = MCP_PER_TARGET_PATHS[target];
+      if (mcpSpec) {
+        const nativePath = join(dir, ...mcpSpec.path.split('/'));
+        hasNativeMcp = existsSync(nativePath);
+      }
+      if (!hasMcpInPlugin && !hasNativeMcp) {
+        throw new Error(`${target}: prepared dir has neither plugin.json mcpServers.atlas nor a native MCP config (${mcpSpec ? mcpSpec.path : 'no spec'}) — bundle may be empty`);
+      }
+    }
+    return true;
+  });
+
+  // 12. Dry-run made no network calls / created no repos: each repo dir is
+  //     git-init-only (.git exists, no origin/<branch> tracking ref / no fetched
+  //     packed refs). The test never passes --push.
+  r.assert('sync: dry-run made no network calls / created no repos — each prepared dir is git-init-only (.git exists, no remote-tracking refs / no fetched packed refs)', () => {
+    for (const target of targets) {
+      const gitDir = join(SYNC_WORK_DIR, target, '.git');
+      if (!existsSync(gitDir) || !statSync(gitDir).isDirectory()) {
+        throw new Error(`${target}: prepared dir is not git-init'd (.git missing)`);
+      }
+      // A dry-run (no clone/fetch/push) leaves NO remote-tracking refs and NO
+      // fetched objects: refs/remotes/origin must not exist, and there must be no
+      // packed-refs / FETCH_HEAD that a fetch/clone would have produced.
+      const remotesDir = join(gitDir, 'refs', 'remotes', 'origin');
+      if (existsSync(remotesDir)) {
+        const entries = readdirSync(remotesDir);
+        if (entries.length > 0) {
+          throw new Error(`${target}: found remote-tracking refs under .git/refs/remotes/origin (${JSON.stringify(entries)}) — implies a clone/fetch happened (not dry-run)`);
+        }
+      }
+      const packedRefs = join(gitDir, 'packed-refs');
+      if (existsSync(packedRefs)) {
+        const raw = readFileSync(packedRefs, 'utf8');
+        if (/\brefs\/remotes\/origin\//.test(raw)) {
+          throw new Error(`${target}: .git/packed-refs contains refs/remotes/origin/* — implies a clone/fetch happened (not dry-run)`);
+        }
+      }
+      if (existsSync(join(gitDir, 'FETCH_HEAD'))) {
+        throw new Error(`${target}: .git/FETCH_HEAD exists — implies a network fetch happened (not dry-run)`);
+      }
+    }
+    return true;
+  });
+
+  // 13. The covered target list spans all 11 targets and every repo string matches
+  //     /^a5c-ai\/atlas-/ and none matches /^a5c-ai\/babysitter-/ (no babysitter
+  //     repo collision).
+  r.assert('sync: covered target list spans all 11 targets; every repo matches /^a5c-ai\\/atlas-/ and none matches /^a5c-ai\\/babysitter-/ (no babysitter collision)', () => {
+    if (targets.length !== 11) throw new Error(`expected 11 atlas targets, got ${targets.length}`);
+    const expected = [...BABYSITTER_TARGETS].sort();
+    const actual = [...targets].sort();
+    if (actual.some((t, i) => t !== expected[i])) {
+      throw new Error(`atlas sync target set ${JSON.stringify(actual)} != babysitter target set ${JSON.stringify(expected)}`);
+    }
+    for (const target of targets) {
+      const { repo } = ATLAS_SYNC_REPOS[target];
+      if (!/^a5c-ai\/atlas-/.test(repo)) {
+        throw new Error(`${target}: repo ${JSON.stringify(repo)} does not match /^a5c-ai\\/atlas-/`);
+      }
+      if (/^a5c-ai\/babysitter-/.test(repo)) {
+        throw new Error(`${target}: repo ${JSON.stringify(repo)} collides with a babysitter repo namespace`);
+      }
+    }
+    return true;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 
@@ -612,6 +923,7 @@ const SUITES = {
   source: runSourceSuite,
   generated: runGeneratedSuite,
   processes: runProcessesSuite,
+  sync: runSyncSuite,
 };
 
 function parseArgs(argv) {
@@ -631,18 +943,18 @@ function parseArgs(argv) {
 async function main() {
   const { suite } = parseArgs(process.argv.slice(2));
   if (!suite) {
-    console.error('Usage: node scripts/test-atlas-plugins.mjs --suite <source|generated|processes|all>');
+    console.error('Usage: node scripts/test-atlas-plugins.mjs --suite <source|generated|processes|sync|all>');
     process.exit(2);
   }
 
-  const order = ['source', 'generated', 'processes'];
+  const order = ['source', 'generated', 'processes', 'sync'];
   let toRun;
   if (suite === 'all') {
     toRun = order;
   } else if (SUITES[suite]) {
     toRun = [suite];
   } else {
-    console.error(`Unknown suite "${suite}". Valid: source, generated, processes, all.`);
+    console.error(`Unknown suite "${suite}". Valid: source, generated, processes, sync, all.`);
     process.exit(2);
     return;
   }

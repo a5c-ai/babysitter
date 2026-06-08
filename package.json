@@ -117,6 +117,7 @@
     "docs:serve": "docusaurus serve docs-site/build",
     "docs:clear": "docusaurus clear docs-site",
     "sync:external-plugins": "node scripts/sync-external-plugin-repos.mjs",
+    "sync:atlas-plugins": "node scripts/sync-atlas-plugin-repos.mjs",
     "validate:edges": "node packages/atlas/scripts/validate-edges.mjs",
     "test:e2e:live-stack:primary": "vitest run --config packages/adapters/cli/vitest.config.ts packages/adapters/cli/tests/live-stack/primary-live-runner.test.ts",
     "test:e2e:live-stack:framework": "vitest run --config packages/adapters/cli/vitest.config.ts packages/adapters/cli/tests/live-stack/scenario-contract.test.ts",
