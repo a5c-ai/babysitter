@@ -76,8 +76,23 @@ for (const descriptor of listPluginTargetDescriptors()) {
   }
 }
 
+// Fallback adapters for targets not present in the catalog-driven registry but
+// required by the spec (e.g. genty). Built lazily and cached so getAdapter is
+// stable across calls. These are NOT placed in ADAPTER_REGISTRY.
+const FALLBACK_ADAPTER_CLASS_BY_TARGET: Record<string, new (targetName: string) => HarnessOutputAdapter> = {
+  'genty': GentyAdapter,
+};
+const FALLBACK_ADAPTERS: Record<string, HarnessOutputAdapter> = {};
+
 export function getAdapter(targetName: string): HarnessOutputAdapter | undefined {
-  return ADAPTER_REGISTRY[targetName];
+  const registered = ADAPTER_REGISTRY[targetName];
+  if (registered) return registered;
+  const FallbackClass = FALLBACK_ADAPTER_CLASS_BY_TARGET[targetName];
+  if (FallbackClass) {
+    FALLBACK_ADAPTERS[targetName] ??= new FallbackClass(targetName);
+    return FALLBACK_ADAPTERS[targetName];
+  }
+  return undefined;
 }
 
 export { ADAPTER_REGISTRY };

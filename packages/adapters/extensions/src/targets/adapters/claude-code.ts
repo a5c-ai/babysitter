@@ -2,6 +2,7 @@
 
 import type { A5cPluginManifest, TargetProfile, TransformedFile, Diagnostic } from '../../types.js';
 import { BaseHarnessOutputAdapter } from './base.js';
+import { emitJsonMcpConfig } from '../../mcpConfig.js';
 import {
   iterateHooks,
   slugify,
@@ -11,6 +12,13 @@ import {
 } from './hooks-utils.js';
 
 export class ClaudeCodeAdapter extends BaseHarnessOutputAdapter {
+
+  generateMcpConfig(
+    manifest: A5cPluginManifest,
+    _targetProfile: TargetProfile
+  ): TransformedFile | null {
+    return emitJsonMcpConfig(manifest, '.mcp.json');
+  }
 
 
 

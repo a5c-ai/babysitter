@@ -36,4 +36,11 @@ export class BaseHarnessOutputAdapter implements HarnessOutputAdapter {
   ): TransformedFile[] {
     return [];
   }
+
+  generateMcpConfig(
+    _manifest: A5cPluginManifest,
+    _targetProfile: TargetProfile
+  ): TransformedFile | null {
+    return null;
+  }
 }

@@ -8,10 +8,16 @@ import {
   resolveHookPath,
   getPattern,
 } from './hooks-utils.js';
+import { emitJsonMcpConfig } from '../../mcpConfig.js';
 
 export class GithubCopilotAdapter extends BaseHarnessOutputAdapter {
 
-
+  generateMcpConfig(
+    manifest: A5cPluginManifest,
+    _targetProfile: TargetProfile
+  ): TransformedFile | null {
+    return emitJsonMcpConfig(manifest, '.mcp.json');
+  }
 
   generateHookRegistration(
     manifest: A5cPluginManifest,

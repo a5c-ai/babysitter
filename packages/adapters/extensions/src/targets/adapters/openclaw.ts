@@ -14,10 +14,16 @@ import {
   resolveTargetNpmPackageName,
 } from '../../sdkConfig.js';
 import { generateOpenClawNativeHooksSection } from '../../transformHelpers.js';
+import { emitJsonMcpConfig } from '../../mcpConfig.js';
 
 export class OpenClawAdapter extends BaseHarnessOutputAdapter {
 
-
+  generateMcpConfig(
+    manifest: A5cPluginManifest,
+    _targetProfile: TargetProfile
+  ): TransformedFile | null {
+    return emitJsonMcpConfig(manifest, '.mcp.json');
+  }
 
   generateHookRegistration(
     manifest: A5cPluginManifest,

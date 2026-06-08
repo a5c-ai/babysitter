@@ -6,6 +6,7 @@
 
 import type { A5cPluginManifest, TargetProfile, TransformedFile, Diagnostic } from '../../types.js';
 import { BaseHarnessOutputAdapter } from './base.js';
+import { emitJsonMcpConfig } from '../../mcpConfig.js';
 import {
   iterateHooks,
   slugify,
@@ -15,6 +16,13 @@ import {
 } from './hooks-utils.js';
 
 export class AntigravityAdapter extends BaseHarnessOutputAdapter {
+
+  generateMcpConfig(
+    manifest: A5cPluginManifest,
+    _targetProfile: TargetProfile
+  ): TransformedFile | null {
+    return emitJsonMcpConfig(manifest, 'mcp.json');
+  }
 
   generateHookRegistration(
     manifest: A5cPluginManifest,
@@ -46,11 +54,9 @@ export class AntigravityAdapter extends BaseHarnessOutputAdapter {
       content: generateAntigravitySkillMd(manifest),
     });
 
-    // MCP config for multi-provider tool integration
-    files.push({
-      path: 'mcp.json',
-      content: generateAntigravityMcpConfig(manifest),
-    });
+    // NOTE: MCP config (mcp.json) is emitted by the global MCP emit step in
+    // transform() via generateMcpConfig(), not here, so it is only produced
+    // when manifest.mcpServers is declared.
 
     return files;
   }
@@ -149,21 +155,6 @@ export function generateAntigravitySkillMd(manifest: A5cPluginManifest): string 
   }
   lines.push('');
   return lines.join('\n');
-}
-
-/**
- * Generate MCP config for multi-provider tool integration.
- *
- * Antigravity CLI supports MCP (Model Context Protocol) natively,
- * enabling tools to be used across multiple model providers.
- */
-export function generateAntigravityMcpConfig(manifest: A5cPluginManifest): string {
-  const config: Record<string, unknown> = {
-    name: manifest.name,
-    version: manifest.version,
-    servers: {},
-  };
-  return JSON.stringify(config, null, 2) + '\n';
 }
 
 /**

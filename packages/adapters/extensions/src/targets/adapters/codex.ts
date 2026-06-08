@@ -14,10 +14,19 @@ import {
   resolveTargetNpmPackageName,
 } from '../../sdkConfig.js';
 import { generateHarnessManifest } from '../../transformHelpers.js';
+import { buildCodexMcpToml } from '../../mcpConfig.js';
 
 export class CodexAdapter extends BaseHarnessOutputAdapter {
 
-
+  generateMcpConfig(
+    manifest: A5cPluginManifest,
+    _targetProfile: TargetProfile
+  ): TransformedFile | null {
+    if (!manifest.mcpServers || Object.keys(manifest.mcpServers).length === 0) {
+      return null;
+    }
+    return { path: 'mcp-servers.toml', content: buildCodexMcpToml(manifest.mcpServers) };
+  }
 
   generateHookRegistration(
     manifest: A5cPluginManifest,

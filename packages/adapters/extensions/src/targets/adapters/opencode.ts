@@ -12,10 +12,19 @@ import {
   resolveSdkConfig,
 } from './hooks-utils.js';
 import { generateOpenCodeAccomplishSkill } from '../../transformHelpers.js';
+import { buildOpencodeMcp, toJsonContent } from '../../mcpConfig.js';
 
 export class OpenCodeAdapter extends BaseHarnessOutputAdapter {
 
-
+  generateMcpConfig(
+    manifest: A5cPluginManifest,
+    _targetProfile: TargetProfile
+  ): TransformedFile | null {
+    if (!manifest.mcpServers || Object.keys(manifest.mcpServers).length === 0) {
+      return null;
+    }
+    return { path: 'opencode.json', content: toJsonContent(buildOpencodeMcp(manifest.mcpServers)) };
+  }
 
   generateHookRegistration(
     manifest: A5cPluginManifest,

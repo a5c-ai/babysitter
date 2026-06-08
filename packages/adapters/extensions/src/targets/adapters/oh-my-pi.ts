@@ -6,10 +6,16 @@ import {
   resolveTargetCliName,
   resolveTargetNpmPackageName,
 } from '../../sdkConfig.js';
+import { emitJsonMcpConfig } from '../../mcpConfig.js';
 
 export class OhMyPiAdapter extends BaseHarnessOutputAdapter {
 
-
+  generateMcpConfig(
+    manifest: A5cPluginManifest,
+    _targetProfile: TargetProfile
+  ): TransformedFile | null {
+    return emitJsonMcpConfig(manifest, '.mcp.json');
+  }
 
   generateManifestFiles(
     _sourceDir: string,

@@ -10,10 +10,20 @@ import {
   resolveSdkConfig,
 } from './hooks-utils.js';
 import { getCommandPaths } from '../../utils.js';
+import { buildGeminiMcpServers, toJsonContent } from '../../mcpConfig.js';
 
 export class GeminiAdapter extends BaseHarnessOutputAdapter {
 
-
+  generateMcpConfig(
+    manifest: A5cPluginManifest,
+    targetProfile: TargetProfile
+  ): TransformedFile | null {
+    if (!manifest.mcpServers || Object.keys(manifest.mcpServers).length === 0) {
+      return null;
+    }
+    const path = targetProfile.harnessManifestPath || 'gemini-extension.json';
+    return { path, content: toJsonContent(buildGeminiMcpServers(manifest.mcpServers)) };
+  }
 
   generateHookRegistration(
     manifest: A5cPluginManifest,
@@ -32,25 +42,31 @@ export class GeminiAdapter extends BaseHarnessOutputAdapter {
   ): TransformedFile[] {
     const files: TransformedFile[] = [];
     const commandPaths = getCommandPaths(sourceDir, manifest);
+    // The gemini-extension.json is emitted here only for plugins with real
+    // command content. For MCP-only plugins it is produced (with mcpServers)
+    // by the global MCP emit step in transform(); see generateMcpConfig.
+    const emitExtensionManifest = commandPaths.length > 0;
     files.push({
       path: 'plugin.json',
-      content: generateGeminiManifest(manifest, commandPaths),
+      content: generateGeminiManifest(manifest, commandPaths, 'gemini', emitExtensionManifest),
     });
-    const extensionManifestPath = targetProfile.harnessManifestPath || 'gemini-extension.json';
-    files.push({
-      path: extensionManifestPath,
-      content: JSON.stringify(
-        {
-          name: manifest.name,
-          version: manifest.version,
-          description: manifest.description,
-          contextFileName: 'GEMINI.md',
-          settings: [],
-        },
-        null,
-        2
-      ) + '\n',
-    });
+    if (emitExtensionManifest) {
+      const extensionManifestPath = targetProfile.harnessManifestPath || 'gemini-extension.json';
+      files.push({
+        path: extensionManifestPath,
+        content: JSON.stringify(
+          {
+            name: manifest.name,
+            version: manifest.version,
+            description: manifest.description,
+            contextFileName: 'GEMINI.md',
+            settings: [],
+          },
+          null,
+          2
+        ) + '\n',
+      });
+    }
     return files;
   }
 }
@@ -59,7 +75,9 @@ export function generateGeminiManifest(
   manifest: A5cPluginManifest,
   commandPaths: string[] = [],
   targetName = 'gemini',
+  includeExtensionManifest = true,
 ): string {
+  void targetName;
   const pluginJson: Record<string, unknown> = {
     name: manifest.name,
     version: manifest.version,
@@ -71,8 +89,10 @@ export function generateGeminiManifest(
     commands: commandPaths.map((cmdPath) => `commands/${cmdPath.split(/[\\/]/).pop()?.replace(/\.md$/, '.toml')}`),
     skills: [],
     contextFileName: 'GEMINI.md',
-    extensionManifest: 'gemini-extension.json',
   };
+  if (includeExtensionManifest) {
+    pluginJson.extensionManifest = 'gemini-extension.json';
+  }
 
   if (manifest.hooks) {
     const hooksObj: Record<string, string | boolean> = {};

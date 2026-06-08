@@ -61,6 +61,9 @@ export function transform(
   const manifestFiles = generateManifests(sourceDir, manifest, targetProfile, diagnostics);
   files.push(...manifestFiles);
 
+  // Emit native MCP config (one file per target) when manifest.mcpServers present
+  emitMcpConfig(manifest, targetProfile, files);
+
   // Copy agent instruction files
   const agentFiles = copyAgentFiles(sourceDir, manifest, targetProfile, diagnostics);
   files.push(...agentFiles);
@@ -338,4 +341,67 @@ function generateHookRegistrationFile(
   const adapter = getAdapter(targetProfile.name);
   if (!adapter) return null;
   return adapter.generateHookRegistration(manifest, targetProfile, diagnostics);
+}
+
+/**
+ * Global MCP emit step: produces exactly one native MCP config file per target
+ * from manifest.mcpServers. When a file already exists at the target MCP path
+ * (e.g. gemini's gemini-extension.json emitted by generateManifestFiles), the
+ * MCP keys are deep-merged into it rather than emitting a duplicate path.
+ */
+function emitMcpConfig(
+  manifest: A5cPluginManifest,
+  targetProfile: TargetProfile,
+  files: TransformedFile[]
+): void {
+  if (!manifest.mcpServers || Object.keys(manifest.mcpServers).length === 0) {
+    return;
+  }
+  const adapter = getAdapter(targetProfile.name);
+  if (!adapter) return;
+  const mcpFile = adapter.generateMcpConfig(manifest, targetProfile);
+  if (!mcpFile) return;
+
+  const existing = files.find((f) => f.path === mcpFile.path);
+  if (!existing) {
+    files.push(mcpFile);
+    return;
+  }
+
+  // A file already lives at this path — merge MCP keys into it (JSON only).
+  if (mcpFile.path.endsWith('.json')) {
+    try {
+      const base = JSON.parse(existing.content) as Record<string, unknown>;
+      const incoming = JSON.parse(mcpFile.content) as Record<string, unknown>;
+      existing.content = toMergedJsonContent(base, incoming);
+      return;
+    } catch {
+      // Fall through to replacement if either side is not valid JSON.
+    }
+  }
+  // Non-JSON or unparseable: the MCP content takes precedence.
+  existing.content = mcpFile.content;
+}
+
+function toMergedJsonContent(
+  base: Record<string, unknown>,
+  incoming: Record<string, unknown>
+): string {
+  const merged: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(incoming)) {
+    const baseValue = merged[key];
+    if (
+      baseValue &&
+      typeof baseValue === 'object' &&
+      !Array.isArray(baseValue) &&
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value)
+    ) {
+      merged[key] = { ...(baseValue as object), ...(value as object) };
+    } else {
+      merged[key] = value;
+    }
+  }
+  return JSON.stringify(merged, null, 2) + '\n';
 }

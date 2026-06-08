@@ -1,5 +1,21 @@
 // Type definitions for the Unified Plugin Format (UPF) and compilation pipeline
 
+// Native MCP server declaration. Keyed by server name (e.g. "atlas") in the
+// manifest's `mcpServers` field; the compiler emits each target's native MCP
+// config from these specs.
+export interface McpServerSpec {
+  // Transport. "remote" => HTTP/SSE URL server launched via mcp-remote bridge.
+  type?: 'remote' | 'http' | 'sse' | 'stdio';
+  // For remote/http/sse:
+  url?: string;            // literal default URL
+  urlEnvVar?: string;      // env var that overrides url at runtime (e.g. ATLAS_MCP_URL)
+  // For stdio:
+  command?: string;
+  args?: string[];
+  env?: Record<string, string>;
+  headers?: Record<string, string>;
+}
+
 export interface A5cPluginManifest {
   // Identity (required)
   name: string;
@@ -28,6 +44,10 @@ export interface A5cPluginManifest {
     file: string;
   }>;
   agents?: string | string[];
+
+  // Native MCP servers to wire into every target in its native config format.
+  // Keyed by server name (e.g. "atlas").
+  mcpServers?: Record<string, McpServerSpec>;
 
   // Context Files
   contextFiles?: Record<string, string>;

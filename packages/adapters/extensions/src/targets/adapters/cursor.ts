@@ -9,10 +9,16 @@ import {
   getPattern,
 } from './hooks-utils.js';
 import { generateHarnessManifest } from '../../transformHelpers.js';
+import { emitJsonMcpConfig } from '../../mcpConfig.js';
 
 export class CursorAdapter extends BaseHarnessOutputAdapter {
 
-
+  generateMcpConfig(
+    manifest: A5cPluginManifest,
+    _targetProfile: TargetProfile
+  ): TransformedFile | null {
+    return emitJsonMcpConfig(manifest, '.cursor/mcp.json');
+  }
 
   generateHookRegistration(
     manifest: A5cPluginManifest,
