@@ -51,6 +51,7 @@ import {
   orchestrateIteration,
 } from "@a5c-ai/babysitter-sdk";
 import { getGlobalRegistry } from "../../../../orchestration/global";
+import { createMicroagentSystem } from "../../../../microagents";
 import {
   BOLD,
   DEFAULT_EFFECT_RETRY_CONFIG,
@@ -344,6 +345,13 @@ export async function resolveEffect(
     return { status: "ok", value: { sleptUntil: new Date().toISOString() } };
   }
   if (kind === "agent") {
+    const agentName = (action.taskDef as Record<string, unknown>)?.agent
+      ? ((action.taskDef as Record<string, unknown>).agent as Record<string, unknown>)?.name as string | undefined
+      : undefined;
+    if (agentName) {
+      const microagentResult = await tryDispatchMicroagent(agentName, action);
+      if (microagentResult) return microagentResult;
+    }
     const prompt = buildAgentPrompt(action.taskDef as Record<string, unknown>);
     const taskHarness = discovered ? resolveTaskHarness(action, harnessName, discovered) : harnessName;
     if (taskHarness !== harnessName && !isInternalHarness(taskHarness)) {
@@ -383,6 +391,47 @@ export async function resolveEffect(
   }
   const fallbackPrompt = action.taskDef?.title ?? `Handle effect ${action.effectId} (kind: ${kind})`;
   return invokePromptEffect(action, harnessName, fallbackPrompt, options, undefined);
+}
+
+let _microagentSystem: ReturnType<typeof createMicroagentSystem> | undefined;
+
+function getMicroagentSystem() {
+  if (!_microagentSystem) {
+    _microagentSystem = createMicroagentSystem();
+  }
+  return _microagentSystem;
+}
+
+async function tryDispatchMicroagent(
+  agentName: string,
+  action: EffectAction,
+): Promise<ResolveEffectResult | undefined> {
+  const system = getMicroagentSystem();
+  if (!system.registry.has(agentName)) return undefined;
+
+  const taskDef = action.taskDef as Record<string, unknown>;
+  const agent = taskDef.agent as Record<string, unknown>;
+  const input = agent.prompt?.toString
+    ? typeof agent.prompt === "object" ? (agent.prompt as Record<string, unknown>).context ?? agent.prompt : agent.prompt
+    : {};
+
+  const result = await system.dispatcher.dispatch(agentName, input, {
+    correlationId: action.effectId,
+    timeout: (taskDef.execution as Record<string, unknown>)?.timeout as number | undefined,
+  });
+
+  if (result.exitCode === 0) {
+    return {
+      status: "ok",
+      value: result.output,
+      stdout: result.logs?.join("\n"),
+    };
+  }
+  return {
+    status: "error",
+    error: new Error(result.error?.message ?? `Microagent ${agentName} exited with code ${result.exitCode}`),
+    stdout: result.logs?.join("\n"),
+  };
 }
 
 function getMcpTaskConfig(action: EffectAction): Record<string, unknown> | undefined {
