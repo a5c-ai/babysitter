@@ -3,17 +3,17 @@ id: plugin-target:genty
 attributes:
   displayName: "genty"
   hostAgent: agent:genty
-  adapterFamily: internal
-  manifestFormat: "none"
-  commandFormat: "none"
+  adapterFamily: programmatic
+  manifestFormat: "package.json"
+  commandFormat: "markdown"
   adapterName: genty
-  skillHandling: none
+  skillHandling: native
   hookRegistrationFormat: none
   hookRegistrationOutputPath: null
   hookRegistrationAliasPaths: []
   harnessManifestPath: null
   pluginRootEnvVar: null
-  pluginRootEnvVarForExtension: null
+  pluginRootEnvVarForExtension: GENTY_PLUGIN_ROOT
   scriptVariants:
     - bash
     - powershell
@@ -21,11 +21,14 @@ attributes:
     - npm-cli
   distributionModel: monorepo
   marketplacePath: null
-  npmPublishable: false
+  npmPublishable: true
   installLayout: null
   packageMetadata:
     moduleType: module
-    binScriptExt: ".js"
+    # genty packages are ESM and expose CommonJS bin entrypoints (bin/cli.cjs);
+    # keep the emitted bin script extension aligned with the genty package.json
+    # bin target so output verification passes.
+    binScriptExt: ".cjs"
     installLifecycle: none
     activationMessage: null
     emitCjsWrappers: false
@@ -33,8 +36,14 @@ attributes:
     agents: unsupported
     context: unsupported
   cliCommand: "genty"
+  # Caller detection must use a genty-SPECIFIC env var. AGENT_SESSION_ID is a
+  # generic var set by every harness session, so using it here caused
+  # detectCallerHarness() to falsely resolve "genty" in any environment
+  # (issue #949). GENTY_PLUGIN_ROOT is set only by the genty extension.
+  # AGENT_SESSION_ID remains a session-id fallback (sessionEnvVarsDescription),
+  # not a caller-detection signal.
   callerEnvVars:
-    - "AGENT_SESSION_ID"
+    - "GENTY_PLUGIN_ROOT"
   configPaths: []
   processNames:
     - "genty"
@@ -47,7 +56,7 @@ attributes:
   externalPackageName: "@a5c-ai/genty"
   generatedSourceDir: null
   marketplaceSpecs: []
-  requiredSurfaceFile: null
+  requiredSurfaceFile: AGENTS.md
   promptCapabilities:
     - hooks
     - task-tool
