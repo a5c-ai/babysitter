@@ -2,15 +2,17 @@
 // Dependency-free acceptance-test runner for the atlas-unified plugin pipeline.
 //
 // Usage:
-//   node scripts/test-atlas-plugins.mjs --suite <source|generated|processes|sync|all>
+//   node scripts/test-atlas-plugins.mjs --suite <source|generated|processes|sync|sync-workflow|all>
 //
 // Suites:
-//   source     — asserts on the plugins/atlas-unified source files (authored here, RED until source exists).
-//   generated  — asserts on artifacts/generated-atlas-plugins (stub — added later by another agent).
-//   processes  — asserts on plugins/atlas-unified/processes (stub — added later by another agent).
-//   sync       — asserts on artifacts/atlas-external-repos prepared by the dry-run atlas sync script
-//                (RED until scripts/sync-atlas-plugin-repos.mjs exists and has been run by the gate).
-//   all        — runs every suite.
+//   source        — asserts on the plugins/atlas-unified source files (authored here, RED until source exists).
+//   generated     — asserts on artifacts/generated-atlas-plugins (stub — added later by another agent).
+//   processes     — asserts on plugins/atlas-unified/processes (stub — added later by another agent).
+//   sync          — asserts on artifacts/atlas-external-repos prepared by the dry-run atlas sync script
+//                   (RED until scripts/sync-atlas-plugin-repos.mjs exists and has been run by the gate).
+//   sync-workflow — asserts on .github/workflows/sync-atlas-plugins.yml, the dedicated atlas sync CI
+//                   workflow (RED until that workflow file exists).
+//   all           — runs every suite.
 //
 // Exit code is non-zero if any assertion in the requested suite(s) fails.
 
@@ -916,6 +918,113 @@ function runSyncSuite(r) {
 }
 
 // ---------------------------------------------------------------------------
+// SUITE: sync-workflow — asserts on the dedicated atlas sync CI workflow
+// .github/workflows/sync-atlas-plugins.yml. Node has no built-in YAML parser, so
+// these are dependency-free structural/string checks (assert required keys/lines
+// are present) per spec.json testContract['sync-workflow'] (SPEC §6).
+// RED until .github/workflows/sync-atlas-plugins.yml exists.
+// ---------------------------------------------------------------------------
+
+const SYNC_WORKFLOW_PATH = join(ROOT, '.github', 'workflows', 'sync-atlas-plugins.yml');
+
+function runSyncWorkflowSuite(r) {
+  // 1. .github/workflows/sync-atlas-plugins.yml exists.
+  r.assert('sync-workflow: .github/workflows/sync-atlas-plugins.yml exists', () => {
+    if (!existsSync(SYNC_WORKFLOW_PATH)) {
+      throw new Error(`missing workflow file ${SYNC_WORKFLOW_PATH}`);
+    }
+    if (!statSync(SYNC_WORKFLOW_PATH).isFile()) {
+      throw new Error(`${SYNC_WORKFLOW_PATH} is not a file`);
+    }
+    return true;
+  });
+
+  // 2. The yml parses (minimal structural check — no YAML dep) and has a top-level
+  //    'on' containing both workflow_call and workflow_dispatch keys.
+  r.assert("sync-workflow: yml has a top-level 'on:' with both workflow_call and workflow_dispatch", () => {
+    if (!existsSync(SYNC_WORKFLOW_PATH)) throw new Error(`missing workflow file ${SYNC_WORKFLOW_PATH}`);
+    const raw = readFileSync(SYNC_WORKFLOW_PATH, 'utf8');
+    if (!raw.trim()) throw new Error('workflow file is empty');
+    // top-level `on:` key (column 0, not indented).
+    if (!/^on:\s*$/m.test(raw) && !/^on:\s*\S/m.test(raw)) {
+      throw new Error("workflow has no top-level 'on:' key");
+    }
+    // both triggers must be declared as keys somewhere in the file.
+    if (!/^\s*workflow_call\s*:/m.test(raw)) {
+      throw new Error("workflow 'on' is missing workflow_call");
+    }
+    if (!/^\s*workflow_dispatch\s*:/m.test(raw)) {
+      throw new Error("workflow 'on' is missing workflow_dispatch");
+    }
+    return true;
+  });
+
+  // 3. permissions.contents === 'write'.
+  r.assert("sync-workflow: permissions.contents === 'write'", () => {
+    if (!existsSync(SYNC_WORKFLOW_PATH)) throw new Error(`missing workflow file ${SYNC_WORKFLOW_PATH}`);
+    const raw = readFileSync(SYNC_WORKFLOW_PATH, 'utf8');
+    if (!/^\s*contents:\s*write\s*$/m.test(raw)) {
+      throw new Error("workflow does not declare permissions.contents: write");
+    }
+    return true;
+  });
+
+  // 4. Body references 'generate-atlas-plugins.mjs' OR 'npm run generate:atlas-plugins'
+  //    (generates atlas bundles before sync).
+  r.assert("sync-workflow: body generates atlas bundles (references generate-atlas-plugins.mjs OR 'npm run generate:atlas-plugins')", () => {
+    if (!existsSync(SYNC_WORKFLOW_PATH)) throw new Error(`missing workflow file ${SYNC_WORKFLOW_PATH}`);
+    const raw = readFileSync(SYNC_WORKFLOW_PATH, 'utf8');
+    if (!raw.includes('generate-atlas-plugins.mjs') && !raw.includes('npm run generate:atlas-plugins')) {
+      throw new Error("workflow does not run the atlas generator (generate-atlas-plugins.mjs / npm run generate:atlas-plugins)");
+    }
+    return true;
+  });
+
+  // 5. Body references 'sync-atlas-plugin-repos.mjs' invoked with '--push'.
+  r.assert("sync-workflow: body runs sync-atlas-plugin-repos.mjs with --push", () => {
+    if (!existsSync(SYNC_WORKFLOW_PATH)) throw new Error(`missing workflow file ${SYNC_WORKFLOW_PATH}`);
+    const raw = readFileSync(SYNC_WORKFLOW_PATH, 'utf8');
+    if (!raw.includes('sync-atlas-plugin-repos.mjs')) {
+      throw new Error("workflow does not reference scripts/sync-atlas-plugin-repos.mjs");
+    }
+    // the sync step must invoke the script with --push (CI pushes). Require both
+    // the script reference and the --push flag on the same command line.
+    const hasPushOnSyncLine = raw
+      .split(/\r?\n/)
+      .some((line) => line.includes('sync-atlas-plugin-repos.mjs') && line.includes('--push'));
+    if (!hasPushOnSyncLine && !(raw.includes('sync-atlas-plugin-repos.mjs') && raw.includes('--push'))) {
+      throw new Error("sync-atlas-plugin-repos.mjs is not invoked with --push");
+    }
+    return true;
+  });
+
+  // 6. Body does NOT reference scripts/sync-external-plugin-repos.mjs (dedicated
+  //    atlas pipeline, not babysitter's).
+  r.assert('sync-workflow: does NOT reference scripts/sync-external-plugin-repos.mjs (dedicated atlas pipeline)', () => {
+    if (!existsSync(SYNC_WORKFLOW_PATH)) throw new Error(`missing workflow file ${SYNC_WORKFLOW_PATH}`);
+    const raw = readFileSync(SYNC_WORKFLOW_PATH, 'utf8');
+    if (raw.includes('sync-external-plugin-repos.mjs')) {
+      throw new Error("workflow references the babysitter sync script scripts/sync-external-plugin-repos.mjs (must be dedicated to atlas)");
+    }
+    return true;
+  });
+
+  // 7. The concurrency group string contains 'sync-atlas-plugins'.
+  r.assert("sync-workflow: concurrency group string contains 'sync-atlas-plugins'", () => {
+    if (!existsSync(SYNC_WORKFLOW_PATH)) throw new Error(`missing workflow file ${SYNC_WORKFLOW_PATH}`);
+    const raw = readFileSync(SYNC_WORKFLOW_PATH, 'utf8');
+    const groupMatch = /^\s*group:\s*(.+)$/m.exec(raw);
+    if (!groupMatch) {
+      throw new Error('workflow has no concurrency.group');
+    }
+    if (!groupMatch[1].includes('sync-atlas-plugins')) {
+      throw new Error(`concurrency group ${JSON.stringify(groupMatch[1].trim())} does not contain 'sync-atlas-plugins'`);
+    }
+    return true;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 
@@ -924,6 +1033,7 @@ const SUITES = {
   generated: runGeneratedSuite,
   processes: runProcessesSuite,
   sync: runSyncSuite,
+  'sync-workflow': runSyncWorkflowSuite,
 };
 
 function parseArgs(argv) {
@@ -943,18 +1053,18 @@ function parseArgs(argv) {
 async function main() {
   const { suite } = parseArgs(process.argv.slice(2));
   if (!suite) {
-    console.error('Usage: node scripts/test-atlas-plugins.mjs --suite <source|generated|processes|sync|all>');
+    console.error('Usage: node scripts/test-atlas-plugins.mjs --suite <source|generated|processes|sync|sync-workflow|all>');
     process.exit(2);
   }
 
-  const order = ['source', 'generated', 'processes', 'sync'];
+  const order = ['source', 'generated', 'processes', 'sync', 'sync-workflow'];
   let toRun;
   if (suite === 'all') {
     toRun = order;
   } else if (SUITES[suite]) {
     toRun = [suite];
   } else {
-    console.error(`Unknown suite "${suite}". Valid: source, generated, processes, sync, all.`);
+    console.error(`Unknown suite "${suite}". Valid: source, generated, processes, sync, sync-workflow, all.`);
     process.exit(2);
     return;
   }
