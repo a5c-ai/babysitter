@@ -49,6 +49,15 @@ function sessionStartInput(ctx?: ExtensionContext): Record<string, unknown> {
   };
 }
 
+function stopHookInput(ctx?: ExtensionContext): Record<string, unknown> {
+  const sessionId = syncSessionEnvironment(ctx);
+  return {
+    event: "stop",
+    cwd: ctx?.cwd ?? process.cwd(),
+    ...(sessionId ? { session_id: sessionId } : {}),
+  };
+}
+
 /**
  * Run a proxied hook script and return parsed JSON result.
  * Returns empty object on failure (hooks are best-effort).
@@ -75,11 +84,56 @@ function runProxiedHook(
   }
 }
 
+// Re-entrancy guard so overlapping agent_end events don't stack stop-hook
+// subprocess invocations. Run-level iteration bounds are owned by the SDK
+// stop hook (max iterations, active-run detection); this only prevents the
+// extension from launching concurrent proxied-stop processes.
+let stopHookInFlight = false;
+
 export default function activate(pi: ExtensionAPI): void {
   initI18n(pi);
 
   pi.on("session_start", async (_event, ctx) => {
     runProxiedHook("babysitter-proxied-session-start.js", sessionStartInput(ctx));
+  });
+
+  // ---------------------------------------------------------------------------
+  // agent_end is the Pi equivalent of Claude Code's Stop hook: it fires when
+  // the assistant finishes a turn. Drive the Babysitter stop/iteration loop
+  // here so a run auto-continues after each turn.
+  //
+  // Active-run detection lives in the SDK stop hook (babysitter hook:run
+  // --hook-type stop). It no-ops — emitting `{}` — whenever there is no active
+  // run for the session (missing/inactive session file, no runId, run waiting
+  // on breakpoints/external effects, or completion proof matched). It only
+  // emits `{ decision: "block", reason, systemMessage }` when the run should
+  // continue, so this handler simply relays that decision. When no run is
+  // active, agent_end is a no-op.
+  // ---------------------------------------------------------------------------
+  pi.on("agent_end", async (_event, ctx) => {
+    if (stopHookInFlight) return;
+    stopHookInFlight = true;
+    try {
+      const result = runProxiedHook("babysitter-proxied-stop.js", stopHookInput(ctx));
+      // Only re-prompt when the stop hook asks to continue the loop. A `{}`
+      // result (no active run / run complete) leaves the turn ended, so the
+      // loop terminates naturally — never an unconditional re-trigger.
+      if (result && result.decision === "block") {
+        const continuation =
+          typeof result.reason === "string" && result.reason.trim()
+            ? result.reason
+            : typeof result.systemMessage === "string"
+              ? result.systemMessage
+              : "";
+        if (continuation.trim()) {
+          pi.sendUserMessage(continuation);
+        }
+      }
+    } catch {
+      // Best-effort, like session_start — never block or throw out of the turn.
+    } finally {
+      stopHookInFlight = false;
+    }
   });
 
   // ---------------------------------------------------------------------------

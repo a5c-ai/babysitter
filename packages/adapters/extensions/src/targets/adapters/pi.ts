@@ -108,6 +108,7 @@ export function generatePiManifest(manifest: ResolvedManifest, targetName = 'pi'
       'skills/',
       'commands/',
       'scripts/',
+      'hooks/',
     ],
     author: typeof manifest.author === 'string' ? manifest.author : manifest.author.name,
     license: manifest.license,
