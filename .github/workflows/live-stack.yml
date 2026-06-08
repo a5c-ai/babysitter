@@ -606,6 +606,45 @@ jobs:
           ls -la all-artifacts/ 2>/dev/null || echo "no all-artifacts dir"
           echo "::endgroup::"
 
+          # --- Robust agent/provider/model derivation (issue #946) -------------
+          # The "live.adapters.<agent>.<provider>.<model>" token in the JSON
+          # artifact filename (or the directory name) is the most reliable source
+          # for the matrix cells. It is always present even when
+          # verification-report.md is missing/malformed or the JSON lacks
+          # evidence fields. The model name itself may contain dots (e.g.
+          # "gpt-5.5"), so we parse with bash parameter expansion (segment-safe)
+          # instead of splitting on ".".
+          DERIVED_AGENT=""; DERIVED_PROVIDER=""; DERIVED_MODEL=""
+          derive_apm() {
+            DERIVED_AGENT=""; DERIVED_PROVIDER=""; DERIVED_MODEL=""
+            local dir="$1" token jf rest
+            jf=$(find "$dir" -name "live.adapters.*.json" 2>/dev/null | head -1 || true)
+            if [ -n "$jf" ]; then
+              token=$(basename "$jf" .json)
+            else
+              token=$(echo "$dir" | grep -oE 'live\.adapters\.[^/]+' | head -1 || true)
+            fi
+            [ -n "$token" ] || return 0
+            token=${token#live.adapters.}            # <agent>.<provider>.<model>
+            DERIVED_AGENT=${token%%.*}               # <agent>
+            rest=${token#*.}
+            [ "$rest" != "$token" ] || return 0      # no provider/model segments
+            DERIVED_PROVIDER=${rest%%.*}             # <provider>
+            local model=${rest#*.}
+            [ "$model" != "$rest" ] && DERIVED_MODEL=$model   # <model> (keeps dots)
+          }
+
+          # Echo the first argument that is non-empty and not "?", trimming
+          # surrounding whitespace; otherwise echo "?".
+          coalesce() {
+            local v
+            for v in "$@"; do
+              v=$(printf '%s' "$v" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+              if [ -n "$v" ] && [ "$v" != "?" ]; then printf '%s' "$v"; return 0; fi
+            done
+            printf '%s' "?"
+          }
+
           echo "# Live Stack Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${{ github.sha }}\` on \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
@@ -637,15 +676,22 @@ jobs:
             report=$(find "$dir" -name "verification-report.md" | head -1)
             json_artifact=$(find "$dir" -name "live.adapters.*.json" | head -1)
 
+            # Filename-derived fallback values (never empty when the artifact
+            # token is present) — fills cells when report/JSON parsing falls short.
+            derive_apm "$dir"
+
             result_status=""
             if [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
               result_status=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.status || '')" 2>/dev/null || echo "")
             fi
 
             if [ -n "$report" ] && [ -f "$report" ]; then
-              agent=$(grep -oP '(?<=\*\*Agent:\*\* ).*' "$report" | head -1 || echo "?")
-              provider=$(grep -oP '(?<=\*\*Provider:\*\* ).*' "$report" | head -1 || echo "?")
-              model=$(grep -oP '(?<=\*\*Model:\*\* ).*' "$report" | head -1 || echo "?")
+              r_agent=$(grep -oP '(?<=\*\*Agent:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              r_provider=$(grep -oP '(?<=\*\*Provider:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              r_model=$(grep -oP '(?<=\*\*Model:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              agent=$(coalesce "$r_agent" "$DERIVED_AGENT")
+              provider=$(coalesce "$r_provider" "$DERIVED_PROVIDER")
+              model=$(coalesce "$r_model" "$DERIVED_MODEL")
               failures=$(grep -c '✗' "$report" 2>/dev/null || true)
               passes=$(grep -c '✓' "$report" 2>/dev/null || true)
               if [ "${failures:-0}" -gt 0 ]; then
@@ -656,16 +702,21 @@ jobs:
                 detail="${passes:-0} checks"
               fi
             elif [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
-              agent=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.scenarioId?.split('.')[2] || '?')" 2>/dev/null || echo "?")
-              provider=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.provider || '?')" 2>/dev/null || echo "?")
-              model=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.model || '?')" 2>/dev/null || echo "?")
+              j_agent=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.scenarioId?.split('.')[2] || '')" 2>/dev/null || echo "")
+              j_provider=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.provider || '')" 2>/dev/null || echo "")
+              j_model=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.model || '')" 2>/dev/null || echo "")
+              agent=$(coalesce "$j_agent" "$DERIVED_AGENT")
+              provider=$(coalesce "$j_provider" "$DERIVED_PROVIDER")
+              model=$(coalesce "$j_model" "$DERIVED_MODEL")
               if [ "$result_status" = "passed" ]; then
                 status="✅"; bp_pass=$((bp_pass + 1)); detail="passed (json)"
               else
                 status="❌"; bp_fail=$((bp_fail + 1)); detail="${result_status:-unknown} (json)"
               fi
             else
-              agent="?"; provider="—"; model="—"
+              agent=$(coalesce "$DERIVED_AGENT")
+              provider=$(coalesce "$DERIVED_PROVIDER" "—")
+              model=$(coalesce "$DERIVED_MODEL" "—")
               status="❌"; bp_fail=$((bp_fail + 1)); detail="no report"
             fi
             echo "| ${OS_LABEL} | ${agent} | ${provider} | ${model} | ${mode} | ${proc_mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
@@ -681,6 +732,7 @@ jobs:
             [ -d "$dir" ] || continue
             report=$(find "$dir" -name "verification-report.md" | head -1)
             json_artifact=$(find "$dir" -name "live.adapters.*.json" | head -1)
+            derive_apm "$dir"
             result_status=""
             if [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
               result_status=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.status || '')" 2>/dev/null || echo "")
@@ -693,9 +745,12 @@ jobs:
               runtime="—"
             fi
             if [ -n "$report" ] && [ -f "$report" ]; then
-              agent=$(grep -oP '(?<=\*\*Agent:\*\* ).*' "$report" | head -1 || echo "?")
-              provider=$(grep -oP '(?<=\*\*Provider:\*\* ).*' "$report" | head -1 || echo "?")
-              model=$(grep -oP '(?<=\*\*Model:\*\* ).*' "$report" | head -1 || echo "?")
+              r_agent=$(grep -oP '(?<=\*\*Agent:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              r_provider=$(grep -oP '(?<=\*\*Provider:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              r_model=$(grep -oP '(?<=\*\*Model:\*\* ).*' "$report" 2>/dev/null | head -1 || true)
+              agent=$(coalesce "$r_agent" "$DERIVED_AGENT")
+              provider=$(coalesce "$r_provider" "$DERIVED_PROVIDER")
+              model=$(coalesce "$r_model" "$DERIVED_MODEL")
               failures=$(grep -c '✗' "$report" 2>/dev/null || true)
               passes=$(grep -c '✓' "$report" 2>/dev/null || true)
               if [ "${failures:-0}" -gt 0 ]; then
@@ -706,16 +761,21 @@ jobs:
                 detail="${passes:-0} checks"
               fi
             elif [ -n "$json_artifact" ] && [ -f "$json_artifact" ]; then
-              agent=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.scenarioId?.split('.')[2] || '?')" 2>/dev/null || echo "?")
-              provider=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.provider || '?')" 2>/dev/null || echo "?")
-              model=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.model || '?')" 2>/dev/null || echo "?")
+              j_agent=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.scenarioId?.split('.')[2] || '')" 2>/dev/null || echo "")
+              j_provider=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.provider || '')" 2>/dev/null || echo "")
+              j_model=$(node -e "const d=JSON.parse(require('fs').readFileSync('$json_artifact','utf8')); console.log(d.evidence?.model || '')" 2>/dev/null || echo "")
+              agent=$(coalesce "$j_agent" "$DERIVED_AGENT")
+              provider=$(coalesce "$j_provider" "$DERIVED_PROVIDER")
+              model=$(coalesce "$j_model" "$DERIVED_MODEL")
               if [ "$result_status" = "passed" ]; then
                 status="✅"; van_pass=$((van_pass + 1)); detail="passed (json)"
               else
                 status="❌"; van_fail=$((van_fail + 1)); detail="${result_status:-unknown} (json)"
               fi
             else
-              agent="?"; provider="—"; model="—"
+              agent=$(coalesce "$DERIVED_AGENT")
+              provider=$(coalesce "$DERIVED_PROVIDER" "—")
+              model=$(coalesce "$DERIVED_MODEL" "—")
               status="❌"; van_fail=$((van_fail + 1)); detail="no report"
             fi
             echo "| ${OS_LABEL} | ${agent} | ${provider} | ${model} | ${mode} | ${runtime} | ${status} | ${detail} |" >> "$GITHUB_STEP_SUMMARY"
