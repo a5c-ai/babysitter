@@ -1,6 +1,7 @@
 # `@a5c-ai/kip-sdk` — SPEC (v1)
 
-> Status: **Draft v3**, spec-only. Illustrative TypeScript interfaces are normative for *shape*,
+> Status: **Draft v3 (final — round-3 adversarial findings resolved)**, spec-only. Illustrative
+> TypeScript interfaces are normative for *shape*,
 > not implementation. `MUST`/`SHOULD`/`MAY` are RFC-2119 keywords. Companion: `PRIOR-ART.md`
 > (research brief). This SPEC **resolves** the hard problems and tensions enumerated there; it does
 > not re-derive them. Cross-references like *(HP-4)* point at PRIOR-ART §3 hard problems and *(T-2)*
@@ -15,29 +16,45 @@
 > earlier pairwise `merge(base,a,b)` interface and the "valid-time-clipping fold is ACI" claim were
 > unsound and have been **removed**.
 >
-> **v3 headline fix — the INGEST-GATE / PROJ split (C2-1).** v2 made trust demotion read `rxFrom`,
-> the receiver-assigned *per-replica* transaction time, which silently re-broke `proj`-purity. v3
-> draws one bright line and never crosses it:
+> **v3 headline fix — the SIGNATURE-ONLY INGEST-GATE / PROJ split (C2-1, C3-1..C3-3, M3-4, M3-5).**
+> v2 made trust demotion read `rxFrom`, the receiver-assigned *per-replica* transaction time, which
+> silently re-broke `proj`-purity. An earlier v3 draft fixed that but relocated the non-determinism into
+> **set membership** by gating admission on the receiver's physical wall clock (drift-ε) and on the
+> replica's partially-synced key log — making admitted sets able to differ *permanently*. v3 (final)
+> draws one bright line and never crosses it: **signature validity is the ONLY thing that can gate
+> membership, because it is the only predicate that is a pure function of the fact's own bytes.**
 >
-> - **INGEST-GATE (objective, set-pure admission).** At ingest a replica admits a fact to the set
->   **iff** (i) its Ed25519 signature verifies over the canonical payload, (ii) its author key is a
->   **registered key at all** (present in the tenant key log — *authorized-to-sign*, distinct from
->   authorized-for-a-given-namespace-at-a-given-time, which is a proj decision), and (iii) its
->   author-HLC `wall` is within the bounded drift ε of the receiver's physical clock (anti-backdating).
->   These three predicates are **objective functions of the fact's own signed bytes** — every honest
->   replica admits exactly the same set. The gate **MUST NOT** consult `rxFrom`, namespace-at-time,
->   or revocation status; it only keeps the admitted set clean and forgery/backdate-free.
-> - **PROJ (set-pure folding).** *All* authorization, namespace-membership, and revocation decisions
->   happen **inside `proj`**, keyed **only** on author-stamped, signed HLCs already resident in the
->   set (never on `rxFrom`). "Was the signing key authorized-for-this-namespace and not-yet-revoked
->   **at this fact's own author-HLC**?" is a pure question over the admitted set `S`.
+> - **INGEST-GATE (signature-validity ONLY — a true G-Set over signature-valid facts).** At ingest a
+>   replica admits a fact to the set **iff** (i) it is well-formed (parses; canonical payload
+>   reconstructible from `signedFields`) and (ii) its Ed25519 signature over that canonical payload
+>   verifies. **NOTHING else gates membership** — not drift, not key-registration, not namespace
+>   authority, not revocation. Ed25519 verification is deterministic and a function of the fact's bytes
+>   alone, so **every honest replica admits exactly the same set**: the admitted set is a pure function
+>   of the *received* facts (a true grow-only set over signature-valid facts). Equal received sets ⇒
+>   equal admitted sets ⇒ (proj pure) ⇒ equal heads. The gate **MUST NOT** consult `rxFrom`, the
+>   physical clock, the key-registration log, namespace-at-time, or revocation status.
+> - **PROJ (set-pure folding + ALL trust demotions).** *Every* trust question —
+>   drift/backdating plausibility, key-registration, namespace-authorization, revocation — is a
+>   **set-pure demotion inside `proj`**, keyed **only** on author-stamped, signed HLCs already resident
+>   in the set (never on `rxFrom`, never on the receiver clock, never on local sync state). A fact that
+>   fails any trust question projects `visible-but-untrusted` / **quarantined** — surfaced and
+>   queryable, never dropped — and is **re-evaluated automatically as more facts arrive** (monotone,
+>   convergent). "Is this fact's key registered / authorized-for-this-namespace / not-yet-revoked, and
+>   is its author-HLC causally plausible, **at this fact's own author-HLC** over the admitted set `S`?"
+>   is a pure question over `S`.
 > - **`rxFrom` is a non-authoritative audit annotation only.** It is **explicitly excluded** from
 >   `proj`, from `orderKey`, and from every trust decision. It exists solely for per-replica
 >   "believed-then" *audit* reads (§4.3), which are labeled non-convergent and never feed `/heads`.
 >
-> Because every input `proj` reads lives in `S`, and the admitted set is identical on equal-set
-> replicas, `proj(S)` is byte-identical across replicas (§4b.4). The backdating attack that motivated
-> v2's `rxFrom` check is instead defended **at the gate** by drift-ε (iii), not inside `proj`.
+> Because admission is a pure function of received bytes (Ed25519 verify), equal received sets give
+> equal admitted sets; and because every input `proj` reads lives in `S`, `proj(S)` is byte-identical
+> across replicas (§4b.4). The backdating attack that motivated v2's `rxFrom` check is defended
+> **inside `proj`** by a **set-resident causal rule** (a fact's author-HLC must dominate the author-HLC
+> of its causal ancestry, and a revoked key's concurrent/backdated facts are demoted), never by a
+> receiver clock. **Offline-first and convergence are now compatible** (C3-2): a signature-valid fact
+> is *never* dropped, so an offline replica that reconnects has all its locally-authored facts accepted
+> by every peer (they verify by signature regardless of age); any still-implausible fact is quarantined
+> in `proj`, never discarded, and re-cleared as the facts it depends on arrive.
 
 ---
 
@@ -111,10 +128,11 @@ substrate, agents are clients). It provides:
 | **Replica** | An independent kip instance (one agent / one process) with its own branch and its own ingest order. |
 | **Valid time** | When a fact is true *in the modeled world* (`validFrom`/`validTo`). May contain **gaps** (Unknown, §4.2). |
 | **Transaction time** | **Receiver-assigned, AUDIT-ONLY**: the HLC the *receiving* replica stamps when it first verifies and ingests a fact (`rxFrom`). Used **only** for per-replica "believed-then" audit reads (§4.3), which are explicitly **non-convergent**. `rxFrom` is **excluded from `proj`, `orderKey`, and every trust/revocation decision** (C2-1). |
-| **Author-HLC** | The fact's own author-stamped, signed `hlc` (§4.1). The **only** time axis `proj` ever reads — for `orderKey`, valid-time geometry, *and* authorization/revocation decisions. Set-resident ⇒ identical on every replica. |
-| **INGEST-GATE** | The objective, set-pure admission predicate (signature ∧ key-registered ∧ drift-within-ε). Decides set *membership* only; identical on every honest replica; **never** decides a projected value (C2-1). §3.2. |
-| **PROJ-demotion** | Authorization / namespace / revocation decisions made **inside `proj`**, keyed on **author-HLC** over the admitted set. Set-pure ⇒ convergent. §3.6, §8.1. |
-| **Authority** | A key (Ed25519) authorized, by a signed chain rooted in the tenant root key, to write a given EID **namespace** and/or perform scoped ops (excise, revoke), **as of an author-HLC interval**. Authorization-to-sign-at-all is an ingest-gate predicate; authorization-for-a-namespace-at-a-time is a proj decision. §2.4, §8. |
+| **Author-HLC** | The fact's own author-stamped, signed `hlc` (§4.1). The **only** time axis `proj` ever reads — for `orderKey`, valid-time geometry, *and* authorization/revocation/plausibility decisions. Set-resident ⇒ identical on every replica. |
+| **INGEST-GATE** | The **signature-validity-only** admission predicate (well-formed ∧ Ed25519 signature verifies). Decides set *membership* only; a pure function of the fact's bytes ⇒ identical on every honest replica; **never** decides a projected value, and **never** consults drift, key-registration, authority, or revocation (C2-1, C3-1, M3-4). §3.2. |
+| **PROJ-demotion** | All trust decisions — key-registration, namespace-authorization, revocation, *and* author-HLC causal plausibility (anti-backdating) — made **inside `proj`**, keyed on **author-HLC** over the admitted set. Set-pure ⇒ convergent. A demoted fact is `untrusted`/`quarantined`, never dropped, and re-evaluated monotonically as facts arrive. §3.6, §8.1. |
+| **Causal plausibility** | A set-pure anti-backdating rule (replaces the v2-draft receiver-clock drift gate, C3-1/C3-3/M3-1): a fact's author-HLC MUST dominate the author-HLC of every fact in its set-resident causal ancestry (its signed `causedBy` edges and their transitive closure over `S` — the set-resident causal relation, never the transport commit-DAG), else it projects `untrusted-anachronistic`. Compared only to set-resident author-HLCs, never to any receiver clock. §3.6, §8.1, §4b.1. |
+| **Authority** | A key (Ed25519) authorized, by a signed chain rooted in the tenant root key, to write a given EID **namespace** and/or perform scoped ops (excise, revoke), **as of an author-HLC interval**. Key-registration, namespace authority, and revocation are **all** proj decisions keyed on author-HLC; **only** signature validity is an ingest-gate predicate. §2.4, §8. |
 
 ---
 
@@ -196,8 +214,9 @@ rejects facts.** Rejecting facts at write would break set-union convergence: rej
 order-dependent and replica-relative (a replica on ontology v1 would accept a fact that a replica on
 v2 rejects — divergence, M-8). Therefore:
 
-- **Facts are always accepted into the substrate** if their *signature and authority* verify (the
-  only hard gate, §2.4). Schema conformance is **not** a gate.
+- **Facts are always accepted into the substrate** if their *signature* verifies (the only hard gate,
+  §2.4). *Authority* (key-registration, namespace, revocation) is **not** an ingest gate — it is a
+  set-pure `proj` demotion (§3.6, §8.1). Schema conformance is **not** a gate either.
 - `proj` applies the ontology **as-of each fact's own `validFrom`/version** via declarative upcasters.
   A fact that conforms projects normally. A fact that does **not** conform under the *current* ontology
   (e.g. a required prop a later schema added, an unknown fact version) is **not dropped**: it projects
@@ -269,11 +288,13 @@ totality, INV-3). `replicaId` here is the author's stamped `hlc.replicaId`, sign
 quantity.
 
 Provenance is **signed and verifiable before ingest** (resolving the trust half of HP-6). The
-INGEST-GATE (§3.2) admits a fact **iff** (i) its signature verifies, (ii) its signing key is a
-**registered key** in the tenant key log at all (authorized-to-sign), and (iii) its author-HLC `wall`
-is within drift ε. These three are objective set-pure predicates. **Namespace-authorization and
-revocation are NOT ingest gates** — they are set-pure demotions inside `proj` keyed on author-HLC
-(§3.6, §8.1, C2-1), so an admitted fact-set is identical across replicas and `proj` over it is pure.
+INGEST-GATE (§3.2) admits a fact **iff** it is well-formed **and** its Ed25519 signature verifies over
+the canonical payload. **Signature validity is the SOLE membership predicate** — it is the only
+predicate that is a pure function of the fact's bytes, so every honest replica admits exactly the same
+set (a true G-Set over signature-valid facts). **Key-registration, namespace-authorization,
+revocation, AND author-HLC plausibility (anti-backdating) are NOT ingest gates** — they are set-pure
+demotions inside `proj` keyed on author-HLC (§3.6, §8.1, C2-1, C3-1/C3-3, M3-4), so an admitted
+fact-set is a function of received facts only, identical across replicas, and `proj` over it is pure.
 `commit` and `rxFrom` are post-hoc annotations (excluded from `signedFields`, `FactId`, `proj`, and
 `orderKey`), so there is no forward-reference circularity (m-3) and no replica-local input to `proj`.
 
@@ -309,7 +330,7 @@ objects/                             # content-addressed: blobs, trees, commits 
 /ontology/nodes/<kind>@<ver>.json            # schema as data, versioned
 /ontology/edges/<kind>@<ver>.json
 /upcasters/<factType>@<from>-<to>.json       # declarative upcaster descriptors (HP-8)
-/manifest.json                               # repo format version, hash algo, clock epoch, GENESIS tenant root key set, shard depth, drift ε — IMMUTABLE post-genesis (m2-5)
+/manifest.json                               # repo format version, hash algo, clock epoch, GENESIS tenant root key set, shard depth, ε_causal (proj-time causal slack), regenBoundaryRule — IMMUTABLE post-genesis (m2-5)
 .gitattributes                               # binds /heads/** AND /manifest.json to the regenerate/reject-not-merge merge driver (below)
 ```
 
@@ -340,7 +361,9 @@ the T-3 contradiction (committed *and* derived):
   lower-write-amplification option an embedder MAY select via `manifest.headsCommitted=false`.
 
 **`/manifest.json` is genesis-immutable and NEVER 3-way-merged (m2-5).** The genesis parameters —
-hash algorithm, `shardDepth`, drift ε, clock epoch, and the **genesis** tenant root key set — are
+hash algorithm, `shardDepth`, `ε_causal` (the proj-time causal-plausibility slack, §4b.1; **not** a
+receiver-clock drift bound), the `regenBoundaryRule` (the deterministic commit-batching rule for DAG
+regeneration, §4.5/M3-3), clock epoch, and the **genesis** tenant root key set — are
 fixed at repo creation and bound to the same regenerate/reject merge driver as `/heads`: a `git merge`
 that would conflict on `manifest.json` is a **hard error (fork)**, never a silent 3-way merge of
 `shardDepth`/`hashAlgo`/root-keys. Adding a *new tenant* to an existing repo is **not** a manifest
@@ -359,32 +382,39 @@ The author constructs and **signs** `f` (including its author-stamped `hlc`, §4
 receiving replica then:
 
 ```
-ingest(f) ⇒                                       // THE INGEST-GATE: objective, set-pure, identical on every honest replica (C2-1)
-  1. verify f.signature over the canonical payload                          (reject if invalid)
-  2. verify f's signing key is a REGISTERED key in the tenant key log       (reject if unknown key)
-     — "authorized-to-sign-at-all", NOT "authorized-for-this-namespace-now".
-       Namespace authorization + revocation are NOT checked here; they are proj decisions (step 7).
-  3. bounded-drift check (M-2): reject iff f.hlc.wall > local_wall + ε      (anti-backdating gate)
-     — this is the SOLE defense against backdated author-HLC; it is a membership gate, not a value decision.
-  4. advance this replica's local HLC past f.hlc; assign AUDIT annotation
+ingest(f) ⇒                                       // THE INGEST-GATE: signature-validity ONLY, a pure function of f's bytes (C2-1, C3-1, M3-4)
+  1. parse f and rebuild the canonical payload from f.provenance.signedFields  (reject iff malformed)
+  2. verify f.signature (Ed25519) over that canonical payload                  (reject iff signature invalid)
+     — THIS IS THE ONLY MEMBERSHIP PREDICATE. Ed25519 verify is deterministic and reads ONLY f's bytes.
+       NOTHING else gates admission: NOT drift, NOT key-registration, NOT namespace authority, NOT revocation.
+       A signature-valid fact is ALWAYS admitted — even if old, even if its key is not yet registered here,
+       even if its key is revoked. All of those become proj-time DEMOTIONS (step 6), never drops (C3-1/C3-2/M3-4).
+  3. advance this replica's local HLC past f.hlc; assign AUDIT annotation
      rxFrom = receiver HLC (§4.2) — does NOT alter f, its CID, or any projected value
-  5. write /facts/<shard>/<f.id>.json   (new blob; if blob already present → no-op, INV-7)
-  6. write tree + commit on the replica branch (commit = transport, NOT trust — M2-2)
+  4. write /facts/<shard>/<f.id>.json   (new blob; if blob already present → no-op, INV-7)
+  5. write tree + commit on the replica branch (commit = transport, NOT trust — M2-2)
        commit.message = canonical fact summary
        commit.author  = f.provenance.author        // may differ from commit signer on regenerated DAGs (M2-2)
        commit trailers: Kip-Fact-Id, Kip-HLC, Kip-Sig-Fpr, Kip-Rx-Hlc (audit)
-  7. /heads and projections are rebuilt LAZILY (on read, on snapshot, or by the merge driver) —
+  6. /heads and projections are rebuilt LAZILY (on read, on snapshot, or by the merge driver) —
      NOT eagerly per fact (M-6). proj re-folds only the cells touched by the new fact(s), and it is
-     proj — NOT this gate — that decides namespace-authorization and revocation, keyed on AUTHOR-HLC
-     over the admitted set (set-pure, §3.6/§8.1, C2-1).
+     proj — NOT this gate — that decides key-registration, namespace-authorization, revocation, AND
+     author-HLC causal plausibility (anti-backdating), keyed on AUTHOR-HLC over the admitted set
+     (set-pure, §3.6/§8.1, C2-1/C3-1/C3-3/M3-4). A fact failing any trust question projects
+     untrusted/quarantined and is re-evaluated automatically as more facts arrive (monotone).
 ```
 
-> **NOTE — the gate decides MEMBERSHIP only, never a value (C2-1).** Steps 1–3 are objective functions
-> of `f`'s own signed bytes (+ the registered-key list and the local physical clock for the ε bound),
-> so every honest replica admits **the same set**. A fact admitted on one replica but not another would
-> break `S_A = S_B`; therefore the gate **MUST NOT** consult `rxFrom`, namespace-at-time, or revocation
-> status. All of those are set-pure demotions inside `proj` (step 7), keyed on author-HLC. This is the
-> bright line that makes `proj(S)` byte-identical across replicas.
+> **NOTE — the gate decides MEMBERSHIP by signature ALONE, never a value, never anything time-/replica-
+> local (C2-1, C3-1, M3-4, M3-5).** Steps 1–2 are a pure function of `f`'s own signed bytes (Ed25519
+> verification is deterministic and input-only), so every honest replica admits **the same set**: the
+> admitted set is exactly the set of *received* signature-valid facts (a true G-Set). A fact admitted on
+> one replica but not another would break `S_A = S_B`; therefore the gate **MUST NOT** consult `rxFrom`,
+> the receiver's physical clock, the (partially-synced) key-registration log, namespace-at-time, or
+> revocation status — every one of those is replica-/time-local and would make membership diverge
+> permanently. All of them are set-pure demotions inside `proj` (step 6), keyed on author-HLC. This is
+> the bright line that makes `proj(S)` byte-identical across replicas, and it is also what makes
+> offline-first and convergence compatible: a fact authored offline and synced late still verifies by
+> signature and is admitted everywhere (C3-2).
 >
 > **NOTE — schema is NOT a gate here (M-8).** There is no "validate against current ontology / reject
 > on violation" step either. Ontology is applied later, in `proj`, with non-conforming facts
@@ -534,10 +564,27 @@ on and the corrective `retract`/`assert` it implies), keyed by that input-CID se
   concurrent), the **default** supersede reducer does **not** pick one by `factCID`. It emits a typed
   `kip:conflict` cell/marker naming both candidates. This is byte-deterministic (the conflict marker
   is a pure function of the set) **and** honest (it surfaces absence-of-agreement instead of laundering
-  a hash winner as consensus). **Resolution requires a new authored `supersede` fact whose author-HLC
-  strictly dominates both** (an agent or human adjudicates); only then does the cell leave `CONFLICTED`.
-  There is no default total-order tiebreak for contradictory supersessions — that path is reserved for
-  the genuinely commutative cell types in the table above (`lww-hlc`, `gset`, `pncounter`).
+  a hash winner as consensus). **Convergence of the marker is contingent on admitted-set convergence**
+  (M3-1): if replica A has both supersedes and B has only one, A reads `CONFLICTED` and B reads clean —
+  they agree only once the sets equalize. Under the signature-only gate this **is** guaranteed (every
+  signature-valid fact is admitted everywhere, §3.2/§4b.4), which is exactly why the gate fix is load-
+  bearing for conflict convergence too.
+  - **Resolution is SINGLE-WRITER per `inputCids` and provably terminating (M3-1).** A `kip:conflict`
+    leaves `CONFLICTED` only via a new authored `supersede` over the same/overlapping `inputCids`
+    **signed by a key holding the `resolve` scope** (the namespace-owner key or a key delegated
+    `resolve`, §8.1). Because resolution authority is **single-writer per `inputCids`**, two adjudicators
+    cannot *both* be authoritative: among facts that strictly dominate both originals **and** carry the
+    `resolve` scope, the cell takes the **`orderKey`-max** one — a total-order pick that is semantically
+    defensible **only here**, because the authorized adjudicator explicitly claimed authority to override
+    (it is not a hidden tiebreak of un-adjudicated contradictory data). This **terminates**: the
+    adjudication ladder cannot ping-pong, since any new dominating resolve must itself come from the
+    single-writer authority and is ordered against prior resolves by `orderKey`; the set-pure
+    `orderKey`-max among `resolve`-scoped dominators is the unique fixpoint. A dominating `supersede`
+    **without** the `resolve` scope does **not** clear the conflict (it is just another candidate),
+    so unauthorized concurrent "resolutions" cannot reopen the ladder.
+  There is no default total-order tiebreak for contradictory supersessions among non-adjudicators —
+  that path is reserved for the genuinely commutative cell types in the table above (`lww-hlc`, `gset`,
+  `pncounter`) and for `resolve`-scoped adjudication.
 - The *bytes of `/heads` are a function of the set only*, never of which replica ran the pass when.
   This is the precise C-3/C2-2 fix: the semantic layer's order-sensitivity is **frozen into a recorded
   fact** before it can affect convergence, and contradictory recorded decisions surface rather than
@@ -648,12 +695,34 @@ in author-HLC space). Concretely:
   and queryable (surfaced, never silently dropped — N5); it simply loses to trusted asserts. A
   low-privilege or cross-tenant key therefore **cannot overwrite** an entity's authoritative head
   (fixes the EID-hijack of C-5.1) **without** any per-replica ingest decision affecting the value.
+- **Key-registration is a `proj`-time demotion, not an ingest gate (M3-4).** A fact whose signing key
+  has **no set-resident registration fact** (no `KeyAuthorization` for that key chaining to the genesis
+  root, §8.1) projects `untrusted`/`quarantined` — exactly as an out-of-namespace fact does. It is
+  still admitted to the set. The moment the key's registration fact arrives in the set, the fact
+  **automatically becomes trusted** on re-fold (monotone, convergent): registration-ordering races
+  (data fact arrives before its key's registration) resolve set-purely and **no fact is ever lost** to
+  a sync-order race. This collapses the gate to a *single* truly-objective predicate (signature) and
+  removes the second membership-divergence axis the v2-draft key-log gate introduced.
+- **Author-HLC causal plausibility is a `proj`-time demotion, not a receiver-clock gate
+  (C3-1/C3-3/M3-1, replaces the v2-draft drift-ε ingest gate).** `proj` demotes a fact to
+  `untrusted-anachronistic` iff its author-HLC does **not dominate** the author-HLC of every fact in its
+  **set-resident causal ancestry** — i.e. the facts it causally depends on via its signed `causedBy`
+  edges and their transitive closure over `S` (the set-resident causal relation, **not** the transport
+  commit-DAG; §4b.1 reconciliation). A genuine backdate (a
+  fact authored *after* honest facts but stamped *before* them) is exposed because its real predecessors
+  carry **higher** author-HLCs than it claims; an honest late fact (offline author, low author-HLC,
+  causally consistent ancestry) passes. The comparison is **only** against set-resident author-HLCs —
+  never `local_wall`, never any receiver clock — so it is byte-identical on every replica and converges
+  monotonically as ancestry arrives. This distinguishes the *malicious* backdate (causally inconsistent)
+  from the *honest* old fact (causally consistent), which a receiver-clock gate provably cannot
+  (C3-2/C3-3).
 - `withScope`/EID minting is a **client-side write guard** (C-5.3): the SDK refuses to *author* an EID
   outside the local key's authorized namespaces. But the authoritative *cross-replica* enforcement is
   the set-pure proj demotion above — never an ingest-time value decision — so an out-of-scope fact that
   nonetheless reaches the set is uniformly demoted by `proj` on every replica, not rejected on some and
-  kept on others (which would break `S_A = S_B`). The **only** ingest gate is the objective triad
-  (signature ∧ key-registered ∧ drift-ε, §3.2).
+  kept on others (which would break `S_A = S_B`). The **only** ingest gate is **signature validity**
+  (§3.2); key-registration, namespace authority, revocation, and author-HLC plausibility are all
+  set-pure `proj` demotions.
 
 The mapping `EID → ordered list of (orderKey, CID)` (the entity's head history) is a derived
 projection rebuildable from the fact set. **Facts reference entities by EID, never by CID.** *Resolves
@@ -703,14 +772,21 @@ interface Fact {
 > **never read by `proj`, `orderKey`, or any trust/revocation decision**. Its sole use is per-replica
 > "believed-then" *audit* reads (§4.3), which are labeled non-convergent.
 >
-> **Backdating is defended at the GATE, not inside proj (C2-1, supersedes the v2 C-6.2 design).** v2
-> defended author backdating by checking revocation against the receiver's `rxFrom` — but that injected
-> a replica-local quantity into `proj` and broke set-purity. v3 instead defends backdating with the
-> **bounded-drift ε ingest gate** (§3.2 step 3, M-2): an honest receiver **refuses to admit** a fact
-> whose author-HLC `wall` is more than ε beyond physical time, so an attacker cannot stamp an
-> arbitrarily old (or future) author-HLC *and* have it accepted by honest replicas. Revocation and
-> authorization are then decided **inside `proj` against the fact's signed author-HLC** (§8.1) — a
-> set-pure comparison. Gate (membership) and proj (value) are kept strictly separate.
+> **Backdating is defended INSIDE proj by a set-resident causal rule, NEVER by a receiver clock
+> (C2-1, C3-1, C3-3, supersedes both the v2 `rxFrom` design and the v3-draft drift-ε gate).** v2
+> defended author backdating by checking revocation against the receiver's `rxFrom`; a v3 draft moved it
+> to a receiver-physical-clock drift *ingest gate* — but **both** inject a replica-/time-local quantity
+> (the v2 one into `proj`, the draft one into *membership itself*, making admitted sets diverge
+> permanently and the SEC theorem vacuous, C3-1). v3 (final) defends backdating with a **purely
+> set-resident causal-plausibility rule** decided inside `proj` (§3.6, §8.1): (a) a fact's author-HLC
+> MUST dominate the author-HLC of every fact in its set-resident causal ancestry, else it projects
+> `untrusted-anachronistic`; and (b) once a key is revoked, any fact from that key that is **not a
+> causal ancestor of the revocation fact** is demoted (§8.1). **No receiver clock appears anywhere.**
+> This distinguishes an honest old-but-causally-consistent fact (admitted *and* trusted — offline-first
+> preserved, C3-2) from a forged backdate (admitted but demoted) — a distinction a receiver-clock gate
+> provably cannot make, since it sees only `f.hlc.wall` and cannot tell a malicious backdate from an
+> honest stale author. Membership (signature only) and proj (value + trust) are kept strictly separate,
+> and neither reads a replica-local clock.
 
 **Accretion-only (Datomic).** Facts are never updated or deleted in place. "Update" = a new assert;
 "delete" = a `retract` (closes/splits an interval, may leave an `unknown` gap, M-9). The single
@@ -850,28 +926,52 @@ and one **physical** mechanism (the explicit, authorized history-rewrite). The s
      never a commit CID. So a pin survives any rewrite by re-resolving the fact frontier; it can never
      dangle on a stale or non-canonical commit CID. An `asOf` that resolves *through* an excised fact
      returns a typed `"excised"` placeholder (§4.3), never fabricated data.
-   - **Concurrent excision is confluent by DAG REGENERATION (C2-3).** The commit DAG is treated as a
-     **deterministic projection of the ordered fact set**: after any excision, kip **regenerates** the
-     canonical commit sequence by folding the remaining admitted set in `orderKey` order (a pure
-     function of the set), rather than *rebasing* the old DAG. Therefore two replicas that excise
-     **concurrently** (A excises F1, B excises F2) converge: the excision *markers* are append-only and
-     converge as a G-Set; the **remaining admitted set converges** (it is the G-Set minus an
-     authorized, replicated excision-fact-set); and re-deriving the canonical DAG from the **same**
-     remaining ordered set yields the **same** canonical commit sequence on both replicas. Excision
-     convergence is thus: *remaining admitted set converges ⇒ `proj` + the regenerated DAG converge* —
-     confluent by construction, with no path-dependent rebase. (git `filter-repo`/`replace-object`
-     rewrites do not commute; **regeneration from the ordered set does**, which is why v3 regenerates
-     rather than rebases.)
-   - **Re-verification — fact signatures are the SOLE trust anchor; commits are transport (C-4.4, M2-2).**
-     After rewrite, remaining **fact** signatures still verify (each fact is self-signed; removing one
-     does not invalidate others). **Commit-level signatures are NOT a trust anchor and `fsck` does not
-     check them.** The regenerated DAG is either *unsigned* (deterministic transport) or signed by the
-     **regenerating replica's own key**, with `commit-author ≠ fact-author` **explicitly allowed and
-     documented** — the regenerator does **not** re-sign commits *as* the original authors (that would
-     forge authorship and, being a write at a new `rxFrom`, re-enter the C2-1 trap). The excision itself
-     is recorded as a **signed `excision` fact**; commit regeneration is a deterministic side effect of
-     the fact set, not an authored act. `fsck` checks **fact** signatures *and*
-     `/heads == proj(remaining facts)` post-excision (INV-6), never commit signatures.
+   - **Concurrent excision is confluent by DETERMINISTIC DAG REGENERATION (C2-3, M3-3).** The commit DAG
+     is treated as a **deterministic, fully set-derived function of the ordered fact set**: after any
+     excision, kip **regenerates** the canonical commit sequence by folding the remaining admitted set in
+     `orderKey` order, rather than *rebasing* the old DAG. For the regenerated DAG to be **byte-identical**
+     across replicas (INV-12), **every** field of every regenerated commit object MUST be a pure function
+     of the ordered set — *no* per-replica or wall-clock field may appear:
+       - **Commit/batch boundaries** = a deterministic rule over `orderKey`: one commit per
+         **author-HLC-contiguous batch** (a maximal run of facts sharing the same `(replicaId, hlc.wall)`
+         in `orderKey` order), or — equivalently and simpler — one commit per fixed `N` facts by
+         `orderKey`. A deployment pins exactly one rule in `manifest.json`; original transport batch
+         membership (a non-set-derivable artifact, gone after excision) is **never** reused.
+       - **Commit timestamp** (author *and* committer date) = the **author-HLC `wall` of the batch's
+         maximum fact** by `orderKey` — the only set-resident time. The regenerator **never** stamps
+         "now".
+       - **Committer identity** = a **fixed sentinel** (e.g. `kip-regen <regen@kip>`), identical on every
+         replica — **never** the regenerating replica's key or identity.
+       - **The regenerated DAG is UNSIGNED** (deterministic transport). There is **no** regenerator
+         self-signing that changes bytes (the "may be signed by the regenerator's key" option is
+         **dropped** — it contradicts INV-12, since A-signed and B-signed commits differ in bytes, M3-3).
+       - **Message** = a canonical, deterministic summary derived from the batch's facts (no free-form
+         text, no locale/time formatting).
+     Therefore two replicas that excise **concurrently** (A excises F1, B excises F2) converge: the
+     excision *markers* are append-only and converge as a G-Set; the **remaining admitted set converges**
+     (the signature-valid G-Set minus an authorized, replicated excision-fact-set); and re-deriving the
+     canonical DAG from the **same** remaining ordered set by the rules above yields the **byte-identical**
+     canonical commit sequence on both replicas. Confluent by construction, with no path-dependent rebase.
+     (git `filter-repo`/`replace-object` rewrites do not commute; **deterministic regeneration from the
+     ordered set does**.)
+   - **Re-verification — fact signatures are the SOLE trust anchor; commits are transport (C-4.4, M2-2,
+     M3-3).** After rewrite, remaining **fact** signatures still verify (each fact is self-signed;
+     removing one does not invalidate others). **Commit-level signatures are NOT a trust anchor and
+     `fsck` does not check them.** The regenerated DAG is **UNSIGNED** (deterministic transport) and uses
+     the fixed sentinel committer; `commit-author ≠ fact-author` is **explicitly allowed and documented**.
+     The "signed by the regenerating replica's own key" option is **removed** — a per-replica signature
+     makes the commit bytes per-replica and **contradicts INV-12** (M3-3), and it would forge authorship.
+     The excision itself is recorded as a **signed `excision` fact**; commit regeneration is a
+     deterministic side effect of the fact set, not an authored act. `fsck` checks **fact** signatures
+     *and* `/heads == proj(remaining facts)` post-excision (INV-6), never commit signatures.
+   - **Regeneration cost — incremental from the excision point (m3-5).** Full regeneration is
+     `O(|remaining set|)`, which is wasteful for a multi-million-fact repo where one GDPR excision touches
+     a single fact. Because commit boundaries are a deterministic function of `orderKey` position, only
+     commits **at or after the earliest excised fact's `orderKey` position** can change; all commits
+     strictly before it are byte-identical and reused. Regeneration is therefore
+     `O(facts after the earliest excision point)`, not whole-history; concurrent excisions regenerate
+     from the **minimum** of their excision points. The cost is stated plainly here (it is the excision
+     analogue of the §3.5 read-latency/byte tradeoffs) rather than assumed free.
    - **SEC bound (C-4.2).** The convergence theorem (§4b.4) is stated over the **non-excised admitted
      fact set, after excision markers have propagated**. During the propagation window a replica that
      has not yet applied the excision still holds the fact and its `/heads` differ; this is an explicit,
@@ -904,12 +1004,24 @@ signed (§4.1). (T-5 resolved.)
 `wall` millisecond the algorithm **carries into `wall+1` and resets `counter` to 0** (it never wraps —
 wrap would violate the total order and break SEC). `wall: int64ms` cannot realistically overflow.
 
-**Bounded-drift rejection (M-2, corrects OQ-7).** HLC ordering *fairness* (not just readability) does
-depend on a drift bound: a replica with a far-ahead `wall` drags the whole fleet's logical time forward
-and would win all `lww-hlc` races forever (monotonic poisoning). kip therefore enforces a **max-drift
-bound ε** (manifest parameter): on ingest, a fact whose `wall` exceeds the receiver's physical clock by
-more than ε is **rejected and surfaced** (per N5 — never silently accepted). This moves drift from
-"operational" to a **core correctness/fairness parameter** for `lww-hlc`.
+**Anti-poisoning by SET-RESIDENT causal plausibility, NOT a receiver-clock ingest gate (M-2, C3-1,
+corrects OQ-7).** HLC ordering *fairness* (not just readability) does depend on bounding backdating /
+forward-poisoning: a replica that stamps a far-ahead `wall` would win all `lww-hlc` races forever
+(monotonic poisoning), and a compromised key could backdate facts. An earlier draft policed this with a
+**receiver-physical-clock drift-ε ingest gate** — but that made set *membership* depend on the
+receiver's wall clock and delivery timing, so honest replicas could admit permanently-different sets
+(C3-1), and it dropped honest offline-authored facts (C3-2). kip therefore polices drift **inside
+`proj` with a set-resident causal rule, never at the gate and never against any receiver clock**: a
+fact's author-HLC must **dominate the author-HLC of every fact in its set-resident causal ancestry**
+(its signed `causedBy` edges and their transitive closure over `S` — the set-resident causal relation
+defined below, **not** the transport commit-DAG), else `proj` demotes it to `untrusted-anachronistic`
+(§3.6, §8.1). A forward-poisoned or backdated stamp is exposed by its own causal neighbours (real
+predecessors carry higher author-HLCs than a backdate claims; a forward-poisoned fact's descendants
+expose it as it accrues ancestry). This is byte-identical on every replica (only set-resident
+author-HLCs are compared), converges monotonically, and — unlike a clock gate — keeps honest late facts
+(C3-2). `ε_causal` (a small slack, manifest parameter) MAY be applied to the *causal* comparison to
+absorb honest same-millisecond skew; it is compared only to set-resident author-HLCs, never to a
+physical clock.
 
 **Concurrency detection — use the commit DAG, not closure traversal (M-1).** kip does **not** claim
 "DVV-grade" detection. The precise, honest rule:
@@ -927,14 +1039,26 @@ more than ε is **rejected and surfaced** (per N5 — never silently accepted). 
   (resolved deterministically by `orderKey`), never silently mis-linearize — so completeness does not
   depend on writer diligence. This is **best-effort concurrency detection with a safe default**, stated
   as such, replacing the unsound v1 "DVV-grade" claim.
-- **Concurrency detection NEVER changes a projected value (C2-1, C2-3).** It is an *audit/diagnostic*
+- **Concurrency detection NEVER changes a projected VALUE (C2-1, C2-3).** It is an *audit/diagnostic*
   signal (e.g. to flag "these were concurrent" in provenance), **not** an input to `proj`'s value
   decision. `proj` resolves *every* cell purely by set-pure `orderKey`-max over the admitted set,
-  whether or not two facts are "concurrent." This matters because commit-DAG ancestry is a transport
-  detail (and, post-excision, a *regenerated* projection of the set, §4.5): were it allowed to flip a
-  projected value, `proj` could become replica-dependent. It is not. Both `causedBy` and DAG-ancestry
-  are constrained to be **consistent with author-HLC order** (a `causedBy` parent MUST have a ≤
-  author-HLC), so they never contradict the set-pure `orderKey`.
+  whether or not two facts are "concurrent." This matters because the **transport commit-DAG** ancestry
+  is a transport detail (and, post-excision, a *regenerated* projection of the set, §4.5): were it
+  allowed to flip a projected value, `proj` could become replica-dependent. It is not.
+- **The causal-plausibility / revocation TRUST rule reads the SET-RESIDENT causal relation, NOT the
+  transport DAG (C3-1/C3-3 reconciliation).** The anti-backdating and revocation-causal-cutoff rules
+  (§3.6, §8.1, §4b.1) need a *causal ancestry*, but to stay set-pure they read **only set-resident,
+  signed causal edges** — the `causedBy` field (a signed component of the canonical payload, §2.4) — and
+  the **deterministic transitive closure** of those edges over the admitted set, **not** the
+  transport/regenerated commit-DAG (which is non-authoritative and may differ per replica). This closure
+  is a pure function of `S` (same `causedBy` edges ⇒ same ancestry on every replica), so the trust
+  decision it feeds is byte-identical. Both `causedBy` and any diagnostic DAG-ancestry are constrained
+  to be **consistent with author-HLC order** (a `causedBy` parent MUST have a ≤ author-HLC), so they
+  never contradict the set-pure `orderKey`. (A fact may *omit* `causedBy`; then it has no set-resident
+  ancestry to violate, so causal-plausibility alone cannot demote it — backdating of a `causedBy`-less
+  fact is instead caught by the revocation causal-cutoff and by namespace/registration demotion.
+  Diligence in stamping `causedBy` only *tightens* the anti-backdating net; its absence never causes a
+  wrong demotion, preserving the "completeness does not depend on writer diligence" property.)
 
 ### 4b.2 Append-only fact log over git as the convergence substrate
 
@@ -971,10 +1095,12 @@ Per T-4, kip splits resolution into a converging substrate and a *recorded* sema
 convergence; that fact is then just another member of the set. Because the corrective fact is **keyed
 by its input-CID set**, a re-run over the same inputs produces the **same CID** (a no-op, INV-7), so
 two replicas running the pass converge rather than emitting contradictory corrections. If two genuinely
-different decisions are emitted (e.g. different model versions), `proj` resolves them by `orderKey` like
-any concurrent asserts — deterministically. Thus **the bytes of `/heads` are a function of the set
-only**, never of which replica ran supersession or when. This is the precise resolution of T-4 and the
-C-3 fix.
+different `supersede` decisions are emitted concurrently (e.g. different model versions) over overlapping
+`inputCids`, the **default** reducer surfaces a deterministic `kip:conflict` (never a hash/`orderKey`
+tiebreak of contradictory adjudications, C2-2), resolved only by a `resolve`-scoped dominating supersede
+(§3.4, M3-1) — a pure function of the set either way. Thus **the bytes of `/heads` are a function of the
+set only**, never of which replica ran supersession or when. This is the precise resolution of T-4 and
+the C-3/C2-2 fix.
 
 ### 4b.4 Convergence guarantee
 
@@ -985,22 +1111,35 @@ C-3 fix.
 > wall-clock-at-read, or which replica authored which fact.
 
 *Proof.*
-1. **The admitted set converges.** The substrate is a G-Set; union is associative, commutative,
-   idempotent. The INGEST-GATE (§3.2) admits a fact iff (signature ∧ key-registered ∧ drift-within-ε)
-   — three **objective functions of the fact's signed bytes** (plus the registered-key log and physical
-   clock), so every honest replica admits **the same** facts; admission never depends on `rxFrom` or on
-   namespace/revocation status. After exchanging missing objects, both replicas hold the same admitted
-   set `S` (Noms-style content-addressed sync guarantees no fact is missed or duplicated). [substrate half]
+1. **The admitted set converges — admission is a pure function of the fact's bytes (C3-1, M3-4, M3-5).**
+   The substrate is a G-Set; union is associative, commutative, idempotent. The INGEST-GATE (§3.2)
+   admits a fact **iff it is well-formed and its Ed25519 signature verifies over the canonical payload**
+   — and **nothing else** (not drift, not key-registration, not namespace authority, not revocation).
+   Ed25519 verification is **deterministic and a function of the fact's bytes alone**: it reads no
+   clock, no `rxFrom`, no partially-synced key log, no local state. Therefore the admitted set is exactly
+   the set of *received* signature-valid facts — a true G-Set whose element universe is identical on
+   every replica. After exchanging missing objects, two replicas that have received the same facts hold
+   the **same** admitted set `S` (Noms-style content-addressed sync guarantees no fact is missed or
+   duplicated), and equal received sets ⇒ equal admitted sets. (This is the C3-1/M3-5 fix: the v3-draft
+   step 1 listed "the registered-key log and physical clock" as inputs, which are per-replica and
+   negated the convergence it claimed; both are removed from membership and become proj-time demotions,
+   step 2.) [substrate half — now genuinely a pure function of received bytes]
 2. **`proj` is a deterministic total function of `S` alone (C2-1).** `proj(S)` (§3.4) imposes **one**
    global total order (`orderKey`), where `orderKey` reads **only** author-stamped, set-resident fields
    and ends in `publicKeyFingerprint` then `factCID`. Totality is genuine: the canonical payload covers
    **every** author/replica/version-distinguishing field (§2.4, M2-1), so two **distinct** admitted
    facts can never tie on all components (INV-3 conformance check). `proj` then groups by cell, applies
-   versioned upcasters (quarantining unknown versions, never failing), decides **authorization and
-   revocation by comparing each fact's signed AUTHOR-HLC** to set-resident key-authorization /
-   revocation `effectiveFrom` (§3.6, §8.1) — **never** `rxFrom`, never ingest order, never
-   wall-clock-at-read — and reduces each cell with a **deterministic total reducer** computing
-   valid-time geometry by a sweep-line over the *set*. Every input is in `S`; no input is replica-local.
+   versioned upcasters (quarantining unknown versions, never failing), and decides **ALL trust questions
+   by comparing each fact's signed AUTHOR-HLC** to set-resident evidence — **key-registration** (a
+   `KeyAuthorization` for the signing key must be in `S`, M3-4), **namespace-authorization**,
+   **revocation** `effectiveFrom`, and **author-HLC causal plausibility** (the fact's author-HLC must
+   dominate its set-resident causal ancestry; a revoked key's non-causal-ancestor facts are demoted,
+   C3-1/C3-3) — all keyed on AUTHOR-HLC over `S`, **never** `rxFrom`, never the receiver clock, never
+   the local key-log view, never ingest order, never wall-clock-at-read. A fact failing any trust
+   question projects `untrusted`/`quarantined` (surfaced, never dropped) and is re-evaluated
+   monotonically as facts arrive. `proj` then reduces each cell with a **deterministic total reducer**
+   computing valid-time geometry by a sweep-line over the *set*. Every input is in `S`; no input is
+   replica-local.
    Therefore `proj(S)` depends **only** on `S`. Equal sets ⇒ identical sorted sequence ⇒ identical
    trust demotions ⇒ byte-identical `/heads`. [projection half — sound because the fold, the order key,
    **and the trust overlay** are all pure set functions; `rxFrom` is excluded by construction.]
@@ -1025,9 +1164,17 @@ While an excision marker is in flight, a replica still holding the excised fact 
 `/heads` — an explicit, bounded, expected window, not a counterexample. Equality is restored once the
 excision has propagated and `/heads` has been re-folded on both sides.
 
-**Partition tolerance.** Replicas operate fully offline (local branch writes). On reconnect, `sync`
-exchanges missing objects; convergence holds the moment fact-sets equalize. No coordinator, no quorum,
-no global lock (T-2 resolved toward *coordinator-free*).
+**Partition tolerance — offline-first and convergence are COMPATIBLE (C3-2, resolved tension).**
+Replicas operate fully offline (local branch writes). On reconnect, `sync` exchanges missing objects;
+because **signature-valid facts are never dropped** (admission is signature-only, §3.2), an offline
+replica that reconnects after an arbitrarily long partition has **all** its locally-authored facts
+accepted by every peer — peers verify them by signature regardless of age, with **no clock-skew /
+delivery-timing window** that could reject them (this is the central contradiction the v3-draft drift-ε
+gate created — partitions longer than ε would lose data; it is gone). Convergence holds the moment
+fact-sets equalize. Any fact that is still *causally implausible* given the currently-received facts is
+**quarantined** (projected `untrusted-anachronistic`), **never discarded**, and **re-evaluated as more
+facts arrive** — so it cannot become permanent data loss. No coordinator, no quorum, no global lock
+(T-2 resolved toward *coordinator-free*).
 
 ### 4b.5 Branch-per-agent vs trunk (decision)
 
@@ -1062,12 +1209,20 @@ assembly (N1).
 
 ```ts
 // The DURABLE frontier is author-HLC space only — NO commit CIDs (C2-3, M2-2). dagTips dropped.
+type PinStatus = "pin-complete" | "pin-incomplete";  // (M3-2) incomplete until all sub-frontier facts present
 type Frontier = { perReplicaHlc: Record<ReplicaId, HlcStamp> }; // author-HLC frontier; survives concurrent excision
+// A replicaId ABSENT from perReplicaHlc means "−∞ for that replica" (m3-3): facts authored by a replica
+// not in the map are NOT ≤-frontier and are EXCLUDED. A pin thus captures exactly the replicas it
+// enumerated at pin time; a later-joining replica's low-author-HLC facts fall OUTSIDE the pin (they are
+// absent ⇒ −∞ ⇒ excluded), so the pinned subset is deterministic and not silently grown by new replicas.
 
 interface SnapshotRef {
   scope: ScopeRef;
   frontier: Frontier;                 // author-HLC frontier of the pinned fact-set (no commit CIDs)
-  factSetDigest: CID;                 // merkle digest of the pinned fact-set; THE durable resolution target — re-resolves after any rewrite (C-4, C2-3)
+  // (M3-2) A pin DENOTES the deterministically-selected subset { f ∈ S : f.authorHlc ≤ frontier[f.replicaId] }
+  //   (replicaId absent ⇒ excluded, m3-3). factSetDigest is the order-independent merkle root (over orderKey)
+  //   of THAT subset — recomputed from the current set, NOT a snapshot hash of "the set as it was when pinned".
+  factSetDigest: CID;                 // merkle root of the sub-frontier subset; THE durable resolution target — re-resolves after any rewrite (C-4, C2-3, M3-2)
   // NOTE: dagTips: CID[] is intentionally ABSENT. Commit CIDs are transport, not identity; under
   // concurrent excision they diverge per replica (C2-3), so they cannot be a durable pin target.
 }
@@ -1091,6 +1246,28 @@ asserts (m2-6) — so a subscriber never misses a revocation-induced head change
 content-addresses the same frontier plus a `factSetDigest` (the **durable** resolution target), so a
 pin **re-resolves after any excision rewrite — including concurrent excision** (C-4, C2-3) — instead of
 dangling on a stale or non-canonical commit CID. The pin contract carries **no commit CIDs** (M2-2).
+
+**Pin resolution and stability as the set grows (M3-2).** A pin does **not** denote "the bytes of the
+set at pin time"; it denotes the **deterministically-selected subset**
+`{ f ∈ S_current : f.authorHlc ≤ frontier[f.replicaId] }` (a replicaId absent from the frontier map is
+treated as `−∞` ⇒ that replica's facts are excluded, m3-3). `factSetDigest` is the **order-independent
+merkle root over `orderKey`** of *that subset*, recomputed from whatever set the resolving replica
+currently holds. Because HLC is **not globally monotone**, a *late-arriving* fact whose author-HLC is
+≤ the pinned frontier was not present when the pin was taken but **is** ≤-frontier once received — so a
+pin is **valid only when COMPLETE**: every fact ≤ frontier has been received. kip therefore defines a
+typed `PinStatus`:
+
+- **`pin-incomplete`** — the replica has **not** yet received every sub-frontier fact (it cannot yet
+  prove the subset is final). Resolution returns the `pin-incomplete` status, **never a silent partial
+  read** (N5). Completion is **monotone**: once a sub-frontier fact arrives it is never removed, so a
+  pin transitions `incomplete → complete` exactly once and never back.
+- **`pin-complete`** — every fact ≤ frontier is present; the subset is final and its `factSetDigest`
+  matches. **Two replicas that have both reached completeness for the same frontier compute the
+  identical subset ⇒ identical `factSetDigest` ⇒ the pin resolves to the same logical state on every
+  replica** (the stability the durable-pin contract requires, and what excision-survival rests on).
+
+So `factSetDigest` *is* a stable, durable address — but only as the digest of the frontier-selected
+subset, gated by completeness — not as a one-time snapshot hash of the growing store.
 
 **Temporal facts drive incremental synchronized context updates**: the context layer maintains a
 frontier cursor and pulls `FactDelta`s; sync across replicas delivers the same facts, so distributed
@@ -1227,7 +1404,7 @@ interface Repo {
   txn<T>(fn: (tx: Tx) => Promise<T>): Promise<{ result: T; commit: CID }>; // one commit per txn
   commit(message?: string): Promise<CID>;           // flush auto-batched facts
 
-  // --- facts ---  (author signs incl. HLC; ingest GATE = sig + key-registered + drift-ε; authority/revocation are proj decisions, NOT gates; schema is NOT a gate)
+  // --- facts ---  (author signs incl. HLC; ingest GATE = SIGNATURE VALIDITY ONLY; key-registration, authority, revocation, drift/backdating are ALL proj-time demotions, NOT gates; schema is NOT a gate)
   assertFact(input: AssertInput): Promise<{ factId: FactId; status: "pending" | "durable" }>; // m-9
   retractFact(input: RetractInput): Promise<{ factId: FactId; status: "pending" | "durable" }>;
 
@@ -1263,9 +1440,10 @@ interface SyncReport { received: number; sent: number; merged: number; conflicts
 Design notes:
 - **`assertFact`/`retractFact` are the substrate**; `putNode`/`putEdge` are thin sugar that compile to
   facts. There is exactly one way to change state: append a signed fact. The author stamps and signs
-  the HLC; kip's only hard ingest gates are **signature + key-registered + drift-ε** (objective,
-  set-pure, §3.2). Namespace-authorization and revocation are **set-pure demotions inside `proj`** keyed
-  on author-HLC (§3.6/§8), never ingest gates and never read against `rxFrom` (C2-1).
+  the HLC; kip's **only** hard ingest gate is **signature validity** (a pure function of the fact's
+  bytes, §3.2). Key-registration, namespace-authorization, revocation, **and** author-HLC
+  causal-plausibility (anti-backdating) are **set-pure demotions inside `proj`** keyed on author-HLC
+  (§3.6/§8), never ingest gates and never read against `rxFrom` or any receiver clock (C2-1, C3-1).
 - **No `delete`/`update`** in the surface (accretion-only, §4.1). Forgetting is `tombstone`/`excise`.
 - **`sync` and `merge` are first-class**, returning typed `conflicts` (never auto-picked).
 - **Durability** is explicit: `assertFact` returns `pending` until the commit publishes (m-9).
@@ -1283,18 +1461,21 @@ Design notes:
   what converges, §3.4). The conformance suite (§9) tests determinism by **folding random permutations
   of the full fact multiset** for a cell and asserting byte-identical output (INV-3) — not the v1
   binary-triple ACI test, which proved nothing about the real fold.
-- **Signing/provenance & trust — gate vs proj (C-6, C2-1)**: every fact is Ed25519-signed over the
-  canonical payload **including the author HLC and `publicKeyFingerprint`** (M2-1). The **ingest gate**
-  verifies only the objective triad: (i) signature, (ii) signing key is a **registered** tenant key
-  (authorized-to-sign-at-all), (iii) author-HLC `wall` within drift ε (§3.2). A fact failing any of
-  these is **not admitted** (objective, identical on every replica). **Namespace-authorization and
-  revocation are NOT ingest gates** — they are **set-pure demotions inside `proj`** that compare each
-  fact's signed **author-HLC** to the namespace-authorization / revocation `effectiveFrom` resident in
-  the set (§3.6, §8.1). A fact whose key was unauthorized-for-namespace or revoked **at its author-HLC**
-  projects `visible-but-untrusted` and loses to trusted asserts — surfaced, never silently dropped (N5),
-  and **never decided by `rxFrom`**. Verifiability ≠ trustworthiness: a revoked key's facts remain
-  *verifiable* but are *demoted* by `proj` deterministically. This makes convergence and trust composable
-  *without* injecting a replica-local quantity into `proj`.
+- **Signing/provenance & trust — signature-only gate vs proj (C-6, C2-1, C3-1, M3-4)**: every fact is
+  Ed25519-signed over the canonical payload **including the author HLC and `publicKeyFingerprint`**
+  (M2-1). The **ingest gate** verifies **only signature validity** (well-formed ∧ Ed25519 verifies) —
+  the sole predicate that is a pure function of the fact's bytes (§3.2). A fact failing it is **not
+  admitted** (objective, identical on every replica); a signature-valid fact is **always** admitted.
+  **Key-registration, namespace-authorization, revocation, AND author-HLC causal-plausibility are NOT
+  ingest gates** — they are **set-pure demotions inside `proj`** that compare each fact's signed
+  **author-HLC** to set-resident evidence (key-authorization / revocation `effectiveFrom`, causal
+  ancestry) in the set (§3.6, §8.1). A fact whose key is unregistered, unauthorized-for-namespace,
+  revoked **at its author-HLC**, or causally anachronistic projects `visible-but-untrusted`/`quarantined`
+  and loses to trusted asserts — surfaced, never silently dropped (N5), re-evaluated as facts arrive,
+  and **never decided by `rxFrom` or any receiver clock**. Verifiability ≠ trustworthiness: a revoked or
+  unregistered key's facts remain *verifiable* but are *demoted* by `proj` deterministically. This makes
+  convergence and trust composable *without* injecting any replica-local quantity into membership or
+  `proj`.
 - **Isolation**: sessions read from pinned (frontier-addressed) snapshots, so a long-running agent run
   sees a stable graph even as other replicas write.
 - **Atomicity**: a `txn` is one commit (all-or-nothing at the git level). A partially-written buffer
@@ -1315,58 +1496,95 @@ The trust set is **not** a flat, freely-writable global ref. kip defines a real 
   *authorizing* key chains, at the key-add fact's author-HLC, to the genesis root** for that namespace.
   A key-add whose chain does not reach the genesis root is **demoted-untrusted by `proj`** (set-pure,
   author-HLC keyed) — so a `key` authorizing a forger key never *grants* authority, on every replica
-  identically. (An unregistered *signing* key is caught earlier, at the objective ingest gate, §3.2.)
-  So a replica that can merely `push` **cannot** self-authorize forgery: its key-add is admitted to the
-  set but folds to *no authority*. The genesis root set itself is permanent (manifest-frozen); routine
-  rotation moves *current* signing authority via the chain without ever touching the genesis root.
+  identically. (A fact signed by an **unregistered** key — one with no set-resident `KeyAuthorization`
+  chaining to the genesis root **at the fact's author-HLC** — is **not** rejected at ingest; it is
+  **admitted** by signature alone and **demoted `untrusted`/`quarantined` by `proj`** (M3-4), becoming
+  trusted automatically if/when a valid registration for that key arrives — so a data-fact that races
+  ahead of its key's registration is never lost.) So a replica that can merely `push` **cannot**
+  self-authorize forgery: its key-add is admitted to the set but folds to *no authority*. The genesis
+  root set itself is permanent (manifest-frozen); routine rotation moves *current* signing authority via
+  the chain without ever touching the genesis root.
 
-- **Scoped authority (C-6.3, C-5).** A key authorization binds `key → { namespaces: EIDNamespace[];
-  ops: ("write" | "delegate" | "excise" | "revoke")[] }`. A key may write only EIDs in its authorized
-  namespaces (the C-5 write-authority binding); `excise`/`revoke` are **separately scoped capabilities**
-  (a write key cannot excise or revoke). Multi-tenant isolation is structural: a tenant-A key is never
-  an authority for a tenant-B namespace.
+- **Scoped authority (C-6.3, C-5, M3-1).** A key authorization binds `key → { namespaces:
+  EIDNamespace[]; ops: ("write" | "delegate" | "excise" | "revoke" | "resolve")[] }`. A key may write
+  only EIDs in its authorized namespaces (the C-5 write-authority binding); `excise`/`revoke`/`resolve`
+  are **separately scoped capabilities** (a write key cannot excise, revoke, or adjudicate conflicts).
+  `resolve` is the **single-writer adjudication scope** that lets a key author a *dominating* `supersede`
+  which clears a `kip:conflict` (§3.4, M3-1) — so contradictory concurrent resolutions cannot both be
+  authoritative. Multi-tenant isolation is structural: a tenant-A key is never an authority for a
+  tenant-B namespace.
 
 ```ts
 interface KeyAuthorization {                 // recorded as a signed fact, target.kind === "key"
   keyFpr: string;                            // SHA-256 of the authorized pubkey
   namespaces: string[];                      // STABLE namespaceIds this key may write (M2-3); authority transfers across keys for a FIXED namespace
-  ops: ("write" | "delegate" | "excise" | "revoke")[];
+  ops: ("write" | "delegate" | "excise" | "revoke" | "resolve")[]; // resolve = single-writer conflict adjudication (M3-1)
   authorizedBy: string;                      // fingerprint of the delegating key (chains to genesis root)
   effectiveFrom: HlcStamp;                   // AUTHOR-HLC: a fact is authorized iff its author-HLC ≥ this and < any later revocation (set-pure, proj decision)
 }
 interface KeyRevocation {                    // type:"revoke-key" fact; demotes, does not delete (N5)
   keyFpr: string;
-  effectiveFrom: HlcStamp;                   // AUTHOR-HLC (M2-5, C2-1): a fact is demoted iff its OWN author-HLC ≥ this. Compared to author-HLC, NEVER to receiver rxFrom.
+  effectiveFrom: HlcStamp;                   // AUTHOR-HLC (M2-5, C2-1): trust cutoff. Compared to author-HLC, NEVER to receiver rxFrom.
+  // Demotion rule (C3-3): a fact from keyFpr is demoted iff EITHER its OWN author-HLC ≥ effectiveFrom,
+  //   OR it is NOT a causal ancestor of THIS revocation fact (i.e. not in the revoker-observed causal
+  //   history) — closing the backdating band a compromised key could exploit just below effectiveFrom.
   reason: string;
   revokedBy: string;                         // must hold `revoke` scope (chains to genesis root)
 }
 ```
 
-- **Revocation is a SET-PURE proj decision keyed on AUTHOR-HLC (C-6.1, C2-1, M2-5).** Key compromise is
-  recoverable **without** rewriting history: a signed `revoke-key` fact carries `effectiveFrom` in
-  **author-HLC space**. Inside `proj`, an assert from a revoked key is demoted to **untrusted iff its
-  OWN signed author-HLC ≥ `effectiveFrom`** — a comparison between two set-resident author-HLCs, made
-  identically on every replica. `proj` then lets a trusted assert win over the untrusted segment —
-  *surfaced, not silently dropped* (N5). Because both operands live in `S` and neither is `rxFrom`, the
-  demotion is **byte-identical across replicas** (this is the C2-1 root fix: revocation no longer reads
-  the receiver-assigned, per-replica `rxFrom`). The compromised key's facts stay *verifiable* (history
-  intact) but *untrustworthy*; kip never conflates the two. A revoker can **predict exactly** which
-  facts a revocation catches — all and only those whose author-HLC ≥ `effectiveFrom` — independent of
-  any replica's ingest order. (Physical erasure of specific malicious facts is the separate,
-  `excise`-scoped operation, §4.5.) **Pre-`effectiveFrom` facts remain trusted forever** — revocation
-  never retroactively invalidates facts signed before the cutoff (M2-3), so key rotation is safe.
+- **Revocation is a SET-PURE proj decision keyed on AUTHOR-HLC, with a CAUSAL cutoff that closes the
+  backdating band (C-6.1, C2-1, M2-5, C3-3).** Key compromise is recoverable **without** rewriting
+  history: a signed `revoke-key` fact carries `effectiveFrom` in **author-HLC space**. Inside `proj`,
+  an assert from a revoked key is demoted to **untrusted iff EITHER**:
+  1. its **own signed author-HLC ≥ `effectiveFrom`** (the ordinary cutoff — catches everything dated at
+     or after the revocation), **OR**
+  2. it is **not a causal ancestor of the `revoke-key` fact** through the **set-resident `causedBy`
+     closure** — i.e. it is not in the revoker-observed causal history the revocation fact names via its
+     own signed `causedBy` (and that edge set's transitive closure over `S`), **not** the transport
+     commit-DAG (§4b.1 reconciliation). To make this defense effective a `revoke-key` fact SHOULD stamp
+     `causedBy` to pin the exact causal frontier it observed at revocation time. Once `keyFpr` is
+     revoked, **only facts the revoker had already causally observed stay trusted**; any *concurrent* or
+     *backdated* fact from the compromised key (authored after the revoker acted but stamped
+     `< effectiveFrom`) is **not** an ancestor of the revocation and is therefore demoted.
+  Both conditions are comparisons over **set-resident** quantities (author-HLCs and the signed
+  `causedBy` closure, all in `S`), made identically on every replica. This **closes the ε-width
+  backdating blind spot** a compromised key could exploit just below `effectiveFrom`: it cannot mint
+  trusted facts dated `< effectiveFrom` after the revocation, because those facts are not in the
+  revocation's causal ancestry. (Equivalently, a deployment MAY set the cutoff to `effectiveFrom −
+  ε_causal` to demote a small honest tail by author-HLC alone; the causal rule (2) is strictly
+  stronger and needs no clock.) `proj` then lets a trusted assert win over the untrusted segment —
+  *surfaced, not silently dropped* (N5). Because every operand lives in `S` and none is `rxFrom` or a
+  receiver clock, the demotion is **byte-identical across replicas** (the C2-1/C3-3 root fix). The
+  compromised key's facts stay *verifiable* (history intact) but *untrustworthy*; kip never conflates
+  the two. A revoker can **predict exactly** which facts a revocation catches: **all facts from the key
+  with author-HLC ≥ `effectiveFrom`, plus all facts from the key not in the revocation's causal
+  ancestry** — and this prediction holds **even against a compromised key**, because the attacker cannot
+  insert a post-revocation fact into the already-fixed causal history the revocation descends from.
+  (Physical erasure of specific malicious facts is the separate, `excise`-scoped operation, §4.5.)
+  **Pre-`effectiveFrom` facts that the revoker causally observed remain trusted forever** — revocation
+  never retroactively invalidates honestly-authored facts in its ancestry (M2-3), so key rotation is
+  safe.
 
-- **Backdating defense — the INGEST GATE's drift-ε bound, NOT receiver-time inside proj (C-6.2, C2-1).**
-  v2 defended backdating by comparing revocation to the receiver's `rxFrom` — security-correct but
-  convergence-fatal (it made `proj` replica-dependent, C2-1). v3 moves the defense to the **ingest
-  gate**: an honest replica **refuses to admit** a fact whose author-HLC `wall` is more than ε beyond
-  its physical clock (§3.2 step 3, M-2). An attacker holding a compromised key therefore cannot stamp an
-  author-HLC arbitrarily *before* `effectiveFrom` and *also* have honest replicas admit it — the only
-  HLCs honest replicas accept are within ε of real time, and a key revoked at `effectiveFrom` cannot
-  produce a within-ε-honest fact whose author-HLC predates `effectiveFrom` by more than ε. Thus
-  backdating is blocked at admission (a membership question, objective and set-pure), while
-  authorization/revocation themselves are decided **inside `proj` against the signed author-HLC** (a
-  value question, set-pure). Gate and proj never share a clock space, and `proj` never reads `rxFrom`.
+- **Backdating defense — a SET-RESIDENT CAUSAL rule inside proj, NOT any clock gate (C-6.2, C2-1,
+  C3-1, C3-3).** v2 compared revocation to the receiver's `rxFrom` (convergence-fatal, C2-1); a v3 draft
+  moved the defense to a **receiver-physical-clock drift-ε ingest gate** — which made set *membership*
+  replica-/time-local (admitted sets could differ permanently, C3-1) and dropped honest offline facts
+  (C3-2), and *still* left an ε-width backdating band a compromised key could exploit just below
+  `effectiveFrom` (C3-3). v3 (final) removes every clock from the defense and decides backdating **inside
+  `proj`** by two set-resident causal rules:
+  1. **Causal plausibility (§3.6, §4b.1).** A fact's author-HLC must **dominate the author-HLC of every
+     fact in its set-resident causal ancestry**; a fact stamped *before* facts it actually depends on is
+     demoted `untrusted-anachronistic`. A genuine backdate is exposed by its own (higher-author-HLC)
+     causal predecessors; an honest old fact with a causally-consistent ancestry passes (C3-2).
+  2. **Revocation causal cutoff (above).** A revoked key's facts that are **not causal ancestors of the
+     revocation fact** are demoted regardless of their self-stamped author-HLC — so a compromised key
+     **cannot** mint trusted facts dated `< effectiveFrom` after the revocation (C3-3 closed).
+  Both rules compare only set-resident author-HLCs and set-resident ancestry; **no receiver clock, no
+  `rxFrom`, no membership decision** is involved. Membership (signature only) and proj (value + trust)
+  never share a clock space, and `proj` never reads `rxFrom`. This is the only defense that
+  distinguishes a *malicious* backdate (causally inconsistent / outside the revoker's history) from an
+  *honest* late fact (causally consistent) — which a gate seeing only `f.hlc.wall` provably cannot.
 
 ### 8.2 Tenancy & scoping
 
@@ -1398,23 +1616,32 @@ asserting fact, actor, authority chain, and source. `fsck` proves `heads == proj
 namespace **at the fact's author-HLC**, and (post-excision) that no excised residue survives in
 `/heads`. **`fsck` does NOT check commit signatures** (M2-2): commit objects are transport, not trust;
 fact signatures are the sole trust anchor, so commit-author ≠ fact-author on a regenerated DAG is
-expected and not an integrity violation.
+expected and not an integrity violation. **`fsck` is a LOCAL integrity check, not a convergence check
+(m3-4):** it verifies `heads == proj(local facts)` on *one* replica; it does **not** imply two replicas
+agree. Cross-replica convergence is INV-2/INV-13's job and follows from signature-only admission
+(equal received facts ⇒ equal admitted sets ⇒ equal heads); a reader must not over-trust a green local
+`fsck` as a convergence guarantee.
 
 ### 8.4 Testability — conformance invariants (the suite kip ships)
 
 Determinism is the testing strategy. The conformance suite asserts (each INV updated to the v2 model):
 
-- **INV-1 (proj determinism + rxFrom-independence).** `proj(factSet)` ⇒ byte-identical `/heads`
-  regardless of delivery order, batching, **`rxFrom`, commit-order, or wall-clock-at-read** (C2-1). A
-  dedicated test perturbs each fact's `rxFrom`/ingest order and commit grouping and asserts `/heads`
-  is **unchanged** — proving `proj` reads no replica-local quantity. `/heads` is advisory; `fsck`
-  asserts committed `/heads == proj(facts)`.
-- **INV-2 (convergence / SEC, INCLUDING the trust overlay).** For random fact-set partitions delivered
-  in random orders to N replicas — **including key-authorization and `revoke-key` facts that cross
-  author-HLC boundaries** — all replicas reach byte-identical `/heads` and byte-identical
-  **deterministic** projections once admitted non-excised fact-sets equalize and excision markers
-  propagate (§4b.4). The suite includes the C2-1 counterexample (a fact straddling a revocation, merged
-  late on one replica) and asserts **equal** heads. Accelerator projections are excluded (see INV-5).
+- **INV-1 (proj determinism + replica-local-input independence).** `proj(factSet)` ⇒ byte-identical
+  `/heads` regardless of delivery order, batching, **`rxFrom`, commit-order, the receiver's physical
+  clock, the local key-log sync state, or wall-clock-at-read** (C2-1, C3-1). A dedicated test perturbs
+  each fact's `rxFrom`/ingest order, commit grouping, the simulated receiver clock, and key-registration
+  arrival order, and asserts `/heads` is **unchanged** — proving `proj` reads no replica-local quantity.
+  `/heads` is advisory; `fsck` asserts committed `/heads == proj(facts)`.
+- **INV-2 (convergence / SEC over the SIGNATURE-VALID admitted set — non-vacuous, C3-1).** The admitted
+  set is **exactly the signature-valid received set** (membership is signature-only, §3.2): so for
+  random fact-set partitions delivered in random orders to N replicas — **including key-authorization,
+  `revoke-key`, and backdated/anachronistic facts that cross author-HLC boundaries** — once the same
+  facts have been *received* (not gate-filtered differently!), all replicas reach byte-identical `/heads`
+  and byte-identical **deterministic** projections (modulo the bounded excision-propagation window,
+  §4b.4). The suite includes the C2-1 counterexample (a fact straddling a revocation, merged late on one
+  replica) **and** C3-1 stress (skewed receiver clocks, key-registration facts arriving *after* the data
+  facts they authorize, long offline partitions) and asserts **equal** heads — catching any membership
+  divergence, not only value divergence. Accelerator projections are excluded (see INV-5).
 - **INV-3 (reducer determinism + orderKey totality).** Every registered `CellReducer`, folded over
   **random permutations of the full fact multiset for a cell**, yields byte-identical segments; every
   reducer's final tiebreak terminates in `orderKey` (m2-1). Additionally: **no two distinct admitted
@@ -1429,14 +1656,17 @@ Determinism is the testing strategy. The conformance suite asserts (each INV upd
 - **INV-5 (projection rebuildability — scoped).** Dropping and rebuilding all **deterministic**
   projections yields byte-identical results. **Accelerator** projections (ANN/embeddings) rebuild to
   **recall-equivalent** (a recall@k threshold test), **not** byte-identical (§5.3, M-7).
-- **INV-6 (gate/proj separation + verification).** The **ingest gate** rejects only objective failures
-  (bad signature, unregistered signing key, author-HLC beyond drift ε) — and does so **identically on
-  every replica** (membership convergence). **Out-of-namespace and revoked facts are NOT rejected at
-  ingest**; they are **demoted-untrusted inside `proj` keyed on author-HLC** (C2-1) — surfaced, never
-  silently trusted or dropped. Excision preserves verifiability of remaining **fact** signatures and
-  re-folds `/heads` so no excised residue survives. **Commit signatures are NOT a trust anchor and are
-  NOT checked** (M2-2); the regenerated DAG may carry the regenerator's signature with
-  commit-author ≠ fact-author, which is allowed.
+- **INV-6 (gate/proj separation + verification — signature-only gate, C3-1, M3-4).** The **ingest gate**
+  rejects **only** signature-invalid or malformed facts (the sole byte-pure predicate) — and does so
+  **identically on every replica** (membership convergence). **Unregistered-key, out-of-namespace,
+  revoked, AND author-HLC-anachronistic facts are NOT rejected at ingest**; they are **demoted-untrusted
+  / quarantined inside `proj` keyed on author-HLC** (C2-1, C3-1, M3-4) — surfaced, never silently trusted
+  or dropped, and re-evaluated monotonically as facts arrive. A dedicated test feeds a signature-valid
+  fact whose key is *unregistered at ingest time*, asserts it is **admitted** (not lost), then delivers
+  the key-registration fact and asserts the fact becomes **trusted** on re-fold. Excision preserves
+  verifiability of remaining **fact** signatures and re-folds `/heads` so no excised residue survives.
+  **Commit signatures are NOT a trust anchor and are NOT checked** (M2-2); the regenerated DAG is
+  **unsigned** with a fixed sentinel committer and commit-author ≠ fact-author, which is allowed (M3-3).
 - **INV-7 (idempotent ingestion).** Re-ingesting any fact set is a no-op — CID dedup holds because the
   author-stamped, signed HLC is part of the CID (M-4), so the same logical fact has one CID on all
   replicas (no double-count under `pncounter`).
@@ -1455,13 +1685,34 @@ Determinism is the testing strategy. The conformance suite asserts (each INV upd
   `asOf({validTime})` on all replicas. A dedicated test perturbs `rxFrom`/ingest order and asserts the
   validTime answer is unchanged, catching any regression that leaks `rxFrom` into the validTime path.
   (This is the convergent counterpart to the per-replica belief-audit INV-4.)
-- **INV-12 (concurrent-excision pin/as-of convergence — closes m2-4, C2-3).** After **concurrent**
-  excision on different replicas, `asOf` and durable pins (`factSetDigest` + author-HLC frontier)
-  resolve **identically** across replicas, **independent of commit-CID divergence**, and the
-  **regenerated** commit DAG is identical given the equal remaining ordered set. The suite excises F1
-  on A and F2 on B concurrently, syncs, and asserts equal `/heads`, equal pin resolution, and equal
-  regenerated DAG. (This forces the C2-3 fix and prevents INV-2 from green-lighting a build whose
-  commit DAG / pins diverge while heads happen to agree.)
+- **INV-12 (concurrent-excision pin/as-of convergence + BYTE-IDENTICAL regenerated DAG — closes m2-4,
+  C2-3, M3-3).** After **concurrent** excision on different replicas, `asOf` and durable pins
+  (`factSetDigest` + author-HLC frontier) resolve **identically** across replicas, **independent of
+  commit-CID divergence**, and the **regenerated** commit DAG is **byte-identical** given the equal
+  remaining ordered set. The test asserts byte-identity of the regenerated commit objects, which holds
+  **iff** every regenerated commit field is set-derived: deterministic `orderKey`-based commit
+  boundaries, commit timestamp = the batch's max author-HLC `wall`, **fixed sentinel committer**, and an
+  **unsigned** DAG (M3-3). The suite excises F1 on A and F2 on B concurrently, syncs, and asserts equal
+  `/heads`, equal pin resolution, and **byte-identical** regenerated DAG; a build that stamps "now",
+  uses the regenerator's identity/key, or reuses transport batch boundaries **fails**. (This forces the
+  C2-3/M3-3 fix and prevents INV-2 from green-lighting a build whose commit DAG / pins diverge while
+  heads happen to agree.)
+- **INV-13 (signature-valid ⇒ eventually-admitted-everywhere — non-vacuous substrate convergence,
+  C3-1/C3-2/M3-4/m3-6).** Every **signature-valid** fact offered to any replica is **admitted by every
+  replica that receives it**, within bounded time, **regardless** of clock skew, partition length, or
+  whether its signing key's registration has arrived yet — and is **never dropped**. The suite delivers
+  signature-valid facts under adversarial clock skew, multi-day offline partitions, and
+  data-before-key-registration ordering, and asserts each fact is present in every replica's admitted set
+  after sync (a quarantined/untrusted fact still counts as *admitted*). This invariant is **only
+  statable truthfully because admission is signature-only** (the v3-draft clock/key-log gate made it
+  false); its passing is the conformance-level proof that the SEC antecedent (equal admitted sets) is
+  actually reachable, not vacuous.
+- **INV-14 (pin completeness & stability — M3-2/m3-3).** A pin resolves to the deterministically-selected
+  subset `{ f ∈ S : f.authorHlc ≤ frontier[f.replicaId] }` (replicaId absent ⇒ excluded). The suite
+  takes a pin, then delivers a **late-arriving sub-frontier fact** to one replica only, and asserts the
+  lagging replica reports **`pin-incomplete`** (never a silent partial digest mismatch); after the fact
+  syncs to all replicas, every replica reports **`pin-complete`** with the **identical** `factSetDigest`.
+  A causal anachronism or key-registration race must not change the pinned subset's digest once complete.
 
 Determinism (author-stamped HLC, fixed reducer seeds, fixed replicaIds, content-addressed everything,
 **`rxFrom` excluded from every convergent path**) makes all of these reproducible. The accelerator
@@ -1490,9 +1741,13 @@ without resolving them:
   DEFAULT reducer (never a hash tiebreak, C2-2)** and require a new dominating supersede to resolve.
   Only the *prompt design* (when to fire) remains above-core; the convergence — and the no-silent-arbitration
   guarantee — are core.
-- ~~OQ-7~~ → **core (§4b.1, M-2).** The HLC max-drift bound ε is a *core fairness/correctness* parameter
-  for `lww-hlc` (unbounded drift causes monotonic poisoning), not mere human-readability. Facts beyond
-  ε are rejected and surfaced.
+- ~~OQ-7~~ → **core (§4b.1, M-2, C3-1).** Anti-poisoning / anti-backdating is a *core
+  fairness/correctness* concern for `lww-hlc` (unbounded drift causes monotonic poisoning), not mere
+  human-readability. It is enforced **inside `proj` by a set-resident causal-plausibility rule** keyed on
+  author-HLC (a fact must dominate its set-resident causal ancestry), **never** by a receiver-clock
+  ingest gate — so set membership stays a pure function of received bytes (C3-1) and honest offline facts
+  are never dropped (C3-2). Implausible facts are **quarantined in `proj` and re-evaluated**, never
+  rejected at the gate.
 
 ---
 
