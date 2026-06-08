@@ -82,8 +82,14 @@ describe("OrchestrationRegistry", () => {
       expect(registry.getOrchestration("babysitter")).toBe(provider);
     });
 
-    it("throws when no provider registered", () => {
-      expect(() => registry.getOrchestration()).toThrow(/no orchestration provider registered/i);
+    it("provides a default orchestration provider when none explicitly registered", () => {
+      // The registry pre-registers a "babysitter" orchestration provider so the
+      // genty runtime, API commands, and tests have a working provider without
+      // loading the plugin's register.ts. See #936.
+      const provider = registry.getOrchestration();
+      expect(provider).toBeDefined();
+      expect(typeof provider.createRun).toBe("function");
+      expect(typeof provider.postEffectResult).toBe("function");
     });
 
     it("throws when named provider not found", () => {
@@ -101,23 +107,24 @@ describe("OrchestrationRegistry", () => {
       expect(registry.getOrchestration("beta")).toBe(beta);
     });
 
-    it("returns first provider when name omitted", () => {
+    it("keeps the default babysitter provider first when name omitted", () => {
       const first = stubOrchestrationProvider("first");
       const second = stubOrchestrationProvider("second");
       registry.registerOrchestration("first", first);
       registry.registerOrchestration("second", second);
 
-      expect(registry.getOrchestration()).toBe(first);
+      // "babysitter" is pre-registered, so it remains the first-wins provider.
+      expect(registry.getOrchestration()).toBe(registry.getOrchestration("babysitter"));
     });
 
-    it("lists registered provider names", () => {
+    it("lists registered provider names including the default", () => {
       registry.registerOrchestration("alpha", stubOrchestrationProvider("alpha"));
       registry.registerOrchestration("beta", stubOrchestrationProvider("beta"));
-      expect(registry.listProviders()).toEqual(["alpha", "beta"]);
+      expect(registry.listProviders()).toEqual(["babysitter", "alpha", "beta"]);
     });
 
-    it("returns empty array when nothing registered", () => {
-      expect(registry.listProviders()).toEqual([]);
+    it("lists only the default provider when nothing else registered", () => {
+      expect(registry.listProviders()).toEqual(["babysitter"]);
     });
   });
 
