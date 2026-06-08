@@ -102,6 +102,11 @@
       "types": "./dist/mcp/transport/index.d.ts",
       "require": "./dist/mcp/transport/index.js",
       "default": "./dist/mcp/transport/index.js"
+    },
+    "./microagents": {
+      "types": "./dist/microagents/index.d.ts",
+      "require": "./dist/microagents/index.js",
+      "default": "./dist/microagents/index.js"
     }
   },
   "files": [

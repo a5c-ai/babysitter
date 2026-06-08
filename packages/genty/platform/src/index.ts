@@ -13,3 +13,4 @@ export * as tasks from "./tasks";
 export * as processes from "./processes";
 export * as skills from "./skills";
 export * as plugins from "./plugins";
+export * as microagents from "./microagents";
