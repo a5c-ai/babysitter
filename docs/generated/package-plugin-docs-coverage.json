@@ -431,6 +431,18 @@
       "note": "README is the canonical package-level contract."
     },
     {
+      "surface": "packages/adapters/hooks/adapter-genty",
+      "packageName": "@a5c-ai/hooks-adapter-genty",
+      "description": "Genty harness adapter for the hooks-adapter system",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/hooks/adapter-genty/README.md",
+      "supporting": [
+        "../packages/adapters/hooks/README.md"
+      ],
+      "note": "README is the canonical package-level contract."
+    },
+    {
       "surface": "packages/adapters/hooks/adapter-oh-my-pi",
       "packageName": "@a5c-ai/hooks-adapter-oh-my-pi",
       "description": "oh-my-pi harness adapter for the hooks-adapter system",
@@ -541,6 +553,16 @@
       "hasReadme": true,
       "status": "Public package",
       "canonicalHome": "../packages/babysitter-sdk/README.md",
+      "supporting": [],
+      "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/babysitter-genty",
+      "packageName": "@a5c-ai/babysitter-genty",
+      "description": "Babysitter orchestration provider for genty — bridges genty interfaces to the babysitter-sdk runtime.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/babysitter-genty/README.md",
       "supporting": [],
       "note": "README is the canonical package-level contract."
     },
