@@ -7,6 +7,7 @@
 
 import { promises as fs } from "fs";
 import * as path from "path";
+// SDK-owned: orchestration iteration loop is the core SDK runtime engine
 import {
   orchestrateIteration,
 } from "@a5c-ai/babysitter-sdk";

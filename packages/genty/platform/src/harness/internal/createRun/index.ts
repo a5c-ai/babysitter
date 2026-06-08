@@ -30,9 +30,8 @@ import {
   emitProgress,
   discoverHarnesses,
 } from "./utils";
+// SDK-owned: adapter lookup and runs directory resolution are harness infrastructure
 import { getAdapterByName, resolveRunsDir } from "@a5c-ai/babysitter-sdk";
-// NOTE: getAdapterByName, resolveRunsDir remain as SDK imports — they are
-// harness-infrastructure concerns shared between genty and the SDK runtime.
 import { ORCHESTRATION_DEFAULTS } from "../../../utils/defaults";
 import { getProcessOutputDir, runPlanProcessPhase } from "./planProcess";
 import { runOrchestrationPhase } from "./orchestration";

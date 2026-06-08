@@ -1,13 +1,12 @@
 import * as path from "node:path";
+// SDK-owned: harness detection, compression config loading, and token
+// estimation utilities are SDK runtime infrastructure
 import {
   detectCallerHarness,
   loadCompressionConfig,
   densityFilterText,
   estimateTokens,
 } from "@a5c-ai/babysitter-sdk";
-// NOTE: detectCallerHarness, loadCompressionConfig are harness/config
-// infrastructure; densityFilterText, estimateTokens are compression
-// utilities. All shared between genty and the SDK runtime.
 import type { CompressionConfig } from "../../../types";
 import type { HarnessDiscoveryResult } from "../../types";
 import type { HarnessPromptContext } from "./prompts";

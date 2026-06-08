@@ -7,6 +7,7 @@
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+// SDK-owned: MCP server factory with babysitter tool registrations lives in SDK
 import { createBabysitterMcpServer } from "@a5c-ai/babysitter-sdk";
 
 /**

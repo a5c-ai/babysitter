@@ -7,10 +7,8 @@
 
 import type { HarnessCapability, HarnessDiscoveryResult } from "./types";
 import { HarnessCapability as Cap } from "./types";
+// SDK-owned: static harness specification registry shared across SDK and genty
 import { KNOWN_HARNESSES } from "@a5c-ai/babysitter-sdk";
-// NOTE: KNOWN_HARNESSES is the static registry of harness specifications
-// built into the SDK. This is harness infrastructure shared between
-// genty and the SDK runtime. It remains as an SDK import.
 
 // ---------------------------------------------------------------------------
 // Types

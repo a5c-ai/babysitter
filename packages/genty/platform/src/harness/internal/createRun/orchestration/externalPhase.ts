@@ -1,4 +1,5 @@
 import * as path from "node:path";
+// SDK-owned: effect index construction from journal events is an SDK runtime utility
 import {
   buildEffectIndex,
 } from "@a5c-ai/babysitter-sdk";

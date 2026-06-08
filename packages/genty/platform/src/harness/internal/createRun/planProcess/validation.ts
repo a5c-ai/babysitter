@@ -1,6 +1,7 @@
 import * as path from "node:path";
 import { promises as fs } from "node:fs";
 import { pathToFileURL } from "node:url";
+// SDK-owned: task registry reset needed before re-importing process definitions
 import { resetGlobalTaskRegistry } from "@a5c-ai/babysitter-sdk";
 import { getGlobalRegistry } from "../../../../orchestration/global";
 import {
@@ -48,6 +49,7 @@ const dynamicImportModule: (specifier: string) => Promise<Record<string, unknown
 })();
 
 async function ensureSdkResolvable(workspaceDir: string): Promise<void> {
+  // SDK-owned: resolve SDK package location to symlink into workspace for process validation
   const sdkPkg = path.dirname(require.resolve("@a5c-ai/babysitter-sdk/package.json"));
   const targetNodeModules = path.join(workspaceDir, "node_modules");
   const targetSdkDir = path.join(targetNodeModules, "@a5c-ai", "babysitter-sdk");

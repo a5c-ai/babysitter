@@ -2,6 +2,7 @@ import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { WorkspaceService } from "@a5c-ai/comm-adapter";
 import { getAdapterByName } from "../../../";
+// SDK-owned: session marker I/O is SDK runtime state management
 import { getSessionMarkerPath, readSessionMarker } from "@a5c-ai/babysitter-sdk";
 import { getGlobalRegistry } from "../../../../orchestration/global";
 import { updateSessionContext } from "../../../../session/context";

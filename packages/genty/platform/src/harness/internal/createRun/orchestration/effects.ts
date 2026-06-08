@@ -46,6 +46,7 @@ import {
 } from "../../../../session/history";
 import { getAdapterByName } from "../../../";
 import type { StreamingOutputOptions } from "../../../types";
+// SDK-owned: orchestration iteration loop is the core SDK runtime engine
 import {
   orchestrateIteration,
 } from "@a5c-ai/babysitter-sdk";

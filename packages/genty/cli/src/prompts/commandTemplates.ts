@@ -246,7 +246,7 @@ Include execution results prominently before the phase summary.
  * templates/commands/ subdirectory.
  */
 function resolveSdkTemplatePath(templateName: string): string {
-  // require.resolve finds the SDK's dist/index.js; go up to dist/, then into prompts/templates/commands/
+  // SDK-owned: command prompt templates are shipped in the SDK dist/prompts/ tree
   const sdkEntry = require.resolve("@a5c-ai/babysitter-sdk");
   const sdkDist = path.dirname(sdkEntry);
   return path.join(sdkDist, "prompts", "templates", "commands", `${templateName}.md`);

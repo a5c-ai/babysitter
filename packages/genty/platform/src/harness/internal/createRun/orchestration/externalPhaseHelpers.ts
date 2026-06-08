@@ -4,6 +4,7 @@
  */
 
 import * as path from "node:path";
+// SDK-owned: prompt composition utilities for process creation prompts
 import {
   createPromptContextFromCatalog,
   composeProcessCreatePrompt,

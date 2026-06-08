@@ -10,13 +10,13 @@
  */
 
 import * as path from "node:path";
+// SDK-owned: adapter creation, session state normalisation, and internal
+// context factory are harness-infrastructure shared with the SDK runtime
 import {
   createClaudeCodeAdapter,
   normalizeSessionStateDir,
   createInternalContext,
 } from "@a5c-ai/babysitter-sdk";
-// NOTE: These adapter/session SDK functions are harness-infrastructure
-// concerns shared between genty and the SDK runtime.
 import type { PromptContext } from "../types";
 import type {
   HarnessAdapter,

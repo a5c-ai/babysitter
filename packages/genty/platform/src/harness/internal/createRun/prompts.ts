@@ -1,6 +1,8 @@
 import type { HarnessDiscoveryResult } from "../../types";
 import type { SessionHistory } from "../../../session/types";
 import type { ExternalAgentDiscovery, ExternalAgentInfo } from "../../../types";
+// SDK-owned: process library resolution and prompt composition are SDK-native
+// prompt authoring utilities consumed during the plan-process phase
 import {
   createPromptContextFromCatalog,
   composeProcessCreatePrompt,

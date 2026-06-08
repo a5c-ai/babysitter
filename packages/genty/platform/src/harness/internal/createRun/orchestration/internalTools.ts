@@ -1,6 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import { createAgentCoreToolDefinitions } from "@a5c-ai/genty-core";
 import { buildBreakpointEffectResult } from "./internalToolsHelpers";
+// SDK-owned: prompt composition utilities for process creation prompts
 import {
   createPromptContextFromCatalog,
   composeProcessCreatePrompt,

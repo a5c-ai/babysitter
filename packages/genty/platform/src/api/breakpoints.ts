@@ -7,6 +7,8 @@
  */
 
 import * as crypto from "node:crypto";
+// SDK-owned: breakpoint rule management, hook execution, task result
+// serialisation, and run locking are SDK runtime primitives
 import {
   addRule,
   callHook,

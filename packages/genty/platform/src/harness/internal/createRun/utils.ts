@@ -413,8 +413,7 @@ export {
 } from "../../../interaction";
 export { createAgentCoreSession } from "@a5c-ai/genty-core";
 export type { AgentCoreSessionHandle } from "@a5c-ai/genty-core";
+// SDK-owned: harness discovery is SDK infrastructure shared with genty
 export { discoverHarnesses } from "@a5c-ai/babysitter-sdk";
-// NOTE: discoverHarnesses is harness infrastructure shared between
-// genty and the SDK runtime.
 export { BabysitterRuntimeError, ErrorCategory } from "../../../utils/errors";
 export { Type } from "@sinclair/typebox";

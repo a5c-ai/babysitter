@@ -18,6 +18,8 @@ export type {
 } from "./types";
 
 export { HarnessCapability } from "./types";
+// SDK-owned: harness registry, discovery, and adapter resolution are SDK-native
+// infrastructure shared between genty and the SDK runtime
 export {
   discoverHarnesses,
   detectCallerHarness,
@@ -30,8 +32,6 @@ export {
   setAdapter,
   resetAdapter,
 } from "@a5c-ai/babysitter-sdk";
-// NOTE: Harness registry functions are harness-infrastructure concerns
-// shared between genty and the SDK runtime. They remain as SDK imports.
 export {
   createAgentCoreToolDefinitions,
   disposeAgentCoreToolDefinitions,

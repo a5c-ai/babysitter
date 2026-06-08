@@ -27,11 +27,13 @@ export type JsonRecord = Record<string, unknown>;
 // These are types returned by SDK runtime functions that genty calls.
 // By re-exporting from a single file we avoid N scattered SDK imports.
 
+// SDK-owned: journal event schema is defined and versioned in the SDK
 export type {
   JournalEvent,
   AppendEventResult,
 } from "@a5c-ai/babysitter-sdk";
 
+// SDK-owned: orchestration runtime types — effect lifecycle, iteration, process context
 export type {
   EffectAction,
   IterationResult,
@@ -50,11 +52,13 @@ export type {
   EffectSchedulerHints,
 } from "@a5c-ai/babysitter-sdk";
 
+// SDK-owned: prompt/compression config types consumed by SDK runtime functions
 export type {
   PromptContext,
   CompressionConfig,
 } from "@a5c-ai/babysitter-sdk";
 
+// SDK-owned: runtime configuration value type used for dynamic config
 export type { RuntimeConfigValueType } from "@a5c-ai/babysitter-sdk";
 
 // ── Effect index (locally defined; matches SDK shape) ────────────────────
@@ -130,10 +134,12 @@ export interface AutoApprovalResult {
   effectiveCategory?: ActionCategory;
 }
 
+// SDK-owned: breakpoint configuration schema defined in SDK
 export type { BreakpointConfig } from "@a5c-ai/babysitter-sdk";
 
 // ── External agents (re-exported from SDK) ───────────────────────────────
 
+// SDK-owned: agent discovery interfaces defined in SDK runtime
 export type {
   ExternalAgentInfo,
   ExternalAgentDiscovery,
@@ -143,6 +149,7 @@ export type {
 // The governance engine in genty consumes these types directly from the SDK
 // policy evaluation layer.
 
+// SDK-owned: policy engine types — governance evaluation is an SDK-native concern
 export type {
   PolicyRuleKind,
   PolicyConditionOp,

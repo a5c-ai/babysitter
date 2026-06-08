@@ -5,6 +5,7 @@
  * effects.  All functions return ApiResult envelopes and never throw.
  */
 
+// SDK-owned: task result serialisation and run locking are SDK runtime primitives
 import {
   serializeAndWriteTaskResult,
   withRunLock,
