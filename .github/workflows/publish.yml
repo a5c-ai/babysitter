@@ -2587,3 +2587,13 @@ jobs:
       branch: ${{ github.ref_name }}
       ref: ${{ github.sha }}
     secrets: inherit
+
+  sync_atlas_plugins:
+    name: Sync Atlas Plugins
+    needs:
+      - create_release_tag
+    uses: ./.github/workflows/sync-atlas-plugins.yml
+    with:
+      branch: ${{ github.ref_name }}
+      ref: ${{ github.sha }}
+    secrets: inherit
