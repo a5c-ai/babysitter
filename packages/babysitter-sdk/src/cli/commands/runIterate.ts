@@ -28,6 +28,26 @@ import {
   parseHookDecision,
 } from "./runIterateHelpers";
 import { resolveExternalAgentEffectsForRun } from "../../harness/hooks/externalAgentEffect";
+import { getAdapterByName, setAdapter } from "../../harness";
+
+/**
+ * Pin the active harness adapter to the harness recorded in run.json so that
+ * run:iterate honors the run's recorded harness instead of re-detecting it from
+ * the ambient environment (issue #949). Re-detection is unreliable: a run
+ * created with `--harness claude-code` could otherwise resolve a different
+ * harness (e.g. one whose caller env vars happen to be set), then hard-fail on
+ * adapter resolution. Falls through to the existing env-based detection when no
+ * harness is recorded or the recorded harness is unknown to the registry.
+ *
+ * @returns true when the active adapter was pinned to the recorded harness.
+ */
+export function pinActiveAdapterToRecordedHarness(harness: string | undefined): boolean {
+  if (!harness) return false;
+  const adapter = getAdapterByName(harness);
+  if (!adapter) return false;
+  setAdapter(adapter);
+  return true;
+}
 
 export interface RunIterateOptions {
   runDir: string;
@@ -74,6 +94,11 @@ export async function runIterate(options: RunIterateOptions): Promise<RunIterate
   // Read run metadata
   const metadata = await readRunMetadata(runDir);
   const runId = metadata.runId;
+
+  // Honor the harness recorded at run-creation time over ambient env detection
+  // (issue #949). Without this, orchestrateIteration's lazy getAdapter() could
+  // resolve a different harness from the environment and hard-fail.
+  pinActiveAdapterToRecordedHarness(metadata.harness);
 
   // Determine iteration number from state cache or journal
   const iterationCount = await detectIterationCount(runDir);
