@@ -136,6 +136,35 @@ function rewritePackageJson(repoDir, target) {
   writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
 }
 
+// Claude-plugin-format repos need `.claude-plugin/marketplace.json` so
+// `claude plugin marketplace add <repo>@<branch>` works on every branch (issue #955).
+function writeRepoMarketplace(repoDir) {
+  const pluginJsonPath = join(repoDir, '.claude-plugin', 'plugin.json');
+  if (!existsSync(pluginJsonPath)) return;
+  const plugin = JSON.parse(readFileSync(pluginJsonPath, 'utf8'));
+  const author =
+    plugin.author && typeof plugin.author === 'object'
+      ? plugin.author
+      : { name: typeof plugin.author === 'string' ? plugin.author : 'a5c.ai' };
+  const marketplace = {
+    name: 'a5c.ai',
+    owner: { name: 'a5c.ai', email: 'support@a5c.ai' },
+    plugins: [
+      {
+        name: plugin.name,
+        source: './',
+        description: plugin.description ?? '',
+        version: plugin.version,
+        author,
+      },
+    ],
+  };
+  writeFileSync(
+    join(repoDir, '.claude-plugin', 'marketplace.json'),
+    `${JSON.stringify(marketplace, null, 2)}\n`,
+  );
+}
+
 function writeExternalReleaseFiles(repoDir, target) {
   mkdirSync(join(repoDir, '.github', 'workflows'), { recursive: true });
   mkdirSync(join(repoDir, 'scripts'), { recursive: true });
@@ -243,6 +272,7 @@ function prepareTarget(target) {
     rmSync(join(repoDir, entry), { recursive: true, force: true });
   }
   copyTree(source, repoDir);
+  writeRepoMarketplace(repoDir);
   rewritePackageJson(repoDir, target);
   writeExternalReleaseFiles(repoDir, target);
   writeFileSync(join(repoDir, 'RELEASE.md'), `# Release flow\n\n- Pushes to \`develop\`, \`staging\`, and \`main\` create immutable \`release/<branch>/v<version>-<sha>\` tags.\n- Publishing runs only from release tags.\n- Source content is synced by \`a5c-ai/babysitter\` via \`scripts/sync-atlas-plugin-repos.mjs\`.\n`);
