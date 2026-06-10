@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+/*
+ * A5C Commander — command-deck theme tokens (SPEC §10).
+ * Near-black blue-charcoal base (#0a0e14 family), glass panels,
+ * one restrained accent per adapter faction, mono accent for numbers.
+ */
+@theme {
+  /* base surfaces */
+  --color-deck-950: #06080d;
+  --color-deck-900: #0a0e14;
+  --color-deck-800: #10151f;
+  --color-deck-700: #1a2130;
+  --color-deck-600: #242d40;
+
+  /* map floor */
+  --color-grid-line: #131a27;
+
+  /* HUD text */
+  --color-hud-text: #c9d6e8;
+  --color-hud-dim: #74849c;
+  --color-hud-bright: #eef4fc;
+
+  /* glass panel chrome */
+  --color-glass-border: rgb(125 165 225 / 0.18);
+  --color-glass-fill: rgb(16 21 31 / 0.55);
+
+  /* adapter faction accents (cyan / magenta / amber / green families) */
+  --color-faction-claude: #2dd4ee;
+  --color-faction-codex: #e26bf5;
+  --color-faction-gemini: #f5b62d;
+  --color-faction-pi: #34d98c;
+
+  /* status accents */
+  --color-status-alert: #f3655a;
+  --color-status-warn: #f5b62d;
+  --color-status-ok: #34d98c;
+  --color-status-info: #2dd4ee;
+
+  /* selection / glow */
+  --color-selection-ring: #7dd7f0;
+
+  /* mono accent for numbers (SPEC §10: single mono accent) */
+  --font-mono-hud:
+    ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-deck-900);
+    color: var(--color-hud-text);
+    font-family:
+      system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+      sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* keyboard-only operation must stay visible (SPEC §14) */
+  :focus-visible {
+    outline: 2px solid var(--color-selection-ring);
+    outline-offset: 2px;
+  }
+}

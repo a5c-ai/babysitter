@@ -1,0 +1,10 @@
+{
+  "repoRoot": "C:/Users/tmusk/IdeaProjects/babysitter/.claude/worktrees/priceless-brown-30ef2c",
+  "appDir": "apps/commander",
+  "specPath": "apps/commander/SPEC.md",
+  "devPort": 5199,
+  "designScoreThreshold": 85,
+  "maxFixAttempts": 4,
+  "maxE2eRounds": 5,
+  "maxPolishRounds": 3
+}
