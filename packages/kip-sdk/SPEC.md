@@ -2115,6 +2115,42 @@ kip deliberately mines that technique — composition is the ordered graph of re
 compatible match of) `steps[i+1].sourceKind`; a `Segment` violating this is ill-typed and MUST NOT be
 compiled or surfaced as an alternative (folded into INV-A2's compile-determinism check).
 
+**Composition-discovery across DIFFERENT contextual relations (patent functionality-DB chaining).** The
+patent's functionality DB lets the engine **DISCOVER a CHAIN of functionalities spanning DIFFERENT
+contextual relations** to satisfy a linkage that **no single functionality covers** — its canonical
+example chains a *search* relation into a *currency-exchange* relation to answer "the price in **any**
+currency," a linkage neither relation supplies alone. kip realizes this during **compile**: when no single
+registered `FunctionalityBinding` realizes the requested `(seed → target)` linkage, the compiler MAY
+**search the ontology graph** for an ordered chain of bindings — each drawn from a possibly **different**
+`EdgeKind`/contextual relation — whose `targetKind → sourceKind` types compose end-to-end into a
+well-typed `Segment` (the same well-typedness rule above). This is **distinct from the intra-segment
+chaining** described just above (which composes steps *within one already-matched relation's* declared
+path): composition-discovery *constructs* the multi-relation `Segment` itself by linking **separate**
+functionalities the author never declared as one path. The search is a **pure, `proj`-total compile-time
+read over the ontology graph** at `asOf` (a deterministic shortest-/all-paths walk over the registered
+bindings, ties broken by `weight` desc then the §3.4 `orderKey`/`factCID` tiebreak), reads no replica-local
+state, and emits **no fact** until the discovered chain is executed; on execution it follows the ordinary
+`assert`/`derived_from` signing path (INV-A1). Multiple discovered chains satisfying one linkage are
+surfaced as a **typed choice** (`Segment.alternatives`), never auto-collapsed to one (N5, INV-A7). Because
+discovery is a pure compile-over-`proj` search that yields an ordinary well-typed `Segment`, it is covered
+by **INV-A2** (two replicas discover the **byte-identical** chain set) and **INV-A7** (multi-chain typed
+choice) — it adds no new substrate input and no new determinism surface.
+
+> **Decision (D-5b.9): the engine MAY discover a multi-relation CHAIN of functionalities to satisfy a
+> linkage no single relation covers (the patent's search→currency-exchange "price in any currency"), as a
+> pure compile-time `proj`-search over the ontology graph.** Composition-discovery constructs a well-typed
+> `Segment` by linking SEPARATE registered bindings across DIFFERENT contextual relations (distinct from
+> intra-segment step chaining within one declared path). The search reads only `proj` at `asOf`, is
+> deterministic (ties via `weight` then §3.4 tiebreak), emits **no** fact until execution, and on execution
+> signs ordinary `assert`/`derived_from` facts (INV-A1) — so it is byte-identical across replicas (INV-A2)
+> and surfaces multiple discovered chains as a typed choice, never auto-picked (INV-A7, N5).
+>
+> **Rejected alternative — require every cross-relation linkage to be hand-declared as a single
+> functionality (no discovery), or run the chain search at dispatch time as a live heuristic.** Hand-
+> declaration cannot answer linkages the patent explicitly composes from separate relations; a dispatch-
+> time heuristic search would make the chosen chain replica-local and irreproducible. Rejected: the
+> functionality DB is set-resident map data and the chain search is a pure, total function of `proj`.
+
 **Single-step-query decomposition + dependency-ordered DAG execution (patent claim 1(d)(e)/claim 4/claim
 24).** The patent names a specific technique: "dividing said query to a NUMBER OF SINGLE-STEP QUERIES" and
 "iteratively executing … in an ORDER MATCHING DEPENDENCIES in said subgraph," the matched subgraph being
@@ -2147,7 +2183,7 @@ hazard (N5), exactly the malformed-declared-data class the `weight`/`range` rule
 > sort using a replica-local heuristic / dispatch order.** A strictly-linear chain cannot express a
 > multi-input join or two converging branches the patent's "plurality of sub-graphs" contemplates; a
 > replica-local sort makes the execution order — and therefore which intermediate facts get authored
-> first — replica-dependent, re-introducing a non-deterministic quantity into a path that must compile
+> first — replica-dependent, re-introducing a non-deterministic quantity into a path that MUST compile
 > identically everywhere. Rejected: the DAG is declared map data and the topological order is a pure,
 > total function of `proj`.
 
@@ -2308,7 +2344,7 @@ blocks may therefore appear out of numeric order across §5b.1–§5b.3.)*
 >
 > **Rejected alternative — evaluate weight/condition at dispatch time as a live runtime score.** A
 > per-replica runtime float would make segment ordering and hop-gating replica-local and irreproducible,
-> re-introducing a non-deterministic quantity into what must be a pure compile-over-`proj` read. Rejected:
+> re-introducing a non-deterministic quantity into what MUST be a pure compile-over-`proj` read. Rejected:
 > the patent's "weighted/conditional relation" is map data (a fact), evaluated deterministically.
 
 > **Decision (D-5b.7): kip adapts THREE distinct patent relation facets — claim-8 CONSTRAINT, claim-12
@@ -2403,10 +2439,10 @@ function converged(s: LearnerLoopState): "accept" | "exhausted" | "continue" {
 ```
 
 **Manifest selection is explicit (N5), mirroring `registerFunctionality`.** Before the loop runs, the
-orchestrator must know *which* encode/decode/learner/loss microagents realize it for this artifact. kip
+orchestrator MUST know *which* encode/decode/learner/loss microagents realize it for this artifact. kip
 does **not** infer them from `rawKind` or any heuristic — the caller **names** each by `(name, version)`
 via `LearnOptions.{encode,decode,learner,loss}` (the §5b.2 dual of §5b.1's explicit `registerFunctionality`
-binding). Those selected `(name,version)` triple are exactly the ones the `kip:learn` fact records in its
+binding). Those selected `(name,version)` pairs are exactly the ones the `kip:learn` fact records in its
 key `(rawRef, ontologyAsOf, encode/decode/learner-manifest)`, so the recorded result is reproducible
 against the *same named agents*. A named manifest that is unregistered/unsigned is **rejected**, never
 silently substituted (N5). The artifact's content-kind is likewise declared once (`LearnOptions.rawKind`)
@@ -2507,7 +2543,7 @@ convergence; both fold into the union, but the resolution differs by **sub-case*
   `kip:learn-exhausted` marker **coexists as inert, accreting provenance**. (Under default-`now` keying
   even two `accept`s occupy different cells and both project trusted — see the keying caveat above.)
 
-A reader must not mistake the search outcome for a determinism guarantee on the active layer; only the
+A reader MUST NOT mistake the search outcome for a determinism guarantee on the active layer; only the
 *recorded* fact is substrate, and `proj` **never** re-runs the loop.
 
 **Reversibility & audit.** A learned fact set is ordinary substrate: it is revertible via `tombstone`
@@ -2731,7 +2767,7 @@ interface LearnOptions {
    *  `MicroagentManifest` the loop dispatches for THIS run. This is the explicit manifest-selection seam
    *  (the §5b.2 dual of `registerFunctionality`'s explicit binding for §5b.1): kip NEVER silently picks a
    *  manifest by `rawKind` or any heuristic (N5) — the caller names exactly which agents realize the loop,
-   *  and those `(name,version)` triple are the very ones recorded in the `kip:learn` fact's key
+   *  and those `(name,version)` pairs are the very ones recorded in the `kip:learn` fact's key
    *  `(rawRef, ontologyAsOf, encode/decode/learner-manifest)` (§5b.2). An unregistered/unsigned named
    *  manifest is rejected, never substituted. */
   encode: { name: string; version: string };
@@ -3264,14 +3300,16 @@ Determinism is the testing strategy. The conformance suite asserts (each INV upd
   cap-bounded retention, **fails**.
 
 **Active-layer conformance invariants (§5b — the suite ships these too).** INV-A1 (§5b) is the prose
-load-bearing rule; INV-A2..INV-A12 are its §8.4-style testable counterparts, each with an adversarial
+load-bearing rule; INV-A2..INV-A14 are its §8.4-style testable counterparts, each with an adversarial
 recipe mirroring INV-1..19. They cover compile-determinism (A2), dispatch no-fallback including the
 claim-8 constraint-violation outcome (A3), learner replica-fold (A4), budget termination over all three
 disjunctive axes (A5), hop idempotence/node-merge (A6), multi-segment/multi-realizer typed choice (A7),
 answer-graph projection (A8), proj-totality + loss-exclusion (A9), the acquisition family lifecycle and
 divergent-registration conflict (A10), the `same_as` equivalence-closure totality + disputed-merge
-conflict (A11), and the learner accept-if-improved monotonicity + `LearnOptions`↔`LearnerLoopState`
-budget-agreement (A12) — **without** touching the convergence core.
+conflict (A11), the learner accept-if-improved monotonicity + `LearnOptions`↔`LearnerLoopState`
+budget-agreement (A12), the explicit encode/decode/learner manifest selection + unregistered-name
+rejection (A13), and the once-declared `rawKind` threaded unchanged into every decode (A14) — **without**
+touching the convergence core.
 
 - **INV-A1 (microagents are clients, never the substrate — §5b).** The suite asserts that **no** active-
   layer path (`registerFunctionality`/`runContextualQuery`/`runAcquisition`/`learn`) mutates `/heads`
@@ -3385,6 +3423,23 @@ budget-agreement (A12) — **without** touching the convergence core.
   the matching `LearnOptions` fields — proving the two shapes name **one** contract and agree. A build in
   which the seeded budget/threshold disagrees with `LearnOptions` (e.g. a dropped or renamed axis)
   **fails**.
+- **INV-A13 (learn() uses the EXPLICITLY-SELECTED encode/decode/learner manifests — never a heuristic
+  pick).** The suite registers **two** distinct, signed encode (and decode, and learner) manifests, then
+  drives `learn()` with a `LearnOptions` that names **one** of each by `(name, version)`, and asserts the
+  loop dispatches **exactly** the named manifests — never the other registered manifest, and never a
+  manifest chosen by inspecting `rawKind` or any content heuristic (it perturbs `rawKind` while holding
+  the selectors fixed and asserts the dispatched agents are unchanged). It then drives `learn()` with a
+  `LearnOptions.{encode|decode|learner|loss}` naming a manifest that is **unregistered** (or registered
+  but **unsigned**) and asserts `learn()` is **rejected before the loop runs** — **no** dispatch, **no**
+  `kip:learn`/`kip:learn-exhausted` fact authored, and the cells stay `Unknown`. A build that selects a
+  manifest by `rawKind`/heuristic when the named one is absent, silently substitutes a registered
+  manifest for an unregistered name, or runs the loop on an unselected manifest, **fails** (N5).
+- **INV-A14 (rawKind declared ONCE, threaded UNCHANGED into every decode).** The suite drives a
+  multi-iteration `learn()` and captures the `rawKind` argument of **every** `DecodeAgent` invocation
+  across the loop, and asserts each one is **byte-identical** to the single `LearnOptions.rawKind` sourced
+  at `learn()` entry — never re-inferred per-iteration, never caller-asserted mid-loop, so encode and
+  decode always agree on the kind. A build that re-infers or mutates `rawKind` between iterations (so two
+  decode calls in the same run see different kinds) **fails**.
 
 Determinism (author-stamped HLC, fixed reducer seeds, fixed replicaIds, content-addressed everything,
 **`rxFrom` excluded from every convergent path**) makes all of these reproducible. The accelerator
