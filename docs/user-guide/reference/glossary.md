@@ -2,7 +2,7 @@
 
 **Version:** 1.1
 **Last Updated:** 2026-01-26
-Last refreshed: 2026-04-25
+Last refreshed: 2026-06-10
 **Audience:** All users
 
 This glossary provides definitions for technical terms and concepts used in Babysitter documentation. Terms are organized alphabetically with cross-references to related concepts and links to detailed documentation.

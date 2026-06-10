@@ -4,7 +4,7 @@
 
 > **Note:** hermes-agent is included as a 10th supported agent per project requirements, extending the original scope's 9 agents. All ten built-in agents (claude, codex, gemini, copilot, cursor, opencode, pi, omp, openclaw, hermes) share the same event contract.
 
-Last refreshed: 2026-04-25
+Last refreshed: 2026-06-10
 
 ---
 

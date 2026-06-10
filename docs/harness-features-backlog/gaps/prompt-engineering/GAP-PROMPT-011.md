@@ -7,7 +7,7 @@
 | Effort | S |
 | Status | Missing |
 
-Last refreshed: 2026-04-25
+Last refreshed: 2026-06-10
 
 ## Description
 Include output efficiency guidelines in orchestration prompts to reduce token consumption from verbose delegated agent output. Long-running orchestrations accumulate context quickly; concise output from each iteration preserves token budget for actual work.
