@@ -88,3 +88,27 @@ journals, or state cache entries.
 Subagent scratch work must not live under `<runDir>/work`. Runtime task
 resolution emits a non-destructive warning when `<runDir>/work` exists and is
 non-empty; the SDK reports the leak but does not delete user data.
+
+## Execution policy (env gates)
+
+When babysitter runs **through a plugin/host harness** (e.g. inside Claude Code),
+the default is **emit-only**: `run:iterate` returns pending effects for the host
+harness or human orchestrator to perform, and does **not** dispatch other
+harnesses or auto-execute tasks itself. Two environment variables opt into
+auto-execution (both default **OFF**):
+
+| Env var | Default | Enables |
+| --- | --- | --- |
+| `BABYSITTER_CROSS_SUBAGENTS` | off | Cross-harness auto-dispatch of `agent` and `skill` effects (via the agent adapters / tasks-adapter). |
+| `BABYSITTER_EXECUTE_TASKS` | off | Auto-execution of `shell` and `node` effects. |
+
+Truthy values are `1` or `true` (case-insensitive); everything else (incl. unset
+and empty) is off. The gates are read at call time and apply in both the SDK
+iterate/stop-hook path and the genty platform `resolveEffect` /
+`resolveAndPostEffect` seams.
+
+With both off (the default), nothing in the iterate path resolves or constructs
+a harness adapter via `@a5c-ai/adapters` — this is why an emit-only run never
+hard-fails on adapter resolution (see issue #949). The **genty** programmatic
+harness sets both vars on at its autonomous entrypoint, so standalone genty still
+auto-executes; only emit-only/plugin contexts default to emitting.
