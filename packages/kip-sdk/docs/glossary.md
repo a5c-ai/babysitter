@@ -33,6 +33,11 @@ by construction (sorts once by a total `orderKey`, then sweep-line folds). All t
 adjacency, salience-with-fixed-weights) are byte-identical across replicas; **accelerator**
 projections (ANN/embeddings) are best-effort, *not* byte-identical (§5.3, INV-5). (§1)
 
+**RRF (Reciprocal Rank Fusion)** — The rank-only fusion step of hybrid retrieval:
+`score(d) = Σ_r 1/(rrfK + rank_r(d))` over the per-retriever ranks (vector / graph-proximity / salience).
+Uses ranks only (never raw scores), so heterogeneous retrievers fuse without score calibration. (§5.1;
+see [retrieval](./26-retrieval.md))
+
 **`orderKey`** — The total order `proj` sorts the admitted fact set by before folding. Every reducer's
 final tiebreak MUST terminate in `orderKey`, so resolution is always total and deterministic (INV-3).
 Reads author-HLC only; never `rxFrom`, never reconstruction loss. (§3.4)
@@ -77,10 +82,22 @@ verifies over the canonical payload). Decides set *membership* only; a pure func
 bytes ⇒ identical on every honest replica. **Never** decides a projected value, and **never** consults
 drift, key-registration, authority, or revocation (C2-1, C3-1, M3-4). (§3.2)
 
-**PROJ-demotion** — All trust decisions — key-registration, namespace-authorization, revocation, *and*
-author-HLC causal plausibility (anti-backdating) — made **inside `proj`**, keyed on author-HLC over the
-admitted set. Set-pure ⇒ convergent. A demoted fact is `untrusted`/`quarantined`, never dropped, and
-re-evaluated monotonically as facts arrive. (§3.6, §8.1)
+**PROJ-demotion** (also written **`proj`-demotion** / **proj-time demotion**) — All trust decisions —
+key-registration, namespace-authorization, revocation, *and* author-HLC causal plausibility
+(anti-backdating) — made **inside `proj`**, keyed on author-HLC over the admitted set. Set-pure ⇒
+convergent. A demoted fact is `untrusted`/`quarantined`, never dropped, and re-evaluated monotonically
+as facts arrive. (§3.6, §8.1)
+
+**Projection trust states** — The trust label `proj` stamps on each admitted fact (the core output
+vocabulary of a PROJ-demotion):
+`trusted | pending | untrusted-anachronistic | untrusted-malformed | quarantined`. **`trusted`** —
+projects over a complete, authorized, non-anachronistic chain. **`pending`** — chain not yet complete
+(e.g. a `(wall,counter)` gap from a missing/evicted same-key link), held back, never silently trusted.
+**`untrusted-anachronistic`** — a same-key higher-author-HLC non-ancestor fact exists in the complete
+chain (backdating). **`untrusted-malformed`** — a forward (`> child`) or cyclic `causedBy` edge (§3.6).
+**`quarantined`** — demoted for trust (e.g. unregistered/unauthorized key), retained not dropped. This
+is a **trust** axis stamped by `proj`; it is **orthogonal** to the byte-retention `RetentionClass`
+axis, and the trust state `quarantined` is **not** the retention class `quarantined-ttl`. (§3.6, §8.1)
 
 **Causal plausibility** — A set-pure anti-backdating rule (replaces the v2 receiver-clock drift gate). A
 fact `F` from key `K` projects **trusted** only over `K`'s **complete gap-free `(wall,counter)` chain**
@@ -95,12 +112,21 @@ given EID **namespace** and/or perform scoped ops (excise, revoke), **as of an a
 Key-registration, namespace authority, and revocation are **all** proj decisions keyed on author-HLC;
 **only** signature validity is an ingest-gate predicate. (§2.4, §8)
 
-**SEC** — The convergence guarantee: convergence = **set-convergence** (the fact set is a G-Set/CRDT
+**SEC (Strong Eventual Consistency)** — The convergence guarantee: convergence = **set-convergence** (the fact set is a G-Set/CRDT
 under union) **+ projection determinism** (`proj` is pure and total). Under partial replication it is
 stated **per-shared-subset** / on the complete durable subset (C4-1, M5-1, C5-1). (§4b.4, §7; see
 [convergence](./24-synchronization-and-convergence.md))
 
 ## Forgetting
+
+**RetentionClass** — The per-fact **byte-retention** class `proj` computes as a pure function of `S`,
+read by the transport layer to decide eviction:
+`{durable, key-chain-durable, quarantined-ttl, evicted}`. **`durable`** — a trusted-author fact, MUST
+NOT be evicted. **`key-chain-durable`** — a registered key's chain, preferentially retained up to
+`keyChainDurableCapBytes` (M6-1). **`quarantined-ttl`** — an unregistered-key fact stored under a
+bounded per-key cap + TTL + global pool budget (m5-1). **`evicted`** — bytes freed. This is a
+**byte-retention** axis, **orthogonal** to the projection-trust axis (Projection trust states); the
+retention class `quarantined-ttl` is **not** the trust state `quarantined`. (§3.5a, INV-18)
 
 **Tombstone (logical)** — Signature-preserving forgetting via a retraction fact; pure append-only,
 keeps verifiability of what remains. (§4.5; see [temporality](./23-temporality-and-bitemporality.md))

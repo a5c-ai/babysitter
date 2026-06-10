@@ -92,6 +92,8 @@ This deterministic-vs-accelerator boundary is load-bearing for convergence — s
 
 ## 5.4 Salience projection
 
+> **Salience ownership (single owning view).** Salience is **one** derived projection with a **conditional layer membership**, and this section is its single owning view. Where it is *computed*: salience is folded from `proj(S)` + `S` (centrality over `/heads` adjacency; recency/access/confidence over `read`-event and value facts). Which *layer* it lives in depends solely on its centrality term — **layer ② (deterministic)** when the centrality algorithm is exactly-specified integer/rational (byte-identical), or **layer ③ (accelerator)** when it uses a floating/iterative algorithm (recall-equivalent only); this is the §5.3 deterministic-vs-accelerator split below, *not* two different salience concepts. Where it is *consumed*: the [recall pipeline](#51-hybrid-pipeline-vector-candidates--graph-expansion--rrf) (RRF salience rank + `rank.salienceWeight` reweight) and the [context-enablement seams](./25-context-enablement-seams.md) (compaction hints). The [architecture overview](./20-architecture-overview.md) layer diagram and component map reference this view rather than restating the split.
+
 ```ts
 interface SalienceModel {
   // salience(eid) = w_r·recency(hlcAge) + w_a·accessFreq + w_c·confidence + w_g·centrality

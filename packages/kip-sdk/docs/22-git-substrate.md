@@ -31,7 +31,7 @@ objects/                             # content-addressed: blobs, trees, commits 
 /ontology/nodes/<kind>@<ver>.json            # schema as data, versioned
 /ontology/edges/<kind>@<ver>.json
 /upcasters/<factType>@<from>-<to>.json       # declarative upcaster descriptors (HP-8)
-/manifest.json                               # repo format version, hash algo, clock epoch, genesis root keys, shard depth, ε_causal, regenBoundaryRule, retention caps — IMMUTABLE post-genesis (m2-5)
+/manifest.json                               # repo format version, hash algo, clock epoch, genesis root keys, shard depth, ε_causal, regenBoundaryRule, quarantineTtlMs + quarantineKeyCapBytes + quarantinePoolBytes (per-key + GLOBAL-aggregate retention bounds, m5-1) + keyChainDurableCapBytes (per-registered-key chain cap, M6-1) — IMMUTABLE post-genesis (m2-5)
 .gitattributes                               # binds /heads/** AND /manifest.json to the regenerate/reject-not-merge merge driver
 ```
 
@@ -138,6 +138,8 @@ Facts are immutable and content-addressed; merging `/facts/**` between branches 
 
 `proj(S)` materializes `/heads`. It is a **single total function of the whole fact set**, order-independent *by construction* because it sorts before it folds:
 
+<a id="orderkey"></a>
+
 ```ts
 // THE deterministic ordering key — used identically on EVERY replica so ties break the same way.
 // Reads ONLY author-stamped, set-resident fields. NEVER rxFrom, commit-order, or wall-clock-at-read (C2-1).
@@ -172,7 +174,7 @@ function proj(S: ReadonlySet<Fact>): Heads {
 ### 4.3 Reducers, interval geometry, existence gating
 
 - **Default reducer `lww-hlc`**: at each valid-time point, the `orderKey`-max covering assert wins. `gset` (grow-only set) and `pncounter` (positive-negative counter, the correct structure for retract/re-assert) are the multi-value reducers; `set-union` is an alias for `gset`. A `gset`/`pncounter` reducer carries per-member/per-increment **tags = the asserting FactId**, so a `retract` names the exact tags it removes (OR-Set semantics). All reducers **MUST** be deterministic, total, and a pure function of their fact subset (INV-3). Every reducer's final tiebreak **MUST** terminate in `orderKey`.
-- **Interval geometry & gaps (M-9).** `reduce` produces **non-overlapping** segments; **gaps are legal and first-class** (`{kind:"unknown"}`). A `retract` of the middle of `[0,20)` yields `value [0,5)`, `unknown [5,10)`, `value [10,20)` — a *split*, not a "partition with a hole." Reads in a gap return `Unknown` (distinct from `null`, an asserted absence). INV-4 tests **no-overlap + gap-as-unknown**. (Detailed in [temporality](./23-temporality-and-bitemporality.md) §4.2.)
+- **Interval geometry & gaps (M-9).** `reduce` produces **non-overlapping** segments; **gaps are legal and first-class** (`{kind:"unknown"}`) — a mid-interval `retract` *splits* the cell rather than leaving a "partition with a hole" (worked `[0,20)` example in the [cell/segment model](./21-data-model.md#retract-split-example)). Reads in a gap return `Unknown` (distinct from `null`, an asserted absence). INV-4 tests **no-overlap + gap-as-unknown**. (Detailed in [temporality](./23-temporality-and-bitemporality.md) §4.2.)
 - **Existence gates properties — no ghost nodes (m2-2).** `node-existence` is the **gate** cell for an entity. `proj` evaluates existence first: for any valid-time sub-interval where `node-existence` is retracted/`unknown`, `proj` **suppresses** that entity's `node-prop` segments over the same sub-interval (they project to `unknown`, not a propertied-but-nonexistent ghost). A `node-prop` assert whose interval extends past an existence retract is clipped to the existence interval. Pure set function, tested by INV-4.
 
 ### 4.4 Conflict surfacing (no fallback) — the per-cell-type resolution table

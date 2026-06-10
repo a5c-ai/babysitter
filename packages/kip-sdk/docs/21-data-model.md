@@ -65,6 +65,7 @@ The three segment kinds are normative:
 | **`unknown`** | No covering non-retracted assert over this valid-time sub-interval (gap, or retracted, M-9). **Distinct from `null`**, which is an *asserted* absence. Reads in a gap return `Unknown`. |
 | **`conflict`** | Genuinely contradictory authored decisions that no total-order tiebreak may silently resolve (N5). Surfaces as `kind:"conflict"` with the full `candidates: FactId[]`; callers MUST handle it explicitly (see [convergence](./24-synchronization-and-convergence.md) §3.4 conflict-surfacing). |
 
+<a id="retract-split-example"></a>
 A cell's segments are non-overlapping; any valid-time sub-interval with no covering non-retracted assert projects to an explicit `unknown` segment. A `retract` of the middle of `[0,20)` *splits* into `value [0,5)` · `unknown [5,10)` · `value [10,20)` — not a "partition with a hole" (M-9). Cells are **produced ONLY by `proj`**, never authored or text-merged.
 
 ---

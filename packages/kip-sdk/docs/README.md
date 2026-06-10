@@ -67,6 +67,7 @@ These five invariants run through every document; nothing in the set may contrad
 | Doc | Purpose | Source |
 |---|---|---|
 | [24-synchronization-and-convergence.md](./24-synchronization-and-convergence.md) | HLC, append-only log, two-layer reconciliation, the convergence guarantee/SEC, branch-per-agent, concurrency model. The load-bearing correctness doc. | §4b + §7 |
+| [27-failure-and-conflict-model.md](./27-failure-and-conflict-model.md) | The single home for the failure/outcome taxonomy (reject-at-gate, proj-demotion/quarantine, `kip:conflict`, dispatch-failure, pending-guard, exhausted, pin-incomplete) and how each propagates up the layers. | N5 + §3.2/§3.4 + §5b synthesis |
 | [60-conformance-and-testability.md](./60-conformance-and-testability.md) | The INV-* and INV-A* conformance invariant catalog as a test plan; what the shipped suite asserts. | §8.4 |
 
 ### Retrieval & API
@@ -109,7 +110,9 @@ These five invariants run through every document; nothing in the set may contrad
 7. **[23-temporality-and-bitemporality.md](./23-temporality-and-bitemporality.md)** — the time axes
    and forgetting.
 8. **[24-synchronization-and-convergence.md](./24-synchronization-and-convergence.md)** — the
-   correctness core (read carefully; everything depends on it).
+   correctness core (read carefully; everything depends on it). Then
+   **[27-failure-and-conflict-model.md](./27-failure-and-conflict-model.md)** — the failure/outcome
+   taxonomy that runs through every layer.
 9. **[25-context-enablement-seams.md](./25-context-enablement-seams.md)** →
    **[26-retrieval.md](./26-retrieval.md)** → **[40-sdk-api-surface.md](./40-sdk-api-surface.md)** —
    the read/consumption surface.

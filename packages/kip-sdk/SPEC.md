@@ -2698,16 +2698,17 @@ client of these seams.
 
 ```ts
 /** The signed-fact AUTHORING inputs (the substrate's only writable shapes, §4.1). An author supplies the
- *  intent fields of a `Fact` (§4.1: `target`, `value?`, valid-time, `causedBy?`, `provenance`, …); kip
- *  fills the derived/receiver fields (`id`/`FactId` = CID of the canonical payload, `v`, and the
- *  audit-only `rxFrom` annotation — never authored). `AssertInput` carries `type: "assert"`, `RetractInput`
+ *  intent fields of a `Fact` (§4.1: `target`, `value?`, valid-time, `causedBy?`, `provenance`, …) AND
+ *  stamps and signs the schema version `v` (it is part of the canonical signed payload, §2.4); kip fills
+ *  only the derived `id`/`FactId` (= CID of the canonical payload) and the audit-only `rxFrom` annotation
+ *  — never `v`. `AssertInput` carries `type: "assert"`, `RetractInput`
  *  `type: "retract"` (a bounded `validTo`). Both are the spec's ESTABLISHED assert/retract-input
  *  convention — §5b REUSES these names (it does NOT invent its own): `EncodeAgent`/`DecodeAgent`/
  *  `LearnerAgent` outputs, `LearnerLoopState.candidate`, and `AcquisitionResult.proposed` are all typed
  *  in terms of them. Defined here once (where `assertFact`/`retractFact` consume them) so every §5b
  *  reference resolves. */
-type AssertInput = Omit<Fact, "id" | "v" | "type"> & { type: "assert" };
-type RetractInput = Omit<Fact, "id" | "v" | "type"> & { type: "retract" };
+type AssertInput = Omit<Fact, "id" | "type"> & { type: "assert" };
+type RetractInput = Omit<Fact, "id" | "type"> & { type: "retract" };
 
 interface Kip {
   // --- lifecycle / substrate ---

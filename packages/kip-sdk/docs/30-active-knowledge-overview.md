@@ -37,6 +37,26 @@ The three subsystems are detailed in their own docs:
 
 The [SDK seams](./40-sdk-api-surface.md) that drive them — `registerFunctionality`, `runContextualQuery`, `runAcquisition`, and `learn` — are themselves thin clients in exactly this sense.
 
+## How the three subsystems relate
+
+The three subsystems are not parallel silos; they sit on a shared lifecycle and differ only in *what kind of fact* they ultimately ask the orchestrator to author:
+
+- **Contextual functionalities** (§5b.1) make a *relation* executable: a `ContextualQuery` compiles to a `Segment` DAG over `proj`, dispatches the bound microagents in topological order, and the orchestrator records the answers as `assert` + `derived_from` facts. It answers questions over existing structure.
+- **Knowledge autoencoding** (§5b.2) makes *learning new structure* a bounded search: the `encode → decode → loss → learner` loop proposes graph structure for a raw artifact, and the orchestrator records the accepted result as one `kip:learn` fact (or a `kip:learn-exhausted` marker). It is itself frequently driven *by* a contextual functionality dispatch — the §5b.1 execution loop is the natural caller of the §5b.2 learner.
+- **Mining / discovery / ingestion** (§5b.3) brings *new raw material* in: Miner/Discoverer/Ingestor microagents realize `data-resource → objects-of-interest → query → acquire`, each emitting signed, source-provenanced facts that then feed §5b.1 traversal and §5b.2 learning.
+
+So the dependency is layered, not circular: **acquisition (§5b.3) supplies raw facts → autoencoding (§5b.2) learns structure over them → contextual functionalities (§5b.1) answer over that structure** — and every arrow lands in the substrate as orchestrator-signed facts, never as a direct write.
+
+## Cross-cutting contracts (shared by §5b.1–.3)
+
+Three contracts are common to all three subsystems and are detailed once in each subsystem doc; they are summarized here as the active layer's shared spine:
+
+1. **Orchestrator-authoring lifecycle.** A microagent only ever *returns a result*; the **orchestrator is the only author** (§4.1, [§6](./40-sdk-api-surface.md)). It validates the result against the manifest `outputSchema`, then wraps it as signed `assert` / `derived_from` / `kip:learn` facts. This is INV-A1 made operational — see [§5b.1 execution](./31-contextual-functionalities.md) and [§5b.2 accept/exhaust](./32-knowledge-autoencoding.md).
+2. **`asOf`-reproducibility residual (R5).** Every active-layer run is reproducible **only against the `asOf` frontier pinned in its provenance**. Default-`now` produces a still-convergent but replica-local (hence irreproducible) answer; callers wanting a reproducible run MUST pass an explicit `asOf`. This residual recurs identically in [contextual-query execution](./31-contextual-functionalities.md), the [autoencoding `ontologyAsOf` key](./32-knowledge-autoencoding.md), and acquisition.
+3. **Typed-choice rule (N5 / INV-A7).** Wherever the active layer faces a choice — among competing realizers (`Segment.alternatives`), among matching segments, or among learned results — it surfaces a **typed choice** mirroring `kip:conflict` rather than auto-collapsing to a winner. No silent picks.
+
+The full taxonomy of how an active-layer step can fail (dispatch-failure, constraint-violation, pending-guard, upstream-stop, exhausted) and how each propagates is consolidated in the [failure & conflict model](./27-failure-and-conflict-model.md).
+
 ## INV-A1 — the single load-bearing rule
 
 The whole section rests on one invariant:

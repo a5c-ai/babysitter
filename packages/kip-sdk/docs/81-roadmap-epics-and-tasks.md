@@ -19,11 +19,14 @@
 
 **Each task records three things.**
 
-- **Implements:** the functional / non-functional requirement ids it realizes — **FR-\*** (linked to [./10-functional-requirements.md](./10-functional-requirements.md)) and **NFR-\*** (linked to [./11-non-functional-requirements.md](./11-non-functional-requirements.md)).
-- **Exit criteria:** the conformance invariant ids that must pass for the task to be done — **INV-\*** / **INV-A\*** (linked to [./60-conformance-and-testability.md](./60-conformance-and-testability.md)). A blank exit-criteria line means the task has no *direct* gating INV; it is exercised through the tasks that depend on it.
-- **Depends on:** the task ids that must exist first (the load-bearing ordering). These are rendered as in-page links to the task anchors below.
+- **Implements:** the functional / non-functional requirement ids it realizes — **FR-\*** and **NFR-\***. The id text names the exact requirement; the link resolves to the requirements **doc** ([./10-functional-requirements.md](./10-functional-requirements.md) for FR, [./11-non-functional-requirements.md](./11-non-functional-requirements.md) for NFR), where the id is found as a bold inline label (these docs do not carry per-id `#anchor` slugs, so the link lands at the doc, not the id).
+- **Exit criteria:** the conformance invariant ids that must pass for the task to be done — **INV-\*** / **INV-A\***, found as bold inline labels in [./60-conformance-and-testability.md](./60-conformance-and-testability.md) (the link resolves to the doc, not a per-id anchor). A blank exit-criteria line means the task has no *direct* gating INV; it is exercised through the tasks that depend on it.
+- **Depends on:** the task ids that must exist first (the load-bearing ordering). These are rendered as **in-page** links to the task anchors below.
 
 **Dependency-respecting epic order.** Epics appear in an order consistent with the edges: `E1 → E2 → E3 → E4 → E5 → E6 → E7 → E8 → E9 → E10 → E11 → E12 → E13`. Within an epic, tasks are listed in their own dependency-respecting order.
+
+> [!NOTE]
+> **Maintenance — task anchors are hand-authored.** Each `[T#.#](#T#.#)` in-page dependency link resolves through an explicit `<a id="T#.#"></a>` tag on the task heading (not a GitHub auto-generated heading slug). Adding, renumbering, or removing a task means hand-editing both the anchor tag and every link that targets it; a dropped or mistyped `<a id>` silently breaks the link with no build-time error. Until a CI link-checker (e.g. `markdown-link-check` / `remark-validate-links`) is wired over `packages/kip-sdk/docs`, contributors MUST verify task-anchor links by hand when editing this WBS — that CI check is the documented mitigation for this fragility.
 
 ---
 
@@ -306,7 +309,7 @@ Implement the fact envelope: author-stamped signed HLC, schema version `v`, `pro
 
 ### <a id="T1.3"></a>T1.3 Signature-only ingest gate
 
-Implement the sole membership predicate: admit a fact iff well-formed and its Ed25519 signature verifies over the canonical payload, with no drift/key-registration/namespace/revocation/schema gate.
+Implement the signature-only ingest gate — the sole membership predicate, spelled out canonically in [§3.2](./22-git-substrate.md).
 
 - **Implements:** — · [NFR-A2](./11-non-functional-requirements.md), [NFR-D5](./11-non-functional-requirements.md), [NFR-I1](./11-non-functional-requirements.md)
 - **Exit criteria:** —
@@ -360,7 +363,7 @@ Ensure re-ingesting an already-held fact is a strict no-op via CID dedup (CID in
 
 ### <a id="T2.1"></a>T2.1 orderKey total order
 
-Implement `orderKey` as the total order over set-resident fields (`validFrom`, `wall`, `counter`, `replicaId`, `publicKeyFingerprint`, `factCID`) with guaranteed totality across distinct admitted facts.
+Implement `orderKey` as the total order over set-resident fields (the canonical [`OrderKey` type](./22-git-substrate.md#orderkey)) with guaranteed totality across distinct admitted facts.
 
 - **Implements:** — · [NFR-A5](./11-non-functional-requirements.md), [NFR-A6](./11-non-functional-requirements.md)
 - **Exit criteria:** [INV-3](./60-conformance-and-testability.md)
@@ -803,7 +806,7 @@ Implement explicit selection of encode/decode/learner/loss microagents from `Lea
 
 ### <a id="T7.2"></a>T7.2 Autoencoding loop with total disjunctive budget
 
-Implement `learn(rawRef, opts)` running encode→decode→reconstruction-loss→learner outside `proj` under a total disjunctive budget (`maxIterations` ∨ `maxWallMs` ∨ `maxInvocations`) so the first axis to cap trips exhausted.
+Implement `learn(rawRef, opts)` running encode→decode→reconstruction-loss→learner outside `proj` under the total disjunctive budget so the first axis to cap trips exhausted — budget semantics per [FR-J1](./10-functional-requirements.md) / [§5b.2](./32-knowledge-autoencoding.md).
 
 - **Implements:** [FR-J1](./10-functional-requirements.md) · [NFR-B4](./11-non-functional-requirements.md), [NFR-H4](./11-non-functional-requirements.md)
 - **Exit criteria:** [INV-A5](./60-conformance-and-testability.md)

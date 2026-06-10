@@ -63,7 +63,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 **Key deliverables.**
 - Object & ref layout: `/facts/**`, `refs/kip/replicas/*`, `refs/kip/sessions/*`, `manifest.json` (genesis root key set pinned, frozen).
 - The **fact envelope** (§4.1): author-stamped signed `hlc`, `provenance.signedFields`, canonical payload, `validFrom`/`validTo`, `factCID`.
-- The **INGEST-GATE** (§3.2): Ed25519 verify over the canonical payload — **the sole membership predicate**. No drift / key-registration / namespace / revocation / schema gate.
+- The **signature-only INGEST-GATE** — the sole membership predicate; spelled out canonically in [§3.2](./22-git-substrate.md) (the [FR group A admission rule](./10-functional-requirements.md#fr-group-a--write--transaction-operations)).
 - Batched commit granularity (`txn` → one commit) with `{factId, status}` durability (m-9).
 - Dual-id scheme stubs: CID (git object id) + namespaced EID structure (§3.6).
 
@@ -71,7 +71,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 
 **Dependencies.** None (foundation).
 
-**Exit criteria.** **INV-7** (idempotent ingestion — CID includes author-HLC), and the gate behavior of **INV-6/INV-13** (signature-valid ⇒ admitted; signature-invalid/malformed ⇒ rejected, identically on every replica).
+**Exit criteria.** [INV-7](./60-conformance-and-testability.md), and the gate behavior of [INV-6](./60-conformance-and-testability.md) / [INV-13](./60-conformance-and-testability.md) (canonical titles + bodies in [60](./60-conformance-and-testability.md)).
 
 ---
 
@@ -80,7 +80,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 **Goal.** The deterministic projection: `proj(S)` materializes byte-identical `/heads`.
 
 **Key deliverables.**
-- `orderKey` (§3.4): the total order over set-resident fields (`validFrom`, `wall`, `counter`, `replicaId`, `publicKeyFingerprint`, `factCID`).
+- `orderKey`: the total order over set-resident fields — see the canonical [`OrderKey` type](./22-git-substrate.md#orderkey).
 - `proj`: sort → group by cell → upcast → reduce; **set-pure, whole-set fold**, no pairwise merge.
 - Cell reducers: `lww-hlc`, `max`, `min`, `gset`, `pncounter`, `custom` — deterministic, total, pure (INV-3).
 - Versioned **upcasters** (§2.2): typed `value | quarantine`, never throw, never invent (M-8).
@@ -91,7 +91,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 
 **Dependencies.** M0 (the fact set + envelope).
 
-**Exit criteria.** **INV-1** (`proj` determinism + replica-local-input independence), **INV-3** (reducer determinism + `orderKey` totality), **INV-4** (no-overlap + gap-as-unknown), **INV-8** (upcaster soundness).
+**Exit criteria.** [INV-1](./60-conformance-and-testability.md), [INV-3](./60-conformance-and-testability.md), [INV-4](./60-conformance-and-testability.md), [INV-8](./60-conformance-and-testability.md) (canonical titles + bodies in [60](./60-conformance-and-testability.md)).
 
 ---
 
@@ -110,7 +110,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 
 **Dependencies.** M1 (`proj` computes the valid-time geometry).
 
-**Exit criteria.** **INV-4** (belief-consistency, per-replica audit), **INV-11** (validTime convergence — `asOf({validTime})` byte-identical for equal sets), **INV-14** (pin completeness & stability via per-`(replicaId,key)` contiguity).
+**Exit criteria.** [INV-4](./60-conformance-and-testability.md), [INV-11](./60-conformance-and-testability.md), [INV-14](./60-conformance-and-testability.md) (canonical titles + bodies in [60](./60-conformance-and-testability.md)).
 
 ---
 
@@ -130,7 +130,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 
 **Dependencies.** M1 (`proj` is half the SEC theorem) + M2 (as-of/pins address the fact set, needed for excision-survivable pins).
 
-**Exit criteria.** **INV-2** (convergence/SEC over the signature-valid admitted set), **INV-12** (concurrent-excision pin/as-of convergence + byte-identical regenerated DAG, incl. the cross-OS/cross-TZ byte recipe), **INV-13** (signature-valid ⇒ eventually-admitted-on-receipt), **INV-9** (gc/excision safety).
+**Exit criteria.** [INV-2](./60-conformance-and-testability.md), [INV-12](./60-conformance-and-testability.md), [INV-13](./60-conformance-and-testability.md), [INV-9](./60-conformance-and-testability.md) (canonical titles + bodies in [60](./60-conformance-and-testability.md)).
 
 ---
 
@@ -149,7 +149,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 
 **Dependencies.** M3 (recall reads a converged graph; pins/as-of from M2/M3).
 
-**Exit criteria.** **INV-5** (projection rebuildability — deterministic projections byte-identical; accelerator projections recall-equivalent only).
+**Exit criteria.** [INV-5](./60-conformance-and-testability.md) (canonical title + body in [60](./60-conformance-and-testability.md)).
 
 ---
 
@@ -178,7 +178,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 **Goal.** The `encode → decode → reconstruction-loss → learner` loop, recorded as facts.
 
 **Key deliverables.**
-- The learner loop (§5b.2) running **outside `proj`** under a hard **disjunctive budget** (`maxIterations` ∨ `maxWallMs` ∨ `maxInvocations` — total, always terminates).
+- The learner loop running **outside `proj`** under a hard **total disjunctive budget** — see [FR-J1](./10-functional-requirements.md) and [§5b.2](./32-knowledge-autoencoding.md).
 - `kip:learn` (correction-class, accept) and `kip:learn-exhausted` (gset marker) facts; achieved loss recorded but **excluded from `orderKey`/reducers** (audit-only, like `rxFrom`).
 - `LearnOptions` ↔ `LearnerLoopState` budget-agreement; accept-if-improved monotonicity.
 - The accelerator-vs-substrate boundary honored: `proj` never re-runs the loop.
@@ -226,7 +226,7 @@ The spine is **M0 → M1 → M3** (substrate → projection → convergence); ev
 
 **Dependencies.** M0 (genesis root in manifest; the gate) + M3 (the set-pure overlay needs the converged set + author-HLC + regeneration; revocation/excision are author-HLC comparisons over `S`).
 
-**Exit criteria.** **INV-6** (gate/proj separation), **INV-10** (authority chain, author-HLC keyed), **INV-15** (`causedBy` well-formedness), **INV-16** (per-key anti-backdating, chain-completeness gated), **INV-17** (revocation intent + `kip:revoked-concurrent` + `re-attest`), **INV-18** (admission-control/retention + aggregate bound + per-shared-subset SEC), **INV-19** (anti-backdating under eviction).
+**Exit criteria.** [INV-6](./60-conformance-and-testability.md), [INV-10](./60-conformance-and-testability.md), [INV-15](./60-conformance-and-testability.md), [INV-16](./60-conformance-and-testability.md), [INV-17](./60-conformance-and-testability.md), [INV-18](./60-conformance-and-testability.md), [INV-19](./60-conformance-and-testability.md) (canonical titles + bodies in [60](./60-conformance-and-testability.md)).
 
 ---
 

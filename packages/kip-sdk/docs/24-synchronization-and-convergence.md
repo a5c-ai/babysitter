@@ -10,18 +10,18 @@ RFC-2119 keywords (MUST / MUST NOT / SHOULD / MAY) are normative and carried ove
 
 ## 0. Why this doc exists
 
-Synchronization & distribution is the core's **headline capability** (resolves hard-problem HP-6 and tensions T-2, T-4, T-5). Everything else in kip is built so that two replicas that have exchanged the same facts compute the **same bytes** — no coordinator, no quorum, no global lock. This document states that guarantee exactly and MUST NOT be read as softening it.
+Synchronization & distribution is the core's **headline capability** (resolves hard-problem HP-6 and tensions T-2, T-4, T-5). Everything else in kip is built so that two replicas compute the **same bytes for the facts they both hold** — no coordinator, no quorum, no global lock. Under admission-control / partial replication this is the **per-shared-subset** guarantee (stated precisely as the SEC corollary in §4.2), **not** an unconditional full-universe byte-identity; with that qualifier in mind, this document states the guarantee exactly and MUST NOT be read as softening it.
 
-The architecture is two layers:
+The convergence core is two layers. **This is a zoom-in on layers ①–② of the five-layer stack in [architecture overview §2](./20-architecture-overview.md#2-the-layering), not a competing model:** the "Substrate" here is layer ① (Git substrate) and the "Deterministic projection `proj(S)`" here is layer ② (deterministic projection). Layers ③–⑤ (accelerators, active layer, context-management) sit *above* this core and never participate in the two layers shown below (they re-enter only as signed facts in the substrate, INV-A1). This doc deliberately collapses to the two layers that carry the SEC guarantee:
 
 ```mermaid
 flowchart TD
-    subgraph SUB["Substrate (converges by construction)"]
+    subgraph SUB["Substrate (converges by construction) — layer ① in 20-architecture-overview"]
       A["Append-only fact log /facts/** — a grow-only set (G-Set)"]
       B["Merge = set union of fact blobs (assoc / comm / idem CRDT)"]
       A --> B
     end
-    subgraph PROJ["Deterministic projection proj(S)"]
+    subgraph PROJ["Deterministic projection proj(S) — layer ② in 20-architecture-overview"]
       C["sort by orderKey → group by cell → upcast → reduce"]
       D["trust overlay: key-reg, namespace, revocation, anti-backdating — all set-pure, author-HLC keyed"]
       C --> D
@@ -30,6 +30,8 @@ flowchart TD
     D --> E["/heads — byte-identical for equal admitted sets"]
     F["Semantic supersession (LLM/heuristic)"] -. "decision frozen into a signed supersede fact, re-enters S" .-> A
 ```
+
+For the temporal ordering of this path across actors (write → commit → sync → lazy `proj` → recall), see the [end-to-end sequence diagram](./20-architecture-overview.md#5a-end-to-end-sequence--write--commit--sync--proj--recall).
 
 The first layer **converges mechanically** (a CRDT). The second layer is **a pure total function of the converged set**. Any order-sensitive or model-driven decision (semantic supersession) is **recorded as a signed fact before it can affect convergence** and is then just another set member.
 
@@ -42,15 +44,9 @@ Every fact carries an **HLC stamp** `(wall: int64ms, counter: uint32, replicaId)
 - **Rejected:** wall-clock alone (no causal order across replicas); Lamport (cannot be human-anchored, cannot bound drift); vector / dotted-version clocks (metadata grows O(replicas) — too heavy for high-fan-out agent fleets).
 - **Chosen:** HLC — human-anchored *and* causally sound, O(1) metadata.
 
-### 1.1 `orderKey` (the total order) — invariant, carry this exactly
+### 1.1 `orderKey` (the total order)
 
-`orderKey` (defined in §3.4, used by `proj`) compares, in order:
-
-```
-validFrom → wall → counter → replicaId → publicKeyFingerprint → factCID
-```
-
-This is a **deterministic total order over author-stamped, set-resident fields only** — it **never** reads `rxFrom` (receive metadata), commit-order, or any receiver clock (M2-1 / C2-1). Totality is genuine: the canonical payload covers **every** author/replica/version-distinguishing field (§2.4), so two **distinct** admitted facts can never tie on all components.
+The exact field tuple of `orderKey` is defined canonically as the `OrderKey` type in [22-git-substrate.md](./22-git-substrate.md#orderkey); `proj` compares those fields in that order. It is a **deterministic total order over author-stamped, set-resident fields only** — it **never** reads `rxFrom` (receive metadata), commit-order, or any receiver clock (M2-1 / C2-1). Totality is genuine: the canonical payload covers **every** author/replica/version-distinguishing field (§2.4), so two **distinct** admitted facts can never tie on all components.
 
 ### 1.2 Counter width & overflow (M-2)
 
@@ -193,6 +189,8 @@ flowchart LR
 
 ## 6. Consistency & concurrency model — §7
 
+> The substrate/`proj` outcomes below (reject-at-gate, proj-demotion/quarantine, `kip:conflict`, pending/pin-incomplete) are the layer-①/② rows of the consolidated [failure & conflict model](./27-failure-and-conflict-model.md); this section keeps the convergence-local detail.
+
 - **Multi-writer model:** branch-per-replica (§5 above). Within a replica, writes are serialized by the commit buffer; across replicas, **no serialization** — convergence handles divergence.
 - **Conflict policy:** per-property `CellReducer` (default `lww-hlc`); conflicts surfaced as `kip:conflict` nodes, **never silently resolved** (N5). A custom reducer **MUST be a deterministic, total, pure function of its fact subset** (it has no binary `merge` op to be "ACI" — the **set-fold** is what converges, §3.4). The conformance suite tests determinism by **folding random permutations of the full fact multiset** for a cell and asserting byte-identical output ([INV-3](./60-conformance-and-testability.md)) — not a binary-triple ACI test, which proves nothing about the real fold.
 - **Signing / provenance & trust — signature-only gate vs proj (C-6, C2-1, C3-1, M3-4):** every fact is Ed25519-signed over the canonical payload **including the author HLC and `publicKeyFingerprint`** (M2-1). The **ingest gate** verifies **only** signature validity (well-formed ∧ Ed25519 verifies) — the sole predicate that is a pure function of the fact's bytes (§3.2). A fact failing it is **not admitted** (objective, identical on every replica); a signature-valid fact is **always admitted**.
@@ -205,14 +203,6 @@ flowchart LR
 
 ## 7. Invariants this doc is responsible for
 
-The convergence claims here are mechanized as conformance invariants — see [conformance & testability](./60-conformance-and-testability.md). The load-bearing ones:
-
-- **INV-1** — proj determinism + replica-local-input independence.
-- **INV-2** — convergence / SEC over the signature-valid admitted set (non-vacuous).
-- **INV-3** — reducer determinism + `orderKey` totality.
-- **INV-7** — idempotent ingestion (CID dedup incl. author-HLC).
-- **INV-13** — signature-valid ⇒ eventually-admitted-on-receipt (makes the SEC antecedent reachable).
-- **INV-16 / INV-19** — per-key anti-backdating, gated on chain completeness, eviction-safe and non-reversing under cap-bounded retention.
-- **INV-18** — admission-control / retention bound + per-shared-subset SEC + the C5-1 regression.
+The convergence claims here are mechanized as conformance invariants whose canonical titles + bodies live in [conformance & testability](./60-conformance-and-testability.md) — referenced here by bare id (not re-glossed): **INV-1**, **INV-2**, **INV-3**, **INV-7**, **INV-13**, **INV-16 / INV-19**, **INV-18**.
 
 The active layer ([active knowledge overview](./30-active-knowledge-overview.md)) sits **above** this core and **never** participates in `proj` (INV-A1) — its order-sensitive decisions are recorded as signed facts and folded like any other, leaving §3.2 / §3.4 / §4b.4 untouched.

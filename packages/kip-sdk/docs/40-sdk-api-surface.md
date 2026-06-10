@@ -12,12 +12,13 @@ small; everything else (context assembly, LLM extraction, embedding) is a **clie
 
 ```ts
 /** The signed-fact AUTHORING inputs (the substrate's only writable shapes, §4.1). An author supplies the
- *  intent fields of a `Fact` (`target`, `value?`, valid-time, `causedBy?`, `provenance`, …); kip fills the
- *  derived/receiver fields (`id`/`FactId` = CID of the canonical payload, `v`, and the audit-only `rxFrom`
- *  annotation — never authored). `AssertInput` carries `type: "assert"`, `RetractInput` `type: "retract"`
- *  (a bounded `validTo`). §5b REUSES these names (it does NOT invent its own). */
-type AssertInput = Omit<Fact, "id" | "v" | "type"> & { type: "assert" };
-type RetractInput = Omit<Fact, "id" | "v" | "type"> & { type: "retract" };
+ *  intent fields of a `Fact` (`target`, `value?`, valid-time, `causedBy?`, `provenance`, …) AND stamps and
+ *  signs the schema version `v` (it is part of the canonical signed payload, §2.4); kip fills only the
+ *  derived `id`/`FactId` (= CID of the canonical payload) and the audit-only `rxFrom` annotation — never
+ *  `v`. `AssertInput` carries `type: "assert"`, `RetractInput` `type: "retract"` (a bounded `validTo`).
+ *  §5b REUSES these names (it does NOT invent its own). */
+type AssertInput = Omit<Fact, "id" | "type"> & { type: "assert" };
+type RetractInput = Omit<Fact, "id" | "type"> & { type: "retract" };
 ```
 
 `AssertInput` / `RetractInput` are the substrate's **only** writable shapes — see
@@ -85,6 +86,8 @@ interface Repo {
   learn(rawRef: BlobRef, opts: LearnOptions): Promise<{ facts: FactId[]; loss: number; status: "accept" | "exhausted" }>; // SELECTS the encode/decode/learner/loss microagents explicitly from LearnOptions.{encode,decode,learner,loss} (name+version of registered manifests — NEVER a heuristic pick by rawKind, N5; the §5b.2 dual of registerFunctionality) and threads LearnOptions.rawKind unchanged into DecodeAgent.rawKind; seeds LearnerLoopState.threshold from LearnOptions.threshold and LearnerLoopState.budget from {maxIterations,maxWallMs,maxInvocations} (the two MUST agree — they name one contract); runs the autoencoding loop OUTSIDE proj under that budget cap (disjunctive: ANY axis); on accept, commits a signed kip:learn fact naming inputs (rawRef + the selected manifest (name,version)s) + achieved loss; on exhausted, commits a signed kip:learn-exhausted marker and NO accept fact (§5b.2)
 }
 ```
+
+<a id="learnoptions"></a>
 
 ```ts
 interface LearnOptions {

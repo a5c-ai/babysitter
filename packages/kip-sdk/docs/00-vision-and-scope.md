@@ -10,6 +10,7 @@
 ---
 
 ## Thesis
+<a id="thesis"></a>
 
 > *kip is a git-substrate, bitemporal, signed-fact property-graph memory whose unit of
 > synchronization is an append-only signed temporal fact, so that coordinator-free agent
@@ -38,7 +39,7 @@ kip provides six things (SPEC §1):
    semantic supersession is itself recorded as facts so all replicas fold the *same recorded
    decision*. Convergence = set-convergence + projection determinism. See
    [synchronization & convergence](./24-synchronization-and-convergence.md).
-5. **Hybrid retrieval**: vector candidates → graph expansion → RRF fusion, over content-addressed,
+5. **Hybrid retrieval**: vector candidates → graph expansion → Reciprocal Rank Fusion (RRF), over content-addressed,
    incrementally rebuildable projections. See [retrieval](./26-retrieval.md).
 6. **Memory semantics**: episodic vs semantic, salience/decay, consolidation, and forgetting via
    **logical tombstone** (signature-preserving) vs **physical excision** (the one authorized

@@ -150,6 +150,8 @@ interface AnswerGraph {
 
 ## Execution = two phases with a hard determinism boundary
 
+> For the temporal ordering across actors (orchestrator → microagent → `proj` → gate → AnswerGraph), see the [active-layer dispatch sequence diagram](./20-architecture-overview.md#5b-end-to-end-sequence--the-active-layer-dispatch-inv-a1).
+
 ```mermaid
 flowchart LR
     Q["ContextualQuery<br/>(seed, target, via, filters, asOf)"] --> C
@@ -171,6 +173,8 @@ flowchart LR
 **Phase 2 — Execute (the only side effect: signed facts).** The orchestrator owns the loop, walking the steps in the **deterministic topological order over `Segment.deps`** (the linear `steps[]` order when `deps` is empty). For each step it builds a `MicroagentInvocation` whose `input` is the materialized output of its `deps` producer(s), first **verifies the seed/input complies with the binding's `constraint`** (claim 8) and enforces any `requires`/`condition` guard (claim 12) as pure `proj` reads, dispatches the bound microagent, and **validates `MicroagentResult.output` against the manifest `outputSchema`** before minting anything.
 
 ### The five N5-safe step outcomes
+
+These are the active-layer (§5b.1) rows of the consolidated [failure & conflict model](./27-failure-and-conflict-model.md) (outcomes #4–#7); the table below keeps the §5b.1-local detail.
 
 | Outcome | Trigger | Effect |
 |---|---|---|

@@ -22,6 +22,8 @@ flowchart TD
   S --> R["transport RetentionClass (§3.5a)\nbounds BYTES, not membership"]
 ```
 
+The security outcomes here — reject-at-gate, and `proj`-time demotion/quarantine (including `kip:revoked-concurrent`) — are the trust rows of the consolidated [failure & conflict model](./27-failure-and-conflict-model.md) (outcomes #1–#2); this doc keeps the trust-local detail.
+
 ---
 
 ## 8.1 Trust model — root of trust, scoped authority, revocation (C-6)

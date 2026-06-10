@@ -93,20 +93,14 @@ INV-A5 forces `loss ≥ threshold` forever under each of (a) tiny `maxIterations
 
 Before the loop runs, the orchestrator MUST know *which* encode/decode/learner/loss microagents realize it for this artifact. kip does **not** infer them from `rawKind` or any heuristic — the caller **names** each by `(name, version)` via `LearnOptions.{encode,decode,learner,loss}` (the §5b.2 dual of [§5b.1's](./31-contextual-functionalities.md) explicit `registerFunctionality` binding). Those selected `(name,version)` pairs are exactly the ones the `kip:learn` fact records in its key `(rawRef, ontologyAsOf, encode/decode/learner-manifest)`, so the recorded result is reproducible against the *same named agents*. A named manifest that is unregistered/unsigned is **rejected**, never silently substituted (N5). The artifact's content-kind is likewise declared once (`LearnOptions.rawKind`) and threaded unchanged into every `DecodeAgent.rawKind`, so encode and decode always agree on the kind.
 
-```ts
-interface LearnOptions {
-  threshold: number; maxIterations: number; maxWallMs: number; maxInvocations: number; asOf?: AsOf;
-  rawKind: string;                                 // content-kind of rawRef; threaded UNCHANGED into every decode
-  encode: { name: string; version: string };       // explicit manifest SELECTION — never a heuristic pick (N5)
-  decode: { name: string; version: string };
-  learner: { name: string; version: string };
-  loss: { name: string; version: string };
-}
-```
+The full `LearnOptions` interface is declared canonically in the [SDK API surface](./40-sdk-api-surface.md#learnoptions); autoencoding-relevant points: `rawKind` is the content-kind threaded UNCHANGED into every decode, and `{encode,decode,learner,loss}` are the explicit `(name,version)` manifest SELECTION — never a heuristic pick (N5) — recorded in the `kip:learn` fact's key.
 
 INV-A13 asserts the loop dispatches **exactly** the named manifests (perturbing `rawKind` while holding selectors fixed) and that an unregistered/unsigned named manifest is **rejected before the loop runs** (no dispatch, no `kip:learn`/`kip:learn-exhausted` fact, cells stay `Unknown`). INV-A14 asserts `rawKind` is captured once and byte-identical across every `DecodeAgent` invocation.
 
 ### Per-iteration failure is treated as infinite loss (N5)
+
+> This is the autoencoding specialization of **dispatch-failure** (#4) and **exhausted** (#8) in the consolidated [failure & conflict model](./27-failure-and-conflict-model.md).
+
 
 An encode/decode/learner dispatch that errors (non-zero `exitCode`) or returns `outputSchema`-invalid output **consumes one `invocation` (and its `elapsedMs`) against budget** and is scored as an **infinite-loss** iteration — the loop NEVER converges on a failed candidate (`bestLoss` is not improved by it). Persistent failure drains the budget and terminates via `converged → "exhausted"`; there is **no best-effort accept** of a failed candidate (N5). This mirrors the [§5b.1](./31-contextual-functionalities.md) dispatch-failure rule: a failed agent yields no trusted output, ever.
 
@@ -126,13 +120,7 @@ Although the achieved loss value lives inside the signed `kip:learn` fact bytes,
 
 ### Reducer / orderKey treatment of the new §5b cells (so `proj` is provably total — INV-3/INV-A9)
 
-| Kind | Reducer class | Behavior |
-|---|---|---|
-| **`kip:learn`** | `supersede`/correction-class, keyed on `(rawRef, ontologyAsOf, encode/decode/learner-manifest)` | Same key, **different** accepted `AssertInput[]` ⇒ `kip:conflict` (NON-commutative), **never** loss-tiebroken; resolved by a dominating `resolve`-scoped supersede. Classification keys on the **accepted graph OUTCOME ALONE** — the recorded loss is never consulted. **Same accepted set ⇒ no-op** *regardless of a divergent recorded loss* (loss is canonicalized OUT of the dedup key, exactly as `rxFrom` is folded out of cell identity, C2-1). |
-| **`kip:learn-exhausted`** | `gset`/append marker | Commutative; many exhaustion records coexist, none contradicts another. Never competes with `kip:learn`; an `accept` for the same key supersedes the Unknown cell with a trusted head. |
-| **microagent-registration** | `supersede`/correction-class (NOT `lww-hlc`), keyed on `(name, version)` | Byte-identical re-registration is a no-op (INV-7); two registrations of the same `(name,version)` with **divergent** manifests surface a `kip:conflict` (a versioned descriptor MUST be immutable), **never** an `orderKey`-max silent LWW overwrite. A genuinely changed descriptor is published under a **new `version`** (INV-A10). |
-| **`derived_from`** | `gset`/append | Commutative; provenance edges only accrete, no contradiction possible. |
-| **`same_as`** | `gset`/append + `proj`-derived equivalence closure | Raw assertions accrete and never contradict; the closure is reflexive/symmetric/transitive with a total order-independent canonical-EID rule (byte-identical on every replica, [§5b.1](./31-contextual-functionalities.md)). A contradicting `not_same_as` surfaces a typed `kip:conflict` on a keyed correction cell, never a silent pick (N5, INV-A11). |
+The per-cell-type reducer/conflict behavior for `kip:learn`, `kip:learn-exhausted`/`derived_from`, `same_as`, and microagent-registration is defined canonically in the [§4.4 per-cell-type resolution table](./22-git-substrate.md#44-conflict-surfacing-no-fallback--the-per-cell-type-resolution-table). The autoencoding-specific point: a `kip:learn` cell is a `supersede`/correction-class cell keyed on `(rawRef, ontologyAsOf, encode/decode/learner-manifest)` whose recorded **loss is audit-only — EXCLUDED from `orderKey` and the dedup key** (exactly as `rxFrom` is, C2-1), so competing accepted sets surface a `kip:conflict` and are **never** loss-tiebroken, while a same-set re-author is a no-op *regardless of a divergent recorded loss*.
 
 **Keying caveat (the same-key conflict guarantee is conditional on a PINNED `ontologyAsOf`).** The `ontologyAsOf` in the key is the **author-resolved frontier recorded in the fact** (set-resident), not the receiver's `now` — so the key is itself convergent. But `ontologyAsOf` **defaults to the authoring replica's local `now`** (R5): two replicas learning the **same** artifact under default-`now` resolve **different** frontiers ⇒ **different** keys ⇒ their `kip:learn` facts land in **separate** cells and **both** project trusted (dual-acceptance) — convergent, but the intended same-key `kip:conflict` **never fires**. This is benign (each cell folds deterministically; no byte-divergence) but it is *not* contradiction-surfacing: the "competing accepted sets ⇒ `kip:conflict`" guarantee holds **only** when `ontologyAsOf` is an **explicitly pinned frontier**. Callers wanting a single authoritative learned result per artifact MUST pin `LearnOptions.asOf` (cross-ref R5/R6, §9).
 
