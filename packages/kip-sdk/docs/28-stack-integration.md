@@ -204,13 +204,15 @@ genty-platform (`packages/genty/platform/src/`):
   `interfaces.ts` module exposes four sibling pluggable backends — `GovernanceProvider` (`:126`),
   `ProcessDefinitionProvider` (`:152`), `ExternalAgentProvider` (`:167`), `SessionProvider` (`:174`) —
   rounding out the provider-seam family, though only Orchestration + Journal are kip-relevant today.
-- `OrchestrationRegistry` — `platform/src/orchestration/registry.ts:58` — named provider maps where
-  **first registered wins among duplicates** and an **unregistered named type throws (no fallback)**;
+- `OrchestrationRegistry` — `platform/src/orchestration/registry.ts:58` — named `ProviderMap`s where
+  `get(name)` **throws for an unregistered name** (no fallback, `:99`); `get()` with **no name** returns
+  the **first-inserted** provider among distinct names (`:107`); and a duplicate registration under the
+  **same name overwrites** (`register()` is `Map.set`, last-write-wins, `:92`).
   `createOrchestrationRegistry()` (`:128`) pre-registers `journal:"fs"` + `orchestration:"babysitter"`
   (the `register()` calls at `:135`/`:136`).
   This is *analogous to* kip's N5 posture — but not identical: N5 forbids silently choosing among
   **competing realizers** for a hop (the `Segment.alternatives`/INV-A7 case), whereas the registry's
-  first-of-many is ordinary provider defaulting.
+  no-name first-of-many is ordinary provider defaulting.
 - Confirmed wiring (gated): a babysitter `agent:` effect dispatches a registered microagent —
   `tryDispatchMicroagent` (`platform/src/harness/internal/createRun/orchestration/effects.ts:425`,
   invoked at `:372`, `kind === "agent"` at `:367`). This fires **only when `BABYSITTER_CROSS_SUBAGENTS`
@@ -568,4 +570,4 @@ courtesies — they are the conditions under which an integration is *conformant
 - [25-context-enablement-seams.md](./25-context-enablement-seams.md) — `pin`/`asOf`/`recall`/`subscribe`/`provenanceOf`.
 - [33-mining-discovery-ingestion.md](./33-mining-discovery-ingestion.md) — the Ingestor path every producer rides.
 - [40-sdk-api-surface.md](./40-sdk-api-surface.md) — `runAcquisition`/`runContextualQuery`/`learn`/`registerFunctionality`.
-- [glossary.md](./glossary.md) — the cross-stack terms (AtlasRecord/Edge, AgentMemoryOntology, MicroagentManifest, extension-mux).
+- [glossary.md](./glossary.md) — the cross-stack terms (AtlasRecord/Edge, AgentMemoryOntology, MicroagentManifest, OrchestrationProvider/JournalProvider/OrchestrationRegistry, extension-mux).

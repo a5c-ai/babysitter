@@ -172,17 +172,19 @@ flowchart LR
 
 **Phase 2 — Execute (the only side effect: signed facts).** The orchestrator owns the loop, walking the steps in the **deterministic topological order over `Segment.deps`** (the linear `steps[]` order when `deps` is empty). For each step it builds a `MicroagentInvocation` whose `input` is the materialized output of its `deps` producer(s), first **verifies the seed/input complies with the binding's `constraint`** (claim 8) and enforces any `requires`/`condition` guard (claim 12) as pure `proj` reads, dispatches the bound microagent, and **validates `MicroagentResult.output` against the manifest `outputSchema`** before minting anything.
 
-### The five N5-safe step outcomes
+### The N5-safe step outcomes
 
-These are the active-layer (§5b.1) rows of the consolidated [failure & conflict model](./27-failure-and-conflict-model.md) (outcomes #4–#7); the table below keeps the §5b.1-local detail.
+> The active-layer step outcomes — **dispatch-failure** (#4), **constraint-violation** (#5),
+> **pending-guard** (#6), and **upstream-stop** (#7) — are defined canonically in the consolidated
+> [failure & conflict model](./27-failure-and-conflict-model.md#1-the-canonical-outcome-taxonomy);
+> their triggers/effects are not re-derived here. A successful step authors signed `assert` +
+> `derived_from` facts (below).
 
-| Outcome | Trigger | Effect |
-|---|---|---|
-| **success** | valid output | author signed `assert` + `derived_from` facts |
-| **dispatch failure** | non-zero `exitCode`, `outputSchema`-validation failure, **or** timeout exceeding the effective `runtime.timeout` (all three identical) | emit **no fact**, cell stays `Unknown` (a fabricated plausible output is the banned fallback, N5) |
-| **constraint-violation** (claim 8) | binding declares a `constraint` and the **seed/input** fails it over `proj` (or it is `unknown`) | **no dispatch**, **no fact**, target cell `Unknown`, violated `constraint` recorded in provenance; validates the *known instance itself* |
-| **pending guard** | a `requires`/`condition` guard not yet satisfied over `proj` | **no dispatch**, target cell `Unknown`; differs from dispatch failure **only in provenance** (the unmet `EdgeKind`/`ConditionNode` is recorded) |
-| **upstream stop** | any of the above on step *i* of an *N*-step segment | orchestrator **stops the segment**, emits **no result-instance facts** for `target`; `runContextualQuery` returns an `AnswerGraph` with `result = []`. Intermediates committed through step *i−1* remain as ordinary facts; no terminal answer fabricated (N5) |
+The §5b.1-local specifics not carried by the canonical taxonomy: **constraint-violation** validates the
+*known instance itself* (claim 8) over `proj`; **pending-guard** differs from dispatch-failure **only in
+provenance** (the unmet `EdgeKind`/`ConditionNode` is recorded, claim 12); and **upstream-stop** leaves
+intermediates committed through step *i−1* as ordinary facts while `runContextualQuery` returns an
+`AnswerGraph` with `result = []` (no terminal answer fabricated, N5). These mechanize INV-A3/INV-A7.
 
 On success the orchestrator authors signed `assert` facts for the intermediate/result instances, each with `provenance.source` naming the `MicroagentInvocation` (by id) **and recording the resolved `asOf` frontier**, plus signed `derived_from` edge facts linking them back to the seed. The union of those `derived_from` facts, read back via `proj`, **is** the `AnswerGraph` (INV-A8).
 

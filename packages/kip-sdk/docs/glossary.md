@@ -160,6 +160,12 @@ executed in deterministic topological order read purely over `proj`. Compilation
 `proj`; only execution emits facts. Multiple matching segments surface as a typed choice, never silently
 picked (N5). (§5b.1)
 
+**`AnswerGraph`** — The result of `runContextualQuery`: the union of the `derived_from` edge facts a
+segment's steps author, read back via `proj` (INV-A8). On any active-layer failure (an
+[upstream-stop](./27-failure-and-conflict-model.md#1-the-canonical-outcome-taxonomy), outcome #7) the
+query returns an `AnswerGraph` with `result = []` — never a fabricated terminal answer (N5). Defined and
+declared (`interface AnswerGraph`) in [31-contextual-functionalities §5b.1](./31-contextual-functionalities.md). (§5b.1)
+
 **Learner microagent** — A microagent that proposes graph edits by running the knowledge-autoencoding
 loop and emits the converged result as **signed `kip:learn` facts** naming inputs + achieved loss. It is
 a client that *proposes*; `proj` decides what becomes effective. (§5b.2)
@@ -231,6 +237,17 @@ only**. (See [context-enablement seams](./25-context-enablement-seams.md), [stac
 (`../SPEC.md:1914`, "do not invent fields"). The genty-platform `MicroagentDispatcher` /
 `createMicroagentSystem` (`packages/genty/platform/src/microagents/`) are the **real dispatch path** kip
 reuses (GROUNDED-NEW). External component referenced by **direct contract reuse**.
+
+**`OrchestrationProvider` / `JournalProvider` / `OrchestrationRegistry` (genty-platform)** — The
+**pluggable-backend seam** kip's babysitter/genty integration depends on. `OrchestrationProvider`
+(`createRun`/`iterateRun`/`postEffectResult`/…) and `JournalProvider` (`loadEvents`/`appendEvent`) are
+the backend interfaces (`packages/genty/platform/src/orchestration/interfaces.ts:89`, `:137`) that let a
+backend plug in **without importing babysitter-sdk**. `OrchestrationRegistry`
+(`.../orchestration/registry.ts:58`) holds named `ProviderMap`s: `get(name)` throws on an unregistered
+name (no fallback, `:99`), `get()` with no name returns the **first-inserted** provider among distinct
+names (`:107`), and a same-name re-registration **overwrites** (`Map.set`, last-write-wins, `:92`).
+External component referenced as a **GROUNDED-NEW** integration seam. (See
+[stack integration](./28-stack-integration.md).)
 
 **babysitter run journal (`JournalEvent` / `RunMetadata` / `StoredTaskResult`)** — The episodic unit kip
 ingests from `@a5c-ai/babysitter-sdk` (`packages/babysitter-sdk/src/storage/types.ts`), read via

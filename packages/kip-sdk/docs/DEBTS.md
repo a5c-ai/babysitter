@@ -11,22 +11,25 @@ of truth). **It does NOT fix the debts** — each entry records a suggested fix 
 
 ## Summary
 
+> Counts below are the register-wide rollup across both audit rounds (round 1: D-01–D-21; round 2: D-22–D-26).
+> See the per-round breakdown in "Audit round 2 — new docs (27, 28) + integrity".
+
 | Severity | Count |
 |---|---|
-| Critical | 1 |
-| Major | 5 |
-| Minor | 15 |
-| **Total kept** | **21** |
+| Critical | 2 |
+| Major | 6 |
+| Minor | 18 |
+| **Total kept** | **26** |
 | Dropped (unsubstantiated) | 1 |
 
 | Category | Count |
 |---|---|
-| Definitions | 4 |
+| Definitions | 6 |
 | Contradictions | 1 |
-| Faithfulness | 2 |
+| Faithfulness | 4 |
 | Architecture | 5 |
 | Completeness | 2 |
-| Redundancy | 7 |
+| Redundancy | 8 |
 
 ---
 
@@ -74,7 +77,7 @@ of truth). **It does NOT fix the debts** — each entry records a suggested fix 
   - `32-knowledge-autoencoding.md` L109: "### Per-iteration failure is treated as infinite loss (N5)" — a separate failure rule local to the autoencoding loop.
 - **Why it is debt:** The system's whole correctness story is failure handling (N5 no-fallbacks, `kip:conflict`, quarantine, reject, dispatch-failure, exhausted, pin-incomplete), yet there is no single architectural view enumerating failure classes and their propagation. A reader must reconstruct the failure model from at least five docs.
 - **Suggested fix:** Add a `27-failure-and-conflict-model.md` that enumerates the canonical outcome taxonomy once (reject-at-gate, proj-demotion/quarantine, `kip:conflict`, dispatch-failure, pending-guard, exhausted, pin-incomplete), shows how each propagates up the layers, and links each subsystem's local table back to it instead of re-deriving them.
-- **Status:** Resolved — created `27-failure-and-conflict-model.md` (9-outcome taxonomy table + per-layer propagation mermaid + "where the per-subsystem tables live"); wired into README's Convergence cluster + reading order; back-linked 20 §3, 24 §6, 31 (five N5-safe step outcomes), 32 (per-iteration failure), 50 §0, and 30 to it instead of re-deriving.
+- **Status:** Resolved — created `27-failure-and-conflict-model.md` (9-outcome taxonomy table + per-layer propagation mermaid + "where the per-subsystem tables live"); wired into README's Convergence cluster + reading order; back-linked 20 §3, 24 §6, 31 (five N5-safe step outcomes), 32 (per-iteration failure), 50 §0, and 30 to it instead of re-deriving. (Round-2 follow-up: 31's table was still a near-verbatim re-derivation of outcomes #4-#7; it has since been reduced to summarize-and-link — see D-23.)
 
 ### D-04: Layer-count model disagrees — overview says five strict layers, convergence core says two
 
@@ -319,3 +322,105 @@ No new findings were invented. Two auditor severities were adjusted downward dur
 (DEFI-2/D-07 SEC-expansion and ARCH-2/D-10 sequence-diagram: both are enhancement/polish gaps that do not
 mislead an implementer, so they are recorded as Minor rather than the auditors' Major). No cross-dimension
 duplicates were found requiring a merge; each kept finding describes a distinct underlying debt.
+
+---
+
+## Audit round 2 — new docs (27, 28) + integrity
+
+> Second pass targeting the two docs added since round 1 — `27-failure-and-conflict-model.md` and
+> `28-stack-integration.md` — plus a deterministic link-integrity scan. Each finding was opened at its
+> cited file:line (and, for 28, against the real genty-platform source) and confirmed before fixing.
+
+### Summary
+
+| Source | Findings | Substantiated | Dropped |
+|---|---|---|---|
+| Integrity scan (dangling links/anchors) | 0 | 0 | 0 |
+| Faithfulness | 2 | 2 | 0 |
+| Definitions / redundancy (defredund) | 3 | 3 | 0 |
+| **Total** | **5** | **5** | **0** |
+
+| Severity | Count |
+|---|---|
+| Critical | 1 |
+| Major | 1 |
+| Minor | 3 |
+
+The integrity report (`.a5c/tmp-newdocs-audit/integrity.json`) scanned 27 files and found **0 dangling
+links/anchors** — the doc package is link-clean, nothing to fix there.
+
+### D-22: 27 §2 over-claims `pending` / `pin-incomplete` is byte-identical-across-replicas (the SEC guarantee)
+
+- **Category:** Faithfulness
+- **Severity:** Critical
+- **Locations:** [27-failure-and-conflict-model.md](./27-failure-and-conflict-model.md) L66 (claim) · L38 (row #9 trigger) · [24-synchronization-and-convergence.md](./24-synchronization-and-convergence.md) L125 · [SPEC.md](../SPEC.md) §4b.4 (L807)
+- **Evidence:**
+  - `27` L66 (before): "Layer ② (`proj`) owns the *set-pure* outcomes: proj-demotion/quarantine, `kip:conflict`, and pending/pin-incomplete. **All three are pure functions of the admitted set, so they are byte-identical across replicas (the SEC guarantee)** and re-evaluate monotonically as facts arrive."
+  - `27` L38 (its own row #9 trigger): pending/pin-incomplete fires when "a read/pin resolves against a sub-frontier the replica has **not** fully received, **or** a per-key trust chain has a `(wall,counter)` gap (chain-incomplete)" — i.e. a function of *what a given replica holds*, not of the universal admitted set.
+  - `24` L125: "wherever a replica's held subset is *not* complete for a covering key, that cell projects **`pending`** on that replica — never a divergent trusted value … **Divergence is surfaced as `pending`, never as two different trusted heads.**"
+  - `SPEC.md` §4b.4 (L807): "a replica that has evicted part of `K`'s chain simply reads dependent facts `pending`, never a divergent trusted value."
+- **Why it is debt:** `pending`/`pin-incomplete` is precisely the **per-replica divergence-absorber** — one replica reads `pending` while another holding the complete chain reads the trusted value, converging once their admitted sets equalize. Lumping it with proj-demotion/`kip:conflict` and asserting all three are "byte-identical across replicas (the SEC guarantee)" contradicts 27's own row-#9 trigger and the convergence core (24 §4.2/§4.6, SPEC §4b.4), which deliberately relaxes full-universe byte-identity to per-shared-subset. The doc's Source header (L7) says "Synthesis — introduces no new claims," yet this is a new claim contradicting its cited §4b.4 (and is the same over-statement round-1 D-21 fixed in 24 §0).
+- **Suggested fix:** Split the L66 sentence: keep proj-demotion/quarantine and `kip:conflict` as "byte-identical for equal admitted sets," and state pending/pin-incomplete separately as the per-shared-subset, chain-completeness outcome — the explicit per-replica divergence-absorber ("surfaced as `pending`, never two different trusted heads"), byte-identical only on the shared complete-durable subset (24 §4.2), NOT attributed to the full-universe SEC guarantee.
+- **Status:** Resolved — rewrote `27` §2 L66 into a split bullet: proj-demotion/quarantine and `kip:conflict` are "byte-identical for equal admitted sets"; pending/pin-incomplete is described (per its row-#9 trigger) as the per-replica divergence-absorber that is a function of what a replica currently holds, byte-identical only on the shared complete-durable subset (24 §4.2), surfaced as `pending` and never two divergent trusted heads (§4b.4). The convergence core (§3.2/§3.4/§4b.4) was not edited.
+
+### D-23: 31's "five N5-safe step outcomes" table duplicates 27's failure taxonomy (#4–#7) near-verbatim instead of summarize-and-link
+
+- **Category:** Redundancy
+- **Severity:** Major
+- **Locations:** [31-contextual-functionalities.md](./31-contextual-functionalities.md) L175-L185 · [27-failure-and-conflict-model.md](./27-failure-and-conflict-model.md) L33-L36 · [DEBTS.md](./DEBTS.md) D-03
+- **Evidence:**
+  - `27` L33 (#4) and `31` L182 carry the same dispatch-failure triple ("non-zero `exitCode`, `outputSchema`-validation failure, **or** timeout … all three identical → emit no fact, cell stays `Unknown`, fabricated output is the banned fallback N5"); `27` L34 (#5) and `31` L183 carry the same constraint-violation trigger/effect; #6/#7 likewise.
+  - `31` L177 added the back-link to 27 but L179-L185 STILL kept the full normative trigger/effect table for outcomes #4-#7.
+  - Contrast `32` L102 (the model 31 should follow): a one-line callout + link to 27's canonical taxonomy, not a re-tabling.
+- **Why it is debt:** 27 declares itself the single canonical home for the outcome taxonomy (L3-L8, L73-L75). Two normative tables for identical behavior will drift (the dispatch-failure triple or the constraint-violation effect must now be edited in both). This is exactly the re-derivation D-03 intended to remove; D-03 back-linked 31 but did not REDUCE it, so its resolution was partial (unlike 32, which was reduced to a callout).
+- **Suggested fix:** Reduce 31's "five N5-safe step outcomes" table to a one-line summary + the existing link to 27's canonical taxonomy (outcomes #4-#7), keeping only genuinely §5b.1-local detail (the "validates the known instance itself" nuance, the provenance-only difference for pending-guard, the intermediates-survive note for upstream-stop, INV-A3/INV-A7), mirroring how 32 was resolved.
+- **Status:** Resolved — replaced 31's "five N5-safe step outcomes" table with a blockquote pointing at 27's canonical taxonomy (`#1-the-canonical-outcome-taxonomy`, outcomes #4-#7) plus a single paragraph carrying only the §5b.1-local specifics (constraint-violation validates the known instance itself; pending-guard differs only in provenance; upstream-stop leaves step-`i−1` intermediates committed while `runContextualQuery` returns an empty-`result` `AnswerGraph`; mechanizes INV-A3/INV-A7). No normative trigger/effect rows are re-derived. D-03's partial resolution is now completed.
+
+### D-24: `AnswerGraph` used normatively in 27 but undefined in glossary (defined only in 31, which 27 precedes in reading order)
+
+- **Category:** Definitions
+- **Severity:** Minor
+- **Locations:** [27-failure-and-conflict-model.md](./27-failure-and-conflict-model.md) L21, L36 · [glossary.md](./glossary.md) (absent) · [31-contextual-functionalities.md](./31-contextual-functionalities.md) (definition) · [README.md](./README.md) L113-L125 (reading order)
+- **Evidence:**
+  - `27` L21: "A failure is always *observable* — … an empty `AnswerGraph`, or a `pending`/`pin-incomplete` status." and L36 (#7 upstream-stop): "`runContextualQuery` returns an `AnswerGraph` with `result = []`."
+  - `31` is where `AnswerGraph` is actually declared (`interface AnswerGraph`) and L187 ("the union of those `derived_from` facts, read back via `proj`, **is** the `AnswerGraph`, INV-A8").
+  - `glossary.md` had no `AnswerGraph` entry; README's reading order places 27 (step 8) two steps before 31 (step 10).
+- **Why it is debt:** `AnswerGraph` is load-bearing in 27's taxonomy (the surfaced outcome of upstream-stop) yet was undefined on first use there, absent from the glossary, and read before its defining doc per README's own order. (`AcquisitionResult` has the same glossary gap but 28 links it to its home doc 33, so only the 27/`AnswerGraph` case is a genuine first-use-undefined gap.)
+- **Suggested fix:** Add an `AnswerGraph` glossary entry (the `derived_from` subgraph read back via `proj`; the result of `runContextualQuery`, empty `result=[]` on upstream-stop; §5b.1/INV-A8) or add an inline link in 27 to its definition in 31.
+- **Status:** Resolved — added an `AnswerGraph` entry to the glossary's *Active knowledge (§5b)* section (after "Query graph / Segment match"): defined as the union of `derived_from` facts read back via `proj` (INV-A8), the result of `runContextualQuery`, empty `result=[]` on upstream-stop (links 27's outcome #7), declared in 31 §5b.1.
+
+### D-25: 28's genty `OrchestrationProvider` / `JournalProvider` / `OrchestrationRegistry` seam missing from the glossary cross-stack section
+
+- **Category:** Definitions
+- **Severity:** Minor
+- **Locations:** [28-stack-integration.md](./28-stack-integration.md) L198-L213, L573 (cross-links) · [glossary.md](./glossary.md) cross-stack section
+- **Evidence:**
+  - `28` L198-L206 leans on `OrchestrationProvider`/`JournalProvider` as "the **pluggable backend seam** … without importing babysitter-sdk," and L207-L213 on `OrchestrationRegistry` (explicitly compared to N5's no-auto-pick posture) as a GROUNDED-NEW integration surface.
+  - `glossary.md` cross-stack section (the `MicroagentManifest (genty-core)` entry) named only `MicroagentDispatcher`/`createMicroagentSystem`; it did NOT mention the provider/registry seam.
+  - `28` L573 cross-link advertised the glossary as the home for cross-stack terms but did not list these symbols.
+- **Why it is debt:** 28 relies on the provider/registry seam as a normative GROUNDED-NEW integration surface, but the glossary's cross-stack section (the README-advertised home for cross-stack terms) never listed these symbols, so a reader could not resolve them from the glossary.
+- **Suggested fix:** Add a glossary cross-stack entry naming `OrchestrationProvider`/`JournalProvider`/`OrchestrationRegistry` (genty-platform pluggable-backend seam) citing `platform/src/orchestration/interfaces.ts` / `registry.ts`.
+- **Status:** Resolved — added a sibling cross-stack glossary entry "`OrchestrationProvider` / `JournalProvider` / `OrchestrationRegistry` (genty-platform)" citing `interfaces.ts:89/:137` and `registry.ts:58` with the corrected registry semantics (see D-26), and extended 28's glossary cross-link to enumerate the three symbols.
+
+### D-26: 28 mis-states the `OrchestrationRegistry` duplicate-resolution rule as "first registered wins among duplicates"
+
+- **Category:** Faithfulness
+- **Severity:** Minor
+- **Locations:** [28-stack-integration.md](./28-stack-integration.md) L207-L213 · [packages/genty/platform/src/orchestration/registry.ts](../../genty/platform/src/orchestration/registry.ts) L91-L93 (register), L95-L116 (get)
+- **Evidence:**
+  - `28` (before): "`OrchestrationRegistry` … named provider maps where **first registered wins among duplicates** and an unregistered named type throws (no fallback)".
+  - `registry.ts` L91-L93: `register(name, provider) { this.providers.set(name, provider); }` — a `Map.set`, so a duplicate **NAME overwrites** (last-write-wins for the same name).
+  - `registry.ts` L98-L99: `get(name)` throws when the name is unregistered (no fallback) — the unregistered-throws half is correct.
+  - `registry.ts` L107-L108: `get()` with **no name** returns the **first-inserted** provider (`this.providers.values().next()`) — across DISTINCT names, not same-name dedup. (The class JSDoc at L81 calling this "insertion-order first-wins" is itself loose; the `register` body is the ground truth.)
+- **Why it is debt:** 28 presents component code as ground truth ("Every type/path below was read in those packages"), so a code-faithfulness error matters. `register` is `Map.set` (last-write-wins on duplicate name) — the opposite of "first registered wins among duplicates." The only first-wins behavior is `get()` with no name returning the first-inserted entry among different names. The mischaracterization also weakened the paragraph's N5-contrast point.
+- **Suggested fix:** Reword to match the code: `get(name)` throws for an unregistered name (no fallback, L99); `get()` with no name returns the first-inserted provider among distinct names (L107); a duplicate registration under the SAME name overwrites (last-write-wins, L92). Keep the N5-contrast note.
+- **Status:** Resolved — reworded `28` L207-L213 to the code-faithful semantics (throws on unregistered name L99; no-name returns first-inserted among distinct names L107; same-name re-register overwrites via `Map.set`, last-write-wins L92) and adjusted the N5-contrast to reference the no-name first-of-many defaulting. The same corrected semantics are carried in the new glossary entry (D-25).
+
+### Verification note (round 2)
+
+All 5 candidate findings (2 faithfulness + 3 defredund) were opened at their cited file:line — and, for
+the genty integration findings, against the real `packages/genty/platform/src/orchestration/registry.ts`
+and `interfaces.ts` — and confirmed. **5 substantiated, 0 dropped.** The integrity scan reported 0 dangling
+references, so no link/anchor fixes were required. The convergence core (§3.2/§3.4/§4b.4), the timeline-free
+roadmap, and INV-A1/N5 were preserved; all fixes are summarize-and-link or faithful corrections to real
+package symbols (no invented APIs).
