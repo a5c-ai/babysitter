@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { EffectAction } from "../../../../../types";
 import { resolveEffect } from "../effects";
 import { resolveAndPostEffect } from "../index";
@@ -249,6 +252,20 @@ describe("#949 genty resolveEffect env-gated execution", () => {
   // dispatcher used by runCliOrchestration. It must honor the same flags at its
   // own execution seam (defense-in-depth), not rely on the entrypoint env mutation.
   describe("resolveAndPostEffect env-gated execution", () => {
+    // resolveAndPostEffect posts back by writing tasks/<id>/output.json under
+    // runDir (real fs) before calling task:post (execFileSync). A non-writable
+    // runDir (e.g. "/repo" at the FS root on CI Linux) makes that write throw —
+    // swallowed by the best-effort catch — so the post is skipped and execFileSync
+    // is never called. Use a real writable temp dir so the post seam is exercised
+    // deterministically across platforms.
+    let runDir: string;
+    beforeEach(async () => {
+      runDir = await mkdtemp(join(tmpdir(), "eff-gating-"));
+    });
+    afterEach(async () => {
+      await rm(runDir, { recursive: true, force: true }).catch(() => {});
+    });
+
     function cliShellAction() {
       return {
         effectId: "eff-cli-shell",
@@ -285,7 +302,7 @@ describe("#949 genty resolveEffect env-gated execution", () => {
 
     it("executes shell when BABYSITTER_EXECUTE_TASKS=1 (exec + post)", async () => {
       process.env.BABYSITTER_EXECUTE_TASKS = "1";
-      await resolveAndPostEffect(cliShellAction(), "/repo", "/repo");
+      await resolveAndPostEffect(cliShellAction(), runDir, "/repo");
 
       expect(execSync).toHaveBeenCalledTimes(1);
       // Posted back via task:post (execFileSync).
@@ -315,7 +332,7 @@ describe("#949 genty resolveEffect env-gated execution", () => {
       process.env.BABYSITTER_CROSS_SUBAGENTS = "1";
       // Force the internal-session path (not tasks-mux) so createAgentCoreSession runs.
       routeTask.mockReturnValue({ responderType: "internal" });
-      await resolveAndPostEffect(cliAgentAction(), "/repo", "/repo");
+      await resolveAndPostEffect(cliAgentAction(), runDir, "/repo");
 
       expect(createAgentCoreSession).toHaveBeenCalledTimes(1);
       expect(sessionPrompt).toHaveBeenCalledTimes(1);
