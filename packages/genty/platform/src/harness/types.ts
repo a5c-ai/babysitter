@@ -7,6 +7,7 @@
  * so the SDK core remains harness-agnostic.
  */
 
+import type { CustomToolDefinition } from "@a5c-ai/genty-core";
 import type { AskUserQuestionUiContext } from "../interaction";
 import type { PromptContext } from "../types";
 
@@ -156,7 +157,7 @@ export interface AgentCoreSessionOptions {
   /** Built-in tool mode to expose to the model. */
   toolsMode?: "default" | "coding" | "readonly";
   /** Custom tool definitions to register with the session. */
-  customTools?: unknown[];
+  customTools?: CustomToolDefinition[];
   /** Optional extension-style UI context exposed to custom tools inside the PI loop. */
   uiContext?: AskUserQuestionUiContext;
   /** Replace the discovered system prompt with a custom one. */

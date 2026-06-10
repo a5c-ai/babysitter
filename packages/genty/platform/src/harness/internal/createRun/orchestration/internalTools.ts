@@ -1,5 +1,5 @@
 import { Type } from "@sinclair/typebox";
-import { createAgentCoreToolDefinitions } from "@a5c-ai/genty-core";
+import { createAgentCoreToolDefinitions, type CustomToolDefinition } from "@a5c-ai/genty-core";
 import { buildBreakpointEffectResult } from "./internalToolsHelpers";
 // SDK-owned: prompt composition utilities for process creation prompts
 import {
@@ -49,7 +49,7 @@ export function createOrchestrationTools(args: {
   writeVerbose: OrchestrationWriteVerbose;
   writeVerboseData: OrchestrationWriteVerboseData;
 }): {
-  mergedTools: unknown[];
+  mergedTools: CustomToolDefinition[];
   iterateTool: OrchestrationNamedTool | undefined;
   taskPostTool: OrchestrationNamedTool | undefined;
   finishTool: OrchestrationNamedTool | undefined;
@@ -59,7 +59,7 @@ export function createOrchestrationTools(args: {
     params?: Record<string, unknown>,
   ) => Promise<ToolResultShape>;
 } {
-  const customTools: unknown[] = [
+  const customTools: CustomToolDefinition[] = [
     createRunIterateTool(args),
     createTaskPostResultTool(args),
     createFinishOrchestrationTool(args),
@@ -149,7 +149,7 @@ function createRunIterateTool(args: {
   state: OrchestrationState;
   writeVerbose: OrchestrationWriteVerbose;
   writeVerboseData: OrchestrationWriteVerboseData;
-}): Record<string, unknown> {
+}): CustomToolDefinition {
   return {
     name: "babysitter_run_iterate",
     label: "Babysitter Run Iterate",
@@ -212,7 +212,7 @@ function createTaskPostResultTool(args: {
   phaseArgs: RunOrchestrationPhaseArgs;
   state: OrchestrationState;
   writeVerboseData: OrchestrationWriteVerboseData;
-}): Record<string, unknown> {
+}): CustomToolDefinition {
   return {
     name: "babysitter_task_post_result",
     label: "Babysitter Task Post Result",
@@ -305,7 +305,7 @@ function createFinishOrchestrationTool(args: {
     harness?: string;
   }>;
   writeVerboseData: OrchestrationWriteVerboseData;
-}): Record<string, unknown> {
+}): CustomToolDefinition {
   return {
     name: "babysitter_finish_orchestration",
     label: "Finish Orchestration",
@@ -367,17 +367,17 @@ function createFinishOrchestrationTool(args: {
 }
 
 function wrapToolExecute(
-  rawTools: unknown[],
+  rawTools: CustomToolDefinition[],
   writeVerbose: OrchestrationWriteVerbose,
-): unknown[] {
+): CustomToolDefinition[] {
   return rawTools.map((tool) => {
-    const typedTool = tool as Record<string, unknown>;
+    const typedTool = tool as unknown as Record<string, unknown>;
     const originalExecute = typedTool.execute;
     if (typeof originalExecute !== "function") {
       return tool;
     }
     return {
-      ...typedTool,
+      ...tool,
       execute: async (...params: unknown[]) => {
         try {
           return await (originalExecute as (...args: unknown[]) => Promise<unknown>)(...params);
@@ -390,7 +390,7 @@ function wrapToolExecute(
           );
         }
       },
-    };
+    } as CustomToolDefinition;
   });
 }
 

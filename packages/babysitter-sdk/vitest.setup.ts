@@ -11,6 +11,46 @@ import {
   clearAmuxMetadataCache,
 } from "./src/harness/adapterMetadata";
 
+// ---------------------------------------------------------------------------
+// Hermeticity: scrub ambient harness-activation env vars.
+//
+// When this suite runs inside a live agent host (Claude Code, Gemini CLI, etc.)
+// the host injects activation env vars (CLAUDECODE, CLAUDE_CODE_SESSION_ID,
+// GEMINI_API_KEY, AI_AGENT, ...). Harness detection (detectAdapter), stop-hook,
+// and state-dir resolution tests assume a clean host environment; leaking these
+// vars makes detectAdapter() resolve the host adapter instead of the one under
+// test and changes path normalization. Clearing them once before the suite runs
+// keeps the tests hermetic in both CI and local agent sessions. Individual tests
+// still set/restore their own per-case env vars in their own hooks.
+// ---------------------------------------------------------------------------
+const AMBIENT_HARNESS_ENV_KEYS = [
+  "CLAUDECODE",
+  "CLAUDE_CODE",
+  "CLAUDE_CODE_SESSION_ID",
+  "CLAUDE_CODE_ENTRYPOINT",
+  "CLAUDE_PROJECT_DIR",
+  "CLAUDE_ENV_FILE",
+  "CLAUDE_PLUGIN_ROOT",
+  "AI_AGENT",
+  "AGENT_SESSION_ID",
+  "GEMINI_API_KEY",
+  "GEMINI_CLI",
+  "GEMINI_SESSION_ID",
+  "GEMINI_PROJECT_DIR",
+  "GEMINI_CWD",
+  "CODEX_THREAD_ID",
+  "CODEX_SESSION_ID",
+  "CODEX_PLUGIN_ROOT",
+  "OMP_SESSION_ID",
+  "OMP_PLUGIN_ROOT",
+  "PI_SESSION_ID",
+  "PI_PLUGIN_ROOT",
+  "OPENCODE_CONFIG",
+];
+for (const key of AMBIENT_HARNESS_ENV_KEYS) {
+  delete process.env[key];
+}
+
 const ADAPTERS: Record<string, unknown> = {
   claude: {
     agent: "claude",

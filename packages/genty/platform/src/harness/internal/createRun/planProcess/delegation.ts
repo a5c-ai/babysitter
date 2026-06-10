@@ -1,6 +1,7 @@
 import * as path from "node:path";
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
+import type { CustomToolDefinition } from "@a5c-ai/genty-core";
 import { invokeHarness } from "../../../invoker";
 import {
   PARENT_PROMPT_TIMEOUT_MS,
@@ -81,7 +82,7 @@ export async function runDelegatedHarnessTask(args: {
   thinkingLevel?: AgentCoreSessionOptions["thinkingLevel"] | "none";
   bashSandbox?: AgentCoreSessionOptions["bashSandbox"];
   skills?: string[];
-  customTools?: unknown[];
+  customTools?: CustomToolDefinition[];
 }): Promise<{
   success: boolean;
   output: string;

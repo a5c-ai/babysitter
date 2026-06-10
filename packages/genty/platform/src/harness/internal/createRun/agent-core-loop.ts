@@ -11,6 +11,7 @@
 import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import type { EffectAction } from "../../../types";
+import type { CustomToolDefinition } from "@a5c-ai/genty-core";
 import type {
   AgentCorePromptResult,
   AgentCoreSessionOptions,
@@ -173,7 +174,7 @@ export function buildWorkerSessionOptions(args: {
   action: EffectAction;
   workspace?: string;
   model?: string;
-  customTools?: unknown[];
+  customTools?: CustomToolDefinition[];
   delegationConfig?: DelegationConfig;
 }): AgentCoreSessionOptions {
   const metadata = args.action.taskDef?.metadata as Record<string, unknown> | undefined;

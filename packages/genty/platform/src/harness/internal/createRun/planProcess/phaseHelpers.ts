@@ -2,7 +2,7 @@ import * as path from "node:path";
 import * as readline from "node:readline";
 import { promises as fs } from "node:fs";
 import { Type } from "@sinclair/typebox";
-import { createAgentCoreToolDefinitions } from "@a5c-ai/genty-core";
+import { createAgentCoreToolDefinitions, type CustomToolDefinition } from "@a5c-ai/genty-core";
 import {
   askUserQuestionViaTool,
   emitProgress,
@@ -69,9 +69,9 @@ export function createPlanProcessTools(args: {
   phaseOutputs: string[];
   sessionRef: { current: AgentCoreSessionHandle | null };
   writeVerboseData: (label: string, value: unknown, maxChars?: number) => void;
-}): unknown[] {
-  let mergedCustomTools: unknown[] = [];
-  const customTools: unknown[] = [
+}): CustomToolDefinition[] {
+  let mergedCustomTools: CustomToolDefinition[] = [];
+  const customTools: CustomToolDefinition[] = [
     {
       name: "babysitter_report_process_definition",
       label: "Report Process Definition",
@@ -82,8 +82,9 @@ export function createPlanProcessTools(args: {
       }),
       execute: async (
         _toolCallId: string,
-        params: { processPath: string; summary?: string },
+        rawParams: Record<string, unknown>,
       ): Promise<ToolResultShape> => {
+        const params = rawParams as { processPath: string; summary?: string };
         args.writeVerboseData("phasePlanProcess tool babysitter_report_process_definition", params);
         const normalizedProcessPath = normalizeReportedPath(
           params.processPath,

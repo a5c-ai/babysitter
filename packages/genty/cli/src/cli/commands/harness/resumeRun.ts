@@ -6,7 +6,7 @@
 
 import * as path from "node:path";
 import { Type } from "@sinclair/typebox";
-import { createAgentCoreSession, AgentCoreSessionHandle } from "@a5c-ai/genty-core";
+import { createAgentCoreSession, AgentCoreSessionHandle, type CustomToolDefinition } from "@a5c-ai/genty-core";
 import { createAgentCoreToolDefinitions } from "@a5c-ai/genty-core";
 import { resolveExistingRunDir, resolveRunsDir } from "../../args/runsDir";
 import type { AgentCoreSessionEvent } from "@a5c-ai/genty-platform/harness";
@@ -112,7 +112,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
   // Define domain-specific tools
   // -----------------------------------------------------------------
 
-  const customTools: unknown[] = [
+  const customTools: CustomToolDefinition[] = [
     {
       name: "babysitter_list_runs",
       label: "List Runs",
@@ -126,8 +126,9 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
       }),
       execute: async (
         _toolCallId: string,
-        params: { statusFilter?: string },
+        rawParams: Record<string, unknown>,
       ): Promise<ToolResultShape> => {
+        const params = rawParams as { statusFilter?: string };
         writeVerboseData("resume tool babysitter_list_runs", params);
         try {
           let runs = await discoverRuns(runsDir);
@@ -172,8 +173,9 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
       }),
       execute: async (
         _toolCallId: string,
-        params: { runId: string },
+        rawParams: Record<string, unknown>,
       ): Promise<ToolResultShape> => {
+        const params = rawParams as { runId: string };
         writeVerboseData("resume tool babysitter_assess_run", params);
         const runDir = resolveExistingRunDir(params.runId, {
           cwd: args.workspace ?? process.cwd(),
@@ -216,8 +218,9 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
       }),
       execute: async (
         _toolCallId: string,
-        params: { runId: string },
+        rawParams: Record<string, unknown>,
       ): Promise<ToolResultShape> => {
+        const params = rawParams as { runId: string };
         writeVerboseData("resume tool babysitter_resume_run", params);
         if (resumeTriggered) {
           return errorResult("Resume has already been triggered for this session.");
@@ -294,7 +297,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
       : undefined,
   });
 
-  const mergedCustomTools: unknown[] = [...customTools, ...agenticTools];
+  const mergedCustomTools: CustomToolDefinition[] = [...customTools, ...agenticTools];
 
   writeVerbose(
     `[resume setup] runsDir=${runsDir} workspace=${path.resolve(args.workspace ?? process.cwd())} model=${args.model ?? "(default)"}`,

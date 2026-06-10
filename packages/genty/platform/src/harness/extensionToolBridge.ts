@@ -1,16 +1,24 @@
+import type { CustomToolDefinition, ToolResult } from "@a5c-ai/genty-core";
 import type { ExtensionRegistry } from '@a5c-ai/genty-core/extensions';
+import { Type, type TObject } from '@sinclair/typebox';
 
-export interface BridgedToolDefinition {
-  name: string;
-  description: string;
-  execute: (params: Record<string, unknown>) => Promise<{ content: Array<{ type: 'text'; text: string }> }>;
-}
-
-export function bridgeExtensionTools(registry: ExtensionRegistry): BridgedToolDefinition[] {
+/**
+ * Bridges extension-registered tools into genty-core {@link CustomToolDefinition}s
+ * so they flow through the agent-core tool-calling loop alongside built-in
+ * custom tools. Extension tools expose a loose `inputSchema`
+ * (`Record<string, unknown>`); we coerce it into a permissive TypeBox object so
+ * the unified tool surface has a concrete parameter schema.
+ */
+export function bridgeExtensionTools(registry: ExtensionRegistry): CustomToolDefinition[] {
   return registry.getAllTools().map((extTool) => ({
     name: extTool.name,
+    label: extTool.name,
     description: extTool.description,
-    execute: async (params: Record<string, unknown>) => {
+    parameters: toToolParameters(extTool.inputSchema),
+    execute: async (
+      _toolCallId: string,
+      params: Record<string, unknown>,
+    ): Promise<ToolResult> => {
       try {
         const result = await extTool.handler(params);
         return {
@@ -24,4 +32,21 @@ export function bridgeExtensionTools(registry: ExtensionRegistry): BridgedToolDe
       }
     },
   }));
+}
+
+/**
+ * Coerce an extension tool's loose JSON-schema-ish `inputSchema` into a TypeBox
+ * `TObject`. Extension schemas are already JSON Schema fragments, so we wrap
+ * them in a permissive object that carries the original schema's `properties`
+ * when present and otherwise accepts arbitrary properties.
+ */
+function toToolParameters(inputSchema: Record<string, unknown>): TObject {
+  const properties =
+    inputSchema && typeof inputSchema === 'object' && inputSchema.type === 'object'
+      ? (inputSchema.properties as Record<string, never> | undefined)
+      : undefined;
+  if (properties) {
+    return Type.Object(properties, { additionalProperties: true });
+  }
+  return Type.Object({}, { additionalProperties: true });
 }

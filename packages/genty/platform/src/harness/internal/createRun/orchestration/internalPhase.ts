@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { randomUUID } from "node:crypto";
+import type { CustomToolDefinition } from "@a5c-ai/genty-core";
 import type { EffectAction } from "../../../../types";
 import {
   BabysitterRuntimeError,
@@ -385,7 +386,7 @@ export async function runInternalOrchestrationPhase(
     args.invocationCommand === "call",
   );
   const appendSystemPrompt = [orchestrationSystemPrompt];
-  let sessionCustomTools: unknown[] = mergedTools;
+  let sessionCustomTools: CustomToolDefinition[] = mergedTools;
 
   if (gentyCtx) {
     // Apply AGENTS.md / SYSTEM.md instructions

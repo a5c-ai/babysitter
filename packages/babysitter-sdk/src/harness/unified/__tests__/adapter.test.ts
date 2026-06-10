@@ -23,9 +23,14 @@ const ENV_KEYS = [
   "AGENT_CAPABILITIES_JSON",
   "AGENT_PLUGIN_ROOT",
   "AGENT_HOOKS_PROXY_PATH",
-  "AGENT_SESSION_ID",
   "BABYSITTER_STATE_DIR",
   "CLAUDE_ENV_FILE",
+  // claude-code activationEnvVars — cleared so detectAdapter() does not resolve
+  // the claude-code adapter from the ambient host environment (hermeticity).
+  "CLAUDECODE",
+  "CLAUDE_CODE",
+  "CLAUDE_CODE_SESSION_ID",
+  "CLAUDE_PROJECT_DIR",
   "CODEX_THREAD_ID",
   "CODEX_SESSION_ID",
   "CODEX_PLUGIN_ROOT",

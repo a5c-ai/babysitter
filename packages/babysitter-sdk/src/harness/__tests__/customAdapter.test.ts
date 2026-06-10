@@ -18,7 +18,11 @@ import { beforeEach, afterEach, vi } from "vitest";
 
 // Save/restore env to prevent leaking
 const ENV_KEYS = [
-  "AGENT_SESSION_ID", "AGENT_SESSION_ID", "CLAUDE_ENV_FILE",
+  "AGENT_SESSION_ID", "CLAUDE_ENV_FILE",
+  // claude-code activationEnvVars — set whenever this suite runs inside a live
+  // Claude Code session. Must be cleared so detectAdapter() does not pick up the
+  // claude-code adapter from the ambient host environment (hermeticity).
+  "CLAUDECODE", "CLAUDE_CODE", "CLAUDE_CODE_SESSION_ID", "CLAUDE_PROJECT_DIR",
   "CODEX_THREAD_ID", "CODEX_SESSION_ID", "CODEX_PLUGIN_ROOT",
   "OMP_SESSION_ID", "PI_SESSION_ID", "OMP_PLUGIN_ROOT", "PI_PLUGIN_ROOT",
   "GEMINI_SESSION_ID", "GEMINI_PROJECT_DIR", "GEMINI_CWD",
