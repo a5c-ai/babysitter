@@ -36,7 +36,8 @@ export const COMMAND_HOTKEYS = [
 
 export type CommandHotkey = (typeof COMMAND_HOTKEYS)[number];
 
-const GLYPH_STROKE = '#9fd9ef';
+/* brass-line engraving stroke (§V2-1 command glyph style) */
+const GLYPH_STROKE = '#d8b561';
 
 function glyph(paths: string): IconSpec {
   return {

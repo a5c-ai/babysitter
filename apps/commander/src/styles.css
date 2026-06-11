@@ -1,49 +1,81 @@
 @import 'tailwindcss';
 
 /*
- * A5C Commander — command-deck theme tokens (SPEC §10).
- * Near-black blue-charcoal base (#0a0e14 family), glass panels,
- * one restrained accent per adapter faction, mono accent for numbers.
+ * A5C Commander — "The Aegis Cogitator" theme tokens (SPEC-V2 §V2-1).
+ * Warm parchment field (aged paper #e9dcbe family) framing slate-umber
+ * panels (#22231e family) edged with brass/gold ornament (#b9913f family),
+ * warm amber lamp-light glows, jewel stained-glass faction accents, serif
+ * display headers with the mono accent kept for numbers.
+ * Geometry is untouched — this is a re-skin of the v1 command deck.
  */
 @theme {
-  /* base surfaces */
-  --color-deck-950: #06080d;
-  --color-deck-900: #0a0e14;
-  --color-deck-800: #10151f;
-  --color-deck-700: #1a2130;
-  --color-deck-600: #242d40;
+  /* parchment field (aged paper) */
+  --color-parchment-50: #f7eed7;
+  --color-parchment-100: #f0e6c9;
+  --color-parchment-200: #e9dcbe;
+  --color-parchment-300: #dcca9e;
+  --color-parchment-400: #c9b384;
+  --color-parchment-500: #ab9264;
 
-  /* map floor */
-  --color-grid-line: #131a27;
+  /* slate-umber panel surfaces */
+  --color-deck-950: #16170f;
+  --color-deck-900: #191a14;
+  --color-deck-800: #22231e;
+  --color-deck-700: #2c2d25;
+  --color-deck-600: #3a3b30;
 
-  /* HUD text */
-  --color-hud-text: #c9d6e8;
-  --color-hud-dim: #74849c;
-  --color-hud-bright: #eef4fc;
+  /* brass / gold ornament */
+  --color-brass-300: #e3c87f;
+  --color-brass-400: #d2ab57;
+  --color-brass-500: #b9913f;
+  --color-brass-600: #94702c;
+  --color-brass-700: #6d5120;
 
-  /* glass panel chrome */
-  --color-glass-border: rgb(125 165 225 / 0.18);
-  --color-glass-fill: rgb(16 21 31 / 0.55);
+  /* warm amber lamp-light */
+  --color-amber-glow: #e8b54a;
+  --color-amber-deep: #c98f2b;
 
-  /* adapter faction accents (cyan / magenta / amber / green families) */
-  --color-faction-claude: #2dd4ee;
-  --color-faction-codex: #e26bf5;
-  --color-faction-gemini: #f5b62d;
-  --color-faction-pi: #34d98c;
+  /* ink on parchment (map labels, plate captions) */
+  --color-ink: #3b3122;
+  --color-ink-soft: #6f5f44;
 
-  /* status accents */
-  --color-status-alert: #f3655a;
-  --color-status-warn: #f5b62d;
-  --color-status-ok: #34d98c;
-  --color-status-info: #2dd4ee;
+  /* map floor drafting grid (sepia) */
+  --color-grid-line: rgb(122 99 60 / 0.16);
 
-  /* selection / glow */
-  --color-selection-ring: #7dd7f0;
+  /* HUD text on slate */
+  --color-hud-text: #e2d3ac;
+  --color-hud-dim: #a59373;
+  --color-hud-bright: #f6ecd2;
 
-  /* mono accent for numbers (SPEC §10: single mono accent) */
+  /* brass panel chrome (var names kept from v1 — many call sites) */
+  --color-glass-border: rgb(185 145 63 / 0.55);
+  --color-glass-fill: rgb(30 31 25 / 0.92);
+
+  /* adapter faction accents — jewel stained-glass over brass (§V2-1):
+     claude-code=verdigris teal glass · codex=garnet glass ·
+     gemini-cli=amber glass · pi=peridot glass */
+  --color-faction-claude: #58b3a4;
+  --color-faction-codex: #d0707c;
+  --color-faction-gemini: #ddab4a;
+  --color-faction-pi: #a9bf57;
+
+  /* status accents (warm jewel, text-grade on slate) */
+  --color-status-alert: #d4604a;
+  --color-status-warn: #dba344;
+  --color-status-ok: #84b274;
+  --color-status-info: #5fae9c;
+
+  /* selection / lamp glow */
+  --color-selection-ring: #e0a83c;
+
+  /* mono accent for numbers (SPEC §10: single mono accent — kept in v2) */
   --font-mono-hud:
     ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas,
     'Liberation Mono', monospace;
+
+  /* serif display stack (§V2-1 small-caps letter-spaced headers) */
+  --font-serif-display:
+    'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
 }
 
 @layer base {
@@ -55,16 +87,15 @@
 
   body {
     margin: 0;
-    background-color: var(--color-deck-900);
+    /* §V2-1 / AC15: the field resolves to the parchment family */
+    background-color: var(--color-parchment-200);
     color: var(--color-hud-text);
-    font-family:
-      system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-      sans-serif;
+    font-family: var(--font-serif-display);
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* keyboard-only operation must stay visible (SPEC §14) */
+  /* keyboard-only operation must stay visible (SPEC §14) — warm lamp focus */
   :focus-visible {
     outline: 2px solid var(--color-selection-ring);
     outline-offset: 2px;
@@ -73,14 +104,19 @@
 
 @layer components {
   /* ======================================================================
-   * Root / map viewport
+   * Root / map viewport — the parchment plate
    * ==================================================================== */
   .wr-root {
     position: relative;
     width: 100vw;
     height: 100dvh;
     overflow: hidden;
-    background: var(--color-deck-950);
+    /* aged-paper mottling over the parchment base */
+    background:
+      radial-gradient(ellipse at 22% 16%, rgb(255 248 224 / 0.55), transparent 55%),
+      radial-gradient(ellipse at 80% 85%, rgb(150 120 66 / 0.16), transparent 60%),
+      radial-gradient(ellipse at 65% 30%, rgb(214 190 140 / 0.35), transparent 65%),
+      var(--color-parchment-200);
     user-select: none;
   }
 
@@ -102,45 +138,88 @@
     will-change: transform;
   }
 
+  /* aged drafting-paper floor: faint sepia grid + clockwork gear watermarks
+     (inline path/circle-only SVG backgrounds — §V2-1, no image assets) */
   .wr-floor {
     position: absolute;
     inset: -400px;
     pointer-events: none;
     background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='34' fill='none' stroke='rgb(122,99,60)' stroke-opacity='0.06' stroke-width='13' stroke-dasharray='9 8'/%3E%3Ccircle cx='60' cy='60' r='26' fill='none' stroke='rgb(122,99,60)' stroke-opacity='0.08' stroke-width='3'/%3E%3Ccircle cx='60' cy='60' r='7' fill='none' stroke='rgb(122,99,60)' stroke-opacity='0.08' stroke-width='3'/%3E%3Cpath d='M60 35 V52 M60 68 V85 M35 60 H52 M68 60 H85' fill='none' stroke='rgb(122,99,60)' stroke-opacity='0.06' stroke-width='3'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='rgb(122,99,60)' stroke-opacity='0.05' stroke-width='7' stroke-dasharray='5 4.5'/%3E%3Ccircle cx='32' cy='32' r='12' fill='none' stroke='rgb(122,99,60)' stroke-opacity='0.06' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='3.5' fill='rgb(122,99,60)' fill-opacity='0.06'/%3E%3C/svg%3E"),
       linear-gradient(to right, var(--color-grid-line) 1px, transparent 1px),
       linear-gradient(to bottom, var(--color-grid-line) 1px, transparent 1px),
-      radial-gradient(ellipse at 50% 30%, rgb(45 212 238 / 0.04), transparent 60%);
+      radial-gradient(ellipse at 50% 30%, rgb(232 181 74 / 0.05), transparent 60%);
     background-size:
+      520px 520px,
+      300px 300px,
       64px 64px,
       64px 64px,
       100% 100%;
+    background-position:
+      80px 140px,
+      -40px -30px,
+      0 0,
+      0 0,
+      0 0;
   }
 
+  /* sepia vignette + etched plate-border flourish (screen space) */
   .wr-vignette {
     position: absolute;
     inset: 0;
+    box-sizing: border-box;
     pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 45%, rgb(3 5 9 / 0.85) 100%);
+    border: 4px double rgb(148 112 44 / 0.45);
+    background: radial-gradient(ellipse at center, transparent 45%, rgb(74 54 24 / 0.42) 100%);
+    box-shadow: inset 0 0 0 7px rgb(233 220 190 / 0.16);
+  }
+  /* corner gears on the plate border */
+  .wr-vignette::before,
+  .wr-vignette::after {
+    content: '';
+    position: absolute;
+    width: 58px;
+    height: 58px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='rgb(148,112,44)' stroke-opacity='0.5' stroke-width='7' stroke-dasharray='5.5 5'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='rgb(148,112,44)' stroke-opacity='0.55' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='32' r='4' fill='rgb(148,112,44)' fill-opacity='0.55'/%3E%3Cpath d='M32 19 V27 M32 37 V45 M19 32 H27 M37 32 H45' fill='none' stroke='rgb(148,112,44)' stroke-opacity='0.45' stroke-width='2.5'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    opacity: 0.5;
+  }
+  .wr-vignette::before {
+    top: 50px;
+    left: -22px;
+  }
+  .wr-vignette::after {
+    bottom: -22px;
+    right: -22px;
   }
 
-  /* CRT scanline texture — 0.05 line alpha × 0.7 layer opacity = 3.5%
-     effective, subtle but actually registers (SPEC §10: ≤4%) */
-  .wr-scanlines {
+  /* paper-grain texture — crossing sepia threads at 0.05 alpha × 0.65 layer
+     opacity ≈ 3.3% effective, replacing the v1 scanlines (§V2-1: ≤4%) */
+  .wr-grain {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: repeating-linear-gradient(
-      0deg,
-      rgb(186 215 247 / 0.05) 0px,
-      rgb(186 215 247 / 0.05) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-    opacity: 0.7;
+    background:
+      repeating-linear-gradient(
+        97deg,
+        rgb(92 70 36 / 0.05) 0px,
+        rgb(92 70 36 / 0.05) 1px,
+        transparent 1px,
+        transparent 4px
+      ),
+      repeating-linear-gradient(
+        171deg,
+        rgb(255 244 214 / 0.05) 0px,
+        rgb(255 244 214 / 0.05) 1px,
+        transparent 1px,
+        transparent 5px
+      );
+    opacity: 0.65;
   }
 
   /* ======================================================================
-   * Unit sprites (SPEC §3 visual states)
+   * Unit sprites (SPEC §3 visual states — warm lamp-light vocabulary)
    * ==================================================================== */
   .wr-unit {
     position: absolute;
@@ -172,7 +251,7 @@
     height: 54px;
     margin-left: -27px;
     border-radius: 9999px;
-    border: 2px solid var(--color-hud-dim);
+    border: 2px solid var(--color-ink-soft);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     pointer-events: none;
   }
@@ -197,7 +276,7 @@
   .wr-bar {
     height: 4px;
     border-radius: 2px;
-    background: rgb(255 255 255 / 0.12);
+    background: rgb(59 49 34 / 0.22);
     overflow: hidden;
   }
   .wr-bar-fill {
@@ -206,10 +285,10 @@
     transition: width 0.4s ease-out;
   }
   .wr-bar--health .wr-bar-fill {
-    background: var(--color-status-ok);
+    background: #4f8f63;
   }
   .wr-bar--energy .wr-bar-fill {
-    background: var(--color-status-info);
+    background: var(--color-amber-deep);
   }
   .wr-bar--progress .wr-bar-fill {
     background: var(--color-selection-ring);
@@ -229,7 +308,7 @@
     height: 0;
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
-    border-bottom: 5px solid var(--color-status-warn);
+    border-bottom: 5px solid var(--color-brass-600);
   }
 
   .wr-unit-label {
@@ -238,8 +317,8 @@
        when the world layer shrinks — var set on .wr-world by MapViewport */
     font-size: calc(10px * var(--wr-label-scale, 1));
     letter-spacing: 0.08em;
-    color: var(--color-hud-text);
-    text-shadow: 0 1px 3px rgb(0 0 0 / 0.9);
+    color: var(--color-ink);
+    text-shadow: 0 1px 2px rgb(247 238 215 / 0.95);
     pointer-events: none;
     white-space: nowrap;
   }
@@ -257,18 +336,18 @@
     font-family: var(--font-mono-hud);
     font-size: 11px;
     font-weight: 700;
-    color: var(--color-deck-950);
+    color: var(--color-parchment-50);
     pointer-events: none;
   }
   .wr-unit-badge--warn {
-    background: var(--color-status-warn);
+    background: var(--color-amber-deep);
   }
   .wr-unit-badge--alert {
-    background: var(--color-status-alert);
+    background: #b3382e;
     animation: wr-urgent 0.9s ease-in-out infinite;
   }
   .wr-unit-badge--paused {
-    background: var(--color-hud-bright);
+    background: var(--color-ink-soft);
     font-size: 8px;
     letter-spacing: 0.08em;
   }
@@ -280,16 +359,16 @@
     border-style: double;
   }
   .wr-unit.is-paused .wr-unit-portrait {
-    filter: saturate(0.55) brightness(0.85);
+    filter: saturate(0.55) brightness(0.95) sepia(0.25);
   }
 
-  /* per-state ring color + animation */
+  /* per-state ring color + animation (warm jewel accents, lamp-light glows) */
   .wr-unit--idle .wr-unit-ring {
-    border-color: rgb(116 132 156 / 0.8);
+    border-color: rgb(111 95 68 / 0.75);
     animation: wr-soft-pulse 3.2s ease-in-out infinite;
   }
   .wr-unit--dispatching .wr-unit-ring {
-    border-color: var(--color-status-info);
+    border-color: #2f8d80;
     border-style: dashed;
     animation: wr-spin 1.6s linear infinite;
   }
@@ -298,39 +377,39 @@
     animation: wr-shimmer 1.4s ease-in-out infinite;
   }
   .wr-unit--tool_running .wr-unit-ring {
-    border-color: var(--color-status-warn);
+    border-color: var(--color-amber-deep);
     border-style: dotted;
     animation: wr-spin 0.9s linear infinite;
   }
   .wr-unit--awaiting_approval .wr-unit-ring {
-    border-color: var(--color-status-alert);
+    border-color: #b3382e;
     animation: wr-urgent 0.8s ease-in-out infinite;
   }
   .wr-unit--blocked {
     opacity: 0.65;
   }
   .wr-unit--blocked .wr-unit-ring {
-    border-color: var(--color-status-warn);
+    border-color: var(--color-amber-deep);
   }
   .wr-unit--completed .wr-unit-ring {
-    border-color: var(--color-status-ok);
+    border-color: #4f8f63;
     animation: wr-flare 0.7s ease-out;
-    box-shadow: 0 0 14px rgb(52 217 140 / 0.55);
+    box-shadow: 0 0 14px rgb(79 143 99 / 0.55);
   }
   .wr-unit--failed .wr-unit-ring {
-    border-color: var(--color-status-alert);
+    border-color: #b3382e;
     animation: wr-flicker 0.5s steps(2, start) infinite;
   }
 
   .wr-unit.is-selected .wr-unit-ring {
     border-color: var(--color-selection-ring);
     box-shadow:
-      0 0 10px rgb(125 215 240 / 0.6),
-      0 0 22px rgb(125 215 240 / 0.25);
+      0 0 10px rgb(224 168 60 / 0.65),
+      0 0 22px rgb(224 168 60 / 0.3);
   }
 
   /* ======================================================================
-   * Task nodes (SPEC §3 task states)
+   * Task nodes (SPEC §3 task states) — brass-ringed wax-seal badges
    * ==================================================================== */
   .wr-task {
     position: absolute;
@@ -358,7 +437,7 @@
   }
   .wr-task-ring-track {
     fill: none;
-    stroke: rgb(255 255 255 / 0.1);
+    stroke: rgb(59 49 34 / 0.25);
     stroke-width: 3;
   }
   .wr-task-ring-fill {
@@ -394,7 +473,7 @@
     pointer-events: none;
   }
 
-  /* operator priority chevron (Prioritize command, SPEC §8) */
+  /* operator priority chevron (Prioritize command, SPEC §8) — brass pip */
   .wr-task-priority {
     position: absolute;
     top: -7px;
@@ -403,8 +482,8 @@
     height: 16px;
     border-radius: 9999px;
     background: var(--color-deck-700);
-    border: 1px solid var(--color-status-warn);
-    color: var(--color-status-warn);
+    border: 1px solid var(--color-brass-400);
+    color: var(--color-brass-300);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -415,7 +494,7 @@
     height: 10px;
   }
   .wr-task.is-priority .wr-task-ring-track {
-    stroke: rgb(245 187 58 / 0.35);
+    stroke: rgb(210 171 87 / 0.45);
   }
 
   .wr-task-label {
@@ -427,8 +506,8 @@
     display: block;
     /* counter-scaled with camera zoom (see .wr-unit-label) */
     font-size: calc(10px * var(--wr-label-scale, 1));
-    color: var(--color-hud-text);
-    text-shadow: 0 1px 3px rgb(0 0 0 / 0.9);
+    color: var(--color-ink);
+    text-shadow: 0 1px 2px rgb(247 238 215 / 0.95);
     white-space: nowrap;
   }
   .wr-task-kind {
@@ -436,40 +515,40 @@
     font-family: var(--font-mono-hud);
     font-size: calc(8px * var(--wr-label-scale, 1));
     letter-spacing: 0.1em;
-    color: var(--color-hud-dim);
+    color: var(--color-ink-soft);
     text-transform: uppercase;
   }
 
-  /* queued = unclaimed objective: full presence + dashed luminous track and a
-     faint glow so it reads as capturable, not disabled */
+  /* queued = unclaimed objective: dashed brass track + faint lamp glow so it
+     reads as capturable, not disabled */
   .wr-task--queued .wr-task-ring-track {
-    stroke: rgb(125 215 240 / 0.32);
+    stroke: rgb(185 145 63 / 0.55);
     stroke-dasharray: 4 3;
   }
   .wr-task--queued .wr-task-body {
-    filter: drop-shadow(0 0 7px rgb(125 215 240 / 0.18));
+    filter: drop-shadow(0 0 7px rgb(232 181 74 / 0.3));
   }
   .wr-task--in_progress .wr-task-ring-fill {
-    stroke: var(--color-status-info);
+    stroke: #2f8d80;
   }
   .wr-task--review .wr-task-ring-fill {
-    stroke: var(--color-status-warn);
+    stroke: var(--color-amber-deep);
   }
   .wr-task--done .wr-task-ring-fill {
-    stroke: var(--color-status-ok);
+    stroke: #4f8f63;
   }
   .wr-task--done .wr-task-body {
-    filter: saturate(0.7) brightness(1.1);
+    filter: saturate(0.7) brightness(1.06);
   }
   .wr-task--failed .wr-task-ring-fill {
-    stroke: var(--color-status-alert);
+    stroke: #b3382e;
   }
   .wr-task--failed .wr-task-body {
     filter: saturate(0.4);
   }
 
   .wr-task.is-selected .wr-task-body {
-    filter: drop-shadow(0 0 8px rgb(125 215 240 / 0.55));
+    filter: drop-shadow(0 0 8px rgb(224 168 60 / 0.65));
   }
 
   /* ======================================================================
@@ -485,7 +564,7 @@
   .wr-link-line {
     stroke-width: 1.5;
     stroke-dasharray: 6 6;
-    opacity: 0.55;
+    opacity: 0.6;
     animation: wr-dash 1.2s linear infinite;
   }
 
@@ -504,47 +583,82 @@
     height: 16px;
     margin: -8px 0 0 -8px;
     border-radius: 9999px;
-    border: 2px solid var(--color-status-alert);
+    border: 2px solid #b3382e;
     animation: wr-ping-expand 1.4s ease-out infinite;
   }
   .wr-ping--info {
-    border-color: var(--color-status-info);
+    border-color: #2f8d80;
   }
 
   .wr-marquee {
     position: absolute;
-    border: 1px solid var(--color-selection-ring);
-    background: rgb(125 215 240 / 0.08);
+    border: 1px solid var(--color-brass-600);
+    background: rgb(224 168 60 / 0.12);
     pointer-events: none;
     z-index: 30;
   }
 
   /* ======================================================================
-   * Glass panels / HUD chrome
+   * Slate panels with brass frames (HUD chrome, §V2-1)
    * ==================================================================== */
   .wr-panel {
-    background: var(--color-glass-fill);
-    border: 1px solid var(--color-glass-border);
+    /* AC15 hook: every panel carries the brass-border custom property */
+    --wr-brass-border: 1px solid var(--color-brass-500);
+    position: relative;
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.05), transparent 38%),
+      var(--color-glass-fill);
+    border: var(--wr-brass-border);
     border-radius: 10px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 8px 30px rgb(0 0 0 / 0.35);
+    /* etched double border (inner umber groove + brass thread) + warm drop */
+    box-shadow:
+      inset 0 0 0 1px rgb(18 16 9 / 0.9),
+      inset 0 0 0 2px rgb(216 181 97 / 0.26),
+      0 10px 26px rgb(58 42 18 / 0.45);
     padding: 8px 10px;
     overflow: hidden;
   }
+  /* corner rivets, struck into the frame */
+  .wr-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle 3px at 7px 7px, #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%),
+      radial-gradient(circle 3px at calc(100% - 7px) 7px, #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%),
+      radial-gradient(circle 3px at 7px calc(100% - 7px), #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%),
+      radial-gradient(circle 3px at calc(100% - 7px) calc(100% - 7px), #e3c87f 0%, #b9913f 45%, #4a3812 80%, transparent 100%);
+  }
 
   .wr-panel-title {
-    font-family: var(--font-mono-hud);
-    font-size: 10px;
-    letter-spacing: 0.28em;
-    color: var(--color-hud-dim);
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-size: 11px;
+    letter-spacing: 0.26em;
+    color: var(--color-brass-400);
     margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
+  /* oval amber "eye" indicator — lamp-lit while the panel is live (§V2-1) */
+  .wr-panel-title::before {
+    content: '';
+    width: 10px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 38%, #ffe9b0, var(--color-amber-glow) 55%, var(--color-amber-deep) 85%);
+    border: 1px solid var(--color-brass-700);
+    box-shadow: 0 0 6px rgb(232 181 74 / 0.75);
+    animation: wr-soft-pulse 3.4s ease-in-out infinite;
+  }
   .wr-panel-count {
     color: var(--color-hud-bright);
+    font-family: var(--font-mono-hud);
   }
 
   /* --- top bar ---------------------------------------------------------- */
@@ -558,22 +672,43 @@
     align-items: center;
     gap: 20px;
     padding: 0 14px;
-    background: linear-gradient(to bottom, rgb(10 14 20 / 0.92), rgb(10 14 20 / 0.65));
-    border-bottom: 1px solid var(--color-glass-border);
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.05), transparent 45%),
+      linear-gradient(to bottom, rgb(25 26 20 / 0.97), rgb(25 26 20 / 0.88));
+    border-bottom: 1px solid var(--color-brass-500);
+    box-shadow:
+      inset 0 -2px 0 rgb(216 181 97 / 0.22),
+      0 6px 18px rgb(58 42 18 / 0.35);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     z-index: 40;
   }
 
   .wr-topbar-logo {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
     font-weight: 700;
-    letter-spacing: 0.3em;
-    font-size: 13px;
+    letter-spacing: 0.22em;
+    font-size: 14px;
     color: var(--color-hud-bright);
     white-space: nowrap;
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
   }
   .wr-topbar-logo span {
-    color: var(--color-faction-claude);
+    color: var(--color-brass-300);
+  }
+  .wr-topbar-cogitator {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--color-hud-dim);
+  }
+  .wr-topbar-cogitator::before {
+    content: '\2014\00a0';
+    color: var(--color-brass-600);
   }
 
   .wr-topbar-stats {
@@ -591,10 +726,11 @@
     white-space: nowrap;
   }
   .wr-stat-label {
-    font-family: var(--font-mono-hud);
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
     font-size: 9px;
     letter-spacing: 0.22em;
-    color: var(--color-hud-dim);
+    color: var(--color-brass-500);
   }
   .wr-stat-value {
     font-family: var(--font-mono-hud);
@@ -623,8 +759,8 @@
     letter-spacing: 0.18em;
     padding: 4px 12px;
     border-radius: 6px;
-    border: 1px solid var(--color-glass-border);
-    background: rgb(255 255 255 / 0.05);
+    border: 1px solid var(--color-brass-600);
+    background: linear-gradient(to bottom, rgb(227 200 127 / 0.14), rgb(109 81 32 / 0.14));
     color: var(--color-hud-text);
     cursor: pointer;
     white-space: nowrap;
@@ -633,11 +769,11 @@
   .wr-sim-toggle:hover {
     border-color: var(--color-selection-ring);
     color: var(--color-hud-bright);
-    background: rgb(125 215 240 / 0.1);
+    background: rgb(224 168 60 / 0.16);
   }
   .wr-sim-toggle--paused {
-    border-color: var(--color-status-warn);
-    color: var(--color-status-warn);
+    border-color: var(--color-amber-glow);
+    color: var(--color-amber-glow);
   }
 
   .wr-topbar-clock {
@@ -652,13 +788,13 @@
   .wr-clock-paused {
     font-size: 9px;
     letter-spacing: 0.2em;
-    color: var(--color-status-warn);
-    border: 1px solid var(--color-status-warn);
+    color: var(--color-amber-glow);
+    border: 1px solid var(--color-amber-glow);
     border-radius: 4px;
     padding: 1px 5px;
   }
 
-  /* --- alert banner ("base under attack", SPEC §10 restraint) -------------- */
+  /* --- alert banner — wax-seal urgency over brass (§V2-1) ----------------- */
   .wr-alert-banner {
     position: absolute;
     top: 52px;
@@ -672,8 +808,13 @@
     gap: 10px;
     padding: 5px 12px;
     border-radius: 8px;
-    background: rgb(40 14 14 / 0.78);
-    border: 1px solid var(--color-status-alert);
+    background:
+      linear-gradient(to bottom, rgb(255 220 190 / 0.05), transparent 40%),
+      rgb(46 23 17 / 0.92);
+    border: 1px solid #b3382e;
+    box-shadow:
+      inset 0 0 0 1px rgb(18 10 7 / 0.9),
+      inset 0 0 0 2px rgb(216 181 97 / 0.2);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     z-index: 45;
@@ -689,12 +830,13 @@
   .wr-alert-actions {
     flex-shrink: 0;
   }
+  /* pending count struck as a garnet wax seal */
   .wr-alert-count {
     min-width: 18px;
     height: 18px;
     border-radius: 9px;
-    background: var(--color-status-alert);
-    color: var(--color-deck-950);
+    background: radial-gradient(circle at 35% 30%, #d4604a, #b3382e 55%, #6f1f16 95%);
+    color: var(--color-parchment-50);
     font-family: var(--font-mono-hud);
     font-size: 11px;
     font-weight: 700;
@@ -702,14 +844,19 @@
     align-items: center;
     justify-content: center;
     padding: 0 4px;
+    box-shadow:
+      0 0 0 2px rgb(111 31 22 / 0.55),
+      inset 0 1px 2px rgb(255 200 170 / 0.4),
+      0 1px 2px rgb(30 8 4 / 0.6);
   }
+  /* requesting unit's portrait on a sepia plate */
   .wr-alert-portrait {
     width: 26px;
     height: 26px;
     flex-shrink: 0;
     border-radius: 7px;
-    background: rgb(255 255 255 / 0.06);
-    border: 1px solid rgb(255 255 255 / 0.14);
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.95), rgb(214 194 148 / 0.95));
+    border: 1px solid var(--color-brass-600);
     padding: 1px;
   }
   .wr-alert-text {
@@ -736,14 +883,14 @@
     letter-spacing: 0.06em;
     padding: 2px 8px;
     border-radius: 9px;
-    border: 1px solid rgb(243 101 90 / 0.55);
-    background: rgb(243 101 90 / 0.12);
+    border: 1px solid rgb(212 96 74 / 0.6);
+    background: rgb(179 56 46 / 0.16);
     color: var(--color-status-alert);
     cursor: pointer;
     white-space: nowrap;
   }
   .wr-alert-more:hover {
-    background: rgb(243 101 90 / 0.24);
+    background: rgb(179 56 46 / 0.3);
   }
   .wr-alert-actions {
     display: flex;
@@ -755,13 +902,13 @@
     letter-spacing: 0.08em;
     padding: 3px 10px;
     border-radius: 6px;
-    border: 1px solid var(--color-glass-border);
-    background: rgb(255 255 255 / 0.06);
+    border: 1px solid var(--color-brass-600);
+    background: linear-gradient(to bottom, rgb(227 200 127 / 0.12), rgb(109 81 32 / 0.1));
     color: var(--color-hud-bright);
     cursor: pointer;
   }
   .wr-alert-btn:hover {
-    background: rgb(255 255 255 / 0.14);
+    background: rgb(227 200 127 / 0.24);
   }
   .wr-alert-btn--approve {
     border-color: var(--color-status-ok);
@@ -772,16 +919,19 @@
     color: var(--color-status-alert);
   }
 
-  /* --- minimap -------------------------------------------------------------- */
+  /* --- minimap — brass-framed chart table -------------------------------- */
   .wr-minimap {
     position: absolute;
     top: 56px;
     right: 12px;
-    background: rgb(8 11 17 / 0.82);
-    border: 1px solid var(--color-glass-border);
+    background:
+      linear-gradient(to bottom, rgb(247 238 215 / 0.96), rgb(220 202 158 / 0.96));
+    border: 1px solid var(--color-brass-500);
     border-radius: 8px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    box-shadow:
+      inset 0 0 0 1px rgb(34 35 30 / 0.55),
+      inset 0 0 14px rgb(140 110 60 / 0.3),
+      0 8px 20px rgb(58 42 18 / 0.4);
     z-index: 40;
     cursor: pointer;
     overflow: hidden;
@@ -805,40 +955,40 @@
     position: absolute;
     width: 4px;
     height: 4px;
-    background: var(--color-hud-dim);
+    background: var(--color-ink-soft);
     pointer-events: none;
   }
   .wr-mini-task--done {
-    background: var(--color-status-ok);
+    background: #4f8f63;
   }
   .wr-mini-task--failed {
-    background: var(--color-status-alert);
+    background: #b3382e;
   }
   .wr-mini-task--in_progress,
   .wr-mini-task--assigned {
-    background: var(--color-status-info);
+    background: #2f8d80;
   }
   .wr-mini-ping {
     position: absolute;
     width: 8px;
     height: 8px;
     border-radius: 9999px;
-    border: 1px solid var(--color-status-alert);
+    border: 1px solid #b3382e;
     animation: wr-ping-expand 1.4s ease-out infinite;
     pointer-events: none;
   }
   .wr-mini-ping--info {
-    border-color: var(--color-status-info);
+    border-color: #2f8d80;
   }
-  /* camera viewport rect — must read at a glance (full-opacity stroke + glow) */
+  /* camera viewport rect — brass frame + lamp glow, reads at a glance */
   .wr-mini-view {
     position: absolute;
-    border: 1px solid var(--color-selection-ring);
+    border: 1px solid var(--color-brass-600);
     border-radius: 2px;
-    background: rgb(125 215 240 / 0.12);
+    background: rgb(224 168 60 / 0.18);
     box-shadow:
-      0 0 6px rgb(125 215 240 / 0.45),
-      inset 0 0 4px rgb(125 215 240 / 0.25);
+      0 0 6px rgb(224 168 60 / 0.55),
+      inset 0 0 4px rgb(224 168 60 / 0.35);
     pointer-events: none;
   }
 
@@ -890,7 +1040,7 @@
     cursor: pointer;
   }
   .wr-ticker-item:hover {
-    background: rgb(255 255 255 / 0.06);
+    background: rgb(227 200 127 / 0.08);
   }
   .wr-ticker-glyph {
     width: 11px;
@@ -911,7 +1061,7 @@
     font-size: 8px;
     letter-spacing: 0.2em;
     color: var(--color-status-info);
-    border: 1px solid rgb(45 212 238 / 0.45);
+    border: 1px solid rgb(95 174 156 / 0.5);
     border-radius: 4px;
     padding: 0 4px;
   }
@@ -963,19 +1113,27 @@
     flex: 1;
     min-height: 0;
   }
+  /* sepia illustration plate: portrait on parchment, brass-framed (§V2-1) */
   .wr-sel-portrait {
     width: 72px;
     height: 72px;
     flex-shrink: 0;
     border-radius: 10px;
-    background: rgb(255 255 255 / 0.04);
-    border: 1px solid var(--color-glass-border);
+    background:
+      radial-gradient(circle at 30% 25%, rgb(255 248 224 / 0.85), transparent 70%),
+      linear-gradient(to bottom, #f0e6c9, #d6c294);
+    border: 1px solid var(--color-brass-600);
+    box-shadow:
+      inset 0 0 0 2px rgb(34 35 30 / 0.18),
+      inset 0 0 10px rgb(140 110 60 / 0.3);
     padding: 4px;
   }
   .wr-sel-info {
     min-width: 140px;
   }
   .wr-sel-name {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
     font-size: 16px;
     font-weight: 600;
     color: var(--color-hud-bright);
@@ -990,14 +1148,15 @@
     margin-top: 2px;
     flex-wrap: wrap;
   }
+  /* oval amber-eye state badge (live status indicator, §V2-1) */
   .wr-sel-state {
     display: inline-block;
     margin-top: 6px;
     font-family: var(--font-mono-hud);
     font-size: 11px;
     letter-spacing: 0.08em;
-    padding: 2px 8px;
-    border-radius: 5px;
+    padding: 2px 10px;
+    border-radius: 9999px;
     border: 1px solid var(--color-hud-dim);
     color: var(--color-hud-text);
   }
@@ -1022,8 +1181,8 @@
     color: var(--color-hud-bright);
   }
   .wr-sel-priority {
-    border: 1px solid var(--color-status-warn);
-    color: var(--color-status-warn);
+    border: 1px solid var(--color-brass-400);
+    color: var(--color-brass-300);
   }
   .wr-sel-card-state .wr-sel-paused {
     margin-top: 0;
@@ -1033,12 +1192,14 @@
   }
   .wr-sel-state--thinking,
   .wr-sel-state--dispatching {
-    border-color: var(--color-status-info);
-    color: var(--color-status-info);
+    border-color: var(--color-amber-glow);
+    color: var(--color-amber-glow);
+    box-shadow: 0 0 7px rgb(232 181 74 / 0.4);
   }
   .wr-sel-state--tool_running {
     border-color: var(--color-status-warn);
     color: var(--color-status-warn);
+    box-shadow: 0 0 7px rgb(219 163 68 / 0.4);
   }
   .wr-sel-state--awaiting_approval,
   .wr-sel-state--failed {
@@ -1051,7 +1212,7 @@
     color: var(--color-status-ok);
   }
 
-  /* faction-accent text (adapter names, SPEC §10 one accent per faction) */
+  /* faction-accent text — jewel stained-glass tints (§V2-1) */
   .wr-faction-text--claude-code {
     color: var(--color-faction-claude);
   }
@@ -1074,7 +1235,7 @@
     white-space: nowrap;
     text-align: left;
     font-size: 11px;
-    color: var(--color-selection-ring);
+    color: var(--color-brass-300);
     background: none;
     border: none;
     padding: 0;
@@ -1099,7 +1260,7 @@
   .wr-sel-assignee {
     font-size: 10px;
     color: var(--color-hud-bright);
-    background: rgb(125 215 240 / 0.08);
+    background: rgb(227 200 127 / 0.1);
     border: 1px solid var(--color-glass-border);
     border-radius: 9px;
     padding: 1px 8px;
@@ -1109,10 +1270,10 @@
   }
   .wr-sel-assignee:hover {
     border-color: var(--color-selection-ring);
-    background: rgb(125 215 240 / 0.18);
+    background: rgb(224 168 60 / 0.2);
   }
 
-  /* rank chevrons (turn count → XP, SPEC §3) */
+  /* rank chevrons (turn count → XP, SPEC §3) — earned in brass */
   .wr-rank {
     display: inline-flex;
     gap: 2px;
@@ -1123,10 +1284,10 @@
     height: 0;
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
-    border-bottom: 6px solid rgb(255 255 255 / 0.14);
+    border-bottom: 6px solid rgb(227 200 127 / 0.18);
   }
   .wr-rank-chevron.is-earned {
-    border-bottom-color: var(--color-status-warn);
+    border-bottom-color: var(--color-brass-400);
   }
 
   .wr-sel-vitals {
@@ -1145,12 +1306,14 @@
   .wr-vital .wr-bar {
     flex: 1;
     height: 6px;
+    background: rgb(227 200 127 / 0.12);
   }
   .wr-vital-label {
-    font-family: var(--font-mono-hud);
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
     font-size: 9px;
     letter-spacing: 0.18em;
-    color: var(--color-hud-dim);
+    color: var(--color-brass-500);
     width: 64px;
     flex-shrink: 0;
   }
@@ -1177,7 +1340,7 @@
     border-radius: 8px;
     padding: 4px;
     text-align: center;
-    background: rgb(255 255 255 / 0.03);
+    background: rgb(227 200 127 / 0.05);
     color: inherit;
     font: inherit;
     cursor: pointer;
@@ -1185,13 +1348,13 @@
   }
   .wr-sel-card:hover {
     border-color: var(--color-selection-ring);
-    background: rgb(125 215 240 / 0.08);
-    box-shadow: 0 0 8px rgb(125 215 240 / 0.25);
+    background: rgb(224 168 60 / 0.1);
+    box-shadow: 0 0 8px rgb(224 168 60 / 0.3);
   }
   /* per-state card border + label accent — the multi-select grid reads fleet
      state at a glance (single-unit view keeps the verbatim state badge) */
   .wr-sel-card--awaiting_approval {
-    border-color: rgb(243 101 90 / 0.6);
+    border-color: rgb(212 96 74 / 0.65);
   }
   .wr-sel-card--awaiting_approval .wr-sel-card-state {
     color: var(--color-status-alert);
@@ -1204,31 +1367,35 @@
   }
   .wr-sel-card--dispatching,
   .wr-sel-card--thinking {
-    border-color: rgb(45 212 238 / 0.45);
+    border-color: rgb(232 181 74 / 0.55);
   }
   .wr-sel-card--dispatching .wr-sel-card-state,
   .wr-sel-card--thinking .wr-sel-card-state {
-    color: var(--color-status-info);
+    color: var(--color-amber-glow);
   }
   .wr-sel-card--tool_running {
-    border-color: rgb(245 182 45 / 0.5);
+    border-color: rgb(219 163 68 / 0.55);
   }
   .wr-sel-card--tool_running .wr-sel-card-state {
     color: var(--color-status-warn);
   }
   .wr-sel-card--blocked {
-    border-color: rgb(245 182 45 / 0.5);
+    border-color: rgb(219 163 68 / 0.55);
   }
   .wr-sel-card--completed {
-    border-color: rgb(52 217 140 / 0.5);
+    border-color: rgb(132 178 116 / 0.55);
   }
   .wr-sel-card--completed .wr-sel-card-state {
     color: var(--color-status-ok);
   }
+  /* card portraits sit on miniature sepia plates */
   .wr-sel-card-portrait {
     width: 36px;
     height: 36px;
     margin: 0 auto;
+    border-radius: 6px;
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.9), rgb(214 194 148 / 0.9));
+    border: 1px solid rgb(148 112 44 / 0.6);
   }
   .wr-sel-card-name {
     font-size: 10px;
@@ -1279,7 +1446,9 @@
     gap: 2px;
     border: 1px solid var(--color-glass-border);
     border-radius: 7px;
-    background: rgb(255 255 255 / 0.04);
+    background:
+      linear-gradient(to bottom, rgb(227 200 127 / 0.07), transparent 55%),
+      rgb(44 45 37 / 0.6);
     color: var(--color-hud-text);
     font-size: 10px;
     cursor: pointer;
@@ -1288,7 +1457,7 @@
     transition: background 0.15s ease, border-color 0.15s ease;
   }
   .wr-cmd:hover:not(:disabled) {
-    background: rgb(125 215 240 / 0.12);
+    background: rgb(224 168 60 / 0.14);
     border-color: var(--color-selection-ring);
   }
   .wr-cmd:disabled {
@@ -1296,14 +1465,14 @@
     cursor: not-allowed;
   }
   .wr-cmd--danger {
-    border-color: rgb(243 101 90 / 0.5);
+    border-color: rgb(212 96 74 / 0.55);
   }
   .wr-cmd--danger:hover:not(:disabled) {
-    background: rgb(243 101 90 / 0.14);
+    background: rgb(179 56 46 / 0.16);
     border-color: var(--color-status-alert);
   }
   .wr-cmd--urgent {
-    border-color: var(--color-status-warn);
+    border-color: var(--color-amber-glow);
     animation: wr-cmd-urgent 1.4s ease-in-out infinite;
   }
   .wr-cmd--empty {
@@ -1323,7 +1492,7 @@
     text-overflow: ellipsis;
     max-width: 100%;
   }
-  /* hint keycap in the cell corner (SPEC §5) */
+  /* engraved brass keycap in the cell corner (SPEC §5 hint; §V2-1 styling) */
   .wr-cmd-hotkey {
     position: absolute;
     top: 2px;
@@ -1333,16 +1502,27 @@
     font-family: var(--font-mono-hud);
     font-size: 8px;
     line-height: 1.5;
-    color: var(--color-hud-dim);
-    border: 1px solid rgb(125 165 225 / 0.28);
+    color: #3b2f17;
+    border: 1px solid var(--color-brass-700);
     border-radius: 3px;
-    background: rgb(255 255 255 / 0.04);
+    background: linear-gradient(to bottom, #e3c87f, #b9913f 60%, #94702c);
+    box-shadow:
+      inset 0 1px 0 rgb(255 240 200 / 0.55),
+      0 1px 1px rgb(20 15 5 / 0.5);
+    text-shadow: 0 1px 0 rgb(255 240 200 / 0.4);
     padding: 0 2px;
     pointer-events: none;
   }
   .wr-cmd:hover:not(:disabled) .wr-cmd-hotkey {
-    color: var(--color-hud-bright);
+    color: #241b0a;
     border-color: var(--color-selection-ring);
+  }
+  .wr-cmd--empty .wr-cmd-hotkey {
+    background: rgb(58 59 48 / 0.7);
+    color: var(--color-hud-dim);
+    border-color: rgb(148 112 44 / 0.4);
+    box-shadow: none;
+    text-shadow: none;
   }
 
   /* --- inspector ----------------------------------------------------------------------- */
@@ -1354,13 +1534,17 @@
     width: 360px;
     display: flex;
     flex-direction: column;
-    background: rgb(10 14 20 / 0.92);
-    border-left: 1px solid var(--color-glass-border);
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.04), transparent 30%),
+      rgb(25 26 20 / 0.96);
+    border-left: 1px solid var(--color-brass-500);
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
+    box-shadow:
+      inset 1px 0 0 rgb(216 181 97 / 0.25),
+      -12px 0 30px rgb(58 42 18 / 0.45);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    box-shadow: -12px 0 30px rgb(0 0 0 / 0.4);
     z-index: 50;
     animation: wr-slide-left 0.22s ease-out;
   }
@@ -1371,16 +1555,23 @@
     padding: 10px;
     border-bottom: 1px solid var(--color-glass-border);
   }
+  /* sepia plate behind the header portrait */
   .wr-inspector-portrait {
     width: 44px;
     height: 44px;
     flex-shrink: 0;
+    border-radius: 8px;
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.95), rgb(214 194 148 / 0.95));
+    border: 1px solid var(--color-brass-600);
+    box-shadow: inset 0 0 6px rgb(140 110 60 / 0.3);
   }
   .wr-inspector-id {
     flex: 1;
     min-width: 0;
   }
   .wr-inspector-name {
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
     font-size: 14px;
     font-weight: 600;
     color: var(--color-hud-bright);
@@ -1434,10 +1625,10 @@
     padding: 3px 12px;
     border-radius: 9999px;
     border: 1px solid var(--color-selection-ring);
-    background: rgb(10 14 20 / 0.92);
+    background: rgb(25 26 20 / 0.95);
     color: var(--color-selection-ring);
     cursor: pointer;
-    box-shadow: 0 0 10px rgb(125 215 240 / 0.3);
+    box-shadow: 0 0 10px rgb(224 168 60 / 0.35);
   }
   .wr-inspector-jump:hover {
     color: var(--color-hud-bright);
@@ -1455,7 +1646,7 @@
     font-style: normal;
     font-size: 8px;
     letter-spacing: 0.22em;
-    color: var(--color-hud-dim);
+    color: var(--color-brass-500);
     margin-bottom: 2px;
   }
   .wr-tr--turn {
@@ -1467,25 +1658,25 @@
     padding: 1px;
   }
   .wr-tr--text {
-    background: rgb(255 255 255 / 0.05);
-    border: 1px solid rgb(125 165 225 / 0.1);
+    background: rgb(233 220 190 / 0.07);
+    border: 1px solid rgb(185 145 63 / 0.18);
     color: var(--color-hud-text);
     margin-right: 18px;
   }
   .wr-tr--thinking {
-    background: rgb(125 215 240 / 0.06);
-    border: 1px solid rgb(125 215 240 / 0.1);
+    background: rgb(232 181 74 / 0.06);
+    border: 1px solid rgb(232 181 74 / 0.14);
     color: var(--color-hud-dim);
     font-style: italic;
     margin-right: 18px;
   }
-  /* live thinking entry shimmers while the unit is in `thinking` (SPEC §3) */
+  /* live thinking entry glows lamp-warm while the unit is in `thinking` */
   .wr-tr--thinking.is-live {
     background: linear-gradient(
       100deg,
-      rgb(125 215 240 / 0.05) 30%,
-      rgb(125 215 240 / 0.16) 50%,
-      rgb(125 215 240 / 0.05) 70%
+      rgb(232 181 74 / 0.05) 30%,
+      rgb(232 181 74 / 0.17) 50%,
+      rgb(232 181 74 / 0.05) 70%
     );
     background-size: 220% 100%;
     animation: wr-text-shimmer 1.6s linear infinite;
@@ -1497,8 +1688,8 @@
     font-family: var(--font-mono-hud);
     font-size: 10px;
     color: var(--color-status-warn);
-    background: rgb(245 182 45 / 0.07);
-    border: 1px solid rgb(245 182 45 / 0.12);
+    background: rgb(219 163 68 / 0.08);
+    border: 1px solid rgb(219 163 68 / 0.16);
   }
   .wr-tr-tool-glyph {
     width: 12px;
@@ -1520,8 +1711,8 @@
   }
   .wr-tr--tool-failed {
     color: var(--color-status-alert);
-    background: rgb(243 101 90 / 0.08);
-    border-color: rgb(243 101 90 / 0.25);
+    background: rgb(179 56 46 / 0.1);
+    border-color: rgb(212 96 74 / 0.3);
   }
   .wr-tr--tool-failed .wr-tr-tool-meta {
     color: var(--color-status-alert);
@@ -1532,13 +1723,13 @@
     color: var(--color-hud-dim);
   }
 
-  /* token usage footer (mono accent for numbers, SPEC §10) */
+  /* token usage footer (mono accent for numbers, kept from v1) */
   .wr-inspector-foot {
     display: flex;
     gap: 12px;
     padding: 8px 10px;
     border-top: 1px solid var(--color-glass-border);
-    background: rgb(8 11 17 / 0.6);
+    background: rgb(22 23 15 / 0.7);
   }
   .wr-foot-cell {
     font-family: var(--font-mono-hud);
@@ -1553,18 +1744,18 @@
     font-style: normal;
     font-size: 8px;
     letter-spacing: 0.16em;
-    color: var(--color-hud-dim);
+    color: var(--color-brass-500);
   }
   .wr-foot-cell--cost {
     margin-left: auto;
-    color: var(--color-status-info);
+    color: var(--color-amber-glow);
   }
 
   /* --- steer modal -------------------------------------------------------------------------- */
   .wr-modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgb(3 5 9 / 0.55);
+    background: rgb(58 42 18 / 0.45);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1572,13 +1763,17 @@
   }
   .wr-modal {
     width: 460px;
-    background: rgb(16 21 31 / 0.88);
-    border: 1px solid var(--color-glass-border);
+    background:
+      linear-gradient(to bottom, rgb(255 240 200 / 0.05), transparent 35%),
+      rgb(30 31 25 / 0.96);
+    border: 1px solid var(--color-brass-500);
     border-radius: 10px;
     padding: 14px;
     box-shadow:
-      0 20px 60px rgb(0 0 0 / 0.6),
-      0 0 24px rgb(125 215 240 / 0.08);
+      inset 0 0 0 1px rgb(18 16 9 / 0.9),
+      inset 0 0 0 2px rgb(216 181 97 / 0.26),
+      0 20px 60px rgb(40 28 10 / 0.6),
+      0 0 24px rgb(232 181 74 / 0.12);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     animation: wr-modal-in 0.18s ease-out;
@@ -1592,7 +1787,7 @@
   .wr-modal-target {
     font-size: 10px;
     color: var(--color-hud-bright);
-    background: rgb(125 215 240 / 0.08);
+    background: rgb(227 200 127 / 0.1);
     border: 1px solid var(--color-glass-border);
     border-radius: 9px;
     padding: 1px 8px;
@@ -1600,26 +1795,33 @@
   }
   .wr-modal-target--none {
     color: var(--color-status-warn);
-    border-color: rgb(245 182 45 / 0.4);
-    background: rgb(245 182 45 / 0.06);
+    border-color: rgb(219 163 68 / 0.45);
+    background: rgb(219 163 68 / 0.08);
   }
+  /* parchment writing inset — orders are penned in ink (§V2-1 inset) */
   .wr-modal-input {
     width: 100%;
     box-sizing: border-box;
-    background: var(--color-deck-950);
-    border: 1px solid var(--color-glass-border);
+    background: linear-gradient(to bottom, #f0e6c9, #e2d1a8);
+    border: 1px solid var(--color-brass-600);
     border-radius: 6px;
-    color: var(--color-hud-bright);
+    color: var(--color-ink);
     font-size: 13px;
     font-family: inherit;
     padding: 8px 10px;
     resize: vertical;
     min-height: 60px;
+    box-shadow: inset 0 1px 4px rgb(109 81 32 / 0.35);
+  }
+  .wr-modal-input::placeholder {
+    color: var(--color-ink-soft);
   }
   .wr-modal-input:focus {
     outline: none;
     border-color: var(--color-selection-ring);
-    box-shadow: 0 0 8px rgb(125 215 240 / 0.25);
+    box-shadow:
+      inset 0 1px 4px rgb(109 81 32 / 0.35),
+      0 0 8px rgb(224 168 60 / 0.4);
   }
   .wr-modal-hint {
     font-family: var(--font-mono-hud);
@@ -1651,16 +1853,24 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--color-deck-950);
+      background:
+        radial-gradient(ellipse at 25% 20%, rgb(255 248 224 / 0.55), transparent 55%),
+        var(--color-parchment-200);
     }
     .wr-narrow-gate-card {
       text-align: center;
-      border: 1px solid var(--color-glass-border);
+      border: 1px solid var(--color-brass-500);
       border-radius: 12px;
       padding: 32px 40px;
       background: var(--color-glass-fill);
+      box-shadow:
+        inset 0 0 0 1px rgb(18 16 9 / 0.9),
+        inset 0 0 0 2px rgb(216 181 97 / 0.26),
+        0 12px 30px rgb(58 42 18 / 0.45);
     }
     .wr-narrow-gate-card h1 {
+      font-family: var(--font-serif-display);
+      font-variant-caps: small-caps;
       letter-spacing: 0.3em;
       font-size: 18px;
       color: var(--color-hud-bright);
@@ -1673,7 +1883,7 @@
   }
 
   /* ======================================================================
-   * Keyframes (SPEC §3/§10 motion vocabulary)
+   * Keyframes (SPEC §3/§10 motion vocabulary — warm lamp-light edition)
    * ==================================================================== */
   @keyframes wr-soft-pulse {
     0%,
@@ -1695,10 +1905,10 @@
   @keyframes wr-shimmer {
     0%,
     100% {
-      box-shadow: 0 0 4px rgb(125 215 240 / 0.25);
+      box-shadow: 0 0 4px rgb(232 181 74 / 0.3);
     }
     50% {
-      box-shadow: 0 0 16px rgb(125 215 240 / 0.65);
+      box-shadow: 0 0 16px rgb(232 181 74 / 0.7);
     }
   }
   @keyframes wr-urgent {
@@ -1722,13 +1932,13 @@
   }
   @keyframes wr-flare {
     0% {
-      box-shadow: 0 0 0 rgb(52 217 140 / 0);
+      box-shadow: 0 0 0 rgb(79 143 99 / 0);
     }
     40% {
-      box-shadow: 0 0 26px rgb(52 217 140 / 0.9);
+      box-shadow: 0 0 26px rgb(79 143 99 / 0.9);
     }
     100% {
-      box-shadow: 0 0 14px rgb(52 217 140 / 0.55);
+      box-shadow: 0 0 14px rgb(79 143 99 / 0.55);
     }
   }
   @keyframes wr-ping-expand {
@@ -1786,26 +1996,32 @@
       opacity: 1;
     }
   }
-  /* "base under attack" — restrained glow pulse (SPEC §10) */
+  /* "base under attack" — restrained garnet wax-seal pulse */
   @keyframes wr-banner-pulse {
     0%,
     100% {
-      box-shadow: 0 0 12px rgb(243 101 90 / 0.25);
+      box-shadow:
+        inset 0 0 0 1px rgb(18 10 7 / 0.9),
+        inset 0 0 0 2px rgb(216 181 97 / 0.2),
+        0 0 12px rgb(179 56 46 / 0.3);
     }
     50% {
-      box-shadow: 0 0 26px rgb(243 101 90 / 0.55);
+      box-shadow:
+        inset 0 0 0 1px rgb(18 10 7 / 0.9),
+        inset 0 0 0 2px rgb(216 181 97 / 0.2),
+        0 0 26px rgb(179 56 46 / 0.6);
     }
   }
-  /* urgent command cell (Approve) */
+  /* urgent command cell (Approve) — amber lamp pulse */
   @keyframes wr-cmd-urgent {
     0%,
     100% {
-      box-shadow: 0 0 2px rgb(245 182 45 / 0.2);
-      border-color: rgb(245 182 45 / 0.6);
+      box-shadow: 0 0 2px rgb(232 181 74 / 0.25);
+      border-color: rgb(232 181 74 / 0.65);
     }
     50% {
-      box-shadow: 0 0 12px rgb(245 182 45 / 0.55);
-      border-color: var(--color-status-warn);
+      box-shadow: 0 0 12px rgb(232 181 74 / 0.6);
+      border-color: var(--color-amber-glow);
     }
   }
   /* counter remount tick (TopBar) */

@@ -45,8 +45,8 @@ export function WarRoom({ store, orders }: WarRoomProps): React.JSX.Element {
       <SteerModal store={store} orders={orders} />
       <div className="wr-narrow-gate" role="note">
         <div className="wr-narrow-gate-card">
-          <h1>A5C COMMANDER</h1>
-          <p>the command deck requires a wider console — widen the window to at least 1100px.</p>
+          <h1>A5C Commander</h1>
+          <p>the cogitator requires a wider plate — widen the window to at least 1100px.</p>
         </div>
       </div>
     </div>

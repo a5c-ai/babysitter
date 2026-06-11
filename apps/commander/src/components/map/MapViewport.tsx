@@ -1,8 +1,9 @@
 /**
  * MapViewport (SPEC §4/§5): the pan/zoom world. A single CSS transform
- * (translate + scale from the §6 camera) positions the world layer; the grid
- * floor lives on the world layer (so it pans/zooms), the vignette +
- * scanline overlays live in screen space. Hosts the link layer, task nodes,
+ * (translate + scale from the §6 camera) positions the world layer; the
+ * drafting-paper floor lives on the world layer (so it pans/zooms), the
+ * vignette + paper-grain overlays live in screen space. Hosts the link
+ * layer, task nodes,
  * unit sprites, ping layer and the marquee selection box.
  *
  * All mouse interaction attaches here via `attachInput` (event delegation
@@ -138,7 +139,7 @@ export function MapViewport({ store, orders }: MapViewportProps): React.JSX.Elem
         <PingLayer store={store} />
       </div>
       <div className="wr-vignette" aria-hidden />
-      <div className="wr-scanlines" aria-hidden />
+      <div className="wr-grain" aria-hidden />
       <SelectionBox store={store} />
     </div>
   );

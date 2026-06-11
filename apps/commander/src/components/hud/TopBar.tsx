@@ -33,7 +33,8 @@ export function TopBar({ store, orders }: TopBarProps): React.JSX.Element {
   return (
     <header className="wr-topbar" data-testid="topbar">
       <div className="wr-topbar-logo">
-        A5C <span>COMMANDER</span>
+        A5C <span>Commander</span>
+        <em className="wr-topbar-cogitator">The Aegis Cogitator</em>
       </div>
       <div className="wr-topbar-stats">
         <div className="wr-stat" data-testid="topbar-units" title="Active units / busy units">
