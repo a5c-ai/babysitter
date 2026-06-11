@@ -1,8 +1,8 @@
-# A5C Commander
+# A5C Commander — The Aegis Cogitator
 
-An RTS-style command deck for orchestrating fleets of AI agents. Agent sessions are **units** on a living battlefield; tasks are **objectives** they capture. You select units with click/marquee, issue orders by right-clicking objectives, read the fleet's pulse from a StarCraft-grade HUD (resource bar, minimap, event ticker, selection panel, contextual command card), and answer approval requests like incoming-attack alerts. v1 runs entirely on a fully mocked, seeded, deterministic backend — but every frame it speaks is a faithful mirror of the real `@a5c-ai/adapters-gateway` WebSocket protocol, so the mock swaps for the real gateway without touching a single UI component.
+A steampunk **kanban board** for orchestrating fleets of AI agents. Tasks are brass-framed parchment cards moving across five lanes — **Backlog → Do → AI Review → Human Review → Approved** — with subtask stacks fanned beneath their parents. You drag a card into DO and a clockwork-creature worker agent materializes on it (agents spawn on demand and despawn when their card moves on; there is no idle fleet). Work completes and the card **auto-glides** to AI Review with a FLIP-style animation; reviewers spawn, render a verdict, and the card either bounces back to DO with feedback, lands in HUMAN REVIEW for you, or — if its **yolo toggle** is on — skips you entirely and routes straight to APPROVED, where an integration agent visibly rebases and merges it to a brass-sealed terminal state. Agents ask questions through the **Inquiry Dock**, a chat-like stack of multi-option breakpoint bubbles (each option an engraved icon + caption). Human review happens in a side **diff panel** (changed files, verdigris/garnet inline diffs, reviewer notes, Approve All / Request Changes). An **Archive** overlay visualizes the shared memory graph the agents query and write back to. v3 runs entirely on a mocked, seeded, deterministic backend — but every frame mirrors the real gateway/kradle/babysitter contracts, so the mock swaps for a live backend without touching UI code. (The free-roam RTS map of v1 is gone; the board superseded it.)
 
-![A5C Commander — unit selected, vitals and command card live](e2e/__shots__/round1-02-single-idle-selected.png)
+![A5C Commander — the cogitator board with the inquiry dock and human-review diff panel](e2e/__shots__/v3-r2-review-diff.png)
 
 ## Quickstart
 
@@ -16,63 +16,55 @@ npm run dev          # Vite dev server on http://localhost:5199 (strictPort)
 |---|---|
 | `npm run dev` | Dev server on port 5199 |
 | `npm run build` | `tsc --noEmit` + `vite build` |
-| `npm run preview` | Serve the production build (also port 5199) |
+| `npm run preview` | Serve the production build |
 | `npm run typecheck` | TypeScript strict check, no emit |
-| `npm run test` | Vitest unit tests (`src/**/*.test.{ts,tsx}`) |
+| `npm run test` | Vitest unit tests (`vitest run`) |
 | `npm run test:e2e` | Playwright e2e (chromium; auto-starts the dev server) |
 
 One-time before e2e: `npx playwright install chromium`.
 
-URL param: `?seed=<n>` seeds the simulation PRNG (mulberry32). Default seed is `42`. Same seed, same world.
+URL param: `?seed=<n>` seeds the simulation PRNG (mulberry32). Default seed is `42`. Same seed, same board.
 
 ## Concept mapping
 
-| RTS concept | Orchestration concept | Backing contract |
+| Kanban concept | Orchestration concept | Backing contract |
 |---|---|---|
-| Unit | Agent session (live or idle) | `SessionEntry` + `RunEntry` (gateway) |
-| Unit class / faction | Agent adapter (claude-code, codex, gemini-cli, pi, ...) | `agent: AgentName` |
-| Health bar | Context-window headroom % | token usage aggregate (200k window assumed) |
-| Energy / mana | Token budget remaining (USD) | `cost: CostRecord` |
-| XP / rank chevrons | Turn count | `turnCount` |
-| Objective (map node) | Task / dispatch | `CommanderTask` (kradle `AgentDispatchRun`-shaped) |
-| Move / attack order | Dispatching a session to a task | `session.start` / `session.message` `ClientFrame` |
-| "Under attack" alert | Pending approval / hook request | `hook.request` frame |
-| Minimap | Workspace overview | client-side layout |
-| Resources (top bar) | active/busy units, tokens burned, tasks done/total, pending alerts | derived |
-| Control groups (Ctrl+1-9) | Saved selections | UI state |
-| Game clock | Sim time | sim state |
+| Card | Task / dispatch | `CommanderTask` (kradle `AgentDispatchRun`-shaped, `src/contracts/kradle-resources.ts`) |
+| Subtask stack | Task hierarchy | `metadata.labels['kradle.a5c.ai/parent-task']` linkage |
+| Column | Task lifecycle stage | board column ids `backlog`/`do`/`ai-review`/`human-review`/`approved` (`src/game/board.ts`) |
+| Agent avatar on a card | Agent session, spawned on demand | `SessionEntry` + `RunEntry`, `session.start` / `session.message` `ClientFrame`s (gateway protocol v1) |
+| Card auto-move | Run lifecycle transition | sim-driven; rendered via FLIP animation with `is-moving` class |
+| Yolo toggle | Skip-human-review routing | sim verb `setYolo` (sim-local; see protocol gaps below) |
+| Inquiry Dock bubble | Breakpoint / hook request with options | `hook.request` frame with `InquiryPayload` (question + 2–5 options); answered via `hook.decision` + `optionId` |
+| Human-review panel | Write-back change approval | `AgentApproval` + patch artifact (`PatchArtifact` shapes, `src/contracts/kradle-workspace.ts`) |
+| Archive overlay (`M`) | Shared agent memory ("the Company Brain") | kradle memory resources: `AgentMemoryRepository`/`AgentMemorySource`/`AgentMemoryQuery`/`AgentMemoryUpdate` + ontology graph records (`src/contracts/kradle-memory.ts`) |
+| Inspector Process tab | Babysitter run observation | `JournalEvent` envelope, event-type union, `ObservedRunState`, `pendingEffectsByKind` (`src/contracts/babysitter-run.ts`) |
 
-Unit visual states: `idle`, `dispatching`, `thinking`, `tool_running`, `awaiting_approval`, `blocked`, `completed`, `failed`. Task states: `queued → assigned → in_progress → review → done | failed`.
+Task kinds map to worker adapters: implement/fix/migrate → claude-code, review → codex, root-cause-analysis/test-coverage → pi, docs/research → gemini-cli, polish/deploy → codex. Reviewer agents always use a different adapter than the worker.
 
 ## Controls
 
-### Mouse
+### Pointer
 
 | Input | Action |
 |---|---|
-| Left-click unit/task | Select (clears previous selection) |
-| Shift+click | Add/remove from selection |
-| Drag on empty ground | Marquee-select units inside the rect |
-| Right-click task node (units selected) | Dispatch order — units move to the objective |
-| Right-click empty ground (units selected) | Rally / reposition |
-| Double-click unit | Open the Inspector (live transcript) |
-| Mouse wheel | Zoom toward cursor (clamped) |
-| Middle-drag or Space+drag | Pan the camera |
-| Minimap click | Jump camera |
+| Click card | Select (SelectionPanel + contextual CommandCard) |
+| Double-click card / agent avatar | Open the Inspector (Transcript / Process / Workspace tabs) |
+| Drag card (pointer-based, no DnD library) | Legal user moves only: **backlog → do** (start work), **backlog reorder**, **human-review → do / ai-review / approved** (verdict by drag). All other movement is automatic. Legal drop lanes glow amber; invalid drops snap back. Parent cards drag their whole stack; child mini-cards and merged cards are not draggable. |
+| Click card in HUMAN REVIEW | Opens the review side panel |
 
-### Keyboard
+### Keyboard (`src/game/input.ts`)
 
 | Input | Action |
 |---|---|
-| `W A S D` / arrow keys | Pan camera (arrows always pan; WASD pans when nothing is selected) |
-| `Esc` | Cascade: close steer modal → close inspector → cancel targeting mode → clear selection |
-| `Space` (tap) | Jump camera to the most recent alert |
-| `F` | Cycle through idle units |
-| `Ctrl+1..9` | Assign control group |
-| `1..9` | Recall control group; recalling the already-active group centers the camera on it |
-| `Q W E R / A S D F / Z X C V` | Command card hotkeys, row-major onto the 3x4 grid |
+| `Esc` | Cascade: foundry/archive → review panel → steer modal → inspector → clear selection (modals close without clearing the selection) |
+| `Space` (tap) | Jump to the latest alert's card and pulse the Inquiry Dock |
+| `M` | Toggle the Archive overlay (only when no other modal is open) |
+| `N` | Toggle the Foundry — Commission Task is its only tab; agents are never created manually under v3 |
+| `Q W E R / A S D F / Z X C V` | Command card hotkeys, row-major onto the 3×4 grid (suppressed while a modal is open; modified letters stay with the browser) |
+| `Ctrl+Enter` (in the steer modal) | Transmit; `Esc` closes without clearing the draft |
 
-Hotkey collisions (`W/A/S/D` pan, `F` idle-cycle vs. command cells) are settled by a pure mode arbiter in `src/game/commands.ts`: with a non-empty selection the command card wins the letter; with an empty selection the camera/idle duties keep it. Arrow keys always pan, so keyboard-only operation never loses the camera.
+All keys are inert while typing in an input. Digits and the v1 camera/marquee/control-group grammar are unbound — the map era is retired.
 
 ## Architecture
 
@@ -80,46 +72,62 @@ Hotkey collisions (`W/A/S/D` pan, `F` idle-cycle vs. command cells) are settled 
 src/
   contracts/    Mirrored wire types — adapter-events.ts (@a5c-ai/comm-adapter events),
                 gateway-protocol.ts (gateway WS protocol v1 + REST entries),
-                kradle-resources.ts (kradle CRDs; CommanderTask = AgentDispatchRun shape)
+                kradle-resources.ts (kradle CRDs; CommanderTask = AgentDispatchRun shape),
+                kradle-memory.ts (memory CRDs + ontology graph, queryGraph results),
+                kradle-workspace.ts (workspace status, patch artifacts, AgentApproval),
+                babysitter-run.ts (journal events, ObservedRunState, pendingEffectsByKind)
   backend/      CommanderBackend interface (types.ts) + mock/ — seeded PRNG,
-                scenario seeding, tick-driven Simulation, MockBackend transport
+                scenario seeding, tick-driven kanban Simulation, MockBackend transport
   microagent/   Microagent interface (contextual CommandSpecs + deterministic
-                procedural IconSpecs) + rule-based mock implementation
-  game/         Zustand store (single store, slices), camera math, world layout,
-                input grammar (input.ts), command/hotkey arbiter (commands.ts)
-  components/   WarRoom shell, map/ (viewport, sprites, task nodes, links, marquee,
-                pings), hud/ (top bar, minimap, selection panel, command card,
-                ticker, alert banner), panels/ (inspector, steer modal)
+                procedural IconSpecs) + rule-based mock — commandGen, iconGen,
+                optionIconGen (engraved glyphs for inquiry options)
+  game/         Zustand store (single store), board logic + drag legality (board.ts),
+                input grammar (input.ts), command/hotkey arbiter (commands.ts),
+                inquiries, review, diff, memory layout, alert queue, views
+  components/   WarRoom shell, board/ (KanbanBoard: lanes, cards, stacks, pointer DnD,
+                FLIP moves), hud/ (top bar, selection panel, command card, ticker,
+                ChatDock = inquiry dock), panels/ (inspector, review panel, foundry,
+                memory overlay, steer modal, workspace view)
 ```
 
-Data flow: the `MockBackend` wraps a deterministic `Simulation` ticking every 250 ms. Each tick emits `ServerFrame`s (`run.event` frames carrying mirrored adapter events — `session_start`, `text_delta`, `tool_call_start`, `turn_end`, ... — plus `hook.request` approvals). `bindBackendToStore` buffers the frames and flushes them together with the sim views in **one store commit per tick batch**; React re-renders from that single commit. No `Date.now()`, no `Math.random()` — the sim clock and one seeded PRNG are the only sources of time and chance.
+Data flow: the `MockBackend` wraps a deterministic `Simulation` ticking every 250 ms. Each tick emits `ServerFrame`s (`run.event` frames carrying mirrored adapter events plus `hook.request` inquiries); `bindBackendToStore` buffers the frames and flushes them together with the sim views in **one store commit per tick batch**; React re-renders from that single commit. No `Date.now()`, no `Math.random()` — the sim clock and one seeded PRNG are the only sources of time and chance.
 
-### Swapping the mock for the real adapter-gateway
+### Swapping the mock for the real backend
 
-The UI talks only to the `CommanderBackend` interface (`src/backend/types.ts`). To go live: implement it over a WebSocket speaking gateway protocol v1 — the `ClientFrame`/`ServerFrame` unions in `src/contracts/gateway-protocol.ts` mirror `@a5c-ai/adapters-gateway` `protocol/v1.ts` exactly, and `listAgents/listSessions/listRuns` map to the gateway REST surface (`GET /api/v1/agents|sessions|runs`). Point the `Microagent` interface (`src/microagent/types.ts`) at a real LLM-backed generator for commands and icons. UI code does not change.
+The UI talks only to the `CommanderBackend` interface (`src/backend/types.ts`). To go live, implement it over a WebSocket speaking **gateway protocol v1** — the `ClientFrame`/`ServerFrame` unions in `src/contracts/gateway-protocol.ts` mirror `@a5c-ai/adapters-gateway` `protocol/v1.ts`, and `listAgents/listSessions/listRuns` map to the gateway REST surface. Then point the `Microagent` interface (`src/microagent/types.ts`) at a real LLM-backed generator for commands, card-seal icons, and inquiry-option icons. UI code does not change.
 
-Mock command conventions (what the sim understands today):
+Documented **v1-protocol gaps** (sim-local extensions to raise upstream):
 
-- **Dispatch**: `session.start` with the `sessionId` of an idle unit and a prompt containing `task:<taskId>`. Without `sessionId`, it clones a fresh unit for `agent`.
-- **Abort**: `session.message` whose prompt is `/abort` (or `/stop`) — protocol v1 has no WS abort frame; the real gateway aborts via REST.
-- **Steer**: any other `session.message` prompt (resumes a blocked unit, starts a run on an idle one).
-- **Approvals**: `hook.decision` with `allow`/`deny` resolves the matching `hook.request`.
+- **Board verbs** — protocol v1 has no board frames, so `moveCard` / `setYolo` / `createTask` ride a sim-local client command channel exposed on the sim API rather than `ClientFrame`s.
+- **`hook.decision.optionId`** — the multi-option inquiry answer extends `hook.decision` with the chosen option id; the legacy approve/deny is the degenerate 2-option case.
+
+Other wiring targets: the Archive maps to kradle-sdk `queryGraph()` / `AgentMemoryQuery` against real memory repositories; the Inspector Process tab maps to babysitter journal observation (`.a5c/runs/<runId>/journal/`); the human-review panel maps to `AgentApproval` + patch-artifact write-back.
 
 ## Test hooks API
 
-Exposed on `window.__commander` (before `connect()`, so a pause-on-boot poller can halt the sim ahead of the first auto-tick):
+Exposed on `window.__commander` before `connect()`, so a pause-on-boot poller wins the race against the first 250 ms auto-tick:
 
 ```ts
 window.__commander = {
-  sim: { pause(), resume(), tick(n), seed },  // drive sim time manually
-  store,                                       // the Zustand store (getState())
-  version,                                     // COMMANDER_VERSION
+  sim: {
+    pause(), resume(), tick(n), seed,            // drive sim time manually
+    moveCard(taskId, column),                    // board verbs — the same
+    setYolo(taskId, on),                         // deterministic channel
+    createTask({ taskKind, title?, parentId? }), // user drags use
+    answerInquiry(hookRequestId, optionId),
+  },
+  store,     // the Zustand store (getState())
+  version,   // COMMANDER_VERSION
 };
 ```
 
-`data-testid` contract: `unit-<id>`, `task-<id>`, `cmd-<commandId>`, `minimap`, `ticker-item`, `selection-panel`, `alert-banner`, `topbar-*` (`units`, `tokens`, `tasks`, `alerts`, `sim-toggle`, `clock`), `inspector` — plus `map-viewport`, `event-ticker`, `command-card`, `steer-modal`, `link-layer`, `selection-box`, `war-room`.
+`data-testid` contract (summary): `kanban-board`, `kanban-col-<id>`, `card-<taskId>`, `card-yolo-<taskId>`, `card-agent-<unitId>`, `chat-dock`, `inquiry-<hookRequestId>`, `inquiry-opt-<hookRequestId>-<optionId>`, `review-panel`, `review-approve-all`, `ws-file-<index>`, `inspector` + `inspector-tab-transcript|process|workspace`, `memory-overlay` / `memory-silo-<name>` / `memory-node-<id>` / `memory-filter-<kind>`, `foundry`, `steer-modal`, `selection-panel`, `command-card` / `cmd-<commandId>`, `event-ticker` / `ticker-item`, `topbar-*`.
 
-Determinism guarantees (unit-tested in `src/backend/mock/__tests__/determinism.test.ts`): same seed ⇒ identical scenario, identical frame streams, deep-equal snapshots after 200 ticks; same seed + same command sequence ⇒ identical state; `tick(20)` twice equals `tick(40)` once; pause blocks auto-ticking while manual `tick()` still advances. E2E tests ride this: boot `/?seed=42`, pause, advance with `tick(n)` — no timing-based waits.
+Determinism guarantee: same seed ⇒ identical scenario, identical frame streams, byte-identical procedural icons; **same seed + same verb sequence ⇒ identical board** (user drags are sim verbs too). `tick(20)` twice equals `tick(40)` once; pause blocks auto-ticking while manual `tick()` still advances. The e2e suites ride this: boot `/?seed=42`, pause, advance with `tick(n)` — no timing-based waits. SVG census rule: zero `<line>`/`<polyline>` elements document-wide, always (all curves are `<path>`).
+
+### Retired v1 e2e suite
+
+`e2e/retired-v1/` holds the v1 specs (boot, camera, selection, commands, alerts, stream) that covered the RTS map surfaces — camera pan/zoom, minimap, marquee selection, right-click dispatch/rally, control groups, idle-unit cycling. V3 retired those surfaces (the kanban board superseded the world map), so the suite is excluded via `testIgnore: ['**/retired-v1/**']` in `playwright.config.ts` and kept for reference. Still-valid v1 behaviors are covered by the active `v2-*.spec.ts` / `v3-*.spec.ts` suites.
 
 ## Workspace note
 
