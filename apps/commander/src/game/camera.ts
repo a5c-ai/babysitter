@@ -24,7 +24,20 @@ export interface CameraState {
   zoom: number;
 }
 
-export const ZOOM_MIN = 0.35;
+/**
+ * Zoom bounds. ZOOM_MIN is deliberately close to the boot zoom: zooming far
+ * below it only manufactures dead map-floor around the world rect (the whole
+ * battlefield already fits the viewport near 0.6).
+ *
+ * NOTE: DEFAULT_ZOOM is pinned by interaction geometry — at 1280x720 the
+ * full content envelope (top task orbits down to world y≈48 through the
+ * staging rows at y≈790) must sit between the 44px top bar and the bottom
+ * HUD so every entity stays directly clickable. Above ~0.62 the topmost
+ * task-orbit slots slide under the top bar. The minimap therefore renders
+ * its camera rect with a clamped, always-visible sub-rect instead of
+ * relying on a tighter default zoom.
+ */
+export const ZOOM_MIN = 0.5;
 export const ZOOM_MAX = 2.5;
 export const DEFAULT_ZOOM = 0.6;
 

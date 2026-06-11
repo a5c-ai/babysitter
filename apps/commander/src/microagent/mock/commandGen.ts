@@ -2,8 +2,12 @@
  * Rule-based mock command generation (SPEC §8).
  *
  * Selection state → command set; mixed unit-state selections get the
- * intersection (by command id); mixed-kind selections fall back to the global
- * set rather than rendering an empty card. Always ≤12 commands (3x4 grid).
+ * intersection (by command id). When the intersection is EMPTY (e.g. idle +
+ * thinking), the card stays selection-scoped: a staple set (Inspect / Approve
+ * / Abort / Rally) acting on the selected units, with per-command enablement
+ * derived from which states are present — falling back to the GLOBAL set here
+ * read like a deselection. Mixed-KIND selections (unit + task) still fall
+ * back to the global set. Always ≤12 commands (3x4 grid).
  *
  * Command glyphs are tiny procedural SVGs (paths only — no <line>/<polyline>;
  * the e2e suite counts those as link-layer shapes).
@@ -221,12 +225,55 @@ const TASK_DEFS: CommandDef[] = [
   },
 ];
 
+/** Unit states that take the working command set (SPEC §3). */
+const WORKING_STATES = new Set(['dispatching', 'thinking', 'tool_running', 'blocked']);
+/** Re-taskable states that share the idle command set (SPEC §3). */
+const IDLE_LIKE_STATES = new Set(['idle', 'completed', 'failed']);
+
 /** Map a unit visual state (SPEC §3) to its command set. */
 function defsForUnitState(state: string): CommandDef[] {
   if (state === 'awaiting_approval') return APPROVAL_DEFS;
-  if (state === 'idle' || state === 'completed' || state === 'failed') return IDLE_DEFS;
+  if (IDLE_LIKE_STATES.has(state)) return IDLE_DEFS;
   return WORKING_DEFS; // dispatching | thinking | tool_running | blocked
 }
+
+/**
+ * Selection-scoped staples for mixed-state unit selections whose strict
+ * intersection is empty (idle + working, awaiting + idle, …). Each command
+ * acts on the applicable subset of the selection; enablement reflects which
+ * states are actually present so the card never reads like a deselection.
+ */
+const MIXED_UNIT_DEFS: CommandDef[] = [
+  {
+    id: 'inspect',
+    label: 'Inspect',
+    intent: { kind: 'inspect' },
+    tooltip: 'Open the transcript inspector for the first selected unit',
+  },
+  {
+    id: 'approve',
+    label: 'Approve',
+    intent: { kind: 'approve' },
+    tooltip: 'Allow the gated action for selected units awaiting approval',
+    severity: 'urgent',
+    enabled: (ctx) => ctx.selection.states.includes('awaiting_approval'),
+  },
+  {
+    id: 'abort',
+    label: 'Abort',
+    intent: { kind: 'abort' },
+    tooltip: 'Abort the active runs of the selected working units',
+    severity: 'danger',
+    enabled: (ctx) => ctx.selection.states.some((state) => WORKING_STATES.has(state)),
+  },
+  {
+    id: 'rally',
+    label: 'Rally',
+    intent: { kind: 'rally-mode' },
+    tooltip: 'Pick a rally point to reposition the selected idle units',
+    enabled: (ctx) => ctx.selection.states.some((state) => IDLE_LIKE_STATES.has(state)),
+  },
+];
 
 export function generateCommands(ctx: CommandContext): CommandSpec[] {
   let defs: CommandDef[];
@@ -240,7 +287,9 @@ export function generateCommands(ctx: CommandContext): CommandSpec[] {
     const sets = ctx.selection.states.map((state) => defsForUnitState(state));
     const first = sets[0] ?? IDLE_DEFS;
     defs = first.filter((def) => sets.every((set) => set.some((d) => d.id === def.id)));
-    if (defs.length === 0) defs = GLOBAL_DEFS;
+    // Empty intersection (e.g. idle + thinking): stay selection-scoped with
+    // the mixed staples instead of the global set (which felt like a deselect).
+    if (defs.length === 0) defs = MIXED_UNIT_DEFS;
   } else {
     // Mixed kinds: the strict intersection is empty — fall back to global.
     defs = GLOBAL_DEFS;

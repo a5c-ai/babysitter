@@ -15,9 +15,31 @@ import clsx from 'clsx';
 
 import { formatInt, formatPct, formatUsd, getSelectedEntities } from '../../game/selectors';
 import type { CommanderStore, TaskEntity, UnitEntity } from '../../game/store';
+import { UNIT_BUDGET_USD } from '../../game/store';
 import { generateIcon } from '../../microagent/mock/iconGen';
 
 const MAX_RANK_CHEVRONS = 5;
+
+/**
+ * Short human-readable state labels for the MULTI-select card grid only.
+ * Frozen e2e contract: the SINGLE-unit view renders `view.state` verbatim
+ * (and must never contain 'idle' for non-idle selections) — these labels are
+ * therefore never used there.
+ */
+const CARD_STATE_LABELS: Record<string, string> = {
+  idle: 'IDLE',
+  dispatching: 'MOVING',
+  thinking: 'THINKING',
+  tool_running: 'TOOLING',
+  awaiting_approval: 'NEEDS OK',
+  blocked: 'BLOCKED',
+  completed: 'DONE',
+  failed: 'FAILED',
+};
+
+function cardStateLabel(state: string): string {
+  return CARD_STATE_LABELS[state] ?? state.replace(/_/g, ' ').toUpperCase();
+}
 
 export interface SelectionPanelProps {
   store: CommanderStore;
@@ -80,7 +102,13 @@ function UnitVitals({ store, unit }: { store: CommanderStore; unit: UnitEntity }
           <div className="wr-bar wr-bar--energy">
             <div className="wr-bar-fill" style={{ width: formatPct(unit.energyPct) }} />
           </div>
-          <span className="wr-vital-value">{formatUsd(unit.view.cost.totalUsd)}</span>
+          {/* bar and number agree: both show budget REMAINING (spent/total on hover) */}
+          <span
+            className="wr-vital-value"
+            title={`${formatUsd(unit.view.cost.totalUsd)} of ${formatUsd(UNIT_BUDGET_USD)} spent`}
+          >
+            {formatUsd(UNIT_BUDGET_USD * unit.energyPct)} left
+          </span>
         </div>
         <div className="wr-vital">
           <span className="wr-vital-label">TURNS</span>
@@ -102,13 +130,13 @@ function UnitCardGrid({ store, units }: { store: CommanderStore; units: UnitEnti
             key={unit.id}
             type="button"
             className={`wr-sel-card wr-sel-card--${unit.view.state}`}
-            title={`${unit.view.title} — click to select only this unit`}
+            title={`${unit.view.title} (${unit.view.state}) — click to select only this unit`}
             onClick={(e) => focusEntity(store, unit.id, e.shiftKey)}
           >
             <div className="wr-sel-card-portrait" dangerouslySetInnerHTML={{ __html: icon.svg }} />
             <div className="wr-sel-card-name">{unit.view.title}</div>
             <div className="wr-sel-card-state">
-              {unit.view.state}
+              {cardStateLabel(unit.view.state)}
               {unit.view.paused && <span className="wr-sel-paused">paused</span>}
             </div>
           </button>

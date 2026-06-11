@@ -17,6 +17,15 @@ import { factionAccent } from '../../microagent/mock/iconGen';
 const MAP_W = 200;
 const MAP_H = 110;
 
+/**
+ * Camera viewport rect clamps: the rect must read at a glance even when the
+ * whole world fits the view (boot zoom) — never thinner than the minimums,
+ * never flush with the minimap frame (inset keeps the stroke visible).
+ */
+const VIEW_MIN_W = 26;
+const VIEW_MIN_H = 16;
+const VIEW_INSET = 2;
+
 /** Unit states that override the faction dot color with the alert accent. */
 const URGENT_DOT_STATES = new Set(['awaiting_approval', 'failed']);
 
@@ -33,10 +42,13 @@ export function Minimap({ store }: MinimapProps): React.JSX.Element {
   const sx = MAP_W / WORLD.width;
   const sy = MAP_H / WORLD.height;
 
-  const viewW = Math.min(MAP_W, (viewport.width / camera.zoom) * sx);
-  const viewH = Math.min(MAP_H, (viewport.height / camera.zoom) * sy);
-  const viewX = Math.min(Math.max(camera.x * sx - viewW / 2, 0), MAP_W - viewW);
-  const viewY = Math.min(Math.max(camera.y * sy - viewH / 2, 0), MAP_H - viewH);
+  // Clamp the camera rect into an always-legible sub-rect: minimum size so a
+  // zoomed-in sliver still reads, inset so a fits-everything view draws a
+  // bright rect just inside the frame instead of vanishing against it.
+  const viewW = Math.max(VIEW_MIN_W, Math.min(MAP_W - VIEW_INSET * 2, (viewport.width / camera.zoom) * sx));
+  const viewH = Math.max(VIEW_MIN_H, Math.min(MAP_H - VIEW_INSET * 2, (viewport.height / camera.zoom) * sy));
+  const viewX = Math.min(Math.max(camera.x * sx - viewW / 2, VIEW_INSET), MAP_W - VIEW_INSET - viewW);
+  const viewY = Math.min(Math.max(camera.y * sy - viewH / 2, VIEW_INSET), MAP_H - VIEW_INSET - viewH);
 
   const jumpTo = (clientX: number, clientY: number, rect: DOMRect): void => {
     const fx = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));

@@ -187,11 +187,58 @@ describe('generateCommands (SPEC §8)', () => {
       ctx({ count: 2, kinds: ['unit'], states: ['awaiting_approval', 'thinking'] }),
     );
     expect(specs.map((s) => s.id)).toEqual(['inspect']);
+  });
+
+  it('mixed unit states with an empty intersection → selection-scoped staples (never the global set)', () => {
     const idleWorking = generateCommands(
       ctx({ count: 2, kinds: ['unit'], states: ['idle', 'thinking'] }),
     );
-    // Idle and working sets share nothing → falls back to the global set.
-    expect(idleWorking.map((s) => s.id)).toEqual(['select-all-idle', 'jump-to-alert', 'toggle-sim']);
+    // Idle and working sets share nothing → mixed staples keep the card
+    // selection-scoped (the global set here read like a deselection).
+    expect(idleWorking.map((s) => s.id)).toEqual(['inspect', 'approve', 'abort', 'rally']);
+    expect(idleWorking.map((s) => s.label)).toEqual(['Inspect', 'Approve', 'Abort', 'Rally']);
+  });
+
+  it('mixed staples enablement reflects which states are present in the selection', () => {
+    const byId = (specs: CommandSpec[]): Record<string, boolean> =>
+      Object.fromEntries(specs.map((s) => [s.id, s.enabled]));
+
+    // idle + thinking: no approvals pending in the selection → Approve disabled;
+    // a working unit exists → Abort enabled; an idle unit exists → Rally enabled.
+    const idleWorking = byId(
+      generateCommands(ctx({ count: 2, kinds: ['unit'], states: ['idle', 'thinking'] })),
+    );
+    expect(idleWorking['inspect']).toBe(true);
+    expect(idleWorking['approve']).toBe(false);
+    expect(idleWorking['abort']).toBe(true);
+    expect(idleWorking['rally']).toBe(true);
+
+    // awaiting_approval + idle: Approve enabled, no working unit → Abort disabled.
+    const awaitingIdle = byId(
+      generateCommands(ctx({ count: 2, kinds: ['unit'], states: ['awaiting_approval', 'idle'] })),
+    );
+    expect(awaitingIdle['approve']).toBe(true);
+    expect(awaitingIdle['abort']).toBe(false);
+    expect(awaitingIdle['rally']).toBe(true);
+
+    // awaiting_approval + completed (idle-like): same staples, Rally enabled.
+    const awaitingCompleted = byId(
+      generateCommands(
+        ctx({ count: 2, kinds: ['unit'], states: ['awaiting_approval', 'completed'] }),
+      ),
+    );
+    expect(awaitingCompleted['approve']).toBe(true);
+    expect(awaitingCompleted['abort']).toBe(false);
+    expect(awaitingCompleted['rally']).toBe(true);
+  });
+
+  it('mixed staples keep positional hotkeys and the ≤12 grid invariant', () => {
+    const specs = generateCommands(
+      ctx({ count: 3, kinds: ['unit'], states: ['idle', 'thinking', 'awaiting_approval'] }),
+    );
+    expect(specs.map((s) => s.id)).toEqual(['inspect', 'approve', 'abort', 'rally']);
+    expect(specs.map((s) => s.hotkey)).toEqual(['Q', 'W', 'E', 'R']);
+    expect(specs.length).toBeLessThanOrEqual(12);
   });
 
   it('mixed kinds (unit + task) → global set, never an empty card', () => {

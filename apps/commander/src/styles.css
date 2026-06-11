@@ -123,18 +123,20 @@
     background: radial-gradient(ellipse at center, transparent 45%, rgb(3 5 9 / 0.85) 100%);
   }
 
+  /* CRT scanline texture — 0.05 line alpha × 0.7 layer opacity = 3.5%
+     effective, subtle but actually registers (SPEC §10: ≤4%) */
   .wr-scanlines {
     position: absolute;
     inset: 0;
     pointer-events: none;
     background: repeating-linear-gradient(
       0deg,
-      rgb(255 255 255 / 0.05) 0px,
-      rgb(255 255 255 / 0.05) 1px,
+      rgb(186 215 247 / 0.05) 0px,
+      rgb(186 215 247 / 0.05) 1px,
       transparent 1px,
       transparent 3px
     );
-    opacity: 0.04;
+    opacity: 0.7;
   }
 
   /* ======================================================================
@@ -232,7 +234,9 @@
 
   .wr-unit-label {
     margin-top: 3px;
-    font-size: 10px;
+    /* counter-scaled against camera zoom (capped) so labels stay legible
+       when the world layer shrinks — var set on .wr-world by MapViewport */
+    font-size: calc(10px * var(--wr-label-scale, 1));
     letter-spacing: 0.08em;
     color: var(--color-hud-text);
     text-shadow: 0 1px 3px rgb(0 0 0 / 0.9);
@@ -421,7 +425,8 @@
   }
   .wr-task-title {
     display: block;
-    font-size: 10px;
+    /* counter-scaled with camera zoom (see .wr-unit-label) */
+    font-size: calc(10px * var(--wr-label-scale, 1));
     color: var(--color-hud-text);
     text-shadow: 0 1px 3px rgb(0 0 0 / 0.9);
     white-space: nowrap;
@@ -429,14 +434,20 @@
   .wr-task-kind {
     display: block;
     font-family: var(--font-mono-hud);
-    font-size: 8px;
+    font-size: calc(8px * var(--wr-label-scale, 1));
     letter-spacing: 0.1em;
     color: var(--color-hud-dim);
     text-transform: uppercase;
   }
 
-  .wr-task--queued {
-    opacity: 0.85;
+  /* queued = unclaimed objective: full presence + dashed luminous track and a
+     faint glow so it reads as capturable, not disabled */
+  .wr-task--queued .wr-task-ring-track {
+    stroke: rgb(125 215 240 / 0.32);
+    stroke-dasharray: 4 3;
+  }
+  .wr-task--queued .wr-task-body {
+    filter: drop-shadow(0 0 7px rgb(125 215 240 / 0.18));
   }
   .wr-task--in_progress .wr-task-ring-fill {
     stroke: var(--color-status-info);
@@ -653,12 +664,13 @@
     top: 52px;
     left: 50%;
     transform: translateX(-50%);
-    max-width: 520px;
-    height: 40px;
+    max-width: 680px;
+    min-height: 40px;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 0 12px;
+    padding: 5px 12px;
     border-radius: 8px;
     background: rgb(40 14 14 / 0.78);
     border: 1px solid var(--color-status-alert);
@@ -670,6 +682,12 @@
       wr-banner-pulse 1.6s ease-in-out infinite;
     white-space: nowrap;
     cursor: pointer;
+  }
+  .wr-alert-count,
+  .wr-alert-portrait,
+  .wr-alert-more,
+  .wr-alert-actions {
+    flex-shrink: 0;
   }
   .wr-alert-count {
     min-width: 18px;
@@ -696,11 +714,19 @@
   }
   .wr-alert-text {
     font-size: 12px;
+    line-height: 1.35;
     color: var(--color-hud-bright);
+    min-width: 0;
+    white-space: normal;
     overflow: hidden;
-    text-overflow: ellipsis;
   }
+  /* the full command may wrap to a second line; beyond that it clamps
+     (the title tooltip carries the complete text) */
   .wr-alert-detail {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
     font-style: normal;
     color: var(--color-hud-dim);
   }
@@ -804,10 +830,15 @@
   .wr-mini-ping--info {
     border-color: var(--color-status-info);
   }
+  /* camera viewport rect — must read at a glance (full-opacity stroke + glow) */
   .wr-mini-view {
     position: absolute;
     border: 1px solid var(--color-selection-ring);
-    background: rgb(125 215 240 / 0.07);
+    border-radius: 2px;
+    background: rgb(125 215 240 / 0.12);
+    box-shadow:
+      0 0 6px rgb(125 215 240 / 0.45),
+      inset 0 0 4px rgb(125 215 240 / 0.25);
     pointer-events: none;
   }
 
@@ -1157,11 +1188,42 @@
     background: rgb(125 215 240 / 0.08);
     box-shadow: 0 0 8px rgb(125 215 240 / 0.25);
   }
+  /* per-state card border + label accent — the multi-select grid reads fleet
+     state at a glance (single-unit view keeps the verbatim state badge) */
   .wr-sel-card--awaiting_approval {
     border-color: rgb(243 101 90 / 0.6);
   }
+  .wr-sel-card--awaiting_approval .wr-sel-card-state {
+    color: var(--color-status-alert);
+  }
   .wr-sel-card--failed {
     border-color: var(--color-status-alert);
+  }
+  .wr-sel-card--failed .wr-sel-card-state {
+    color: var(--color-status-alert);
+  }
+  .wr-sel-card--dispatching,
+  .wr-sel-card--thinking {
+    border-color: rgb(45 212 238 / 0.45);
+  }
+  .wr-sel-card--dispatching .wr-sel-card-state,
+  .wr-sel-card--thinking .wr-sel-card-state {
+    color: var(--color-status-info);
+  }
+  .wr-sel-card--tool_running {
+    border-color: rgb(245 182 45 / 0.5);
+  }
+  .wr-sel-card--tool_running .wr-sel-card-state {
+    color: var(--color-status-warn);
+  }
+  .wr-sel-card--blocked {
+    border-color: rgb(245 182 45 / 0.5);
+  }
+  .wr-sel-card--completed {
+    border-color: rgb(52 217 140 / 0.5);
+  }
+  .wr-sel-card--completed .wr-sel-card-state {
+    color: var(--color-status-ok);
   }
   .wr-sel-card-portrait {
     width: 36px;

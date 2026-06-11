@@ -104,6 +104,12 @@ export function MapViewport({ store, orders }: MapViewportProps): React.JSX.Elem
   const tx = viewport.width / 2 - camera.x * camera.zoom;
   const ty = viewport.height / 2 - camera.y * camera.zoom;
 
+  // Counter-scale for unit/task labels: at low zoom the world layer scale
+  // would render 10px labels at ~6px on screen — divide the font size by the
+  // zoom (capped) so labels stay legible without re-rendering the memoized
+  // sprites (consumed via CSS var in .wr-unit-label / .wr-task-label).
+  const labelScale = Math.min(1.7, Math.max(1, 1 / camera.zoom));
+
   return (
     <div
       ref={ref}
@@ -112,11 +118,14 @@ export function MapViewport({ store, orders }: MapViewportProps): React.JSX.Elem
     >
       <div
         className="wr-world"
-        style={{
-          width: WORLD.width,
-          height: WORLD.height,
-          transform: `translate3d(${tx}px, ${ty}px, 0) scale(${camera.zoom})`,
-        }}
+        style={
+          {
+            width: WORLD.width,
+            height: WORLD.height,
+            transform: `translate3d(${tx}px, ${ty}px, 0) scale(${camera.zoom})`,
+            '--wr-label-scale': labelScale,
+          } as React.CSSProperties
+        }
       >
         <div className="wr-floor" aria-hidden />
         <LinkLayer store={store} />

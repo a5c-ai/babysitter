@@ -38,6 +38,8 @@ export function AlertBanner({ store, orders }: AlertBannerProps): React.JSX.Elem
   });
   const action = typeof shown.payload['action'] === 'string' ? shown.payload['action'] : shown.kind;
   const detail = typeof shown.payload['detail'] === 'string' ? shown.payload['detail'] : null;
+  /** Full command for hover tooltips — the visible detail may clamp at two lines. */
+  const fullCommand = `${unitTitle} wants to ${action}${detail !== null ? ` — ${detail}` : ''}`;
   const more = alerts.length - 1;
 
   const cycle = (): void => {
@@ -57,15 +59,15 @@ export function AlertBanner({ store, orders }: AlertBannerProps): React.JSX.Elem
       data-testid="alert-banner"
       role="alert"
       onClick={cycle}
-      title={more > 0 ? 'Click to cycle through pending alerts' : detail ?? undefined}
+      title={more > 0 ? 'Click to cycle through pending alerts' : fullCommand}
     >
       <span className="wr-alert-count" aria-label={`${alerts.length} pending approvals`}>
         {alerts.length}
       </span>
       <span className="wr-alert-portrait" aria-hidden dangerouslySetInnerHTML={{ __html: portrait.svg }} />
-      <span className="wr-alert-text">
+      <span className="wr-alert-text" title={fullCommand}>
         <strong>{unitTitle}</strong> wants to {action}
-        {detail !== null && <em className="wr-alert-detail"> — {detail}</em>}
+        {detail !== null && <em className="wr-alert-detail">{detail}</em>}
       </span>
       {more > 0 && (
         <button
