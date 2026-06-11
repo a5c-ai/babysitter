@@ -836,19 +836,24 @@ export function resolveWorkspaceRunsDir(
     return explicitRunsDir;
   }
   const cwd = workspace ?? process.cwd();
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const sdk = require("@a5c-ai/babysitter-sdk") as {
-      resolveRunsDir: (opts?: { cwd?: string }) => string;
-      getRunsScope: () => "global" | "repo";
-    };
-    // An explicit BABYSITTER_RUNS_DIR override (or repo scope) already resolves
-    // to a deterministic, caller-intended location — honor it verbatim.
-    if (process.env.BABYSITTER_RUNS_DIR?.trim() || sdk.getRunsScope() === "repo") {
+  // An explicit BABYSITTER_RUNS_DIR override is a deterministic, caller-intended
+  // location — honor it verbatim (this is how the live-stack BP path and users
+  // pin the runs dir). Do NOT defer to getRunsScope()==="repo": sdk.resolveRunsDir
+  // walks UP to the nearest repo root and falls back to the GLOBAL ~/.a5c/runs when
+  // `cwd` is not itself a repo root (e.g. genty invoked with an explicit --workspace
+  // that is a tmp/live-stack dir, or any non-repo-root workspace). That escaped the
+  // run — and its completion proof — out of <workspace>/.a5c/runs where the
+  // live-stack validator (and users) look, which was the residual #936 failure.
+  if (process.env.BABYSITTER_RUNS_DIR?.trim()) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const sdk = require("@a5c-ai/babysitter-sdk") as {
+        resolveRunsDir: (opts?: { cwd?: string }) => string;
+      };
       return sdk.resolveRunsDir({ cwd });
+    } catch {
+      // SDK unavailable: fall through to the deterministic workspace anchor below.
     }
-  } catch {
-    // SDK unavailable: fall through to the deterministic workspace anchor below.
   }
   // Default genty's internal execution to the runs dir directly under the
   // workspace the CLI was invoked in — <workspace>/.a5c/runs — NOT the global

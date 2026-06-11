@@ -82,7 +82,11 @@ export const BOOLEAN_FLAGS: Record<string, (parsed: HarnessParsedArgs) => void> 
 export const FLAG_PARSERS: Record<string, FlagParser> = {
   // Core flag parsers (previously from SDK)
   "--runs-dir": (parsed, args, index) => {
-    parsed.runsDir = resolveRunsDir({ override: expectFlagValue(args, index + 1, "--runs-dir") });
+    const resolved = resolveRunsDir({ override: expectFlagValue(args, index + 1, "--runs-dir") });
+    parsed.runsDir = resolved;
+    // #936: mark the explicit override so CREATE commands honor it verbatim while
+    // an absent --runs-dir lets the run default to <workspace>/.a5c/runs.
+    parsed.runsDirOverride = resolved;
     return index + 1;
   },
   "--kind": (parsed, args, index) => {

@@ -82,6 +82,20 @@ export async function handleHarnessCreateRun(
   // source of truth threaded into BOTH the plan-process phase (parent run
   // creation) and the orchestration phase.
   const runsDir = resolveWorkspaceRunsDir(requestedRunsDir, workspace ?? process.cwd());
+  // Bug #936 (residual): the resolved runsDir is threaded as a param into the
+  // plan-process and orchestration phases, but the SDK's run creation (and any
+  // NESTED run it spawns) ultimately resolves its location from BABYSITTER_RUNS_DIR
+  // / resolveRunsDir() — the param did not reliably reach every createRun seam, so
+  // a plain `genty call/yolo` still materialized the run in the GLOBAL ~/.a5c/runs
+  // and the live-stack validator (which checks <workspace>/.a5c/runs) reported
+  // "no .a5c/runs/ directory found" despite authoring+execution+file-creation all
+  // passing. Pin BABYSITTER_RUNS_DIR to the resolved workspace runs dir so ALL run
+  // creation (parent + nested + the in-process orchestration) lands where the
+  // validator and users look. An explicit external override is respected (only set
+  // when unset).
+  if (!process.env.BABYSITTER_RUNS_DIR?.trim()) {
+    process.env.BABYSITTER_RUNS_DIR = runsDir;
+  }
 
   const mode: OutputMode = resolveOutputMode(json, parsed.outputMode);
   const interactive = parsed.interactive ?? (mode === "cli" && process.stdin.isTTY === true);

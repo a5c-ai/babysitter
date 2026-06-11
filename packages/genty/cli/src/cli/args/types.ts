@@ -6,7 +6,18 @@ export type HelpSurface = "agent" | "human";
 
 export interface CoreParsedArgs {
   command?: string;
+  /**
+   * The resolved runs dir used by READ commands (tui/jsonl/resume/cleanup) to
+   * discover existing runs. Defaults to the global/repo runs dir.
+   */
   runsDir: string;
+  /**
+   * Only set when `--runs-dir` is passed explicitly. CREATE commands (yolo/call/
+   * create-run) use this so that, when absent, the run defaults to
+   * <workspace>/.a5c/runs (resolveWorkspaceRunsDir) instead of the global default.
+   * #936: a non-undefined eager default here previously defeated the workspace anchor.
+   */
+  runsDirOverride?: string;
   json: boolean;
   dryRun: boolean;
   verbose: boolean;

@@ -258,7 +258,9 @@ async function handleHarnessInvoke(parsed: HarnessParsedArgs): Promise<number> {
       workspace: parsed.workspace,
       model: parsed.model,
       maxIterations: parsed.maxIterations,
-      runsDir: parsed.runsDir,
+      // #936: only an explicit --runs-dir override is forwarded; otherwise leave
+      // undefined so handleHarnessCreateRun anchors the run on <workspace>/.a5c/runs.
+      runsDir: parsed.runsDirOverride,
       json: parsed.json,
       verbose: parsed.verbose,
       interactive: false,
@@ -342,7 +344,9 @@ async function runHarnessCreateRun(
     workspace: parsed.workspace,
     model: parsed.model,
     maxIterations: parsed.maxIterations,
-    runsDir: parsed.runsDir,
+    // #936: only an explicit --runs-dir override is forwarded; otherwise leave
+    // undefined so handleHarnessCreateRun anchors the run on <workspace>/.a5c/runs.
+    runsDir: parsed.runsDirOverride,
     json: parsed.json,
     verbose: parsed.verbose,
     interactive: overrides.interactive ?? parsed.interactive,
