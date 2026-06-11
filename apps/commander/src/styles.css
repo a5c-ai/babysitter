@@ -119,6 +119,35 @@
       var(--color-parchment-200);
     user-select: none;
   }
+  /* §V2-1: ≤4%-effective paper grain + faint repeating gear watermarks over
+     the parchment field (inline path-only SVG data-URIs; layer opacity 0.07
+     × baked 0.5 stroke-opacity ≈ 3.5% effective). */
+  .wr-root::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.42 0 0 0 0 0.33 0 0 0 0 0.18 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%236f5430' stroke-opacity='.5' stroke-width='7' stroke-dasharray='6.5 5'/%3E%3Ccircle cx='32' cy='32' r='12' fill='none' stroke='%236f5430' stroke-opacity='.5' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%236f5430' fill-opacity='.5'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%236f5430' stroke-opacity='.4' stroke-width='7' stroke-dasharray='6.5 5'/%3E%3Ccircle cx='32' cy='32' r='12' fill='none' stroke='%236f5430' stroke-opacity='.4' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%236f5430' fill-opacity='.4'/%3E%3C/svg%3E");
+    background-repeat: repeat, repeat, repeat;
+    background-size: 160px 160px, 340px 340px, 230px 230px;
+    background-position: 0 0, 40px 60px, 190px 230px;
+  }
+  /* plate-border flourish: a hairline engraved frame just inside the field */
+  .wr-root::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    z-index: 0;
+    pointer-events: none;
+    border: 1px solid rgb(122 99 60 / 0.28);
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 3px rgb(122 99 60 / 0.08);
+  }
 
   /* ======================================================================
    * Slate panels with brass frames (HUD chrome, §V2-1)
@@ -128,16 +157,20 @@
     --wr-brass-border: 1px solid var(--color-brass-500);
     position: relative;
     background:
-      linear-gradient(to bottom, rgb(255 240 200 / 0.05), transparent 38%),
+      linear-gradient(to bottom, rgb(255 240 200 / 0.09), transparent 38%),
+      radial-gradient(ellipse at 50% 120%, rgb(140 110 60 / 0.18), transparent 60%),
       var(--color-glass-fill);
     border: var(--wr-brass-border);
     border-radius: 10px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    /* etched double border (inner umber groove + brass thread) + warm drop */
+    /* etched double border (inner umber groove + brass thread) + a faint
+       parchment inset frame warming the slate + warm drop */
     box-shadow:
       inset 0 0 0 1px rgb(18 16 9 / 0.9),
       inset 0 0 0 2px rgb(216 181 97 / 0.26),
+      inset 0 0 0 4px rgb(233 220 190 / 0.06),
+      inset 0 0 22px rgb(232 181 74 / 0.05),
       0 10px 26px rgb(58 42 18 / 0.45);
     padding: 8px 10px;
     overflow: hidden;
@@ -1382,6 +1415,7 @@
   }
 
   .wr-lane {
+    position: relative;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -1389,13 +1423,42 @@
     font-variant-caps: small-caps;
     border: 1px solid var(--color-brass-500);
     border-radius: 10px;
+    /* ghosted lane watermark: one large faint gear fills the empty plate
+       (§V2-1 boot composition) over the parchment gradient */
     background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='%236f5430' stroke-opacity='.055' stroke-width='8' stroke-dasharray='7 5.6'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='%236f5430' stroke-opacity='.055' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='32' r='4.5' fill='%236f5430' fill-opacity='.055'/%3E%3C/svg%3E")
+        center 42% / 150px 150px no-repeat,
       linear-gradient(to bottom, rgb(247 238 215 / 0.92), rgb(228 211 168 / 0.92));
+    /* etched double border: paired inset grooves (umber thread · parchment
+       highlight · brass thread) under the warm drop */
     box-shadow:
       inset 0 0 0 1px rgb(34 35 30 / 0.35),
+      inset 0 0 0 2.5px rgb(255 248 224 / 0.55),
+      inset 0 0 0 3.5px rgb(148 112 44 / 0.45),
       inset 0 0 18px rgb(140 110 60 / 0.18),
       0 6px 16px rgb(58 42 18 / 0.25);
     transition: box-shadow 160ms ease, border-color 160ms ease;
+  }
+  /* corner-gear ornaments + brass rivet dots struck into the lane frame */
+  .wr-lane::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 10px;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23947030' stroke-opacity='.55' stroke-width='8' stroke-dasharray='7 5.6'/%3E%3Ccircle cx='32' cy='32' r='11' fill='none' stroke='%23947030' stroke-opacity='.55' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23947030' fill-opacity='.55'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23947030' stroke-opacity='.55' stroke-width='8' stroke-dasharray='7 5.6'/%3E%3Ccircle cx='32' cy='32' r='11' fill='none' stroke='%23947030' stroke-opacity='.55' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23947030' fill-opacity='.55'/%3E%3C/svg%3E"),
+      radial-gradient(circle 2.5px at 6px 6px, #b9913f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at calc(100% - 6px) 6px, #b9913f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at 6px calc(100% - 6px), #b9913f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at calc(100% - 6px) calc(100% - 6px), #b9913f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 1.5px at 50% 4.5px, #94702c 0%, #94702c 60%, transparent 100%),
+      radial-gradient(circle 1.5px at 50% calc(100% - 4.5px), #94702c 0%, #94702c 60%, transparent 100%);
+    background-repeat: no-repeat;
+    background-size: 16px 16px, 16px 16px, auto, auto, auto, auto, auto, auto;
+    background-position: -5px -5px, calc(100% + 5px) calc(100% + 5px), 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
   }
   /* §V3-1: legal drop lanes glow warm amber while a card is lifted */
   .wr-lane.is-drop-legal {
@@ -1509,7 +1572,18 @@
     border-radius: 10px;
     pointer-events: none;
     background: linear-gradient(120deg, transparent 30%, rgb(227 200 127 / 0.5), transparent 70%);
+    background-size: 240% 100%;
     filter: blur(3px);
+    /* §V3-3: the brass trail streams along the FLIP glide */
+    animation: wr-trail-slide 600ms linear infinite;
+  }
+  @keyframes wr-trail-slide {
+    from {
+      background-position: 120% 0;
+    }
+    to {
+      background-position: -120% 0;
+    }
   }
   .wr-card--arrive-glow {
     box-shadow: 0 0 16px rgb(232 181 74 / 0.8);
@@ -1594,10 +1668,43 @@
     animation: wr-soft-pulse 1.2s ease-in-out infinite;
   }
   .wr-card-ring {
-    width: 22px;
-    height: 22px;
+    width: 25px;
+    height: 25px;
     flex: none;
     color: var(--color-brass-600);
+  }
+  /* verdigris-to-amber progress arc over the etched brass track (§V2-1) */
+  .wr-ring-track {
+    stroke: var(--color-brass-600);
+  }
+  .wr-ring-arc {
+    stroke: #3f8d7d;
+  }
+  /* amber oval "eye" lamp — lit while a working agent attends the card */
+  .wr-card-eye {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 11px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 38%, #ffe9b0, var(--color-amber-glow) 55%, var(--color-amber-deep) 88%);
+    border: 1px solid var(--color-brass-700);
+    box-shadow: 0 0 7px rgb(232 181 74 / 0.85);
+    animation: wr-eye-glow 2.2s ease-in-out infinite;
+    z-index: 2;
+    pointer-events: none;
+  }
+  @keyframes wr-eye-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 4px rgb(232 181 74 / 0.5);
+      opacity: 0.8;
+    }
+    50% {
+      box-shadow: 0 0 11px rgb(232 181 74 / 0.95);
+      opacity: 1;
+    }
   }
   .wr-card-yolo {
     flex: none;
@@ -1633,19 +1740,26 @@
   .wr-card-agents:not(:empty) {
     margin-top: 5px;
   }
+  /* creature portraits sit on a light parchment plate inside a brass ring —
+     no dark coin backing, so the stained-glass wing tints read (§V2-1) */
   .wr-card-agent {
-    width: 30px;
-    height: 30px;
-    padding: 1px;
+    width: 46px;
+    height: 46px;
+    padding: 2px;
     border-radius: 9999px;
-    border: 1px solid var(--color-brass-500);
-    background: rgb(34 35 30 / 0.9);
+    border: 1.5px solid var(--color-brass-500);
+    background:
+      radial-gradient(circle at 32% 26%, rgb(255 248 224 / 0.95), transparent 70%),
+      linear-gradient(to bottom, #f3e9cc, #ddc99c);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.6),
+      inset 0 -3px 6px rgb(140 110 60 / 0.25);
     cursor: pointer;
   }
-  .wr-card-agent--claude-code { box-shadow: 0 0 6px rgb(88 179 164 / 0.7); }
-  .wr-card-agent--codex { box-shadow: 0 0 6px rgb(208 112 124 / 0.7); }
-  .wr-card-agent--gemini-cli { box-shadow: 0 0 6px rgb(221 171 74 / 0.7); }
-  .wr-card-agent--pi { box-shadow: 0 0 6px rgb(169 191 87 / 0.7); }
+  .wr-card-agent--claude-code { box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.6), 0 0 8px rgb(88 179 164 / 0.65); }
+  .wr-card-agent--codex { box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.6), 0 0 8px rgb(208 112 124 / 0.65); }
+  .wr-card-agent--gemini-cli { box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.6), 0 0 8px rgb(221 171 74 / 0.65); }
+  .wr-card-agent--pi { box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.6), 0 0 8px rgb(169 191 87 / 0.65); }
   .wr-card-agent-portrait {
     display: block;
     width: 100%;
@@ -1852,13 +1966,35 @@
     border: 2px solid var(--color-amber-glow);
     animation: wr-ping-expand 1.2s ease-out infinite;
   }
+  /* parchment vignette + engraved plate-border frame (§V2-3 retheme) */
   .wr-memory-plate {
     position: relative;
     flex: 1;
     min-width: 0;
-    border: 1px solid rgb(148 112 44 / 0.4);
+    border: 1px solid var(--color-brass-600);
     border-radius: 8px;
     overflow: hidden;
+    background:
+      radial-gradient(ellipse at 50% 42%, rgb(255 248 224 / 0.5), transparent 62%),
+      radial-gradient(ellipse at 50% 50%, transparent 58%, rgb(140 110 60 / 0.22) 100%),
+      linear-gradient(to bottom, #f2e8ca, #e4d3a8);
+    box-shadow:
+      inset 0 0 0 1px rgb(34 35 30 / 0.3),
+      inset 0 0 0 3.5px rgb(255 248 224 / 0.5),
+      inset 0 0 0 4.5px rgb(148 112 44 / 0.4),
+      inset 0 0 26px rgb(140 110 60 / 0.2);
+  }
+  /* corner rivets struck into the plate frame */
+  .wr-memory-plate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle 2.5px at 8px 8px, #e3c87f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at calc(100% - 8px) 8px, #e3c87f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at 8px calc(100% - 8px), #e3c87f 0%, #94702c 55%, transparent 100%),
+      radial-gradient(circle 2.5px at calc(100% - 8px) calc(100% - 8px), #e3c87f 0%, #94702c 55%, transparent 100%);
   }
   .wr-memory-graph {
     width: 100%;
@@ -1872,10 +2008,21 @@
   .wr-mem-node {
     cursor: pointer;
   }
+  /* wax-seal node: brass ring · jewel-glass wax disc with engraved sepia
+     edge · porcelain gloss bead (§V2-1 four-faction glass tints) */
+  .wr-mem-node-ring {
+    fill: none;
+    stroke: var(--color-brass-500);
+    stroke-width: 2.4;
+  }
   .wr-mem-node-dot {
-    fill: hsl(var(--mem-hue, 40) 50% 45%);
-    stroke: var(--color-brass-700);
-    stroke-width: 1;
+    fill: hsl(var(--mem-hue, 40) 52% 38%);
+    stroke: #4a3812;
+    stroke-width: 1.3;
+  }
+  .wr-mem-node-gloss {
+    fill: rgb(255 248 224 / 0.45);
+    pointer-events: none;
   }
   .wr-mem-node.is-dimmed {
     opacity: 0.3;
@@ -1978,6 +2125,8 @@
     .wr-card-agent.is-spawning,
     .wr-card-agent--ghost,
     .wr-card-inquiry,
+    .wr-card-eye,
+    .wr-card.is-moving::after,
     .wr-mem-pulse,
     .wr-mem-node-pulse {
       animation: none;
@@ -2257,27 +2406,33 @@
     font-size: 11px;
     padding: 8px 2px;
   }
+  /* file rows read as parchment dossier slips (§V3-4 sepia dossier) */
   .wr-ws-file {
     display: flex;
     align-items: center;
     gap: 7px;
     width: 100%;
     text-align: left;
-    background: none;
-    border: 1px solid transparent;
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.85), rgb(222 204 160 / 0.85));
+    border: 1px solid rgb(148 112 44 / 0.45);
     border-radius: 6px;
     padding: 3px 6px;
     cursor: pointer;
-    color: var(--color-hud-text);
+    color: var(--color-ink);
     font-family: var(--font-mono-hud);
     font-size: 11px;
+    box-shadow: inset 0 0 0 1px rgb(255 248 224 / 0.4);
   }
   .wr-ws-file:hover {
-    background: rgb(227 200 127 / 0.08);
+    border-color: var(--color-selection-ring);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.95), rgb(228 211 168 / 0.95));
   }
   .wr-ws-file.is-open {
-    border-color: var(--color-brass-600);
-    background: rgb(227 200 127 / 0.1);
+    border-color: var(--color-brass-500);
+    background: linear-gradient(to bottom, rgb(250 242 222 / 0.97), rgb(233 217 178 / 0.97));
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.5),
+      0 0 6px rgb(232 181 74 / 0.3);
   }
   .wr-ws-status {
     flex-shrink: 0;
@@ -2286,14 +2441,15 @@
     font-weight: 700;
     border-radius: 4px;
   }
+  /* ink-grade status letters — sepia-legible on the parchment slips */
   .wr-ws-status--A {
-    color: var(--color-status-ok);
+    color: #3f7a4e;
   }
   .wr-ws-status--M {
-    color: var(--color-status-warn);
+    color: #8a5a14;
   }
   .wr-ws-status--D {
-    color: var(--color-status-alert);
+    color: #8a3526;
   }
   .wr-ws-path {
     flex: 1;
@@ -2459,17 +2615,22 @@
     flex-direction: column;
     gap: 4px;
   }
+  /* reviewer notes are inked on parchment slips — one sepia dossier (§V3-4) */
   .wr-review-note {
+    font-family: var(--font-serif-display);
     font-size: 11px;
-    color: var(--color-hud-text);
-    background: rgb(227 200 127 / 0.07);
-    border: 1px solid rgb(185 145 63 / 0.3);
+    color: var(--color-ink);
+    background: linear-gradient(to bottom, rgb(240 230 201 / 0.92), rgb(222 204 160 / 0.92));
+    border: 1px solid rgb(148 112 44 / 0.5);
     border-radius: 7px;
     padding: 5px 8px;
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.45),
+      inset 0 1px 3px rgb(109 81 32 / 0.2);
   }
   .wr-review-note::before {
     content: '\201C';
-    color: var(--color-brass-400);
+    color: var(--color-brass-600);
     margin-right: 3px;
   }
   .wr-review-bar {
@@ -2592,29 +2753,43 @@
     box-shadow:
       inset 0 0 0 1px rgb(18 16 9 / 0.9),
       inset 0 0 0 2px rgb(216 181 97 / 0.22),
+      inset 0 0 0 4px rgb(233 220 190 / 0.06),
       0 10px 24px rgb(58 42 18 / 0.45);
     padding: 8px;
     animation: wr-slide-in 0.25s ease-out;
     position: relative;
   }
   .wr-inq-portrait {
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
-    border-radius: 7px;
-    background: linear-gradient(to bottom, rgb(240 230 201 / 0.95), rgb(214 194 148 / 0.95));
+    border-radius: 9px;
+    background:
+      radial-gradient(circle at 32% 26%, rgb(255 248 224 / 0.95), transparent 70%),
+      linear-gradient(to bottom, rgb(240 230 201 / 0.95), rgb(214 194 148 / 0.95));
     border: 1px solid var(--color-brass-600);
-    box-shadow: inset 0 0 5px rgb(140 110 60 / 0.3);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.5),
+      inset 0 0 5px rgb(140 110 60 / 0.3);
+    padding: 2px;
   }
   .wr-inq-main {
     flex: 1;
     min-width: 0;
   }
+  /* the question is penned on a brass-edged parchment inset plate (§V2-1) */
   .wr-inq-question {
     font-family: var(--font-serif-display);
     font-size: 12px;
-    color: var(--color-hud-bright);
+    color: var(--color-ink);
     margin-bottom: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--color-brass-600);
+    background: linear-gradient(to bottom, #f0e6c9, #e2d1a8);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 248 224 / 0.55),
+      inset 0 1px 4px rgb(109 81 32 / 0.3);
   }
   .wr-inq-options {
     display: flex;

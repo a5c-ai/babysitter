@@ -27,13 +27,19 @@ export interface MemoryOverlayProps {
   store: CommanderStore;
 }
 
-/** nodeKind → stable hue (deterministic; engraved-jewel family). */
+/**
+ * nodeKind → stable hue (deterministic), quantized to the four faction
+ * stained-glass tints (§V2-1): verdigris teal · garnet · amber · peridot.
+ * Nodes read as brass-ringed wax seals in jewel glass, not generic d3 dots.
+ */
+const GLASS_HUES: readonly number[] = [168, 352, 42, 75];
+
 function kindHue(kind: string): number {
   let h = 0;
   for (let i = 0; i < kind.length; i += 1) {
     h = (h * 31 + kind.charCodeAt(i)) >>> 0;
   }
-  return h % 360;
+  return GLASS_HUES[h % GLASS_HUES.length] ?? 42;
 }
 
 export function MemoryOverlay({ store }: MemoryOverlayProps): React.JSX.Element | null {
@@ -163,7 +169,9 @@ export function MemoryOverlay({ store }: MemoryOverlayProps): React.JSX.Element 
                         setFocusId(node.id === focusId ? null : node.id);
                       }}
                     >
+                      <circle className="wr-mem-node-ring" r="11.5" />
                       <circle className="wr-mem-node-dot" r="9" />
+                      <circle className="wr-mem-node-gloss" cx="-2.5" cy="-3" r="3" />
                       {pulsed && <circle className="wr-mem-node-pulse memory-pulse" r="9" />}
                       <text className="wr-mem-node-label" y="22" textAnchor="middle">
                         {node.id.split(':').pop()}

@@ -62,14 +62,15 @@ function ProgressRing({ progress }: { progress: number }): React.JSX.Element {
   return (
     <span className="wr-card-ring" title={`progress ${formatPct(filled)}`} aria-label={`progress ${formatPct(filled)}`}>
       <svg viewBox="0 0 22 22" width="100%" height="100%" aria-hidden="true">
-        <circle cx="11" cy="11" r={r} fill="none" stroke="currentColor" strokeOpacity="0.25" strokeWidth="2.5" />
+        <circle className="wr-ring-track" cx="11" cy="11" r={r} fill="none" stroke="currentColor" strokeOpacity="0.3" strokeWidth="3.2" />
         <circle
+          className="wr-ring-arc"
           cx="11"
           cy="11"
           r={r}
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.5"
+          strokeWidth="3.2"
           strokeLinecap="round"
           strokeDasharray={`${c * filled} ${c}`}
           transform="rotate(-90 11 11)"
@@ -391,6 +392,7 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
       }}
     >
       {card.merged && <span className="wr-card-sealstamp" title="merged" aria-label="merged" />}
+      {!card.merged && card.agentIds.length > 0 && <span className="wr-card-eye" aria-hidden />}
       <CardBody card={card} orders={orders} mini={false} />
       <AgentSlot agentIds={card.agentIds} agents={agents} store={store} />
       {isStack && (
