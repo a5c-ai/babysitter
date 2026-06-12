@@ -38,6 +38,7 @@ import { generateIcon } from '../../microagent/mock/iconGen';
 import { generateOptionIcon } from '../../microagent/mock/optionIconGen';
 import { InquiryOptionRow } from '../hud/ChatDock';
 import { MemoryIOTab } from './MemoryIOTab';
+import { SessionsTab } from './SessionsTab';
 import { TerminalTab } from './TerminalTab';
 import { ChangedFileList, GitStatusHeader } from './WorkspaceView';
 
@@ -48,7 +49,7 @@ export interface InspectorProps {
 }
 
 /** Path-only gear glyph for tool rows (never <line>/<polyline> — frozen contract). */
-const TOOL_GLYPH =
+export const TOOL_GLYPH =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="100%" height="100%" aria-hidden="true">' +
   '<path d="M8 5.2 A2.8 2.8 0 1 0 8 10.8 A2.8 2.8 0 1 0 8 5.2 Z M8 1.5 V3.5 M8 12.5 V14.5 M1.5 8 H3.5 M12.5 8 H14.5 M3.4 3.4 L4.8 4.8 M11.2 11.2 L12.6 12.6 M12.6 3.4 L11.2 4.8 M4.8 11.2 L3.4 12.6" ' +
   'fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
@@ -57,6 +58,7 @@ const SCROLL_STICK_THRESHOLD_PX = 28;
 
 const TABS: ReadonlyArray<{ id: InspectorTab; label: string }> = [
   { id: 'transcript', label: 'Transcript' },
+  { id: 'sessions', label: 'Sessions' },
   { id: 'process', label: 'Process' },
   { id: 'workspace', label: 'Workspace' },
   { id: 'memory', label: 'Memory' },
@@ -420,7 +422,9 @@ export function Inspector({ store, orders, views }: InspectorProps): React.JSX.E
   if (unit !== undefined) {
     const icon = generateIcon({ entityId: unit.id, kind: 'unit', adapter: unit.view.agent });
     // §V4-5: the agent's stack identity (spawn-time binding) — header chip.
-    const stackName = board.agents[unit.id]?.stackName;
+    // §V5-4: the chip is now a LINK to the Registry stack detail (stub intent
+    // this phase — the registry phase opens the overlay on it).
+    const agentView = board.agents[unit.id];
     head = (
       <>
         <div className="wr-inspector-portrait" dangerouslySetInnerHTML={{ __html: icon.svg }} />
@@ -428,10 +432,15 @@ export function Inspector({ store, orders, views }: InspectorProps): React.JSX.E
           <div className="wr-inspector-name">{unit.view.title}</div>
           <div className="wr-inspector-sub">
             {unit.view.agent} · {unit.view.model}
-            {stackName !== undefined && (
-              <span className="wr-inspector-stack" title="agent stack">
-                {stackName}
-              </span>
+            {agentView !== undefined && (
+              <button
+                type="button"
+                className="wr-inspector-stack"
+                title="agent stack — view in the Registry"
+                onClick={() => store.getState().openRegistryStack(agentView.stackRef)}
+              >
+                {agentView.stackName}
+              </button>
             )}
           </div>
           {card !== undefined && (
@@ -519,6 +528,9 @@ export function Inspector({ store, orders, views }: InspectorProps): React.JSX.E
         ) : (
           <div className="wr-inspector-body wr-tab-empty">no attending agent — no transcript</div>
         ))}
+      {tab === 'sessions' && (
+        <SessionsTab views={views} taskId={taskId} childIds={card?.view.childIds ?? []} />
+      )}
       {tab === 'process' && <ProcessTab observation={observation} simStartMs={simStartMs} />}
       {tab === 'workspace' && <WorkspaceTab taskId={taskId} views={views} />}
       {tab === 'memory' && (

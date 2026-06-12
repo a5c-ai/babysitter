@@ -52,6 +52,8 @@ const DRAG_THRESHOLD_PX = 4;
 const MOVE_ANIM_MS = 600;
 const SNAPBACK_MS = 220;
 const DESPAWN_MS = 450;
+/** Double-click grace before a single click opens the review panel (§V5-2). */
+const REVIEW_CLICK_GRACE_MS = 250;
 
 function reducedMotion(): boolean {
   return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -187,7 +189,11 @@ function AgentSlot({
             data-adapter={adapter}
             data-role={agent?.role ?? 'worker'}
             className={clsx('wr-card-agent', `wr-card-agent--${adapter}`, 'is-spawning')}
-            title={`${agent?.role ?? 'agent'} · ${adapter} — click to select, double-click to inspect`}
+            title={
+              agent !== undefined
+                ? `${agent.creatureName} — session of ${agent.stackName}`
+                : `agent · ${adapter} — click to select, double-click to inspect`
+            }
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
@@ -300,6 +306,13 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
   const ref = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const suppressClickRef = useRef(false);
+  /** Pending single-click review-open (cancelled by a double click, §V5-2). */
+  const reviewTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (reviewTimerRef.current !== null) window.clearTimeout(reviewTimerRef.current);
+    };
+  }, []);
   const ghostRef = useRef<GhostSnapshot | null>(null);
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const [snapback, setSnapback] = useState(false);
@@ -405,21 +418,34 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
     if (suppressClickRef.current) return;
     store.getState().clickSelect(card.taskId, e.shiftKey);
     // SPEC-V3 §V3-4: a SINGLE click on a HUMAN REVIEW card opens the review
-    // side panel (AC30).
-    if (card.column === 'human-review' && !card.merged) {
-      store.getState().openReview(card.taskId);
+    // side panel (AC30). Deferred one double-click grace so a DOUBLE click
+    // can cancel it and open the Inspector instead (§V5-2/AC46) — otherwise
+    // the slide-over panel would swallow the second click of the pair.
+    if (card.column === 'human-review' && !card.merged && e.detail === 1) {
+      if (reviewTimerRef.current !== null) window.clearTimeout(reviewTimerRef.current);
+      reviewTimerRef.current = window.setTimeout(() => {
+        reviewTimerRef.current = null;
+        store.getState().openReview(card.taskId);
+      }, REVIEW_CLICK_GRACE_MS);
     }
   };
 
   const onDoubleClick = (e: React.MouseEvent): void => {
     e.stopPropagation();
+    // A double click supersedes the pending single-click review-open (§V5-2).
+    if (reviewTimerRef.current !== null) {
+      window.clearTimeout(reviewTimerRef.current);
+      reviewTimerRef.current = null;
+    }
     if (suppressClickRef.current) return;
     const first = card.agentIds[0];
     if (first !== undefined) {
       store.getState().openInspector(first);
-    } else if (card.column !== 'human-review') {
-      // Agent-less cards open the Inspector in card mode (Process tab
-      // default, §V2-5); human-review cards already opened the review panel.
+    } else {
+      // Agent-less cards open the Inspector in card mode (§V5-2 default-tab
+      // policy: Sessions for the review-and-beyond columns, else Process).
+      // The Inspector becomes primary — the review panel that the first
+      // click of the double-click may have opened closes (§V4-3 rule, AC46).
       store.getState().openInspectorCard(card.taskId);
     }
   };
@@ -497,9 +523,13 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
                 if (!suppressClickRef.current) store.getState().clickSelect(child.taskId, e.shiftKey);
               }}
               onDoubleClick={(e) => {
-                e.stopPropagation();
                 const first = child.agentIds[0];
-                if (first !== undefined) store.getState().openInspector(first);
+                if (first !== undefined) {
+                  e.stopPropagation();
+                  store.getState().openInspector(first);
+                }
+                // Agent-less mini: bubble to the stack PARENT — its card-mode
+                // Inspector owns the stack's session forensics (§V5-2, AC47).
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') store.getState().clickSelect(child.taskId, e.shiftKey);

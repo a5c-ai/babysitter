@@ -49,7 +49,7 @@ export function WarRoom({ store, orders, views }: WarRoomProps): React.JSX.Eleme
       <ChatDock store={store} orders={orders} />
       <div className="wr-bottom-row">
         <EventTicker store={store} />
-        <SelectionPanel store={store} />
+        <SelectionPanel store={store} views={views} />
         <CommandCard store={store} orders={orders} />
       </div>
       <Inspector store={store} orders={orders} views={views} />

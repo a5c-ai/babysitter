@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import { formatInt, formatPct, formatUsd, getSelectedEntities } from '../../game/selectors';
 import type { CommanderStore, TaskEntity, UnitEntity } from '../../game/store';
 import { UNIT_BUDGET_USD } from '../../game/store';
+import type { SimViews } from '../../game/views';
 import { generateIcon } from '../../microagent/mock/iconGen';
 
 const MAX_RANK_CHEVRONS = 5;
@@ -43,6 +44,7 @@ function cardStateLabel(state: string): string {
 
 export interface SelectionPanelProps {
   store: CommanderStore;
+  views: SimViews;
 }
 
 function focusEntity(store: CommanderStore, id: string, shift: boolean): void {
@@ -145,10 +147,22 @@ function UnitCardGrid({ store, units }: { store: CommanderStore; units: UnitEnti
   );
 }
 
-function TaskDetails({ store, task }: { store: CommanderStore; task: TaskEntity }): React.JSX.Element {
+function TaskDetails({
+  store,
+  views,
+  task,
+}: {
+  store: CommanderStore;
+  views: SimViews;
+  task: TaskEntity;
+}): React.JSX.Element {
   const units = useStore(store, (s) => s.world.units);
   /** Current babysitter process phase of the card's run (§V2-5 sel-stage). */
   const runStage = useStore(store, (s) => s.board.cards[task.id]?.runStage ?? null);
+  // §V5-4 entity separation: the attending agent line splits into SESSION
+  // (instance) and STACK (template). Refresh per committed tick.
+  useStore(store, (s) => s.meta.tickIndex);
+  const activeSession = views.listSessions(task.id).find((s) => s.status === 'active');
   const icon = generateIcon({ entityId: task.id, kind: 'task', taskKind: task.view.taskKind });
   return (
     <div className="wr-sel-single">
@@ -177,6 +191,28 @@ function TaskDetails({ store, task }: { store: CommanderStore; task: TaskEntity 
             EDIT CARD
           </button>
         </div>
+        {activeSession !== undefined && (
+          <div className="wr-sel-agentline">
+            <button
+              type="button"
+              data-testid="sel-session-link"
+              className="wr-sel-entitylink"
+              title={`${activeSession.creatureName} — session of ${activeSession.stackName}`}
+              onClick={() => store.getState().openInspectorSessions(task.id)}
+            >
+              {activeSession.creatureName} · view session
+            </button>
+            <button
+              type="button"
+              data-testid="sel-stack-link"
+              className="wr-sel-entitylink wr-sel-entitylink--stack"
+              title={`open the agent stack "${activeSession.stackName}" in the Registry (§V5-4)`}
+              onClick={() => store.getState().openRegistryStack(activeSession.stackRef)}
+            >
+              {activeSession.stackName} · view stack
+            </button>
+          </div>
+        )}
       </div>
       <div className="wr-sel-vitals">
         <div className="wr-vital">
@@ -211,7 +247,7 @@ function TaskDetails({ store, task }: { store: CommanderStore; task: TaskEntity 
   );
 }
 
-export function SelectionPanel({ store }: SelectionPanelProps): React.JSX.Element {
+export function SelectionPanel({ store, views }: SelectionPanelProps): React.JSX.Element {
   const world = useStore(store, (s) => s.world);
   const selection = useStore(store, (s) => s.selection);
   const { units, tasks } = getSelectedEntities({ world, selection });
@@ -227,13 +263,13 @@ export function SelectionPanel({ store }: SelectionPanelProps): React.JSX.Elemen
     content = <UnitCardGrid store={store} units={units} />;
   } else if (tasks.length === 1 && units.length === 0) {
     const task = tasks[0];
-    content = task !== undefined ? <TaskDetails store={store} task={task} /> : <div />;
+    content = task !== undefined ? <TaskDetails store={store} views={views} task={task} /> : <div />;
   } else {
     content = (
       <div className="wr-sel-mixed">
         <UnitCardGrid store={store} units={units} />
         {tasks.map((task) => (
-          <TaskDetails key={task.id} store={store} task={task} />
+          <TaskDetails key={task.id} store={store} views={views} task={task} />
         ))}
       </div>
     );

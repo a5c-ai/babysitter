@@ -18,6 +18,7 @@
 import { WarRoom } from './components/WarRoom';
 import { createMockBackendFromSearch } from './backend/mock/mockBackend';
 import type {
+  SimCardView,
   SimFileTreeNode,
   SimGitCommitView,
   SimMemoryIOView,
@@ -71,6 +72,8 @@ interface CommanderTestApi {
     /** SPEC-V5 §V5-1 persistent-session views. */
     listSessions(taskId?: string): SimSessionView[];
     getSession(sessionId: string): SimSessionDetailView | null;
+    /** Established card-view probe (frozen v5 helpers use it for staging). */
+    listCardViews(): SimCardView[];
   };
   store: CommanderStore;
   version: string;
@@ -154,6 +157,7 @@ window.__commander = {
     // --- SPEC-V5 §V5-1 persistent-session views --------------------------------
     listSessions: (taskId?: string) => backend.sim.listSessions(taskId),
     getSession: (sessionId: string) => backend.sim.getSession(sessionId),
+    listCardViews: () => backend.sim.listCardViews(),
   },
   store,
   version: COMMANDER_VERSION,

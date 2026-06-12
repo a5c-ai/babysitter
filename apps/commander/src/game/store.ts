@@ -43,6 +43,7 @@ import type {
 } from '../backend/mock/simulation';
 import type { KradleAgentStackInput } from '../contracts/kradle-stack';
 import type { TaskKind } from '../backend/mock/scenario';
+import { CARD_SUPPORTED_TABS, defaultInspectorCardTab } from './sessions';
 
 // ---------------------------------------------------------------------------
 // Entity & slice types (SPEC §6 / SPEC-V3)
@@ -213,8 +214,8 @@ export interface MemoryPulse {
   ts: number;
 }
 
-/** Inspector tab ids (SPEC-V2 §V2-5/§V2-7 as amended by SPEC-V4 §V4-7/§V4-9). */
-export type InspectorTab = 'transcript' | 'process' | 'workspace' | 'memory' | 'terminal';
+/** Inspector tab ids (SPEC-V2 §V2-5/§V2-7 as amended by SPEC-V4 §V4-7/§V4-9 and SPEC-V5 §V5-2). */
+export type InspectorTab = 'transcript' | 'sessions' | 'process' | 'workspace' | 'memory' | 'terminal';
 
 export interface MetaSlice {
   resources: ResourcesSnapshot;
@@ -252,6 +253,12 @@ export interface MetaSlice {
   archiveFocusId: string | null;
   /** The Runs ledger overlay (§V4-6 — top Esc tier with foundry/archive). */
   runsOpen: boolean;
+  /**
+   * §V5-3/§V5-4 Registry stack-detail intent (stub this phase): the stackRef
+   * the Registry overlay should open on. The registry phase consumes it;
+   * until then it only records the routed intent. null = none pending.
+   */
+  registryStackRef: string | null;
   /** §V4-11 web IDE overlay target (full-screen plate); null = closed. */
   ideTaskId: string | null;
   /** taskId → in-flight automatic move (cleared by the board after the glide). */
@@ -301,8 +308,12 @@ export interface CommanderState {
   // --- transient UI ---------------------------------------------------------
   setViewport(size: { width: number; height: number }): void;
   openInspector(unitId: string): void;
-  /** Open the Inspector on an agent-less CARD (defaults to the Process tab). */
+  /** Open the Inspector on a CARD (§V5-2 default-tab policy: Sessions for agent-less review-and-beyond cards, else Process). */
   openInspectorCard(taskId: string): void;
+  /** §V5-2/§V5-4 deep-link: open the Inspector on a card's SESSIONS tab (review-panel chip, sel-session-link). */
+  openInspectorSessions(taskId: string): void;
+  /** §V5-4 stub intent: route "view stack" to the Registry stack detail (the registry phase consumes it). */
+  openRegistryStack(stackRef: string): void;
   closeInspector(): void;
   /** Switch the Inspector tab (externally settable — Open Diff, §V2-2). */
   setInspectorTab(tab: InspectorTab): void;
@@ -939,6 +950,7 @@ export function createCommanderStore(): CommanderStore {
       archiveOpen: false,
       archiveFocusId: null,
       runsOpen: false,
+      registryStackRef: null,
       ideTaskId: null,
       movingCards: {},
       moveSeq: 0,
@@ -1308,15 +1320,24 @@ export function createCommanderStore(): CommanderStore {
       });
     },
     openInspectorCard(taskId) {
-      // Agent-less cards default to the Process tab (SPEC-V2 §V2-5 under V3).
-      // §V4-3 retargeting: preserve the selected tab when the card supports
-      // it (Process/Workspace); Transcript falls back to Process (V3 rules).
-      // As with openInspector, the Inspector becomes primary: an open review
-      // panel (same task or different) closes.
+      // §V5-2 default-tab policy: agent-less cards in the review-and-beyond
+      // columns open on SESSIONS (ahead of Process); backlog/do cards keep
+      // the V3 Process default. §V4-3 retargeting: preserve the selected tab
+      // when the card supports it (CARD_SUPPORTED_TABS — now incl. Sessions);
+      // the live Transcript falls back to the card default. As with
+      // openInspector, the Inspector becomes primary: an open review panel
+      // (same task or different) closes.
       set((state) => {
         const wasOpen = state.meta.inspectorUnitId !== null || state.meta.inspectorTaskId !== null;
+        const card = state.board.cards[taskId];
+        const fallback = defaultInspectorCardTab(
+          card?.view.column,
+          card?.view.agentIds.length ?? 0,
+        );
         const tab: InspectorTab =
-          wasOpen && state.meta.inspectorTab !== 'transcript' ? state.meta.inspectorTab : 'process';
+          wasOpen && CARD_SUPPORTED_TABS.has(state.meta.inspectorTab)
+            ? state.meta.inspectorTab
+            : fallback;
         return {
           meta: {
             ...state.meta,
@@ -1327,6 +1348,28 @@ export function createCommanderStore(): CommanderStore {
           },
         };
       });
+    },
+    openInspectorSessions(taskId) {
+      // §V5-2/§V5-4 deep-link (review-panel "Sessions" chip, sel-session-link):
+      // always lands on the Sessions tab regardless of retarget state.
+      set((state) => ({
+        meta: {
+          ...state.meta,
+          inspectorUnitId: null,
+          inspectorTaskId: taskId,
+          inspectorTab: 'sessions',
+          reviewTaskId: null,
+        },
+      }));
+    },
+    openRegistryStack(stackRef) {
+      // §V5-4 stub intent: record the routed stack so the registry phase can
+      // open its overlay on this detail. No overlay exists yet this phase.
+      set((state) =>
+        state.meta.registryStackRef === stackRef
+          ? state
+          : { meta: { ...state.meta, registryStackRef: stackRef } },
+      );
     },
     closeInspector() {
       set((state) => ({ meta: { ...state.meta, inspectorUnitId: null, inspectorTaskId: null } }));

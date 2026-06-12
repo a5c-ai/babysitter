@@ -65,6 +65,14 @@ export function ReviewPanel({ store, orders, views }: ReviewPanelProps): React.J
         </div>
         <button
           type="button"
+          className="wr-review-btn wr-review-btn--sessions"
+          title="Open the Sessions tab for this card (§V5-2)"
+          onClick={() => store.getState().openInspectorSessions(taskId)}
+        >
+          Sessions
+        </button>
+        <button
+          type="button"
           data-testid="review-open-ide"
           className="wr-review-btn wr-review-btn--ide"
           aria-label="Open in IDE"

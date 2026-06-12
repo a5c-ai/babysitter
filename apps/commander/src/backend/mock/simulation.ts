@@ -247,6 +247,8 @@ export interface SimAgentView {
   unitId: string;
   agent: AdapterName;
   model: string;
+  /** §V5-4: the session's creature name (avatar tooltip "<creature> — session of <stack>"). */
+  creatureName: string;
   /** §V4-5: the agent-stack this agent was spawned from. */
   stackRef: string;
   stackName: string;
@@ -2162,6 +2164,7 @@ export class Simulation {
       unitId: agent.unitId,
       agent: agent.agent,
       model: agent.model,
+      creatureName: agent.session.creatureName,
       stackRef: agent.stackRef,
       stackName: agent.stackName,
       role: agent.role,
