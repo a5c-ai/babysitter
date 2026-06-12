@@ -20,8 +20,20 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import { tick, tickUntil } from './helpers';
 
-/** SPEC-V3 column ids (§V3-1). */
-export const COLUMNS = ['backlog', 'do', 'ai-review', 'human-review', 'approved'] as const;
+/**
+ * Column ids — SPEC-V3 §V3-1 as AMENDED by SPEC-V4 §V4-1 (sanctioned in the SPEC-V4 header:
+ * "AC25's five-column assertion becomes seven columns"): the board gains the release rail
+ * lanes `merged` and `in-production` (testids `kanban-col-merged`, `kanban-col-in-production`).
+ */
+export const COLUMNS = [
+  'backlog',
+  'do',
+  'ai-review',
+  'human-review',
+  'approved',
+  'merged',
+  'in-production',
+] as const;
 export type ColumnId = (typeof COLUMNS)[number];
 
 /** SPEC-V2 §V2-2 task kinds (sim must generate all). */
@@ -199,7 +211,8 @@ export async function moveCardViaSim(page: Page, taskId: string, columnId: Colum
 
 /**
  * Bounded, tick-driven wait for `card-<taskId>` to land in `columnId`.
- * Generous default budget: 80 chunks × 10 ticks = 800 ticks.
+ * Generous default budget: 160 chunks × 10 ticks = 1600 ticks (doubled per SPEC-V4 §V4-4
+ * pacing slowdown — sanctioned by the SPEC-V4 header; budgets are not semantic).
  */
 export async function tickUntilCardInColumn(
   page: Page,
@@ -207,7 +220,7 @@ export async function tickUntilCardInColumn(
   columnId: ColumnId,
   opts: { chunk?: number; maxChunks?: number } = {},
 ): Promise<void> {
-  const { chunk = 10, maxChunks = 80 } = opts;
+  const { chunk = 10, maxChunks = 160 } = opts;
   const ok = await tickUntil(page, async () => (await columnOfCard(page, taskId)) === columnId, {
     chunk,
     maxChunks,
@@ -302,7 +315,8 @@ export async function tickUntilTickerMatches(
   pattern: RegExp,
   opts: { chunk?: number; maxChunks?: number; label?: string } = {},
 ): Promise<string> {
-  const { chunk = 10, maxChunks = 80, label = String(pattern) } = opts;
+  // default budget doubled for the SPEC-V4 §V4-4 pacing slowdown (sanctioned; non-semantic)
+  const { chunk = 10, maxChunks = 160, label = String(pattern) } = opts;
   let match = '';
   const ok = await tickUntil(
     page,
@@ -408,7 +422,8 @@ export async function openInquiryAndChoose(
   page: Page,
   opts: { minOptions?: number; pick?: number; chunk?: number; maxChunks?: number } = {},
 ): Promise<{ hookRequestId: string; optionId: string; caption: string }> {
-  const { minOptions = 3, pick = 0, chunk = 10, maxChunks = 80 } = opts;
+  // default budget doubled for the SPEC-V4 §V4-4 pacing slowdown (sanctioned; non-semantic)
+  const { minOptions = 3, pick = 0, chunk = 10, maxChunks = 160 } = opts;
   let info: InquiryInfo | null = null;
   const ok = await tickUntil(
     page,

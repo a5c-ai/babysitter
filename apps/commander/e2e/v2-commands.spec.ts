@@ -5,6 +5,7 @@
  * §V3-1: "Clicking a card selects it (SelectionPanel + contextual CommandCard as before)").
  *
  * FROZEN input for implementation.
+ * tickUntil budgets in this file doubled per SPEC-V4 §V4-4 pacing (sanctioned; non-semantic).
  */
 import { expect, test, type Page } from '@playwright/test';
 import { tickUntil } from './helpers';
@@ -24,7 +25,7 @@ async function selectWorkingCardOfKind(page: Page, kind: TaskKind): Promise<stri
   await moveCardViaSim(page, taskId, 'do');
   const working = await tickUntil(page, async () => (await agentsOnCard(page, taskId).count()) > 0, {
     chunk: 5,
-    maxChunks: 40,
+    maxChunks: 80,
   });
   expect(working, `a worker must spawn on the ${kind} card-${taskId} after it enters DO (§V3-2)`).toBe(true);
   await cardById(page, taskId).click();

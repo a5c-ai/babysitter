@@ -4,6 +4,7 @@
  * unit is reached by starting a card in DO. Double-click opens the Inspector (§V3-1).
  *
  * FROZEN input for implementation.
+ * tickUntil budgets in this file doubled per SPEC-V4 §V4-4 pacing (sanctioned; non-semantic).
  */
 import { expect, test } from '@playwright/test';
 import { tick, tickUntil } from './helpers';
@@ -29,7 +30,7 @@ test('AC20: Inspector Process tab — stage pipeline with exactly one current st
   await moveCardViaSim(page, taskId, 'do');
   const working = await tickUntil(page, async () => (await agentsOnCard(page, taskId).count()) > 0, {
     chunk: 5,
-    maxChunks: 40,
+    maxChunks: 80,
   });
   expect(working, `a worker must spawn on card-${taskId} (§V3-2)`).toBe(true);
   await tick(page, 10); // let the run emit its first journal events
@@ -78,7 +79,7 @@ test('AC20: Inspector Process tab — stage pipeline with exactly one current st
   expect(before, 'the journal list must already show events for a working run (V2-5)').toBeGreaterThan(0);
   const grew = await tickUntil(page, async () => (await journalSize()) > before, {
     chunk: 10,
-    maxChunks: 40,
+    maxChunks: 80,
   });
   expect(grew, `the journal list must grow over ticks (AC20); stuck at ${before} events`).toBe(true);
 
@@ -87,7 +88,7 @@ test('AC20: Inspector Process tab — stage pipeline with exactly one current st
   const inquiryPending = await tickUntil(
     page,
     async () => (await firstInquiryWithOptions(page, 2)) !== null,
-    { chunk: 10, maxChunks: 80 },
+    { chunk: 10, maxChunks: 160 },
   );
   expect(
     inquiryPending,

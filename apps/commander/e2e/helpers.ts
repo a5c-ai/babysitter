@@ -258,7 +258,9 @@ export async function tickUntil(
   predicate: () => Promise<boolean>,
   opts: { chunk?: number; maxChunks?: number } = {},
 ): Promise<boolean> {
-  const { chunk = 5, maxChunks = 60 } = opts;
+  // default budget doubled for the SPEC-V4 §V4-4 pacing slowdown (sanctioned by the SPEC-V4
+  // header: budgets are not semantic assertions)
+  const { chunk = 5, maxChunks = 120 } = opts;
   if (await predicate()) return true;
   for (let i = 0; i < maxChunks; i++) {
     await tick(page, chunk);

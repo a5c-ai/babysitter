@@ -4,6 +4,7 @@
  * that "working units" are now the agents attending DO cards, so AC18 starts a card first.
  *
  * FROZEN input for implementation.
+ * tickUntil budgets in this file doubled per SPEC-V4 §V4-4 pacing (sanctioned; non-semantic).
  */
 import { expect, test } from '@playwright/test';
 import { tickUntil } from './helpers';
@@ -111,7 +112,7 @@ test('AC18: memory transfer — a memory_query event yields a ticker entry, a tr
   await tickUntilTickerMatches(page, /memory[\s_-]?quer/i, {
     label: 'a memory_query ticker entry (AC18)',
     chunk: 10,
-    maxChunks: 80,
+    maxChunks: 160,
   });
 
   // AC18: "with the overlay open, a transfer pulse element" — V2-3: "live transfer events
@@ -124,7 +125,7 @@ test('AC18: memory transfer — a memory_query event yields a ticker entry, a tr
         (root: Element) =>
           root.querySelectorAll('[data-testid*="pulse"], [class*="pulse"], [data-transfer]').length,
       )) > 0,
-    { chunk: 5, maxChunks: 40 },
+    { chunk: 5, maxChunks: 80 },
   );
   expect(
     pulseSeen,
@@ -135,7 +136,7 @@ test('AC18: memory transfer — a memory_query event yields a ticker entry, a tr
   // enter the agent's held-pieces set (V2-3 sim).
   const heldGrew = await tickUntil(page, async () => (await heldHighlights()) > heldBefore, {
     chunk: 10,
-    maxChunks: 80,
+    maxChunks: 160,
   });
   expect(
     heldGrew,

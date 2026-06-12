@@ -6,6 +6,11 @@
  * FROZEN input for implementation. Setup uses the sim verb `moveCard` (the real pointer drag
  * is proven by AC26 in v3-board.spec.ts; SPEC-V3 §V3-7 sanctions verb-driven movement —
  * "All board movement flows through deterministic sim verbs (user drags included)").
+ *
+ * AMENDED per the SPEC-V4 header (sanctioned product change, §V4-1): the merged seal /
+ * terminal state moves from the APPROVED column to the MERGED column — an approved card
+ * completing integration AUTO-moves to `merged`, and AC31 now asserts the seal there.
+ * tickUntil budgets in this file are doubled for the §V4-4 pacing slowdown (non-semantic).
  */
 import { expect, test } from '@playwright/test';
 import { tickUntil } from './helpers';
@@ -33,7 +38,7 @@ async function tickTrackingHistory(
   done: (history: Map<string, ColumnId[]>) => boolean,
   opts: { chunk?: number; maxChunks?: number } = {},
 ): Promise<Map<string, ColumnId[]>> {
-  const { chunk = 10, maxChunks = 80 } = opts;
+  const { chunk = 10, maxChunks = 160 } = opts;
   const history = new Map<string, ColumnId[]>();
   const record = async () => {
     for (const id of taskIds) {
@@ -79,13 +84,13 @@ test('AC28: non-yolo pass lands in HUMAN REVIEW with no agents; a rejected card 
 
   const history = await tickTrackingHistory(page, ids, (h) => passed(h) && rejected(h), {
     chunk: 10,
-    maxChunks: 80,
+    maxChunks: 160,
   });
   const dump = JSON.stringify([...history.entries()]);
 
   // AC28: "a non-yolo card passing AI review lands in HUMAN REVIEW (no agents attached)".
   const passCard = [...history.entries()].find(([, cols]) => cols[cols.length - 1] === 'human-review');
-  expect(passCard, `some card must pass AI review into HUMAN REVIEW within 800 ticks; histories: ${dump}`).toBeTruthy();
+  expect(passCard, `some card must pass AI review into HUMAN REVIEW within 1600 ticks; histories: ${dump}`).toBeTruthy();
   // §V3-2: "HUMAN REVIEW: no agents attend."
   await expect(agentsOnCard(page, passCard![0])).toHaveCount(0);
 
@@ -95,7 +100,7 @@ test('AC28: non-yolo pass lands in HUMAN REVIEW with no agents; a rejected card 
   );
   expect(
     rejectEntry,
-    `some card must be REJECTED by AI review and bounce back to DO within 800 ticks; histories: ${dump}`,
+    `some card must be REJECTED by AI review and bounce back to DO within 1600 ticks; histories: ${dump}`,
   ).toBeTruthy();
   const texts = await tickerTexts(page);
   expect(
@@ -109,7 +114,7 @@ test('AC28: non-yolo pass lands in HUMAN REVIEW with no agents; a rejected card 
   if (!reworked) {
     const freshWorker = await tickUntil(page, async () => (await agentsOnCard(page, rejId).count()) > 0, {
       chunk: 5,
-      maxChunks: 40,
+      maxChunks: 80,
     });
     expect(freshWorker, `a fresh worker must attend the bounced card-${rejId} back in DO (AC28)`).toBe(true);
   }
@@ -135,11 +140,11 @@ test('AC29: a yolo-flagged card passing AI review lands directly in APPROVED, sk
     page,
     ids,
     (h) => [...h.values()].some((cols) => cols.includes('approved')),
-    { chunk: 10, maxChunks: 80 },
+    { chunk: 10, maxChunks: 160 },
   );
   const dump = JSON.stringify([...history.entries()]);
   const winner = [...history.entries()].find(([, cols]) => cols.includes('approved'));
-  expect(winner, `some yolo card must pass AI review into APPROVED within 800 ticks; histories: ${dump}`).toBeTruthy();
+  expect(winner, `some yolo card must pass AI review into APPROVED within 1600 ticks; histories: ${dump}`).toBeTruthy();
 
   // AC29: "lands it in APPROVED, skipping HUMAN REVIEW".
   expect(
@@ -148,7 +153,7 @@ test('AC29: a yolo-flagged card passing AI review lands directly in APPROVED, sk
   ).not.toContain('human-review');
 });
 
-test('AC30 + AC31: human review panel (files, diff, Approve All), drag-back verdict, then integration to the merged seal', async ({
+test('AC30 + AC31 (as amended by SPEC-V4 §V4-1): human review panel (files, diff, Approve All), drag-back verdict, then integration auto-moves to the MERGED column', async ({
   page,
 }) => {
   await bootBoard(page, { seed: 42 });
@@ -160,9 +165,9 @@ test('AC30 + AC31: human review panel (files, diff, Approve All), drag-back verd
   await tickUntil(
     page,
     async () => (await cardsInColumn(page, 'human-review').count()) >= 2,
-    { chunk: 10, maxChunks: 80 },
+    { chunk: 10, maxChunks: 160 },
   ).then((ok) => {
-    expect(ok, '≥2 cards must reach HUMAN REVIEW within 800 ticks (AC30 needs a second card for the drag-back verdict)').toBe(true);
+    expect(ok, '≥2 cards must reach HUMAN REVIEW within 1600 ticks (AC30 needs a second card for the drag-back verdict)').toBe(true);
   });
 
   const inReview: string[] = [];
@@ -191,7 +196,7 @@ test('AC30 + AC31: human review panel (files, diff, Approve All), drag-back verd
 
   // AC30: "Approve All animates the card to APPROVED" (also the surviving V2 AC23 approve path).
   await panel.locator(SEL3.reviewApproveAll).click();
-  await tickUntilCardInColumn(page, approveId, 'approved', { chunk: 5, maxChunks: 40 });
+  await tickUntilCardInColumn(page, approveId, 'approved', { chunk: 5, maxChunks: 80 });
 
   // AC30: "(separate card) dragging from HUMAN REVIEW back to DO works" (§V3-1 user drag verdict;
   // surviving V2 AC23 request-changes path: the unit returns to working).
@@ -202,8 +207,11 @@ test('AC30 + AC31: human review panel (files, diff, Approve All), drag-back verd
     })
     .toBe(1);
 
-  // AC31: "an APPROVED card shows merge/rebase activity events and reaches the merged seal state,
-  // its integration agent despawning after" (§V3-2 INTEGRATION agent).
+  // AC31 — AMENDED per the SPEC-V4 header + §V4-1 (sanctioned product change): the merged
+  // terminal state moves from APPROVED to the MERGED column. "An APPROVED card shows
+  // merge/rebase activity events" and, when integration completes, AUTO-MOVES to the MERGED
+  // column where the merged seal now lives ("Approved no longer holds terminal cards"); its
+  // integration agent despawns after (§V3-2 INTEGRATION agent).
   let sawIntegrationAgent = false;
   const isMerged = async (): Promise<boolean> =>
     cardById(page, approveId).evaluate((el: Element) => {
@@ -216,13 +224,19 @@ test('AC30 + AC31: human review panel (files, diff, Approve All), drag-back verd
     page,
     async () => {
       if ((await agentsOnCard(page, approveId).count()) > 0) sawIntegrationAgent = true;
-      return isMerged();
+      return (await columnOfCard(page, approveId)) === 'merged';
     },
-    { chunk: 10, maxChunks: 80 },
+    { chunk: 10, maxChunks: 160 },
   );
-  expect(merged, `card-${approveId} must reach the merged seal state (class or testid mutation) within 800 ticks (AC31)`).toBe(
-    true,
-  );
+  expect(
+    merged,
+    `card-${approveId} must AUTO-move to the MERGED column within 1600 ticks (AC31 as amended by SPEC-V4 §V4-1)`,
+  ).toBe(true);
+  await expect
+    .poll(isMerged, {
+      message: `card-${approveId} must carry the merged seal in the MERGED column (AC31 as amended by SPEC-V4 §V4-1: "the merged seal now lives there")`,
+    })
+    .toBe(true);
   expect(
     sawIntegrationAgent,
     `an integration agent must visibly attend card-${approveId} during merge (AC31/§V3-2)`,

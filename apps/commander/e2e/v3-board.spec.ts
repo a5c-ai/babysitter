@@ -25,14 +25,20 @@ import {
   watchIsMoving,
 } from './helpers-v3';
 
-test('AC25: board boot — 5 columns, backlog holds ≥5 cards incl. ≥1 stack with ≥2 mini-children, zero agents, units counter 0', async ({
+test('AC25 (as amended by SPEC-V4): board boot — 7 columns, backlog holds ≥5 cards incl. ≥1 stack with ≥2 mini-children, zero agents, units counter 0', async ({
   page,
 }) => {
   await bootBoard(page, { seed: 42 });
 
-  // AC25: "5 columns with testids" (§V3-1 ids: backlog, do, ai-review, human-review, approved).
+  // AC25 AMENDED per the SPEC-V4 header + §V4-1 (sanctioned product change): the five-column
+  // assertion becomes SEVEN columns — §V3-1 ids plus the release rail `merged` and
+  // `in-production` (testids kanban-col-merged, kanban-col-in-production).
+  expect(COLUMNS.length, 'seven lanes total (SPEC-V4 §V4-1)').toBe(7);
   for (const id of COLUMNS) {
-    await expect(column(page, id), `kanban-col-${id} must exist (SPEC-V3 §V3-1)`).toBeVisible();
+    await expect(
+      column(page, id),
+      `kanban-col-${id} must exist (SPEC-V3 §V3-1 as amended by SPEC-V4 §V4-1)`,
+    ).toBeVisible();
   }
 
   // AC25: "backlog holds ≥5 cards".
@@ -107,9 +113,10 @@ test('AC26 + AC27: pointer-drag a backlog card to DO spawns a mapped worker; wor
     .toBe(1);
 
   // AC26: "an agent avatar spawns in its slot with adapter per the V3-2 mapping".
+  // (tickUntil budgets in this file doubled per SPEC-V4 §V4-4 pacing — sanctioned, non-semantic)
   const spawned = await tickUntil(page, async () => (await agentsOnCard(page, taskId).count()) > 0, {
     chunk: 5,
-    maxChunks: 40,
+    maxChunks: 80,
   });
   expect(spawned, `a worker agent must spawn on card-${taskId} after it enters DO (§V3-2)`).toBe(true);
   const workerAvatar = agentsOnCard(page, taskId).first();
@@ -126,7 +133,7 @@ test('AC26 + AC27: pointer-drag a backlog card to DO spawns a mapped worker; wor
   const eventsStarted = await tickUntil(
     page,
     async () => (await tickerTexts(page)).length > tickerBefore,
-    { chunk: 10, maxChunks: 40 },
+    { chunk: 10, maxChunks: 80 },
   );
   expect(eventsStarted, 'ticker must stream work events after the card enters DO (AC26)').toBe(true);
 
@@ -149,7 +156,7 @@ test('AC26 + AC27: pointer-drag a backlog card to DO spawns a mapped worker; wor
       const adapter = await agentAdapter(agentsOnCard(page, taskId).first());
       return adapter !== null && adapter !== workerAdapter;
     },
-    { chunk: 5, maxChunks: 40 },
+    { chunk: 5, maxChunks: 80 },
   );
   expect(
     reviewerSeen,

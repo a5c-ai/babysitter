@@ -2,6 +2,7 @@
  * v3-inquiries.spec.ts — SPEC-V3 §V3-6: AC32 (breakpoint inquiries — option palettes, §V3-5).
  *
  * FROZEN input for implementation. Setup uses the sim verb `moveCard` (real drag proven by
+ * tickUntil budgets in this file doubled per SPEC-V4 §V4-4 pacing (sanctioned; non-semantic).
  * AC26); inquiries only fire from working agents, so several cards are started.
  */
 import { expect, test } from '@playwright/test';
@@ -31,7 +32,7 @@ test('AC32: an inquiry with ≥3 options appears in the chat dock; options carry
   const appeared = await tickUntil(
     page,
     async () => (await firstInquiryWithOptions(page, 3)) !== null,
-    { chunk: 10, maxChunks: 80 },
+    { chunk: 10, maxChunks: 160 },
   );
   expect(
     appeared,
@@ -76,7 +77,7 @@ test('AC32: an inquiry with ≥3 options appears in the chat dock; options carry
       const texts = await tickerTexts(page);
       return texts.some((t) => new RegExp(escaped, 'i').test(t));
     },
-    { chunk: 5, maxChunks: 40 },
+    { chunk: 5, maxChunks: 80 },
   );
   expect(
     captionLogged,
@@ -96,7 +97,7 @@ test('AC32: an inquiry with ≥3 options appears in the chat dock; options carry
       );
       return mentions.length >= 2; // the choice log itself + ≥1 branch follow-up
     },
-    { chunk: 10, maxChunks: 80 },
+    { chunk: 10, maxChunks: 160 },
   );
   expect(
     followUp,

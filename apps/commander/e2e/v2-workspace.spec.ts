@@ -5,6 +5,7 @@
  * approve/reject paths of V2 AC23) are covered by AC30 in v3-review-flow.spec.ts.
  *
  * FROZEN input for implementation.
+ * tickUntil budgets in this file doubled per SPEC-V4 §V4-4 pacing (sanctioned; non-semantic).
  */
 import { expect, test } from '@playwright/test';
 import { tickUntil } from './helpers';
@@ -31,7 +32,7 @@ test('AC22: a working card\'s Workspace tab lists ≥2 changed files with status
   await moveCardViaSim(page, taskId, 'do');
   const working = await tickUntil(page, async () => (await agentsOnCard(page, taskId).count()) > 0, {
     chunk: 5,
-    maxChunks: 40,
+    maxChunks: 80,
   });
   expect(working, `a worker must spawn on card-${taskId} (§V3-2)`).toBe(true);
 
@@ -46,7 +47,7 @@ test('AC22: a working card\'s Workspace tab lists ≥2 changed files with status
   const fileCount = async () => inspector.locator(SEL3.wsFile).count();
   const enough = await tickUntil(page, async () => (await fileCount()) >= 2, {
     chunk: 10,
-    maxChunks: 80,
+    maxChunks: 160,
   });
   expect(
     enough,
