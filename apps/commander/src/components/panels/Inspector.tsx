@@ -422,6 +422,11 @@ export function Inspector({ store, orders, views }: InspectorProps): React.JSX.E
           <div className="wr-inspector-sub">
             {unit.view.agent} · {unit.view.model}
           </div>
+          {card !== undefined && (
+            <div className="wr-inspector-sub wr-inspector-attended" title="attended card">
+              {card.view.title}
+            </div>
+          )}
           <div className={`wr-sel-state wr-sel-state--${unit.view.state}`}>{unit.view.state}</div>
         </div>
       </>

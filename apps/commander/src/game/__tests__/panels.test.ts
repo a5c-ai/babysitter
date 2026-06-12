@@ -39,6 +39,10 @@ function mockOrders(): Orders {
     setYolo: vi.fn(),
     createTask: vi.fn(() => null),
     answerInquiry: vi.fn(),
+    revertCard: vi.fn(),
+    release: vi.fn(() => null),
+    rollbackCard: vi.fn(),
+    setSpeed: vi.fn(() => true),
   };
 }
 

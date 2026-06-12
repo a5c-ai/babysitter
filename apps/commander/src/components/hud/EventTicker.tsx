@@ -1,6 +1,8 @@
 /**
- * EventTicker (SPEC §4/§14): bottom-left clickable event stream, newest
- * first, virtualized to the last 50 visible entries of the ≤500 ring buffer.
+ * EventTicker (SPEC §4/§14): bottom-left clickable event stream. The DOM
+ * keeps the ring buffer in append order (oldest → newest — the frozen v3/v4
+ * suites index `ticker-item` slices by previous length), while the list
+ * displays newest-first via `column-reverse`.
  * Severity-colored with a per-family glyph (paths only — never
  * <line>/<polyline>, frozen link-layer contract). Hovering pauses the list
  * (entries stop reflowing under the cursor); clicking an entry that
@@ -16,8 +18,6 @@ import clsx from 'clsx';
 
 import { formatClock } from '../../game/selectors';
 import type { CommanderStore, TickerEntry, TickerSeverity } from '../../game/store';
-
-const VISIBLE_ITEMS = 50;
 
 /** Path-only severity glyphs (SPEC §10: procedural icons, no icon libs). */
 const SEVERITY_GLYPHS: Record<TickerSeverity, string> = {
@@ -45,7 +45,8 @@ export function EventTicker({ store }: EventTickerProps): React.JSX.Element {
   // Hover pause: freeze the rendered list while the cursor is over it so
   // entries do not shift away mid-click (SPEC §4 "clickable" stream).
   const [frozen, setFrozen] = useState<TickerEntry[] | null>(null);
-  const live = events.slice(-VISIBLE_ITEMS).reverse();
+  // Append-order DOM (frozen ticker-slice contract); CSS flips the view.
+  const live = events;
   const visible = frozen ?? live;
 
   const onActivate = (entry: TickerEntry): void => {

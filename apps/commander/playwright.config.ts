@@ -6,6 +6,10 @@ export default defineConfig({
   // marquee, control groups, idle fleet) are quarantined, not deleted.
   testIgnore: ['**/retired-v1/**'],
   fullyParallel: true,
+  // SPEC-V4 §V4-4: lifecycle pacing roughly doubled and the frozen-suite tick
+  // budgets doubled with it (sanctioned, non-semantic) — give the heavy
+  // release-rail scenarios real-time headroom.
+  timeout: 120_000,
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:5199',

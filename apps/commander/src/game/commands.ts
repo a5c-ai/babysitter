@@ -181,6 +181,35 @@ export function executeIntent(intent: CommandIntent, store: CommanderStore, orde
     case 'hold-merge':
       toggleHolds(state, orders, agentIds);
       return;
+    case 'revert-card': {
+      // §V4-1: revert each selected MERGED card from staging back to DO.
+      for (const task of tasks) {
+        orders.revertCard(task.id);
+      }
+      return;
+    }
+    case 'release':
+      // §V4-1: the release train takes EVERY merged card — no per-card args.
+      orders.release();
+      return;
+    case 'rollback-card': {
+      for (const task of tasks) {
+        orders.rollbackCard(task.id);
+      }
+      return;
+    }
+    case 'open-terminal': {
+      // §V4-7 delivers the dedicated Terminal tab in a later phase; until
+      // then the command surfaces the Inspector for the card's session.
+      const first = agentIds[0];
+      const task = tasks[0];
+      if (first !== undefined) {
+        state.openInspector(first);
+      } else if (task !== undefined) {
+        state.openInspectorCard(task.id);
+      }
+      return;
+    }
     case 'jump-to-alert':
       state.jumpToLatestAlert();
       return;

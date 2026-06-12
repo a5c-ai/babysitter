@@ -53,8 +53,13 @@ export const CONTEXT_WINDOW_TOKENS = 200_000;
 /** Assumed token budget per agent (USD) → energy bar = budget remaining. */
 export const UNIT_BUDGET_USD = 2.5;
 
-/** Ring buffer cap (SPEC §6). */
-export const EVENT_RING_CAP = 500;
+/**
+ * Ring buffer cap (SPEC §6, raised for V4): the frozen v3/v4 ticker probes
+ * index into the rendered list (`tickerTexts().slice(before)`), so the ring
+ * must not roll over within a single scenario's event volume (§V4-4 pacing
+ * roughly doubles tick counts per scenario).
+ */
+export const EVENT_RING_CAP = 2000;
 /** Transcript entries kept per agent (Inspector stream). */
 const TRANSCRIPT_CAP = 100;
 /** Memory transfer pulse lifetime in sim milliseconds (§V2-3). */
@@ -211,6 +216,8 @@ export type InspectorTab = 'transcript' | 'process' | 'workspace';
 
 export interface MetaSlice {
   resources: ResourcesSnapshot;
+  /** §V4-4 sim speed multiplier mirror (0.5 | 1 | 2) — TopBar speed control. */
+  speed: number;
   simTimeMs: number;
   simStartMs: number;
   tickIndex: number;
@@ -303,6 +310,8 @@ export interface CommanderState {
   clearMoving(taskId: string): void;
   setMemory(memory: BoardMemory): void;
   setPaused(paused: boolean): void;
+  /** §V4-4: mirror the sim speed multiplier (TopBar label re-render). */
+  setSimSpeed(speed: number): void;
   pushEvent(text: string, severity: TickerSeverity, entityId?: string): void;
 }
 
@@ -515,7 +524,14 @@ function routeFrames(
   return routing;
 }
 
-/** Ticker phrasing for automatic card moves (§V3-2/§V3-3). */
+/**
+ * Card-move reasons whose ticker line is owned elsewhere: user moves are
+ * logged by the Orders layer; revert/release/rollback carry dedicated §V4-1
+ * events (`reverted`/`release_shipped`/`rolled_back`) routed below.
+ */
+const SILENT_MOVE_REASONS = new Set(['user-move', 'reverted', 'release-shipped', 'rolled-back']);
+
+/** Ticker phrasing for automatic card moves (§V3-2/§V3-3/§V4-1). */
 function cardMoveText(reason: string, title: string, to: ColumnId): string {
   switch (reason) {
     case 'work-complete':
@@ -528,6 +544,8 @@ function cardMoveText(reason: string, title: string, to: ColumnId): string {
       return `Review rejected — ${title} returns to DO for rework`;
     case 'aborted':
       return `Abort executed — ${title} returns to the backlog`;
+    case 'integration-complete':
+      return `Integration complete — ${title} lands on staging (MERGED)`;
     default:
       return `${title} moved to ${to.toUpperCase()}`;
   }
@@ -676,11 +694,41 @@ function routeRunEvent(
       const reason = asString(ev['reason']) ?? 'user-move';
       if (taskId !== undefined && from !== undefined && to !== undefined) {
         routing.cardMoves.push({ taskId, from, to, reason });
-        if (reason !== 'user-move') {
-          // User moves are logged by the Orders layer; auto-moves here.
+        if (!SILENT_MOVE_REASONS.has(reason)) {
+          // User moves are logged by the Orders layer; §V4-1 rail verbs carry
+          // their own dedicated events; remaining auto-moves ticker here.
           ticker({ ts, severity: 'info', text: cardMoveText(reason, taskTitle(taskId), to), entityId: taskId });
         }
       }
+      break;
+    }
+    // --- §V4-1 release-rail events -------------------------------------------
+    case 'reverted': {
+      ticker({
+        ts,
+        severity: 'warn',
+        text: `Reverted — ${taskTitle(taskId)} pulled from staging, returns to DO`,
+        ...(taskId !== undefined ? { entityId: taskId } : {}),
+      });
+      break;
+    }
+    case 'release_shipped': {
+      const releaseId = asString(ev['releaseId']) ?? 'rel-??';
+      ticker({
+        ts,
+        severity: 'success',
+        text: `Release ${releaseId} — ${taskTitle(taskId)} ships to production`,
+        ...(taskId !== undefined ? { entityId: taskId } : {}),
+      });
+      break;
+    }
+    case 'rolled_back': {
+      ticker({
+        ts,
+        severity: 'warn',
+        text: `Rolled back — ${taskTitle(taskId)} withdrawn from production to staging`,
+        ...(taskId !== undefined ? { entityId: taskId } : {}),
+      });
       break;
     }
     case 'card_merged': {
@@ -816,6 +864,7 @@ export function createCommanderStore(): CommanderStore {
     alerts: [],
     meta: {
       resources: initialResources(),
+      speed: 1,
       simTimeMs: 0,
       simStartMs: 0,
       tickIndex: 0,
@@ -1165,15 +1214,28 @@ export function createCommanderStore(): CommanderStore {
       );
     },
     openInspector(unitId) {
-      set((state) => ({
-        meta: { ...state.meta, inspectorUnitId: unitId, inspectorTaskId: null, inspectorTab: 'transcript' },
-      }));
+      // §V4-3 retargeting: an already-open Inspector keeps its selected tab
+      // (agents support every tab); a fresh open defaults to Transcript.
+      set((state) => {
+        const wasOpen = state.meta.inspectorUnitId !== null || state.meta.inspectorTaskId !== null;
+        const tab: InspectorTab = wasOpen ? state.meta.inspectorTab : 'transcript';
+        return {
+          meta: { ...state.meta, inspectorUnitId: unitId, inspectorTaskId: null, inspectorTab: tab },
+        };
+      });
     },
     openInspectorCard(taskId) {
       // Agent-less cards default to the Process tab (SPEC-V2 §V2-5 under V3).
-      set((state) => ({
-        meta: { ...state.meta, inspectorUnitId: null, inspectorTaskId: taskId, inspectorTab: 'process' },
-      }));
+      // §V4-3 retargeting: preserve the selected tab when the card supports
+      // it (Process/Workspace); Transcript falls back to Process (V3 rules).
+      set((state) => {
+        const wasOpen = state.meta.inspectorUnitId !== null || state.meta.inspectorTaskId !== null;
+        const tab: InspectorTab =
+          wasOpen && state.meta.inspectorTab !== 'transcript' ? state.meta.inspectorTab : 'process';
+        return {
+          meta: { ...state.meta, inspectorUnitId: null, inspectorTaskId: taskId, inspectorTab: tab },
+        };
+      });
     },
     closeInspector() {
       set((state) => ({ meta: { ...state.meta, inspectorUnitId: null, inspectorTaskId: null } }));
@@ -1237,6 +1299,9 @@ export function createCommanderStore(): CommanderStore {
     setPaused(paused) {
       set((state) => (state.meta.paused === paused ? state : { meta: { ...state.meta, paused } }));
     },
+    setSimSpeed(speed) {
+      set((state) => (state.meta.speed === speed ? state : { meta: { ...state.meta, speed } }));
+    },
     pushEvent(text, severity, entityId) {
       set((state) => {
         const eventSeq = state.meta.eventSeq + 1;
@@ -1284,6 +1349,14 @@ export interface Orders {
   createTask(input: { taskKind: TaskKind; title?: string; parentId?: string; workspaceId?: string }): string | null;
   /** SPEC-V3 §V3-5: resolve an inquiry with the chosen option. */
   answerInquiry(hookRequestId: string, optionId: string | null): void;
+  /** SPEC-V4 §V4-1: revert a MERGED card from staging back to DO. */
+  revertCard(taskId: string): void;
+  /** SPEC-V4 §V4-1: ship ALL merged cards to production (release train). */
+  release(): string | null;
+  /** SPEC-V4 §V4-1: roll an IN PRODUCTION card back to MERGED (staging). */
+  rollbackCard(taskId: string): void;
+  /** SPEC-V4 §V4-4: set the real-time pacing multiplier (0.5 | 1 | 2). */
+  setSpeed(speed: number): boolean;
 }
 
 export interface BackendBinding {
@@ -1432,6 +1505,30 @@ export function bindBackendToStore(store: CommanderStore, backend: MockBackend):
         ...(optionId !== null ? { optionId } : {}),
       });
       flush();
+    },
+    revertCard(taskId) {
+      // §V4-1: the sim emits the `reverted` event + card_moved(reverted);
+      // the frame router owns the ticker line.
+      sim.revertCard(taskId);
+      flush();
+    },
+    release() {
+      const releaseId = sim.release();
+      flush();
+      return releaseId;
+    },
+    rollbackCard(taskId) {
+      sim.rollbackCard(taskId);
+      flush();
+    },
+    setSpeed(speed) {
+      // §V4-4: real-time pacing only — never journaled, tick(n) untouched.
+      const ok = sim.setSpeed(speed);
+      if (ok) {
+        store.getState().setSimSpeed(speed);
+        store.getState().pushEvent(`Cogitator pacing — ${speed}x`, 'info');
+      }
+      return ok;
     },
   };
 

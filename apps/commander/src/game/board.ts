@@ -84,3 +84,40 @@ export function columnFromElement(el: Element | null): ColumnId | null {
   const id = lane?.getAttribute('data-testid')?.slice('kanban-col-'.length) ?? '';
   return (COLUMNS as readonly string[]).includes(id) ? (id as ColumnId) : null;
 }
+
+/**
+ * Structural slice of Element used by the drop-resolution helpers — keeps the
+ * §V4-2 ghost-skipping logic unit-testable without a DOM environment.
+ */
+export interface HitLike {
+  closest(selectors: string): HitLike | null;
+  getAttribute(name: string): string | null;
+}
+
+/**
+ * SPEC-V4 §V4-2 drop resolution over an `elementsFromPoint` stack: the drag
+ * ghost rides topmost (so AC36's probe hits it), so lane resolution takes the
+ * FIRST hit that is NOT inside the ghost layer and resolves its lane. Only
+ * that first non-ghost hit decides — matching the old single-elementFromPoint
+ * semantics with the ghost layered above.
+ */
+export function laneFromHits(hits: ReadonlyArray<HitLike>): ColumnId | null {
+  for (const hit of hits) {
+    if (hit.closest('[data-drag-ghost]') !== null) continue;
+    const lane = hit.closest('[data-testid^="kanban-col-"]');
+    const id = lane?.getAttribute('data-testid')?.slice('kanban-col-'.length) ?? '';
+    return (COLUMNS as readonly string[]).includes(id) ? (id as ColumnId) : null;
+  }
+  return null;
+}
+
+/**
+ * §V4-2 drag ghost markup: a static visual snapshot of the lifted card. Every
+ * data-testid is stripped so the ghost never collides with the frozen
+ * selector contract (`card-*`, `card-agent-*`, `card-yolo-*` stay unique in
+ * the lanes); the AC36 probe identifies the ghost via the layer's
+ * `data-drag-ghost` attribute instead.
+ */
+export function sanitizeGhostMarkup(outerHtml: string): string {
+  return outerHtml.replace(/\s+data-testid="[^"]*"/g, '');
+}

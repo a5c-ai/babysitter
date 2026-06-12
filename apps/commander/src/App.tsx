@@ -17,6 +17,17 @@
 
 import { WarRoom } from './components/WarRoom';
 import { createMockBackendFromSearch } from './backend/mock/mockBackend';
+import type {
+  SimFileTreeNode,
+  SimGitCommitView,
+  SimMemoryIOView,
+  SimProcessTemplateView,
+  SimRunView,
+  SimStackView,
+  UpdateTaskPatch,
+} from './backend/mock/simulation';
+import type { KradleAgentStackInput } from './contracts/kradle-stack';
+import type { TaskKind } from './backend/mock/scenario';
 import {
   bindBackendToStore,
   COMMANDER_VERSION,
@@ -30,11 +41,31 @@ interface CommanderTestApi {
     resume(): void;
     tick(n: number): void;
     seed: number;
+    /** SPEC-V4 §V4-4 pacing scalars (read-only mirrors of the sim). */
+    readonly speed: number;
+    readonly tickIntervalMs: number;
     /** SPEC-V3 §V3-7 board verbs on the test-hooks API (deterministic setup). */
     moveCard(taskId: string, column: string): void;
     setYolo(taskId: string, on: boolean): void;
     createTask(input: { taskKind: string; title?: string; parentId?: string }): string | null;
     answerInquiry(hookRequestId: string, optionId: string | null): void;
+    /** SPEC-V4 §V4-1/§V4-4/§V4-5/§V4-6/§V4-11 verbs (deterministic, journaled). */
+    revertCard(taskId: string): void;
+    release(): string | null;
+    rollbackCard(taskId: string): void;
+    setSpeed(speed: number): boolean;
+    updateTask(taskId: string, patch: UpdateTaskPatch): boolean;
+    upsertStack(stack: KradleAgentStackInput): string | null;
+    updateProcessTemplate(kind: string, phases: string[]): number | null;
+    writeFile(taskId: string, path: string, content: string): boolean;
+    /** SPEC-V4 §V4-5/§V4-6/§V4-8/§V4-9 read-only views. */
+    listStacks(): SimStackView[];
+    listProcessTemplates(): SimProcessTemplateView[];
+    listRuns(): SimRunView[];
+    getWorkspaceTree(taskId: string): SimFileTreeNode | null;
+    getFileContent(taskId: string, path: string): string | null;
+    getMemoryIO(ref: string): SimMemoryIOView;
+    getGitLog(taskId: string): SimGitCommitView[];
   };
   store: CommanderStore;
   version: string;
@@ -67,6 +98,13 @@ window.__commander = {
       binding.flush();
     },
     seed: backend.sim.seed,
+    // §V4-4 pacing scalars — live getters over the sim (frozen-suite probes).
+    get speed(): number {
+      return backend.sim.speed;
+    },
+    get tickIntervalMs(): number {
+      return backend.sim.tickIntervalMs;
+    },
     moveCard: (taskId: string, column: string) => {
       binding.orders.moveCard(taskId, column as Parameters<typeof binding.orders.moveCard>[1]);
     },
@@ -78,6 +116,43 @@ window.__commander = {
     answerInquiry: (hookRequestId: string, optionId: string | null) => {
       binding.orders.answerInquiry(hookRequestId, optionId);
     },
+    // --- SPEC-V4 verbs (route through Orders so the store flushes/mirrors) ---
+    revertCard: (taskId: string) => {
+      binding.orders.revertCard(taskId);
+    },
+    release: () => binding.orders.release(),
+    rollbackCard: (taskId: string) => {
+      binding.orders.rollbackCard(taskId);
+    },
+    setSpeed: (speed: number) => binding.orders.setSpeed(speed),
+    updateTask: (taskId: string, patch: UpdateTaskPatch) => {
+      const ok = backend.sim.updateTask(taskId, patch);
+      binding.flush();
+      return ok;
+    },
+    upsertStack: (stack: KradleAgentStackInput) => {
+      const stackRef = backend.sim.upsertStack(stack);
+      binding.flush();
+      return stackRef;
+    },
+    updateProcessTemplate: (kind: string, phases: string[]) => {
+      const revision = backend.sim.updateProcessTemplate(kind as TaskKind, phases);
+      binding.flush();
+      return revision;
+    },
+    writeFile: (taskId: string, path: string, content: string) => {
+      const ok = backend.sim.writeFile(taskId, path, content);
+      binding.flush();
+      return ok;
+    },
+    // --- SPEC-V4 read-only views ---------------------------------------------
+    listStacks: () => backend.sim.listStacks(),
+    listProcessTemplates: () => backend.sim.listProcessTemplates(),
+    listRuns: () => backend.sim.listRuns(),
+    getWorkspaceTree: (taskId: string) => backend.sim.getWorkspaceTree(taskId),
+    getFileContent: (taskId: string, path: string) => backend.sim.getFileContent(taskId, path),
+    getMemoryIO: (ref: string) => backend.sim.getMemoryIO(ref),
+    getGitLog: (taskId: string) => backend.sim.getGitLog(taskId),
   },
   store,
   version: COMMANDER_VERSION,

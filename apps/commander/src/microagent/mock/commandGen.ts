@@ -76,6 +76,15 @@ export const GLYPHS: Record<string, IconSpec> = {
   'open-review': glyph('<path d="M10 5 Q6.5 3 3 4.5 V15.5 Q6.5 14 10 16 Q13.5 14 17 15.5 V4.5 Q13.5 3 10 5 Z M10 5 V16"/>'),
   'approve-all': glyph('<path d="M3 10.5 L6.5 14 L12 6.5 M8.5 11 L11.5 14 L17 6.5"/>'),
   'request-changes': glyph('<path d="M14 5 a5.5 5.5 0 0 1 0 10 H6"/><path d="M8.5 12 L5.5 15 L8.5 18"/><path d="M5 5 H10"/>'),
+  // --- release rail (§V4-1) ------------------------------------------------------
+  // Revert: counter-arrow seal — a wax ring with a counterclockwise return arrow.
+  'revert-card': glyph('<circle cx="10" cy="10" r="7.5"/><path d="M13.5 7.5 H8.4 a2.6 2.6 0 0 0 0 5.2 H12"/><path d="M10 5 L7.5 7.5 L10 10"/>'),
+  // Release: the brass lever thrown, with a launch arc.
+  release: glyph('<path d="M4 16.5 H16"/><path d="M10 16.5 V10.5"/><path d="M10 10.5 L14.2 5.2"/><circle cx="15.2" cy="4" r="1.7"/><path d="M4.5 12.5 a5.5 5.5 0 0 1 4 -4.6"/>'),
+  // Rollback: crown-return — the production crown handed back down.
+  'rollback-prod': glyph('<path d="M5 8.5 L4.5 4 L7.3 6.4 L10 2.8 L12.7 6.4 L15.5 4 L15 8.5 Z"/><path d="M14.5 14 a4.5 4.5 0 1 1 -1.3 -3.2"/><path d="M15 8.6 L14.5 11.4 L11.7 10.9"/>'),
+  // Terminal: cogitator slate with a prompt chevron and input bar.
+  'open-terminal': glyph('<rect x="3" y="4" width="14" height="12" rx="1.6"/><path d="M5.8 8 L8.8 10.4 L5.8 12.8"/><path d="M10.4 13.2 H14.2"/>'),
   // --- approved ---------------------------------------------------------------
   'hold-merge': glyph('<path d="M6 3.5 V9 a4 4 0 0 0 4 4 a4 4 0 0 1 4 4"/><path d="M3.5 7 H8.5 M11.5 14 H16.5"/>'),
   'force-rebase': glyph('<circle cx="5.5" cy="5" r="1.8"/><circle cx="5.5" cy="15" r="1.8"/><path d="M5.5 7 V13 M7.5 5 H12 a3 3 0 0 1 3 3 V11 M12.5 9 L15 11.5 L17.5 9"/>'),
@@ -444,6 +453,58 @@ const MERGED_DEFS: CommandDef[] = [
   },
 ];
 
+/** SPEC-V4 §V4-1: MERGED lane (staging) — Revert / Release / Inspect / Terminal. */
+const MERGED_LANE_DEFS: CommandDef[] = [
+  {
+    id: 'revert-card',
+    label: 'Revert',
+    intent: { kind: 'revert-card' },
+    tooltip: 'Revert the change from staging — the card returns to DO and a fresh worker iterates',
+    severity: 'danger',
+  },
+  {
+    id: 'release',
+    label: 'Release',
+    intent: { kind: 'release' },
+    tooltip: 'Throw the release lever — ALL merged cards ship to production as one train (rel-NN)',
+  },
+  {
+    id: 'inspect',
+    label: 'Inspect',
+    intent: { kind: 'inspect' },
+    tooltip: 'Inspect the merged card’s record',
+  },
+  {
+    id: 'open-terminal',
+    label: 'Terminal',
+    intent: { kind: 'open-terminal' },
+    tooltip: 'Open a cogitator terminal bound to the card’s workspace (§V4-7)',
+  },
+];
+
+/** SPEC-V4 §V4-1: IN PRODUCTION lane — Rollback / Inspect / Terminal. */
+const IN_PRODUCTION_DEFS: CommandDef[] = [
+  {
+    id: 'rollback-prod',
+    label: 'Rollback',
+    intent: { kind: 'rollback-card' },
+    tooltip: 'Withdraw the change from production back to staging (MERGED)',
+    severity: 'danger',
+  },
+  {
+    id: 'inspect',
+    label: 'Inspect',
+    intent: { kind: 'inspect' },
+    tooltip: 'Inspect the production card’s record',
+  },
+  {
+    id: 'open-terminal',
+    label: 'Terminal',
+    intent: { kind: 'open-terminal' },
+    tooltip: 'Open a cogitator terminal bound to the card’s workspace (§V4-7)',
+  },
+];
+
 /** Unit states that take the working command set (SPEC §3 / §V3-2). */
 const WORKING_STATES = new Set(['dispatching', 'thinking', 'tool_running', 'blocked']);
 
@@ -484,20 +545,22 @@ function defsForColumn(column: BoardColumn, cards: readonly CardContextSummary[]
     case 'human-review':
       return HUMAN_REVIEW_DEFS;
     case 'approved':
+      // Legacy guard: a merged-sealed card still parked in APPROVED gets the
+      // terminal inspect-only set (V4 normally auto-moves these to MERGED).
       return cards.every((c) => c.merged) ? MERGED_DEFS : APPROVED_DEFS;
-    // §V4-1 lanes: the v4 ui-phase designs the Revert/Release/Rollback sets;
-    // until then the merged-seal set applies.
+    // §V4-1 release rail sets.
     case 'merged':
+      return MERGED_LANE_DEFS;
     case 'in-production':
-      return MERGED_DEFS;
+      return IN_PRODUCTION_DEFS;
   }
 }
 
 /** Card-selection sets: single column → its set; mixed columns → intersection → staples. */
 function cardDefs(cards: readonly CardContextSummary[]): CommandDef[] {
-  const columns = [...new Set(cards.map((c) => (c.merged ? 'merged' : c.column)))];
+  const columns = [...new Set(cards.map((c) => c.column))];
   if (columns.length === 1) {
-    return defsForColumn(cards[0]!.merged ? 'approved' : cards[0]!.column, cards);
+    return defsForColumn(columns[0]!, cards);
   }
   const sets = cards.map((c) => defsForColumn(c.column, [c]));
   const first = sets[0] ?? [];

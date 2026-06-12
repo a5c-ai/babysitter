@@ -407,6 +407,13 @@
     padding: 0;
     overflow-y: auto;
     flex: 1;
+    /* DOM stays append-order (frozen ticker-slice contract); the view shows
+       newest first and stays anchored on the latest entry. */
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .wr-ticker-list > li {
+    flex: none;
   }
   .wr-ticker-item {
     display: flex;
@@ -996,6 +1003,18 @@
     font-family: var(--font-mono-hud);
     font-size: 10px;
     color: var(--color-hud-dim);
+  }
+  /* §V4-3: the attended card's serif title under the agent identity, so a
+     retargeted Inspector visibly re-renders for the new entity. */
+  .wr-inspector-attended {
+    font-family: var(--font-serif-display);
+    font-size: 11px;
+    font-style: italic;
+    color: var(--color-hud-text);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 280px;
   }
   .wr-inspector-close {
     font-family: var(--font-mono-hud);
@@ -1621,11 +1640,38 @@
       0 0 12px rgb(224 168 60 / 0.6),
       0 2px 6px rgb(58 42 18 / 0.28);
   }
-  /* lift shadow + slight tilt while dragging (§V3-1) */
+  /* §V4-2: while the ghost rides the top-level layer, the in-lane original
+     dims to an etched placeholder slot (the lift moved onto the ghost). */
   .wr-card.is-dragging {
     cursor: grabbing;
+    opacity: 0.35;
+    filter: saturate(0.5);
+    border-style: dashed;
+    box-shadow: inset 0 0 0 1px rgb(148 112 44 / 0.35);
+  }
+  /* §V4-2 top-level drag ghost layer: sibling of every panel, above all HUD
+     chrome and overlays. The layer ignores the pointer; the ghost itself
+     stays hit-testable so elementFromPoint resolves it topmost (AC36) — lane
+     drop resolution skips it via elementsFromPoint. */
+  .wr-drag-ghost-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    pointer-events: none;
+  }
+  .wr-drag-ghost {
+    position: fixed;
+    pointer-events: auto;
+    cursor: grabbing;
+    transform: rotate(2.2deg);
+    filter: drop-shadow(0 14px 24px rgb(58 42 18 / 0.5));
+  }
+  /* the injected snapshot root keeps its wr-card skin; re-light it */
+  .wr-drag-ghost > .wr-card {
+    opacity: 1;
+    border-style: solid;
     box-shadow:
-      0 14px 30px rgb(58 42 18 / 0.5),
+      0 6px 18px rgb(58 42 18 / 0.45),
       0 0 0 1px var(--color-amber-glow);
   }
   .wr-card.is-snapback {
@@ -1920,6 +1966,106 @@
     border: 1px solid var(--color-brass-700);
     box-shadow: 0 1px 4px rgb(58 42 18 / 0.5), inset 0 0 4px rgb(255 248 224 / 0.6);
     z-index: 2;
+  }
+
+  /* --- the release rail (§V4-1: MERGED = staging, IN PRODUCTION) ------------- */
+  /* etched lane sub-caption (MERGED: "staging" · IN PRODUCTION: "live") */
+  .wr-lane-caption {
+    text-align: center;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    font-style: italic;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    opacity: 0.8;
+    padding: 3px 0 0;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.6);
+  }
+  /* the brass release lever in the MERGED lane header (col-release) */
+  .wr-release-lever {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--color-brass-700);
+    background:
+      linear-gradient(to bottom, var(--color-brass-300), var(--color-brass-500) 60%, var(--color-brass-600));
+    color: var(--color-deck-900);
+    cursor: pointer;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 224 / 0.65),
+      0 1px 3px rgb(58 42 18 / 0.45);
+    transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  }
+  .wr-release-lever:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 224 / 0.7),
+      0 0 10px rgb(232 181 74 / 0.55);
+  }
+  .wr-release-lever:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .wr-release-lever:disabled {
+    opacity: 0.45;
+    cursor: default;
+    filter: grayscale(0.55);
+  }
+  .wr-release-lever-glyph {
+    width: 12px;
+    height: 12px;
+    display: inline-flex;
+  }
+  /* crown seal on IN PRODUCTION rows (§V4-1) */
+  .wr-card-crown {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    color: var(--color-brass-400);
+    filter: drop-shadow(0 1px 2px rgb(58 42 18 / 0.55));
+    z-index: 2;
+    display: inline-flex;
+  }
+  /* §V4-1: in-production rows compact to slim rows after 30 ticks */
+  .wr-card--compact {
+    padding: 2px 8px;
+    opacity: 0.78;
+  }
+  .wr-card--compact .wr-card-chips,
+  .wr-card--compact .wr-card-ring,
+  .wr-card--compact .wr-card-yolo,
+  .wr-card--compact .wr-card-agents {
+    display: none;
+  }
+  .wr-card--compact .wr-card-seal {
+    width: 16px;
+    height: 16px;
+  }
+  .wr-card--compact .wr-card-title {
+    font-size: 10.5px;
+    -webkit-line-clamp: 1;
+  }
+  .wr-card--compact .wr-card-crown {
+    top: -6px;
+    width: 16px;
+    height: 16px;
+  }
+
+  /* §V4-4 TopBar speed control — mono multiplier label */
+  .wr-speed-control {
+    min-width: 46px;
+    text-align: center;
+    letter-spacing: 0.08em;
   }
 
   /* --- the Foundry (§V2-6, Commission Task only) ---------------------------- */

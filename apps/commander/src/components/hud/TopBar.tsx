@@ -10,8 +10,15 @@
 
 import { useStore } from 'zustand';
 
+import { SIM_SPEEDS } from '../../backend/mock/simulation';
 import { formatClock, formatInt } from '../../game/selectors';
 import type { CommanderStore, Orders } from '../../game/store';
+
+/** §V4-4: next pacing step in the 0.5x → 1x → 2x cycle (3 clicks = home). */
+export function nextSimSpeed(speed: number): number {
+  const index = (SIM_SPEEDS as readonly number[]).indexOf(speed);
+  return SIM_SPEEDS[(index + 1 + SIM_SPEEDS.length) % SIM_SPEEDS.length]!;
+}
 
 export interface TopBarProps {
   store: CommanderStore;
@@ -98,6 +105,15 @@ export function TopBar({ store, orders }: TopBarProps): React.JSX.Element {
         }}
       >
         FOUNDRY
+      </button>
+      <button
+        type="button"
+        className="wr-sim-toggle wr-speed-control"
+        data-testid="topbar-speed"
+        title={`Cogitator pacing — ${meta.speed}x (click to cycle 0.5x / 1x / 2x, §V4-4)`}
+        onClick={() => orders.setSpeed(nextSimSpeed(meta.speed))}
+      >
+        {meta.speed}x
       </button>
       <button
         type="button"

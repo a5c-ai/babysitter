@@ -1,18 +1,22 @@
 /**
- * KanbanBoard (SPEC-V3 §V3-1): five brass-framed parchment lanes with etched
- * small-caps headers and live card-count chips. Cards are tasks — wax-seal
+ * KanbanBoard (SPEC-V3 §V3-1 as amended by SPEC-V4 §V4-1): seven brass-framed
+ * parchment lanes (the release rail adds MERGED — staging, with the brass
+ * Release lever in its header — and IN PRODUCTION, whose rows carry a crown
+ * seal and compact to slim rows after 30 ticks). Cards are tasks — wax-seal
  * kind icon, serif title, kind chip, progress ring, yolo toggle, workspace
  * dirty badge and an agent slot of attending clockwork creatures. Subtask
  * stacks render the parent card with children fanned beneath (inside the
- * parent's draggable group). Merged cards compact to slim brass-sealed rows
- * at the bottom of APPROVED.
+ * parent's draggable group). Merged cards render as brass-sealed rows in the
+ * MERGED lane (§V4-1: the seal lives there now).
  *
- * Drag & drop (§V3-1): raw pointer events, no library. Lift shadow + tilt
- * while dragging, amber glow on legal drop lanes, snap-back on invalid drop;
- * every legal drop issues the sim verb `orders.moveCard`. Hit-testing uses
- * `elementFromPoint` with the dragged card's pointer-events disabled, so the
+ * Drag & drop (§V3-1 + §V4-2): raw pointer events, no library. The lifted
+ * card renders as a GHOST in a top-level portal layer (`data-drag-ghost`,
+ * z-index above all panels) so no lane or HUD chrome can occlude it (AC36);
+ * the in-lane original dims to a placeholder. Lane hit-testing resolves via
+ * `elementsFromPoint`, skipping the ghost layer, so drop resolution and the
  * synthetic e2e pointer sequence (mouse.down → stepped moves → mouse.up)
- * works without pointer capture.
+ * keep working without pointer capture. Amber glow on legal drop lanes,
+ * snap-back on invalid drop; every legal drop issues `orders.moveCard`.
  *
  * Auto-move animation (§V3-3): `meta.movingCards` entries trigger a
  * FLIP-style ~600ms arc glide; the card carries `is-moving` for the duration
@@ -23,18 +27,20 @@
  */
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useStore } from 'zustand';
 import clsx from 'clsx';
 
 import {
   cardsForColumn,
   childrenOf,
-  columnFromElement,
   COLUMN_TITLES,
   COLUMNS,
   isDraggable,
+  laneFromHits,
   legalUserMove,
   planDrop,
+  sanitizeGhostMarkup,
   type ColumnId,
 } from '../../game/board';
 import { formatPct } from '../../game/selectors';
@@ -50,6 +56,29 @@ const DESPAWN_MS = 450;
 function reducedMotion(): boolean {
   return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
+
+/**
+ * §V4-2 drop resolution: the drag ghost is hit-testable (so AC36's
+ * elementFromPoint probe finds it topmost), so the lane under the pointer is
+ * resolved from the full hit stack, skipping the ghost layer.
+ */
+function laneFromPoint(x: number, y: number): ColumnId | null {
+  return laneFromHits(document.elementsFromPoint(x, y));
+}
+
+/** §V4-1 crown seal for IN PRODUCTION rows (path-only — frozen census). */
+const CROWN_GLYPH =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="100%" height="100%" aria-hidden="true">' +
+  '<path d="M4.2 13 L3.4 5.6 L7.2 8.6 L10 4 L12.8 8.6 L16.6 5.6 L15.8 13 Z" fill="currentColor"/>' +
+  '<path d="M4.6 15.4 H15.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
+  '</svg>';
+
+/** §V4-1 brass release-lever glyph (path-only). */
+const LEVER_GLYPH =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="100%" height="100%" aria-hidden="true">' +
+  '<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+  '<path d="M4 16.5 H16 M10 16.5 V10.5 M10 10.5 L14.2 5.2"/><circle cx="15.2" cy="4" r="1.7"/>' +
+  '</g></svg>';
 
 // ---------------------------------------------------------------------------
 // Progress ring (path/circle only — never <line>/<polyline>, AC33)
@@ -242,10 +271,19 @@ function CardBody({
   );
 }
 
+/** §V4-2 ghost snapshot: sanitized markup + the lifted card's start frame. */
+interface GhostSnapshot {
+  html: string;
+  left: number;
+  top: number;
+  width: number;
+}
+
 function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: CardProps): React.JSX.Element {
   const ref = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const suppressClickRef = useRef(false);
+  const ghostRef = useRef<GhostSnapshot | null>(null);
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const [snapback, setSnapback] = useState(false);
   const draggable = isDraggable(card);
@@ -256,6 +294,7 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
     const plan = planDrop(card, commitLane);
     onHoverLane(null, null);
     dragRef.current = null;
+    ghostRef.current = null;
     ref.current?.style.removeProperty('pointer-events');
     if (plan !== null) {
       setDrag(null);
@@ -293,14 +332,24 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
         if (Math.abs(session.dx) < DRAG_THRESHOLD_PX && Math.abs(session.dy) < DRAG_THRESHOLD_PX) return;
         session.dragging = true;
         suppressClickRef.current = true;
-        // Disable hit-testing on the lifted card immediately (synchronously,
-        // ahead of the React state flush) so elementFromPoint sees the lane.
-        ref.current?.style.setProperty('pointer-events', 'none');
+        const el = ref.current;
+        if (el !== null) {
+          // §V4-2: snapshot the lifted card for the top-level drag ghost and
+          // turn the in-lane original into a dim, hit-test-free placeholder.
+          const rect = el.getBoundingClientRect();
+          ghostRef.current = {
+            html: sanitizeGhostMarkup(el.outerHTML),
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+          };
+          el.style.setProperty('pointer-events', 'none');
+        }
       }
       setDrag({ dx: session.dx, dy: session.dy });
-      // Hit-test the lane under the pointer (the dragged card itself has
-      // pointer-events: none while lifted — see style below).
-      const lane = columnFromElement(document.elementFromPoint(ev.clientX, ev.clientY));
+      // Hit-test the lane under the pointer — the §V4-2 ghost layer rides
+      // topmost, so resolve from the full hit stack, skipping the ghost.
+      const lane = laneFromPoint(ev.clientX, ev.clientY);
       onHoverLane(card.column, lane);
     };
 
@@ -314,7 +363,7 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
         dragRef.current = null;
         return;
       }
-      const lane = columnFromElement(document.elementFromPoint(ev.clientX, ev.clientY));
+      const lane = laneFromPoint(ev.clientX, ev.clientY);
       endDrag(lane);
       window.setTimeout(() => {
         suppressClickRef.current = false;
@@ -359,13 +408,11 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
   };
 
   const dragging = drag !== null;
-  const style: React.CSSProperties | undefined = dragging
-    ? {
-        transform: `translate(${drag.dx}px, ${drag.dy}px) rotate(2.2deg)`,
-        pointerEvents: 'none',
-        zIndex: 60,
-      }
-    : undefined;
+  const ghost = ghostRef.current;
+  // §V4-2: the in-lane original stays put as a dim placeholder (no inline
+  // transform) while the portal ghost tracks the pointer above everything.
+  const style: React.CSSProperties | undefined = dragging ? { pointerEvents: 'none' } : undefined;
+  const inProduction = card.column === 'in-production';
 
   return (
     <div
@@ -378,6 +425,7 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
         'wr-card',
         isStack && 'wr-card--stack',
         card.merged && 'wr-card--merged',
+        card.compacted && 'wr-card--compact',
         selected.has(card.taskId) && 'is-selected',
         draggable && 'is-draggable',
         dragging && 'is-dragging',
@@ -391,7 +439,29 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
         if (e.key === 'Enter') store.getState().clickSelect(card.taskId, e.shiftKey);
       }}
     >
-      {card.merged && <span className="wr-card-sealstamp" title="merged" aria-label="merged" />}
+      {drag !== null &&
+        ghost !== null &&
+        createPortal(
+          <div className="wr-drag-ghost-layer" data-drag-ghost="true" aria-hidden="true">
+            <div
+              className="wr-drag-ghost"
+              style={{ left: ghost.left + drag.dx, top: ghost.top + drag.dy, width: ghost.width }}
+              dangerouslySetInnerHTML={{ __html: ghost.html }}
+            />
+          </div>,
+          document.body,
+        )}
+      {card.merged && !inProduction && (
+        <span className="wr-card-sealstamp" title="merged" aria-label="merged" />
+      )}
+      {inProduction && (
+        <span
+          className="wr-card-crown"
+          title="in production"
+          aria-label="in production"
+          dangerouslySetInnerHTML={{ __html: CROWN_GLYPH }}
+        />
+      )}
       {!card.merged && card.agentIds.length > 0 && <span className="wr-card-eye" aria-hidden />}
       <CardBody card={card} orders={orders} mini={false} />
       <AgentSlot agentIds={card.agentIds} agents={agents} store={store} />
@@ -554,10 +624,32 @@ export function KanbanBoard({ store, orders }: KanbanBoardProps): React.JSX.Elem
           >
             <header className="wr-lane-head">
               <span className="wr-lane-title">{COLUMN_TITLES[columnId]}</span>
+              {columnId === 'merged' && (
+                <button
+                  type="button"
+                  data-testid="col-release"
+                  className="wr-release-lever"
+                  disabled={lane.length === 0}
+                  title={
+                    lane.length === 0
+                      ? 'The release lever waits — staging holds no merged cards'
+                      : 'Throw the release lever — ship every merged card to production as one train (§V4-1)'
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    orders.release();
+                  }}
+                >
+                  <span className="wr-release-lever-glyph" aria-hidden dangerouslySetInnerHTML={{ __html: LEVER_GLYPH }} />
+                  Release
+                </button>
+              )}
               <span className="wr-lane-count" data-testid={`kanban-count-${columnId}`}>
                 {cardCount}
               </span>
             </header>
+            {columnId === 'merged' && <div className="wr-lane-caption">staging</div>}
+            {columnId === 'in-production' && <div className="wr-lane-caption">live</div>}
             <div className="wr-lane-cards">
               {lane.map((card) => {
                 const el = (

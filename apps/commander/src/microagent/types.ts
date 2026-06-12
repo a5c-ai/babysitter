@@ -123,6 +123,14 @@ export type CommandIntent =
   | { kind: 'open-review' }
   /** Hold/release the integration agents of an approved card (§V3-2). */
   | { kind: 'hold-merge' }
+  /** SPEC-V4 §V4-1: revert a MERGED card from staging back to DO (danger). */
+  | { kind: 'revert-card' }
+  /** SPEC-V4 §V4-1: throw the release lever — ship ALL merged cards. */
+  | { kind: 'release' }
+  /** SPEC-V4 §V4-1: roll an IN PRODUCTION card back to MERGED (danger). */
+  | { kind: 'rollback-card' }
+  /** SPEC-V4 §V4-7: open the cogitator terminal for the card's workspace. */
+  | { kind: 'open-terminal' }
   | { kind: 'jump-to-alert' }
   | { kind: 'toggle-sim' };
 
