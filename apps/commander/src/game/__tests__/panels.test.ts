@@ -47,6 +47,11 @@ function mockOrders(): Orders {
     upsertStack: vi.fn(() => null),
     updateProcessTemplate: vi.fn(() => null),
     writeFile: vi.fn(() => true),
+    createRosterAgent: vi.fn().mockReturnValue(null),
+    deleteRosterAgent: vi.fn(),
+    assignTaskAgent: vi.fn(),
+    assignTaskHuman: vi.fn(),
+    focusInquiryCard: vi.fn(),
   };
 }
 

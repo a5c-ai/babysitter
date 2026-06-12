@@ -54,6 +54,7 @@ function commit(rig: Rig, frames: RunEventFrame[], tickIndex: number): void {
     agents: rig.backend.sim.listActiveAgentViews(),
     inquiries: rig.backend.sim.listInquiries(),
     runStages: {},
+    rosterAgents: rig.backend.sim.listRosterAgents(),
     nowMs: tickIndex * 250,
     tickIndex,
     paused: true,

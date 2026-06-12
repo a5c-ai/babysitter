@@ -37,6 +37,7 @@ import type {
   SimHookView,
   SimInquiryView,
   SimMemorySiloView,
+  SimRosterAgentView,
   SimTaskView,
   SimUnitView,
   UpdateTaskPatch,
@@ -178,6 +179,8 @@ export interface BoardSlice {
    * highlighting a selected card's pieces, §V2-3/AC18).
    */
   heldByCard: Record<string, string[]>;
+  /** Named assignable workers/reviewers (roster agents). */
+  rosterAgents: SimRosterAgentView[];
 }
 
 export interface SelectionSlice {
@@ -269,7 +272,7 @@ export interface MetaSlice {
    */
   registryStackRef: string | null;
   /** §V5-3 Foundry landing tab ("open in Foundry" → Stacks; default Commission). */
-  foundryTab: 'commission' | 'stacks';
+  foundryTab: 'commission' | 'stacks' | 'agents';
   /** §V4-11 web IDE overlay target (full-screen plate); null = closed. */
   ideTaskId: string | null;
   /** taskId → in-flight automatic move (cleared by the board after the glide). */
@@ -291,6 +294,7 @@ export interface TickCommitInput {
   inquiries: SimInquiryView[];
   /** taskId → current babysitter phase label (active cards only, §V2-5). */
   runStages: Record<string, string | null>;
+  rosterAgents: SimRosterAgentView[];
   nowMs: number;
   tickIndex: number;
   paused: boolean;
@@ -457,6 +461,9 @@ function cardViewEqual(a: SimCardView, b: SimCardView): boolean {
     a.feedback === b.feedback &&
     a.dirtyFileCount === b.dirtyFileCount &&
     a.hasPendingInquiry === b.hasPendingInquiry &&
+    a.workerAgentId === b.workerAgentId &&
+    a.reviewerAgentId === b.reviewerAgentId &&
+    a.humanAssigneeId === b.humanAssigneeId &&
     a.childIds.length === b.childIds.length &&
     a.childIds.every((id, i) => b.childIds[i] === id) &&
     a.agentIds.length === b.agentIds.length &&
@@ -947,6 +954,7 @@ export function createCommanderStore(): CommanderStore {
       resolvedInquiries: {},
       memory: { silos: [], records: [] },
       heldByCard: {},
+      rosterAgents: [],
     },
     selection: { ids: [] },
     events: [],
@@ -1210,13 +1218,19 @@ export function createCommanderStore(): CommanderStore {
               }
             : prevWorld;
 
+        const rosterAgents = input.rosterAgents;
+        const rosterChanged = rosterAgents !== prevBoard.rosterAgents &&
+          (rosterAgents.length !== prevBoard.rosterAgents.length ||
+            rosterAgents.some((a, i) => a !== prevBoard.rosterAgents[i]));
+
         const board: BoardSlice =
           cardsChanged ||
           agentsChanged ||
           !cardIdsStable ||
           !agentIdsStable ||
           inquiries !== prevBoard.inquiries ||
-          heldByCard !== prevBoard.heldByCard
+          heldByCard !== prevBoard.heldByCard ||
+          rosterChanged
             ? {
                 cards,
                 cardIds: cardIdsStable ? prevBoard.cardIds : cardIds,
@@ -1226,6 +1240,7 @@ export function createCommanderStore(): CommanderStore {
                 resolvedInquiries: prevBoard.resolvedInquiries,
                 memory: prevBoard.memory,
                 heldByCard,
+                rosterAgents,
               }
             : prevBoard;
 
@@ -1602,6 +1617,20 @@ export interface Orders {
    * (dirty badges + diff plates) reflects it on the next read.
    */
   writeFile(taskId: string, path: string, content: string): boolean;
+  /** Recruit a named roster agent from a stack. */
+  createRosterAgent(input: { stackRef: string; role: 'worker' | 'reviewer'; name?: string }): string | null;
+  /** Release (delete) a roster agent. */
+  deleteRosterAgent(agentId: string): void;
+  /** Assign or unassign a roster agent to a task role (null = unassign). */
+  assignTaskAgent(taskId: string, role: 'worker' | 'reviewer', agentId: string | null): void;
+  /** Toggle the human operator assignee for a task. */
+  assignTaskHuman(taskId: string, assign: boolean): void;
+  /**
+   * Navigate to the card's context when an inquiry bubble is clicked:
+   * human-review cards open the Review Panel; others open the Inspector
+   * on the Transcript tab.
+   */
+  focusInquiryCard(taskId: string): void;
 }
 
 export interface BackendBinding {
@@ -1648,6 +1677,7 @@ export function bindBackendToStore(store: CommanderStore, backend: MockBackend):
       agents: sim.listActiveAgentViews(),
       inquiries: sim.listInquiries(),
       runStages,
+      rosterAgents: sim.listRosterAgents(),
       nowMs: sim.now(),
       tickIndex: sim.tickIndex,
       paused: sim.paused,
@@ -1801,6 +1831,49 @@ export function bindBackendToStore(store: CommanderStore, backend: MockBackend):
       const ok = sim.writeFile(taskId, path, content);
       flush();
       return ok;
+    },
+    createRosterAgent(input) {
+      const agentId = sim.createRosterAgent(input);
+      flush();
+      if (agentId !== null) {
+        store.getState().pushEvent(`Agent recruited — ${input.role} ${agentId} joins the roster`, 'info');
+      }
+      return agentId;
+    },
+    deleteRosterAgent(agentId) {
+      sim.deleteRosterAgent(agentId);
+      flush();
+      store.getState().pushEvent(`Agent released — ${agentId} departs the roster`, 'info');
+    },
+    assignTaskAgent(taskId, role, agentId) {
+      sim.assignTaskAgent(taskId, role, agentId);
+      flush();
+      const title = store.getState().board.cards[taskId]?.view.title ?? taskId;
+      const text = agentId !== null
+        ? `Assigned ${agentId} as ${role} to ${title}`
+        : `Unassigned ${role} from ${title}`;
+      store.getState().pushEvent(text, 'info', taskId);
+    },
+    assignTaskHuman(taskId, assign) {
+      sim.assignTaskHuman(taskId, assign);
+      flush();
+      const title = store.getState().board.cards[taskId]?.view.title ?? taskId;
+      store.getState().pushEvent(
+        assign ? `Human review assigned to ${title}` : `Human review unassigned from ${title}`,
+        'info',
+        taskId,
+      );
+    },
+    focusInquiryCard(taskId) {
+      const state = store.getState();
+      const card = state.board.cards[taskId];
+      if (!card) return;
+      if (card.view.column === 'human-review') {
+        state.openReview(taskId);
+      } else {
+        state.openInspectorCard(taskId);
+        state.setInspectorTab('transcript');
+      }
     },
   };
 

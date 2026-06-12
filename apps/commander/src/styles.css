@@ -3630,6 +3630,194 @@
     border-color: rgb(132 178 116 / 0.5);
   }
 
+  /* inquiry focus-button (portrait + question as a clickable header) */
+  .wr-inq-focus-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.12s ease;
+  }
+  .wr-inq-focus-btn:hover {
+    background: rgb(216 181 97 / 0.1);
+  }
+  .wr-inq-focus-btn:hover .wr-inq-question {
+    box-shadow:
+      inset 0 0 0 1px rgb(216 181 97 / 0.35),
+      inset 0 1px 4px rgb(109 81 32 / 0.3);
+  }
+  /* when we use a focus-btn the .wr-inq layout adjusts */
+  .wr-inq:has(.wr-inq-focus-btn) {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .wr-inq-focus-btn .wr-inq-question {
+    margin-bottom: 0;
+    text-align: left;
+  }
+
+  /* --- roster agent tab (Foundry Agents tab) -------------------------------- */
+  .wr-roster-row {
+    /* inherits from .wr-stack-row */
+  }
+  .wr-roster-role {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 8px;
+    padding: 0 6px;
+  }
+  .wr-roster-role--worker {
+    color: #9fbf78;
+    border: 1px solid rgb(159 191 120 / 0.4);
+  }
+  .wr-roster-role--reviewer {
+    color: #78a9bf;
+    border: 1px solid rgb(120 169 191 / 0.4);
+  }
+  .wr-roster-assigned {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-amber-glow);
+    border: 1px solid rgb(232 181 74 / 0.45);
+    border-radius: 8px;
+    padding: 0 6px;
+  }
+  .wr-roster-empty {
+    list-style: none;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--color-hud-dim);
+    padding: 6px 0;
+    text-align: center;
+  }
+
+  /* --- assignment chips on backlog cards ------------------------------------ */
+  .wr-assign-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 0 2px;
+    border-top: 1px solid rgb(216 181 97 / 0.14);
+    margin-top: 2px;
+  }
+  .wr-assign-slot {
+    position: relative;
+    display: inline-flex;
+  }
+  .wr-assign-chip {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    padding: 1px 5px;
+    border-radius: 6px;
+    border: 1px solid rgb(216 181 97 / 0.22);
+    background: rgb(26 27 21 / 0.6);
+    color: var(--color-hud-dim);
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s;
+  }
+  .wr-assign-chip:hover {
+    border-color: rgb(216 181 97 / 0.5);
+    color: var(--color-hud-text);
+  }
+  .wr-assign-chip.is-set {
+    color: var(--color-hud-bright);
+    border-color: rgb(216 181 97 / 0.5);
+    background: rgb(216 181 97 / 0.1);
+  }
+  .wr-assign-chip--worker.is-set {
+    color: #9fbf78;
+    border-color: rgb(159 191 120 / 0.5);
+    background: rgb(159 191 120 / 0.08);
+  }
+  .wr-assign-chip--reviewer.is-set {
+    color: #78a9bf;
+    border-color: rgb(120 169 191 / 0.5);
+    background: rgb(120 169 191 / 0.08);
+  }
+  .wr-assign-chip--human.is-set {
+    color: var(--color-amber-glow);
+    border-color: rgb(232 181 74 / 0.5);
+    background: rgb(232 181 74 / 0.08);
+  }
+  .wr-assign-chip-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px;
+    display: inline-block;
+    vertical-align: bottom;
+  }
+  .wr-assign-popover {
+    position: absolute;
+    top: calc(100% + 3px);
+    left: 0;
+    z-index: 60;
+    min-width: 140px;
+    background: var(--color-deck-800);
+    border: 1px solid var(--color-brass-500);
+    border-radius: 8px;
+    box-shadow:
+      0 8px 24px rgb(10 8 3 / 0.65),
+      inset 0 0 0 1px rgb(216 181 97 / 0.15);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .wr-assign-pop-opt {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    border: none;
+    background: none;
+    color: var(--color-hud-text);
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .wr-assign-pop-opt:hover {
+    background: rgb(216 181 97 / 0.1);
+  }
+  .wr-assign-pop-opt.is-selected {
+    color: var(--color-amber-glow);
+    background: rgb(232 181 74 / 0.1);
+  }
+  .wr-assign-pop-opt.is-busy {
+    opacity: 0.45;
+  }
+  .wr-assign-pop-opt--clear {
+    color: var(--color-hud-dim);
+    font-style: italic;
+    border-bottom: 1px solid rgb(216 181 97 / 0.15);
+    border-radius: 0;
+    margin-bottom: 2px;
+    padding-bottom: 5px;
+  }
+  .wr-assign-pop-adapter {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .wr-assign-pop-empty {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    color: var(--color-hud-dim);
+    font-style: italic;
+    padding: 4px 8px;
+  }
+
   /* sel-stage chip (§V2-5) */
   .wr-sel-stage {
     font-family: var(--font-mono-hud);

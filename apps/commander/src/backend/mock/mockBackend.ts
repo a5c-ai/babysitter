@@ -41,12 +41,14 @@ import type {
   SimGitCommitView,
   SimMemoryIOView,
   SimProcessTemplateView,
+  SimRosterAgentView,
   SimRunView,
   SimSessionDetailView,
   SimSessionView,
   SimStackView,
   SimWorkspaceSummaryView,
   UpdateTaskPatch,
+  RosterRole,
 } from './simulation';
 import { Simulation } from './simulation';
 import type { TaskKind } from './scenario';
@@ -148,6 +150,28 @@ export class MockBackend implements CommanderBackend {
 
   setSpeed(speed: number): boolean {
     return this.sim.setSpeed(speed);
+  }
+
+  // --- roster agent verbs (assignable workers/reviewers) ----------------------
+
+  createRosterAgent(input: { stackRef: string; role: RosterRole; name?: string }): string | null {
+    return this.sim.createRosterAgent(input);
+  }
+
+  deleteRosterAgent(agentId: string): boolean {
+    return this.sim.deleteRosterAgent(agentId);
+  }
+
+  assignTaskAgent(taskId: string, role: RosterRole, agentId: string | null): boolean {
+    return this.sim.assignTaskAgent(taskId, role, agentId);
+  }
+
+  assignTaskHuman(taskId: string, assign: boolean): boolean {
+    return this.sim.assignTaskHuman(taskId, assign);
+  }
+
+  listRosterAgents(): SimRosterAgentView[] {
+    return this.sim.listRosterAgents();
   }
 
   // --- v4 views ---------------------------------------------------------------

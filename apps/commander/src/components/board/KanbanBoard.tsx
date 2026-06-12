@@ -45,7 +45,7 @@ import {
 } from '../../game/board';
 import { formatPct } from '../../game/selectors';
 import type { CommanderStore, Orders } from '../../game/store';
-import type { SimAgentView, SimCardView } from '../../backend/mock/simulation';
+import type { SimAgentView, SimCardView, SimRosterAgentView } from '../../backend/mock/simulation';
 import { generateIcon } from '../../microagent/mock/iconGen';
 
 const DRAG_THRESHOLD_PX = 4;
@@ -235,6 +235,7 @@ interface CardProps {
   card: SimCardView;
   allCards: readonly SimCardView[];
   agents: Record<string, SimAgentView>;
+  rosterAgents: SimRosterAgentView[];
   store: CommanderStore;
   orders: Orders;
   selected: ReadonlySet<string>;
@@ -249,6 +250,164 @@ interface DragState {
   dy: number;
   dragging: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// Assignment chips (backlog cards): worker / reviewer / human slots
+// ---------------------------------------------------------------------------
+
+function AssignmentChips({
+  card,
+  rosterAgents,
+  orders,
+}: {
+  card: SimCardView;
+  rosterAgents: SimRosterAgentView[];
+  orders: Orders;
+}): React.JSX.Element {
+  const [openSlot, setOpenSlot] = useState<'worker' | 'reviewer' | 'human' | null>(null);
+
+  const workers = rosterAgents.filter((a) => a.role === 'worker');
+  const reviewers = rosterAgents.filter((a) => a.role === 'reviewer');
+
+  const workerName = card.workerAgentId
+    ? (rosterAgents.find((a) => a.agentId === card.workerAgentId)?.name ?? card.workerAgentId)
+    : null;
+  const reviewerName = card.reviewerAgentId
+    ? (rosterAgents.find((a) => a.agentId === card.reviewerAgentId)?.name ?? card.reviewerAgentId)
+    : null;
+  const humanAssigned = card.humanAssigneeId !== null;
+
+  const closeOnEscape = (e: React.KeyboardEvent): void => {
+    if (e.key === 'Escape') setOpenSlot(null);
+  };
+
+  return (
+    <div className="wr-assign-chips" onPointerDown={(e) => e.stopPropagation()}>
+      {/* Worker slot */}
+      <div className="wr-assign-slot">
+        <button
+          type="button"
+          className={clsx('wr-assign-chip', 'wr-assign-chip--worker', workerName !== null && 'is-set')}
+          title={workerName !== null ? `Worker: ${workerName}` : 'Assign worker agent'}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenSlot(openSlot === 'worker' ? null : 'worker');
+          }}
+          onKeyDown={closeOnEscape}
+        >
+          <span className="wr-assign-chip-label">{workerName ?? 'wrkr'}</span>
+        </button>
+        {openSlot === 'worker' && (
+          <div className="wr-assign-popover">
+            <button
+              type="button"
+              className="wr-assign-pop-opt wr-assign-pop-opt--clear"
+              onClick={(e) => {
+                e.stopPropagation();
+                orders.assignTaskAgent(card.taskId, 'worker', null);
+                setOpenSlot(null);
+              }}
+            >
+              — unassign —
+            </button>
+            {workers.map((a) => (
+              <button
+                key={a.agentId}
+                type="button"
+                className={clsx(
+                  'wr-assign-pop-opt',
+                  card.workerAgentId === a.agentId && 'is-selected',
+                  a.status === 'assigned' && a.agentId !== card.workerAgentId && 'is-busy',
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  orders.assignTaskAgent(card.taskId, 'worker', a.agentId);
+                  setOpenSlot(null);
+                }}
+              >
+                <span className={`wr-assign-pop-adapter wr-faction-text--${a.adapter}`}>{a.adapter}</span>
+                {a.name}
+              </button>
+            ))}
+            {workers.length === 0 && (
+              <span className="wr-assign-pop-empty">No workers — recruit in Foundry</span>
+            )}
+          </div>
+        )}
+      </div>
+      {/* Reviewer slot */}
+      <div className="wr-assign-slot">
+        <button
+          type="button"
+          className={clsx('wr-assign-chip', 'wr-assign-chip--reviewer', reviewerName !== null && 'is-set')}
+          title={reviewerName !== null ? `Reviewer: ${reviewerName}` : 'Assign reviewer agent'}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenSlot(openSlot === 'reviewer' ? null : 'reviewer');
+          }}
+          onKeyDown={closeOnEscape}
+        >
+          <span className="wr-assign-chip-label">{reviewerName ?? 'revr'}</span>
+        </button>
+        {openSlot === 'reviewer' && (
+          <div className="wr-assign-popover">
+            <button
+              type="button"
+              className="wr-assign-pop-opt wr-assign-pop-opt--clear"
+              onClick={(e) => {
+                e.stopPropagation();
+                orders.assignTaskAgent(card.taskId, 'reviewer', null);
+                setOpenSlot(null);
+              }}
+            >
+              — unassign —
+            </button>
+            {reviewers.map((a) => (
+              <button
+                key={a.agentId}
+                type="button"
+                className={clsx(
+                  'wr-assign-pop-opt',
+                  card.reviewerAgentId === a.agentId && 'is-selected',
+                  a.status === 'assigned' && a.agentId !== card.reviewerAgentId && 'is-busy',
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  orders.assignTaskAgent(card.taskId, 'reviewer', a.agentId);
+                  setOpenSlot(null);
+                }}
+              >
+                <span className={`wr-assign-pop-adapter wr-faction-text--${a.adapter}`}>{a.adapter}</span>
+                {a.name}
+              </button>
+            ))}
+            {reviewers.length === 0 && (
+              <span className="wr-assign-pop-empty">No reviewers — recruit in Foundry</span>
+            )}
+          </div>
+        )}
+      </div>
+      {/* Human slot */}
+      <div className="wr-assign-slot">
+        <button
+          type="button"
+          className={clsx('wr-assign-chip', 'wr-assign-chip--human', humanAssigned && 'is-set')}
+          title={humanAssigned ? 'Human review assigned' : 'Assign for human review'}
+          onClick={(e) => {
+            e.stopPropagation();
+            orders.assignTaskHuman(card.taskId, !humanAssigned);
+          }}
+        >
+          <span className="wr-assign-chip-label">{humanAssigned ? 'you' : 'hmn'}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Card body
+// ---------------------------------------------------------------------------
 
 function CardBody({
   card,
@@ -308,7 +467,7 @@ interface GhostSnapshot {
   width: number;
 }
 
-function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: CardProps): React.JSX.Element {
+function Card({ card, allCards, agents, rosterAgents, store, orders, selected, onHoverLane }: CardProps): React.JSX.Element {
   const ref = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const suppressClickRef = useRef(false);
@@ -513,6 +672,9 @@ function Card({ card, allCards, agents, store, orders, selected, onHoverLane }: 
       )}
       {!card.merged && card.agentIds.length > 0 && <span className="wr-card-eye" aria-hidden />}
       <CardBody card={card} orders={orders} mini={false} />
+      {card.column === 'backlog' && (
+        <AssignmentChips card={card} rosterAgents={rosterAgents} orders={orders} />
+      )}
       <AgentSlot agentIds={card.agentIds} agents={agents} store={store} />
       {isStack && (
         <div className="wr-card-children">
@@ -746,6 +908,7 @@ export function KanbanBoard({ store, orders }: KanbanBoardProps): React.JSX.Elem
                     card={card}
                     allCards={cardViews}
                     agents={board.agents}
+                    rosterAgents={board.rosterAgents}
                     store={store}
                     orders={orders}
                     selected={selected}

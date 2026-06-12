@@ -120,6 +120,9 @@ export const IN_PRODUCTION_COMPACT_TICKS = 30;
 /** Agent roles (SPEC-V3 §V3-2). */
 export type AgentRole = 'worker' | 'reviewer' | 'integration';
 
+/** Assignable roles for roster agents (integration is always auto-assigned). */
+export type RosterRole = 'worker' | 'reviewer';
+
 /** Active-agent visual states. */
 export type AgentState = 'thinking' | 'tool_running' | 'awaiting_input';
 
@@ -208,7 +211,11 @@ export interface SimLocalEventPayload {
     | 'rolled_back'
     | 'task_updated'
     | 'stack_forged'
-    | 'process_updated';
+    | 'process_updated'
+    | 'agent_recruited'
+    | 'agent_released'
+    | 'task_agent_assigned'
+    | 'task_human_assigned';
   runId: string;
   agent: string;
   timestamp: number;
@@ -247,6 +254,12 @@ export interface SimCardView {
   releaseId: string | null;
   /** §V4-1: in-production cards compact to slim rows after 30 ticks. */
   compacted: boolean;
+  /** Roster agent explicitly assigned as worker (null = auto-select from stack). */
+  workerAgentId: string | null;
+  /** Roster agent explicitly assigned as reviewer (null = auto-select). */
+  reviewerAgentId: string | null;
+  /** Human operator assigned for human-review/breakpoints ('user' or null). */
+  humanAssigneeId: string | null;
 }
 
 export interface SimAgentView {
@@ -338,6 +351,24 @@ export interface SimSessionView {
 export interface SimSessionDetailView {
   record: SimSessionView;
   transcript: SimSessionTranscriptEntry[];
+}
+
+/**
+ * A recruited agent in the operator's roster — a named, stackbound worker
+ * or reviewer available to be assigned to specific tasks before they enter
+ * their working column. Distinct from auto-spawned ephemeral AgentRecords.
+ */
+export interface SimRosterAgentView {
+  agentId: string;
+  name: string;
+  stackRef: string;
+  stackName: string;
+  adapter: AdapterName;
+  model: string;
+  role: RosterRole;
+  status: 'available' | 'assigned';
+  assignedTaskId: string | null;
+  assignedRole: RosterRole | null;
 }
 
 export interface SimInquiryView {
@@ -970,6 +1001,12 @@ interface CardRecord {
   /** §V4-9 memory I/O ledgers (accumulated from memory_query/memory_update). */
   memoryReads: SimMemoryReadEntry[];
   memoryWrites: SimMemoryWriteEntry[];
+  /** Roster agent explicitly assigned as worker (null = auto). */
+  workerAgentId: string | null;
+  /** Roster agent explicitly assigned as reviewer (null = auto). */
+  reviewerAgentId: string | null;
+  /** Human operator assigned ('user' or null). */
+  humanAssigneeId: string | null;
 }
 
 /**
@@ -1050,6 +1087,15 @@ interface InquiryRecord {
   effectId: string;
 }
 
+interface RosterAgentRecord {
+  agentId: string;
+  name: string;
+  stackRef: string;
+  role: RosterRole;
+  assignedTaskId: string | null;
+  assignedRole: RosterRole | null;
+}
+
 // ---------------------------------------------------------------------------
 // ObservedRunState derivation (mirror semantics of the babysitter SDK)
 // ---------------------------------------------------------------------------
@@ -1116,6 +1162,9 @@ export class Simulation {
   private creationCounter = 0;
   private ulidCounter = 0;
   private orderCounter = 0;
+  /** Operator roster agents (named workers/reviewers assignable to tasks). */
+  private readonly rosterAgents = new Map<string, RosterAgentRecord>();
+  private rosterCounter = 0;
   // --- v4 state -------------------------------------------------------------
   /** §V4-5 agent stacks: seeded + foundry-forged, keyed by stackRef. */
   private readonly stacks = new Map<string, { stackRef: string; custom: boolean; stack: KradleAgentStack }>();
@@ -1142,6 +1191,25 @@ export class Simulation {
     }
     for (const kind of TASK_KINDS) {
       this.templates.set(kind, { revision: 1, phases: [...PHASES_BY_KIND[kind]] });
+    }
+
+    // Seed 3 roster agents from distinct stacks (deterministic names).
+    const SEED_ROSTER: Array<{ stackRef: string; name: string; role: RosterRole }> = [
+      { stackRef: SEEDED_STACKS[0]!.stackRef, name: 'Cogsworth', role: 'worker' },
+      { stackRef: SEEDED_STACKS[1]!.stackRef, name: 'Pendula', role: 'reviewer' },
+      { stackRef: SEEDED_STACKS[2]!.stackRef, name: 'Brassbeak', role: 'worker' },
+    ];
+    for (const seed of SEED_ROSTER) {
+      this.rosterCounter += 1;
+      const agentId = `ra-${String(this.rosterCounter).padStart(3, '0')}`;
+      this.rosterAgents.set(agentId, {
+        agentId,
+        name: seed.name,
+        stackRef: seed.stackRef,
+        role: seed.role,
+        assignedTaskId: null,
+        assignedRole: null,
+      });
     }
 
     for (const card of this.scenario.cards) {
@@ -2007,6 +2075,139 @@ export class Simulation {
     }));
   }
 
+  // -------------------------------------------------------------------------
+  // Roster agents (named, stackbound workers/reviewers assignable to tasks)
+  // -------------------------------------------------------------------------
+
+  listRosterAgents(): SimRosterAgentView[] {
+    return [...this.rosterAgents.values()].map((r) => this.rosterAgentView(r));
+  }
+
+  private rosterAgentView(r: RosterAgentRecord): SimRosterAgentView {
+    const stackEntry = this.stacks.get(r.stackRef);
+    const adapter = stackEntry ? this.adapterOfStackSpec(stackEntry.stack.spec) : 'claude-code';
+    const model = stackEntry?.stack.spec.model || MODELS_BY_ADAPTER[adapter][0]!;
+    return {
+      agentId: r.agentId,
+      name: r.name,
+      stackRef: r.stackRef,
+      stackName: stackEntry?.stack.metadata.name ?? r.stackRef,
+      adapter,
+      model,
+      role: r.role,
+      status: r.assignedTaskId !== null ? 'assigned' : 'available',
+      assignedTaskId: r.assignedTaskId,
+      assignedRole: r.assignedRole,
+    };
+  }
+
+  createRosterAgent(input: { stackRef: string; role: RosterRole; name?: string }): string | null {
+    const stackEntry = this.stacks.get(input.stackRef);
+    if (!stackEntry) return null;
+    this.rosterCounter += 1;
+    const agentId = `ra-${String(this.rosterCounter).padStart(3, '0')}`;
+    const adapter = this.adapterOfStackSpec(stackEntry.stack.spec);
+    const name = input.name?.trim() || `${CREATURE_NAMES[this.rosterCounter % CREATURE_NAMES.length]}`;
+    this.rosterAgents.set(agentId, {
+      agentId,
+      name,
+      stackRef: input.stackRef,
+      role: input.role,
+      assignedTaskId: null,
+      assignedRole: null,
+    });
+    this.emitSimEvent(null, {
+      type: 'agent_recruited',
+      runId: 'run-none',
+      agent: adapter,
+      timestamp: this.now(),
+      taskId: '',
+      agentId,
+      name,
+      stackRef: input.stackRef,
+    });
+    return agentId;
+  }
+
+  deleteRosterAgent(agentId: string): boolean {
+    const record = this.rosterAgents.get(agentId);
+    if (!record) return false;
+    // Unassign from any task
+    if (record.assignedTaskId !== null) {
+      const card = this.cards.get(record.assignedTaskId);
+      if (card) {
+        if (card.workerAgentId === agentId) card.workerAgentId = null;
+        if (card.reviewerAgentId === agentId) card.reviewerAgentId = null;
+      }
+    }
+    this.rosterAgents.delete(agentId);
+    this.emitSimEvent(null, {
+      type: 'agent_released',
+      runId: 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId: '',
+      agentId,
+      name: record.name,
+    });
+    return true;
+  }
+
+  assignTaskAgent(taskId: string, role: RosterRole, agentId: string | null): boolean {
+    const card = this.cards.get(taskId);
+    if (!card) return false;
+    // Unassign previous occupant of this slot
+    const prevId = role === 'worker' ? card.workerAgentId : card.reviewerAgentId;
+    if (prevId !== null && prevId !== agentId) {
+      const prev = this.rosterAgents.get(prevId);
+      if (prev && prev.assignedTaskId === taskId) {
+        prev.assignedTaskId = null;
+        prev.assignedRole = null;
+      }
+    }
+    if (agentId !== null) {
+      const roster = this.rosterAgents.get(agentId);
+      if (!roster) return false;
+      // Unassign from previous task if needed
+      if (roster.assignedTaskId !== null && roster.assignedTaskId !== taskId) {
+        const prevCard = this.cards.get(roster.assignedTaskId);
+        if (prevCard) {
+          if (prevCard.workerAgentId === agentId) prevCard.workerAgentId = null;
+          if (prevCard.reviewerAgentId === agentId) prevCard.reviewerAgentId = null;
+        }
+      }
+      roster.assignedTaskId = taskId;
+      roster.assignedRole = role;
+    }
+    if (role === 'worker') card.workerAgentId = agentId;
+    else card.reviewerAgentId = agentId;
+    this.emitSimEvent(card, {
+      type: 'task_agent_assigned',
+      runId: card.run?.runId ?? 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId,
+      role,
+      agentId,
+    });
+    return true;
+  }
+
+  assignTaskHuman(taskId: string, assign: boolean): boolean {
+    const card = this.cards.get(taskId);
+    if (!card) return false;
+    card.humanAssigneeId = assign ? 'user' : null;
+    this.emitSimEvent(card, {
+      type: 'task_human_assigned',
+      runId: card.run?.runId ?? 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId,
+      assigned: assign,
+    });
+    return true;
+  }
+
   /** §V4-6 `listProcessTemplates()`: the per-kind phase pipeline templates. */
   listProcessTemplates(): SimProcessTemplateView[] {
     return TASK_KINDS.map((kind) => {
@@ -2249,6 +2450,9 @@ export class Simulation {
         card.column === 'in-production' &&
         card.inProductionAtTick !== null &&
         this.tickCount - card.inProductionAtTick >= IN_PRODUCTION_COMPACT_TICKS,
+      workerAgentId: card.workerAgentId,
+      reviewerAgentId: card.reviewerAgentId,
+      humanAssigneeId: card.humanAssigneeId,
     }));
   }
 
@@ -2914,10 +3118,11 @@ export class Simulation {
       leaf.inquiriesThisAttempt = 0;
       this.ensureRun(leaf);
       this.initWorkspace(leaf);
-      // §V4-5: the worker spawn binds the card's agent stack (adapter/model
-      // from the stack; the kind mapping now selects a STACK).
-      const stackRef = this.stackRefOf(leaf);
-      const stackEntry = this.stacks.get(stackRef)!;
+      // §V4-5: the worker spawn binds the card's agent stack. If a roster
+      // agent is assigned to this card as worker, use its stack instead.
+      const rosterWorker = card.workerAgentId ? this.rosterAgents.get(card.workerAgentId) : null;
+      const stackRef = rosterWorker?.stackRef ?? this.stackRefOf(leaf);
+      const stackEntry = (this.stacks.get(stackRef) ?? this.stacks.get(this.stackRefOf(leaf)))!;
       const adapter = this.adapterOfStackSpec(stackEntry.stack.spec);
       leaf.workerAdapter = adapter;
       const worker = this.spawnAgent(
@@ -2948,19 +3153,24 @@ export class Simulation {
   }
 
   private enterAiReview(card: CardRecord): void {
-    // 1–2 reviewer agents of a DIFFERENT adapter than the worker.
+    // 1–2 reviewer agents. If a roster reviewer is assigned, use their stack.
+    const rosterReviewer = card.reviewerAgentId ? this.rosterAgents.get(card.reviewerAgentId) : null;
     const workerAdapter = card.workerAdapter ?? WORKER_ADAPTER_BY_KIND[card.taskKind];
+    const count = rosterReviewer ? 1 : this.rng.int(1, 2);
     const pool = ADAPTERS.filter((a) => a !== workerAdapter);
-    const count = this.rng.int(1, 2);
     // §V5-1 (b): reviewers judge the attempt's worker session (a stack
     // parent's "worker" is its coordination session — also role worker).
     const judged = this.latestSession((s) => s.taskId === card.taskId && s.role === 'worker');
     for (let i = 0; i < count; i += 1) {
+      const reviewerStackEntry = rosterReviewer ? this.stacks.get(rosterReviewer.stackRef) : undefined;
+      const reviewerAdapter = reviewerStackEntry
+        ? this.adapterOfStackSpec(reviewerStackEntry.stack.spec)
+        : this.rng.pick(pool);
       this.spawnAgent(
-        this.rng.pick(pool),
+        reviewerAdapter,
         'reviewer',
         card.taskId,
-        undefined,
+        reviewerStackEntry,
         judged !== undefined ? { reviewOfSessionId: judged.sessionId } : undefined,
       );
     }
@@ -3774,6 +3984,9 @@ export class Simulation {
       fileOverrides: new Map(),
       memoryReads: [],
       memoryWrites: [],
+      workerAgentId: null,
+      reviewerAgentId: null,
+      humanAssigneeId: null,
     };
     this.cards.set(card.taskId, card);
     if (parentId !== null) {
@@ -4030,7 +4243,7 @@ export class Simulation {
     this.emitEnveloped(payload.runId, payload.agent, { ...payload });
   }
 
-  private emitSimEvent(_card: CardRecord, payload: SimLocalEventPayload): void {
+  private emitSimEvent(_card: CardRecord | null, payload: SimLocalEventPayload): void {
     this.emitEnveloped(payload.runId, payload.agent, { ...payload });
   }
 

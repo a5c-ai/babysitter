@@ -18,7 +18,7 @@ import { useStore } from 'zustand';
 import clsx from 'clsx';
 
 import { TASK_KINDS, TASK_TITLES, ADAPTERS, type TaskKind } from '../../backend/mock/scenario';
-import type { SimStackView } from '../../backend/mock/simulation';
+import type { SimRosterAgentView, SimStackView } from '../../backend/mock/simulation';
 import type { CommanderStore, Orders } from '../../game/store';
 import type { SimViews } from '../../game/views';
 import {
@@ -38,7 +38,7 @@ export interface FoundryProps {
   views: SimViews;
 }
 
-type FoundryTab = 'commission' | 'stacks';
+type FoundryTab = 'commission' | 'stacks' | 'agents';
 
 /** v4-r1: small anvil glyph for the Forge From chip (path-only — census). */
 const ANVIL_GLYPH =
@@ -305,6 +305,142 @@ function StacksTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
 }
 
 // ---------------------------------------------------------------------------
+// Agents tab (named roster agents — assignable workers/reviewers)
+// ---------------------------------------------------------------------------
+
+function RosterAgentRow({
+  agent,
+  onRelease,
+}: {
+  agent: SimRosterAgentView;
+  onRelease: () => void;
+}): React.JSX.Element {
+  return (
+    <li className="wr-stack-row wr-roster-row">
+      <div className="wr-stack-row-main">
+        <span className="wr-stack-name">{agent.name}</span>
+        <span className={`wr-stack-adapter wr-faction-text--${agent.adapter}`}>{agent.adapter}</span>
+        <span className="wr-stack-model">{agent.model}</span>
+        <span className={clsx('wr-roster-role', `wr-roster-role--${agent.role}`)}>{agent.role}</span>
+        {agent.status === 'assigned' && (
+          <span className="wr-roster-assigned" title={agent.assignedTaskId ?? ''}>
+            assigned
+          </span>
+        )}
+        <span className="wr-stack-id">{agent.stackRef}</span>
+      </div>
+      <div className="wr-stack-row-actions">
+        <button
+          type="button"
+          className="wr-alert-btn wr-stack-btn"
+          disabled={agent.status === 'assigned'}
+          title={agent.status === 'assigned' ? 'Unassign before releasing' : 'Release this agent'}
+          onClick={onRelease}
+        >
+          Release
+        </button>
+      </div>
+    </li>
+  );
+}
+
+function AgentsTab({ orders, views }: { orders: Orders; views: SimViews }): React.JSX.Element {
+  const stacks = views.listStacks();
+  const [, setRecruitSeq] = useState(0);
+  const agents = views.listRosterAgents();
+  const [stackRef, setStackRef] = useState(stacks[0]?.stackRef ?? '');
+  const [role, setRole] = useState<'worker' | 'reviewer'>('worker');
+  const [name, setName] = useState('');
+
+  const recruit = (): void => {
+    if (!stackRef) return;
+    const agentId = orders.createRosterAgent({
+      stackRef,
+      role,
+      ...(name.trim() !== '' ? { name: name.trim() } : {}),
+    });
+    if (agentId !== null) {
+      setName('');
+      setRecruitSeq((n) => n + 1);
+    }
+  };
+
+  return (
+    <div className="wr-foundry-stacks-body">
+      <ul className="wr-stack-roster" aria-label="Roster agents">
+        {agents.length === 0 && (
+          <li className="wr-roster-empty">No agents recruited — forge one below</li>
+        )}
+        {agents.map((a) => (
+          <RosterAgentRow
+            key={a.agentId}
+            agent={a}
+            onRelease={() => {
+              orders.deleteRosterAgent(a.agentId);
+              setRecruitSeq((n) => n + 1);
+            }}
+          />
+        ))}
+      </ul>
+      <div className="wr-stack-editor" aria-label="Recruit agent">
+        <div className="wr-stack-editor-title">RECRUIT AN AGENT</div>
+        <div className="wr-stack-editor-grid">
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">stack</span>
+            <select
+              className="wr-foundry-input"
+              value={stackRef}
+              onChange={(e) => setStackRef(e.target.value)}
+            >
+              {stacks.map((s) => (
+                <option key={s.stackRef} value={s.stackRef}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">role</span>
+            <select
+              className="wr-foundry-input"
+              value={role}
+              onChange={(e) => setRole(e.target.value as 'worker' | 'reviewer')}
+            >
+              <option value="worker">worker</option>
+              <option value="reviewer">reviewer</option>
+            </select>
+          </label>
+          <label className="wr-foundry-field">
+            <span className="wr-foundry-label">name (optional)</span>
+            <input
+              className="wr-foundry-input"
+              type="text"
+              value={name}
+              placeholder="auto-generate"
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') recruit();
+              }}
+            />
+          </label>
+        </div>
+        <div className="wr-modal-hint">binds to the selected stack · assignable via task backlog</div>
+        <div className="wr-modal-actions">
+          <button
+            type="button"
+            className="wr-alert-btn wr-alert-btn--approve"
+            disabled={!stackRef}
+            onClick={recruit}
+          >
+            Recruit
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Shell
 // ---------------------------------------------------------------------------
 
@@ -322,7 +458,7 @@ export function Foundry({ store, orders, views }: FoundryProps): React.JSX.Eleme
   return (
     <div className="wr-modal-backdrop" data-testid="foundry">
       <div
-        className={clsx('wr-modal wr-foundry', tab === 'stacks' && 'wr-foundry--wide')}
+        className={clsx('wr-modal wr-foundry', (tab === 'stacks' || tab === 'agents') && 'wr-foundry--wide')}
         role="dialog"
         aria-label="The Foundry"
       >
@@ -356,11 +492,26 @@ export function Foundry({ store, orders, views }: FoundryProps): React.JSX.Eleme
           >
             Stacks
           </div>
+          <div
+            role="tab"
+            tabIndex={0}
+            data-testid="foundry-agents"
+            aria-selected={tab === 'agents'}
+            className={clsx('wr-foundry-tab', tab === 'agents' && 'is-active')}
+            onClick={() => setTab('agents')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setTab('agents');
+            }}
+          >
+            Agents
+          </div>
         </div>
         {tab === 'commission' ? (
           <CommissionTab store={store} orders={orders} />
-        ) : (
+        ) : tab === 'stacks' ? (
           <StacksTab orders={orders} views={views} />
+        ) : (
+          <AgentsTab orders={orders} views={views} />
         )}
       </div>
     </div>

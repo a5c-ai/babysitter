@@ -74,6 +74,9 @@ function cardView(overrides: Partial<SimCardView> = {}): SimCardView {
     description: 'original description',
     releaseId: null,
     compacted: false,
+    workerAgentId: null,
+    reviewerAgentId: null,
+    humanAssigneeId: null,
     ...overrides,
   };
 }

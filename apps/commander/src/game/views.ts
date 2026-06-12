@@ -14,6 +14,7 @@ import type {
   SimGitCommitView,
   SimMemoryIOView,
   SimProcessTemplateView,
+  SimRosterAgentView,
   SimRunObservationView,
   SimRunView,
   SimSessionDetailView,
@@ -28,6 +29,8 @@ export interface SimViews {
   getRunObservation(taskId: string): SimRunObservationView | null;
   /** §V4-5 agent-stack roster (4 seeded + custom foundry-forged stacks). */
   listStacks(): SimStackView[];
+  /** Operator roster agents (named workers/reviewers assignable to tasks). */
+  listRosterAgents(): SimRosterAgentView[];
   /** §V4-6 runs registry: every card attempt, newest first. */
   listRuns(): SimRunView[];
   /** §V4-6 per-taskKind phase pipeline templates (`commander/<kind>@vN`). */

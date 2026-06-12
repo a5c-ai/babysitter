@@ -170,13 +170,20 @@ export function ChatDock({ store, orders }: ChatDockProps): React.JSX.Element | 
               className="wr-inq"
               data-testid={`inquiry-${inquiry.hookRequestId}`}
             >
-              <span
-                className={`wr-inq-portrait wr-faction-text--${adapter}`}
-                title={inquiry.unitId}
-                dangerouslySetInnerHTML={{ __html: portrait.svg }}
-              />
-              <div className="wr-inq-main">
+              <button
+                type="button"
+                className="wr-inq-focus-btn"
+                title="Open card context"
+                onClick={() => orders.focusInquiryCard(inquiry.taskId)}
+              >
+                <span
+                  className={`wr-inq-portrait wr-faction-text--${adapter}`}
+                  title={inquiry.unitId}
+                  dangerouslySetInnerHTML={{ __html: portrait.svg }}
+                />
                 <div className="wr-inq-question">{inquiry.question}</div>
+              </button>
+              <div className="wr-inq-main">
                 <InquiryOptionRow inquiry={inquiry} onChoose={(option) => choose(inquiry, option)} withTestIds />
               </div>
             </div>
