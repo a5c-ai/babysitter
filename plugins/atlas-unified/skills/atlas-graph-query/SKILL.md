@@ -1,10 +1,12 @@
 ---
 name: atlas-graph-query
 description: >
-  Reference for querying the Atlas knowledge graph through its MCP tools. Use
-  when you need to look up nodes, edges, kinds, clusters, stats, or wiki pages in
-  Atlas. (atlas graph, query atlas, atlas mcp, search the graph, graph neighbors,
-  atlas record, atlas kinds)
+  Reference for querying the Atlas knowledge graph through its MCP tools — the
+  SECONDARY enrichment/comparison layer that adds best-practice context to systems
+  you have ALREADY scanned from your real sources (`az`, repos, dirs). Use when
+  you need to look up nodes, edges, kinds, clusters, stats, or wiki pages in Atlas
+  to compare against your real inventory. (atlas graph, query atlas, atlas mcp,
+  search the graph, graph neighbors, atlas record, atlas kinds, enrichment layer)
 allowed-tools: mcp__atlas__atlas_public_search, mcp__atlas__atlas_public_record, mcp__atlas__atlas_public_neighbors, mcp__atlas__atlas_public_kinds, mcp__atlas__atlas_public_kind, mcp__atlas__atlas_public_edge_kinds, mcp__atlas__atlas_public_edge_kind, mcp__atlas__atlas_public_clusters, mcp__atlas__atlas_public_stats, mcp__atlas__atlas_public_wiki_page
 version: 0.1.0
 ---
@@ -15,6 +17,14 @@ A thin reference for the Atlas knowledge-graph MCP tool surface so any agent
 (including sub-agents) can query the graph without re-deriving conventions. The
 server URL is wired natively by the `atlas` plugin and is overridable via
 `ATLAS_MCP_URL`. Never invent node ids — only use ids returned by these tools.
+
+> **Position: this is the SECONDARY / enrichment layer.** The `atlas` plugin is
+> scan-first — it inventories your REAL systems by scanning your actual sources
+> (Azure via read-only `az`, git repos, local directories) and process/data
+> mining them. The graph queries below are used ONLY to add best-practice /
+> comparison context to those already-discovered real systems. Do NOT use the
+> graph as the primary content, and never pad a real inventory with generic
+> catalog nodes. Tie every graph lookup back to a real scanned system.
 
 ## Tools
 

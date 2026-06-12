@@ -1,11 +1,16 @@
 /**
  * @process atlas/atlas-process-mining
- * @description Mine the processes/workflows a domain requires from the Atlas
- *   knowledge graph. Short, iterative, TDD-shaped: each phase produces a checkable
- *   artifact and asserts on it. All graph queries go through the Atlas MCP tools
- *   (mcp__atlas__atlas_public_*). Agent tasks only — no shell.
+ * @description Mine the REAL processes/workflows that exist in the user's named
+ *   sources (git repos + local dirs, plus any Azure automation in scope): CI/CD
+ *   (.github/workflows), npm scripts, IaC (terraform / bicep / helm / k8s),
+ *   Dockerfiles, babysitter `.a5c` processes, and cron/automation. Every mined
+ *   process cites the real file it came from. The Atlas public knowledge graph
+ *   (mcp__atlas__atlas_public_*) is used ONLY as a SECONDARY comparison layer.
+ *   Short, iterative, TDD-shaped: each phase produces a checkable artifact and
+ *   asserts on it. Agent tasks only — no shell tasks (the agent runs the real
+ *   read-only scans itself via its Bash tool).
  * @inputs { need, projectDir?, outDir? }
- * @outputs { success, domain, processCount, catalog }
+ * @outputs { success, sourceCount, processCount, catalog }
  *
  * Repo override honored: agent-only subtasks (no shell); breakpoints kept sparse.
  */
@@ -13,29 +18,32 @@
 import { defineTask } from '@a5c-ai/babysitter-sdk';
 
 // ---------------------------------------------------------------------------
-// Phase 1: scope the domain to Atlas clusters/kinds
+// Phase 1: parse the stated need into concrete repo/dir (and cloud) sources
 // ---------------------------------------------------------------------------
-export const scopeDomainTask = defineTask('atlas-procmine-scope-domain', (args, taskCtx) => ({
+export const parseSourcesTask = defineTask('atlas-procmine-parse-sources', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Scope the domain to Atlas clusters/kinds',
+  title: 'Parse the stated need into concrete sources to mine for processes',
   agent: {
     name: 'general-purpose',
     prompt: {
-      role: 'Atlas graph miner',
-      task: `Resolve the domain "${args.need}" to the relevant Atlas clusters and kinds for process mining.`,
-      context: { need: args.need, outDir: args.outDir },
+      role: 'Process-mining analyst (real-source scanner)',
+      task: `Interpret the stated need into a concrete, de-duplicated list of SOURCES whose REAL processes will be mined: git repos, local directories, and (for cron/automation) Azure account(s). Determine the output directory.`,
+      context: { need: args.need, projectDir: args.projectDir, outDir: args.outDir },
       instructions: [
-        'Use mcp__atlas__atlas_public_clusters and mcp__atlas__atlas_public_kinds to scope the domain.',
-        'Identify the target cluster(s) and process/workflow-bearing kind(s) (e.g. Process, Workflow).',
-        `Write "${args.outDir}/scope.json" with keys: domain, clusters (array), kinds (array of process/workflow kinds).`,
-        'TDD assertion for this phase: scope.json MUST list at least one target cluster or kind. Iterate until satisfied.',
+        'Read the stated need below and extract the SOURCES whose processes you must mine: repos (kind:"repo"), directories (kind:"dir"), and optionally a cloud account (kind:"cloud") for scheduled jobs / automation.',
+        'Resolve "this repo" / "this directory" against projectDir. Detect an output directory if the need states one (e.g. "into <path>"); otherwise use the provided outDir.',
+        'Do NOT invent sources the user did not mention. Only mine what is in scope (scoping, not a silent fallback to the public graph).',
+        'If the sources are genuinely ambiguous, set `ambiguous: true` and list `questions`.',
+        `Write "${args.outDir}/sources.json" with keys: sources (array of { kind, ref, note? }), resolvedOutDir (string), ambiguous (boolean), questions (array).`,
+        'TDD assertion: sources.json has a non-empty `sources[]` (unless ambiguous:true) and a non-empty `resolvedOutDir`. Iterate until both hold.',
+        `Stated need:\n${args.need}`,
       ],
       outputFormat: 'JSON',
     },
     outputSchema: {
       type: 'object',
-      required: ['clusters', 'kinds'],
-      properties: { domain: { type: 'string' }, clusters: { type: 'array' }, kinds: { type: 'array' } },
+      required: ['sources', 'resolvedOutDir'],
+      properties: { sources: { type: 'array' }, resolvedOutDir: { type: 'string' }, ambiguous: { type: 'boolean' }, questions: { type: 'array' } },
     },
   },
   io: {
@@ -45,93 +53,70 @@ export const scopeDomainTask = defineTask('atlas-procmine-scope-domain', (args, 
 }));
 
 // ---------------------------------------------------------------------------
-// Phase 2: find candidate processes/workflows
+// Phase 2: mine REAL processes from the filesystem/git (primary)
 // ---------------------------------------------------------------------------
-export const findProcessesTask = defineTask('atlas-procmine-find-processes', (args, taskCtx) => ({
+export const mineProcessesTask = defineTask('atlas-procmine-mine', (args, taskCtx) => ({
   kind: 'agent',
-  title: 'Enumerate candidate processes/workflows',
+  title: 'Mine real processes from the named sources (CI/CD, npm, IaC, .a5c, cron)',
   agent: {
     name: 'general-purpose',
     prompt: {
-      role: 'Atlas graph miner',
-      task: `Enumerate the processes/workflows in scope for "${args.need}".`,
-      context: { need: args.need, scope: args.scope, outDir: args.outDir },
+      role: 'Process-mining engineer (read-only filesystem + git survey)',
+      task: `For each repo/dir source in scope, mine the REAL automation/processes that actually exist, via your Bash/Read/Glob tools. Every mined process MUST cite the real file it came from.`,
+      context: { sources: args.sources, projectDir: args.projectDir, outDir: args.outDir },
       instructions: [
-        'Use mcp__atlas__atlas_public_search (filter to Process/Workflow kinds) to find candidate processes.',
-        'Use mcp__atlas__atlas_public_neighbors from any anchor to enumerate connected processes/workflows.',
-        'Collect only real ids returned by the tools — never invent ids.',
-        `Write "${args.outDir}/candidates.json" with key: candidates (array of { id, name, kind }).`,
-        'TDD assertion for this phase: candidates.json MUST be non-empty and every id must be real. Iterate your queries until satisfied.',
-      ],
-      outputFormat: 'JSON',
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['candidates'],
-      properties: { candidates: { type: 'array' } },
-    },
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
-
-// ---------------------------------------------------------------------------
-// Phase 3: detail each candidate and rank by relevance
-// ---------------------------------------------------------------------------
-export const detailAndRankTask = defineTask('atlas-procmine-detail-rank', (args, taskCtx) => ({
-  kind: 'agent',
-  title: 'Detail and rank candidate processes',
-  agent: {
-    name: 'general-purpose',
-    prompt: {
-      role: 'Atlas graph analyst',
-      task: `Detail each candidate process and rank it by relevance to the need "${args.need}".`,
-      context: { need: args.need, candidates: args.candidates, outDir: args.outDir },
-      instructions: [
-        'For each candidate, call mcp__atlas__atlas_public_record(id) to read its phases/steps and edges.',
-        'Summarize each process and assign a relevance score (0-1) to the stated need.',
-        `Write "${args.outDir}/detail.json" with key: details (array of { id, name, summary, phases, relevance }).`,
-        'TDD assertion for this phase: every entry MUST have id, name, a phases/steps summary, and a relevance score. Iterate until complete.',
-      ],
-      outputFormat: 'JSON',
-    },
-    outputSchema: {
-      type: 'object',
-      required: ['details'],
-      properties: { details: { type: 'array' } },
-    },
-  },
-  io: {
-    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
-    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
-  },
-}));
-
-// ---------------------------------------------------------------------------
-// Phase 4: emit the process catalog
-// ---------------------------------------------------------------------------
-export const emitCatalogTask = defineTask('atlas-procmine-emit-catalog', (args, taskCtx) => ({
-  kind: 'agent',
-  title: 'Emit the process catalog',
-  agent: {
-    name: 'general-purpose',
-    prompt: {
-      role: 'Technical writer',
-      task: `Write the ranked process catalog for the need "${args.need}".`,
-      context: { need: args.need, details: args.details, outDir: args.outDir },
-      instructions: [
-        `Write "${args.outDir}/processes.md" — a ranked, human-readable catalog of the mined processes, each citing its real Atlas id.`,
-        `Write "${args.outDir}/processes.json" — the machine mirror with key: processes (array of { id, name, summary, phases, relevance }).`,
-        'TDD assertion for this phase: catalog count MUST equal the ranked detail count and every id MUST be present in the detail set. Iterate until consistent.',
+        'For each repo/dir source, survey the REAL tree (read-only) for these process classes, each cited to its file path:',
+        '  - CI/CD: `.github/workflows/*.yml` (capture name + `on:` triggers + what each job does), other CI (.gitlab-ci.yml, azure-pipelines.yml, .circleci, Jenkinsfile).',
+        '  - npm scripts: the `scripts` block of each package.json (which are build/test/deploy/lint/codegen).',
+        '  - IaC: terraform (*.tf), bicep (*.bicep), helm charts (Chart.yaml / templates), k8s manifests, Dockerfiles (and what each builds/deploys).',
+        '  - babysitter processes: `.a5c/processes/*.mjs` / `.a5c/process-library/**` (the process id + what it orchestrates).',
+        '  - cron/automation: schedule triggers in workflows (`on: schedule`), crontabs, scheduled jobs.',
+        'If a cloud source is in scope, ALSO mine real scheduled/automation in the cloud via read-only `az` (e.g. container app jobs, scheduled jobs) — cite the resource id. NEVER run mutating az commands.',
+        'Run ONLY read-only commands. NEVER invent workflows, scripts, charts, processes, or file paths. If you did not observe it in a real file, it does not go in the catalog.',
+        `Write "${args.outDir}/processes.json" with key: processes (array of { name, kind: 'ci'|'npm'|'iac'|'babysitter'|'cron'|'cloud-automation'|'other', file, source, trigger?, summary }). Group/derive counts as helpful.`,
+        `Write "${args.outDir}/processes.md" — a human-readable catalog grouped by class (CI/Release, Agent/Automation, IaC, npm scripts, .a5c processes, cron), EACH entry citing its real file path.`,
+        'TDD assertion: processes.json is valid JSON; if repo/dir sources were in scope it has a non-empty processes[] each with a real `file`; otherwise it records skipped:true with a reason. No invented files. Iterate until satisfied.',
       ],
       outputFormat: 'JSON',
     },
     outputSchema: {
       type: 'object',
       required: ['processes'],
-      properties: { processes: { type: 'array' }, catalogPath: { type: 'string' } },
+      properties: { processes: { type: 'array' }, skipped: { type: 'boolean' }, reason: { type: 'string' } },
+    },
+  },
+  io: {
+    inputJsonPath: `tasks/${taskCtx.effectId}/inputs.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`,
+  },
+}));
+
+// ---------------------------------------------------------------------------
+// Phase 3 (SECONDARY): compare mined processes against the Atlas graph
+// ---------------------------------------------------------------------------
+export const enrichProcessesTask = defineTask('atlas-procmine-enrich', (args, taskCtx) => ({
+  kind: 'agent',
+  title: 'Compare mined real processes against the Atlas graph (secondary)',
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Atlas graph enricher (secondary comparison layer)',
+      task: `Compare the REAL mined processes (in processes.json) against the Atlas public knowledge graph to add best-practice / gap commentary. This is SECONDARY and must never replace the real mined catalog.`,
+      context: { outDir: args.outDir, processCount: args.processCount },
+      instructions: [
+        `Read "${args.outDir}/processes.json" — the real mined processes are the input.`,
+        'For the major real process families found (e.g. "PR gate CI", "publish pipeline", "IaC helm deploy", "agentic dispatch"), query the Atlas graph for comparable process patterns via mcp__atlas__atlas_public_search / _neighbors / _record. Use the atlas-graph-query skill conventions.',
+        'Collect only real Atlas ids returned by the tools — never invent node ids. Tie each comparison to the real mined process it annotates (cite its file).',
+        'SECONDARY only: if the graph offers nothing relevant or is unreachable, write a near-empty enrichment with a note. Do NOT pad with generic catalog processes; do NOT let graph content become the catalog.',
+        `Write "${args.outDir}/processes-enrichment.json" with keys: comparisons (array of { minedFile, minedName, atlasIds: [...], note }), notes (array).`,
+        'TDD assertion: processes-enrichment.json is valid JSON; every atlasId is real; every comparison references a real mined process. Iterate until satisfied.',
+      ],
+      outputFormat: 'JSON',
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['comparisons'],
+      properties: { comparisons: { type: 'array' }, notes: { type: 'array' } },
     },
   },
   io: {
@@ -141,7 +126,7 @@ export const emitCatalogTask = defineTask('atlas-procmine-emit-catalog', (args, 
 }));
 
 // ===========================================================================
-// Orchestration
+// Orchestration — mine real processes first; graph comparison secondary.
 // ===========================================================================
 export async function process(inputs, ctx) {
   const need = inputs.need ?? inputs.$ARGUMENTS ?? '';
@@ -149,16 +134,39 @@ export async function process(inputs, ctx) {
   const outDir = inputs.outDir ?? `.a5c/atlas/${ctx.runId ?? 'run'}`;
   const base = { need, projectDir, outDir };
 
-  const scope = await ctx.task(scopeDomainTask, base, { key: 'scope-domain' });
-  const candidates = await ctx.task(findProcessesTask, { ...base, scope }, { key: 'find-processes' });
-  const detail = await ctx.task(detailAndRankTask, { ...base, candidates: candidates.candidates }, { key: 'detail-and-rank' });
-  const catalog = await ctx.task(emitCatalogTask, { ...base, details: detail.details }, { key: 'emit-catalog' });
+  const parsed = await ctx.task(parseSourcesTask, base, { key: 'parse-sources' });
+
+  if (parsed.ambiguous === true) {
+    const clarify = await ctx.breakpoint({
+      question: `The sources to mine are ambiguous. ${(parsed.questions || []).join(' ')} Which repo(s)/director(ies) should I mine processes from?`,
+      options: ['Provide the sources', 'Proceed with best-guess sources'],
+      expert: 'owner',
+      tags: ['interview'],
+    });
+    if (clarify && clarify.response) {
+      base.need = `${need}\n\nClarification (sources): ${clarify.response}`;
+      const reparsed = await ctx.task(parseSourcesTask, base, { key: 'parse-sources-2' });
+      parsed.sources = reparsed.sources;
+      parsed.resolvedOutDir = reparsed.resolvedOutDir;
+    }
+  }
+
+  const resolvedOutDir = parsed.resolvedOutDir && String(parsed.resolvedOutDir).trim() ? parsed.resolvedOutDir : outDir;
+  const scanBase = { ...base, outDir: resolvedOutDir, sources: parsed.sources };
+
+  const mined = await ctx.task(mineProcessesTask, scanBase, { key: 'mine-processes' });
+
+  await ctx.task(
+    enrichProcessesTask,
+    { ...scanBase, processCount: Array.isArray(mined.processes) ? mined.processes.length : 0 },
+    { key: 'enrich-processes' },
+  );
 
   return {
     success: true,
-    domain: scope.domain ?? need,
-    processCount: Array.isArray(catalog.processes) ? catalog.processes.length : 0,
-    catalog,
+    sourceCount: Array.isArray(parsed.sources) ? parsed.sources.length : 0,
+    processCount: Array.isArray(mined.processes) ? mined.processes.length : 0,
+    catalog: mined,
   };
 }
 
