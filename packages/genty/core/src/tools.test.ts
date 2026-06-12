@@ -30,6 +30,7 @@ import {
 } from "./tools";
 import {
   createAgentCoreToolDefinitions as createAgentCoreToolDefinitionsFromIndex,
+  createProcessAuthoringToolDefinitions,
   DeferredToolRegistry,
 } from "./index";
 import { BackgroundProcessRegistry } from "./backgroundProcessRegistry";
@@ -78,6 +79,56 @@ function mockSpawnExit(exitCode = 0, stdoutText = "") {
     return processHandle;
   });
 }
+
+describe("createProcessAuthoringToolDefinitions", () => {
+  // #956: the create-run phase-1 (PhasePlanProcess) authoring agent must only be
+  // able to author a process definition — not perform the user's work directly.
+  // Weak models hand the full tool surface use bash/python/browser to "just do
+  // the task" and then fail authoring. The authoring surface must expose file +
+  // delegation tools only.
+  const workspace = mkdtempSync(path.join(os.tmpdir(), "authoring-tools-"));
+
+  it("exposes file tools and delegation tools only", () => {
+    const names = createProcessAuthoringToolDefinitions({
+      workspace,
+      interactive: false,
+      deferredToolRegistry: new DeferredToolRegistry(),
+    }).map((tool) => tool.name).sort();
+
+    // File tools needed to search references and write the process file.
+    expect(names).toEqual(expect.arrayContaining(["read", "write", "edit", "grep", "find"]));
+    // Delegation tools (wired through the caller's handlers).
+    expect(names).toEqual(expect.arrayContaining(["AskUserQuestion", "task", "skill"]));
+  });
+
+  it("excludes execution, browser, web, code, and config tools so weak models cannot sidestep authoring", () => {
+    const names = new Set(
+      createProcessAuthoringToolDefinitions({
+        workspace,
+        interactive: false,
+        deferredToolRegistry: new DeferredToolRegistry(),
+      }).map((tool) => tool.name),
+    );
+
+    for (const forbidden of [
+      "bash",
+      "python",
+      "ssh",
+      "fetch",
+      "browser",
+      "calc",
+      "ast_grep",
+      "ast_edit",
+      "render_mermaid",
+      "notebook",
+      "config",
+      "web_search",
+      "web_fetch",
+    ]) {
+      expect(names.has(forbidden)).toBe(false);
+    }
+  });
+});
 
 describe("agent-core tools", () => {
   afterEach(() => {
