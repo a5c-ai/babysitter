@@ -70,13 +70,16 @@ import type {
   WorkspaceGitStatus,
 } from '../../contracts/kradle-workspace';
 import type { CommanderTask, KradlePhase } from '../../contracts/kradle-resources';
+import type { KradleAgentStack, KradleAgentStackInput } from '../../contracts/kradle-stack';
 import { hashString, Prng } from './prng';
 import type { AdapterName, Scenario, TaskKind } from './scenario';
 import {
   ADAPTERS,
+  DEFAULT_STACK_BY_KIND,
   generateScenario,
   MODELS_BY_ADAPTER,
   PARENT_TASK_LABEL,
+  SEEDED_STACKS,
   TASK_KINDS,
   TASK_TITLES,
   WORKER_ADAPTER_BY_KIND,
@@ -86,11 +89,33 @@ import {
 // Sim-local domain types (NOT contracts — UI/game-layer vocabulary)
 // ---------------------------------------------------------------------------
 
+/** Sim-time advanced per tick. `tick(n)` semantics are UNCHANGED by §V4-4. */
 export const TICK_MS = 250;
 
-/** SPEC-V3 §V3-1 column ids. */
-export const COLUMNS = ['backlog', 'do', 'ai-review', 'human-review', 'approved'] as const;
+/**
+ * SPEC-V4 §V4-4: default real-time auto-tick interval (was 250ms in v3).
+ * Real-time pacing only — never part of tick determinism.
+ */
+export const DEFAULT_TICK_INTERVAL_MS = 800;
+
+/** §V4-4 speed steps: 0.5x → 1600ms, 1x → 800ms, 2x → 400ms. */
+export const SIM_SPEEDS = [0.5, 1, 2] as const;
+export type SimSpeed = (typeof SIM_SPEEDS)[number];
+
+/** SPEC-V3 §V3-1 column ids as amended by SPEC-V4 §V4-1 (the release rail). */
+export const COLUMNS = [
+  'backlog',
+  'do',
+  'ai-review',
+  'human-review',
+  'approved',
+  'merged',
+  'in-production',
+] as const;
 export type ColumnId = (typeof COLUMNS)[number];
+
+/** §V4-1: in-production cards compact to slim rows after this many ticks. */
+export const IN_PRODUCTION_COMPACT_TICKS = 30;
 
 /** Agent roles (SPEC-V3 §V3-2). */
 export type AgentRole = 'worker' | 'reviewer' | 'integration';
@@ -148,7 +173,11 @@ export interface CardMovedEventPayload {
     | 'review-pass'
     | 'review-pass-yolo'
     | 'review-rejected'
-    | 'aborted';
+    | 'aborted'
+    | 'integration-complete'
+    | 'reverted'
+    | 'release-shipped'
+    | 'rolled-back';
 }
 
 export interface SimLocalEventPayload {
@@ -167,7 +196,13 @@ export interface SimLocalEventPayload {
     | 'inquiry_followup'
     | 'memory_query'
     | 'memory_update'
-    | 'workspace_change';
+    | 'workspace_change'
+    | 'reverted'
+    | 'release_shipped'
+    | 'rolled_back'
+    | 'task_updated'
+    | 'stack_forged'
+    | 'process_updated';
   runId: string;
   agent: string;
   timestamp: number;
@@ -198,12 +233,23 @@ export interface SimCardView {
   feedback: string | null;
   dirtyFileCount: number;
   hasPendingInquiry: boolean;
+  /** §V4-5: resolved agent-stack binding (explicit, else kind-mapped default). */
+  stackRef: string;
+  /** §V4-5 card editor description field. */
+  description: string;
+  /** §V4-1: release train this card shipped on (in-production only). */
+  releaseId: string | null;
+  /** §V4-1: in-production cards compact to slim rows after 30 ticks. */
+  compacted: boolean;
 }
 
 export interface SimAgentView {
   unitId: string;
   agent: AdapterName;
   model: string;
+  /** §V4-5: the agent-stack this agent was spawned from. */
+  stackRef: string;
+  stackName: string;
   role: AgentRole;
   taskId: string;
   state: AgentState;
@@ -272,6 +318,97 @@ export interface SimMemorySiloView {
   recordIds: string[];
 }
 
+// --- v4 views (SPEC-V4 §V4-5/§V4-6/§V4-8/§V4-9 + terminal git log) -----------
+
+/** §V4-5 `listStacks()` row: a stack plus its sim id and provenance. */
+export interface SimStackView {
+  stackRef: string;
+  name: string;
+  /** False for the 4 seeded stacks; true for foundry-forged stk-cNN stacks. */
+  custom: boolean;
+  stack: KradleAgentStack;
+}
+
+/** §V4-5 `updateTask(taskId, patch)` patch shape (card editor form). */
+export interface UpdateTaskPatch {
+  title?: string;
+  taskKind?: TaskKind;
+  description?: string;
+  yolo?: boolean;
+  /** Legal only while the card sits in backlog. `null` detaches. */
+  parentId?: string | null;
+  workspaceId?: string;
+  stackRef?: string;
+}
+
+/** §V4-6 runs-registry row (`listRuns()`, newest first). */
+export interface SimRunView {
+  runId: string;
+  taskId: string;
+  taskKind: TaskKind;
+  /** `commander/<kind>@v<rev>` — pinned at run creation (§V4-6). */
+  processId: string;
+  processRevision: number;
+  observedState: ObservedRunState;
+  phases: Array<{ label: string; status: 'done' | 'current' | 'pending' }>;
+  pendingEffectsByKind: PendingEffectsByKind;
+  tokens: {
+    inputTokens: number;
+    outputTokens: number;
+    thinkingTokens: number;
+    cachedTokens: number;
+  };
+  costUsd: number;
+  startedAt: number;
+  endedAt: number | null;
+}
+
+/** §V4-6 per-kind phase pipeline template (`listProcessTemplates()`). */
+export interface SimProcessTemplateView {
+  kind: TaskKind;
+  processId: string;
+  revision: number;
+  phases: string[];
+}
+
+/** §V4-8 workspace file-tree node (`getWorkspaceTree(taskId)`). */
+export interface SimFileTreeNode {
+  name: string;
+  path: string;
+  type: 'dir' | 'file';
+  children?: SimFileTreeNode[];
+}
+
+/** §V4-9 memory I/O ledgers (`getMemoryIO(ref)`). */
+export interface SimMemoryReadEntry {
+  recordId: string;
+  kind: string;
+  silo: string;
+  tick: number;
+  unitId: string;
+}
+
+export interface SimMemoryWriteEntry {
+  updateId: string;
+  silo: string;
+  changes: Array<{ path: string; action: string; reason: string }>;
+  phase: string;
+  tick: number;
+  unitId: string;
+}
+
+export interface SimMemoryIOView {
+  read: SimMemoryReadEntry[];
+  written: SimMemoryWriteEntry[];
+}
+
+/** §V4-7 `git log` — journal/phase-derived commits (`getGitLog(taskId)`). */
+export interface SimGitCommitView {
+  sha: string;
+  message: string;
+  tick: number;
+}
+
 // --- v1 compatibility views (consumed by the existing game store) ------------
 
 export interface SimUnitView {
@@ -327,12 +464,24 @@ export interface SimSnapshot {
   tick: number;
   simTimeMs: number;
   rngDraws: number;
-  counters: { runs: number; hooks: number; tools: number; agents: number; creations: number };
+  counters: {
+    runs: number;
+    hooks: number;
+    tools: number;
+    agents: number;
+    creations: number;
+    stacks: number;
+    releases: number;
+    memoryUpdates: number;
+  };
   cards: SimCardView[];
   agents: SimAgentView[];
   inquiries: SimInquiryView[];
   workspaces: SimWorkspaceView[];
   runs: RunEntry[];
+  stacks: SimStackView[];
+  processTemplates: SimProcessTemplateView[];
+  runLedger: SimRunView[];
 }
 
 // ---------------------------------------------------------------------------
@@ -490,6 +639,14 @@ interface CardRunRecord {
   openEffects: OpenEffect[];
   effectCounter: number;
   terminal: 'completed' | 'failed' | null;
+  /** §V4-6 run registry: pinned process template at creation time. */
+  taskId: string;
+  taskKind: TaskKind;
+  processId: string;
+  processRevision: number;
+  /** Token/cost totals folded in from despawned agents (live agents add on read). */
+  tokens: { inputTokens: number; outputTokens: number; thinkingTokens: number; cachedTokens: number };
+  costUsd: number;
 }
 
 interface WorkspaceFileRecord {
@@ -538,12 +695,29 @@ interface CardRecord {
   /** Inquiries raised in the current DO attempt (capped at 1 per attempt). */
   inquiriesThisAttempt: number;
   workerAdapter: AdapterName | null;
+  // --- v4 state ---------------------------------------------------------
+  /** §V4-5: explicit stack binding; null = default mapped from taskKind. */
+  stackRefOverride: string | null;
+  description: string;
+  /** §V4-1 release rail bookkeeping. */
+  releaseId: string | null;
+  inProductionAtTick: number | null;
+  /** Staggered release glide: ships when the countdown reaches zero. */
+  shipTicksLeft: number | null;
+  pendingReleaseId: string | null;
+  /** §V4-8: editor-written file contents (writeFile overrides). */
+  fileOverrides: Map<string, string>;
+  /** §V4-9 memory I/O ledgers (accumulated from memory_query/memory_update). */
+  memoryReads: SimMemoryReadEntry[];
+  memoryWrites: SimMemoryWriteEntry[];
 }
 
 interface AgentRecord {
   unitId: string;
   agent: AdapterName;
   model: string;
+  stackRef: string;
+  stackName: string;
   role: AgentRole;
   taskId: string;
   state: AgentState;
@@ -642,11 +816,33 @@ export class Simulation {
   private creationCounter = 0;
   private ulidCounter = 0;
   private orderCounter = 0;
+  // --- v4 state -------------------------------------------------------------
+  /** §V4-5 agent stacks: seeded + foundry-forged, keyed by stackRef. */
+  private readonly stacks = new Map<string, { stackRef: string; custom: boolean; stack: KradleAgentStack }>();
+  private stackCounter = 0;
+  /** §V4-1 release trains. */
+  private releaseCounter = 0;
+  /** §V4-6 per-kind phase pipeline templates (revision-bumped on edit). */
+  private readonly templates = new Map<TaskKind, { revision: number; phases: string[] }>();
+  private memoryUpdateCounter = 0;
+  /** §V4-4 real-time pacing only — NEVER consulted by tick logic. */
+  private speedValue: SimSpeed = 1;
 
   constructor(options: SimulationOptions) {
     this.seed = options.seed >>> 0;
     this.scenario = options.scenario ?? generateScenario(this.seed);
     this.rng = new Prng(this.seed);
+
+    for (const seeded of SEEDED_STACKS) {
+      this.stacks.set(seeded.stackRef, {
+        stackRef: seeded.stackRef,
+        custom: false,
+        stack: JSON.parse(JSON.stringify(seeded.stack)) as KradleAgentStack,
+      });
+    }
+    for (const kind of TASK_KINDS) {
+      this.templates.set(kind, { revision: 1, phases: [...PHASES_BY_KIND[kind]] });
+    }
 
     for (const card of this.scenario.cards) {
       this.addCard(card.resource, card.taskKind, card.parentId);
@@ -685,14 +881,18 @@ export class Simulation {
     }
   }
 
-  /** Begin auto-ticking every `intervalMs` (skips ticks while paused). */
-  start(intervalMs: number = TICK_MS): void {
+  /**
+   * Begin auto-ticking (skips ticks while paused). Defaults to the §V4-4
+   * speed-derived interval; an explicit override wins (tests).
+   */
+  start(intervalMs?: number): void {
     if (this.interval !== null) return;
+    this.intervalOverride = intervalMs ?? null;
     this.interval = setInterval(() => {
       if (!this.pausedFlag) {
         this.stepOnce();
       }
-    }, intervalMs);
+    }, intervalMs ?? this.tickIntervalMs);
   }
 
   stop(): void {
@@ -700,6 +900,42 @@ export class Simulation {
       clearInterval(this.interval);
       this.interval = null;
     }
+  }
+
+  // --- §V4-4 speed control (real-time pacing ONLY; tick(n) untouched) --------
+
+  private intervalOverride: number | null = null;
+
+  /** Current speed multiplier (0.5 | 1 | 2). */
+  get speed(): SimSpeed {
+    return this.speedValue;
+  }
+
+  /** Current real-time auto-tick interval: 1600/800/400ms for 0.5x/1x/2x. */
+  get tickIntervalMs(): number {
+    return DEFAULT_TICK_INTERVAL_MS / this.speedValue;
+  }
+
+  /**
+   * §V4-4 `setSpeed(0.5|1|2)`. Restarts a running auto-tick loop at the new
+   * interval. Deliberately NOT journaled and rng-free: speed is real-time
+   * pacing only and must never affect tick determinism.
+   */
+  setSpeed(speed: number): boolean {
+    if (!(SIM_SPEEDS as readonly number[]).includes(speed)) {
+      this.emit({
+        type: 'error',
+        code: 'invalid_speed',
+        message: `Speed must be one of ${SIM_SPEEDS.join('/')}; got ${String(speed)}`,
+      });
+      return false;
+    }
+    this.speedValue = speed as SimSpeed;
+    if (this.interval !== null) {
+      this.stop();
+      this.start(this.intervalOverride ?? undefined);
+    }
+    return true;
   }
 
   // -------------------------------------------------------------------------
@@ -977,6 +1213,354 @@ export class Simulation {
   }
 
   // -------------------------------------------------------------------------
+  // v4 verbs (SPEC-V4 §V4-1/§V4-5/§V4-6/§V4-8 — sim-local channel, journaled)
+  // -------------------------------------------------------------------------
+
+  /**
+   * §V4-1 `revertCard(taskId)`: revert a MERGED card from staging — back to DO
+   * with a `reverted` feedback event; a fresh worker iterates on arrival.
+   */
+  revertCard(taskId: string): boolean {
+    const card = this.cards.get(taskId);
+    if (!card) {
+      this.emit({ type: 'error', code: 'task_not_found', message: `Unknown task: ${taskId}` });
+      return false;
+    }
+    if (card.parentId !== null || card.column !== 'merged') {
+      this.emit({
+        type: 'error',
+        code: 'illegal_move',
+        message: `Revert requires a top-level card in MERGED; ${taskId} is in ${card.column}`,
+      });
+      return false;
+    }
+    const feedback = `Reverted from staging: release verification flagged "${this.titleOf(card)}" — iterate and re-land.`;
+    card.feedback = feedback;
+    card.shipTicksLeft = null;
+    card.pendingReleaseId = null;
+    card.releaseId = null;
+    this.unseal(card);
+    this.emitSimEvent(card, {
+      type: 'reverted',
+      runId: card.run?.runId ?? 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId,
+      feedback,
+    });
+    this.transitionCard(card, 'do', 'reverted');
+    return true;
+  }
+
+  /**
+   * §V4-1 `release()`: ship ALL merged cards to IN PRODUCTION as one release
+   * train `rel-NN` — the first wagon immediately, the rest staggered one tick
+   * apart (`release_shipped` events + staggered card_moved). Returns the
+   * release id, or null when the MERGED lane is empty.
+   */
+  release(): string | null {
+    const train = [...this.cards.values()].filter(
+      (c) => c.parentId === null && c.column === 'merged' && c.shipTicksLeft === null,
+    );
+    if (train.length === 0) {
+      this.emit({ type: 'error', code: 'empty_release', message: 'No merged cards to release' });
+      return null;
+    }
+    this.releaseCounter += 1;
+    const releaseId = `rel-${String(this.releaseCounter).padStart(2, '0')}`;
+    train.forEach((card, index) => {
+      if (index === 0) {
+        this.shipCard(card, releaseId);
+      } else {
+        card.pendingReleaseId = releaseId;
+        card.shipTicksLeft = index;
+      }
+    });
+    return releaseId;
+  }
+
+  /** §V4-1 `rollbackCard(taskId)`: in-production → MERGED (staging), `rolled_back` event. */
+  rollbackCard(taskId: string): boolean {
+    const card = this.cards.get(taskId);
+    if (!card) {
+      this.emit({ type: 'error', code: 'task_not_found', message: `Unknown task: ${taskId}` });
+      return false;
+    }
+    if (card.parentId !== null || card.column !== 'in-production') {
+      this.emit({
+        type: 'error',
+        code: 'illegal_move',
+        message: `Rollback requires a top-level card in IN PRODUCTION; ${taskId} is in ${card.column}`,
+      });
+      return false;
+    }
+    const releaseId = card.releaseId;
+    card.releaseId = null;
+    card.inProductionAtTick = null;
+    this.emitSimEvent(card, {
+      type: 'rolled_back',
+      runId: card.run?.runId ?? 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId,
+      releaseId,
+    });
+    this.transitionCard(card, 'merged', 'rolled-back');
+    return true;
+  }
+
+  /**
+   * §V4-5 `updateTask(taskId, patch)` — the card editor's verb. Deterministic,
+   * evented `task_updated`. A kind change remaps the DEFAULT stack mapping
+   * only when the card's stackRef was never explicitly set.
+   */
+  updateTask(taskId: string, patch: UpdateTaskPatch): boolean {
+    const card = this.cards.get(taskId);
+    if (!card) {
+      this.emit({ type: 'error', code: 'task_not_found', message: `Unknown task: ${taskId}` });
+      return false;
+    }
+    if (patch.taskKind !== undefined && !(TASK_KINDS as readonly string[]).includes(patch.taskKind)) {
+      this.emit({ type: 'error', code: 'invalid_task_kind', message: `Unknown task kind: ${String(patch.taskKind)}` });
+      return false;
+    }
+    if (patch.stackRef !== undefined && !this.stacks.has(patch.stackRef)) {
+      this.emit({ type: 'error', code: 'stack_not_found', message: `Unknown agent stack: ${patch.stackRef}` });
+      return false;
+    }
+    if (patch.parentId !== undefined && patch.parentId !== null) {
+      const parent = this.cards.get(patch.parentId);
+      if (!parent || parent.taskId === taskId || parent.parentId !== null) {
+        this.emit({
+          type: 'error',
+          code: 'task_not_found',
+          message: `Invalid parent task: ${String(patch.parentId)}`,
+        });
+        return false;
+      }
+      if (card.column !== 'backlog') {
+        this.emit({
+          type: 'error',
+          code: 'illegal_move',
+          message: `Parent reassignment is legal only while in backlog; ${taskId} is in ${card.column}`,
+        });
+        return false;
+      }
+    }
+    const ws =
+      patch.workspaceId !== undefined
+        ? this.scenario.workspaces.find((w) => w.workspaceId === patch.workspaceId)
+        : undefined;
+    if (patch.workspaceId !== undefined && !ws) {
+      this.emit({ type: 'error', code: 'workspace_not_found', message: `Unknown workspace: ${patch.workspaceId}` });
+      return false;
+    }
+
+    const applied: Record<string, unknown> = {};
+    if (patch.title !== undefined) {
+      card.resource.metadata.labels = { ...card.resource.metadata.labels, 'a5c.ai/title': patch.title };
+      applied['title'] = patch.title;
+    }
+    if (patch.taskKind !== undefined && patch.taskKind !== card.taskKind) {
+      card.taskKind = patch.taskKind;
+      card.resource.spec.taskKind = patch.taskKind;
+      applied['taskKind'] = patch.taskKind;
+    }
+    if (patch.description !== undefined) {
+      card.description = patch.description;
+      applied['description'] = patch.description;
+    }
+    if (patch.yolo !== undefined && patch.yolo !== card.yolo) {
+      card.yolo = patch.yolo;
+      applied['yolo'] = patch.yolo;
+    }
+    if (patch.parentId !== undefined) {
+      const oldParent = card.parentId !== null ? this.cards.get(card.parentId) : undefined;
+      if (oldParent) oldParent.childIds = oldParent.childIds.filter((id) => id !== taskId);
+      card.parentId = patch.parentId;
+      if (patch.parentId !== null) {
+        const parent = this.cards.get(patch.parentId)!;
+        if (!parent.childIds.includes(taskId)) parent.childIds.push(taskId);
+        card.resource.metadata.labels = { ...card.resource.metadata.labels, [PARENT_TASK_LABEL]: patch.parentId };
+      } else if (card.resource.metadata.labels) {
+        delete card.resource.metadata.labels[PARENT_TASK_LABEL];
+      }
+      applied['parentId'] = patch.parentId;
+    }
+    if (ws) {
+      card.resource.spec.workspaceRef = ws.workspaceId;
+      card.resource.spec.repository = ws.repository;
+      card.resource.metadata.labels = { ...card.resource.metadata.labels, 'kradle.a5c.ai/repository': ws.repository };
+      applied['workspaceId'] = ws.workspaceId;
+    }
+    if (patch.stackRef !== undefined) {
+      card.stackRefOverride = patch.stackRef;
+      applied['stackRef'] = patch.stackRef;
+    }
+
+    this.emitSimEvent(card, {
+      type: 'task_updated',
+      runId: card.run?.runId ?? 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId,
+      patch: applied,
+      stackRef: this.stackRefOf(card),
+    });
+    return true;
+  }
+
+  /**
+   * §V4-5 `upsertStack(stack)` — the foundry's verb. A known `stackRef`
+   * updates in place; otherwise a deterministic `stk-cNN` id is minted.
+   * Emits `stack_forged`. Returns the stackRef (null on invalid input).
+   */
+  upsertStack(input: KradleAgentStackInput): string | null {
+    const name = input.metadata?.name?.trim() ?? '';
+    const spec = input.spec;
+    if (name === '' || !spec || typeof spec.baseAgent !== 'string' || typeof spec.adapter !== 'string') {
+      this.emit({
+        type: 'error',
+        code: 'invalid_stack',
+        message: 'upsertStack requires metadata.name and spec.{baseAgent, adapter}',
+      });
+      return null;
+    }
+    let stackRef = input.stackRef !== undefined && this.stacks.has(input.stackRef) ? input.stackRef : null;
+    if (stackRef === null) {
+      this.stackCounter += 1;
+      stackRef = `stk-c${String(this.stackCounter).padStart(2, '0')}`;
+    }
+    const stack: KradleAgentStack = {
+      apiVersion: input.apiVersion ?? 'kradle.a5c.ai/v1alpha1',
+      kind: 'AgentStack',
+      metadata: { name, namespace: input.metadata.namespace ?? 'kradle-system', labels: { ...input.metadata.labels } },
+      spec: {
+        baseAgent: spec.baseAgent,
+        adapter: spec.adapter,
+        ...(spec.provider !== undefined ? { provider: spec.provider } : {}),
+        model: spec.model ?? MODELS_BY_ADAPTER[this.adapterOfStackSpec(spec)][0]!,
+        prompt: { system: spec.prompt?.system ?? '', developer: spec.prompt?.developer },
+        approvalMode: spec.approvalMode ?? 'prompt',
+        ...(spec.toolProfileRef !== undefined ? { toolProfileRef: spec.toolProfileRef } : {}),
+        ...(spec.skillRefs !== undefined ? { skillRefs: [...spec.skillRefs] } : {}),
+        ...(spec.subagentRefs !== undefined ? { subagentRefs: [...spec.subagentRefs] } : {}),
+        ...(spec.runnerPool !== undefined ? { runnerPool: spec.runnerPool } : {}),
+      },
+      status: { phase: input.status?.phase ?? 'ready' },
+    };
+    const existing = this.stacks.get(stackRef);
+    this.stacks.set(stackRef, { stackRef, custom: existing ? existing.custom : true, stack });
+    this.emitEnveloped('run-none', 'commander', {
+      type: 'stack_forged',
+      runId: 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId: '',
+      stackRef,
+      name,
+      adapter: stack.spec.adapter,
+      model: stack.spec.model,
+      updated: existing !== undefined,
+    });
+    return stackRef;
+  }
+
+  /**
+   * §V4-6 `updateProcessTemplate(kind, phases)`: edit a kind's phase pipeline
+   * TEMPLATE (≥2 non-empty phases). Bumps the revision (`process_updated`
+   * event); the NEXT run created for that kind pins the new revision while
+   * running runs keep theirs. Returns the new revision (null on rejection).
+   */
+  updateProcessTemplate(kind: TaskKind, phases: string[]): number | null {
+    const template = this.templates.get(kind);
+    if (!template) {
+      this.emit({ type: 'error', code: 'invalid_task_kind', message: `Unknown task kind: ${String(kind)}` });
+      return null;
+    }
+    const cleaned = phases.map((p) => String(p).trim()).filter((p) => p.length > 0);
+    if (cleaned.length < 2 || cleaned.length !== phases.length) {
+      this.emit({
+        type: 'error',
+        code: 'invalid_template',
+        message: `A process template needs >=2 non-empty phases; got ${JSON.stringify(phases)}`,
+      });
+      return null;
+    }
+    template.revision += 1;
+    template.phases = cleaned;
+    this.emitEnveloped('run-none', 'commander', {
+      type: 'process_updated',
+      runId: 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId: '',
+      kind,
+      processId: `commander/${kind}@v${template.revision}`,
+      revision: template.revision,
+      phases: [...cleaned],
+    });
+    return template.revision;
+  }
+
+  /**
+   * §V4-8/§V4-11 `writeFile(taskId, path, content)`: a session-local editor
+   * write. Updates the workspace view (dirty count + a diff vs the PRE-EDIT
+   * content) and emits `workspace_change`.
+   */
+  writeFile(taskId: string, path: string, content: string): boolean {
+    const card = this.cards.get(taskId);
+    if (!card) {
+      this.emit({ type: 'error', code: 'task_not_found', message: `Unknown task: ${taskId}` });
+      return false;
+    }
+    const before = this.getFileContent(taskId, path) ?? '';
+    card.fileOverrides.set(path, content);
+
+    const oldLines = before === '' ? [] : before.split('\n');
+    const newLines = content.split('\n');
+    const oldSet = new Set(oldLines);
+    const newSet = new Set(newLines);
+    const minus = oldLines.filter((l) => !newSet.has(l));
+    const plus = newLines.filter((l) => !oldSet.has(l));
+    const diffLines = [
+      `@@ -1,${oldLines.length} +1,${newLines.length} @@ manual edit`,
+      ` // edited via commander: ${path}`,
+      ...minus.slice(0, 10).map((l) => `-${l}`),
+      ...plus.slice(0, 10).map((l) => `+${l}`),
+      ` // end: ${path}`,
+    ];
+    const existing = card.ws.files.find((f) => f.path === path);
+    const status: 'A' | 'M' = existing || before !== '' ? 'M' : 'A';
+    if (existing) {
+      existing.status = 'M';
+      existing.additions += plus.length;
+      existing.deletions += minus.length;
+      existing.diff = diffLines.slice(0, 25).join('\n');
+    } else {
+      card.ws.files.push({
+        path,
+        status,
+        additions: Math.max(plus.length, 1),
+        deletions: minus.length,
+        diff: diffLines.slice(0, 25).join('\n'),
+      });
+    }
+    card.ws.dirty = true;
+    this.emitSimEvent(card, {
+      type: 'workspace_change',
+      runId: card.run?.runId ?? 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId,
+      path,
+      status,
+      source: 'editor',
+    });
+    return true;
+  }
+
+  // -------------------------------------------------------------------------
   // v1 compat operator verbs (kept type-compatible for the existing store)
   // -------------------------------------------------------------------------
 
@@ -1074,8 +1658,166 @@ export class Simulation {
     });
   }
 
-  listRuns(): RunEntry[] {
+  /** Gateway-protocol run entries (REST mirror; the §V4-6 ledger is `listRuns()`). */
+  listRunEntries(): RunEntry[] {
     return [...this.runs.values()].map((record) => ({ ...record.entry }));
+  }
+
+  /** §V4-6 runs registry: every card attempt, newest first. */
+  listRuns(): SimRunView[] {
+    return [...this.runs.values()].map((run) => this.runViewOf(run)).reverse();
+  }
+
+  /** §V4-5 `listStacks()`: 4 seeded + custom foundry stacks, stable order. */
+  listStacks(): SimStackView[] {
+    return [...this.stacks.values()].map((entry) => ({
+      stackRef: entry.stackRef,
+      name: entry.stack.metadata.name,
+      custom: entry.custom,
+      stack: JSON.parse(JSON.stringify(entry.stack)) as KradleAgentStack,
+    }));
+  }
+
+  /** §V4-6 `listProcessTemplates()`: the per-kind phase pipeline templates. */
+  listProcessTemplates(): SimProcessTemplateView[] {
+    return TASK_KINDS.map((kind) => {
+      const template = this.templates.get(kind)!;
+      return {
+        kind,
+        processId: `commander/${kind}@v${template.revision}`,
+        revision: template.revision,
+        phases: [...template.phases],
+      };
+    });
+  }
+
+  /**
+   * §V4-8 `getWorkspaceTree(taskId)`: deterministic nested file tree (8–20
+   * plausible files per task kind). Pure — never touches the engine rng.
+   */
+  getWorkspaceTree(taskId: string): SimFileTreeNode | null {
+    const card = this.cards.get(taskId);
+    if (!card) return null;
+    const paths = this.workspacePathsOf(card);
+    const root: SimFileTreeNode = { name: this.workspaceOf(taskId) || taskId, path: '', type: 'dir', children: [] };
+    for (const path of paths) {
+      let node = root;
+      const segments = path.split('/');
+      segments.forEach((segment, index) => {
+        const childPath = segments.slice(0, index + 1).join('/');
+        const isFile = index === segments.length - 1;
+        node.children = node.children ?? [];
+        let child = node.children.find((c) => c.path === childPath);
+        if (!child) {
+          child = isFile
+            ? { name: segment, path: childPath, type: 'file' }
+            : { name: segment, path: childPath, type: 'dir', children: [] };
+          node.children.push(child);
+        }
+        node = child;
+      });
+    }
+    sortTree(root);
+    return root;
+  }
+
+  /**
+   * §V4-8 `getFileContent(taskId, path)`: deterministic 20–80-line content.
+   * CHANGED files contain their diff hunks' added lines; editor writes
+   * (`writeFile`) override. Pure — never touches the engine rng.
+   */
+  getFileContent(taskId: string, path: string): string | null {
+    const card = this.cards.get(taskId);
+    if (!card) return null;
+    const override = card.fileOverrides.get(path);
+    if (override !== undefined) return override;
+    const known = this.workspacePathsOf(card).includes(path) || card.ws.files.some((f) => f.path === path);
+    if (!known) return null;
+
+    const rng = new Prng(hashString(`${this.seed}:content:${card.taskId}:${path}`));
+    const title = this.titleOf(card);
+    const lines: string[] = [];
+    const ext = path.includes('.') ? path.slice(path.lastIndexOf('.') + 1) : '';
+    const lineCount = rng.int(20, 60);
+    if (ext === 'json') {
+      lines.push('{', `  "name": "${this.workspaceOf(card.taskId) || 'workspace'}",`, `  "version": "0.${rng.int(1, 9)}.${rng.int(0, 9)}",`);
+      for (let i = lines.length; i < lineCount - 1; i += 1) {
+        lines.push(`  "field${i}": "value-${rng.int(100, 999)}",`);
+      }
+      lines.push('  "private": true', '}');
+    } else if (ext === 'md') {
+      lines.push(`# ${path.split('/').pop() ?? path}`, '', `Notes for "${title}".`, '');
+      for (let i = lines.length; i < lineCount; i += 1) {
+        lines.push(`- entry ${i}: observation ${rng.int(100, 999)} recorded by the cogitator`);
+      }
+    } else {
+      lines.push(`// ${path} — part of "${title}"`, `// deterministic mock content (seed ${this.seed})`, '');
+      for (let i = lines.length; i < lineCount; i += 1) {
+        const pick = rng.int(0, 3);
+        if (pick === 0) lines.push(`export function mechanism${i}(): number { return ${rng.int(1, 99)}; }`);
+        else if (pick === 1) lines.push(`const gauge${i} = calibrate(${rng.int(1, 12)});`);
+        else if (pick === 2) lines.push(`// gear ${i}: torque within tolerance`);
+        else lines.push(`registry.set('cog-${i}', gauge${rng.int(0, 60)});`);
+      }
+    }
+
+    // Changed files reflect their diff hunks applied: splice the added rows in.
+    const changed = card.ws.files.find((f) => f.path === path);
+    if (changed) {
+      const added = changed.diff
+        .split('\n')
+        .filter((l) => l.startsWith('+'))
+        .map((l) => l.slice(1));
+      const at = Math.min(lines.length, 3 + (hashString(`${this.seed}:hunk:${path}`) % 10));
+      lines.splice(at, 0, ...added);
+    }
+    return lines.slice(0, 80).join('\n');
+  }
+
+  /**
+   * §V4-9 `getMemoryIO(ref)`: read/written memory ledgers for an agent unitId
+   * OR a card taskId, accumulated from memory_query / memory_update events.
+   */
+  getMemoryIO(ref: string): SimMemoryIOView {
+    const read: SimMemoryReadEntry[] = [];
+    const written: SimMemoryWriteEntry[] = [];
+    for (const card of this.cards.values()) {
+      const byCard = card.taskId === ref;
+      for (const entry of card.memoryReads) {
+        if (byCard || entry.unitId === ref) read.push({ ...entry });
+      }
+      for (const entry of card.memoryWrites) {
+        if (byCard || entry.unitId === ref) {
+          written.push({ ...entry, changes: entry.changes.map((c) => ({ ...c })) });
+        }
+      }
+    }
+    return { read, written };
+  }
+
+  /** §V4-7 `git log`: commits derived deterministically from the journal/phases. */
+  getGitLog(taskId: string): SimGitCommitView[] {
+    const card = this.cards.get(taskId);
+    if (!card) return [];
+    const commits: SimGitCommitView[] = [
+      {
+        sha: this.deterministicSha(`${taskId}:git:base`),
+        message: `chore: cut branch agent/${taskId} from main`,
+        tick: 0,
+      },
+    ];
+    if (card.run) {
+      for (const event of card.run.journal) {
+        if (event.type !== 'EFFECT_RESOLVED' || event.data['kind'] !== 'node') continue;
+        const label = String(event.data['label'] ?? 'work');
+        commits.push({
+          sha: this.deterministicSha(`${taskId}:git:${card.run.runId}:${event.seq}`),
+          message: `feat(${card.taskKind}): complete ${label}`,
+          tick: Math.max(0, Math.round((event.recordedAt - this.scenario.epochMs) / TICK_MS)),
+        });
+      }
+    }
+    return commits.reverse();
   }
 
   listTasks(): CommanderTask[] {
@@ -1104,6 +1846,13 @@ export class Simulation {
       feedback: card.feedback,
       dirtyFileCount: card.ws.dirty ? card.ws.files.length : 0,
       hasPendingInquiry: [...this.inquiries.values()].some((i) => i.taskId === card.taskId),
+      stackRef: this.stackRefOf(card),
+      description: card.description,
+      releaseId: card.releaseId,
+      compacted:
+        card.column === 'in-production' &&
+        card.inProductionAtTick !== null &&
+        this.tickCount - card.inProductionAtTick >= IN_PRODUCTION_COMPACT_TICKS,
     }));
   }
 
@@ -1113,6 +1862,8 @@ export class Simulation {
       unitId: agent.unitId,
       agent: agent.agent,
       model: agent.model,
+      stackRef: agent.stackRef,
+      stackName: agent.stackName,
       role: agent.role,
       taskId: agent.taskId,
       state: agent.state,
@@ -1276,6 +2027,9 @@ export class Simulation {
         tools: this.toolCounter,
         agents: this.agentCounter,
         creations: this.creationCounter,
+        stacks: this.stackCounter,
+        releases: this.releaseCounter,
+        memoryUpdates: this.memoryUpdateCounter,
       },
       cards: this.listCardViews(),
       agents: this.listActiveAgentViews(),
@@ -1283,7 +2037,10 @@ export class Simulation {
       workspaces: [...this.cards.keys()]
         .map((id) => this.getWorkspaceView(id))
         .filter((w): w is SimWorkspaceView => w !== null),
-      runs: this.listRuns(),
+      runs: this.listRunEntries(),
+      stacks: this.listStacks(),
+      processTemplates: this.listProcessTemplates(),
+      runLedger: this.listRuns(),
     };
   }
 
@@ -1371,6 +2128,20 @@ export class Simulation {
       case 'approved':
         if (card.parentId === null && !card.merged) this.advanceIntegration(card);
         return;
+      case 'merged':
+        if (card.parentId === null) this.advanceMergedShipping(card);
+        return;
+      case 'in-production':
+        return;
+    }
+  }
+
+  /** §V4-1 staggered release glide: ship a queued wagon when its countdown hits 0. */
+  private advanceMergedShipping(card: CardRecord): void {
+    if (card.shipTicksLeft === null || card.pendingReleaseId === null) return;
+    card.shipTicksLeft -= 1;
+    if (card.shipTicksLeft <= 0) {
+      this.shipCard(card, card.pendingReleaseId);
     }
   }
 
@@ -1549,11 +2320,13 @@ export class Simulation {
     });
     card.integrationIndex += 1;
     if (card.integrationIndex < card.integrationSteps.length) {
-      card.integrationTicksLeft = this.rng.int(3, 6);
+      card.integrationTicksLeft = this.rng.int(6, 12);
       return;
     }
 
-    // Merged terminal state: patch applied, run completed, agent despawns.
+    // Merged seal: patch applied, run completed, agent despawns — and the
+    // card AUTO-MOVES to the MERGED lane (§V4-1: merged = live on staging;
+    // APPROVED no longer holds terminal cards).
     card.merged = true;
     card.progress = 1;
     card.ws.dirty = false;
@@ -1578,6 +2351,7 @@ export class Simulation {
       taskId: card.taskId,
     });
     this.despawnAgent(integrator.unitId);
+    this.transitionCard(card, 'merged', 'integration-complete');
   }
 
   // -------------------------------------------------------------------------
@@ -1617,6 +2391,19 @@ export class Simulation {
       case 'approved':
         this.enterApproved(card);
         break;
+      case 'merged':
+        card.resource.status.phase = 'Ready';
+        card.inProductionAtTick = null;
+        break;
+      case 'in-production': {
+        card.inProductionAtTick = this.tickCount;
+        card.resource.status.phase = 'Ready';
+        for (const childId of card.childIds) {
+          const child = this.cards.get(childId);
+          if (child) child.inProductionAtTick = this.tickCount;
+        }
+        break;
+      }
       case 'backlog':
         break;
     }
@@ -1631,9 +2418,13 @@ export class Simulation {
       leaf.inquiriesThisAttempt = 0;
       this.ensureRun(leaf);
       this.initWorkspace(leaf);
-      const adapter = WORKER_ADAPTER_BY_KIND[leaf.taskKind];
+      // §V4-5: the worker spawn binds the card's agent stack (adapter/model
+      // from the stack; the kind mapping now selects a STACK).
+      const stackRef = this.stackRefOf(leaf);
+      const stackEntry = this.stacks.get(stackRef)!;
+      const adapter = this.adapterOfStackSpec(stackEntry.stack.spec);
       leaf.workerAdapter = adapter;
-      this.spawnAgent(adapter, 'worker', leaf.taskId);
+      this.spawnAgent(adapter, 'worker', leaf.taskId, stackEntry);
       const run = leaf.run!;
       // Rework after a rejection re-opens the pipeline.
       if (run.phaseIndex >= run.phases.length) {
@@ -1655,7 +2446,8 @@ export class Simulation {
     for (let i = 0; i < count; i += 1) {
       this.spawnAgent(this.rng.pick(pool), 'reviewer', card.taskId);
     }
-    card.reviewTicksLeft = this.rng.int(8, 14);
+    // §V4-4: lifecycle phase durations roughly double the v3 values.
+    card.reviewTicksLeft = this.rng.int(16, 28);
     if (card.run) {
       this.requestEffect(card.run, 'agent', 'ai-review');
     }
@@ -1668,7 +2460,8 @@ export class Simulation {
       ? ['rebase onto main', 'conflict-fix', 'integration-test', 'merge']
       : ['rebase onto main', 'integration-test', 'merge'];
     card.integrationIndex = 0;
-    card.integrationTicksLeft = this.rng.int(3, 6);
+    // §V4-4: lifecycle phase durations roughly double the v3 values.
+    card.integrationTicksLeft = this.rng.int(6, 12);
     if (card.run) {
       // Close the review effect if still open; open the integration effect.
       const open = card.run.openEffects.find((e) => e.kind === 'agent');
@@ -1691,13 +2484,25 @@ export class Simulation {
   // Agents
   // -------------------------------------------------------------------------
 
-  private spawnAgent(adapter: AdapterName, role: AgentRole, taskId: string): AgentRecord {
+  private spawnAgent(
+    adapter: AdapterName,
+    role: AgentRole,
+    taskId: string,
+    stackEntry?: { stackRef: string; stack: KradleAgentStack },
+  ): AgentRecord {
+    // §V4-5: every agent derives from a stack — explicit for workers, the
+    // adapter family's seeded stack otherwise.
+    const bound =
+      stackEntry ??
+      this.stacks.get(SEEDED_STACKS.find((s) => s.stack.spec.adapter === adapter)!.stackRef)!;
     this.agentCounter += 1;
     const now = this.now();
     const agent: AgentRecord = {
       unitId: `agt-${String(this.agentCounter).padStart(3, '0')}-${role}`,
       agent: adapter,
-      model: MODELS_BY_ADAPTER[adapter][0]!,
+      model: bound.stack.spec.model || MODELS_BY_ADAPTER[adapter][0]!,
+      stackRef: bound.stackRef,
+      stackName: bound.stack.metadata.name,
       role,
       taskId,
       state: 'thinking',
@@ -1730,12 +2535,33 @@ export class Simulation {
       sessionId: agent.unitId,
       resumed: false,
     });
+    // §V4-5: the transcript's first message references the stack personality.
+    const persona = bound.stack.spec.prompt.system.split('. ')[0]?.trim() ?? '';
+    const greeting = `[${bound.stack.metadata.name}] ${persona !== '' ? `${persona}.` : 'Stack engaged.'} Taking up ${role} duty on ${taskId}. `;
+    agent.accumulatedText = greeting;
+    this.emitAgentEvent(agent, {
+      type: 'text_delta',
+      runId: this.runIdOf(agent),
+      agent: adapter,
+      timestamp: now,
+      delta: greeting,
+      accumulated: agent.accumulatedText,
+    });
     return agent;
   }
 
   private despawnAgent(unitId: string): void {
     const agent = this.agents.get(unitId);
     if (!agent) return;
+    // §V4-6: fold the agent's burn into its run's registry totals.
+    const run = this.runs.get(this.runIdOf(agent));
+    if (run) {
+      run.tokens.inputTokens += agent.tokenUsage.inputTokens;
+      run.tokens.outputTokens += agent.tokenUsage.outputTokens;
+      run.tokens.thinkingTokens += agent.tokenUsage.thinkingTokens;
+      run.tokens.cachedTokens += agent.tokenUsage.cachedTokens;
+      run.costUsd = roundTo(run.costUsd + this.costOf(agent).totalUsd, 6);
+    }
     this.emitAgentEvent(agent, {
       type: 'session_end',
       runId: this.runIdOf(agent),
@@ -1938,6 +2764,16 @@ export class Simulation {
       if (!matched.includes(id)) matched.push(id);
       if (!agent.heldPieces.includes(id)) agent.heldPieces.push(id);
     }
+    // §V4-9: accumulate the READ ledger from memory_query events.
+    for (const id of matched) {
+      card.memoryReads.push({
+        recordId: id,
+        kind: this.scenario.memory.records.find((r) => r.id === id)?.nodeKind ?? 'Term',
+        silo: silo.name,
+        tick: this.tickCount,
+        unitId: agent.unitId,
+      });
+    }
     this.emitSimEvent(card, {
       type: 'memory_query',
       runId: card.run?.runId ?? 'run-none',
@@ -1954,6 +2790,26 @@ export class Simulation {
 
   private emitMemoryUpdate(card: CardRecord, agent: AgentRecord): void {
     const silo = this.siloFor(card);
+    const changes = card.ws.files.slice(0, 2).map((f) => ({
+      path: `notes/${card.taskId}.md`,
+      action: 'add',
+      reason: `Lessons from ${f.path}`,
+    }));
+    // §V4-9: accumulate the WRITTEN ledger from memory_update events.
+    this.memoryUpdateCounter += 1;
+    const updateId = `mu-${this.seed}-${String(this.memoryUpdateCounter).padStart(4, '0')}`;
+    const phase =
+      card.run !== null
+        ? (card.run.phases[Math.min(card.run.phaseIndex, card.run.phases.length - 1)] ?? 'work')
+        : 'work';
+    card.memoryWrites.push({
+      updateId,
+      silo: silo.name,
+      changes: changes.map((c) => ({ ...c })),
+      phase,
+      tick: this.tickCount,
+      unitId: agent.unitId,
+    });
     this.emitSimEvent(card, {
       type: 'memory_update',
       runId: card.run?.runId ?? 'run-none',
@@ -1962,13 +2818,11 @@ export class Simulation {
       taskId: card.taskId,
       unitId: agent.unitId,
       silo: silo.name,
+      updateId,
       updateKind: 'proposed-pr',
       branchName: `memory/${card.taskId}`,
-      changes: card.ws.files.slice(0, 2).map((f) => ({
-        path: `notes/${card.taskId}.md`,
-        action: 'add',
-        reason: `Lessons from ${f.path}`,
-      })),
+      phase,
+      changes,
     });
   }
 
@@ -1981,6 +2835,8 @@ export class Simulation {
     this.runCounter += 1;
     const runId = `run-${this.seed}-${String(this.runCounter).padStart(4, '0')}`;
     const now = this.now();
+    // §V4-6: pin the CURRENT process template revision to this run.
+    const template = this.templates.get(card.taskKind)!;
     const run: CardRunRecord = {
       runId,
       entry: {
@@ -1999,20 +2855,31 @@ export class Simulation {
       seq: 0,
       journal: [],
       journalSeq: 0,
-      phases: [...PHASES_BY_KIND[card.taskKind]],
+      phases: [...template.phases],
       phaseIndex: 0,
       phaseTicksLeft: 0,
       openEffects: [],
       effectCounter: 0,
       terminal: null,
+      taskId: card.taskId,
+      taskKind: card.taskKind,
+      processId: `commander/${card.taskKind}@v${template.revision}`,
+      processRevision: template.revision,
+      tokens: { inputTokens: 0, outputTokens: 0, thinkingTokens: 0, cachedTokens: 0 },
+      costUsd: 0,
     };
     this.runs.set(runId, run);
     card.run = run;
-    this.appendJournal(run, 'RUN_CREATED', { processId: `commander/${card.taskKind}`, taskId: card.taskId });
+    this.appendJournal(run, 'RUN_CREATED', {
+      processId: run.processId,
+      processRevision: run.processRevision,
+      taskId: card.taskId,
+    });
   }
 
   private requestPhaseEffect(_card: CardRecord, run: CardRunRecord): void {
-    run.phaseTicksLeft = this.rng.int(6, 12);
+    // §V4-4: lifecycle phase durations roughly double the v3 values (6–12).
+    run.phaseTicksLeft = this.rng.int(12, 24);
     this.requestEffect(run, 'node', run.phases[run.phaseIndex] ?? 'work');
   }
 
@@ -2162,6 +3029,15 @@ export class Simulation {
       pendingFollowUps: [],
       inquiriesThisAttempt: 0,
       workerAdapter: null,
+      stackRefOverride: null,
+      description: '',
+      releaseId: null,
+      inProductionAtTick: null,
+      shipTicksLeft: null,
+      pendingReleaseId: null,
+      fileOverrides: new Map(),
+      memoryReads: [],
+      memoryWrites: [],
     };
     this.cards.set(card.taskId, card);
     if (parentId !== null) {
@@ -2173,6 +3049,140 @@ export class Simulation {
 
   private topLevelOf(card: CardRecord): CardRecord {
     return card.parentId !== null ? (this.cards.get(card.parentId) ?? card) : card;
+  }
+
+  private titleOf(card: CardRecord): string {
+    return card.resource.metadata.labels?.['a5c.ai/title'] ?? card.taskId;
+  }
+
+  /** §V4-5: resolved stack binding — explicit override, else kind-mapped default. */
+  private stackRefOf(card: CardRecord): string {
+    if (card.stackRefOverride !== null && this.stacks.has(card.stackRefOverride)) {
+      return card.stackRefOverride;
+    }
+    return DEFAULT_STACK_BY_KIND[card.taskKind];
+  }
+
+  /** Narrow a stack's adapter binding to a known AdapterName (sim families). */
+  private adapterOfStackSpec(spec: { adapter: string; baseAgent: string }): AdapterName {
+    const candidates = [spec.adapter, spec.adapter.replace(/^adapters\./, ''), spec.baseAgent];
+    for (const candidate of candidates) {
+      if ((ADAPTERS as readonly string[]).includes(candidate)) return candidate as AdapterName;
+    }
+    return 'claude-code';
+  }
+
+  /** §V4-1 revert: lift the merged seal so the card can iterate again. */
+  private unseal(card: CardRecord): void {
+    card.merged = false;
+    card.progress = 0;
+    card.resource.status.phase = 'Pending';
+    card.inProductionAtTick = null;
+    for (const childId of card.childIds) {
+      const child = this.cards.get(childId);
+      if (child) {
+        child.merged = false;
+        child.progress = 0;
+        child.resource.status.phase = 'Pending';
+        child.inProductionAtTick = null;
+      }
+    }
+  }
+
+  /** §V4-1: one wagon of the release train ships to IN PRODUCTION. */
+  private shipCard(card: CardRecord, releaseId: string): void {
+    card.releaseId = releaseId;
+    card.pendingReleaseId = null;
+    card.shipTicksLeft = null;
+    for (const childId of card.childIds) {
+      const child = this.cards.get(childId);
+      if (child) child.releaseId = releaseId;
+    }
+    this.emitSimEvent(card, {
+      type: 'release_shipped',
+      runId: card.run?.runId ?? 'run-none',
+      agent: 'commander',
+      timestamp: this.now(),
+      taskId: card.taskId,
+      releaseId,
+    });
+    this.transitionCard(card, 'in-production', 'release-shipped');
+  }
+
+  /** §V4-6: project a run record into its registry row (live agents add on top). */
+  private runViewOf(run: CardRunRecord): SimRunView {
+    const pendingEffectsByKind: PendingEffectsByKind = {};
+    for (const effect of run.openEffects) {
+      pendingEffectsByKind[effect.kind] = (pendingEffectsByKind[effect.kind] ?? 0) + 1;
+    }
+    const tokens = { ...run.tokens };
+    let costUsd = run.costUsd;
+    for (const agent of this.agents.values()) {
+      if (this.runIdOf(agent) !== run.runId) continue;
+      tokens.inputTokens += agent.tokenUsage.inputTokens;
+      tokens.outputTokens += agent.tokenUsage.outputTokens;
+      tokens.thinkingTokens += agent.tokenUsage.thinkingTokens;
+      tokens.cachedTokens += agent.tokenUsage.cachedTokens;
+      costUsd += this.costOf(agent).totalUsd;
+    }
+    return {
+      runId: run.runId,
+      taskId: run.taskId,
+      taskKind: run.taskKind,
+      processId: run.processId,
+      processRevision: run.processRevision,
+      observedState:
+        run.terminal === 'completed'
+          ? 'completed'
+          : run.terminal === 'failed'
+            ? 'failed'
+            : deriveObservedRunState(run.journal),
+      pendingEffectsByKind,
+      phases: run.phases.map((label, index) => ({
+        label,
+        status: index < run.phaseIndex ? 'done' : index === run.phaseIndex ? 'current' : 'pending',
+      })),
+      tokens,
+      costUsd: roundTo(costUsd, 6),
+      startedAt: run.entry.startedAt ?? run.entry.createdAt,
+      endedAt: run.entry.endedAt,
+    };
+  }
+
+  /**
+   * §V4-8: the deterministic flat path list of a card's workspace — a
+   * plausible repo skeleton per task kind (8–20 files), guaranteed to include
+   * the kind's change pool and any editor-written files. Pure (local Prng).
+   */
+  private workspacePathsOf(card: CardRecord): string[] {
+    const rng = new Prng(hashString(`${this.seed}:tree:${card.taskId}`));
+    const paths = new Set<string>([
+      'package.json',
+      'README.md',
+      'tsconfig.json',
+      'src/index.ts',
+      'src/core/registry.ts',
+      'tests/core.test.ts',
+      'docs/overview.md',
+    ]);
+    for (const path of FILE_POOLS[card.taskKind]) paths.add(path);
+    const extras = [
+      'src/core/mechanism.ts',
+      'src/engine/valves.ts',
+      'src/util/gauges.ts',
+      'tests/engine.test.ts',
+      'docs/decisions.md',
+      'scripts/build.sh',
+      '.gitignore',
+      'vitest.config.ts',
+    ];
+    const extraCount = rng.int(2, Math.min(5, 20 - paths.size));
+    for (let i = 0; i < extraCount; i += 1) {
+      paths.add(extras[rng.int(0, extras.length - 1)]!);
+    }
+    for (const file of card.ws.files) paths.add(file.path);
+    for (const path of card.fileOverrides.keys()) paths.add(path);
+    return [...paths].sort();
   }
 
   private progressOf(card: CardRecord): number {
@@ -2198,6 +3208,9 @@ export class Simulation {
       case 'human-review':
       case 'approved':
         return 'review';
+      case 'merged':
+      case 'in-production':
+        return 'done';
     }
   }
 
@@ -2300,6 +3313,16 @@ export class Simulation {
 function roundTo(value: number, digits: number): number {
   const factor = 10 ** digits;
   return Math.round(value * factor) / factor;
+}
+
+/** Deterministic tree ordering: directories first, then alphabetical. */
+function sortTree(node: SimFileTreeNode): void {
+  if (!node.children) return;
+  node.children.sort((a, b) => {
+    if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+    return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+  });
+  for (const child of node.children) sortTree(child);
 }
 
 /** Extract a `task:<taskId>` reference from a steer prompt (v1 compat). */

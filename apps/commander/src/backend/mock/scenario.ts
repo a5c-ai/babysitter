@@ -24,6 +24,7 @@ import type {
 } from '../../contracts/kradle-memory';
 import type { CommanderTask } from '../../contracts/kradle-resources';
 import { KRADLE_API_VERSION } from '../../contracts/kradle-resources';
+import type { KradleAgentStack } from '../../contracts/kradle-stack';
 import { Prng } from './prng';
 
 /** Fixed simulated epoch: the sim clock never touches Date.now(). */
@@ -70,6 +71,87 @@ export const WORKER_ADAPTER_BY_KIND: Record<TaskKind, AdapterName> = {
 
 /** V2-4 hierarchy label: children point at their parent's metadata.name. */
 export const PARENT_TASK_LABEL = 'kradle.a5c.ai/parent-task';
+
+// ---------------------------------------------------------------------------
+// Agent stacks (SPEC-V4 §V4-5: 4 seeded stacks, one per adapter family, each
+// with a distinct written personality in prompt.system)
+// ---------------------------------------------------------------------------
+
+export interface SeededStack {
+  /** Deterministic seeded stack id (custom stacks mint stk-cNN). */
+  stackRef: string;
+  stack: KradleAgentStack;
+}
+
+function seededStack(
+  stackRef: string,
+  name: string,
+  adapter: AdapterName,
+  system: string,
+  developer: string,
+): SeededStack {
+  return {
+    stackRef,
+    stack: {
+      apiVersion: KRADLE_API_VERSION,
+      kind: 'AgentStack',
+      metadata: { name, namespace: 'kradle-system', labels: { 'a5c.ai/owner': 'commander' } },
+      spec: {
+        baseAgent: adapter,
+        adapter,
+        model: MODELS_BY_ADAPTER[adapter][0]!,
+        prompt: { system, developer },
+        approvalMode: 'prompt',
+        runnerPool: 'untrusted-linux',
+      },
+      status: { phase: 'ready' },
+    },
+  };
+}
+
+/** The 4 seeded stacks (§V4-5): distinct personalities, one per adapter family. */
+export const SEEDED_STACKS: readonly SeededStack[] = [
+  seededStack(
+    'stk-01',
+    'Meticulous Reviewer',
+    'claude-code',
+    'A meticulous reviewer who reads every diff line twice and trusts nothing without a failing test first. ' +
+      'It cites the exact file and line for every finding and never waves a change through on vibes.',
+    'Prefer small reviewed steps; demand a regression test for every fix.',
+  ),
+  seededStack(
+    'stk-02',
+    'Bold Refactorer',
+    'codex',
+    'A bold refactorer who would rather rebuild the mechanism than patch around it. ' +
+      'It moves fast, deletes dead weight without sentiment, and leaves the architecture simpler than it found it.',
+    'When duplication appears twice, extract; when a module fights you, replace it.',
+  ),
+  seededStack(
+    'stk-03',
+    'Careful Archivist',
+    'gemini-cli',
+    'A careful archivist who documents every decision before acting and never lets a finding go unrecorded. ' +
+      'It writes prose first, code second, and keeps the ledgers immaculate.',
+    'Every change ships with updated docs and a one-line rationale in the changelog.',
+  ),
+  seededStack(
+    'stk-04',
+    'Swift Scout',
+    'pi',
+    'A swift scout that maps the territory in minutes and reports back before committing to anything heavy. ' +
+      'It favors the smallest probe that answers the question and abandons dead ends without regret.',
+    'Time-box every investigation; surface findings early and often.',
+  ),
+] as const;
+
+/** §V4-5: the kind → default stack mapping (mirrors WORKER_ADAPTER_BY_KIND). */
+export const DEFAULT_STACK_BY_KIND: Record<TaskKind, string> = Object.fromEntries(
+  TASK_KINDS.map((kind) => [
+    kind,
+    SEEDED_STACKS.find((s) => s.stack.spec.adapter === WORKER_ADAPTER_BY_KIND[kind])!.stackRef,
+  ]),
+) as Record<TaskKind, string>;
 
 export const TASK_TITLES: Record<TaskKind, string> = {
   implement: 'Forge the new mechanism',

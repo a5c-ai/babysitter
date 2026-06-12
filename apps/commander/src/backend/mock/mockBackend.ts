@@ -32,17 +32,30 @@ import type {
   SessionEntry,
 } from '../../contracts/gateway-protocol';
 import type { CommanderTask } from '../../contracts/kradle-resources';
+import type { KradleAgentStackInput } from '../../contracts/kradle-stack';
 import type { CommanderBackend } from '../types';
 import { seedFromSearch } from './prng';
-import type { ColumnId } from './simulation';
-import { Simulation, TICK_MS } from './simulation';
+import type {
+  ColumnId,
+  SimFileTreeNode,
+  SimGitCommitView,
+  SimMemoryIOView,
+  SimProcessTemplateView,
+  SimRunView,
+  SimStackView,
+  UpdateTaskPatch,
+} from './simulation';
+import { Simulation } from './simulation';
 import type { TaskKind } from './scenario';
 
 export const DEFAULT_SEED = 42;
 
 export interface MockBackendOptions {
   seed?: number;
-  /** Auto-tick interval once connected. Default: 250ms (SPEC §7). */
+  /**
+   * Auto-tick interval once connected. Default: the sim's §V4-4 speed-derived
+   * interval (800ms at 1x). An explicit value pins the interval (tests).
+   */
   tickIntervalMs?: number;
   /** Start the auto-tick loop on connect(). Default: true. Tests pass false. */
   autoStart?: boolean;
@@ -50,13 +63,13 @@ export interface MockBackendOptions {
 
 export class MockBackend implements CommanderBackend {
   readonly sim: Simulation;
-  private readonly tickIntervalMs: number;
+  private readonly tickIntervalMs: number | undefined;
   private readonly autoStart: boolean;
   private connected = false;
 
   constructor(options: MockBackendOptions = {}) {
     this.sim = new Simulation({ seed: options.seed ?? DEFAULT_SEED });
-    this.tickIntervalMs = options.tickIntervalMs ?? TICK_MS;
+    this.tickIntervalMs = options.tickIntervalMs;
     this.autoStart = options.autoStart ?? true;
   }
 
@@ -100,6 +113,70 @@ export class MockBackend implements CommanderBackend {
     return this.sim.createTask(input);
   }
 
+  // --- v4 verbs (SPEC-V4 §V4-1/§V4-4/§V4-5/§V4-6/§V4-8 — same sim-local channel) ---
+
+  revertCard(taskId: string): boolean {
+    return this.sim.revertCard(taskId);
+  }
+
+  release(): string | null {
+    return this.sim.release();
+  }
+
+  rollbackCard(taskId: string): boolean {
+    return this.sim.rollbackCard(taskId);
+  }
+
+  updateTask(taskId: string, patch: UpdateTaskPatch): boolean {
+    return this.sim.updateTask(taskId, patch);
+  }
+
+  upsertStack(stack: KradleAgentStackInput): string | null {
+    return this.sim.upsertStack(stack);
+  }
+
+  updateProcessTemplate(kind: TaskKind, phases: string[]): number | null {
+    return this.sim.updateProcessTemplate(kind, phases);
+  }
+
+  writeFile(taskId: string, path: string, content: string): boolean {
+    return this.sim.writeFile(taskId, path, content);
+  }
+
+  setSpeed(speed: number): boolean {
+    return this.sim.setSpeed(speed);
+  }
+
+  // --- v4 views ---------------------------------------------------------------
+
+  listStacks(): SimStackView[] {
+    return this.sim.listStacks();
+  }
+
+  listProcessTemplates(): SimProcessTemplateView[] {
+    return this.sim.listProcessTemplates();
+  }
+
+  listRunLedger(): SimRunView[] {
+    return this.sim.listRuns();
+  }
+
+  getWorkspaceTree(taskId: string): SimFileTreeNode | null {
+    return this.sim.getWorkspaceTree(taskId);
+  }
+
+  getFileContent(taskId: string, path: string): string | null {
+    return this.sim.getFileContent(taskId, path);
+  }
+
+  getMemoryIO(ref: string): SimMemoryIOView {
+    return this.sim.getMemoryIO(ref);
+  }
+
+  getGitLog(taskId: string): SimGitCommitView[] {
+    return this.sim.getGitLog(taskId);
+  }
+
   // --- REST mirrors ----------------------------------------------------------
 
   listAgents(): Promise<AgentSummary[]> {
@@ -111,7 +188,7 @@ export class MockBackend implements CommanderBackend {
   }
 
   listRuns(): Promise<RunEntry[]> {
-    return Promise.resolve(this.sim.listRuns());
+    return Promise.resolve(this.sim.listRunEntries());
   }
 
   listTasks(): Promise<CommanderTask[]> {

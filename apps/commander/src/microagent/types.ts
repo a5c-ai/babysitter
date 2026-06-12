@@ -8,8 +8,15 @@
 
 export type IconSpec = { svg: string; palette: string[] };
 
-/** SPEC-V3 §V3-1 board columns (CommandContext gains `column`, §V3-7). */
-export type BoardColumn = 'backlog' | 'do' | 'ai-review' | 'human-review' | 'approved';
+/** SPEC-V3 §V3-1 board columns as amended by SPEC-V4 §V4-1 (release rail). */
+export type BoardColumn =
+  | 'backlog'
+  | 'do'
+  | 'ai-review'
+  | 'human-review'
+  | 'approved'
+  | 'merged'
+  | 'in-production';
 
 /** Agent roles attending a card (SPEC-V3 §V3-2). */
 export type BoardAgentRole = 'worker' | 'reviewer' | 'integration';

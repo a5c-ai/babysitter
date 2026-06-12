@@ -17,6 +17,8 @@ export const COLUMN_TITLES: Record<ColumnId, string> = {
   'ai-review': 'AI Review',
   'human-review': 'Human Review',
   approved: 'Approved',
+  merged: 'Merged',
+  'in-production': 'In Production',
 };
 
 /**

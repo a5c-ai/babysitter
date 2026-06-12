@@ -101,11 +101,13 @@ describe('text_delta collapse (SPEC §14 noise control)', () => {
       1,
     );
 
-    // The spawn emits a session-start note first (V3 worker spawn) — the
-    // collapse invariant concerns the delta kinds only.
+    // The spawn emits a session-start note first, and §V4-5 prepends a
+    // stack-personality greeting (text) — the collapse invariant concerns
+    // the synthetic delta kinds only, so assert on the trailing entries.
     const transcript = rig.store
       .getState()
-      .world.units[unitId]!.transcript.filter((t) => t.kind === 'text' || t.kind === 'thinking');
+      .world.units[unitId]!.transcript.filter((t) => t.kind === 'text' || t.kind === 'thinking')
+      .slice(-3);
     expect(transcript.map((t) => [t.kind, t.text])).toEqual([
       ['thinking', 'hm'],
       ['text', 'xy'],

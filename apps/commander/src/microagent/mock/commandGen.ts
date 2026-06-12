@@ -485,6 +485,11 @@ function defsForColumn(column: BoardColumn, cards: readonly CardContextSummary[]
       return HUMAN_REVIEW_DEFS;
     case 'approved':
       return cards.every((c) => c.merged) ? MERGED_DEFS : APPROVED_DEFS;
+    // §V4-1 lanes: the v4 ui-phase designs the Revert/Release/Rollback sets;
+    // until then the merged-seal set applies.
+    case 'merged':
+    case 'in-production':
+      return MERGED_DEFS;
   }
 }
 

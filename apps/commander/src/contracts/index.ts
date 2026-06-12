@@ -7,4 +7,5 @@ export * from './babysitter-run';
 export * from './gateway-protocol';
 export * from './kradle-memory';
 export * from './kradle-resources';
+export * from './kradle-stack';
 export * from './kradle-workspace';

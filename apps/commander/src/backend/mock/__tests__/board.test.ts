@@ -353,7 +353,15 @@ describe('protocol-frame surface', () => {
     expect(frames[3]).toMatchObject({ type: 'error', code: 'run_not_found' });
   });
 
-  it('COLUMNS exposes the five V3 lanes in board order', () => {
-    expect(COLUMNS).toEqual(['backlog', 'do', 'ai-review', 'human-review', 'approved']);
+  it('COLUMNS exposes the seven V4 lanes in board order (§V4-1 release rail)', () => {
+    expect(COLUMNS).toEqual([
+      'backlog',
+      'do',
+      'ai-review',
+      'human-review',
+      'approved',
+      'merged',
+      'in-production',
+    ]);
   });
 });
