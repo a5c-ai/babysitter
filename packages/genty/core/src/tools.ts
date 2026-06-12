@@ -8,6 +8,7 @@ export { AGENT_CORE_TOOL_NAMES as AGENTIC_TOOL_NAMES } from "./types";
 export {
   createAgentCoreToolDefinitions,
   createCodingToolDefinitions,
+  createProcessAuthoringToolDefinitions,
   disposeAgentCoreToolDefinitions,
 } from "./agenticTools/index";
 export { resetRunScopedConfig } from "./agenticTools/config/state";

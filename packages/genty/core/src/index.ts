@@ -28,6 +28,7 @@ export {
 export {
   createAgentCoreToolDefinitions,
   createCodingToolDefinitions,
+  createProcessAuthoringToolDefinitions,
   disposeAgentCoreToolDefinitions,
   resetRunScopedConfig,
   parseSearchResults,

@@ -40,6 +40,21 @@ export function createFileSystemTools(options: AgenticToolOptions): CustomToolDe
       }),
       execute: (_toolCallId, params): ToolResult => {
         const filePath = resolveReadable(workspace, String(params.path), readOnlyRoots);
+        // Reading a directory throws EISDIR; return a recoverable error that
+        // lists the entries so the model can pick a file instead of crashing
+        // the tool (weaker models often `read` a dir like .a5c-live-test/).
+        let stat: fs.Stats;
+        try {
+          stat = fs.statSync(filePath);
+        } catch {
+          return errorResult(`Path not found: ${params.path as string}`);
+        }
+        if (stat.isDirectory()) {
+          const entries = fs.readdirSync(filePath).slice(0, 100);
+          return errorResult(
+            `${params.path as string} is a directory, not a file. Use the write tool to create a file inside it. Entries: ${entries.join(", ") || "(empty)"}`,
+          );
+        }
         const lines = fs.readFileSync(filePath, "utf8").split("\n");
         const start = Math.max(0, ((params.offset as number) ?? 1) - 1);
         const requestedLimit = (params.limit as number) ?? MAX_READ_LINES;
