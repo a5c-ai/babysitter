@@ -80,43 +80,6 @@ export function createCodingToolDefinitions(
   return wrapped;
 }
 
-/**
- * Authoring-scoped tool surface for the create-run phase-1 (PhasePlanProcess)
- * agent. The phase-1 agent's ONLY job is to AUTHOR a babysitter process
- * definition file and report it — it must NOT perform the user's requested
- * work directly. The full {@link createAgentCoreToolDefinitions} surface hands
- * it `bash`, `python`, `ssh`, browser, web-fetch, and code-execution tools,
- * which weak models use to "just do the task" (write the deliverable, run a
- * shell command, read a directory) instead of authoring the process — then the
- * phase fails with `ProcessDefinitionReportMissing` / `ProcessDefinitionFailed`
- * (#956). This surface exposes only what authoring needs: the file tools
- * (read/write/edit/grep/find — to search references and write the process
- * file) plus the delegation tools (AskUserQuestion/task/skill — wired through
- * the caller's handlers). No execution/browser/web/code/config/background/
- * discovery tools, so the model cannot sidestep authoring.
- */
-export function createProcessAuthoringToolDefinitions(options: AgenticToolOptions): CustomToolDefinition[] {
-  const allowedDelegationNames = new Set(["AskUserQuestion", "task", "skill"]);
-  const tools = [
-    ...createFileSystemTools(options),
-    ...createDelegationTools(options).filter((tool) => allowedDelegationNames.has(tool.name)),
-  ].map((tool) => wrapToolDefinition(tool, options.onToolUse));
-
-  options.toolRegistry?.registerAll?.(tools.map((tool) => ({
-    name: tool.name,
-    description: tool.description,
-    parameters: tool.parameters as unknown as Record<string, unknown>,
-    source: "builtin",
-    metadata: tool.metadata as Record<string, unknown> | undefined,
-  })));
-
-  toolDefinitionScopes.set(tools, options);
-  for (const tool of tools) {
-    toolDefinitionOwners.set(tool, options);
-  }
-  return tools;
-}
-
 export function disposeAgentCoreToolDefinitions(definitions: CustomToolDefinition[]): void {
   const options = toolDefinitionScopes.get(definitions)
     ?? definitions.map((definition) => toolDefinitionOwners.get(definition)).find(Boolean);

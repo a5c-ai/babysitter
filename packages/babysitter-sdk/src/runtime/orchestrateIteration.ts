@@ -246,21 +246,11 @@ async function loadProcessFunction(options: OrchestrateOptions, defaults: Entryp
   }
   let mod: Record<string, unknown>;
   try { mod = await dynamicImportModule(moduleUrl); }
-  catch (esmError) {
-    // require() can never load an ESM .mjs module (ERR_REQUIRE_ESM), so falling
-    // back to it there only MASKS the real dynamic-import error. Only attempt the
-    // require() fallback for .js/.cjs; for .mjs surface the actual ESM cause.
-    const isEsmOnly = resolvedPath.endsWith(".mjs");
-    if (isEsmOnly) {
-      throw new RunFailedError(
-        `Failed to load process module at ${resolvedPath}: ${esmError instanceof Error ? esmError.message : String(esmError)}`,
-        { details: { error: serializeUnknownError(esmError) }, cause: esmError instanceof Error ? esmError : undefined },
-      );
-    }
+  catch {
     // ESM import may fail on some Node/CJS configurations. Fall back to require().
     try { delete require.cache[require.resolve(resolvedPath)]; } catch (e) { process.stderr.write(`[babysitter] require.cache clear failed for ${resolvedPath}: ${e instanceof Error ? e.message : String(e)}\n`); }
     try { mod = require(resolvedPath) as Record<string, unknown>; }
-    catch (error) { throw new RunFailedError(`Failed to load process module at ${resolvedPath}: ${error instanceof Error ? error.message : String(error)} (esm: ${esmError instanceof Error ? esmError.message : String(esmError)})`, { details: { error: serializeUnknownError(error), esmError: serializeUnknownError(esmError) }, cause: error instanceof Error ? error : undefined }); }
+    catch (error) { throw new RunFailedError(`Failed to load process module at ${resolvedPath}`, { details: { error: serializeUnknownError(error) }, cause: error instanceof Error ? error : undefined }); }
   }
   const candidate = (exportName && mod[exportName]) ?? (!exportName && mod.default) ?? mod.process ?? mod.default;
   if (typeof candidate !== "function") throw new RunFailedError(`Export '${exportName}' was not a function in ${resolvedPath}`);

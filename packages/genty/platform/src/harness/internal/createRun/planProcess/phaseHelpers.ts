@@ -2,7 +2,7 @@ import * as path from "node:path";
 import * as readline from "node:readline";
 import { promises as fs } from "node:fs";
 import { Type } from "@sinclair/typebox";
-import { createProcessAuthoringToolDefinitions, type CustomToolDefinition } from "@a5c-ai/genty-core";
+import { createAgentCoreToolDefinitions, type CustomToolDefinition } from "@a5c-ai/genty-core";
 import {
   askUserQuestionViaTool,
   emitProgress,
@@ -81,7 +81,7 @@ export function createPlanProcessTools(args: {
     {
       name: "babysitter_report_process_definition",
       label: "Report Process Definition",
-      description: "Report that the babysitter PROCESS DEFINITION file (a .mjs module that orchestrates the work) is ready, after writing it with the write tool. processPath MUST be that .mjs process file inside the process directory — NOT the user's requested output/deliverable file. The process you author is what later runs to produce the user's deliverable. This also creates the run and binds the current session when possible.",
+      description: "Report that the process definition is ready after writing it with the normal file tools. This also creates the run and binds the current session when possible.",
       parameters: Type.Object({
         processPath: Type.String(),
         summary: Type.Optional(Type.String()),
@@ -98,23 +98,13 @@ export function createPlanProcessTools(args: {
         );
         const resolvedOutputDir = path.resolve(args.outputDir);
         if (!normalizedProcessPath.startsWith(`${resolvedOutputDir}${path.sep}`) && normalizedProcessPath !== resolvedOutputDir) {
-          // Recoverable: weaker models sometimes report the user's OUTPUT file
-          // (e.g. the requested .a5c-live-test/*.md) as the process path. Feed a
-          // corrective error back so the agent re-authors a real process file in
-          // the process directory instead of aborting the whole phase.
-          return formatToolResult(
-            { reportedPath: normalizedProcessPath, requiredDir: resolvedOutputDir },
-            `Invalid processPath. The process definition file MUST be written inside ${resolvedOutputDir} (e.g. ${path.join(resolvedOutputDir, "process.mjs")}). You reported ${normalizedProcessPath}, which is NOT a babysitter process file. Do NOT report the user's output/deliverable file here — author a .mjs process whose task writes that deliverable, save it under ${resolvedOutputDir}, then call this tool again with that .mjs path.`,
+          throw new BabysitterRuntimeError(
+            "ProcessDefinitionInvalidPath",
+            `Reported process path must stay within ${resolvedOutputDir}, got ${normalizedProcessPath}`,
+            { category: ErrorCategory.Validation },
           );
         }
-        try {
-          await fs.access(normalizedProcessPath);
-        } catch {
-          return formatToolResult(
-            { reportedPath: normalizedProcessPath },
-            `Process file not found at ${normalizedProcessPath}. Write the process definition with the write tool first, then call babysitter_report_process_definition with that exact path.`,
-          );
-        }
+        await fs.access(normalizedProcessPath);
         const runState = args.createRunOnReport === false
           ? undefined
           : await createRunAndMaybeBindFromProcessDefinition({
@@ -145,13 +135,7 @@ export function createPlanProcessTools(args: {
     },
   ];
 
-  // Authoring is intentionally scoped to file + delegation tools only. The
-  // phase-1 agent must AUTHOR a process definition, not perform the user's work
-  // directly. Granting it the full surface (bash/python/ssh/browser/web/code)
-  // lets weak models sidestep authoring and "just do the task", which then
-  // fails the phase (#956). createProcessAuthoringToolDefinitions exposes
-  // read/write/edit/grep/find + AskUserQuestion/task/skill and nothing else.
-  const agenticTools = createProcessAuthoringToolDefinitions({
+  const agenticTools = createAgentCoreToolDefinitions({
     workspace: args.workspace ?? process.cwd(),
     ...(args.readOnlyRoots?.length ? { readOnlyRoots: args.readOnlyRoots } : {}),
     interactive: args.interactive ?? false,

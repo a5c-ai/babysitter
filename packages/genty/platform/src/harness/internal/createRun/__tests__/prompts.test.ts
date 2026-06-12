@@ -87,10 +87,7 @@ describe("harnessPrompts", () => {
     expect(prompt).toContain("DefinedTask created via `defineTask(...)`");
     expect(prompt).toContain("use `inputs.json` for task inputs");
     expect(prompt).toContain("do not reference Node's global process object as `process.*`");
-    // #956: exact-path mandate replaces the brittle import.meta.url workspace-root advice.
-    expect(prompt).toContain("EXACT OUTPUT PATH (mandatory)");
-    expect(prompt).toContain("write that exact path verbatim");
-    expect(prompt).toContain("Do NOT recompute the workspace root from the module location");
+    expect(prompt).toContain("do not assume `ctx.workspaceDir` or `ctx.cwd` exists");
     expect(prompt).toContain("import.meta.url");
     expect(prompt).toContain("syntactically valid ESM");
     expect(prompt).toContain("raw nested template literals");
