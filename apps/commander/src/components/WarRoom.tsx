@@ -29,6 +29,7 @@ import { Foundry } from './panels/Foundry';
 import { IdeOverlay } from './panels/IdeOverlay';
 import { Inspector } from './panels/Inspector';
 import { MemoryOverlay } from './panels/MemoryOverlay';
+import { RegistryOverlay } from './panels/RegistryOverlay';
 import { ReviewPanel } from './panels/ReviewPanel';
 import { RunsOverlay } from './panels/RunsOverlay';
 import { SteerModal } from './panels/SteerModal';
@@ -58,6 +59,9 @@ export function WarRoom({ store, orders, views }: WarRoomProps): React.JSX.Eleme
       <Foundry store={store} orders={orders} views={views} />
       <CardEditor store={store} orders={orders} views={views} />
       <MemoryOverlay store={store} />
+      {/* Registry renders BELOW Runs: a registry run link opens the Runs
+          overlay above it; Esc unwinds runs first (§V5-3). */}
+      <RegistryOverlay store={store} views={views} />
       <RunsOverlay store={store} orders={orders} views={views} />
       <IdeOverlay store={store} orders={orders} views={views} />
       <div className="wr-narrow-gate" role="note">

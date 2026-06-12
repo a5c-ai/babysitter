@@ -45,6 +45,7 @@ import type {
   SimSessionDetailView,
   SimSessionView,
   SimStackView,
+  SimWorkspaceSummaryView,
   UpdateTaskPatch,
 } from './simulation';
 import { Simulation } from './simulation';
@@ -171,6 +172,11 @@ export class MockBackend implements CommanderBackend {
 
   getSession(sessionId: string): SimSessionDetailView | null {
     return this.sim.getSession(sessionId);
+  }
+
+  /** SPEC-V5 §V5-3 Registry workspaces tab summary view. */
+  listWorkspaces(): SimWorkspaceSummaryView[] {
+    return this.sim.listWorkspaces();
   }
 
   getWorkspaceTree(taskId: string): SimFileTreeNode | null {

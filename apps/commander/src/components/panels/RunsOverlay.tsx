@@ -335,6 +335,8 @@ type RunsTab = 'runs' | 'processes';
 
 export function RunsOverlay({ store, orders, views }: RunsOverlayProps): React.JSX.Element | null {
   const open = useStore(store, (s) => s.meta.runsOpen);
+  // §V5-3 deep-link: a registry run link opens directly on that run's detail.
+  const focusRunId = useStore(store, (s) => s.meta.runsFocusRunId);
   const cards = useStore(store, (s) => s.board.cards);
   const simStartMs = useStore(store, (s) => s.meta.simStartMs);
   // Sim views refresh per committed tick (ledger + auto-follow journal).
@@ -342,13 +344,14 @@ export function RunsOverlay({ store, orders, views }: RunsOverlayProps): React.J
   const [tab, setTab] = useState<RunsTab>('runs');
   const [detailRunId, setDetailRunId] = useState<string | null>(null);
 
-  // Each open starts on the ledger (fresh navigation state).
+  // Each open starts on the ledger (fresh navigation state), or on the
+  // deep-linked run's detail when a registry run link routed here (§V5-3).
   useEffect(() => {
     if (open) {
       setTab('runs');
-      setDetailRunId(null);
+      setDetailRunId(focusRunId);
     }
-  }, [open]);
+  }, [open, focusRunId]);
 
   if (!open) return null;
 

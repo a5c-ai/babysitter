@@ -133,7 +133,8 @@ function SessionRow({
   );
 }
 
-function SessionList({
+/** Grouped session list — exported for the Registry task detail (§V5-3). */
+export function SessionList({
   sessions,
   views,
   onOpen,
@@ -205,7 +206,8 @@ function SessionBubble({ entry }: { entry: SimSessionTranscriptEntry }): React.J
   }
 }
 
-function SessionTranscript({
+/** Read-only transcript view — exported for the Registry agent detail (§V5-3). */
+export function SessionTranscript({
   sessionId,
   views,
   onOpen,

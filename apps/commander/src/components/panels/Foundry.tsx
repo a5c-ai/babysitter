@@ -310,11 +310,13 @@ function StacksTab({ orders, views }: { orders: Orders; views: SimViews }): Reac
 
 export function Foundry({ store, orders, views }: FoundryProps): React.JSX.Element | null {
   const open = useStore(store, (s) => s.meta.foundryOpen);
+  // §V5-3 landing intent: openFoundry() lands on Commission Task (the
+  // historical default); the registry's "open in Foundry" lands on Stacks.
+  const landingTab = useStore(store, (s) => s.meta.foundryTab);
   const [tab, setTab] = useState<FoundryTab>('commission');
-  // Each opening starts on Commission Task (the historical default surface).
   useEffect(() => {
-    if (open) setTab('commission');
-  }, [open]);
+    if (open) setTab(landingTab);
+  }, [open, landingTab]);
   if (!open) return null;
 
   return (

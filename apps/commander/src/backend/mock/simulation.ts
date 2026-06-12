@@ -372,6 +372,41 @@ export interface SimRunObservationView {
   journal: JournalEvent[];
 }
 
+// --- v5 registry workspaces view (SPEC-V5 §V5-3) ------------------------------
+
+/** Per-card git line inside a workspace summary (branch/sha/dirty). */
+export interface SimWorkspaceCardGitView {
+  taskId: string;
+  title: string;
+  branch: string;
+  headSha: string;
+  dirty: boolean;
+  dirtyFileCount: number;
+}
+
+/**
+ * SPEC-V5 §V5-3 `listWorkspaces()` row: one entry per scenario workspace,
+ * derived PURELY from existing card/session state (no rng draws — the view
+ * is a read like every other list view). `cards` carries the per-card
+ * gitStatus lines; `gitStatus` mirrors the first (sorted) card's workspace
+ * as the representative branch/sha for the row.
+ */
+export interface SimWorkspaceSummaryView {
+  workspaceId: string;
+  name: string;
+  repository: string;
+  /** Representative phase (first card's workspace), 'ready' when empty. */
+  phase: AgentWorkspacePhase;
+  /** Representative gitStatus (first card), null when no cards yet. */
+  gitStatus: WorkspaceGitStatus | null;
+  /** True when ANY of its cards' workspaces is dirty (aggregate). */
+  dirty: boolean;
+  cardIds: string[];
+  cards: SimWorkspaceCardGitView[];
+  /** ACTIVE session ids across its cards (§V5-1 registry cross-links). */
+  activeSessionIds: string[];
+}
+
 export interface SimMemorySiloView {
   name: string;
   phase: KradlePhase;
@@ -2216,6 +2251,67 @@ export class Simulation {
       testEvidence: { ...card.ws.testEvidence },
       reviewerNotes: [...card.ws.reviewerNotes],
     };
+  }
+
+  /**
+   * SPEC-V5 §V5-3 `listWorkspaces()`: one summary per scenario workspace,
+   * stable scenario order. Derived PURELY from existing card + session state
+   * (no rng draws — same seed + verb sequence ⇒ identical output). Cards are
+   * grouped by `spec.workspaceRef` and listed in sorted-taskId order; the
+   * first card supplies the representative phase/gitStatus.
+   */
+  listWorkspaces(): SimWorkspaceSummaryView[] {
+    const cardsByWorkspace = new Map<string, CardRecord[]>();
+    for (const card of this.cards.values()) {
+      const wsId = card.resource.spec.workspaceRef ?? '';
+      if (wsId === '') continue;
+      const list = cardsByWorkspace.get(wsId);
+      if (list) {
+        list.push(card);
+      } else {
+        cardsByWorkspace.set(wsId, [card]);
+      }
+    }
+    return this.scenario.workspaces.map((ws) => {
+      const cards = (cardsByWorkspace.get(ws.workspaceId) ?? []).sort((a, b) =>
+        a.taskId.localeCompare(b.taskId),
+      );
+      const first = cards[0];
+      const cardIds = cards.map((c) => c.taskId);
+      const cardIdSet = new Set(cardIds);
+      const activeSessionIds = [...this.sessions.values()]
+        .filter((s) => s.status === 'active' && cardIdSet.has(s.taskId))
+        .sort((a, b) => a.order - b.order)
+        .map((s) => s.sessionId);
+      return {
+        workspaceId: ws.workspaceId,
+        name: ws.name,
+        repository: ws.repository,
+        phase: first !== undefined ? first.ws.phase : 'ready',
+        gitStatus:
+          first !== undefined
+            ? {
+                branch: first.ws.branch,
+                headSha: first.ws.headSha,
+                ahead: first.ws.ahead,
+                behind: first.ws.behind,
+                dirty: first.ws.dirty,
+                uncommittedCount: first.ws.dirty ? first.ws.files.length : 0,
+              }
+            : null,
+        dirty: cards.some((c) => c.ws.dirty),
+        cardIds,
+        cards: cards.map((c) => ({
+          taskId: c.taskId,
+          title: c.resource.metadata.labels?.['a5c.ai/title'] ?? c.taskId,
+          branch: c.ws.branch,
+          headSha: c.ws.headSha,
+          dirty: c.ws.dirty,
+          dirtyFileCount: c.ws.dirty ? c.ws.files.length : 0,
+        })),
+        activeSessionIds,
+      };
+    });
   }
 
   /** Process-flow observation for a card's run (SPEC-V2 §V2-5). */

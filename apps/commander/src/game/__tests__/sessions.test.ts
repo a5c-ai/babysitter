@@ -277,10 +277,12 @@ describe('store wiring (§V5-2 default tab, §V5-4 intents)', () => {
     expect(meta.reviewTaskId).toBeNull();
   });
 
-  it('openRegistryStack records the routed stackRef (stub for the registry phase)', () => {
+  it('openRegistryStack records the routed stackRef AND opens the registry overlay (§V5-4)', () => {
     const store = createCommanderStore();
     expect(store.getState().meta.registryStackRef).toBeNull();
+    expect(store.getState().meta.registryOpen).toBe(false);
     store.getState().openRegistryStack('stk-02');
     expect(store.getState().meta.registryStackRef).toBe('stk-02');
+    expect(store.getState().meta.registryOpen).toBe(true);
   });
 });

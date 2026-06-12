@@ -109,6 +109,21 @@ export function TopBar({ store, orders }: TopBarProps): React.JSX.Element {
       <button
         type="button"
         className="wr-sim-toggle"
+        data-testid="topbar-registry"
+        title="Open the Registry — stacks, agents, tasks and workspaces (§V5-3)"
+        onClick={() => {
+          if (meta.registryOpen) {
+            store.getState().closeRegistry();
+          } else {
+            store.getState().openRegistry();
+          }
+        }}
+      >
+        REGISTRY
+      </button>
+      <button
+        type="button"
+        className="wr-sim-toggle"
         data-testid="topbar-create"
         title="Open the Foundry — commission a task (N)"
         onClick={() => {

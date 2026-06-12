@@ -9,6 +9,7 @@
  */
 
 import type {
+  SimCardView,
   SimFileTreeNode,
   SimGitCommitView,
   SimMemoryIOView,
@@ -18,6 +19,7 @@ import type {
   SimSessionDetailView,
   SimSessionView,
   SimStackView,
+  SimWorkspaceSummaryView,
   SimWorkspaceView,
 } from '../backend/mock/simulation';
 
@@ -42,4 +44,8 @@ export interface SimViews {
   listSessions(taskId?: string): SimSessionView[];
   /** §V5-1 one persisted session: record + transcript (survives despawn). */
   getSession(sessionId: string): SimSessionDetailView | null;
+  /** §V5-3 Registry tasks tab: every card (board view, all columns). */
+  listCardViews(): SimCardView[];
+  /** §V5-3 Registry workspaces tab: per-workspace git/card/session summary. */
+  listWorkspaces(): SimWorkspaceSummaryView[];
 }

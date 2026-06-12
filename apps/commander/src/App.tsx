@@ -27,6 +27,7 @@ import type {
   SimSessionDetailView,
   SimSessionView,
   SimStackView,
+  SimWorkspaceSummaryView,
   UpdateTaskPatch,
 } from './backend/mock/simulation';
 import type { KradleAgentStackInput } from './contracts/kradle-stack';
@@ -74,6 +75,8 @@ interface CommanderTestApi {
     getSession(sessionId: string): SimSessionDetailView | null;
     /** Established card-view probe (frozen v5 helpers use it for staging). */
     listCardViews(): SimCardView[];
+    /** SPEC-V5 §V5-3 Registry workspaces summary view. */
+    listWorkspaces(): SimWorkspaceSummaryView[];
   };
   store: CommanderStore;
   version: string;
@@ -158,6 +161,7 @@ window.__commander = {
     listSessions: (taskId?: string) => backend.sim.listSessions(taskId),
     getSession: (sessionId: string) => backend.sim.getSession(sessionId),
     listCardViews: () => backend.sim.listCardViews(),
+    listWorkspaces: () => backend.sim.listWorkspaces(),
   },
   store,
   version: COMMANDER_VERSION,

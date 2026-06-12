@@ -254,11 +254,20 @@ export interface MetaSlice {
   /** The Runs ledger overlay (§V4-6 — top Esc tier with foundry/archive). */
   runsOpen: boolean;
   /**
-   * §V5-3/§V5-4 Registry stack-detail intent (stub this phase): the stackRef
-   * the Registry overlay should open on. The registry phase consumes it;
-   * until then it only records the routed intent. null = none pending.
+   * §V5-3 Runs deep-link: a registry run link opens the Runs overlay
+   * directly on this run's detail (null = open on the ledger list).
+   */
+  runsFocusRunId: string | null;
+  /** §V5-3 the Registry ledger overlay (top Esc tier, below runs). */
+  registryOpen: boolean;
+  /**
+   * §V5-3/§V5-4 Registry stack-detail deep-link: when set, the overlay opens
+   * directly on this stack's detail (sel-stack-link / Inspector stack chip).
+   * null = the overlay opens on the stacks list.
    */
   registryStackRef: string | null;
+  /** §V5-3 Foundry landing tab ("open in Foundry" → Stacks; default Commission). */
+  foundryTab: 'commission' | 'stacks';
   /** §V4-11 web IDE overlay target (full-screen plate); null = closed. */
   ideTaskId: string | null;
   /** taskId → in-flight automatic move (cleared by the board after the glide). */
@@ -312,8 +321,15 @@ export interface CommanderState {
   openInspectorCard(taskId: string): void;
   /** §V5-2/§V5-4 deep-link: open the Inspector on a card's SESSIONS tab (review-panel chip, sel-session-link). */
   openInspectorSessions(taskId: string): void;
-  /** §V5-4 stub intent: route "view stack" to the Registry stack detail (the registry phase consumes it). */
+  /** §V5-4: open the Registry overlay directly on a stack's detail (sel-stack-link, Inspector stack chip). */
   openRegistryStack(stackRef: string): void;
+  /** §V5-3: open/close the Registry ledger overlay (TopBar button; opens on the stacks list). */
+  openRegistry(): void;
+  closeRegistry(): void;
+  /** §V5-3: open the Runs overlay directly on a run's detail (registry run links). */
+  openRunsAt(runId: string): void;
+  /** §V5-3: open the Foundry on its STACKS tab (registry "open in Foundry"). */
+  openFoundryStacks(): void;
   closeInspector(): void;
   /** Switch the Inspector tab (externally settable — Open Diff, §V2-2). */
   setInspectorTab(tab: InspectorTab): void;
@@ -950,7 +966,10 @@ export function createCommanderStore(): CommanderStore {
       archiveOpen: false,
       archiveFocusId: null,
       runsOpen: false,
+      runsFocusRunId: null,
+      registryOpen: false,
       registryStackRef: null,
+      foundryTab: 'commission',
       ideTaskId: null,
       movingCards: {},
       moveSeq: 0,
@@ -1238,10 +1257,13 @@ export function createCommanderStore(): CommanderStore {
       );
     },
     escape() {
-      // Esc cascade (§V3-7 as amended by §V4-13/§V4-11): ide > card-editor >
-      // runs > foundry > archive > review panel > steer modal > inspector >
-      // selection. Modals close WITHOUT clearing the selection; the review
-      // panel SURVIVES the IDE's Esc (AC45).
+      // Esc cascade (§V3-7 as amended by §V4-13/§V4-11/§V5-3): ide >
+      // card-editor > runs > registry > foundry > archive > review panel >
+      // steer modal > inspector > selection. The registry joins the top tier
+      // BELOW runs: a registry run link opens the Runs overlay above the
+      // registry, so Esc unwinds runs first and returns to the registry's
+      // preserved navigation state. Modals close WITHOUT clearing the
+      // selection; the review panel SURVIVES the IDE's Esc (AC45).
       const state = get();
       if (state.meta.ideTaskId !== null) {
         set({ meta: { ...state.meta, ideTaskId: null } });
@@ -1252,7 +1274,11 @@ export function createCommanderStore(): CommanderStore {
         return;
       }
       if (state.meta.runsOpen) {
-        set({ meta: { ...state.meta, runsOpen: false } });
+        set({ meta: { ...state.meta, runsOpen: false, runsFocusRunId: null } });
+        return;
+      }
+      if (state.meta.registryOpen) {
+        set({ meta: { ...state.meta, registryOpen: false, registryStackRef: null } });
         return;
       }
       if (state.meta.foundryOpen) {
@@ -1363,13 +1389,42 @@ export function createCommanderStore(): CommanderStore {
       }));
     },
     openRegistryStack(stackRef) {
-      // §V5-4 stub intent: record the routed stack so the registry phase can
-      // open its overlay on this detail. No overlay exists yet this phase.
-      set((state) =>
-        state.meta.registryStackRef === stackRef
-          ? state
-          : { meta: { ...state.meta, registryStackRef: stackRef } },
-      );
+      // §V5-4: "view stack" routes to the Registry overlay opened directly
+      // on that stack's detail (the overlay consumes registryStackRef as its
+      // deep-link on open).
+      set((state) => ({
+        meta: { ...state.meta, registryOpen: true, registryStackRef: stackRef },
+      }));
+    },
+    openRegistry() {
+      // §V5-3 TopBar button: fresh open on the stacks list (no deep-link).
+      set((state) => ({
+        meta: { ...state.meta, registryOpen: true, registryStackRef: null },
+      }));
+    },
+    closeRegistry() {
+      set((state) => ({
+        meta: { ...state.meta, registryOpen: false, registryStackRef: null },
+      }));
+    },
+    openRunsAt(runId) {
+      // §V5-3 registry run links: the Runs overlay opens ABOVE the registry
+      // directly on the run's detail; the registry keeps its navigation
+      // state for the Esc return trip.
+      set((state) => ({ meta: { ...state.meta, runsOpen: true, runsFocusRunId: runId } }));
+    },
+    openFoundryStacks() {
+      // §V5-3 stack detail "open in Foundry": a deliberate exit from the
+      // registry into the Foundry's STACKS tab.
+      set((state) => ({
+        meta: {
+          ...state.meta,
+          foundryOpen: true,
+          foundryTab: 'stacks',
+          registryOpen: false,
+          registryStackRef: null,
+        },
+      }));
     },
     closeInspector() {
       set((state) => ({ meta: { ...state.meta, inspectorUnitId: null, inspectorTaskId: null } }));
@@ -1414,7 +1469,7 @@ export function createCommanderStore(): CommanderStore {
       set((state) => ({ meta: { ...state.meta, steerOpen: false } }));
     },
     openFoundry() {
-      set((state) => ({ meta: { ...state.meta, foundryOpen: true } }));
+      set((state) => ({ meta: { ...state.meta, foundryOpen: true, foundryTab: 'commission' } }));
     },
     closeFoundry() {
       set((state) => ({ meta: { ...state.meta, foundryOpen: false } }));
@@ -1439,10 +1494,10 @@ export function createCommanderStore(): CommanderStore {
       }));
     },
     openRuns() {
-      set((state) => ({ meta: { ...state.meta, runsOpen: true } }));
+      set((state) => ({ meta: { ...state.meta, runsOpen: true, runsFocusRunId: null } }));
     },
     closeRuns() {
-      set((state) => ({ meta: { ...state.meta, runsOpen: false } }));
+      set((state) => ({ meta: { ...state.meta, runsOpen: false, runsFocusRunId: null } }));
     },
     openIde(taskId) {
       set((state) => ({ meta: { ...state.meta, ideTaskId: taskId } }));

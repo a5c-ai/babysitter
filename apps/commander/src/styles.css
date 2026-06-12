@@ -4851,3 +4851,302 @@
     margin-left: 0;
   }
 }
+
+/* ==========================================================================
+ * SPEC-V5 §V5-3 — THE REGISTRY (parchment ledger family, AC48–AC51)
+ * ======================================================================== */
+@layer components {
+  .wr-reg-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wr-reg-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .wr-reg-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border: 1px solid rgb(216 181 97 / 0.28);
+    border-radius: 7px;
+    background: rgb(227 200 127 / 0.05);
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--color-ink-soft);
+  }
+  .wr-reg-row:hover {
+    border-color: var(--color-brass-500);
+    background: rgb(232 181 74 / 0.09);
+  }
+  /* agents tab status inks (§V5-3: active amber, completed ink, aborted garnet) */
+  .wr-reg-row--active {
+    border-color: rgb(232 181 74 / 0.6);
+    background: rgb(232 181 74 / 0.12);
+    box-shadow: inset 0 0 0 1px rgb(232 181 74 / 0.25);
+  }
+  .wr-reg-row--aborted {
+    border-color: rgb(146 46 46 / 0.55);
+    background: rgb(146 46 46 / 0.07);
+  }
+  .wr-reg-row--ws {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .wr-reg-ws-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+  .wr-reg-ws-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0 0 18px;
+    border-left: 2px solid rgb(148 112 44 / 0.35);
+    margin-left: 4px;
+  }
+  .wr-reg-ws-cardline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+  }
+  .wr-reg-name {
+    font-family: var(--font-serif-display);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .wr-reg-dim {
+    font-size: 10px;
+    color: var(--color-ink-soft);
+    opacity: 0.85;
+  }
+  .wr-reg-mono {
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    color: var(--color-ink-soft);
+  }
+  .wr-reg-chiprow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .wr-reg-model,
+  .wr-reg-approval,
+  .wr-reg-phase,
+  .wr-reg-column {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 1px 7px;
+    border-radius: 8px;
+    border: 1px solid rgb(148 112 44 / 0.5);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.85), rgb(233 220 190 / 0.85));
+    color: #5c4516;
+    text-shadow: 0 1px 0 rgb(255 248 224 / 0.8);
+    white-space: nowrap;
+  }
+  .wr-reg-custom,
+  .wr-reg-yolo {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 1px 7px;
+    border-radius: 8px;
+    border: 1px solid rgb(146 46 46 / 0.6);
+    background: rgb(146 46 46 / 0.08);
+    color: #7c2d2d;
+    white-space: nowrap;
+  }
+  .wr-reg-excerpt {
+    flex: 1 1 100%;
+    font-style: italic;
+    font-size: 10px;
+    color: var(--color-ink-soft);
+    opacity: 0.9;
+  }
+  .wr-reg-dirty {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 1px 7px;
+    border-radius: 8px;
+    border: 1px solid rgb(82 112 58 / 0.55);
+    background: rgb(110 140 76 / 0.1);
+    color: #44602e;
+    white-space: nowrap;
+  }
+  .wr-reg-dirty.is-dirty {
+    border-color: rgb(168 62 50 / 0.6);
+    background: rgb(168 62 50 / 0.08);
+    color: #8a3326;
+  }
+  .wr-reg-link {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    padding: 1px 8px;
+    border-radius: 8px;
+    border: 1px solid rgb(148 112 44 / 0.55);
+    background: rgb(227 200 127 / 0.12);
+    color: #5c4516;
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wr-reg-link:hover {
+    border-color: var(--color-brass-500);
+    color: #2f2305;
+    background: rgb(232 181 74 / 0.2);
+  }
+  .wr-reg-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wr-reg-detail-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid rgb(148 112 44 / 0.5);
+    border-radius: 7px;
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.6), rgb(233 220 190 / 0.5));
+    box-shadow: inset 0 1px 1px rgb(109 81 32 / 0.18);
+  }
+  .wr-reg-detail-title {
+    font-family: var(--font-serif-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+  .wr-reg-foundry {
+    margin-left: auto;
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    border-radius: 7px;
+    border: 1px solid rgb(148 112 44 / 0.65);
+    background: linear-gradient(to bottom, rgb(247 238 215 / 0.92), rgb(233 220 190 / 0.92));
+    color: #5c4516;
+    cursor: pointer;
+  }
+  .wr-reg-foundry:hover {
+    border-color: var(--color-brass-500);
+    color: #2f2305;
+  }
+  .wr-reg-section {
+    margin-top: 6px;
+    font-family: var(--font-serif-display);
+    font-variant-caps: small-caps;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    color: var(--color-ink-soft);
+    border-bottom: 1px solid rgb(148 112 44 / 0.4);
+    padding-bottom: 2px;
+  }
+  /* §V5-3 sepia spec plates: prompt.system / prompt.developer verbatim */
+  .wr-reg-plates {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wr-reg-plate-label {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--color-ink-soft);
+    margin-bottom: 2px;
+  }
+  .wr-reg-plate {
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid rgb(148 112 44 / 0.45);
+    border-radius: 6px;
+    background: linear-gradient(to bottom, rgb(243 230 200 / 0.9), rgb(231 214 178 / 0.9));
+    box-shadow: inset 0 1px 2px rgb(109 81 32 / 0.2);
+    font-family: var(--font-mono-hud);
+    font-size: 10px;
+    line-height: 1.6;
+    color: #3d2e10;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .wr-reg-sublist {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wr-reg-subrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 10px;
+    border: 1px solid rgb(216 181 97 / 0.22);
+    border-radius: 6px;
+    background: rgb(227 200 127 / 0.04);
+    cursor: pointer;
+    font-size: 10px;
+    color: var(--color-ink-soft);
+  }
+  .wr-reg-subrow:hover {
+    border-color: var(--color-brass-500);
+    background: rgb(232 181 74 / 0.08);
+  }
+  .wr-reg-subrow--file {
+    cursor: default;
+  }
+  .wr-reg-subrow--active {
+    border-color: rgb(232 181 74 / 0.55);
+    background: rgb(232 181 74 / 0.1);
+  }
+  .wr-reg-subrow--aborted {
+    border-color: rgb(146 46 46 / 0.5);
+  }
+  .wr-reg-filestatus {
+    font-family: var(--font-mono-hud);
+    font-size: 9px;
+    width: 14px;
+    text-align: center;
+    border: 1px solid rgb(148 112 44 / 0.5);
+    border-radius: 4px;
+    background: rgb(247 238 215 / 0.85);
+    color: #5c4516;
+  }
+  .wr-reg-ws-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border: 1px solid rgb(216 181 97 / 0.28);
+    border-radius: 7px;
+    background: rgb(227 200 127 / 0.05);
+    font-size: 11px;
+  }
+  .wr-reg-linkrow {
+    padding: 6px 10px;
+    border: 1px solid rgb(216 181 97 / 0.28);
+    border-radius: 7px;
+    background: rgb(227 200 127 / 0.05);
+  }
+  /* parchment ink for the reused session components inside the registry */
+  .wr-registry .wr-sess-row,
+  .wr-registry .wr-sess-transcript {
+    color: var(--color-ink-soft);
+  }
+}
