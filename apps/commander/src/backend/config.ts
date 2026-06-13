@@ -9,6 +9,12 @@
  * DEFAULT mode is `'mock'` (AC1/AC10). A real mode that is missing its
  * `gatewayUrl`/`token` fails safe back to mock rather than booting a dead
  * socket — the deterministic mock is always the safe default.
+ *
+ * SPEC-KRADLE-CONTROLPLANE §4.1 (AC16) extends this with the kradle control-plane
+ * knobs (`kradle{ApiUrl,Token,Org,Repo}` ← `VITE_KRADLE_*` / `?kradle=&ktoken=&korg=&krepo=`).
+ * The kradle fields are resolved INDEPENDENTLY of `mode`, and the real fail-safe
+ * is relaxed: a real mode is valid with `(gatewayUrl && token)` OR `kradleApiUrl`
+ * (kradle-only real mode). The default stays `'mock'`; kradle never flips it.
  */
 
 import { DEFAULT_SEED } from './mock/mockBackend';
@@ -30,6 +36,19 @@ export interface BackendConfig {
   baseDelayMs?: number;
   maxDelayMs?: number;
   maxReconnectAttempts?: number;
+  /**
+   * Kradle control-plane knobs (SPEC-KRADLE-CONTROLPLANE §4.1, AC16). Resolved
+   * independently of `mode`; the kradle client is constructed only on the real
+   * boot path and only when `kradleApiUrl` is set (§4.2, AC18).
+   */
+  /** Base origin of the kradle web app. ← `VITE_KRADLE_API_URL` / `?kradle=`. */
+  kradleApiUrl?: string;
+  /** Bearer token for the kradle BFF. ← `VITE_KRADLE_TOKEN` / `?ktoken=`. */
+  kradleToken?: string;
+  /** Org slug (default `'default'`). ← `VITE_KRADLE_ORG` / `?korg=`. */
+  kradleOrg?: string;
+  /** Default dispatch repository (default `'default'`). ← `VITE_KRADLE_REPO` / `?krepo=`. */
+  kradleRepo?: string;
 }
 
 /**
@@ -42,6 +61,10 @@ export interface BackendEnv {
   readonly VITE_BACKEND?: string;
   readonly VITE_GATEWAY_URL?: string;
   readonly VITE_GATEWAY_TOKEN?: string;
+  readonly VITE_KRADLE_API_URL?: string;
+  readonly VITE_KRADLE_TOKEN?: string;
+  readonly VITE_KRADLE_ORG?: string;
+  readonly VITE_KRADLE_REPO?: string;
 }
 
 function normalizeMode(raw: string | null | undefined): BackendMode | null {
@@ -71,11 +94,40 @@ export function resolveBackendConfig(env: BackendEnv, search: string): BackendCo
   const gatewayUrl = nonEmpty(params.get('gateway')) ?? nonEmpty(env.VITE_GATEWAY_URL);
   const token = nonEmpty(params.get('token')) ?? nonEmpty(env.VITE_GATEWAY_TOKEN);
 
-  // Fail-safe: a real mode missing its url/token degrades to the mock so a
-  // misconfigured deploy boots the deterministic sim, not a dead socket (AC1).
-  if (requestedMode === 'real' && gatewayUrl !== undefined && token !== undefined) {
-    return { mode: 'real', seed, gatewayUrl, token };
+  // Kradle control-plane fields (§4.1, AC16). Resolved independently of `mode`;
+  // URL params win over env. `kradleApiUrl` is the gate — it is set iff a
+  // non-empty `?kradle=`/`VITE_KRADLE_API_URL` is present.
+  const kradleApiUrl = nonEmpty(params.get('kradle')) ?? nonEmpty(env.VITE_KRADLE_API_URL);
+  const kradleToken = nonEmpty(params.get('ktoken')) ?? nonEmpty(env.VITE_KRADLE_TOKEN);
+  const kradleOrg = nonEmpty(params.get('korg')) ?? nonEmpty(env.VITE_KRADLE_ORG);
+  const kradleRepo = nonEmpty(params.get('krepo')) ?? nonEmpty(env.VITE_KRADLE_REPO);
+
+  // Only attach kradle fields when a kradle URL is present, so the mock-branch
+  // output is byte-unchanged for every input that does not set kradle (AC15).
+  const kradleFields: Partial<BackendConfig> = kradleApiUrl
+    ? {
+        kradleApiUrl,
+        ...(kradleToken !== undefined ? { kradleToken } : {}),
+        kradleOrg: kradleOrg ?? 'default',
+        kradleRepo: kradleRepo ?? 'default',
+      }
+    : {};
+
+  // Fail-safe (relaxed for kradle, §4.1/AC16): a real mode is valid with a
+  // gateway (url && token) OR a kradle URL (kradle-only real mode). Otherwise a
+  // misconfigured real degrades to the deterministic mock, not a dead socket.
+  const gatewayReady = gatewayUrl !== undefined && token !== undefined;
+  if (requestedMode === 'real' && (gatewayReady || kradleApiUrl !== undefined)) {
+    return {
+      mode: 'real',
+      seed,
+      ...(gatewayUrl !== undefined ? { gatewayUrl } : {}),
+      ...(token !== undefined ? { token } : {}),
+      ...kradleFields,
+    };
   }
 
-  return { mode: 'mock', seed };
+  // Mock default. Kradle fields are carried (inert under mock, §4.1) only when a
+  // kradle URL was supplied; inputs without kradle keep the exact prior shape.
+  return { mode: 'mock', seed, ...kradleFields };
 }
