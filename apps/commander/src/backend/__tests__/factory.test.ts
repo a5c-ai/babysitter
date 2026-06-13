@@ -74,4 +74,27 @@ describe('createBackend (AC11 — factory)', () => {
     expect(config.mode).toBe('mock');
     expect(createBackend(config)).toBeInstanceOf(MockBackend);
   });
+
+  it('AC16: kradle-only real config (no gateway) returns a non-throwing inert-gateway backend', async () => {
+    // SPEC-KRADLE-CONTROLPLANE §4.1/AC16: real mode is valid with just
+    // kradleApiUrl. The factory must NOT construct a gateway RealBackend (which
+    // requires gatewayUrl+token and would throw at boot) — it returns an inert
+    // gateway whose kradle data rides bootReal's own client.
+    const config = resolveBackendConfig(
+      { VITE_BACKEND: 'real', VITE_KRADLE_API_URL: 'https://kradle.example' },
+      '',
+    );
+    expect(config.mode).toBe('real');
+    expect(config.gatewayUrl).toBeUndefined();
+    expect(config.kradleApiUrl).toBe('https://kradle.example');
+    const backend = createBackend(config);
+    expect(backend).not.toBeInstanceOf(MockBackend);
+    expect(backend).not.toBeInstanceOf(RealBackend);
+    // The inert gateway is a usable CommanderBackend: connect resolves, lists empty.
+    await expect(backend.connect()).resolves.toBeUndefined();
+    expect(backend.onFrame(() => undefined)()).toBeUndefined();
+    await expect(backend.listAgents()).resolves.toEqual([]);
+    await expect(backend.listRuns()).resolves.toEqual([]);
+    backend.disconnect();
+  });
 });
